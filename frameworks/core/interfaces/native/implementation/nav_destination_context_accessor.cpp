@@ -20,6 +20,16 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 
+namespace OHOS::Ace::NG::Converter {
+using NG::GeneratedModifier::NavigationContext::NavigationStack;
+void AssignArkValue(Ark_NavPathStack& dst, const RefPtr<NavigationStack>& src, ConvContext *ctx)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
+    peer->SetNavigationStack(src);
+    dst = peer;
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
 void DestroyPeerImpl(Ark_NavDestinationContext peer)

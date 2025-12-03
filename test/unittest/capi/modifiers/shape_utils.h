@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CAPI_UNIT_TEST_SHAPE_UTILS_H
+#define CAPI_UNIT_TEST_SHAPE_UTILS_H
 
-#include "core/interfaces/native/implementation/image_common_methods.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
-namespace OHOS::Ace::NG {
-namespace GeneratedModifier {
-const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
-} // namespace GeneratedModifier
-namespace ColorFilter {
-constexpr auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
-constexpr auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
+namespace OHOS::Ace::NG::Converter {
+inline void AssignArkValue(Ark_ShapePoint& dst, const std::pair<std::string, std::string>& src, ConvContext *ctx)
+{
+    dst.value0 = ArkUnion<Ark_Length, Ark_String>(std::get<0>(src), ctx);
+    dst.value1 = ArkUnion<Ark_Length, Ark_String>(std::get<1>(src), ctx);
+}
+} // namespace OHOS::Ace::NG::Converter
 
-extern const std::vector<std::tuple<std::string, Array_Float64, std::vector<float>>> floatMatrixTest;
-} // namespace ColorFilter
-} // namespace OHOS::Ace::NG
+#endif // CAPI_UNIT_TEST_SHAPE_UTILS_H

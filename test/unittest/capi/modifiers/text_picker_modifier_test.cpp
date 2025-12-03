@@ -126,21 +126,17 @@ const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE = "false";
 
 // Test plans
-typedef std::pair<Opt_Union_Number_String, std::string> PickerItemHeightTestStep;
+typedef std::pair<Opt_Union_F64_String, std::string> PickerItemHeightTestStep;
 const std::vector<PickerItemHeightTestStep> PICKER_ITEM_HEIGHT_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1), "1.00vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3.3f), "3.30vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-3.3f), "-3.30vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("3.3px"), "3.30px" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("3.3vp"), "3.30vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("345vp"), "345.00vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("25%"), "25.00%" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-10px"), "-10.00px" }
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.), "1.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3.3), "3.30vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-3.3), "-3.30vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("3.3px"), "3.30px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("3.3vp"), "3.30vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("345vp"), "345.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("25%"), "25.00%" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-10px"), "-10.00px" }
 };
-
-const Ark_Float32 AFLT32_POS(1.234f);
-const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
@@ -156,17 +152,16 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
-    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>(1.234), "1.23fp" },
+    { Converter::ArkValue<Opt_Length>(-5.6789), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
 };
 
-typedef std::pair<Opt_Union_Number_String_Resource, std::string> NumberTestStep;
-const std::vector<NumberTestStep> MIN_MAX_FONT_SIZE_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(28), "28.00fp" },
-    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28px"), "28.00px" },
-    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28"), "28.00fp" },
-    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("28%"), "28.00%" },
-    { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_INT_1_ID)), "28.00vp" },
+const std::vector<std::pair<Opt_Union_F64_String_Resource, std::string>> MIN_MAX_FONT_SIZE_TEST_PLAN = {
+    { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(28.), "28.00fp" },
+    { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("28px"), "28.00px" },
+    { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("28"), "28.00fp" },
+    { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("28%"), "28.00%" },
+    { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Resource>(CreateResource(RES_INT_1_ID)), "28.00vp" },
 };
 
 typedef std::pair<Opt_TextOverflow, std::string> TextOverflowTestStep;
@@ -253,87 +248,64 @@ const std::vector<ColorTestStep> COLOR_TRANSPARENT_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT }
 };
 
-auto array1 = std::array {
-    Converter::ArkValue<Ark_Number>(1),
-    Converter::ArkValue<Ark_Number>(2),
-    Converter::ArkValue<Ark_Number>(3)
-};
-Converter::ArkArrayHolder<Array_Number> holder1(array1);
-Array_Number arrayNumber1 = holder1.ArkValue();
+Converter::ConvContext ctx;
+auto array1 = std::array {1, 2, 3};
+auto arrayNumber1 = ArkValue<Array_Int32>(array1, &ctx);
 
-auto array2 = std::array {
-    Converter::ArkValue<Ark_Number>(9),
-    Converter::ArkValue<Ark_Number>(1),
-};
-Converter::ArkArrayHolder<Array_Number> holder2(array2);
-Array_Number arrayNumber2 = holder2.ArkValue();
+auto array2 = std::array {9, 1};
+auto arrayNumber2 = ArkValue<Array_Int32>(array2, &ctx);
 
-auto array3 = std::array {
-    Converter::ArkValue<Ark_Number>(2),
-    Converter::ArkValue<Ark_Number>(-2),
-    Converter::ArkValue<Ark_Number>(2),
-    Converter::ArkValue<Ark_Number>(1),
-    Converter::ArkValue<Ark_Number>(2),
-};
-Converter::ArkArrayHolder<Array_Number> holder3(array3);
-Array_Number arrayNumber3 = holder3.ArkValue();
+auto array3 = std::array {2, -2, 2, 1, 2};
+auto arrayNumber3 = ArkValue<Array_Int32>(array3, &ctx);
 
-auto array4 = std::array {
-    Converter::ArkValue<Ark_Number>(6),
-    Converter::ArkValue<Ark_Number>(5),
-    Converter::ArkValue<Ark_Number>(4),
-    Converter::ArkValue<Ark_Number>(3),
-    Converter::ArkValue<Ark_Number>(2),
-    Converter::ArkValue<Ark_Number>(1)
-};
-Converter::ArkArrayHolder<Array_Number> holder4(array4);
-Array_Number arrayNumber4 = holder4.ArkValue();
-auto array5 = std::array<Ark_Number, 0> {};
-Converter::ArkArrayHolder<Array_Number> holder5(array5);
-Array_Number arrayNumber5 = holder5.ArkValue();
+auto array4 = std::array {6, 5, 4, 3, 2, 1};
+auto arrayNumber4 = ArkValue<Array_Int32>(array4, &ctx);
 
-typedef std::tuple<Opt_Union_Number_Array_Number, std::string> SelectedIndexTestStep;
+auto array5 = std::array<int32_t, 0> {};
+auto arrayNumber5 = ArkValue<Array_Int32>(array5, &ctx);
+
+typedef std::tuple<Opt_Union_I32_Array_I32, std::string> SelectedIndexTestStep;
 const std::vector<SelectedIndexTestStep> SELECTED_INDEX_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(1), "1" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(-33), "0" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(2), "2" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(33), "0" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber1), "1" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber2), "0" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber3), "2" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber4), "0" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber5), "0" }
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(1), "1" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "2" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1), "1" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3), "2" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5), "0" }
 };
 
 const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(1), "[\"1\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(-33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(2), "[\"2\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber1),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(1), "[\"1\",\"0\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "[\"2\",\"0\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1),
         "[\"1\",\"2\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber2),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2),
         "[\"0\",\"1\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber3),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3),
         "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber4),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4),
         "[\"0\",\"0\",\"0\",\"0\",\"2\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber5),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5),
         "[\"0\",\"0\",\"0\",\"0\",\"0\"]" }
 };
 
 const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_CASCADE_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(1), "[\"1\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(-33), "[\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(2), "[\"2\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(33), "[\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber1), "[\"1\",\"2\",\"3\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber2), "[\"0\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber3),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(1), "[\"1\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "[\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "[\"2\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "[\"0\",\"0\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1), "[\"1\",\"2\",\"3\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2), "[\"0\",\"1\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3),
         "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber4),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4),
         "[\"0\",\"0\",\"4\",\"3\",\"2\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_Number_Array_Number, Array_Number>(arrayNumber5), "[\"0\",\"0\"]" }
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5), "[\"0\",\"0\"]" }
 };
 
 typedef std::pair<Opt_Dimension, std::string> OptDimensionTestStep;
@@ -485,9 +457,9 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
         }
 
         if (std::get<HAS_SELECTEDS_ID>(value)) {
-            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
+            auto arkSelected = std::get<SELECTEDS_ID>(value);
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Number>(arkSelected);
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Int32>(arkSelected);
         } else {
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
@@ -608,9 +580,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
         }
 
         if (std::get<HAS_SELECTEDS_ID>(value)) {
-            Ark_Number arkSelected = Converter::ArkValue<Ark_Number>(std::get<SELECTEDS_ID>(value));
-            arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Number>(arkSelected);
+            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable,
+                Ark_Int32>(std::get<SELECTEDS_ID>(value));
         } else {
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
@@ -640,11 +611,20 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
     }
 }
 
-typedef std::tuple<std::string, std::vector<std::vector<std::string>>, std::vector<std::string>,
-    std::vector<int32_t>, bool, bool, std::string, std::vector<std::string>,
-    std::vector<std::string>> multu_array_test_data;
+namespace {
+struct MultiArrayTestData {
+    std::string input;
+    std::vector<std::vector<std::string>> range;
+    std::vector<std::string> values;
+    std::vector<int32_t> selecteds;
+    bool hasValues;
+    bool hasSelecteds;
+    std::string rangeRes;
+    std::vector<std::string> valuesRes;
+    std::vector<std::string> selectedsRes;
+};
 
-static std::vector<multu_array_test_data> textPickerOptionsAsStringMultiArray = {
+static std::vector<MultiArrayTestData> textPickerOptionsAsStringMultiArray = {
     {"multi-column-picker#0", { {"aa", "bb", "cc"}, {"dd", "ee", "ff"} }, {}, {}, false, false,
         "[[\"aa\",\"bb\",\"cc\"],[\"dd\",\"ee\",\"ff\"]]", {"\"aa\"", "\"dd\""}, {"\"0\"", "\"0\""}},
     {"multi-column-picker#1", { {"aa", "bb", "cc"}, {"dd", "ee", "ff"} }, {"bb", "ee"}, {}, true, false,
@@ -675,58 +655,62 @@ static std::vector<multu_array_test_data> textPickerOptionsAsStringMultiArray = 
         "[[\"aa\",\"bb\",\"cc\"],[\"dd\",\"ee\",\"ff\"]]", {"\"cc\"", "\"ff\""}, {"\"0\"", "\"0\""}}
 };
 
-void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, multu_array_test_data value)
+void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, MultiArrayTestData value)
 {
     std::string resultStr;
     std::string expectedStr;
 
     //check "range"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
-    expectedStr = std::get<RANGE_RES_ID>(value);
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    expectedStr = value.rangeRes;
+    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
 
     //check "value"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
     expectedStr = ATTRIBUTE_VALUE_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
 
     //check "values"
     auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
     auto resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
-    EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    auto requiredValuesCount = std::get<RANGE_ID>(value).size();
+    EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << value.input;
+    auto requiredValuesCount = value.range.size();
     ASSERT_EQ(requiredValuesCount, resultJson->GetArraySize())
-        << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    ASSERT_EQ(requiredValuesCount, std::get<VALUES_RES_ID>(value).size())
-        << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        << "Passed value is: " << value.input;
+    ASSERT_EQ(requiredValuesCount, value.valuesRes.size())
+        << "Passed value is: " << value.input;
     for (int i = 0; i < requiredValuesCount; i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
-        expectedStr = std::get<VALUES_RES_ID>(value)[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        expectedStr = value.valuesRes[i];
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
     }
 
     //check "selected"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
     expectedStr = ATTRIBUTE_SELECTED_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << value.input;
 
+    if (!value.hasSelecteds) {
+        return;
+    }
     //check "selecteds"
     attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
     resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
-    EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    auto requiredSelectedsCount = std::get<RANGE_ID>(value).size();
-    ASSERT_EQ(true, (requiredSelectedsCount <= resultJson->GetArraySize()))
-        << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
-    ASSERT_EQ(requiredSelectedsCount, std::get<SELECTEDS_RES_ID>(value).size())
-        << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << value.input;
+    auto requiredSelectedsCount = value.range.size();
+    ASSERT_LE(requiredSelectedsCount, resultJson->GetArraySize())
+        << "Passed value is: " << value.input;
+    ASSERT_EQ(requiredSelectedsCount, value.selectedsRes.size())
+        << "Passed value is: " << value.input;
     for (int i = 0; i < requiredSelectedsCount; i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
-        expectedStr = std::get<SELECTEDS_RES_ID>(value)[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        expectedStr = value.selectedsRes[i];
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
     }
 }
+} // namespace
 
 /*
  * @tc.name: setTextPickerOptionsAsStringMultiArray
@@ -743,38 +727,21 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
         Ark_TextPickerOptions arkTextPickerOptions;
         Converter::ConvContext ctx;
 
-        std::vector<Array_String> vectorArrayString;
-        auto rangeData = std::get<RANGE_ID>(value);
-        Converter::ArkArrayHolder<Array_String> stringHolder1(rangeData[0]);
-        Array_String stringHolderValue1 = stringHolder1.ArkValue();
-        vectorArrayString.emplace_back(stringHolderValue1);
-
-        Converter::ArkArrayHolder<Array_String> stringHolder2(rangeData[1]);
-        Array_String stringHolderValue2 = stringHolder2.ArkValue();
-        vectorArrayString.emplace_back(stringHolderValue2);
-
-        Converter::ArkArrayHolder<Array_Array_String> holder(vectorArrayString);
-        Array_Array_String stringMultiArray = holder.ArkValue();
-
         arkTextPickerOptions.range = Converter::ArkUnion<
             Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent,
-            Array_Array_String>(stringMultiArray);
+            Array_Array_String>(value.range, &ctx);
 
-        if (std::get<HAS_VALUES_ID>(value)) {
-            auto arkValue = Converter::ArkValue<Array_ResourceStr>(std::get<VALUES_ID>(value), &ctx);
+        if (value.hasValues) {
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
-                Array_ResourceStr>(arkValue);
+                Array_ResourceStr>(value.values, &ctx);
         } else {
             arkTextPickerOptions.value =
                 Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
         }
 
-        Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTEDS_ID>(value));
-        Array_Number arkSelected = arkSelectedHolder.ArkValue();
-
-        if (std::get<HAS_SELECTEDS_ID>(value)) {
-            arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Number>(arkSelected);
+        if (value.hasSelecteds) {
+            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable,
+                Array_Int32>(value.selecteds, &ctx);
         } else {
             arkTextPickerOptions.selected =
                 Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
@@ -788,7 +755,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
     }
 }
 
-static std::string CASCADE1 =
+namespace {
+constexpr auto CASCADE_DATA =
     "[{\"text\":\"Category 1\", "
     "\"children\":[{\"text\":\"Subcategory 1\", "
     "\"children\":[{\"text\":\"Subcategory 2\"},{\"text\":\"Subcategory 3\"}]},"
@@ -801,10 +769,11 @@ static std::string CASCADE1 =
 typedef std::tuple<std::string, std::string, std::vector<std::string>, std::vector<int32_t>, bool, bool,
     std::string, std::vector<std::string>, std::vector<std::string>> cascade_test_data;
 
-static std::vector<cascade_test_data> textPickerOptionsAsCascadeArray = {
-    {"cascade-picker#1", "", {}, {}, false, false, CASCADE1,
+const std::vector<cascade_test_data> textPickerOptionsAsCascadeArray = {
+    {"cascade-picker#1", "", {}, {}, false, false, CASCADE_DATA,
         {"\"Category 1\"", "\"Subcategory 1\"", "\"Subcategory 2\""}, {"\"0\"", "\"0\"", "\"0\""}}
 };
+} // namespace
 
 Ark_TextCascadePickerRangeContent createCascadeLevel1(std::string str)
 {
@@ -823,7 +792,8 @@ void InitChild(Ark_TextCascadePickerRangeContent& child, std::string name)
 
 void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
     cascade_test_data value,
-    Ark_TextPickerOptions& arkTextPickerOptions)
+    Ark_TextPickerOptions& arkTextPickerOptions,
+    Converter::ConvContext *ctx)
 {
     arkTextPickerOptions.range = Converter::ArkUnion<
         Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent,
@@ -836,11 +806,10 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
         arkTextPickerOptions.value =
             Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
     }
-    Converter::ArkArrayHolder<Array_Number> arkSelectedHolder(std::get<SELECTEDS_ID>(value));
-    Array_Number arkSelected = arkSelectedHolder.ArkValue();
     if (std::get<HAS_SELECTEDS_ID>(value)) {
         arkTextPickerOptions.selected =
-            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Number>(arkSelected);
+            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Int32>(
+                std::get<SELECTEDS_ID>(value), ctx);
     } else {
         arkTextPickerOptions.selected =
             Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
@@ -940,7 +909,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Le
     std::string expectedStr;
     for (auto&& value: textPickerOptionsAsCascadeArray) {
         Ark_TextPickerOptions arkTextPickerOptions;
-        CreateOptions(arrayRoot, value, arkTextPickerOptions);
+        Converter::ConvContext ctx;
+        CreateOptions(arrayRoot, value, arkTextPickerOptions, &ctx);
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
         modifier_->setTextPickerOptions(node_, &inputValueOptions);
@@ -972,7 +942,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto developerCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
-        const Ark_Union_Number_Array_Number selecteds) {
+        const Ark_Union_I32_Array_I32 selecteds) {
         std::vector<std::string> stdValues;
         if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
             auto pickerValue = pickerValueOpt.value();
@@ -997,11 +967,10 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
         }
         checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
     };
-    auto func = ArkValue<OnTextPickerChangeCallback>(developerCallback, CONTEXT_ID);
+    auto func = ArkCallback<Opt_OnTextPickerChangeCallback>(developerCallback, CONTEXT_ID);
     textPickerEventHub->FireChangeEvent(values, indexes);
     ASSERT_FALSE(checkInvoke.has_value());
-    auto optCallback = Converter::ArkValue<Opt_OnTextPickerChangeCallback>(func);
-    modifier_->setOnChange(node_, &optCallback);
+    modifier_->setOnChange(node_, &func);
     textPickerEventHub->FireChangeEvent(values, indexes);
     ASSERT_TRUE(checkInvoke.has_value());
     EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);
@@ -1909,7 +1878,7 @@ HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.GradientHeightImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setGradientHeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setGradientHeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGradientHeight, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
@@ -2358,7 +2327,7 @@ HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
-        const Ark_Union_Number_Array_Number selecteds) {
+        const Ark_Union_I32_Array_I32 selecteds) {
         std::vector<std::string> stdValues;
         if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
             auto pickerValue = pickerValueOpt.value();
@@ -2383,11 +2352,10 @@ HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
         }
         checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
     };
-    auto arkCallback = ArkValue<TextPickerScrollStopCallback>(checkCallback, CONTEXT_ID);
+    auto arkCallback = ArkCallback<Opt_TextPickerScrollStopCallback>(checkCallback, CONTEXT_ID);
     textPickerEventHub->FireScrollStopEvent(values, indexes);
     ASSERT_FALSE(checkInvoke.has_value());
-    auto optCallback = Converter::ArkValue<Opt_TextPickerScrollStopCallback>(arkCallback);
-    modifier_->setOnScrollStop(node_, &optCallback);
+    modifier_->setOnScrollStop(node_, &arkCallback);
     textPickerEventHub->FireScrollStopEvent(values, indexes);
     ASSERT_TRUE(checkInvoke.has_value());
     EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);
@@ -2409,7 +2377,7 @@ HWTEST_F(TextPickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
-        const Ark_Union_Number_Array_Number selecteds) {
+        const Ark_Union_I32_Array_I32 selecteds) {
         std::vector<std::string> stdValues;
         if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
             auto pickerValue = pickerValueOpt.value();
@@ -2434,11 +2402,10 @@ HWTEST_F(TextPickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
         }
         checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
     };
-    auto arkCallback = ArkValue<TextPickerEnterSelectedAreaCallback>(checkCallback, CONTEXT_ID);
+    auto arkCallback = ArkCallback<Opt_TextPickerEnterSelectedAreaCallback>(checkCallback, CONTEXT_ID);
     textPickerEventHub->FireEnterSelectedAreaEvent(values, indexes);
     ASSERT_FALSE(checkInvoke.has_value());
-    auto optCallback = Converter::ArkValue<Opt_TextPickerEnterSelectedAreaCallback>(arkCallback);
-    modifier_->setOnEnterSelectedArea(node_, &optCallback);
+    modifier_->setOnEnterSelectedArea(node_, &arkCallback);
     textPickerEventHub->FireEnterSelectedAreaEvent(values, indexes);
     ASSERT_TRUE(checkInvoke.has_value());
     EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);

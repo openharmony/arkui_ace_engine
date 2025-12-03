@@ -154,16 +154,10 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto panelOptions = Converter::OptConvertPtr<Converter::DataPanelOptions>(options);
-    if (panelOptions.has_value()) {
-        DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
-        DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
-        DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
-    } else {
-        DataPanelModelStatic::SetValues(frameNode, std::nullopt);
-        DataPanelModelStatic::SetMax(frameNode, std::nullopt);
-        DataPanelModelStatic::SetType(frameNode, std::nullopt);
-    }
+    auto panelOptions = Converter::Convert<Converter::DataPanelOptions>(*options);
+    DataPanelModelStatic::SetValues(frameNode, panelOptions.values);
+    DataPanelModelStatic::SetMax(frameNode, panelOptions.max);
+    DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.type));
 }
 } // DataPanelInterfaceModifier
 namespace DataPanelAttributeModifier {

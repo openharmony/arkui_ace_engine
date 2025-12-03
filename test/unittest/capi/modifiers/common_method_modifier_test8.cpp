@@ -233,11 +233,11 @@ HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setRestoreId, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, std::string>;
+    using OneTestStep = std::tuple<Opt_Int32, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(1), "1"},
-        {Converter::ArkValue<Opt_Number>(2), "2"},
-        {Converter::ArkValue<Opt_Number>(3), "3"},
+        {Converter::ArkValue<Opt_Int32>(1), "1"},
+        {Converter::ArkValue<Opt_Int32>(2), "2"},
+        {Converter::ArkValue<Opt_Int32>(3), "3"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setRestoreId(node_, &inputValue);

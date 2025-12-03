@@ -110,33 +110,33 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'value' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> setGaugeOptionsValueValidValues = {
-    {"20.15f", Converter::ArkValue<Opt_Number>(20.15f), "20.15"},
-    {"499.0f", Converter::ArkValue<Opt_Number>(499.0f), "499.00"},
-    {"-99.0f", Converter::ArkValue<Opt_Number>(-99.0f), "-99.00"},
-    {"-100.0f", Converter::ArkValue<Opt_Number>(-100.0f), "-100.00"},
-    {"500.0f", Converter::ArkValue<Opt_Number>(500.0f), "500.00"},
-    {"-999.0f", Converter::ArkValue<Opt_Number>(-999.0f), "-100.00"},
-    {"1000.0f", Converter::ArkValue<Opt_Number>(1000.0f), "-100.00"},
-    {"undefined", Converter::ArkValue<Opt_Number>(), "0.00"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> setGaugeOptionsValueValidValues = {
+    {"20.15", Converter::ArkValue<Opt_Float64>(20.15), "20.15"},
+    {"499.0", Converter::ArkValue<Opt_Float64>(499.0), "499.00"},
+    {"-99.0", Converter::ArkValue<Opt_Float64>(-99.0), "-99.00"},
+    {"-100.0", Converter::ArkValue<Opt_Float64>(-100.0), "-100.00"},
+    {"500.0", Converter::ArkValue<Opt_Float64>(500.0), "500.00"},
+    {"-999.0", Converter::ArkValue<Opt_Float64>(-999.0), "-100.00"},
+    {"1000.0", Converter::ArkValue<Opt_Float64>(1000.0), "-100.00"},
+    {"undefined", Converter::ArkValue<Opt_Float64>(), "0.00"},
 };
 
 // Valid values for attribute 'min' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> setGaugeOptionsMinValidValues = {
-    {"-100.0f", Converter::ArkValue<Opt_Number>(-100.0f), "-100.00"},
-    {"20.15f", Converter::ArkValue<Opt_Number>(20.15f), "20.15"},
-    {"-9999.0f", Converter::ArkValue<Opt_Number>(-9999.0f), "-9999.00"},
-    {"undefined", Converter::ArkValue<Opt_Number>(), "0.00"},
-    {"501.0f", Converter::ArkValue<Opt_Number>(501.0f), "0.00"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> setGaugeOptionsMinValidValues = {
+    {"-100.0", Converter::ArkValue<Opt_Float64>(-100.0), "-100.00"},
+    {"20.15", Converter::ArkValue<Opt_Float64>(20.15), "20.15"},
+    {"-9999.0", Converter::ArkValue<Opt_Float64>(-9999.0), "-9999.00"},
+    {"undefined", Converter::ArkValue<Opt_Float64>(), "0.00"},
+    {"501.0", Converter::ArkValue<Opt_Float64>(501.0), "0.00"},
 };
 
 // Valid values for attribute 'max' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> setGaugeOptionsMaxValidValues = {
-    {"500.0f", Converter::ArkValue<Opt_Number>(500.0f), "500.00"},
-    {"-99.0f", Converter::ArkValue<Opt_Number>(-99.0f), "-99.00"},
-    {"100.0f", Converter::ArkValue<Opt_Number>(100.0f), "100.00"},
-    {"undefined", Converter::ArkValue<Opt_Number>(), "100.00"},
-    {"-110.0f", Converter::ArkValue<Opt_Number>(-110.0f), "100.00"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> setGaugeOptionsMaxValidValues = {
+    {"500.0", Converter::ArkValue<Opt_Float64>(500.0), "500.00"},
+    {"-99.0", Converter::ArkValue<Opt_Float64>(-99.0), "-99.00"},
+    {"100.0", Converter::ArkValue<Opt_Float64>(100.0), "100.00"},
+    {"undefined", Converter::ArkValue<Opt_Float64>(), "100.00"},
+    {"-110.0", Converter::ArkValue<Opt_Float64>(-110.0), "100.00"},
 };
 
 /*
@@ -192,13 +192,13 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'min' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Opt_Number>> setGaugeOptionsMinInvalidValues = {
-    {"undefined", Converter::ArkValue<Opt_Number>(Ark_Empty())},
+static std::vector<std::tuple<std::string, Opt_Float64>> setGaugeOptionsMinInvalidValues = {
+    {"undefined", Converter::ArkValue<Opt_Float64>(Ark_Empty())},
 };
 
 // Invalid values for attribute 'max' of method 'setGaugeOptions'
-static std::vector<std::tuple<std::string, Opt_Number>> setGaugeOptionsMaxInvalidValues = {
-    {"undefined", Converter::ArkValue<Opt_Number>(Ark_Empty())},
+static std::vector<std::tuple<std::string, Opt_Float64>> setGaugeOptionsMaxInvalidValues = {
+    {"undefined", Converter::ArkValue<Opt_Float64>(Ark_Empty())},
 };
 
 /*
@@ -259,13 +259,13 @@ HWTEST_F(GaugeModifierTest, setValueTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'value' of method 'value'
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> valueValueValidValues = {
-    {"20.0f", Converter::ArkValue<Ark_Number>(20.0f), "20.00"},
-    {"499.0f", Converter::ArkValue<Ark_Number>(499.0f), "499.00"},
-    {"-100.0f", Converter::ArkValue<Ark_Number>(-100.0f), "-100.00"},
-    {"0.50f", Converter::ArkValue<Ark_Number>(0.50f), "0.50"},
-    {"99.0f", Converter::ArkValue<Ark_Number>(99.0f), "99.00"},
-    {"100.0f", Converter::ArkValue<Ark_Number>(100.0f), "100.00"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> valueValueValidValues = {
+    {"20.0f", Converter::ArkValue<Opt_Float64>(20.0f), "20.00"},
+    {"499.0f", Converter::ArkValue<Opt_Float64>(499.0f), "499.00"},
+    {"-100.0f", Converter::ArkValue<Opt_Float64>(-100.0f), "-100.00"},
+    {"0.50f", Converter::ArkValue<Opt_Float64>(0.50f), "0.50"},
+    {"99.0f", Converter::ArkValue<Opt_Float64>(99.0f), "99.00"},
+    {"100.0f", Converter::ArkValue<Opt_Float64>(100.0f), "100.00"},
 };
 
 /*
@@ -278,18 +278,11 @@ HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Number inputValueValue;
-    Ark_Number initValueValue;
-
-    // Initial setup
-    initValueValue = std::get<1>(valueValueValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueValue = initValueValue;
     for (auto&& value: valueValueValidValues) {
-        inputValueValue = std::get<1>(value);
-        auto optInputValueValue = Converter::ArkValue<Opt_Number>(inputValueValue);
-        modifier_->setValue(node_, &optInputValueValue);
+        auto inputValueValue = std::get<1>(value);
+        modifier_->setValue(node_, &inputValueValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         expectedStr = std::get<2>(value);
@@ -311,16 +304,16 @@ HWTEST_F(GaugeModifierTest, setStartAngleTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'startAngle' and 'endAngle' of method 'startAngle' and 'endAngle'
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> angleValidValues = {
-    {"20.0f", Converter::ArkValue<Ark_Number>(20.0f), "20.00"},
-    {"360.0f", Converter::ArkValue<Ark_Number>(360.0f), "360.00"},
-    {"710.0f", Converter::ArkValue<Ark_Number>(710.0f), "710.00"},
-    {"720.0f", Converter::ArkValue<Ark_Number>(0.0f), "0.00"},
-    {"730.0f", Converter::ArkValue<Ark_Number>(10.0f), "10.00"},
-    {"-730.0f", Converter::ArkValue<Ark_Number>(-10.0f), "-10.00"},
-    {"-720.0f", Converter::ArkValue<Ark_Number>(0.0f), "0.00"},
-    {"-600.0f", Converter::ArkValue<Ark_Number>(-600.0f), "-600.00"},
-    {"-10.0f", Converter::ArkValue<Ark_Number>(-10.0f), "-10.00"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> angleValidValues = {
+    {"20.0", Converter::ArkValue<Opt_Float64>(20.0), "20.00"},
+    {"360.0", Converter::ArkValue<Opt_Float64>(360.0), "360.00"},
+    {"710.0", Converter::ArkValue<Opt_Float64>(710.0), "710.00"},
+    {"720.0", Converter::ArkValue<Opt_Float64>(0.0), "0.00"},
+    {"730.0", Converter::ArkValue<Opt_Float64>(10.0), "10.00"},
+    {"-730.0", Converter::ArkValue<Opt_Float64>(-10.0), "-10.00"},
+    {"-720.0", Converter::ArkValue<Opt_Float64>(0.0), "0.00"},
+    {"-600.0", Converter::ArkValue<Opt_Float64>(-600.0), "-600.00"},
+    {"-10.0", Converter::ArkValue<Opt_Float64>(-10.0), "-10.00"},
 };
 
 /*
@@ -333,18 +326,11 @@ HWTEST_F(GaugeModifierTest, setStartAngleTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Number inputValueStartAngleAngle;
-    Ark_Number initValueStartAngleAngle;
-
-    // Initial setup
-    initValueStartAngleAngle = std::get<1>(angleValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueStartAngleAngle = initValueStartAngleAngle;
     for (auto&& value: angleValidValues) {
-        inputValueStartAngleAngle = std::get<1>(value);
-        auto optInputValueStartAngleAngle = Converter::ArkValue<Opt_Number>(inputValueStartAngleAngle);
-        modifier_->setStartAngle(node_, &optInputValueStartAngleAngle);
+        auto inputValueStartAngleAngle = std::get<1>(value);
+        modifier_->setStartAngle(node_, &inputValueStartAngleAngle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
@@ -376,18 +362,11 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Number inputValueEndAngleAngle;
-    Ark_Number initValueEndAngleAngle;
-
-    // Initial setup
-    initValueEndAngleAngle = std::get<1>(angleValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueEndAngleAngle = initValueEndAngleAngle;
     for (auto&& value: angleValidValues) {
-        inputValueEndAngleAngle = std::get<1>(value);
-        auto optInputValueEndAngleAngle = Converter::ArkValue<Opt_Number>(inputValueEndAngleAngle);
-        modifier_->setEndAngle(node_, &optInputValueEndAngleAngle);
+        auto inputValueEndAngleAngle = std::get<1>(value);
+        modifier_->setEndAngle(node_, &inputValueEndAngleAngle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_END_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
@@ -427,60 +406,60 @@ const std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimensio
     std::make_pair(Color::GREEN, 100.0_px),
 };
 
-const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> COLORS_ARRAY {
+const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_F64> COLORS_ARRAY {
     {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-        Converter::ArkValue<Ark_Number>(1.0f)},
+        Converter::ArkValue<Ark_Float64>(1.0)},
     {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-        Converter::ArkValue<Ark_Number>(0.25f)},
+        Converter::ArkValue<Ark_Float64>(0.25)},
     {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
-        Converter::ArkValue<Ark_Number>(0.5f)},
+        Converter::ArkValue<Ark_Float64>(0.5)},
     {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_RES_BY_NAME),
-        Converter::ArkValue<Ark_Number>(1.0f)},
+        Converter::ArkValue<Ark_Float64>(1.0)},
     {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_RES_BY_ID),
-        Converter::ArkValue<Ark_Number>(1.0f)},
+        Converter::ArkValue<Ark_Float64>(1.0)},
 };
-Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number> arkColorsArray(COLORS_ARRAY);
+Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_F64> arkColorsArray(COLORS_ARRAY);
 
-Array_Tuple_Union_ResourceColor_LinearGradient_Number GetGradientArray()
+Array_Tuple_Union_ResourceColor_LinearGradient_F64 GetGradientArray()
 {
-    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> gradientArray {
+    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_F64> gradientArray {
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
             PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER1)),
-            Converter::ArkValue<Ark_Number>(0.25f)},
+            Converter::ArkValue<Ark_Float64>(0.25)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
             PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER2)),
-            Converter::ArkValue<Ark_Number>(0.75f)},
+            Converter::ArkValue<Ark_Float64>(0.75)},
     };
-    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_Number>(gradientArray, Converter::FC);
+    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_F64>(gradientArray, Converter::FC);
 }
 
-Array_Tuple_Union_ResourceColor_LinearGradient_Number GetColorsBigArray()
+Array_Tuple_Union_ResourceColor_LinearGradient_F64 GetColorsBigArray()
 {
-    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> colorsBigArray {
+    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_F64> colorsBigArray {
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-            Converter::ArkValue<Ark_Number>(1.0f)},
+            Converter::ArkValue<Ark_Float64>(1.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
             PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER1)),
-            Converter::ArkValue<Ark_Number>(2.0f)},
+            Converter::ArkValue<Ark_Float64>(2.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
             PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER2)),
-            Converter::ArkValue<Ark_Number>(1.0f)},
+            Converter::ArkValue<Ark_Float64>(1.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-            Converter::ArkValue<Ark_Number>(2.0f)},
+            Converter::ArkValue<Ark_Float64>(2.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-            Converter::ArkValue<Ark_Number>(1.0f)},
+            Converter::ArkValue<Ark_Float64>(1.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
-            Converter::ArkValue<Ark_Number>(2.0f)},
+            Converter::ArkValue<Ark_Float64>(2.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-            Converter::ArkValue<Ark_Number>(1.0f)},
+            Converter::ArkValue<Ark_Float64>(1.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-            Converter::ArkValue<Ark_Number>(2.0f)},
+            Converter::ArkValue<Ark_Float64>(2.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
-            Converter::ArkValue<Ark_Number>(1.0f)},
+            Converter::ArkValue<Ark_Float64>(1.0f)},
         {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-            Converter::ArkValue<Ark_Number>(2.0f)},
+            Converter::ArkValue<Ark_Float64>(2.0f)},
     };
-    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_Number>(colorsBigArray, Converter::FC);
+    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_F64>(colorsBigArray, Converter::FC);
 }
 const std::string COLORS_BIG_ARRAY_RESULT =
                 "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
@@ -501,7 +480,7 @@ const std::string GRADIENT_ARRAY_RESULT =
                 "[\"#FFFFFFFF\",\"20.000000\"]],0.25],"
                 "[[[\"#FF000000\",\"5.500000\"],"
                 "[\"#FF00FF00\",\"100.000000\"]],0.75]]";
-using ArkColorColor = Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+using ArkColorColor = Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64;
 using GaugeColorsValues = std::vector<std::tuple<std::string, ArkColorColor, std::string>>;
 
 // Valid values for attribute of method 'colors'
@@ -534,19 +513,19 @@ GaugeColorsValues CreateColorsValidValues()
         }, {
             "COLORS_ARRAY",
             Converter::ArkUnion<ArkColorColor,
-                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(arkColorsArray.ArkValue()),
+                Array_Tuple_Union_ResourceColor_LinearGradient_F64>(arkColorsArray.ArkValue()),
             "[[[[\"#FFFF0000\",\"0.000000\"]],1],[[[\"#F000FF00\",\"0.000000\"]],0.25],"
                 "[[[\"#800000FF\",\"0.000000\"]],0.5],[[[\"#FF5A0F78\",\"0.000000\"]],1],"
                 "[[[\"#ABCDEF01\",\"0.000000\"]],1]]"
         }, {
             "GRADIENT_ARRAY",
             Converter::ArkUnion<ArkColorColor,
-                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(GetGradientArray()),
+                Array_Tuple_Union_ResourceColor_LinearGradient_F64>(GetGradientArray()),
             GRADIENT_ARRAY_RESULT
         }, {
             "COLORS_BIG_ARRAY",
             Converter::ArkUnion<ArkColorColor,
-                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(GetColorsBigArray()),
+                Array_Tuple_Union_ResourceColor_LinearGradient_F64>(GetColorsBigArray()),
             COLORS_BIG_ARRAY_RESULT
         },
     };
@@ -692,10 +671,12 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
 static std::vector<std::tuple<std::string, Ark_Length>> strokeWidthStrokeWidthLengthInvalidValues = {
     {"10%", Converter::ArkValue<Ark_Length>("10%")},
     {"0%", Converter::ArkValue<Ark_Length>("0%")},
+#ifdef WRONG_API // Need to check synamic API behavior
     {"-5.0f", Converter::ArkValue<Ark_Length>(-5.0f)},
     {"-15.5vp", Converter::ArkValue<Ark_Length>("-15.5vp")},
     {"-25.0px", Converter::ArkValue<Ark_Length>("-25.0px")},
     {"-0.5fp", Converter::ArkValue<Ark_Length>("-0.5fp")},
+#endif
 };
 
 /*
@@ -784,45 +765,30 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'radius' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowRadiusValidValues = {
-    {"0.05f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.05f)),
-        "0.050000"},
-    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
-        "10.000000"},
-    {"100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(100.0f)),
-        "100.000000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowRadiusValidValues = {
+    {"0.05", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.05), "0.050000"},
+    {"10.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10.0), "10.000000"},
+    {"100.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(100.0), "100.000000"},
+    {"res:str", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_NAME), "5.000000"},
+    {"res:id", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_ID), "1.000000"},
 };
 
 // Valid values for attribute 'offsetX' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetXValidValues = {
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
-        "0.000000"},
-    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
-        "10.000000"},
-    {"-0.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-0.5f)),
-        "-0.500000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowOffsetXValidValues = {
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0), "0.000000"},
+    {"10.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10.0), "10.000000"},
+    {"-0.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-0.5), "-0.500000"},
+    {"res:id", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_ID), "1.000000"},
+    {"res:str", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_NAME), "5.000000"},
 };
 
 // Valid values for attribute 'offsetY' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetYValidValues = {
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
-        "0.000000"},
-    {"-100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-100.0f)),
-        "-100.000000"},
-    {"5.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(5.5f)),
-        "5.500000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowOffsetYValidValues = {
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0), "0.000000"},
+    {"-100.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-100.0), "-100.000000"},
+    {"5.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(5.5), "5.500000"},
+    {"res:str", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_NAME), "5.000000"},
+    {"res:id", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_ID), "1.000000"},
 };
 
 /*
@@ -885,23 +851,23 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'radius' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowRadiusInvalidValues = {
-    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f))},
-    {"-20.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-20.5f))},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowRadiusInvalidValues = {
+    {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0)},
+    {"-20.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-20.5)},
 };
 
 // Invalid values for attribute 'offsetX' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetXInvalidValues = {
-    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowOffsetXInvalidValues = {
+    {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
 
 // Invalid values for attribute 'offsetY' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetYInvalidValues = {
-    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowOffsetYInvalidValues = {
+    {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
 
 /*

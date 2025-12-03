@@ -22,12 +22,10 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-inline void AssignArkValue(Ark_Tuple_Union_ResourceColor_LinearGradient_Number& dst,
-    const std::tuple<Ark_Union_ResourceColor_LinearGradient, Ark_Number>& src)
+inline void AssignArkValue(Ark_Tuple_Union_ResourceColor_LinearGradient_F64& dst,
+    const std::tuple<Ark_Union_ResourceColor_LinearGradient, Ark_Float64>& src)
 {
-#ifdef WRONG_TYPE
     std::tie(dst.value0, dst.value1) = src;
-#endif
 }
 } // namespace OHOS::Ace::NG::Converter
 

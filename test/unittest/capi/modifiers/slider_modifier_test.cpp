@@ -72,14 +72,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -88,13 +88,13 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Ark_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        inputValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(value);
+        inputValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(value);
         modifier_->setSliderOptions(node, &realInputValue);
         auto jsonValueFull = GetJsonValue(node);
         auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
@@ -105,7 +105,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Ark_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Ark_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -119,14 +119,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -135,7 +135,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Union_Number_Bindable& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Union_F64_Bindable& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -152,12 +152,12 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(std::get<1>(value)),
             std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Union_Number_Bindable>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Union_F64_Bindable>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
 }
 
 /*
@@ -170,14 +170,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -186,7 +186,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinValidValues, TestSize
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -203,7 +203,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinValidValues, TestSize
     };
 
     for (auto&& value : Fixtures::testFixtureNumberMinValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -217,14 +217,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -233,7 +233,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinInvalidValues, TestSi
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -250,11 +250,11 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinInvalidValues, TestSi
     };
 
     for (auto&& value : Fixtures::testFixtureNumberMinInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
 }
 
 /*
@@ -267,14 +267,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -283,7 +283,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxValidValues, TestSize
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -300,7 +300,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxValidValues, TestSize
     };
 
     for (auto&& value : Fixtures::testFixtureNumberMaxValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -314,14 +314,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -330,7 +330,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxInvalidValues, TestSi
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -347,11 +347,11 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxInvalidValues, TestSi
     };
 
     for (auto&& value : Fixtures::testFixtureNumberMaxInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
 }
 
 /*
@@ -364,14 +364,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepValidValues, TestSiz
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -380,7 +380,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepValidValues, TestSiz
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -397,7 +397,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepValidValues, TestSiz
     };
 
     for (auto&& value : Fixtures::testFixtureNumberStepValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -411,14 +411,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepInvalidValues, TestS
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -427,7 +427,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepInvalidValues, TestS
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
         // Re-create node for 'options' attribute
@@ -443,11 +443,11 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepInvalidValues, TestS
     };
 
     for (auto&& value : Fixtures::testFixtureNumberStepInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>(), ATTRIBUTE_STEP_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>(), ATTRIBUTE_STEP_DEFAULT_VALUE);
 }
 
 /*
@@ -460,14 +460,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValuesSlider[0]));
     initValueOptions.direction =
@@ -507,14 +507,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValuesSlider[0]));
     initValueOptions.direction =
@@ -553,14 +553,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionValidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -601,14 +601,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionInvalidValues, 
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -647,14 +647,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseValidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -694,14 +694,14 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseInvalidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[1]));
     initValueOptions.step =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[2]));
     initValueOptions.style =
         Converter::ArkValue<Opt_SliderStyle>(std::get<1>(Fixtures::testFixtureEnumSliderStyleValidValues[0]));
     initValueOptions.direction =
@@ -2059,18 +2059,8 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestDefaultValues, TestSize
  */
 HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level1)
 {
-    Ark_Number initValueMinResponsiveDistance;
-
-    // Initial setup
-    initValueMinResponsiveDistance = std::get<1>(Fixtures::testFixtureNumberResponsiveDistanceValidValuesSlider[0]);
-
-    auto checkValue = [this, &initValueMinResponsiveDistance](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueMinResponsiveDistance = initValueMinResponsiveDistance;
-
-        inputValueMinResponsiveDistance = value;
-        auto minResponsiveDistance = Converter::ArkValue<Opt_Number>(inputValueMinResponsiveDistance);
-        modifier_->setMinResponsiveDistance(node_, &minResponsiveDistance);
+    auto checkValue = [this](const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
+        modifier_->setMinResponsiveDistance(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2078,7 +2068,7 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level
     };
 
     for (auto&& value : Fixtures::testFixtureNumberResponsiveDistanceValidValuesSlider) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -2089,18 +2079,16 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level
  */
 HWTEST_F(SliderModifierTest, setMinResponsiveDistanceInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueMinResponsiveDistance;
-
     // Initial setup
-    initValueMinResponsiveDistance = std::get<1>(Fixtures::testFixtureNumberResponsiveDistanceValidValuesSlider[0]);
+    auto initValueMinResponsiveDistance = Converter::ArkValue<Opt_Float64>(
+        std::get<1>(Fixtures::testFixtureNumberResponsiveDistanceValidValuesSlider[0]));
 
     auto checkValue = [this, &initValueMinResponsiveDistance](
-                          const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueMinResponsiveDistance = initValueMinResponsiveDistance;
-
+                          const std::string& input, const Opt_Float64& value) {
+        auto inputValueMinResponsiveDistance = initValueMinResponsiveDistance;
+        modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
         inputValueMinResponsiveDistance = value;
-        auto minResponsiveDistance = Converter::ArkValue<Opt_Number>(inputValueMinResponsiveDistance);
-        modifier_->setMinResponsiveDistance(node_, &minResponsiveDistance);
+        modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE)
@@ -2108,8 +2096,9 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceInvalidValues, TestSize.Lev
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueInvalidValuesSlider) {
-        checkValue(std::get<0>(value), std::get<1>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)));
     }
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>());
 }
 
 /*
@@ -2141,12 +2130,12 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromValidValues, TestSiz
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
     initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
 
     auto checkValue = [this, &initValueSlideRange](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
 
         inputValueSlideRange.from = value;
@@ -2160,7 +2149,7 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromValidValues, TestSiz
     };
 
     for (auto&& value : Fixtures::testFixtureNumberRangeFromValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -2175,11 +2164,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
     initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
 
-    auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
+    auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Float64& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
         auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
         modifier_->setSlideRange(node_, &slideRange);
@@ -2194,11 +2183,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
     };
 
     for (auto&& value : Fixtures::testFixtureNumberRangeFromInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>());
 }
 
 /*
@@ -2212,12 +2201,12 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToValidValues, TestSize.
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
     initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
 
     auto checkValue = [this, &initValueSlideRange](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
 
         inputValueSlideRange.to = value;
@@ -2231,7 +2220,7 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToValidValues, TestSize.
     };
 
     for (auto&& value : Fixtures::testFixtureNumberRangeToValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -2246,11 +2235,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
 
     // Initial setup
     initValueSlideRange.from =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeFromValidValuesSlider[0]));
     initValueSlideRange.to =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
+        Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberRangeToValidValuesSlider[0]));
 
-    auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Number& value) {
+    auto checkValue = [this, &initValueSlideRange](const std::string& input, const Opt_Float64& value) {
         Ark_SlideRange inputValueSlideRange = initValueSlideRange;
         auto slideRange = Converter::ArkValue<Opt_SlideRange>(inputValueSlideRange);
         modifier_->setSlideRange(node_, &slideRange);
@@ -2265,11 +2254,11 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
     };
 
     for (auto&& value : Fixtures::testFixtureNumberRangeToInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Float64>(std::get<1>(value)));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>());
+    checkValue("undefined", Converter::ArkValue<Opt_Float64>());
 }
 
 /*
@@ -2290,28 +2279,26 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         std::optional<int32_t> mode;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_SliderChangeMode_Void onChangeCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_Number value, Ark_SliderChangeMode mode) {
-            checkEvent = {
-                .nodeId = nodeId,
-                .value = Converter::Convert<float>(value),
-                .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
-            };
-        }
+    auto onChangeCallback = [](Ark_Int32 nodeId, const Ark_Float64 value, Ark_SliderChangeMode mode) {
+        checkEvent = {
+            .nodeId = nodeId,
+            .value = Converter::Convert<float>(value),
+            .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
+        };
     };
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_SliderChangeMode_Void>(onChangeCallback);
+    auto optCallback = Converter::ArkCallback<Opt_Callback_F64_SliderChangeMode_Void>(onChangeCallback,
+         frameNode->GetId());
     modifier_->setOnChange(node_, &optCallback);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->value, 10);
+    EXPECT_FLOAT_EQ(checkEvent->value, 10.);
     EXPECT_EQ(checkEvent->mode.value(), 0);
     eventHub->FireChangeEvent(20, 1);
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->value, 20);
+    EXPECT_FLOAT_EQ(checkEvent->value, 20.);
     EXPECT_EQ(checkEvent->mode.value(), 1);
 }
 

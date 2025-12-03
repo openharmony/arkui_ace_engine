@@ -416,7 +416,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     EXPECT_EQ(gutterCheckValue, "0.00vp");
 
     // lanes, gutter are valid
-    Ark_Union_Number_LengthConstrain value =  Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_Int32>(2);
+    auto value =  Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_Int32>(2);
     auto optValue = Converter::ArkValue<Opt_Union_I32_LengthConstrain>(value);
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>(55.5f);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
@@ -459,7 +459,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
 {
     // lanes, gutter are negative
-    Ark_Union_Number_LengthConstrain value = Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_I32>(-2);
+    auto value = Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_Int32>(-2);
     auto optValue = Converter::ArkValue<Opt_Union_I32_LengthConstrain>(value);
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>("-88px");
     modifier_->setLanes(node_, &optValue, &gutterOpt);
@@ -653,7 +653,7 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
         int32_t center;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_Number_Void arkCallback = {
+    Callback_I32_I32_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center) {
             checkEvent = {
@@ -809,7 +809,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
         int32_t insertIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Number_Void arkCallback = {
+    Callback_ItemDragInfo_I32_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event,
                 const Ark_Int32 itemIndex, const Ark_Int32 insertIndex) {
@@ -855,7 +855,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
         int32_t itemIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Void arkCallback = {
+    Callback_ItemDragInfo_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex) {
             checkEvent = {
@@ -866,7 +866,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
         }
     };
 
-    auto optCallback = Converter::ArkValue<Opt_Callback_ItemDragInfo_Int32_Void>(arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_ItemDragInfo_I32_Void>(arkCallback);
     modifier_->setOnItemDragLeave(node_, &optCallback);
 
     dragInfo.SetX(135);
@@ -987,8 +987,8 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     Callback_ItemDragInfo_I32_I32_Boolean_Void arkCallbackDrop = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_I32 itemIndex,
-                const Ark_I32 insertIndex, const Ark_Boolean isSuccess) {
+        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
+                const Ark_Int32 insertIndex, const Ark_Boolean isSuccess) {
             checkEvent = {.nodeId = nodeId,
                 .dragInfo = Converter::Convert<ItemDragInfo>(event),
                 .itemIndex = Converter::Convert<int32_t>(itemIndex),

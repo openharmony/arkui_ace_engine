@@ -23,6 +23,8 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 
+#include "shape_utils.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -69,11 +71,11 @@ public:
     }
 };
 
-Opt_LineOptions BuildLineOptions(int width, int height)
+Opt_LineOptions BuildLineOptions(double width, double height)
 {
     Ark_LineOptions options;
-    options.width = Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(width);
-    options.height = Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(height);
+    options.width = Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(width);
+    options.height = Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(height);
     return Converter::ArkValue<Opt_LineOptions>(options);
 }
 
@@ -117,13 +119,10 @@ HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
 HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Length x = Converter::ArkValue<Ark_Length>(P1_X);
-    Ark_Length y = Converter::ArkValue<Ark_Length>(P1_Y);
-    Ark_ShapePoint array;
-    array.value0 = x;
-    array.value1 = y;
 
-    auto optArray = Converter::ArkValue<Opt_ShapePoint>(array);
+    Converter::ConvContext ctx;
+    std::pair<std::string, std::string> input = {P1_X, P1_Y};
+    auto optArray = Converter::ArkValue<Opt_ShapePoint>(input, &ctx);
     modifier_->setStartPoint(frameNode, &optArray);
 
     std::string strResult;
@@ -139,13 +138,10 @@ HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
 HWTEST_F(LineModifierTest, LineModifierEndPointTest, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Length x = Converter::ArkValue<Ark_Length>(P2_X);
-    Ark_Length y = Converter::ArkValue<Ark_Length>(P2_Y);
-    Ark_ShapePoint array;
-    array.value0 = x;
-    array.value1 = y;
 
-    auto optArray = Converter::ArkValue<Opt_ShapePoint>(array);
+    Converter::ConvContext ctx;
+    std::pair<std::string, std::string> input = {P2_X, P2_Y};
+    auto optArray = Converter::ArkValue<Opt_ShapePoint>(input, &ctx);
     modifier_->setEndPoint(frameNode, &optArray);
 
     std::string strResult;

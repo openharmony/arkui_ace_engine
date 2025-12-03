@@ -443,7 +443,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
     auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::FLOAT};
-    auto friction = CreateResourceUnion<Opt_Union_I32_Resource>(RES_NAME);
+    auto friction = CreateResourceUnion<Opt_Union_F64_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);

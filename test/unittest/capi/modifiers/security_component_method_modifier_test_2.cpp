@@ -420,14 +420,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestValidValues, TestSize.Lev
  */
 HWTEST_F(SecurityComponentMethodModifierTest, alignTestInvalidValues, TestSize.Level1)
 {
-    const auto initialValue = ARK_ALIGNMENT_TOP_START;
+    const auto initialValue = Converter::ArkValue<Opt_Alignment>(ARK_ALIGNMENT_TOP_START);
 
-    auto checkValue = [initialValue, this](const std::string& input, const Ark_Alignment& value)
+    std::vector<std::tuple<std::string, Opt_Alignment>> testFixtureEnumAlignmentInvalidValues = {
+        {"invalid", Converter::ArkValue<Opt_Alignment>(INVALID_ENUM_VAL<Ark_Alignment>)},
+        {"undefined", Converter::ArkValue<Opt_Alignment>()},
+    };
+
+    auto checkValue = [initialValue, this](const std::string& input, const Opt_Alignment& value)
     {
-        auto convValue = Converter::ArkValue<Opt_Alignment>(initialValue);
-        modifier_->setAlign(node_, &convValue);
-        convValue = Converter::ArkValue<Opt_Alignment>(value);
-        modifier_->setAlign(node_, &convValue);
+        modifier_->setAlign(node_, &initialValue);
+        modifier_->setAlign(node_, &value);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -436,7 +439,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestInvalidValues, TestSize.L
             "Input value is: " << input << ", method: setAlign";
     };
 
-    for (const auto &[input, value]: Fixtures::testFixtureEnumAlignmentInvalidValues) {
+    for (const auto &[input, value]: testFixtureEnumAlignmentInvalidValues) {
         checkValue(input, value);
     }
 }
@@ -600,7 +603,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestValidValues, TestSi
         Ark_Int32 inputValueMaxLines = initValueMaxLines;
 
         inputValueMaxLines = value;
-        auto convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
+        auto convValue = ArkUnion<Opt_Union_I32_Resource, Ark_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -632,10 +635,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestInvalidValues, Test
 
     auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Int32& value) {
         Ark_Int32 inputValueMaxLines = initValueMaxLines;
-        auto convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
+        auto convValue = ArkUnion<Opt_Union_I32_Resource, Ark_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         inputValueMaxLines = value;
-        convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
+        convValue = ArkUnion<Opt_Union_I32_Resource, Ark_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);

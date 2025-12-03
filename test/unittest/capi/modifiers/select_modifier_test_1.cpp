@@ -19,9 +19,9 @@ namespace OHOS::Ace::NG {
 using namespace SelectTest;
 
 namespace SelectTest {
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberNonNegIntValidValues = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testNumberNonNegIntValidValues = {
+    { "0", Converter::ArkValue<Ark_Int32>(0), "0" },
+    { "1", Converter::ArkValue<Ark_Int32>(1), "1" },
 };
 std::vector<std::tuple<std::string, Ark_String, std::string>> testWeightStringValidValues = {
     { "\"ARK_FONT_WEIGHT_LIGHTER\"", Converter::ArkValue<Ark_String>("lighter"), "FontWeight.Lighter" },
@@ -88,7 +88,7 @@ std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resou
 HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_Resource_Bindable_Bindable& value) {
+                          const Opt_Union_I32_Resource_Bindable_Bindable& value) {
         auto inputValueSelected = value;
         modifier_->setSelected(node_, &inputValueSelected);
         auto jsonValue = GetJsonValue(node_);
@@ -98,7 +98,7 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
     };
 // we can check only empty selection, i.e. 0 and 1 indexes
     for (auto& [input, value, expected] : testNumberNonNegIntValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(value));
     }
     //todo add resource test
 }
@@ -110,11 +110,11 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
  */
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, TestSize.Level1)
 {
-    auto initValueSelected = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(
+    auto initValueSelected = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(
         std::get<1>(testNumberNonNegIntValidValues[0]));
 
     auto checkValue = [this, &initValueSelected](const std::string& input,
-        const Opt_Union_Number_Resource_Bindable_Bindable& value) {
+        const Opt_Union_I32_Resource_Bindable_Bindable& value) {
         auto inputValueSelected = initValueSelected;
         modifier_->setSelected(node_, &inputValueSelected);
         inputValueSelected = value;
@@ -125,10 +125,10 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, Test
             "Input value is: " << input << ", method: setSelected, attribute: selected";
     };
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_Resource_Bindable_Bindable>());
-    checkValue("-1", ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(-1));
+    checkValue("undefined", ArkValue<Opt_Union_I32_Resource_Bindable_Bindable>());
+    checkValue("-1", ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(-1));
 }
 
 /*

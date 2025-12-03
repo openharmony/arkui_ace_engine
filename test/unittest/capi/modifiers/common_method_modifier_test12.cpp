@@ -29,11 +29,19 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
-    const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_OVERLAY_NAME = "overlay";
-    const auto ATTRIBUTE_OVERLAY_DEFAULT_VALUE = "{\"title\":\"\","
-        "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"0.00px\",\"y\":\"0.00px\"}}}";
+const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
+const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_OVERLAY_NAME = "overlay";
+const auto ATTRIBUTE_OVERLAY_TITLE_NAME = "title";
+const auto ATTRIBUTE_OVERLAY_TITLE_DEAFULT_VALUE = "";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_NAME = "options";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_NAME = "align";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_DEAFULT_VALUE = "Alignment.Center";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME = "offset";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_NAME = "x";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_DEAFULT_VALUE = "0.00px";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_NAME = "y";
+const auto ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_DEAFULT_VALUE = "0.00px";
 }
 
 
@@ -169,38 +177,26 @@ HWTEST_F(CommonMethodModifierTest12, AccessibilityVirtualNodeTest, TestSize.Leve
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
-//////// Overlay
-using OverlayTestStep = std::tuple<Ark_Alignment, std::string>;
-static const std::vector<OverlayTestStep> testPlan = {
-    {Ark_Alignment::ARK_ALIGNMENT_TOP_START, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.TopStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_TOP, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.Top\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_TOP_END, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.TopEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_START, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.Start\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_CENTER, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.Center\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_END, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.End\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.BottomStart\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.Bottom\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-    {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "{\"title\":\"overlay string\","
-        "\"options\":{\"align\":\"Alignment.BottomEnd\",\"offset\":{\"x\":\"5.00vp\",\"y\":\"6.00vp\"}}}"},
-};
-
 /*
  * @tc.name: OverlayTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, OverlayTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, setOverlayTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_OVERLAY_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_OVERLAY_DEFAULT_VALUE);
+    auto fullJson = GetJsonValue(node_);
+    auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
+    auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+    auto offset = GetAttrValue<std::unique_ptr<JsonValue>>(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
+
+    auto title = GetAttrValue<std::string>(overlay, ATTRIBUTE_OVERLAY_TITLE_NAME);
+    EXPECT_EQ(title, ATTRIBUTE_OVERLAY_TITLE_DEAFULT_VALUE);
+    auto align = GetAttrValue<std::string>(options, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_NAME);
+    EXPECT_EQ(align, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_DEAFULT_VALUE);
+    auto x = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_NAME);
+    EXPECT_EQ(x, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_DEAFULT_VALUE);
+    auto y = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_NAME);
+    EXPECT_EQ(y, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_DEAFULT_VALUE);
 }
 
 /*
@@ -208,41 +204,63 @@ HWTEST_F(CommonMethodModifierTest12, OverlayTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, DISABLED_OverlayTest_Union_String_CustomNodeBuilder_Values, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, setOverlayTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOverlay, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
+    const std::vector<std::tuple<Ark_Alignment, std::string>> testPlan = {
+        {ARK_ALIGNMENT_TOP_START, "Alignment.TopStart" },
+        {ARK_ALIGNMENT_TOP, "Alignment.Top"},
+        {ARK_ALIGNMENT_TOP_END, "Alignment.TopEnd"},
+        {ARK_ALIGNMENT_START, "Alignment.Start"},
+        {ARK_ALIGNMENT_CENTER, "Alignment.Center"},
+        {ARK_ALIGNMENT_END, "Alignment.End"},
+        {ARK_ALIGNMENT_BOTTOM_START, "Alignment.BottomStart"},
+        {ARK_ALIGNMENT_BOTTOM, "Alignment.Bottom"},
+        {ARK_ALIGNMENT_BOTTOM_END, "Alignment.BottomEnd"},
+    };
+
     std::string expectedStr = "overlay string";
-    auto arkExpectedStr = Converter::ArkValue<Ark_String>(expectedStr);
     auto unionStringValue = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>(
-        arkExpectedStr);
+        expectedStr, Converter::FC);
     Ark_OverlayOffset arkOverlayOffset = {
-        .x = Converter::ArkValue<Opt_Number>(5), .y = Converter::ArkValue<Opt_Number>(6)};
+        .x = Converter::ArkValue<Opt_Float64>(5.),
+        .y = Converter::ArkValue<Opt_Float64>(6.),
+    };
     Ark_OverlayOptions arkOverlayOptions;
-    Opt_OverlayOptions optOverlayOptions;
+    arkOverlayOptions.offset = Converter::ArkValue<Opt_OverlayOffset>(arkOverlayOffset);
 
     for (auto [inputValue, expectedValue]: testPlan) {
-        arkOverlayOptions = {
-            .align = Converter::ArkValue<Opt_Alignment>(inputValue),
-            .offset = Converter::ArkValue<Opt_OverlayOffset>(arkOverlayOffset),
-        };
-        optOverlayOptions = Converter::ArkValue<Opt_OverlayOptions>(arkOverlayOptions);
+        arkOverlayOptions.align = Converter::ArkValue<Opt_Alignment>(inputValue);
+        auto optOverlayOptions = Converter::ArkValue<Opt_OverlayOptions>(arkOverlayOptions);
         modifier_->setOverlay(node_, &unionStringValue, &optOverlayOptions);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_OVERLAY_NAME);
+        auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
+        auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+        auto resultValue = GetAttrValue<std::string>(options, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 
+    auto fullJson = GetJsonValue(node_);
+    auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
+    auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+    auto offset = GetAttrValue<std::unique_ptr<JsonValue>>(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
+
+    auto title = GetAttrValue<std::string>(overlay, ATTRIBUTE_OVERLAY_TITLE_NAME);
+    EXPECT_EQ(title, expectedStr);
+    auto x = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_NAME);
+    EXPECT_EQ(x, "5.00vp");
+    auto y = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_NAME);
+    EXPECT_EQ(y, "6.00vp");
+
     // test CustomNodeBuilder
-    int callsCount = 0;
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
-    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent,
-        CustomNodeBuilder>(builder);
-    modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, &optOverlayOptions);
-    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
+        CustomNodeBuilder>(builderHelper.GetBuilder());
+    modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, nullptr);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), 1);
 }
 
 }

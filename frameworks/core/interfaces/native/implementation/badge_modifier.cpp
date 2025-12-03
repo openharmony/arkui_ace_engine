@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    using UnionBadgeOptions = std::variant<Ark_BadgePosition, Ark_Position>;
 struct Position {
     std::optional<int> badgePosition;
     std::optional<bool> isPositionXy = false;
@@ -41,13 +40,15 @@ struct Style {
 
 namespace Converter {
 template<>
-void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
+Position Convert(const Ark_Position& src)
 {
-    dst->isPositionXy = true;
-    dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
-    dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-    Validator::ValidateNonNegative(dst->badgePositionX);
-    Validator::ValidateNonNegative(dst->badgePositionY);
+    Position dst;
+    dst.isPositionXy = true;
+    dst.badgePositionX = Converter::OptConvert<Dimension>(src.x);
+    dst.badgePositionY = Converter::OptConvert<Dimension>(src.y);
+    Validator::ValidateNonNegative(dst.badgePositionX);
+    Validator::ValidateNonNegative(dst.badgePositionY);
+    return dst;
 }
 
 template<>
@@ -57,6 +58,7 @@ void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
         case ARK_BADGE_POSITION_RIGHT_TOP:
         case ARK_BADGE_POSITION_RIGHT:
         case ARK_BADGE_POSITION_LEFT:
+            dst = Position();
             dst->isPositionXy = false;
             dst->badgePosition = src;
             break;
@@ -91,10 +93,12 @@ BadgeParameters ConverterHelper(const T& src)
     auto position = Converter::OptConvert<Position>(src.position);
     Style style = Converter::Convert<Style>(src.style);
 
-    dst.isPositionXy = position->isPositionXy;
-    dst.badgePositionX = position->badgePositionX;
-    dst.badgePositionY = position->badgePositionY;
-    dst.badgePosition = position->badgePosition;
+    if (position) {
+        dst.isPositionXy = position->isPositionXy;
+        dst.badgePositionX = position->badgePositionX;
+        dst.badgePositionY = position->badgePositionY;
+        dst.badgePosition = position->badgePosition;
+    }
 
     dst.badgeColor = style.badgeColor;
     dst.badgeTextColor = style.badgeTextColor;
@@ -137,15 +141,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // BadgeModifier
 namespace BadgeInterfaceModifier {
-
-BadgeParameters ParseBadgeParameter(const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
-{
-    if (value->selector == SELECTOR_ID_0) {
-        return  Converter::Convert<BadgeParameters>(value->value0);
-    }
-    return Converter::Convert<BadgeParameters>(value->value1);
-}
-
 void SetBadgeOptionsImpl(Ark_NativePointer node,
                          const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
 {
@@ -153,7 +148,9 @@ void SetBadgeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    BadgeParameters badgeParameters = ParseBadgeParameter(value);
+    auto convValue = Converter::OptConvert<BadgeParameters>(*value);
+    CHECK_NULL_VOID(convValue);
+    auto badgeParameters = *convValue;
     bool isDefaultFontSize = !badgeParameters.badgeFontSize.has_value();
     bool isDefaultBadgeSize = !badgeParameters.badgeCircleSize.has_value();
 

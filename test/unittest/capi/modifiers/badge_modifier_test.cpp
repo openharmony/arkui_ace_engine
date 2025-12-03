@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "badge_modifier_test.h"
-
 #include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
@@ -68,12 +66,12 @@ void FillEmptyOptions(T& options)
     options.position = Converter::ArkValue<Opt_Union_BadgePosition_Position>(Ark_Empty());
     options.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .fontSize = Converter::ArkValue<Opt_Union_Number_ResourceStr>(Ark_Empty()),
-        .badgeSize = Converter::ArkValue<Opt_Union_Number_ResourceStr>(Ark_Empty()),
+        .fontSize = Converter::ArkValue<Opt_Union_F64_ResourceStr>(Ark_Empty()),
+        .badgeSize = Converter::ArkValue<Opt_Union_F64_ResourceStr>(Ark_Empty()),
         .badgeColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
         .borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
         .borderWidth = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .fontWeight = Converter::ArkValue<Opt_Union_Number_FontWeight_ResourceStr>(Ark_Empty()),
+        .fontWeight = Converter::ArkValue<Opt_Union_I32_FontWeight_ResourceStr>(Ark_Empty()),
     };
 }
 
@@ -86,40 +84,16 @@ void InitStringOptions(Ark_BadgeParamWithString& options)
 void InitNumberOptions(Ark_BadgeParamWithNumber& options)
 {
     FillEmptyOptions(options);
-    options.maxCount = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    options.count = Converter::ArkValue<Ark_Number>(0);
+    options.maxCount = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    options.count = Converter::ArkValue<Ark_Int32>(0);
 }
 
-Opt_Union_Number_ResourceStr GetOptNumStr(std::string str)
+Opt_Union_F64_ResourceStr GetOptNumStr(std::string str)
 {
-    return Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(
+    return Converter::ArkUnion<Opt_Union_F64_ResourceStr, Ark_ResourceStr>(
         Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str, Converter::FC));
 }
-
 } // namespace
-
-namespace Converter {
-
-void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src)
-{
-    switch (src) {
-        case FontWeight::W100: dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER; break;
-        case FontWeight::W400: dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL; break;
-        case FontWeight::W700: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD; break;
-        case FontWeight::W900: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER; break;
-        case FontWeight::LIGHTER: dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER; break;
-        case FontWeight::NORMAL: dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL; break;
-        case FontWeight::REGULAR: dst = Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR; break;
-        case FontWeight::MEDIUM: dst = Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM; break;
-        case FontWeight::BOLD: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD; break;
-        case FontWeight::BOLDER: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER; break;
-        default:
-            dst = static_cast<Ark_FontWeight>(-1);
-            LOGE("Unexpected enum value in Ark_FontWeight: %{public}d", src);
-    }
-}
-
-} // namespace Converter
 
 class BadgeModifierTest : public ModifierTestBase<GENERATED_ArkUIBadgeModifier,
                               &GENERATED_ArkUINodeModifiers::getBadgeModifier, GENERATED_ARKUI_BADGE> {
@@ -207,7 +181,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestEmptyValues, TestSize.Level1)
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
 
-    modifier_->setBadgeOptions0(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithNumber>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
@@ -258,22 +234,20 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
-        .color =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY),
         .fontSize = GetOptNumStr("8.00vp"),
-        .badgeSize = Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(32.00f),
-        .badgeColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FF00FF00")),
-        .borderColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF0000FF)),
+        .badgeSize = Converter::ArkUnion<Opt_Union_F64_ResourceStr, Ark_Float64>(32.00f),
+        .badgeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#FF00FF00"),
+        .borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xFF0000FF),
         .borderWidth = Converter::ArkValue<Opt_Length>("2.45vp"),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
-            Converter::ArkValue<Ark_FontWeight>(FontWeight::MEDIUM)),
+        .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM),
     };
-    inputValueOptions.count = Converter::ArkValue<Ark_Number>(4);
-    inputValueOptions.maxCount = Converter::ArkValue<Opt_Number>(20);
+    inputValueOptions.count = Converter::ArkValue<Ark_Int32>(4);
+    inputValueOptions.maxCount = Converter::ArkValue<Opt_Int32>(20);
 
-    modifier_->setBadgeOptions0(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithNumber>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
@@ -325,22 +299,21 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
-        .color =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("invalid color"),
         .fontSize = GetOptNumStr("-8.00vp"),
         .badgeSize = GetOptNumStr("-32.00vp"),
-        .badgeColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("-100 color")),
-        .borderColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
+        .badgeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("-100 color"),
+        .borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("no color"),
         .borderWidth = Converter::ArkValue<Opt_Length>("-2.45vp"),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
-            Converter::ArkValue<Ark_FontWeight>(static_cast<FontWeight>(-100))),
+        .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(
+            static_cast<Ark_FontWeight>(-100)),
     };
-    inputValueOptions.count = Converter::ArkValue<Ark_Number>(-1);
-    inputValueOptions.maxCount = Converter::ArkValue<Opt_Number>(-100);
+    inputValueOptions.count = Converter::ArkValue<Ark_Int32>(-1);
+    inputValueOptions.maxCount = Converter::ArkValue<Opt_Int32>(-100);
 
-    modifier_->setBadgeOptions0(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithNumber>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
@@ -385,7 +358,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestEmptyValues, TestSize.Level1)
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
 
-    modifier_->setBadgeOptions1(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithString>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
@@ -416,7 +391,7 @@ static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
     { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF0000FF" },
     { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "32.00px" },
     { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF123456" },
-    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "10.00px" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "10.00vp" },
     { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "100" },
 };
 
@@ -435,23 +410,22 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
     position.y = Converter::ArkValue<Opt_Length>(24.00f);
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_BadgePosition>(
-        Converter::ArkValue<Ark_BadgePosition>(BadgePosition::LEFT)
-        );
+        ARK_BADGE_POSITION_LEFT);
     inputValueOptions.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF00FFFF)),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(28.00f),
+        .fontSize = Converter::ArkUnion<Opt_Union_F64_ResourceStr, Ark_Float64>(28.00),
         .badgeSize = GetOptNumStr("32.00px"),
-        .badgeColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
-        .borderColor =Converter::ArkValue<Opt_ResourceColor>(
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME))),
+        .badgeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE),
+        .borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         .borderWidth = Converter::ArkValue<Opt_Length>(10.f),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+        .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
             Converter::ArkUnion<Ark_ResourceStr, Ark_String>("100")),
     };
     inputValueOptions.value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("badge_value");
 
-    modifier_->setBadgeOptions1(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithString>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
@@ -502,20 +476,19 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
-        .color =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("invalid color"),
         .fontSize = GetOptNumStr("50%"),
         .badgeSize = GetOptNumStr("10%"),
-        .badgeColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
-        .borderColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("blue color")),
+        .badgeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("no color"),
+        .borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("blue color"),
         .borderWidth = Converter::ArkValue<Opt_Length>("55%"),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_Number>(-100),
+        .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(-100),
     };
     inputValueOptions.value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
 
-    modifier_->setBadgeOptions1(node_, &inputValueOptions);
+    auto inputVal = Converter::ArkUnion<Ark_Union_BadgeParamWithNumber_BadgeParamWithString, Ark_BadgeParamWithString>(
+        inputValueOptions);
+    modifier_->setBadgeOptions(node_, &inputVal);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");

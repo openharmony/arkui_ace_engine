@@ -308,6 +308,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTest, TestSize.Lev
  */
 HWTEST_F(RichEditorModifierTest, setDataDetectorConfigTest, TestSize.Level1)
 {
+    Converter::ConvContext ctx;
     ASSERT_NE(modifier_->setDataDetectorConfig, nullptr);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -317,8 +318,7 @@ HWTEST_F(RichEditorModifierTest, setDataDetectorConfigTest, TestSize.Level1)
 
     Ark_TextDataDetectorConfig config;
     config.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(TEST_COLOR);
-    Converter::ArkArrayHolder<Array_TextDataDetectorType> types(ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE_ARR);
-    config.types = types.ArkValue();
+    config.types = Converter::ArkValue<Opt_Array_TextDataDetectorType>(ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE_ARR, &ctx);
     config.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(Ark_DecorationStyleInterface{
         .style = Converter::ArkValue<Opt_TextDecorationStyle>(ATTRIBUTE_DATA_DETECTOR_STYLE_VALUE)
     });

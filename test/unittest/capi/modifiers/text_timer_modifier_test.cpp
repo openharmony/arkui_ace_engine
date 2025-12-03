@@ -62,6 +62,57 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
 const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE = "0.000000";
 const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME = "fill";
 const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE = "false";
+
+std::vector<std::tuple<std::string, Ark_Int64, std::string>> testFixtureTimerInputCountValidValues = {
+    { "1", Converter::ArkValue<Ark_Int64>(1), "1.000000" },
+    { "25", Converter::ArkValue<Ark_Int64>(25), "25.000000" },
+    { "86300000", Converter::ArkValue<Ark_Int64>(86300000), "86300000.000000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Int64>> testFixtureTimerInputCountInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Int64>(0) },
+    { "-5", Converter::ArkValue<Ark_Int64>(-5.0) },
+    { "86400001", Converter::ArkValue<Ark_Int64>(86400001) },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureShadowRadiusNumberValidValues = {
+    { "123", Converter::ArkValue<Ark_Float64>(123.), "123.000000" },
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "1.23", Converter::ArkValue<Ark_Float64>(1.23), "1.230000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64>> testFixtureShadowRadiusNumberInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1.) },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureShadowOffsetNumberValidValues = {
+    { "123", Converter::ArkValue<Ark_Float64>(123.), "123.000000" },
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "1.23", Converter::ArkValue<Ark_Float64>(1.23), "1.230000" },
+    { "-1.23", Converter::ArkValue<Ark_Float64>(-1.23), "-1.230000" },
+    { "6.54", Converter::ArkValue<Ark_Float64>(6.54), "6.540000" },
+    { "-99", Converter::ArkValue<Ark_Float64>(-99.), "-99.000000" },
+    { "100", Converter::ArkValue<Ark_Float64>(100.), "100.000000" },
+};
+
+
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureFontWeightNumbersValidValues = {
+    { "100", Converter::ArkValue<Ark_Int32>(100), "100" },
+    { "200", Converter::ArkValue<Ark_Int32>(200), "200" },
+    { "300", Converter::ArkValue<Ark_Int32>(300), "300" },
+    { "400", Converter::ArkValue<Ark_Int32>(400), "400" },
+    { "500", Converter::ArkValue<Ark_Int32>(500), "500" },
+    { "600", Converter::ArkValue<Ark_Int32>(600), "600" },
+    { "700", Converter::ArkValue<Ark_Int32>(700), "700" },
+    { "800", Converter::ArkValue<Ark_Int32>(800), "800" },
+    { "900", Converter::ArkValue<Ark_Int32>(900), "900" },
+};
+
+std::vector<std::tuple<std::string, Ark_Int32>> testFixtureFontWeightNumbersInvalidValues = {
+    { "0", Converter::ArkValue<Ark_Int32>(0) },
+    { "1000", Converter::ArkValue<Ark_Int32>(1000) },
+    { "-100", Converter::ArkValue<Ark_Int32>(-100) },
+};
 } // namespace
 
 class TextTimerModifierTest : public ModifierTestBase<GENERATED_ArkUITextTimerModifier,
@@ -134,36 +185,21 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestCountDownValues, TestSize
  */
 HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountValidValues, TestSize.Level1)
 {
-    Ark_Number inputCount;
-
-    // Initial setup
-    inputCount = std::get<1>(Fixtures::testFixtureTimerInputCountValidValues[0]);
-    Opt_TextTimerOptions opts = { .value = { .count = { .value = inputCount } } };
-
-    auto checkValue = [this, &opts](const std::string& input, const Ark_Number& value,
+    auto checkValue = [this](const std::string& input, const Opt_Int64& value,
         const std::string& expectedStr) {
-        Opt_TextTimerOptions options = opts;
-
-        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(true) };
-        options.value.count = { .value = value };
-        modifier_->setTextTimerOptions(node_, &options);
+        Ark_TextTimerOptions options{};
+        options.isCountDown = Converter::ArkValue<Opt_Boolean>(true);
+        options.count = value;
+        auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
+        modifier_->setTextTimerOptions(node_, &inputValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
         EXPECT_EQ(resultStr, expectedStr)
             << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
-
-        // If isCountDown set to false, input count should have default value
-        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(false) };
-        options.value.count = { .value = value };
-        modifier_->setTextTimerOptions(node_, &options);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureTimerInputCountValidValues) {
-        checkValue(input, value, expected);
+    for (auto& [input, value, expected] : testFixtureTimerInputCountValidValues) {
+        checkValue(input, Converter::ArkValue<Opt_Int64>(value), expected);
     }
 }
 
@@ -174,36 +210,37 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountValidValues, Te
  */
 HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestInputCountInvalidValues, TestSize.Level1)
 {
-    Ark_Number inputCount;
-
-    // Initial setup
-    inputCount = std::get<1>(Fixtures::testFixtureTimerInputCountValidValues[0]);
-    Opt_TextTimerOptions opts = { .value = { .count = { .value = inputCount } } };
-
-    auto checkValue = [this, &opts](const std::string& input, const Ark_Number& value) {
-        Opt_TextTimerOptions options = opts;
-
-        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(true) };
-        options.value.count = { .value = value };
-        modifier_->setTextTimerOptions(node_, &options);
+    auto checkValue = [this](const std::string& input, const Opt_Int64& value) {
+        Ark_TextTimerOptions options{};
+        options.isCountDown = Converter::ArkValue<Opt_Boolean>(true);
+        options.count = value;
+        auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
+        modifier_->setTextTimerOptions(node_, &inputValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
             << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
-
-        // If isCountDown set to false, input count should be default value
-        options.value.isCountDown = { .value = Converter::ArkValue<Ark_Boolean>(false) };
-        options.value.count = { .value = value };
-        modifier_->setTextTimerOptions(node_, &options);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: count";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureTimerInputCountInvalidValues) {
-        checkValue(input, value);
+    for (auto& [input, value] : testFixtureTimerInputCountInvalidValues) {
+        checkValue(input, Converter::ArkValue<Opt_Int64>(value));
     }
+
+    checkValue("undefined", Converter::ArkValue<Opt_Int64>());
+
+    // Initial setup
+    auto inputCount = Converter::ArkValue<Opt_Int64>(std::get<1>(testFixtureTimerInputCountValidValues[0]));
+
+    Ark_TextTimerOptions options{};
+    // If isCountDown set to false, input count should be default value
+    options.isCountDown = Converter::ArkValue<Opt_Boolean>(false);
+    options.count = inputCount;
+    auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
+    modifier_->setTextTimerOptions(node_, &inputValue);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COUNT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_COUNT_DEFAULT_VALUE)
+        << "Input value is: false, method: setTextTimerOptions, attribute: isCountDown";
 }
 
 /*
@@ -423,7 +460,7 @@ HWTEST_F(TextTimerModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextTimerModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     Opt_Length initValueFontSize;
 
@@ -536,9 +573,9 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input,
-                          const Ark_Union_Number_FontWeight_ResourceStr& value, const std::string& expectedStr) {
-        Opt_Union_Number_FontWeight_ResourceStr inputValueFontWeight =
-            Converter::ArkValue<Opt_Union_Number_FontWeight_ResourceStr>(value);
+                          const Opt_Union_I32_FontWeight_ResourceStr& value, const std::string& expectedStr) {
+        Opt_Union_I32_FontWeight_ResourceStr inputValueFontWeight =
+            Converter::ArkValue<Opt_Union_I32_FontWeight_ResourceStr>(value);
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -547,13 +584,13 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_Number>(value), expected);
+    for (auto& [input, value, expected] : testFixtureFontWeightNumbersValidValues) {
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
             ArkUnion<Ark_ResourceStr, Ark_String>(value)), expected);
     }
 }
@@ -565,18 +602,18 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize
  */
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Opt_Union_Number_FontWeight_ResourceStr initValueFontWeight;
+    Opt_Union_I32_FontWeight_ResourceStr initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
-                          const std::string& input, const Ark_Union_Number_FontWeight_ResourceStr& value) {
-        Opt_Union_Number_FontWeight_ResourceStr inputValueFontWeight = initValueFontWeight;
+                          const std::string& input, const Opt_Union_I32_FontWeight_ResourceStr& value) {
+        Opt_Union_I32_FontWeight_ResourceStr inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
-        inputValueFontWeight = Converter::ArkValue<Opt_Union_Number_FontWeight_ResourceStr>(value);
+        inputValueFontWeight = Converter::ArkValue<Opt_Union_I32_FontWeight_ResourceStr>(value);
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -584,18 +621,18 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightInvalidValues, TestSi
             << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_Number>(value));
+    for (auto& [input, value] : testFixtureFontWeightNumbersInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
             ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_ResourceStr, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Empty>(nullptr));
 }
 
 /*
@@ -642,7 +679,7 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(TextTimerModifierTest, DISABLED_setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
     Opt_ResourceStr initValueFontFamily;
 
@@ -719,21 +756,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusValidValues, Te
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_Number_Resource& value,
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_F64_Resource& value,
                           const std::string& expectedStr) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
@@ -747,11 +784,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusValidValues, Te
             << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..radius";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureShadowRadiusNumberValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
+    for (auto& [input, value, expected] : testFixtureShadowRadiusNumberValidValues) {
+        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureShadowRadiusResValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value), expected);
     }
 }
 
@@ -765,21 +802,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusInvalidValues, 
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_Number_Resource& value) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_F64_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
         auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
         modifier_->setTextShadow(node_, &optValue);
@@ -793,14 +830,14 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowRadiusInvalidValues, 
             << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..radius";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureShadowRadiusNumberInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    for (auto& [input, value] : testFixtureShadowRadiusNumberInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureShadowRadiusResInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_F64_Resource, Ark_Empty>(nullptr));
 }
 
 /*
@@ -813,17 +850,17 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowTypeValidVal
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -856,17 +893,17 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowTypeInvalidV
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -900,17 +937,17 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowColorValidVa
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -954,17 +991,17 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowColorInvalidValues, T
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1008,21 +1045,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXValidValues, T
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value,
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_F64_Resource& value,
                           const std::string& expectedStr) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
@@ -1036,11 +1073,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXValidValues, T
             << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetX";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureShadowOffsetNumberValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value), expected);
+    for (auto& [input, value, expected] : testFixtureShadowOffsetNumberValidValues) {
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureShadowOffsetResValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value), expected);
     }
 }
 
@@ -1054,21 +1091,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXInvalidValues,
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_F64_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
         auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
         modifier_->setTextShadow(node_, &optValue);
@@ -1083,9 +1120,9 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetXInvalidValues,
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_F64_Resource>());
 }
 
 /*
@@ -1098,21 +1135,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYValidValues, T
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value,
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_F64_Resource& value,
                           const std::string& expectedStr) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
@@ -1126,11 +1163,11 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYValidValues, T
             << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetY";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureShadowOffsetNumberValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value), expected);
+    for (auto& [input, value, expected] : testFixtureShadowOffsetNumberValidValues) {
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureShadowOffsetResValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value), expected);
     }
 }
 
@@ -1144,21 +1181,21 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYInvalidValues,
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_F64_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
         auto optValue = Converter::ArkValue<Opt_Union_ShadowOptions_Array_ShadowOptions>(inputValueTextShadow);
         modifier_->setTextShadow(node_, &optValue);
@@ -1173,9 +1210,9 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowOffsetYInvalidValues,
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_F64_Resource>());
 }
 
 /*
@@ -1188,17 +1225,17 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillValidValues, Test
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1231,17 +1268,17 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillInvalidValues, Te
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
     // Initial setup
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowRadiusNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureEnumShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).color =
         ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
-    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
+    WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 

@@ -499,10 +499,10 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestDefaultValues, TestSize.
 }
 
 // Valid values for attribute 'pointRadius' of method 'switchStyle'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>>
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>>
     switchStylePointRadiusValidValues = {
-    { "55.50vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(55.5f), "55.50vp" },
-    { "7.00vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(POINT_RADIUS_RESOURCE), "7.00vp" }
+    { "55.50vp", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(55.5), "55.50vp" },
+    { "7.00vp", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(POINT_RADIUS_RESOURCE), "7.00vp" }
 };
 
 /*
@@ -624,10 +624,10 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestPointColorValidValues, T
 }
 
 // Valid values for attribute 'trackBorderRadius' of method 'switchStyle'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>>
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>>
     switchStyleTrackBorderRadiusValidValues = {
-    { "55.50vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(55.5f), "55.50vp" },
-    { "7.00vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(TRACK_BORDER_RADIUS_RESOURCE), "7.00vp" }
+    { "55.50vp", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(55.5), "55.50vp" },
+    { "7.00vp", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TRACK_BORDER_RADIUS_RESOURCE), "7.00vp" }
 };
 
 /*
@@ -663,9 +663,9 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusValidValues, Tes
 }
 
 // Invalid values for attribute 'pointRadius' of method 'switchStyle'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchStylePointRadiusInvalidValues = {
-    { "Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty()) },
-    { "nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr) },
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> switchStylePointRadiusInvalidValues = {
+    { "Ark_Empty()", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty()) },
+    { "nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr) },
 };
 
 /*
@@ -777,9 +777,9 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestPointColorInvalidValues,
 }
 
 // Invalid values for attribute 'trackBorderRadius' of method 'switchStyle'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchStyleTrackBorderRadiusInvalidValues = {
-    { "Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty()) },
-    { "nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr) },
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> switchStyleTrackBorderRadiusInvalidValues = {
+    { "Ark_Empty()", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty()) },
+    { "nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr) },
 };
 
 /*
