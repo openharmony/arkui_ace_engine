@@ -17,8 +17,8 @@ import { memo } from '@koalaui/runtime/annotations'
 import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
-} from 'arkui.stateManagement.runtime';
-import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
+} from 'arkui.incremental.runtime.state';
+import { IncrementalNode } from '@koalaui/runtime/tree/IncrementalNode';
 import { uint32 } from '@koalaui/compat';
 
 @memo

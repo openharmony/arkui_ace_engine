@@ -24,7 +24,7 @@ type int32 = int;
 
 export declare class ArkStackPeer extends ArkCommonMethodPeer {
     _attributeSet?:StackModifier;
-    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0);
+    constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0);
 
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkStackPeer;
 
