@@ -124,6 +124,10 @@ public:
 
     void JavaScriptOnDocumentStart(const ScriptItems&);
     void JavaScriptOnDocumentEnd(const ScriptItems&);
+    void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
+    void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
         const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
 
