@@ -3700,6 +3700,65 @@ HWTEST_F(ListLayoutTestNg, FadingEdge009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FadingEdge010
+ * @tc.desc: Test FadingEdge with animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: List overlay has no LinearGradient color
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(3);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    ASSERT_TRUE(renderContext);
+    auto gradientOpt = renderContext->GetLinearGradient();
+    ASSERT_TRUE(gradientOpt.has_value());
+    EXPECT_EQ(gradientOpt.value().GetColors().size(), 0);
+
+    /**
+     * @tc.steps: step2. add child with animation
+     * @tc.expected: List overlay update LinearGradient color without animation
+     */
+    NG::MockAnimationManager::GetInstance().OpenAnimation();
+    for (int32_t i = 0; i < 2; i++) {
+        CreateListItem(V2::ListItemStyle::NONE);
+        RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+        auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+        currentFrameNode->MountToParent(frameNode_);
+    }
+    FlushUITasks();
+    UpdateContentModifier();
+    EXPECT_FALSE(NG::MockAnimationManager::GetInstance().IsAnimationOpen());
+    gradientOpt = renderContext->GetLinearGradient();
+    ASSERT_TRUE(gradientOpt.has_value());
+    EXPECT_EQ(gradientOpt.value().GetColors().size(), 4);
+
+    /**
+     * @tc.steps: step3. update fadingEdge length with animation
+     * @tc.expected: List overlay update LinearGradient color with animation
+     */
+    NG::MockAnimationManager::GetInstance().OpenAnimation();
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), true, Dimension(30.0f));
+    FlushUITasks();
+    UpdateContentModifier();
+    EXPECT_TRUE(NG::MockAnimationManager::GetInstance().IsAnimationOpen());
+    gradientOpt = renderContext->GetLinearGradient();
+    ASSERT_TRUE(gradientOpt.has_value());
+    EXPECT_EQ(gradientOpt.value().GetColors().size(), 4);
+    NG::MockAnimationManager::GetInstance().CloseAnimation();
+}
+
+/**
  * @tc.name: InitialIndex001
  * @tc.desc: Test the initialIndex and scrollToIndex priority.
  * @tc.type: FUNC
