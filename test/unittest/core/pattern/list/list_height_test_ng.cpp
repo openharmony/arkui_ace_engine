@@ -231,4 +231,155 @@ HWTEST_F(ListHeightTestNg, GetLazyForEachIndexAverageHeight001, TestSize.Level1)
     EXPECT_FALSE(hasGroup);
     EXPECT_EQ(listHeightOffsetCalculator.estimateItemHeight_, 2.0f);
 }
+
+/**
+ * @tc.name: CalcRangeRightHalfTest001
+ * @tc.desc: Test CalcRangeRightHalf When posMap_ is empty, then estimateHeight_ is estimated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListHeightTestNg, CalcRangeRightHalfTest001, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(0); // 0: itemStartIndex
+    auto itemPosition = listLayoutAlgorithm->GetItemPosition();
+    // space: 1.0f, lanes: 2, Axis: VERTICAL, itemStartIndex: 0
+    ListHeightOffsetCalculator calc(itemPosition, 1.0f, 2, Axis::VERTICAL, 0);
+
+    /**
+     * @tc.steps: step1. Prepare ListHeightOffsetCalculator calc
+     */
+    calc.posMap_ = nullptr;
+    calc.estimateItemHeight_ = 5.0f;
+    calc.estimateHeight_ = 0.0f;
+
+    /**
+     * @tc.steps: step2. Call CalcRangeRightHalf with valid start and end index.
+     * @tc.expected: currentIndex_ advanced to end + 1, estimateHeight_ increased according to estimatedAverageHeight.
+     */
+    int start = 2;
+    int end = 3;
+    bool result = calc.CalcRangeRightHalf(start, end);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(calc.currentIndex_, end + 1);
+    // estimate increased by (estimateItemHeight_ + space) * lines = (5 + 1) * (2 / 2) = 6.0f
+    EXPECT_FLOAT_EQ(calc.estimateHeight_, 6.0f);
+}
+
+/**
+ * @tc.name: CalcRangeRightHalfTest002
+ * @tc.desc: Test CalcRangeRightHalf When posMap_ start entry is a group, function should return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListHeightTestNg, CalcRangeRightHalfTest002, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(0); // 0: itemStartIndex
+    auto itemPosition = listLayoutAlgorithm->GetItemPosition();
+    // space: 2.0f, lanes: 2, Axis: VERTICAL, itemStartIndex: 0
+    ListHeightOffsetCalculator calc(itemPosition, 2.0f, 2, Axis::VERTICAL, 0);
+
+    /**
+     * @tc.steps: step1. Prepare ListHeightOffsetCalculator calc and posMap_ start entry is group.
+     */
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    posMap->posMap_[2] = { 2.0f, 6.0f, true }; // isGroup = true
+    posMap->posMap_[4] = { 10.0f, 4.0f, false };
+    calc.posMap_ = posMap;
+    calc.estimateHeight_ = 1.0f;
+
+    /**
+     * @tc.steps: step2. Call CalcRangeRightHalf with valid start and end index.
+     * @tc.expected: currentIndex_ and estimateHeight_ unchanged.
+     */
+    int start = 2;
+    int end = 4;
+    bool result = calc.CalcRangeRightHalf(start, end);
+    EXPECT_FALSE(result);
+    // state should be unchanged (no advancement)
+    EXPECT_EQ(calc.currentIndex_, 0); // default initial value in ctor is expected to be 0
+    EXPECT_FLOAT_EQ(calc.estimateHeight_, 1.0f);
+}
+
+/**
+ * @tc.name: CalcRangeRightHalfTest003
+ * @tc.desc: Test CalcRangeRightHalf when both start and end have non-negative mainSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListHeightTestNg, CalcRangeRightHalfTest003, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(0); // 0: itemStartIndex
+    auto itemPosition = listLayoutAlgorithm->GetItemPosition();
+    // space: 2.0f, lanes: 2, Axis: VERTICAL, itemStartIndex: 0
+    ListHeightOffsetCalculator calc(itemPosition, 2.0f, 2, Axis::VERTICAL, 0);
+
+    /**
+     * @tc.steps: step1. Prepare ListHeightOffsetCalculator calc and posMap_.
+     */
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    // start index in posMap_ = 2
+    posMap->posMap_[2] = { 2.0f, 3.0f, false };
+    // end index in posMap_ = 5
+    posMap->posMap_[5] = { 10.0f, 4.0f, false };
+    calc.posMap_ = posMap;
+    calc.estimateHeight_ = 1.0f;
+    calc.totalItemHeight_ = 0.0f;
+    calc.totalItemCount_ = 0;
+
+    /**
+     * @tc.steps: step2. Call CalcRangeRightHalf with valid start and end index.
+     * @tc.expected: currentIndex_ and estimateHeight_ advanced according to posMap_.
+     */
+    int start = 2;
+    int end = 5; // count = 4, lanes = 2 => rowCount = 2
+    bool result = calc.CalcRangeRightHalf(start, end);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(calc.currentIndex_, end + 1);
+    // expected estimate increase = posMapEnd.mainPos - posMapStart.mainPos + posMapEnd.mainSize + spaceWidth
+    float expectedIncrease = posMap->posMap_[5].mainPos - posMap->posMap_[2].mainPos
+                              + posMap->posMap_[5].mainSize + calc.spaceWidth_;
+    EXPECT_FLOAT_EQ(calc.estimateHeight_, 1.0f + expectedIncrease);
+    // totalSpaceWidth = spaceWidth * rowCount (start != 0)
+    float totalSpaceWidth = calc.spaceWidth_ * 2; // rowCount = 2
+    float delta = expectedIncrease;
+    // totalItemHeight_ += (delta - totalSpaceWidth) * lanes
+    float expectedTotalItemHeight = (delta - totalSpaceWidth) * calc.lanes_;
+    EXPECT_FLOAT_EQ(calc.totalItemHeight_, expectedTotalItemHeight);
+    EXPECT_EQ(calc.totalItemCount_, end - start + 1);
+}
+
+/**
+ * @tc.name: CalcRangeRightHalfTest004
+ * @tc.desc: Test CalcRangeRightHalf start is negative mainSize, but there exists a posMap entry at or after start,
+ *           end should be adjusted to (entryAtOrAfter(start) - 1) and calculation done accordingly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListHeightTestNg, CalcRangeRightHalfTest004, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(0); // 0: itemStartIndex
+    auto itemPosition = listLayoutAlgorithm->GetItemPosition();
+    // space: 1.0f, lanes: 2, Axis: VERTICAL, itemStartIndex: 0
+    ListHeightOffsetCalculator calc(itemPosition, 1.0f, 2, Axis::VERTICAL, 0);
+
+    /**
+     * @tc.steps: step1. Prepare ListHeightOffsetCalculator calc and posMap_ with an entry at index 4.
+     */
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    posMap->posMap_[4] = { 2.0f, 3.0f, false };
+    posMap->posMap_[6] = { 10.0f, 3.0f, false };
+    calc.posMap_ = posMap;
+    calc.estimateItemHeight_ = 3.0f;
+    calc.estimateHeight_ = 0.0f;
+    calc.totalItemCount_ = 0;
+
+    /**
+     * @tc.steps: step2. Call CalcRangeRightHalf with valid start and end index.
+     * @tc.expected: end adjusted to entryAtOrAfter(start) - 1.
+     */
+    int start = 2;
+    int end = 6; // will be adjusted to entryAtOrAfter(2) - 1 => 4 - 1 = 3
+    bool result = calc.CalcRangeRightHalf(start, end);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(calc.currentIndex_, 4); // adjusted end 3 -> currentIndex = 4
+    // rowCount = GetLines(lanes=2, count = end-start+1 = 3-2+1 = 2) => 1
+    float expectedIncrease = (calc.GetAverageItemHeight() + calc.spaceWidth_) * 1;
+    EXPECT_FLOAT_EQ(calc.estimateHeight_, expectedIncrease);
+}
 } // namespace OHOS::Ace::NG

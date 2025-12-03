@@ -41,7 +41,9 @@ public:
 
     void CalculatePosMapNode();
 
-    bool CalculateRangeWithPosMap(int start, int end);
+    bool CalcRangeLeftHalf(int start, int end);
+
+    bool CalcRangeRightHalf(int start, int end);
 
     int32_t GetPosMapStartIndex();
 
