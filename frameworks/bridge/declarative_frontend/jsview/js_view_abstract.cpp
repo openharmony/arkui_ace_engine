@@ -3255,39 +3255,6 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
-void JSViewAbstract::JsColorPicker(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        info.ReturnSelf();
-        return;
-    }
-    auto jsVal = info[0];
-    ColorPlaceholder placeholder = ColorPlaceholder::NONE;
-    if (jsVal->IsString()) {
-        Color::MatchPlaceholderString(jsVal->ToString(), placeholder);
-    }
-    // Optional second parameter: ColorPickStrategy (number).
-    ColorPickStrategy strategy = ColorPickStrategy::CONTRAST;
-    if (info.Length() >= 2 && !info[1]->IsUndefined() && !info[1]->IsNull()) {
-        auto sVal = info[1];
-        if (sVal->IsNumber()) {
-            auto newStrategy = static_cast<ColorPickStrategy>(sVal->ToNumber<int32_t>());
-            if (newStrategy >= ColorPickStrategy::NONE &&
-                newStrategy <= ColorPickStrategy::CONTRAST) {
-                strategy = newStrategy;
-            }
-        }
-    }
-    // Optional third parameter: interval (number, milliseconds).
-    uint32_t interval = 0;
-    if (info.Length() >= 3 && info[2]->IsNumber()) {
-        auto iv = info[2]->ToNumber<int32_t>();
-        interval = iv > 0 ? static_cast<uint32_t>(iv) : 0; // negative treated as default 0
-    }
-    ViewAbstractModel::GetInstance()->SetColorPicker(placeholder, strategy, interval);
-    info.ReturnSelf();
-}
-
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
     int32_t resId = 0;
@@ -6959,6 +6926,10 @@ bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, Foregroun
             strategy = ForegroundColorStrategy::INVERT;
             return true;
         }
+        if (colorStr.compare("contrast") == 0) {
+            strategy = ForegroundColorStrategy::CONTRAST;
+            return true;
+        }
     }
     return false;
 }
@@ -9503,7 +9474,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
-    JSClass<JSViewAbstract>::StaticMethod("colorPicker", &JSViewAbstract::JsColorPicker);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);

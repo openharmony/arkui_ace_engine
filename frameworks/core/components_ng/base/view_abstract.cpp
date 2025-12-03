@@ -5902,6 +5902,11 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (strategy == ForegroundColorStrategy::CONTRAST) {
+        BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::CONTRAST, 500);
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true); // to prevent inheriting from other foreground strategy
+        return;
+    }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);

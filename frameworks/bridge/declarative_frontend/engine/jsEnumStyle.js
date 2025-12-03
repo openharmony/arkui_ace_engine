@@ -35,6 +35,7 @@ let ColoringStrategy;
   ColoringStrategy.INVERT = 'invert';
   ColoringStrategy.AVERAGE = 'average';
   ColoringStrategy.PRIMARY = 'primary';
+  ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 let TextInputStyle;
@@ -4496,15 +4497,6 @@ const ColorPlaceholder = {
   ACCENT: 'ACCENT',
   FOREGROUND: 'FOREGROUND',
 };
-let ColorPickStrategy;
-(function (ColorPickStrategy) {
-  ColorPickStrategy[ColorPickStrategy.NONE = 0] = 'NONE';
-  ColorPickStrategy[ColorPickStrategy.DOMINANT = 1] = 'DOMINANT';
-  ColorPickStrategy[ColorPickStrategy.AVERAGE = 2] = 'AVERAGE';
-  ColorPickStrategy[ColorPickStrategy.CONTRAST = 3] = 'CONTRAST';
-})(ColorPickStrategy || (ColorPickStrategy = {}));
-
-globalThis.ColorPlaceholder = ColorPlaceholder;
 
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
