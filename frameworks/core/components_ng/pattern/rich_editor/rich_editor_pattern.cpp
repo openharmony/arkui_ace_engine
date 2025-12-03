@@ -3837,6 +3837,7 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
     IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
+    ReportEditorEvent(EDITOR_FOCUS_EVENT);
     if (previewLongPress_ || isOnlyRequestFocus_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
             "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
@@ -3871,7 +3872,6 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 
     IF_TRUE(!requestFocusBySingleClick_, RequestKeyboard(false, true, needShowSoftKeyboard));
     HandleOnEditChanged(true);
-    ReportEditorEvent(EDITOR_FOCUS_EVENT);
 }
 
 void RichEditorPattern::OnFocusNodeChange(FocusReason focusReason)

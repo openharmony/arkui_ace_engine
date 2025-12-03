@@ -984,4 +984,23 @@ HWTEST_F(RichEditorTextCalTestNg, ReportTextChange002, TestSize.Level0)
     UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(nullptr);
     ClearSpan();
 }
+
+/**
+ * @tc.name: SetSupportPreviewText001
+ * @tc.desc: test SetSupportPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetSupportPreviewText001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSupportPreviewText(false);
+    EXPECT_FALSE(richEditorPattern->isTextPreviewSupported_);
+}
 } // namespace OHOS::Ace::NG
