@@ -282,6 +282,9 @@ HWTEST_F(RichEditorStyleChangeTestNg, UpdateSpanStyle002, TestSize.Level0)
  */
 HWTEST_F(RichEditorStyleChangeTestNg, UpdateSpanStyle003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -289,6 +292,10 @@ HWTEST_F(RichEditorStyleChangeTestNg, UpdateSpanStyle003, TestSize.Level0)
     ASSERT_NE(richEditorController, nullptr);
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize style
+     */
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
     AddSpan(INIT_VALUE_2);
@@ -313,6 +320,10 @@ HWTEST_F(RichEditorStyleChangeTestNg, UpdateSpanStyle003, TestSize.Level0)
     updateSpanStyle.updateTextDecoration = TEXT_DECORATION_VALUE;
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
     updateSpanStyle.updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE;
+
+    /**
+     * @tc.steps: step2. updateSpanStyle and check
+     */
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_EQ(contentNode->GetChildren().size(), 5);
