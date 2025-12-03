@@ -82,6 +82,7 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
             peerImplPtr->SetController(positionController);
             peerImplPtr->SetScrollBarProxy(scrollBarProxy);
         }
+#ifdef WRONG_GEN_140
         auto optArkSections = Converter::OptConvert<Ark_WaterFlowSections>(convValue.value().sections);
         if (optArkSections) {
             auto peerImplPtr = optArkSections.value();
@@ -89,6 +90,7 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
             RefPtr<WaterFlowSections> sections = WaterFlowModelStatic::GetOrCreateWaterFlowSections(frameNode);
             peerImplPtr->SetController(sections);
         }
+#endif // WRONG_GEN_140
         auto optArkLayoutMode = Converter::OptConvert<Ark_WaterFlowLayoutMode>(convValue.value().layoutMode);
         if (optArkLayoutMode) {
             auto optlayoutMode = Converter::OptConvert<WaterFlowLayoutMode>(optArkLayoutMode.value());
