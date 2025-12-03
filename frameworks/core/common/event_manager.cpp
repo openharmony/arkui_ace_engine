@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
+#include "core/common/reporter/reporter.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
@@ -923,6 +924,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         }
     }
 
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(point);
     bool dispatchSuccess = true;
     dispatchSuccess = DispatchMultiContainerEvent(point);
     // If one gesture recognizer has already been won, other gesture recognizers will still be affected by
@@ -1628,6 +1630,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     if (validAction.find(event.action) == validAction.end()) {
         return false;
     }
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     lastMouseEvent_ = event;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         return DispatchMouseEventInGreatOrEqualAPI13(event);
@@ -1969,6 +1972,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     // when api >= 15, do not block this event.
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&

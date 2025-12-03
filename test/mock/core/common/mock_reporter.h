@@ -28,6 +28,13 @@ class MockReporter : public Reporter {
 
 public:
     MOCK_METHOD(void, HandleUISessionReporting, (const JsonReport& report), (const, override));
+    MOCK_METHOD(void, HandleInputEventInspectorReporting, (const TouchEvent& event), (const, override));
+    MOCK_METHOD(void, HandleInputEventInspectorReporting, (const MouseEvent& event), (const, override));
+    MOCK_METHOD(void, HandleInputEventInspectorReporting, (const AxisEvent& event), (const, override));
+    MOCK_METHOD(void, HandleInputEventInspectorReporting, (const KeyEvent& event), (const, override));
+    MOCK_METHOD(void, HandleWindowFocusInspectorReporting, (bool isFocus), (const, override));
+private:
+    MOCK_METHOD(void, HandleInspectorReporting, (const JsonReport& report), (const, override));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_UDMF_H

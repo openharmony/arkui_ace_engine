@@ -14,12 +14,12 @@
  */
 
 #include "reporter_impl.h"
-#include "frameworks/core/common/reporter/reporter.h"
-#include "frameworks/core/components_ng/manager/event/json_report.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/event_report.h"
+#include "frameworks/core/common/reporter/reporter.h"
+#include "frameworks/core/components_ng/manager/event/json_report.h"
 
 namespace OHOS::Ace::NG {
 Reporter& Reporter::GetInstance()
@@ -29,4 +29,10 @@ Reporter& Reporter::GetInstance()
 }
 
 void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const {}
+void ReporterImpl::HandleInspectorReporting(const JsonReport& report) const {}
+void ReporterImpl::HandleInputEventInspectorReporting(const TouchEvent& event) const {}
+void ReporterImpl::HandleInputEventInspectorReporting(const MouseEvent& event) const {}
+void ReporterImpl::HandleInputEventInspectorReporting(const AxisEvent& event) const {}
+void ReporterImpl::HandleInputEventInspectorReporting(const KeyEvent& event) const {}
+void ReporterImpl::HandleWindowFocusInspectorReporting(bool isFocus) const {}
 } // namespace OHOS::Ace::NG

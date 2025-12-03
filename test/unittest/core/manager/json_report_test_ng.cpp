@@ -265,4 +265,164 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest008, TestSize.Level1)
         "{\"GestureType\":\"DrageEnd\",\"point\":[0,0],\"dropResult\":\"fail\",\"hostName\":\"test\"}";
     EXPECT_EQ(JsonStrDopfail, JsonStrDopfail1);
 }
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest009
+ * @tc.desc: Test TouchJsonReport with different properties
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest009, TestSize.Level1)
+{
+    TouchJsonReport touchReport;
+    touchReport.SetPoint(globalPoint);
+    touchReport.SetEventType("TouchScreen");
+    touchReport.SetAction("down");
+    TimeStamp time(std::chrono::nanoseconds(1000000));
+    touchReport.SetTime(time);
+    touchReport.SetWindowID(100);
+    auto value = touchReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"TouchScreen\",\"action\":\"down\","
+                           "\"time\":1000000,\"windowId\":100,\"data\":{\"point\":[100,100]}}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+
+    touchReport.SetAction("");
+    auto value2 = touchReport.GetJsonData();
+    std::string JsonStr2 = value2->ToString().c_str();
+    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"TouchScreen\",\"action\":\"\",\"time\":1000000,"
+                            "\"windowId\":100,\"data\":{\"point\":[100,100]}}";
+    EXPECT_EQ(JsonStr2, JsonStr21);
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest010
+ * @tc.desc: Test MouseJsonReport with different properties
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest010, TestSize.Level1)
+{
+    MouseJsonReport mouseReport;
+    mouseReport.SetPoint(globalPoint);
+    mouseReport.SetWindowID(200);
+    mouseReport.SetEventType("Mouse");
+    TimeStamp time(std::chrono::nanoseconds(2000000));
+    mouseReport.SetTime(time);
+    mouseReport.SetAction("press");
+    mouseReport.SetMouseButton("left");
+    auto value = mouseReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"Mouse\",\"action\":\"press\","
+                           "\"time\":2000000,\"windowId\":200,\"data\":{\"point\":[100,100],\"mouseButton\":\"left\"}}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+
+    mouseReport.SetAction("release");
+    mouseReport.SetMouseButton("right");
+    auto value2 = mouseReport.GetJsonData();
+    std::string JsonStr2 = value2->ToString().c_str();
+    std::string JsonStr21 =
+        "{\"type\":\"event\",\"eventType\":\"Mouse\",\"action\":\"release\","
+        "\"time\":2000000,\"windowId\":200,\"data\":{\"point\":[100,100],\"mouseButton\":\"right\"}}";
+    EXPECT_EQ(JsonStr2, JsonStr21);
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest011
+ * @tc.desc: Test KeyJsonReport with different key codes and actions
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest011, TestSize.Level1)
+{
+    KeyJsonReport keyReport;
+    keyReport.SetWindowID(300);
+    keyReport.SetEventType("Key");
+    TimeStamp time(std::chrono::nanoseconds(3000000));
+    keyReport.SetTime(time);
+    keyReport.SetKeyCode(2042);
+    keyReport.SetAction("down");
+    auto value = keyReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"Key\",\"action\":\"down\","
+                           "\"time\":3000000,\"windowId\":300,\"data\":{\"keyCode\":2042}}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+
+    keyReport.SetAction("up");
+    keyReport.SetKeyCode(2042);
+    auto value2 = keyReport.GetJsonData();
+    std::string JsonStr2 = value2->ToString().c_str();
+    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"Key\",\"action\":\"up\","
+                            "\"time\":3000000,\"windowId\":300,\"data\":{\"keyCode\":2042}}";
+    EXPECT_EQ(JsonStr2, JsonStr21);
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest012
+ * @tc.desc: Test AxisJsonReport with different axis types and values
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest012, TestSize.Level1)
+{
+    AxisJsonReport axisReport;
+    axisReport.SetPoint(globalPoint);
+    axisReport.SetWindowID(400);
+    axisReport.SetEventType("Axis");
+    TimeStamp time(std::chrono::nanoseconds(4000000));
+    axisReport.SetTime(time);
+    axisReport.SetAction("Update");
+
+    AxisValue axisValues1 = { 0.0f, 1.5f, 1.0f, 0.0f };
+    axisReport.SetAxisValues(axisValues1);
+
+    auto value = axisReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"Axis\",\"action\":\"Update\","
+                           "\"time\":4000000,\"windowId\":400,\"data\":{\"point\":[100,100],"
+                           "\"axisValues\":{\"horizontalAxis\":0,\"verticalAxis\":1.5,"
+                           "\"pinchAxisScale\":1,\"rotateAxisAngle\":0}}}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+
+    AxisValue axisValues2 = { -2.0f, 0.0f, 1.0f, 0.0f };
+    axisReport.SetAxisValues(axisValues2);
+
+    auto value2 = axisReport.GetJsonData();
+    std::string JsonStr2 = value2->ToString().c_str();
+    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"Axis\",\"action\":\"Update\","
+                            "\"time\":4000000,\"windowId\":400,\"data\":{\"point\":[100,100],"
+                            "\"axisValues\":{\"horizontalAxis\":-2,\"verticalAxis\":0,"
+                            "\"pinchAxisScale\":1,\"rotateAxisAngle\":0}}}";
+    EXPECT_EQ(JsonStr2, JsonStr21);
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest013
+ * @tc.desc: Test FocusJsonReport with focus and blur states
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest013, TestSize.Level1)
+{
+    FocusJsonReport focusReport;
+    focusReport.SetWindowID(500);
+    focusReport.SetEventType("WindowFocus");
+    TimeStamp time(std::chrono::nanoseconds(5000000));
+    focusReport.SetTime(time);
+    focusReport.SetAction("Focus");
+    focusReport.SetIsFocus(true);
+    auto value = focusReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"WindowFocus\",\"action\":\"Focus\","
+                           "\"windowId\":500,\"time\":5000000,\"data\":{\"isFocus\":true}}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+
+    focusReport.SetAction("Blur");
+    focusReport.SetIsFocus(false);
+    auto value2 = focusReport.GetJsonData();
+    std::string JsonStr2 = value2->ToString().c_str();
+    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"WindowFocus\",\"action\":\"Blur\","
+                            "\"windowId\":500,\"time\":5000000,\"data\":{\"isFocus\":false}}";
+    EXPECT_EQ(JsonStr2, JsonStr21);
+}
 } // namespace OHOS::Ace::NG
