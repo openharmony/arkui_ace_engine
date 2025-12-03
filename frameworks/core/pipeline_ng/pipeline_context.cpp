@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/common/reporter/reporter.h"
 #include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -4633,6 +4634,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.pointerEvent = event.pointerEvent;
     result.screenX = event.screenX;
     result.screenY = event.screenY;
+    result.convertInfo.first = UIInputEventType::AXIS;
+    result.convertInfo.second = UIInputEventType::MOUSE;
     return result;
 }
 
@@ -4906,6 +4909,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }
+    NG::Reporter::GetInstance().HandleWindowFocusInspectorReporting(isFocus);
     GetOrCreateFocusManager()->WindowFocus(isFocus);
     FlushWindowFocusChangedCallback(isFocus);
 }

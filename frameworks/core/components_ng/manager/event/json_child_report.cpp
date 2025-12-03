@@ -237,4 +237,91 @@ std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
     }
     return value;
 }
+
+std::shared_ptr<InspectorJsonValue> TouchJsonReport::GetJsonData() const
+{
+    auto touchValue = InspectorJsonUtil::CreateArray();
+    touchValue->Put(GetPoint().GetX());
+    touchValue->Put(GetPoint().GetY());
+    auto value = InspectorJsonUtil::Create();
+    value->Put("type", "event");
+    value->Put("eventType", "TouchScreen");
+    value->Put("action", action_.c_str());
+    value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
+    value->Put("windowId", windowID_);
+    auto dataValue = InspectorJsonUtil::CreateObject();
+    dataValue->Put("point", touchValue);
+    value->Put("data", dataValue);
+    return value;
+}
+
+std::shared_ptr<InspectorJsonValue> MouseJsonReport::GetJsonData() const
+{
+    auto mousePoint = InspectorJsonUtil::CreateArray();
+    mousePoint->Put(GetPoint().GetX());
+    mousePoint->Put(GetPoint().GetY());
+
+    auto value = InspectorJsonUtil::Create();
+    value->Put("type", "event");
+    value->Put("eventType", "Mouse");
+    value->Put("action", action_.c_str());
+    value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
+    value->Put("windowId", windowID_);
+    auto dataValue = InspectorJsonUtil::CreateObject();
+    dataValue->Put("point", mousePoint);
+    dataValue->Put("mouseButton", mouseButton_.c_str());
+    value->Put("data", dataValue);
+    return value;
+}
+
+std::shared_ptr<InspectorJsonValue> KeyJsonReport::GetJsonData() const
+{
+    auto value = InspectorJsonUtil::Create();
+    value->Put("type", "event");
+    value->Put("eventType", "Key");
+    value->Put("action", action_.c_str());
+    value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
+    value->Put("windowId", windowID_);
+    auto dataValue = InspectorJsonUtil::CreateObject();
+    dataValue->Put("keyCode", keyCode_);
+    value->Put("data", dataValue);
+    return value;
+}
+
+std::shared_ptr<InspectorJsonValue> AxisJsonReport::GetJsonData() const
+{
+    auto axisPoint = InspectorJsonUtil::CreateArray();
+    axisPoint->Put(static_cast<double>(point_.GetX()));
+    axisPoint->Put(static_cast<double>(point_.GetY()));
+    auto axisValuesObj = InspectorJsonUtil::CreateObject();
+    axisValuesObj->Put("horizontalAxis", axisValues_.horizontalAxis);
+    axisValuesObj->Put("verticalAxis", axisValues_.verticalAxis);
+    axisValuesObj->Put("pinchAxisScale", axisValues_.pinchAxisScale);
+    axisValuesObj->Put("rotateAxisAngle", axisValues_.rotateAxisAngle);
+    auto value = InspectorJsonUtil::Create();
+    value->Put("type", "event");
+    value->Put("eventType", eventType_.c_str());
+    value->Put("action", action_.c_str());
+    value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
+    value->Put("windowId", windowID_);
+    auto dataValue = InspectorJsonUtil::CreateObject();
+    dataValue->Put("point", axisPoint);
+    dataValue->Put("axisValues", axisValuesObj);
+    value->Put("data", dataValue);
+    return value;
+}
+
+std::shared_ptr<InspectorJsonValue> FocusJsonReport::GetJsonData() const
+{
+    auto value = InspectorJsonUtil::Create();
+    value->Put("type", "event");
+    value->Put("eventType", "WindowFocus");
+    value->Put("action", action_.c_str());
+    value->Put("windowId", windowID_);
+    value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
+    auto dataValue = InspectorJsonUtil::CreateObject();
+    dataValue->Put("isFocus", isFocus_);
+    value->Put("data", dataValue);
+    return value;
+}
 } // namespace OHOS::Ace::NG

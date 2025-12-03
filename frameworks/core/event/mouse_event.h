@@ -188,6 +188,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
         mouseEvent.passThrough = passThrough;
         mouseEvent.pressedTime = pressedTime;
+        mouseEvent.convertInfo = convertInfo;
         // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             mouseEvent.postEventNodeId = postEventNodeId;

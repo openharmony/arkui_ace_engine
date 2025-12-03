@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/reporter/reporter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -527,6 +528,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 
     // onKeyPreIme
     if (event.isPreIme) {
+        Reporter::GetInstance().HandleInputEventInspectorReporting(event);
         ResSchedReport::GetInstance().OnKeyEvent(event);
         if (TriggerKeyEventDispatch(event)) {
             return true;

@@ -187,6 +187,174 @@ private:
     DropResult dropResult_;
     DragReporterPharse pharse_;
 };
+
+class TouchJsonReport : public JsonReport {
+public:
+    void SetEventType(std::string eventType)
+    {
+        eventType_ = eventType;
+    }
+    void SetAction(std::string action)
+    {
+        action_ = action;
+    }
+    void SetTime(TimeStamp time)
+    {
+        time_ = time;
+    }
+    void SetWindowID(int32_t windowID)
+    {
+        windowID_ = windowID;
+    }
+    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+
+private:
+    TimeStamp time_;
+    std::string eventType_;
+    std::string action_;
+    int32_t windowID_;
+};
+
+class MouseJsonReport : public JsonReport {
+public:
+    void SetWindowID(int32_t windowID)
+    {
+        windowID_ = windowID;
+    }
+    void SetEventType(std::string eventType)
+    {
+        eventType_ = eventType;
+    }
+    void SetTime(TimeStamp time)
+    {
+        time_ = time;
+    }
+    void SetAction(std::string action)
+    {
+        action_ = action;
+    }
+    void SetMouseButton(std::string mouseButton)
+    {
+        mouseButton_ = mouseButton;
+    }
+    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+
+private:
+    TimeStamp time_;
+    std::string eventType_;
+    std::string action_;
+    std::string mouseButton_;
+    int32_t windowID_;
+};
+
+class KeyJsonReport : public JsonReport {
+public:
+    void SetWindowID(int32_t windowID)
+    {
+        windowID_ = windowID;
+    }
+    void SetEventType(std::string eventType)
+    {
+        eventType_ = eventType;
+    }
+    void SetTime(TimeStamp time)
+    {
+        time_ = time;
+    }
+    void SetKeyCode(int32_t keyCode)
+    {
+        keyCode_ = keyCode;
+    }
+    void SetAction(std::string action)
+    {
+        action_ = action;
+    }
+    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+
+private:
+    TimeStamp time_;
+    std::string eventType_;
+    std::string action_;
+    int32_t windowID_;
+    int32_t keyCode_;
+};
+
+struct AxisValue {
+    double horizontalAxis = 0.0;
+    double verticalAxis = 0.0;
+    double pinchAxisScale = 0.0;
+    double rotateAxisAngle = 0.0;
+};
+
+class AxisJsonReport : public JsonReport {
+public:
+    void SetWindowID(int32_t windowID)
+    {
+        windowID_ = windowID;
+    }
+    void SetEventType(std::string eventType)
+    {
+        eventType_ = eventType;
+    }
+    void SetTime(TimeStamp time)
+    {
+        time_ = time;
+    }
+    void SetAction(std::string action)
+    {
+        action_ = action;
+    }
+    void SetPoint(Point point)
+    {
+        point_ = point;
+    }
+    void SetAxisValues(AxisValue axisValues)
+    {
+        axisValues_ = axisValues;
+    }
+    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+
+private:
+    AxisValue axisValues_;
+    TimeStamp time_;
+    std::string eventType_;
+    std::string action_;
+    int32_t windowID_;
+    Point point_;
+};
+
+class FocusJsonReport : public JsonReport {
+public:
+    void SetWindowID(int32_t windowID)
+    {
+        windowID_ = windowID;
+    }
+    void SetEventType(std::string eventType)
+    {
+        eventType_ = eventType;
+    }
+    void SetTime(TimeStamp time)
+    {
+        time_ = time;
+    }
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+
+    void SetAction(std::string action)
+    {
+        action_ = action;
+    }
+    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+
+private:
+    std::string eventType_;
+    std::string action_;
+    TimeStamp time_;
+    int32_t windowID_;
+    bool isFocus_;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_EVENT_JSON_CHILD_REPORT_H
