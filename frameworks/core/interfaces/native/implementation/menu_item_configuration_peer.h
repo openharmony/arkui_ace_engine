@@ -22,18 +22,18 @@
 #include "arkoala_api_generated.h"
 
 struct MenuItemConfigurationPeer {
-    bool enabled_;
+    bool enabled_ = false;
     std::string value_;
     std::string icon_;
-    OHOS::Ace::RefPtr<OHOS::Ace::SymbolModifier> symbolModifier_;
-    int32_t index_;
-    bool selected_;
-    Ark_ContentModifier contentModifier_;
-    Ark_NativePointer node_;
+    OHOS::Ace::RefPtr<OHOS::Ace::SymbolModifier> symbolModifier_ = nullptr;
+    int32_t index_ = 0;
+    bool selected_ = false;
+    Ark_ContentModifier contentModifier_{};
+    Ark_NativePointer node_{};
 
 protected:
-    MenuItemConfigurationPeer() {}
-    ~MenuItemConfigurationPeer() {}
+    MenuItemConfigurationPeer() = default;
+    ~MenuItemConfigurationPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
 
