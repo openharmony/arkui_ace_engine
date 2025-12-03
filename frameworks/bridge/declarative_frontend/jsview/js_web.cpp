@@ -3127,6 +3127,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 if (!eventInfo) {
                     return;
                 }
+
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                auto napi_status = napi_open_handle_scope(env, &scope);
+                if (napi_status != napi_ok) {
+                    return;
+                }
+
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
@@ -3136,6 +3147,8 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 obj->SetPropertyObject("url", urlVal);
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
                 auto result = func->Call(webviewController, 1, argv);
+
+                napi_close_handle_scope(env, scope);
         };
     }
 
