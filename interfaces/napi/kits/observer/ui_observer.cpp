@@ -538,19 +538,23 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
 
 void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
 {
+    auto env = GetCurrentNapiEnv();
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
         auto localInfo = infosForRouterPage_[ref];
         if (info.IsEqual(localInfo)) {
-            auto env = GetCurrentNapiEnv();
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
-
             NG::RouterPageInfoNG abilityPageInfo(
-                abilityContext, pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
+                pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
             auto holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
-                listener->OnRouterPageStateChange(abilityPageInfo);
+                listener->OnRouterPageStateChange(abilityPageInfo, abilityContext);
             }
             break;
         }
@@ -559,12 +563,15 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const
     auto currentId = Container::CurrentId();
     auto iter = specifiedRouterPageListeners_.find(currentId);
     if (iter == specifiedRouterPageListeners_.end()) {
+        napi_close_handle_scope(env, scope);
         return;
     }
+    auto context = GetContextValue();
     auto holder = iter->second;
     for (const auto& listener : holder) {
-        listener->OnRouterPageStateChange(pageInfo);
+        listener->OnRouterPageStateChange(pageInfo, context);
     }
+    napi_close_handle_scope(env, scope);
 }
 
 // UIObserver.on(type: "densityUpdate", uiContext | null, callback)
@@ -848,14 +855,20 @@ void UIObserver::UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanc
 void UIObserver::HandleNavDestinationSwitch(
     const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
 {
+    auto env = GetCurrentNapiEnv();
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     HandleAbilityUIContextNavDestinationSwitch(info, switchInfo);
     HandleUIContextNavDestinationSwitch(switchInfo);
+    napi_close_handle_scope(env, scope);
 }
 
 void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
     const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
 {
-    napi_value uiContextBackup = switchInfo.context;
     for (auto listenerPair : abilityUIContextNavDesSwitchListeners_) {
         auto ref = listenerPair.first;
         auto localInfo = infosForNavDesSwitch_[ref];
@@ -867,13 +880,11 @@ void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
         napi_value abilityContext = nullptr;
         napi_get_reference_value(env, ref, &abilityContext);
 
-        switchInfo.context = abilityContext;
         auto listenersMap = listenerPair.second;
-        HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
-        HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+        HandleListenersWithEmptyNavigationId(listenersMap, switchInfo, abilityContext);
+        HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo, abilityContext);
         break;
     }
-    switchInfo.context = uiContextBackup;
 }
 
 void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
@@ -884,25 +895,26 @@ void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwi
         return;
     }
     auto listenersMap = listenersMapIter->second;
-    HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
-    HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+    auto context = GetContextValue();
+    HandleListenersWithEmptyNavigationId(listenersMap, switchInfo, context);
+    HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo, context);
 }
 
 void UIObserver::HandleListenersWithEmptyNavigationId(
-    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     std::optional<std::string> navId;
     auto it = listenersMap.find(navId);
     if (it != listenersMap.end()) {
         const auto listeners = it->second;
         for (const auto& listener : listeners) {
-            listener->OnNavDestinationSwitch(switchInfo);
+            listener->OnNavDestinationSwitch(switchInfo, context);
         }
     }
 }
 
 void UIObserver::HandleListenersWithSpecifiedNavigationId(
-    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     std::string navigationId;
     if (switchInfo.from.has_value()) {
@@ -916,7 +928,7 @@ void UIObserver::HandleListenersWithSpecifiedNavigationId(
         if (it != listenersMap.end()) {
             const auto listeners = it->second;
             for (const auto& listener : listeners) {
-                listener->OnNavDestinationSwitch(switchInfo);
+                listener->OnNavDestinationSwitch(switchInfo, context);
             }
         }
     }
@@ -2192,5 +2204,14 @@ napi_env UIObserver::GetCurrentNapiEnv()
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, nullptr);
     return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+napi_value UIObserver::GetContextValue()
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, nullptr);
+    return frontend->GetContextValue();
 }
 } // namespace OHOS::Ace::Napi

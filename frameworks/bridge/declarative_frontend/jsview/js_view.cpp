@@ -1127,12 +1127,24 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+JSRef<JSVal> JSViewPartialUpdate::GetJsContext()
+{
+    ContainerScope scope(GetInstanceId());
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, JSRef<JSVal>());
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, JSRef<JSVal>());
+    auto context = frontend->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    return jsVal;
+}
+
 void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 {
     auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        auto jsContext = GetJsContext();
         obj->SetPropertyObject("context", jsContext);
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetProperty<std::string>("name", result->name);
@@ -1467,5 +1479,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     info.SetReturnValue(targetView);
     return;
 }
-
 } // namespace OHOS::Ace::Framework

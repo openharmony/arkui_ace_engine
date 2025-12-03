@@ -244,7 +244,7 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo)
+void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo, napi_value context)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -260,7 +260,6 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
     napi_create_object(env_, &objValue);
-    napi_value napiCtx = pageInfo.context;
     napi_value napiIndex = nullptr;
     napi_value napiName = nullptr;
     napi_value napiPath = nullptr;
@@ -271,7 +270,7 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
     napi_create_string_utf8(env_, pageInfo.path.c_str(), pageInfo.path.length(), &napiPath);
     napi_create_int32(env_, static_cast<int32_t>(pageInfo.state), &napiState);
     napi_create_string_utf8(env_, pageInfo.pageId.c_str(), pageInfo.pageId.length(), &napiPageId);
-    napi_set_named_property(env_, objValue, "context", napiCtx);
+    napi_set_named_property(env_, objValue, "context", context);
     napi_set_named_property(env_, objValue, "index", napiIndex);
     napi_set_named_property(env_, objValue, "name", napiName);
     napi_set_named_property(env_, objValue, "path", napiPath);
@@ -395,7 +394,7 @@ void UIObserverListener::OnDrawOrLayout()
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
+void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -409,7 +408,7 @@ void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchIn
     }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
+    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo, context) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
 }
@@ -488,7 +487,8 @@ void UIObserverListener::HandleSwiperContentUpdate(const NG::SwiperContentInfo& 
     napi_close_handle_scope(env_, scope);
 }
 
-napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
+napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(
+    const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     napi_value objValue = nullptr;
     napi_create_object(env_, &objValue);
@@ -506,7 +506,7 @@ napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDe
         napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiTo);
     }
     napi_create_int32(env_, static_cast<int32_t>(switchInfo.operation), &napiOperation);
-    napi_set_named_property(env_, objValue, "context", switchInfo.context);
+    napi_set_named_property(env_, objValue, "context", context);
     napi_set_named_property(env_, objValue, "from", napiFrom);
     napi_set_named_property(env_, objValue, "to", napiTo);
     napi_set_named_property(env_, objValue, "operation", napiOperation);

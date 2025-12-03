@@ -42,7 +42,7 @@ public:
     void OnNavigationStateChange(const NG::NavDestinationInfo& info);
     void OnScrollEventStateChange(
         const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset, Ace::Axis axis);
-    void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo);
+    void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo, napi_value context = nullptr);
     void OnDensityChange(double density);
     void OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpoint info);
     void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
@@ -57,14 +57,14 @@ public:
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
     void OnTabChange(const NG::TabContentInfo& tabContentInfo);
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
-    void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
+    void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context);
     void OnTextChangeEvent(const NG::TextChangeEventInfo& info);
     void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
 
 private:
-    napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
+    napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
     napi_value GetNapiCallback();
     napi_value GetFrameNodeObject(const RefPtr<NG::FrameNode>& frameNode);

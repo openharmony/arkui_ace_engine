@@ -102,29 +102,27 @@ struct ScrollEventInfo {
 
 struct NavDestinationSwitchInfo {
     // UIContext
-    napi_value context;
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation;
 
-    NavDestinationSwitchInfo(napi_value ctx, std::optional<NavDestinationInfo>&& fromInfo,
-        std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
-        : context(ctx), from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+    NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo, std::optional<NavDestinationInfo>&& toInfo,
+        NavigationOperation op)
+        : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
           to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
     {}
 };
 
 struct RouterPageInfoNG {
-    napi_value context;
     int32_t index;
     std::string name;
     std::string path;
     RouterPageState state;
     std::string pageId;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+    RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
         std::string pageId)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+        : index(index), name(std::move(name)), path(std::move(path)), state(state),
           pageId(std::move(pageId))
     {}
 };
