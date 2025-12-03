@@ -452,7 +452,10 @@ void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& s
         case ConsoleMessageSource::VIOLATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION; break;
         case ConsoleMessageSource::INTERVENTION: dst = ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION; break;
         case ConsoleMessageSource::RECOMMENDATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION; break;
-        default: LOGE("Unexpected enum value in ConsoleMessageSource: %{public}d", src);
+        default: {
+            dst = static_cast<Ark_ConsoleMessageSource>(-1);
+            LOGE("Unexpected enum value in ConsoleMessageSource: %{public}d", src);
+        }
     }
 }
 
