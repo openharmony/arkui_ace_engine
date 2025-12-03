@@ -195,6 +195,7 @@ export struct GridObjectSortComponent {
   @State hoverId: number | string = '';
   // component state : edit === true   unedited === false
   @State @Watch('onGridComStateChange') gridComState: boolean = false;
+  @State comState: boolean = false;
   @State menuSwitch: boolean = false;
   // component width
   @State areaWidth: number = 0;
@@ -291,7 +292,6 @@ export struct GridObjectSortComponent {
       let uiContent: UIContext = this.getUIContext();
       let hostContext: common.UIAbilityContext = uiContent.getHostContext() as common.UIAbilityContext
       this.applicationContext = hostContext.getApplicationContext();
-      this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
     } catch (paramError) {
       let code = (paramError as ClassCastError).code;
       let message = (paramError as ClassCastError).message;
@@ -372,17 +372,11 @@ export struct GridObjectSortComponent {
       duration: ENTER_EXIT_ICON_DURATION,
       curve: COMMON_BEZIER as ICurve,
     }, () => {
-      this.gridComState = false;
+      this.comState = false;
     });
     this.menuSwitch = false;
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
-    if (this.callbackId) {
-      this.applicationContext.offEnvironment(this.callbackId as Int,
-        (err: BusinessError<void> | null): void => {
-          hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
-        })
-    }
   }
 
   // Array deduplication
@@ -435,9 +429,7 @@ export struct GridObjectSortComponent {
     this.editGridDataLength = this.selected.length;
     this.calcGridHeight();
     this.isPointToAddTitleBarEditButton = true;
-    if (typeof this.onCancel === 'function') {
-      this.onCancel?.();
-    }
+    this.onCancel && this.onCancel?.();
   }
 
   // Enter edit function
@@ -496,9 +488,7 @@ export struct GridObjectSortComponent {
       this.selected = selected;
       this.unSelected = unSelected;
       this.calcGridHeight();
-      if (typeof this.onSave === 'function') {
-        this.onSave?.(selected, unSelected);
-      }
+      this.onSave && this.onSave?.(selected, unSelected);
     });
     setTimeout(() => {
       this.saveClick = false;
@@ -571,7 +561,7 @@ export struct GridObjectSortComponent {
     this.getUIContext()?.animateTo({
       curve: REMOVE_ADD_SPRING as ICurve, onFinish: () => {
         this.scaleIcon = 1;
-        this.selected.splice(1);
+        this.selected.splice(currentIndex, 1);
         this.unSelected.unshift(content);
         this.calcGridHeight();
         this.editGridDataLength = this.editGridDataLength - 1;
@@ -1018,11 +1008,19 @@ export struct GridObjectSortComponent {
         this.pointToAddTitleBarEditButton();
       } else {
         if (this.isPointToEditTitleBarSaveButton) {
-          let resourceMan = resourceManager.getSysResourceManager()
-          let eventInfo: accessibility.EventInfo =
-            new accessibility.EventInfo('announceForAccessibility', this.bundleName, 'common');
-          eventInfo.textAnnouncedForAccessibility = resourceMan?.
-          getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) as string;
+          try {
+            let resourceMan = resourceManager.getSysResourceManager()
+            let eventInfo: accessibility.EventInfo =
+              new accessibility.EventInfo('announceForAccessibility', this.bundleName, 'common');
+            eventInfo.textAnnouncedForAccessibility = resourceMan?.
+            getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) as string;
+            accessibility.sendAccessibilityEvent(eventInfo);
+          } catch (paramError) {
+            let code = (paramError as BusinessError)?.code;
+            let message = (paramError as BusinessError)?.message;
+            hilog.error(0x3900, 'Ace',
+              `GridObjectSortComponent Faild to get textAnnouncedForAccessibility param error: ${code}, ${message}`);
+          }
         }
       }
     })
@@ -1520,7 +1518,7 @@ export struct GridObjectSortComponent {
             this.scaleIcon = 1;
             this.scaleAddIcon = 0;
             this.selected.push(item);
-            this.unSelected.splice(1);
+            this.unSelected.splice(index, 1);
             this.calcGridHeight();
             this.arrayUnSelectIsChange = 2;
             this.addItemMoveX = 0;
@@ -1587,7 +1585,7 @@ export struct GridObjectSortComponent {
           this.scaleIcon = 1;
           this.scaleAddIcon = 0;
           this.selected.push(item);
-          this.unSelected.splice(1);
+          this.unSelected.splice(index, 1);
           this.calcGridHeight();
           this.arrayUnSelectIsChange = 2;
           this.addItemMoveX = 0;
@@ -1844,8 +1842,8 @@ export struct GridObjectSortComponent {
     })
     this.isStartDrag = false;
     if (insertIndex !== -1) {
-      this.selected.splice(1);
-      this.selected.splice(0);
+      this.selected.splice(itemIndex, 1);
+      this.selected.splice(insertIndex, 0, this.dragContent);
       this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(insertIndex / this.colNum) + 1,

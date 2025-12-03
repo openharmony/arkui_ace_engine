@@ -143,7 +143,7 @@ import {
   
   @ComponentV2
   export struct TipsDialogV2 {
-    @Require @Param imageRes: ResourceStr | PixelMap;
+    @Require @Param imageRes: ResourceStr | PixelMap | undefined;
     @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE } as SizeOptions;
     @Param imageBorderColor?: ColorMetrics = undefined;
     @Param imageBorderWidth?: LengthMetrics = undefined;
@@ -227,13 +227,16 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        contentBuilder: () => {
-          this.contentBuilder();
-        },
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     @Builder
@@ -370,11 +373,11 @@ import {
             }
           }
         }
-        .width('100%')
-        .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
     }
   
     aboutToAppear(): void {
@@ -480,7 +483,7 @@ import {
   
   @ComponentV2
   export struct SelectDialogV2 {
-    @Require @Param title: ResourceStr = '';
+    @Require @Param title: ResourceStr | undefined = '';
     @Param content?: ResourceStr = '';
     @Param confirm?: AdvancedDialogV2Button | undefined = undefined;
     @Require @Param radioContent: SheetInfo[] = [] as Array<SheetInfo>;
@@ -685,15 +688,18 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.title,
-        contentBuilder: () => {
-          this.contentBuilder();
-        },
-        buttons: this.buttons,
-        contentAreaPadding: this.contentPadding,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.title,
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: this.buttons,
+          contentAreaPadding: this.contentPadding,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -770,7 +776,7 @@ import {
   
   @ComponentV2
   export struct ConfirmDialogV2 {
-    @Require @Param title: ResourceStr = '';
+    @Require @Param title: ResourceStr | undefined = '';
     @Param content?: ResourceStr = '';
     @Param checkTips?: ResourceStr = '';
     @Param checked?: boolean = false;
@@ -863,11 +869,11 @@ import {
               })
               .width('100%')
           }
-          .width('100%')
-          .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+          .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+          .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
         }
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+        .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
       }
     }
   
@@ -937,14 +943,17 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.title,
-        contentBuilder: () => {
-          this.buildContent();
-        },
-        minContentHeight: this.minContentHeight!!,
-        buttons: this.buttons,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.title,
+          contentBuilder: () => {
+            this.buildContent();
+          },
+          minContentHeight: this.minContentHeight!!,
+          buttons: this.buttons,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -956,7 +965,7 @@ import {
   export struct AlertDialogV2 {
     @Param primaryTitle?: ResourceStr = undefined;
     @Param secondaryTitle?: ResourceStr = undefined;
-    @Require @Param content: ResourceStr = '';
+    @Require @Param content: ResourceStr | undefined = '';
     @Param primaryButton?: AdvancedDialogV2Button | undefined = undefined;
     @Param secondaryButton?: AdvancedDialogV2Button | undefined = undefined;
     private textAlign: TextAlign = TextAlign.Center;
@@ -982,15 +991,18 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.primaryTitle,
-        secondaryTitle: this.secondaryTitle,
-        contentBuilder: () => {
-          this.AlertDialogContentBuilder();
-        },
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.primaryTitle,
+          secondaryTitle: this.secondaryTitle,
+          contentBuilder: () => {
+            this.AlertDialogContentBuilder();
+          },
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     @Builder
@@ -1006,8 +1018,8 @@ import {
             .fontSize(`${BODY_L}fp`)
             .fontWeight(this.getFontWeight() as int)
             .fontColor(this.fontColorWithTheme)
-            .width('100%')
-            .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+            .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+            .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
             .textAlign(this.textAlign)
             .onKeyEvent((event: KeyEvent) => {
               if (event) {
@@ -1019,7 +1031,7 @@ import {
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
         .width('100%')
       }
-      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -1048,16 +1060,19 @@ import {
     @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.primaryTitle,
-        secondaryTitle: this.secondaryTitle,
-        contentBuilder: () => {
-            this.contentBuilder();
-        },
-        contentAreaPadding: this.contentAreaPadding,
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.primaryTitle,
+          secondaryTitle: this.secondaryTitle,
+          contentBuilder: () => {
+              this.contentBuilder();
+          },
+          contentAreaPadding: this.contentAreaPadding,
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   }
   
@@ -1824,12 +1839,15 @@ import {
   
     build() {
       Column() {
-        CustomDialogContentComponent({
-          contentBuilder: () => {
-            this.contentBuilder();
-          },
-          minContentHeight: this.minContentHeight!!,
-        })
+        Column() {
+          CustomDialogContentComponent({
+            contentBuilder: () => {
+              this.contentBuilder();
+            },
+            minContentHeight: this.minContentHeight!!,
+          })
+        }
+        .constraintSize({ maxHeight: '100%' })
       }
     }
   
@@ -1870,7 +1888,7 @@ import {
   @ComponentV2
   export struct PopoverDialogV2 {
     @Require @Param
-    visible: boolean = false;
+    visible: boolean | undefined = false;
     @Event
     $visible?: PopoverDialogV2OnVisibleChange;
     @Require @Param
