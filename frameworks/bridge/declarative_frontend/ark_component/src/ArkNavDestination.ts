@@ -40,14 +40,19 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationTitleModifier, arkNavigationTitle);
     return this;
   }
-  menus(value: Array<NavigationMenuItem> | undefined): this {
+  menus(value: Array<NavigationMenuItem> | undefined, options?: NavigationMenuOptions): this {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
         NavDestinationMenusModifier, undefined);
       return this;
     }
+    let config: ArkNavigationMenu = new ArkNavigationMenu();
+    config.menu = value;
+    if (!isNull(options)) {
+      config.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
-        NavDestinationMenusModifier, value);
+        NavDestinationMenusModifier, config);
     return this;
   }
   hideTitleBar(isHide: boolean, animated?: boolean): this {
@@ -268,8 +273,8 @@ class NavDestinationTitleModifier extends ModifierWithKey<ArkNavigationTitle | u
   }
 }
 
-class NavDestinationMenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefined> {
-  constructor(value: Array<NavigationMenuItem> | undefined) {
+class NavDestinationMenusModifier extends ModifierWithKey<ArkNavigationMenu> {
+  constructor(value: ArkNavigationMenu) {
     super(value);
   }
   static identity: Symbol = Symbol('menus');
@@ -278,7 +283,7 @@ class NavDestinationMenusModifier extends ModifierWithKey<Array<NavigationMenuIt
     if (reset) {
       getUINativeModule().navDestination.resetMenus(node);
     } else {
-      getUINativeModule().navDestination.setMenus(node, this.value);
+      getUINativeModule().navDestination.setMenus(node, this.value.menu, this.value.options);
     }
   }
   checkObjectDiff(): boolean {

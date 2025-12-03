@@ -20848,6 +20848,16 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavigationMenu {
+  constructor() {
+    this.menu = undefined;
+    this.options = undefined;
+  }
+  isEqual(another) {
+    return (this.menu === another.menu) && (this.options === another.options);
+  }
+}
+
 class ArkNavHideTitleBarOrToolBar {
   constructor() {
     this.isHide = undefined;
@@ -25950,14 +25960,19 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationTitleModifier, arkNavigationTitle);
     return this;
   }
-  menus(value) {
+  menus(value, options) {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
         NavDestinationMenusModifier, undefined);
       return this;
     }
+    let config = new ArkNavigationMenu();
+    config.menu = value;
+    if (!isNull(options)) {
+      config.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
-        NavDestinationMenusModifier, value);
+        NavDestinationMenusModifier, config);
     return this;
   }
   hideTitleBar(isHide, animated) {
@@ -26291,7 +26306,7 @@ class NavDestinationMenusModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().navDestination.resetMenus(node);
     } else {
-      getUINativeModule().navDestination.setMenus(node, this.value);
+      getUINativeModule().navDestination.setMenus(node, this.value.menu, this.value.options);
     }
   }
   checkObjectDiff() {
@@ -27410,12 +27425,17 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
-  menus(value) {
+  menus(value, options) {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, undefined);
       return this;
     }
-    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, value);
+    let config = new ArkNavigationMenu();
+    config.menu = value;
+    if (!isNull(options)) {
+      config.options = options;
+    }
+    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, config);
     return this;
   }
   toolBar(value) {
@@ -27974,7 +27994,7 @@ class MenusModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().navigation.resetMenus(node);
     } else {
-      getUINativeModule().navigation.setMenus(node, this.value);
+      getUINativeModule().navigation.setMenus(node, this.value.menu, this.value.options);
     }
   }
   checkObjectDiff() {

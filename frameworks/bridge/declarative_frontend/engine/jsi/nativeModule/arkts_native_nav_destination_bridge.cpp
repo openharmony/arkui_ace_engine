@@ -500,6 +500,16 @@ ArkUINativeModuleValue NavDestinationBridge::SetMenus(ArkUIRuntimeCallInfo* runt
     } else if (menusArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
     }
+    // deal menu options
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() <= NUM_2 || !info[NUM_2]->IsObject()) {
+        return panda::StringRef::Undefined(vm);
+    }
+    NG::NavigationMenuOptions options;
+    auto optObj = JSRef<JSObject>::Cast(info[NUM_2]);
+    auto moreButtonProperty = optObj->GetProperty("moreButtonOptions");
+    JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    NavDestinationModel::GetInstance()->SetMenuOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -510,6 +520,10 @@ ArkUINativeModuleValue NavDestinationBridge::ResetMenus(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
+    NG::NavigationMenuOptions options;
+    NavDestinationModelNG::GetInstance()->SetMenuOptions(std::move(options));
+    NavDestinationModelNG::ResetResObj(reinterpret_cast<FrameNode*>(nativeNode),
+        NavDestinationPatternType::TITLE_BAR, "navDestination.navigationMenuOptions");
     return panda::JSValueRef::Undefined(vm);
 }
 
