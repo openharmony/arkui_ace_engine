@@ -756,6 +756,9 @@ export class FrameNode implements MaterializedBase {
     public isInRenderState(): boolean {
         return FrameNodeExtender.isOnRenderTree(this);
     }
+    public isOnMainTree(): boolean {
+        return FrameNodeExtender.isOnMainTree(this);
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
