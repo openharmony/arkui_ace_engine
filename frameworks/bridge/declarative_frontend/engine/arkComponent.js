@@ -32713,12 +32713,12 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
-  onCameraCaptureStateChanged(callback) {
-    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
+  onCameraCaptureStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangeModifier.identity, WebOnCameraCaptureStateChangeModifier, callback);
     return this;
   }
-  onMicrophoneCaptureStateChanged(callback) {
-    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangedModifier.identity, WebOnMicrophoneCaptureStateChangedModifier, callback);
+  onMicrophoneCaptureStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangeModifier.identity, WebOnMicrophoneCaptureStateChangeModifier, callback);
     return this;
   }
 }
@@ -34389,7 +34389,7 @@ class WebBackToTopModifier extends ModifierWithKey {
 }
 WebBackToTopModifier.identity = Symbol('webBackToTopModifier');
 
-class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey {
+class WebOnCameraCaptureStateChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -34402,9 +34402,9 @@ class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey {
     }
   }
 }
-WebOnCameraCaptureStateChangedModifier.identity = Symbol('webOnCameraCaptureStateChangedModifier');
+WebOnCameraCaptureStateChangeModifier.identity = Symbol('webOnCameraCaptureStateChangeModifier');
 
-class WebOnMicrophoneCaptureStateChangedModifier extends ModifierWithKey {
+class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -34417,7 +34417,7 @@ class WebOnMicrophoneCaptureStateChangedModifier extends ModifierWithKey {
     }
   }
 }
-WebOnMicrophoneCaptureStateChangedModifier.identity = Symbol('webOnMicrophoneCaptureStateChangedModifier');
+WebOnMicrophoneCaptureStateChangeModifier.identity = Symbol('webOnMicrophoneCaptureStateChangeModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {
