@@ -947,6 +947,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
         ani_native_function {
+            "_ConditionScope_Mark_Dirty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConditionScopeMarkDirty)
+        },
+        ani_native_function {
             "_Common_vp2px",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Vp2px)

@@ -309,6 +309,7 @@ export class ArkUIAniModule {
         getAllCustomPropertiesCallback: () => string): void
     native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+    native static _ConditionScope_Mark_Dirty(ptr: KPointer): void;
 
     native static _Common_vp2px(value:number, instanceId: KInt): number
     native static _Common_px2vp(value:number, instanceId: KInt): number

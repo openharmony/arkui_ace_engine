@@ -36,4 +36,15 @@ void ConditionScopeNode::AddChild(
     LayoutProperty::UpdateAllGeometryTransition(child);
 }
 
+void ConditionScopeNode::FlushUpdateAndMarkDirty()
+{
+    auto parent = GetParent();
+    int64_t accessibilityId = GetAccessibilityId();
+    if (parent) {
+        parent->NotifyChange(0, 0, accessibilityId, NotificationType::START_CHANGE_POSITION);
+    }
+    // mark parent dirty to flush measure.
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 } // namespace OHOS::Ace::NG
