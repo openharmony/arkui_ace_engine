@@ -3082,6 +3082,7 @@ const ArkUI_AttributeItem* GetResponseRegion(ArkUI_NodeHandle node)
     ArkUI_Float32 values[32];
     auto valueSize =
         GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegion(node->uiNodeHandle, &values);
+    valueSize = valueSize > MAX_ATTRIBUTE_ITEM_LEN ? MAX_ATTRIBUTE_ITEM_LEN : valueSize;
     for (int i = 0; i < valueSize; i++) {
         g_numberValues[i].f32 = values[i];
     }
@@ -3146,6 +3147,7 @@ const ArkUI_AttributeItem* GetResponseRegionList(ArkUI_NodeHandle node)
         g_attributeItem.size = NUM_5;
         return &g_attributeItem;
     }
+    regionSize = regionSize > NUM_4 ? NUM_4 : regionSize;
     int32_t toolType[regionSize];
     float valueArray[regionSize * NUM_4];
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegionList(
