@@ -144,7 +144,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
             interop_memory_copy(
-                result + serializer.length(), size - serializer.length(),&resourceId, sizeof(InteropInt32)
+                result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32)
             );
             break;
         }
