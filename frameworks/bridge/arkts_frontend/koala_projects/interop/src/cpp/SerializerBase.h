@@ -202,7 +202,7 @@ public:
     void writeString(InteropString value) {
         writeInt32(value.length + 1);
         check(value.length + 1);
-        interop_string_copy(reinterpret_cast<char*>(data + position), dataLength, value.chars);
+        InteropStringCopy(reinterpret_cast<char*>(data + position), dataLength, value.chars);
         position += value.length + 1;
     }
 

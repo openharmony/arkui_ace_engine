@@ -20,7 +20,7 @@
 #include <cstdio>
 #include "securec.h"
 
-inline errno_t interop_string_copy(char *dest, size_t destsz, const char *src)
+inline errno_t InteropStringCopy(char *dest, size_t destsz, const char *src)
 {
     errno_t ret = strcpy_s(dest, reinterpret_cast<rsize_t>(destsz), src);
     if (ret > 0) {
@@ -57,7 +57,7 @@ inline errno_t interop_memory_set(void *dest, size_t destsz, int ch, size_t coun
 }
 
 template <typename... T>
-inline int interop_print_to_buffer(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBuffer(char *buffer, size_t bufsz, const char *format, T... args)
 {
     int ret = sprintf_s(buffer, reinterpret_cast<rsize_t>(bufsz), format, args...);
     if (ret < 0) {
@@ -67,7 +67,7 @@ inline int interop_print_to_buffer(char *buffer, size_t bufsz, const char *forma
 }
 
 template <typename... T>
-inline int interop_print_to_buffer_n(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBufferN(char *buffer, size_t bufsz, const char *format, T... args)
 {
     int ret = snprintf_s(buffer, bufsz, format, args...);
     if (ret < 0) {
@@ -76,7 +76,7 @@ inline int interop_print_to_buffer_n(char *buffer, size_t bufsz, const char *for
     return ret;
 }
 
-inline int interop_print_vlist_to_buffer_n(char *buffer, size_t bufsz, const char *format, va_list vlist)
+inline int InteropPrintVlistToBufferN(char *buffer, size_t bufsz, const char *format, va_list vlist)
 {
     int ret = vsnprintf_s(buffer, bufsz, format, vlist);
     if (ret == EINVAL) {
@@ -87,7 +87,7 @@ inline int interop_print_vlist_to_buffer_n(char *buffer, size_t bufsz, const cha
     return ret;
 }
 
-inline size_t interop_string_length(const char *str)
+inline size_t InteropStringLength(const char *str)
 {
     return strnlen_s(str, UINT_MAX);
 }
