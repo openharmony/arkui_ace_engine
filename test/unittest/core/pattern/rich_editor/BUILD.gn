@@ -74,5 +74,6 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_typing_style_test.cpp",
     "rich_editor_undo_redo_test.cpp",
     "rich_editor_url_style_test.cpp",
+    "rich_editor_model_static_test_ng.cpp",
   ]
 }
