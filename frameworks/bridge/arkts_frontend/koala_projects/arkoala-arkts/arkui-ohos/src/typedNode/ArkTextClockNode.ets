@@ -17,7 +17,7 @@ export class ArkTextClockNode extends ArkBaseNode implements TextClockAttribute 
         this.markDirty()
         return this
     }
-    public format(value: string | undefined): this {
+    public format(value: ResourceStr | undefined): this {
         this.component.format(value)
         this.markDirty()
         return this
