@@ -429,6 +429,20 @@ static ArkUINodeType ParseNodeType(
     return nodeType;
 }
 
+static ArkUINodeType ParseNodeTypeWithCheck(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node,
+    const std::unordered_map<std::string, ArkUINodeType>& typeMap)
+{
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
+    std::string type = firstArg->IsString(vm) ? firstArg->ToString(vm)->ToString(vm) : "";
+    ArkUINodeType nodeType = ARKUI_CUSTOM;
+    auto iter = typeMap.find(type);
+    if (iter != typeMap.end()) {
+        nodeType = iter->second;
+    }
+    return nodeType;
+}
+
 static void HandleNodeParams(
     ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeType nodeType, int32_t nodeId, RefPtr<FrameNode>& node)
 {
@@ -3105,5 +3119,41 @@ ArkUINativeModuleValue FrameNodeBridge::FireArkUIObjectLifecycleCallback(ArkUIRu
     void* data = static_cast<void*>(runtimeCallInfo);
     context->FireArkUIObjectLifecycleCallback(data);
     return defaultReturnValue;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> node;
+    static const std::unordered_map<std::string, ArkUINodeType> typeMapLite = { { "Text", ARKUI_TEXT },
+        { "Stack", ARKUI_STACK } };
+    ArkUINodeType nodeType = ParseNodeTypeWithCheck(runtimeCallInfo, vm, nodeId, node, typeMapLite);
+    if (nodeType != ARKUI_CUSTOM) {
+        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
+    }
+
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
+    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> node;
+    static const std::unordered_map<std::string, ArkUINodeType> typeMapFull = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Stack", ARKUI_STACK } };
+    ArkUINodeType nodeType = ParseNodeTypeWithCheck(runtimeCallInfo, vm, nodeId, node, typeMapFull);
+    if (nodeType != ARKUI_CUSTOM) {
+        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
+    }
+
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
+    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return reslut;
 }
 } // namespace OHOS::Ace::NG

@@ -154,6 +154,10 @@ public:
     static ArkUINativeModuleValue RemoveAdoptedChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard start
+    static ArkUINativeModuleValue CreateTypedFrameNodeLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateTypedFrameNodeFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard end
 };
 
 } // namespace OHOS::Ace::NG

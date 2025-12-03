@@ -27326,7 +27326,6 @@ if (globalThis.CheckboxGroup !== undefined) {
       return new modifierJS.CheckboxGroupModifier(nativePtr, classType);
     });
   };
-}
 
   globalThis.CheckboxGroup.contentModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -27336,6 +27335,7 @@ if (globalThis.CheckboxGroup !== undefined) {
     });
     component.setContentModifier(modifier);
   };
+}
 
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
@@ -41338,6 +41338,7 @@ class LazyGridRowsGapModifier extends ModifierWithKey {
 }
 LazyGridRowsGapModifier.identity = Symbol('lazyGridRowsGap');
 // @ts-ignore
+if (globalThis.LazyVGridLayout !== undefined) {
 globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
   attributeModifierFunc.call(this, modifier, (nativePtr) => {
     return new ArkLazyVGridLayoutComponent(nativePtr);
@@ -41345,6 +41346,7 @@ globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
     return new modifierJS.LazyVGridLayoutModifier(nativePtr, classType);
   });
 };
+}
 
 class ArkContainerPickerComponent extends ArkComponent {
     constructor(nativePtr, classType) {
@@ -41495,3 +41497,7 @@ function getArkUINodeFromNapi() {
 }
 
 globalThis.__getArkUINode__ = getArkUINodeFromNapi;
+
+function __getArkUINativeModuleForm__() {
+  return arkUINativeModule;
+}
