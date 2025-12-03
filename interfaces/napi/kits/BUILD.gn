@@ -95,6 +95,7 @@ group("napi_group") {
     deps += [
       "$ace_root/interfaces/napi/kits/drawabledescriptor:drawabledescriptor",
       "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
+      "$ace_root/interfaces/napi/kits/intelligence/image_generation:imagegeneration"
     ]
   }
 }

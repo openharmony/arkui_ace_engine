@@ -1075,6 +1075,8 @@ private:
     int32_t oldTargetId_ = -1;
     std::unordered_set<int32_t> onDisappearFilterIds_;
     std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
+
+    friend class ImageGeneratorDialogView;
 };
 } // namespace OHOS::Ace::NG
 
