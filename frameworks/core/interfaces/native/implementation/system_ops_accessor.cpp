@@ -84,7 +84,6 @@ void SetFrameCallbackImpl(const Callback_Long_Void* onFrameCallback,
 {
     CHECK_NULL_VOID(onFrameCallback);
     CHECK_NULL_VOID(onIdleCallback);
-    CHECK_NULL_VOID(delayTime);
     auto delayTimeInt = Converter::Convert<int64_t>(delayTime);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
