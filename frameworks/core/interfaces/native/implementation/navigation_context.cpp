@@ -15,6 +15,7 @@
 
 #include "navigation_context.h"
 #include "nav_path_info_peer_impl.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -124,6 +125,7 @@ bool PathStack::PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode l
     it->onPop_ = info.onPop_;
     it->needUpdate_ = true;
     it->isEntry_ = info.isEntry_;
+    it->isFromSingleToNMoved_ = true;
     if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
         MoveToTopInternal(it, animated);
     } else {
@@ -974,6 +976,18 @@ int32_t NavigationStack::GetRecoveredDestinationMode(int32_t index)
 {
     auto pathInfo = PathStack::GetPathInfo(index);
     return pathInfo ? pathInfo->mode_ : INVALID_DESTINATION_MODE;
+}
+
+bool NavigationStack::IsTopFromSingletonMoved()
+{
+    auto size = GetSize();
+    if (size == 0) {
+        return false;
+    }
+
+    auto pathInfo = PathStack::GetPathInfo(size - 1);
+    CHECK_NULL_RETURN(pathInfo, false);
+    return pathInfo->isFromSingleToNMoved_;
 }
 
 std::vector<std::string> PathStack::GetIdByName(const std::string& name)

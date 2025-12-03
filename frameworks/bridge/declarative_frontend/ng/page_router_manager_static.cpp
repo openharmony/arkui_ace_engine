@@ -19,6 +19,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_node.h"
@@ -764,5 +765,43 @@ void PageRouterManager::BackToIndexWithTargetExtender(int32_t index, const std::
     RouterPageInfo info;
     info.params = params;
     RestorePageWithTarget(index - 1, true, info, RestorePageDestination::BOTTOM);
+}
+
+void PageRouterManager::EnableAlertBeforeBackPageExtender(
+    const std::string& message, std::function<void(int32_t)>&& callback)
+{
+    auto currentPage = GetCurrentPageNode();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+
+    DialogProperties dialogProperties = {
+        .content = message,
+        .autoCancel = false,
+        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
+            { .text = dialogTheme->GetConfirmText(), .textColor = "" } },
+        .onSuccess =
+            [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
+                int32_t successType, int32_t successIndex) {
+                auto pageInfo = weakPageInfo.Upgrade();
+                if (pageInfo && pageInfo->GetAlertCallback() && !successType) {
+                    pageInfo->GetAlertCallback()(successIndex);
+                    if (successIndex) {
+                        auto router = weak.Upgrade();
+                        CHECK_NULL_VOID(router);
+                        router->StartBackExtender(router->ngBackTarget_);
+                    }
+                }
+            },
+    };
+
+    pageInfo->SetDialogProperties(dialogProperties);
+    pageInfo->SetAlertCallback(std::move(callback));
 }
 } // namespace OHOS::Ace::NG
