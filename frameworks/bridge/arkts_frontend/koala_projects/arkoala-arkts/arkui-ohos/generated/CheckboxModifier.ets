@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookCheckBoxContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCheckboxPeer, OnCheckboxChangeCallback, CheckBoxConfiguration, CheckboxAttribute } from "./component/checkbox"
@@ -51,6 +51,8 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
     _mark_0_0value?: MarkStyle | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnCheckboxChangeCallback | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<CheckBoxConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -163,6 +165,24 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookCheckBoxContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<CheckBoxConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookCheckBoxContentModifier(peer, (undefined as ContentModifier<CheckBoxConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CheckboxModifier): void {
         super.mergeModifier(modifier)
@@ -245,6 +265,19 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<CheckBoxConfiguration> | undefined));
+                }
+            }
+        }
     }
     select(value: boolean | Bindable<boolean> | undefined): this {
         if (((this._select_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -309,6 +342,17 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

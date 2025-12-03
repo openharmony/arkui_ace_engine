@@ -18,6 +18,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { ArkRatingPeer, RatingOptions, RatingAttribute, OnRatingChangeCallback, StarStyleOptions,
     RatingConfiguration } from "../framework";
 import { ContentModifier } from "#handwritten";
+import { hookRatingContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
 export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -66,6 +67,7 @@ export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
     }
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<RatingConfiguration> | undefined);
+        hookRatingContentModifier(this.getPeer(), value_casted);
         this.markDirty();
         return this;
     }

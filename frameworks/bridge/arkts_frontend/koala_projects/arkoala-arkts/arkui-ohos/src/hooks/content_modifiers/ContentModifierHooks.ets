@@ -17,19 +17,19 @@ import { memo } from "@koalaui/runtime/annotations"
 import { ContentModifierHelper } from "#generated"
 import { ContentModifier } from "#generated"
 import { KPointer, pointer } from "@koalaui/interop";
-import { ArkButtonComponent, ButtonConfiguration } from "#generated"
-import { ArkCheckboxComponent, CheckBoxConfiguration } from "#generated"
+import { ArkButtonComponent, ArkButtonPeer, ButtonConfiguration } from "#generated"
+import { ArkCheckboxComponent, ArkCheckboxPeer, CheckBoxConfiguration } from "#generated"
 import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelConfiguration } from "#generated"
 import { ArkGaugeComponent, ArkGaugePeer, GaugeConfiguration } from "#generated"
 import { ArkLoadingProgressComponent, ArkLoadingProgressPeer, LoadingProgressConfiguration } from "#generated"
 import { ArkProgressComponent, ArkProgressPeer, ProgressConfiguration } from "#generated"
-import { ArkRadioComponent, RadioConfiguration } from "#generated"
-import { ArkRatingComponent, RatingConfiguration } from "#generated"
-import { ArkSelectComponent, MenuItemConfiguration } from "#generated"
-import { ArkSliderComponent, SliderConfiguration } from "#generated"
+import { ArkRadioComponent, ArkRadioPeer, RadioConfiguration } from "#generated"
+import { ArkRatingComponent, ArkRatingPeer, RatingConfiguration } from "#generated"
+import { ArkSelectComponent, ArkSelectPeer, MenuItemConfiguration } from "#generated"
+import { ArkSliderComponent, ArkSliderPeer, SliderConfiguration } from "#generated"
 import { ArkTextClockComponent, ArkTextClockPeer, TextClockConfiguration } from "#generated"
 import { ArkTextTimerComponent, ArkTextTimerPeer, TextTimerConfiguration } from "#generated"
-import { ArkToggleComponent, ToggleConfiguration } from "#generated"
+import { ArkToggleComponent, ArkTogglePeer, ToggleConfiguration } from "#generated"
 import { ArkCheckboxGroupComponent, CheckBoxGroupConfiguration } from "#generated"
 import { CustomBuilder } from "#generated"
 import { CallbackTransformer } from "../../CallbackTransformer"
@@ -44,8 +44,15 @@ function memoWrapper<Args>(
 }
 
 export function hookButtonContentModifier(
-    receiver: ArkButtonComponent, value?: ContentModifier<ButtonConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkButtonComponent | ArkButtonPeer, value?: ContentModifier<ButtonConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkButtonComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkButtonPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookButtonContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierButton(ptr)
         return
@@ -64,8 +71,15 @@ export function hookButtonContentModifier(
 }
 
 export function hookCheckBoxContentModifier(
-    receiver: ArkCheckboxComponent, value?: ContentModifier<CheckBoxConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkCheckboxComponent | ArkCheckboxPeer, value?: ContentModifier<CheckBoxConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkCheckboxComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkCheckboxPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookCheckBoxContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierCheckBox(ptr)
         return
@@ -192,8 +206,15 @@ export function hookProgressContentModifier(
 }
 
 export function hookRadioContentModifier(
-    receiver: ArkRadioComponent, value?: ContentModifier<RadioConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkRadioComponent | ArkRadioPeer, value?: ContentModifier<RadioConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkRadioComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkRadioPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookRadioContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierRadio(ptr)
         return
@@ -212,8 +233,15 @@ export function hookRadioContentModifier(
 }
 
 export function hookRatingContentModifier(
-    receiver: ArkRatingComponent, value?: ContentModifier<RatingConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkRatingComponent | ArkRatingPeer, value?: ContentModifier<RatingConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkRatingComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkRatingPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookRatingContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierRating(ptr)
         return
@@ -232,8 +260,15 @@ export function hookRatingContentModifier(
 }
 
 export function hookSelectContentModifier(
-    receiver: ArkSelectComponent, value?: ContentModifier<MenuItemConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkSelectComponent | ArkSelectPeer, value?: ContentModifier<MenuItemConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkSelectComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkSelectPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookSelectContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierMenuItem(ptr)
         return
@@ -252,8 +287,15 @@ export function hookSelectContentModifier(
 }
 
 export function hookSliderContentModifier(
-    receiver: ArkSliderComponent, value?: ContentModifier<SliderConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkSliderComponent | ArkSliderPeer, value?: ContentModifier<SliderConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkSliderComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkSliderPeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookSliderContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierSlider(ptr)
         return
@@ -326,8 +368,15 @@ export function hookTextTimerContentModifier(
 }
 
 export function hookToggleContentModifier(
-    receiver: ArkToggleComponent, value?: ContentModifier<ToggleConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    receiver: ArkToggleComponent | ArkTogglePeer, value?: ContentModifier<ToggleConfiguration>) {
+    let ptr: pointer;
+    if (receiver instanceof ArkToggleComponent) {
+        ptr = receiver.getPeer().peer.ptr
+    } else if (receiver instanceof ArkTogglePeer) {
+        ptr = receiver.peer.ptr
+    } else {
+        throw new Error("hookToggleContentModifier unsupported receiver type");
+    }
     if (!value) {
         ContentModifierHelper.resetContentModifierToggle(ptr)
         return

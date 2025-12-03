@@ -18,6 +18,7 @@ import { ArkRadioPeer, RadioOptions, RadioAttribute, OnRadioChangeCallback, Radi
     Bindable } from "../framework";
 import { ContentModifier } from "#handwritten";
 import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { hookRadioContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
 export class ArkRadioNode extends ArkBaseNode implements RadioAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -62,6 +63,7 @@ export class ArkRadioNode extends ArkBaseNode implements RadioAttribute {
     }
     contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<RadioConfiguration> | undefined);
+        hookRadioContentModifier(this.getPeer(), value_casted);
         this.markDirty();
         return this;
     }

@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, ContentModifier, extractors, hookSelectSetDividerMethod } from "#handwritten"
+import { AttributeModifier, ContentModifier, extractors, hookSelectSetDividerMethod, hookSelectContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
@@ -104,6 +104,8 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<MenuItemConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -648,6 +650,24 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSelectContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<MenuItemConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSelectContentModifier(peer, (undefined as ContentModifier<MenuItemConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SelectModifier): void {
         super.mergeModifier(modifier)
@@ -1042,6 +1062,19 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuItemContentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuItemContentModifier((undefined as ContentModifier<MenuItemConfiguration> | undefined));
+                }
+            }
+        }
     }
     selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
         if (((this._selected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -1371,6 +1404,17 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._menuAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

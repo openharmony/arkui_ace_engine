@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookButtonContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkButtonPeer, ButtonType, ButtonStyleMode, ControlSize, ButtonRole, ButtonConfiguration, ButtonLabelStyle, ButtonAttribute } from "./component/button"
@@ -65,6 +65,8 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: double | Resource | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<ButtonConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -303,6 +305,24 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookButtonContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<ButtonConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookButtonContentModifier(peer, (undefined as ContentModifier<ButtonConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ButtonModifier): void {
         super.mergeModifier(modifier)
@@ -476,6 +496,19 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<ButtonConfiguration> | undefined));
+                }
+            }
+        }
     }
     type(value: ButtonType | undefined): this {
         if (((this._type_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -617,6 +650,17 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

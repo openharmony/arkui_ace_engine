@@ -25,6 +25,7 @@ import {
 } from "../framework";
 import { Resource } from "global.resource";
 import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
+import { hookSelectContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {
@@ -165,6 +166,7 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        hookSelectContentModifier(this.getPeer(), value);
         this.markDirty();
         return this;
     }
