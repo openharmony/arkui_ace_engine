@@ -2787,6 +2787,27 @@ ArkUI_Int32 SnapshotOptionsSetScale(ArkUISnapshotOptions* snapshotOptions, ArkUI
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 SnapshotOptionsSetColorMode(ArkUISnapshotOptions* snapshotOptions, ArkUI_Int32 colorSpace, bool isAuto)
+{
+    if (snapshotOptions == nullptr) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    snapshotOptions->colorSpaceModeOptions.colorSpaceMode = static_cast<ArkUI_Uint32>(colorSpace);
+    snapshotOptions->colorSpaceModeOptions.isAuto = isAuto;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SnapshotOptionsSetDynamicRangeMode(
+    ArkUISnapshotOptions* snapshotOptions, ArkUI_Int32 dynamicRangeMode, bool isAuto)
+{
+    if (snapshotOptions == nullptr) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    snapshotOptions->dynamicRangeModeOptions.dynamicRangeMode = static_cast<ArkUI_Uint32>(dynamicRangeMode);
+    snapshotOptions->dynamicRangeModeOptions.isAuto = isAuto;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel)
 {
     auto frameNode =
@@ -2794,6 +2815,16 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     NG::SnapshotOptions options;
     options.scale = snapshotOptions != nullptr ? snapshotOptions->scale : 1.0f;
+    options.colorSpaceModeOptions.colorSpaceMode = snapshotOptions != nullptr
+                                                       ? snapshotOptions->colorSpaceModeOptions.colorSpaceMode
+                                                       : ARKUI_DEFAULT_COLORSPACE_VALUE_SRGB;
+    options.colorSpaceModeOptions.isAuto =
+        snapshotOptions != nullptr ? snapshotOptions->colorSpaceModeOptions.isAuto : false;
+    options.dynamicRangeModeOptions.dynamicRangeMode = snapshotOptions != nullptr
+                                                           ? snapshotOptions->dynamicRangeModeOptions.dynamicRangeMode
+                                                           : ARKUI_DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+    options.dynamicRangeModeOptions.isAuto =
+        snapshotOptions != nullptr ? snapshotOptions->dynamicRangeModeOptions.isAuto : false;
     options.waitUntilRenderFinished = true;
     auto result = delegate->GetSyncSnapshot(frameNode, options);
     *reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(mediaPixel) = result.second;
@@ -2807,6 +2838,8 @@ const ArkUISnapshotAPI* GetComponentSnapshotAPI()
         .createSnapshotOptions = CreateSnapshotOptions,
         .destroySnapshotOptions = DestroySnapshotOptions,
         .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .snapshotOptionsSetColorMode = SnapshotOptionsSetColorMode,
+        .snapshotOptionsSetDynamicRangeMode = SnapshotOptionsSetDynamicRangeMode,
         .getSyncSnapshot = GetNodeSnapshot
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line

@@ -35,6 +35,8 @@ extern "C" {
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 const float DEFAULT_SNAPSHOT_SCALE = 1.f;
 const int32_t DEFAULT_DELAY_TIME = 300;
+const uint32_t DEFAULT_COLORSPACE_VALUE_SRGB = 4;
+const uint32_t DEFAULT_DYNAMICRANGE_VALUE_STANDARD = 2;
 
 struct _ArkUIStyledString;
 struct _ArkUINode;
@@ -291,11 +293,26 @@ struct ArkUILocalizedSnapshotRegion {
     double bottom = -1.f;
 };
 
+typedef uint32_t ArkUIColorSpaceMode;
+typedef uint32_t ArkUIDynamicRange;
+
+struct ArkUIColorSpaceModeOptions {
+    ArkUIColorSpaceMode colorSpaceMode = DEFAULT_COLORSPACE_VALUE_SRGB;
+    bool isAuto = false;
+};
+
+struct ArkUIDynamicRangeModeOptions {
+    ArkUIDynamicRange dynamicRangeMode = DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+    bool isAuto = false;
+};
+
 struct ArkUIComponentSnapshotOptions {
     float scale = DEFAULT_SNAPSHOT_SCALE;
     bool waitUntilRenderFinished = false;
     ArkUILocalizedSnapshotRegion snapshotRegion;
     ArkUISnapshotRegionMode regionMode = ArkUISnapshotRegionMode::NO_REGION;
+    ArkUIColorSpaceModeOptions colorSpaceModeOptions;
+    ArkUIDynamicRangeModeOptions dynamicRangeModeOptions;
 };
 
 struct ArkUISnapshotParam {

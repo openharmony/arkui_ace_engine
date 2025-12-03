@@ -46,6 +46,8 @@ extern "C" {
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
 #define ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT 10
 #define ARKUI_MAX_ANCHOR_ID_SIZE 50
+#define ARKUI_DEFAULT_COLORSPACE_VALUE_SRGB 4
+#define ARKUI_DEFAULT_DYNAMICRANGE_VALUE_STANDARD 2
 enum ArkUIAPIVariantKind {
     BASIC = 1,
     FULL = 2,
@@ -8237,14 +8239,29 @@ typedef struct {
     void (*enableDropDisallowedBadge)(bool enabled);
 } ArkUIDragAdapterAPI;
 
+struct ColorSpaceModeOptions {
+    ArkUI_Uint32 colorSpaceMode = ARKUI_DEFAULT_COLORSPACE_VALUE_SRGB;
+    bool isAuto = false;
+};
+struct DynamicRangeModeOptions {
+    ArkUI_Uint32 dynamicRangeMode = ARKUI_DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+    bool isAuto = false;
+};
+
 struct ArkUISnapshotOptions {
     ArkUI_Float32 scale = 1.0f;
+    ColorSpaceModeOptions colorSpaceModeOptions;
+    DynamicRangeModeOptions dynamicRangeModeOptions;
 };
 
 typedef struct {
     ArkUISnapshotOptions* (*createSnapshotOptions)();
     void (*destroySnapshotOptions)(ArkUISnapshotOptions* snapshotOptions);
     ArkUI_Int32 (*snapshotOptionsSetScale)(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale);
+    ArkUI_Int32 (*snapshotOptionsSetColorMode)(
+        ArkUISnapshotOptions* snapshotOptions, ArkUI_Int32 colorSpace, bool isAuto);
+    ArkUI_Int32 (*snapshotOptionsSetDynamicRangeMode)(
+        ArkUISnapshotOptions* snapshotOptions, ArkUI_Int32 dynamicRangeMode, bool isAuto);
     ArkUI_Int32 (*getSyncSnapshot)(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel);
 } ArkUISnapshotAPI;
 
