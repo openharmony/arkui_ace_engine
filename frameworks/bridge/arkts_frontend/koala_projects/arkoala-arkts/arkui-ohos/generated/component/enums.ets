@@ -759,6 +759,10 @@ export enum DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1
 }
+export enum TipsAnchorType {
+    TARGET = 0,
+    CURSOR = 1
+}
 export enum AnimationPropertyType {
     ROTATION = 0,
     TRANSLATION = 1,

@@ -24,7 +24,7 @@ import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, 
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, TipsAnchorType } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -7060,6 +7060,7 @@ export interface TipsOptions {
     arrowPointPosition?: ArrowPointPosition;
     arrowWidth?: Dimension;
     arrowHeight?: Dimension;
+    showAtAnchor?: TipsAnchorType;
 }
 export interface PopupButton {
     value: string;
@@ -17355,6 +17356,14 @@ export class TipsOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForShowAtAnchor  = value.showAtAnchor
+        if (valueHolderForShowAtAnchor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowAtAnchorTmpValue  = (valueHolderForShowAtAnchor as TipsAnchorType)
+            valueSerializer.writeInt32(valueHolderForShowAtAnchorTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TipsOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -17428,7 +17437,13 @@ export class TipsOptions_serializer {
             arrowHeightTmpBuf = (arrowHeightTmpBuf_ as string | number | Resource)
         }
         const arrowHeightTmpResult : Dimension | undefined = arrowHeightTmpBuf
-        let value : TipsOptions = ({appearingTime: appearingTimeTmpResult, disappearingTime: disappearingTimeTmpResult, appearingTimeWithContinuousOperation: appearingTimeWithContinuousOperationTmpResult, disappearingTimeWithContinuousOperation: disappearingTimeWithContinuousOperationTmpResult, enableArrow: enableArrowTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult} as TipsOptions)
+        const showAtAnchorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showAtAnchorTmpBuf : TipsAnchorType | undefined = undefined
+        if ((showAtAnchorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showAtAnchorTmpBuf = TipsAnchorType.fromValue(valueDeserializer.readInt32())
+        }
+        const showAtAnchorTmpResult : TipsAnchorType | undefined = showAtAnchorTmpBuf
+        let value : TipsOptions = ({appearingTime: appearingTimeTmpResult, disappearingTime: disappearingTimeTmpResult, appearingTimeWithContinuousOperation: appearingTimeWithContinuousOperationTmpResult, disappearingTimeWithContinuousOperation: disappearingTimeWithContinuousOperationTmpResult, enableArrow: enableArrowTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, showAtAnchor: showAtAnchorTmpResult} as TipsOptions)
         return value
     }
 }
