@@ -3125,6 +3125,7 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
