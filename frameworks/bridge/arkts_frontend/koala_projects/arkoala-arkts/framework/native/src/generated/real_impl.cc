@@ -12108,6 +12108,59 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // CanvasRenderingContext2DAccessor
+    namespace CheckBoxGroupConfigurationAccessor {
+    void DestroyPeerImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        auto peerImpl = reinterpret_cast<CheckBoxGroupConfigurationPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_CheckBoxGroupConfiguration ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void TriggerChangeImpl(Ark_CheckBoxGroupConfiguration peer,
+                           Ark_Boolean isSelect)
+    {
+    }
+    Ark_Boolean GetEnabledImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        return {};
+    }
+    void SetEnabledImpl(Ark_CheckBoxGroupConfiguration peer,
+                        Ark_Boolean enabled)
+    {
+    }
+    Ark_ContentModifier GetContentModifierImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        return {};
+    }
+    void SetContentModifierImpl(Ark_CheckBoxGroupConfiguration peer,
+                                const Ark_Object* contentModifier)
+    {
+    }
+    Ark_String GetNameImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        return {};
+    }
+    void SetNameImpl(Ark_CheckBoxGroupConfiguration peer,
+                     const Ark_String* name)
+    {
+    }
+    Ark_SelectStatus GetStatusImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        return {};
+    }
+    void SetStatusImpl(Ark_CheckBoxGroupConfiguration peer,
+                       Ark_SelectStatus status)
+    {
+    }
+    } // CheckBoxGroupConfigurationAccessor
     namespace ChildrenMainSizeAccessor {
     void DestroyPeerImpl(Ark_ChildrenMainSize peer)
     {
@@ -12512,6 +12565,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     void ResetContentModifierToggleImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ContentModifierCheckBoxGroupImpl(Ark_NativePointer node,
+                                          const Ark_Object* contentModifier,
+                                          const CheckBoxGroupModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierCheckBoxGroupImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -19392,6 +19457,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CanvasRenderingContext2DPeer {
         virtual ~CanvasRenderingContext2DPeer() = default;
     };
+    const GENERATED_ArkUICheckBoxGroupConfigurationAccessor* GetCheckBoxGroupConfigurationAccessor()
+    {
+        static const GENERATED_ArkUICheckBoxGroupConfigurationAccessor CheckBoxGroupConfigurationAccessorImpl {
+            CheckBoxGroupConfigurationAccessor::DestroyPeerImpl,
+            CheckBoxGroupConfigurationAccessor::ConstructImpl,
+            CheckBoxGroupConfigurationAccessor::GetFinalizerImpl,
+            CheckBoxGroupConfigurationAccessor::TriggerChangeImpl,
+            CheckBoxGroupConfigurationAccessor::GetEnabledImpl,
+            CheckBoxGroupConfigurationAccessor::SetEnabledImpl,
+            CheckBoxGroupConfigurationAccessor::GetContentModifierImpl,
+            CheckBoxGroupConfigurationAccessor::SetContentModifierImpl,
+            CheckBoxGroupConfigurationAccessor::GetNameImpl,
+            CheckBoxGroupConfigurationAccessor::SetNameImpl,
+            CheckBoxGroupConfigurationAccessor::GetStatusImpl,
+            CheckBoxGroupConfigurationAccessor::SetStatusImpl,
+        };
+        return &CheckBoxGroupConfigurationAccessorImpl;
+    }
     const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     {
         static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
@@ -19543,6 +19626,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ContentModifierHelperAccessor::ResetContentModifierTextTimerImpl,
             ContentModifierHelperAccessor::ContentModifierToggleImpl,
             ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ContentModifierCheckBoxGroupImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxGroupImpl,
         };
         return &ContentModifierHelperAccessorImpl;
     }
@@ -22462,6 +22547,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCanvasPatternAccessor,
             GetCanvasRendererAccessor,
             GetCanvasRenderingContext2DAccessor,
+            GetCheckBoxGroupConfigurationAccessor,
             GetChildrenMainSizeAccessor,
             GetClickEventAccessor,
             GetClientAuthenticationHandlerAccessor,

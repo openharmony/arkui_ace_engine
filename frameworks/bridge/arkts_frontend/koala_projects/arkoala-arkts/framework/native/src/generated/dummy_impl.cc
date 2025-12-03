@@ -27738,6 +27738,150 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // CanvasRenderingContext2DAccessor
+    namespace CheckBoxGroupConfigurationAccessor {
+    void DestroyPeerImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_CheckBoxGroupConfiguration ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_CheckBoxGroupConfiguration>(100);
+        }
+        string out("new CheckBoxGroupConfiguration(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_CheckBoxGroupConfiguration>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_CheckBoxGroupConfiguration>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void TriggerChangeImpl(Ark_CheckBoxGroupConfiguration peer,
+                           Ark_Boolean isSelect)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("triggerChange(");
+        WriteToString(&out, isSelect);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Boolean GetEnabledImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("getEnabled(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void SetEnabledImpl(Ark_CheckBoxGroupConfiguration peer,
+                        Ark_Boolean enabled)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnabled(");
+        WriteToString(&out, enabled);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_ContentModifier GetContentModifierImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getContentModifier(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetContentModifierImpl(Ark_CheckBoxGroupConfiguration peer,
+                                const Ark_Object* contentModifier)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setContentModifier(");
+        WriteToString(&out, contentModifier);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_String GetNameImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getName(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetNameImpl(Ark_CheckBoxGroupConfiguration peer,
+                     const Ark_String* name)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setName(");
+        WriteToString(&out, name);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_SelectStatus GetStatusImpl(Ark_CheckBoxGroupConfiguration peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStatus(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetStatusImpl(Ark_CheckBoxGroupConfiguration peer,
+                       Ark_SelectStatus status)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setStatus(");
+        WriteToString(&out, status);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // CheckBoxGroupConfigurationAccessor
     namespace ChildrenMainSizeAccessor {
     void DestroyPeerImpl(Ark_ChildrenMainSize peer)
     {
@@ -28749,6 +28893,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("resetContentModifierToggle(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ContentModifierCheckBoxGroupImpl(Ark_NativePointer node,
+                                          const Ark_Object* contentModifier,
+                                          const CheckBoxGroupModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("contentModifierCheckBoxGroup(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ResetContentModifierCheckBoxGroupImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("resetContentModifierCheckBoxGroup(");
         WriteToString(&out, node);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -46208,6 +46380,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CanvasRenderingContext2DPeer {
         virtual ~CanvasRenderingContext2DPeer() = default;
     };
+    const GENERATED_ArkUICheckBoxGroupConfigurationAccessor* GetCheckBoxGroupConfigurationAccessor()
+    {
+        static const GENERATED_ArkUICheckBoxGroupConfigurationAccessor CheckBoxGroupConfigurationAccessorImpl {
+            CheckBoxGroupConfigurationAccessor::DestroyPeerImpl,
+            CheckBoxGroupConfigurationAccessor::ConstructImpl,
+            CheckBoxGroupConfigurationAccessor::GetFinalizerImpl,
+            CheckBoxGroupConfigurationAccessor::TriggerChangeImpl,
+            CheckBoxGroupConfigurationAccessor::GetEnabledImpl,
+            CheckBoxGroupConfigurationAccessor::SetEnabledImpl,
+            CheckBoxGroupConfigurationAccessor::GetContentModifierImpl,
+            CheckBoxGroupConfigurationAccessor::SetContentModifierImpl,
+            CheckBoxGroupConfigurationAccessor::GetNameImpl,
+            CheckBoxGroupConfigurationAccessor::SetNameImpl,
+            CheckBoxGroupConfigurationAccessor::GetStatusImpl,
+            CheckBoxGroupConfigurationAccessor::SetStatusImpl,
+        };
+        return &CheckBoxGroupConfigurationAccessorImpl;
+    }
     const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     {
         static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
@@ -46359,6 +46549,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ContentModifierHelperAccessor::ResetContentModifierTextTimerImpl,
             ContentModifierHelperAccessor::ContentModifierToggleImpl,
             ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ContentModifierCheckBoxGroupImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxGroupImpl,
         };
         return &ContentModifierHelperAccessorImpl;
     }
@@ -49324,6 +49516,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCanvasPatternAccessor,
             GetCanvasRendererAccessor,
             GetCanvasRenderingContext2DAccessor,
+            GetCheckBoxGroupConfigurationAccessor,
             GetChildrenMainSizeAccessor,
             GetClickEventAccessor,
             GetClientAuthenticationHandlerAccessor,

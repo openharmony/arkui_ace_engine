@@ -47,6 +47,7 @@ import { SliderConfiguration, SliderPrefixOptions_serializer, SliderSuffixOption
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
+import { CheckBoxGroupConfiguration, CheckBoxGroupConfigurationInternal } from "./checkboxgroup"
 import { default as promptAction, LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { Size_serializer, Frame_serializer, LengthMetrics_serializer, ColorMetrics_serializer, Vector2_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
@@ -1091,6 +1092,16 @@ export class ContentModifierHelper {
     static resetContentModifierToggle_serialize(node: KPointer): void {
         ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierToggle(node)
     }
+    static contentModifierCheckBoxGroup_serialize(node: KPointer, contentModifier: ContentModifier<CheckBoxGroupConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxGroupConfiguration) => KPointer)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        thisSerializer.holdAndWriteCallback(builder)
+        ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierCheckBoxGroup(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static resetContentModifierCheckBoxGroup_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierCheckBoxGroup(node)
+    }
     public static contentModifierButton(node: KPointer, contentModifier: ContentModifier<ButtonConfiguration>, builder: ((parentNode: KPointer,config: ButtonConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<ButtonConfiguration>)
@@ -1245,6 +1256,18 @@ export class ContentModifierHelper {
     public static resetContentModifierToggle(node: KPointer): void {
         const node_casted = node as (KPointer)
         ContentModifierHelper.resetContentModifierToggle_serialize(node_casted)
+        return
+    }
+    public static contentModifierCheckBoxGroup(node: KPointer, contentModifier: ContentModifier<CheckBoxGroupConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxGroupConfiguration) => KPointer)): void {
+        const node_casted = node as (KPointer)
+        const contentModifier_casted = contentModifier as (ContentModifier<CheckBoxGroupConfiguration>)
+        const builder_casted = builder as (((parentNode: KPointer,config: CheckBoxGroupConfiguration) => KPointer))
+        ContentModifierHelper.contentModifierCheckBoxGroup_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierCheckBoxGroup(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierCheckBoxGroup_serialize(node_casted)
         return
     }
 }

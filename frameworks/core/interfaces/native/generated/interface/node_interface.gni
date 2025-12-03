@@ -48,6 +48,7 @@ generated_sources = [
   "implementation/canvas_pattern_accessor.cpp",
   "implementation/canvas_renderer_accessor.cpp",
   "implementation/canvas_rendering_context2d_accessor.cpp",
+  "implementation/checkbox_group_configuration_accessor.cpp",
   "implementation/checkbox_group_modifier.cpp",
   "implementation/checkbox_modifier.cpp",
   "implementation/children_main_size_accessor.cpp",

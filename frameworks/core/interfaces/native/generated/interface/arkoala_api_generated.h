@@ -1494,6 +1494,8 @@ typedef struct Callback_Void Callback_Void;
 typedef struct Opt_Callback_Void Opt_Callback_Void;
 typedef struct Callback_WebKeyboardOptions_Void Callback_WebKeyboardOptions_Void;
 typedef struct Opt_Callback_WebKeyboardOptions_Void Opt_Callback_WebKeyboardOptions_Void;
+typedef struct CheckBoxGroupModifierBuilder CheckBoxGroupModifierBuilder;
+typedef struct Opt_CheckBoxGroupModifierBuilder Opt_CheckBoxGroupModifierBuilder;
 typedef struct CheckBoxModifierBuilder CheckBoxModifierBuilder;
 typedef struct Opt_CheckBoxModifierBuilder Opt_CheckBoxModifierBuilder;
 typedef struct ContentDidScrollCallback ContentDidScrollCallback;
@@ -1852,6 +1854,8 @@ typedef struct Ark_ChainWeightOptions Ark_ChainWeightOptions;
 typedef struct Opt_ChainWeightOptions Opt_ChainWeightOptions;
 typedef struct Ark_CheckBoxConfiguration Ark_CheckBoxConfiguration;
 typedef struct Opt_CheckBoxConfiguration Opt_CheckBoxConfiguration;
+typedef struct CheckBoxGroupConfigurationPeer CheckBoxGroupConfigurationPeer;
+typedef struct CheckBoxGroupConfigurationPeer* Ark_CheckBoxGroupConfiguration;
 typedef struct Ark_CheckboxGroupOptions Ark_CheckboxGroupOptions;
 typedef struct Opt_CheckboxGroupOptions Opt_CheckboxGroupOptions;
 typedef struct Ark_CheckboxGroupResult Ark_CheckboxGroupResult;
@@ -11995,6 +11999,16 @@ typedef struct Opt_Callback_WebKeyboardOptions_Void {
     Ark_Tag tag;
     Callback_WebKeyboardOptions_Void value;
 } Opt_Callback_WebKeyboardOptions_Void;
+typedef struct CheckBoxGroupModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation);
+} CheckBoxGroupModifierBuilder;
+typedef struct Opt_CheckBoxGroupModifierBuilder {
+    Ark_Tag tag;
+    CheckBoxGroupModifierBuilder value;
+} Opt_CheckBoxGroupModifierBuilder;
 typedef struct CheckBoxModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13696,6 +13710,10 @@ typedef struct Opt_CheckBoxConfiguration {
     Ark_Tag tag;
     Ark_CheckBoxConfiguration value;
 } Opt_CheckBoxConfiguration;
+typedef struct Opt_CheckBoxGroupConfiguration {
+    Ark_Tag tag;
+    Ark_CheckBoxGroupConfiguration value;
+} Opt_CheckBoxGroupConfiguration;
 typedef struct Ark_CheckboxGroupOptions {
     /* kind: Interface */
     Opt_String group;
@@ -26427,6 +26445,26 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
                       Ark_FrameNode canvas);
 } GENERATED_ArkUICanvasRenderingContext2DAccessor;
 
+typedef struct GENERATED_ArkUICheckBoxGroupConfigurationAccessor {
+    void (*destroyPeer)(Ark_CheckBoxGroupConfiguration peer);
+    Ark_CheckBoxGroupConfiguration (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*triggerChange)(Ark_CheckBoxGroupConfiguration peer,
+                          Ark_Boolean isSelect);
+    Ark_Boolean (*getEnabled)(Ark_CheckBoxGroupConfiguration peer);
+    void (*setEnabled)(Ark_CheckBoxGroupConfiguration peer,
+                       Ark_Boolean enabled);
+    Ark_ContentModifier (*getContentModifier)(Ark_CheckBoxGroupConfiguration peer);
+    void (*setContentModifier)(Ark_CheckBoxGroupConfiguration peer,
+                               const Ark_Object* contentModifier);
+    Ark_String (*getName)(Ark_CheckBoxGroupConfiguration peer);
+    void (*setName)(Ark_CheckBoxGroupConfiguration peer,
+                    const Ark_String* name);
+    Ark_SelectStatus (*getStatus)(Ark_CheckBoxGroupConfiguration peer);
+    void (*setStatus)(Ark_CheckBoxGroupConfiguration peer,
+                      Ark_SelectStatus status);
+} GENERATED_ArkUICheckBoxGroupConfigurationAccessor;
+
 typedef struct GENERATED_ArkUIChildrenMainSizeAccessor {
     void (*destroyPeer)(Ark_ChildrenMainSize peer);
     Ark_ChildrenMainSize (*construct)(Ark_Float64 childDefaultSize);
@@ -26573,6 +26611,10 @@ typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
                                   const Ark_Object* contentModifier,
                                   const ToggleModifierBuilder* builder);
     void (*resetContentModifierToggle)(Ark_NativePointer node);
+    void (*contentModifierCheckBoxGroup)(Ark_NativePointer node,
+                                         const Ark_Object* contentModifier,
+                                         const CheckBoxGroupModifierBuilder* builder);
+    void (*resetContentModifierCheckBoxGroup)(Ark_NativePointer node);
 } GENERATED_ArkUIContentModifierHelperAccessor;
 
 typedef struct GENERATED_ArkUIControllerHandlerAccessor {
@@ -29406,6 +29448,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUICanvasPatternAccessor* (*getCanvasPatternAccessor)();
     const GENERATED_ArkUICanvasRendererAccessor* (*getCanvasRendererAccessor)();
     const GENERATED_ArkUICanvasRenderingContext2DAccessor* (*getCanvasRenderingContext2DAccessor)();
+    const GENERATED_ArkUICheckBoxGroupConfigurationAccessor* (*getCheckBoxGroupConfigurationAccessor)();
     const GENERATED_ArkUIChildrenMainSizeAccessor* (*getChildrenMainSizeAccessor)();
     const GENERATED_ArkUIClickEventAccessor* (*getClickEventAccessor)();
     const GENERATED_ArkUIClientAuthenticationHandlerAccessor* (*getClientAuthenticationHandlerAccessor)();

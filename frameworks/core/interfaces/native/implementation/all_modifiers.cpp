@@ -216,6 +216,7 @@ const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor();
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
+const GENERATED_ArkUICheckBoxGroupConfigurationAccessor* GetCheckBoxGroupConfigurationAccessor();
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor();
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
 const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor();
@@ -537,6 +538,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCanvasPatternAccessor,
         GetCanvasRendererAccessor,
         GetCanvasRenderingContext2DAccessor,
+        GetCheckBoxGroupConfigurationAccessor,
         GetChildrenMainSizeAccessor,
         GetClickEventAccessor,
         GetClientAuthenticationHandlerAccessor,

@@ -199,6 +199,7 @@ export enum CallbackKind {
     Kind_Callback_VisibilityChangeReason_Void = -2144679285,
     Kind_Callback_Void = -1867723152,
     Kind_Callback_WebKeyboardOptions_Void = -1376223390,
+    Kind_CheckBoxGroupModifierBuilder = 983434920,
     Kind_CheckBoxModifierBuilder = 1317697111,
     Kind_ContentDidScrollCallback = 1532328438,
     Kind_ContentWillScrollCallback = -2146044511,

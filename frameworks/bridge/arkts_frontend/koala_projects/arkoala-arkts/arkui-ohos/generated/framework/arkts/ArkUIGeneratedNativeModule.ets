@@ -3689,6 +3689,28 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_setCanvas(ptr: KPointer, canvas: KPointer): void
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_triggerChange(ptr: KPointer, isSelect: KInt): void
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_getEnabled(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_setEnabled(ptr: KPointer, enabled: KInt): void
+    @ani.unsafe.Quick
+    native static _CheckBoxGroupConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _CheckBoxGroupConfiguration_getName(ptr: KPointer): string
+    @ani.unsafe.Quick
+    native static _CheckBoxGroupConfiguration_setName(ptr: KPointer, name: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_getStatus(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _CheckBoxGroupConfiguration_setStatus(ptr: KPointer, status: KInt): void
     @ani.unsafe.Quick
     native static _ChildrenMainSize_construct(childDefaultSize: KDouble): KPointer
     @ani.unsafe.Direct
@@ -3833,6 +3855,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ContentModifierHelper_contentModifierToggle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierToggle(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierCheckBoxGroup(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierCheckBoxGroup(node: KPointer): void
     @ani.unsafe.Direct
     native static _ControllerHandler_construct(): KPointer
     @ani.unsafe.Direct
