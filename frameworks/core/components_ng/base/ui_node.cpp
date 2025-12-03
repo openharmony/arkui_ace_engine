@@ -142,6 +142,16 @@ void UINode::RegisterReleaseFunc(bool enableRegister)
 
 void UINode::OnDelete()
 {
+    if (onMainTree_) {
+        if (context_) {
+            context_->RemoveAttachedNode(this);
+        }
+        onMainTree_ = false;
+        if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
+            nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+        }
+    }
+
     disappearingChildren_.clear();
     children_.clear();
 }

@@ -23,7 +23,10 @@
 #undef protected
 using namespace testing;
 using namespace testing::ext;
- 
+
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 class UINodeGCTestNg : public testing::Test {
 public:
@@ -153,4 +156,105 @@ HWTEST_F(UINodeGCTestNg, OnReleaseFuncTest, TestSize.Level1)
     UiNodeGc::OnReleaseFunc(nullptr);
     EXPECT_EQ(nodeRawBucket.size(), 0);
 }
+
+/**
+ * @tc.name: UINode_OnDelete_OnMainTree_True
+ * @tc.desc: OnDeleteTest_001
+ * @tc.type: UINode will be off tree automaticly when node is attached on the tree
+ */
+HWTEST_F(UINodeGCTestNg, UINode_OnDelete_OnMainTree_True, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto context = std::make_shared<MockPipelineContext>();
+
+    // enable UINodeGc
+    frameNode1->RegisterReleaseFunc(true);
+    frameNode1->onMainTree_ = false;
+    frameNode1->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    // attach node on main tree
+    frameNode1->AttachToMainTree(false, context.get());
+
+    EXPECT_TRUE(frameNode1->onMainTree_);
+    EXPECT_EQ(frameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_ON_MAINTREE);
+
+    auto rawFrameNode1 = AceType::RawPtr(frameNode1);
+    frameNode1 = nullptr;
+
+    // frameNode1 is not released actually, we can use its raw ptr still
+    EXPECT_FALSE(rawFrameNode1->onMainTree_);
+    EXPECT_EQ(rawFrameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
+    // actually released in ReleaseNodeRawMemory
+    UiNodeGc::ReleaseNodeRawMemory(-1, nullptr);
 }
+
+/**
+ * @tc.name: UINode_OnDelete_OnMainTree_True_NodeStatus_True
+ * @tc.desc: OnDeleteTest_001
+ * @tc.type: UINode will be off tree automaticly when node is attached on the tree
+ */
+HWTEST_F(UINodeGCTestNg, UINode_OnDelete_OnMainTree_True_NodeStatus_True, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto context = std::make_shared<MockPipelineContext>();
+
+    // enable UINodeGc
+    frameNode1->RegisterReleaseFunc(true);
+    frameNode1->onMainTree_ = false;
+    frameNode1->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    // attach node on main tree
+    frameNode1->AttachToMainTree(false, context.get());
+
+    EXPECT_TRUE(frameNode1->onMainTree_);
+    EXPECT_EQ(frameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_ON_MAINTREE);
+
+    frameNode1->context_ = nullptr;
+    frameNode1->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    auto rawFrameNode1 = AceType::RawPtr(frameNode1);
+    frameNode1 = nullptr;
+
+    // frameNode1 is not released actually, we can use its raw ptr still
+    EXPECT_FALSE(rawFrameNode1->onMainTree_);
+    EXPECT_EQ(rawFrameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
+    // actually released in ReleaseNodeRawMemory
+    UiNodeGc::ReleaseNodeRawMemory(-1, nullptr);
+}
+
+
+/**
+ * @tc.name: UINode_OnDelete_OnMainTree_False
+ * @tc.desc: OnDeleteTest_001
+ * @tc.type: UINode will be off tree automaticly when node is attached on the tree
+ */
+HWTEST_F(UINodeGCTestNg, UINode_OnDelete_OnMainTree_False, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto context = std::make_shared<MockPipelineContext>();
+
+    // enable UINodeGc
+    frameNode1->RegisterReleaseFunc(true);
+    frameNode1->onMainTree_ = false;
+    frameNode1->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    // not attach node on main tree
+    EXPECT_FALSE(frameNode1->onMainTree_);
+    EXPECT_EQ(frameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
+    auto rawFrameNode1 = AceType::RawPtr(frameNode1);
+    frameNode1 = nullptr;
+
+    // frameNode1 is not released actually, we can use its raw ptr still
+    EXPECT_FALSE(rawFrameNode1->onMainTree_);
+    EXPECT_EQ(rawFrameNode1->nodeStatus_, NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
+    // actually released in ReleaseNodeRawMemory
+    UiNodeGc::ReleaseNodeRawMemory(-1, nullptr);
+}
+} // namespace OHOS::Ace::NG
