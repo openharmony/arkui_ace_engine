@@ -6841,6 +6841,9 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     backgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        // instructive change start
+        this.backgroundEffectClear();
+        // instructive change end
         if (((this._flagArray[19]) == (0)) || (true))
         {
             this._flagArray[19] = 1
@@ -8641,7 +8644,22 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+
+    // instructive change start
+    backgroundEffectClear() {
+        this._backgroundBlurStyle_0_0value = undefined
+        this._backgroundBlurStyle_0_1value = undefined
+        this._backgroundBlurStyle_0_2value = undefined
+
+        this._backgroundEffect_1_0value = undefined
+        this._backgroundEffect_1_1value = undefined
+        this._backgroundEffect_0_0value = undefined
+    }
+    // instructive change end
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        // instructive change start
+        this.backgroundEffectClear();
+        // instructive change end
         if (((this._flagArray[166]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[166] = 1
@@ -8656,6 +8674,9 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+        // instructive change start
+        this.backgroundEffectClear();
+        // instructive change end
         if (((this._flagArray[167]) == (0)) || (true) || (true))
         {
             this._flagArray[167] = 1
