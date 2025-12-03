@@ -5026,6 +5026,8 @@ let SystemProperties;
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
   SystemProperties.WINDOW_SIZE = 'system.window.size';
   SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
+  SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
+  SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
 })(SystemProperties || (SystemProperties = {}));
 
 let PinVerifyResult;
