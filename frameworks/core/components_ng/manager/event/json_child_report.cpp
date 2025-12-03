@@ -245,7 +245,7 @@ std::shared_ptr<InspectorJsonValue> TouchJsonReport::GetJsonData() const
     touchValue->Put(GetPoint().GetY());
     auto value = InspectorJsonUtil::Create();
     value->Put("type", "event");
-    value->Put("eventType", "TouchScreen");
+    value->Put("eventType", "Touch");
     value->Put("action", action_.c_str());
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
     value->Put("windowId", windowID_);
