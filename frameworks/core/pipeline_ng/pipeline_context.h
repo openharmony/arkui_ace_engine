@@ -89,6 +89,7 @@ using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t fra
 class NodeRenderStatusMonitor;
 class MagnifierController;
 class LoadCompleteManager;
+class PageInfo;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -198,6 +199,12 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     std::string GetCurrentPageNameCallback();
+
+    const RefPtr<PageInfo> GetLastPageInfo();
+
+    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);
+
+    std::string GetCurrentPageName();
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 

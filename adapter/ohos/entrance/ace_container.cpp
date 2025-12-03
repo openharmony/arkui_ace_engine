@@ -63,6 +63,7 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -1655,12 +1656,16 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-
+    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content, params);
+        auto result = front->RunPageByNamedRouter(content, params);
+        container->LoadCompleteManagerStopCollect();
+        return result;
     }
 
-    return front->RunPage(content, params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1671,7 +1676,10 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    return front->RunPage(content, params);
+    container->LoadCompleteManagerStartCollect(params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 bool AceContainer::RunDynamicPage(
@@ -5078,5 +5086,19 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     if (subFrontend_) {
         subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
     }
+}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+}
+
+void AceContainer::LoadCompleteManagerStopCollect()
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StopCollect();
 }
 } // namespace OHOS::Ace::Platform

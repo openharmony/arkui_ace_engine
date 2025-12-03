@@ -2614,7 +2614,7 @@ void NavigationGroupNode::LoadCompleteManagerStartCollect()
 {
     auto context = GetContextWithCheck();
     if (context) {
-        context->GetLoadCompleteManager()->StartCollect("");
+        context->GetLoadCompleteManager()->StartCollect(context->GetCurrentPageName());
     }
 }
 

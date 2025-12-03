@@ -5991,7 +5991,7 @@ void NavigationPattern::LoadCompleteManagerStartCollect()
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        pipeline->GetLoadCompleteManager()->StartCollect(pipeline->GetCurrentPageName());
     }
 }
 

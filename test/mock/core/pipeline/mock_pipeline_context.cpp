@@ -1564,6 +1564,21 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
+const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo()
+{
+    return nullptr;
+}
+
+std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+{
+    return "";
+}
+
+std::string NG::PipelineContext::GetCurrentPageName()
+{
+    return "";
+}
+
 void NG::PipelineContext::AddNeedReloadNodes(NG::UINode* node) {}
 
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)

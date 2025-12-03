@@ -309,4 +309,8 @@ void AceContainer::UpdateColorMode(uint32_t colorMode,
 void AceContainer::TriggerModuleSerializer() {}
 
 void AceContainer::SetIsFormRender(bool isFormRender) {}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url) {}
+
+void AceContainer::LoadCompleteManagerStopCollect() {}
 } // namespace OHOS::Ace::NG

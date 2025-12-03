@@ -7882,7 +7882,11 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(currentIndex_);
+        if (targetIndex_.has_value()) {
+            url += ",targetIndex-" + std::to_string(targetIndex_.value());
+        }
+        pipeline->GetLoadCompleteManager()->StartCollect(url);
     }
 }
 

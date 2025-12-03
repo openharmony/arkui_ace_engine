@@ -1592,7 +1592,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
-            LoadCompleteManagerStartCollect();
+            LoadCompleteManagerStartCollect(index);
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1982,7 +1982,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
-            LoadCompleteManagerStartCollect();
+            LoadCompleteManagerStartCollect(index);
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -3860,11 +3860,12 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     indicatorNode->MarkModifyDone();
 }
 
-void TabBarPattern::LoadCompleteManagerStartCollect()
+void TabBarPattern::LoadCompleteManagerStartCollect(int32_t index)
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(index);
+        pipeline->GetLoadCompleteManager()->StartCollect(url);
     }
 }
 
