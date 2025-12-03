@@ -792,6 +792,15 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
     textPattern->OnModifyDone();
     EXPECT_NE(textPattern->longPressEvent_, nullptr);
     EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), TEXT_CONTENT);
+
+    textLayoutProperty->UpdateContent("Hello World");
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 3;
+    textPattern->selectOverlay_->isTriggerParentToScroll_ = true;
+    textPattern->OnModifyDone();
+    EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), "Hello World");
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(textPattern->textSelector_.destinationOffset, 3);
 }
 
 /**
