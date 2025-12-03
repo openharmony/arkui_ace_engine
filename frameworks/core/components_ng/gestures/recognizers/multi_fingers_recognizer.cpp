@@ -79,6 +79,17 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
             && point.second.pointers.size() >= touchPoints_.size()) {
             lastPointEvent_ = point.second.GetTouchEventPointerEvent();
             maxTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
+        } else if (point.second.pointers.size() < touchPoints_.size()) {
+            std::string str = "[";
+            for (const auto& point : touchPoints_) {
+                str +=
+                    ("{" + std::to_string(point.second.touchEventId) + ", " + std::to_string(point.second.id) + "}, ");
+            }
+            str += "]";
+            TAG_LOGW(AceLogTag::ACE_GESTURE,
+                "lastPointEvent_ update failed. size:%{public}d touchPoints:%{public}s "
+                "extraInfo:%{public}s",
+                static_cast<int32_t>(point.second.pointers.size()), str.c_str(), GetExtraInfo().c_str());
         }
     }
 }
