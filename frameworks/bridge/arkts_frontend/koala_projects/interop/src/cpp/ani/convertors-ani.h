@@ -159,7 +159,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       void* data {};
       ani_arraybuffer result;
       CHECK_ANI_FATAL(env->CreateArrayBuffer(value.length, &data, &result));
-      interop_memcpy(data, value.length, value.data, value.length);
+      interop_memory_copy(data, value.length, value.data, value.length);
       value.dispose(value.resourceId);
       return result;
     }
@@ -1917,7 +1917,7 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
       "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
-    CHECK_ANI_FATAL(env->String_NewUTF8(message, interop_strlen(message), &messageObject));                     \
+    CHECK_ANI_FATAL(env->String_NewUTF8(message, interop_string_length(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \
     CHECK_ANI_FATAL(env->GetUndefined(&undefined));                                                     \
     ani_object throwObject{};                                                                           \

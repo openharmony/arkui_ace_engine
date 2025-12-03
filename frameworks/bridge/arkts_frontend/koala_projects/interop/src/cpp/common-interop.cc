@@ -145,7 +145,7 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 void impl_StringData(KNativePointer ptr, KByte* bytes, KInt size) {
     string* s = reinterpret_cast<string*>(ptr);
     if (s) {
-        interop_memcpy(bytes, size, s->c_str(), size);
+        interop_memory_copy(bytes, size, s->c_str(), size);
     }
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KInt)
@@ -168,7 +168,7 @@ KOALA_INTEROP_1(StringMake, KNativePointer, KStringPtr)
 
 // For slow runtimes w/o fast encoders.
 KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt bufferSize, KInt offset) {
-    interop_memcpy((uint8_t*)buffer + offset, bufferSize, string.c_str(), string.length() + 1);
+    interop_memory_copy((uint8_t*)buffer + offset, bufferSize, string.c_str(), string.length() + 1);
     return string.length() + 1;
 }
 KOALA_INTEROP_4(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt, KInt)
@@ -324,7 +324,7 @@ KStringPtr impl_LoadView(const KStringPtr& className, const KStringPtr& params) 
     static LoadView_t impl = nullptr;
     if (!impl) impl = reinterpret_cast<LoadView_t>(getImpl(nullptr, "LoadView"));
     const char* result = impl(className.c_str(), params.c_str());
-    return KStringPtr(result, interop_strlen(result), true);
+    return KStringPtr(result, interop_string_length(result), true);
 }
 KOALA_INTEROP_2(LoadView, KStringPtr, KStringPtr, KStringPtr)
 #endif  // KOALA_ANI
@@ -381,7 +381,7 @@ void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
         INTEROP_FATAL("CopyArray called with incorrect nullptr args");
     }
 
-    interop_memcpy(data, length, array, length);
+    interop_memory_copy(data, length, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
@@ -735,7 +735,7 @@ KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KByte*, KInt, KInt)
 #if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
 KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
     auto string = (const char*)data;
-    KStringPtr result(string, interop_strlen(string), false);
+    KStringPtr result(string, interop_string_length(string), false);
     return result;
 }
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
@@ -774,7 +774,7 @@ KOALA_INTEROP_CTX_1(StdStringToString, KStringPtr, KNativePointer)
 
 KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) {
     void* data = new int8_t[v1];
-    interop_memset(data, v1, v2, v1);
+    interop_memory_set(data, v1, v2, v1);
     KInteropReturnBuffer buffer = { v1, data, [](KNativePointer ptr, KInt) { delete[] (int8_t*)ptr; }};
     return buffer;
 }

@@ -71,7 +71,7 @@ class InteropProfiler {
             auto count = a.second.count;
             char buffer[1024];
             double toPercent = 100.0;
-            interop_snprintf(
+            interop_print_to_buffer_n(
                 buffer,
                 sizeof buffer,
                 "for %s[%lld]: %.01f%% (%lld)\n",

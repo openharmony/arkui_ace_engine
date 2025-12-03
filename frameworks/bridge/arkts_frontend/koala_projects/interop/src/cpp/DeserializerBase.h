@@ -170,7 +170,7 @@ template <>
 inline void WriteToString(std::string *result, const InteropMaterialized *value)
 {
   char hex[20];
-  interop_snprintf(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
+  interop_print_to_buffer_n(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
   result->append("\"");
   result->append("Materialized ");
   result->append(hex);
@@ -244,7 +244,7 @@ struct CustomDeserializer
   virtual InteropCustomObject deserialize(DeserializerBase *deserializer, const std::string &kind)
   {
     InteropCustomObject result;
-    interop_strcpy(result.kind, sizeof(result.kind), "error");
+    interop_string_copy(result.kind, sizeof(result.kind), "error");
     return result;
   }
   CustomDeserializer *next = nullptr;
@@ -301,7 +301,7 @@ public:
         INTEROP_FATAL("Cannot allocate memory");
         return;
       }
-      interop_memset(value, length * sizeof(E), 0, length * sizeof(E));
+      interop_memory_set(value, length * sizeof(E), 0, length * sizeof(E));
       toClean.push_back(value);
     }
     array->length = length;
@@ -319,14 +319,14 @@ public:
       if (!keys) {
         INTEROP_FATAL("Cannot allocate memory");
       }
-      interop_memset(keys, length * sizeof(K), 0, length * sizeof(K));
+      interop_memory_set(keys, length * sizeof(K), 0, length * sizeof(K));
       toClean.push_back(keys);
 
       values = malloc(length * sizeof(V));
       if (!values) {
         INTEROP_FATAL("Cannot allocate memory");
       }
-      interop_memset(values, length * sizeof(V), 0, length * sizeof(V));
+      interop_memory_set(values, length * sizeof(V), 0, length * sizeof(V));
       toClean.push_back(values);
     }
     map->size = length;
@@ -359,8 +359,8 @@ public:
     if (tag == INTEROP_TAG_UNDEFINED) LOGE("Undefined interop tag");
     // Skip undefined tag!.
     InteropCustomObject result;
-    interop_strcpy(result.kind, sizeof(result.kind), "Error");
-    interop_strcat(result.kind, sizeof(result.kind), kind.c_str());
+    interop_string_copy(result.kind, sizeof(result.kind), "Error");
+    interop_string_concatenate(result.kind, sizeof(result.kind), kind.c_str());
     return result;
   }
 
@@ -401,7 +401,7 @@ public:
     check(sizeof(InteropInt32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt32 value;
-    interop_memcpy(&value, sizeof(InteropInt32), data + position, sizeof(InteropInt32));
+    interop_memory_copy(&value, sizeof(InteropInt32), data + position, sizeof(InteropInt32));
 #else
     auto value = *(InteropInt32 *)(data + position);
 #endif
@@ -413,7 +413,7 @@ public:
     check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
+    interop_memory_copy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
     auto value = *(InteropInt64 *)(data + position);
 #endif
@@ -425,7 +425,7 @@ public:
     check(sizeof(InteropUInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    interop_memcpy(&value, sizeof(InteropUInt64), data + position, sizeof(InteropUInt64));
+    interop_memory_copy(&value, sizeof(InteropUInt64), data + position, sizeof(InteropUInt64));
 #else
     auto value = *(InteropUInt64 *)(data + position);
 #endif
@@ -437,7 +437,7 @@ public:
     check(sizeof(InteropFloat32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropFloat32 value;
-    interop_memcpy(&value, sizeof(InteropFloat32), data + position, sizeof(InteropFloat32));
+    interop_memory_copy(&value, sizeof(InteropFloat32), data + position, sizeof(InteropFloat32));
 #else
     auto value = *(InteropFloat32 *)(data + position);
 #endif
@@ -449,7 +449,7 @@ public:
     check(sizeof(InteropFloat64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropFloat64 value;
-    interop_memcpy(&value, sizeof(InteropFloat64), data + position, sizeof(InteropFloat64));
+    interop_memory_copy(&value, sizeof(InteropFloat64), data + position, sizeof(InteropFloat64));
 #else
     auto value = *(InteropFloat64 *)(data + position);
 #endif
@@ -461,7 +461,7 @@ public:
     check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value = 0;
-    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
+    interop_memory_copy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
     InteropInt64 value = *(int64_t *)(data + position);
 #endif
@@ -567,7 +567,7 @@ inline void WriteToString(std::string *result, InteropFloat32 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  interop_snprintf(buf, sizeof buf, "%f", value);
+  interop_print_to_buffer_n(buf, sizeof buf, "%f", value);
   result->append(buf);
 #elif !defined(__linux__)
   std::string storage;
@@ -584,7 +584,7 @@ inline void WriteToString(std::string *result, InteropFloat64 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  interop_snprintf(buf, sizeof buf, "%f", value);
+  interop_print_to_buffer_n(buf, sizeof buf, "%f", value);
   result->append(buf);
 #elif !defined(__linux__)
   std::string storage;
