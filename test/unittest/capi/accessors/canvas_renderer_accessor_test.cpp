@@ -80,7 +80,7 @@ std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN =
     { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
 };
 std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_ALPHA_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(100), 1.0 },
     { Converter::ArkValue<Ark_Float64>(0), 0 },
     { Converter::ArkValue<Ark_Float64>(-0.54), 0.0 },
     { Converter::ArkValue<Ark_Float64>(0.98), 0.98 },
@@ -126,12 +126,12 @@ std::vector<std::tuple<Ark_String, CompositeOperation, std::string>> ARK_COMPOSI
     { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER, "source-over" },
     { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER, "source-over" },
 };
-std::vector<std::tuple<Ark_String, Color, std::string>> ARK_STRING_COLOR_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff), "#ff0000ff" },
-    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000), "#00000000" },
-    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff), "#80ffffff" },
-    { Converter::ArkValue<Ark_String>(""), Color(0x00000000), "#00000000" },
-    { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
+std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_COLOR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("#ff0000ff"), "#FF0000FF" },
+    { Converter::ArkValue<Ark_String>("#00000000"), "#00000000" },
+    { Converter::ArkValue<Ark_String>("#80ffffff"), "#80FFFFFF" },
+    { Converter::ArkValue<Ark_String>(""), "" },
+    { Converter::ArkValue<Ark_String>("invalid color"), "" },
 };
 std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
     { Converter::ArkValue<Ark_Boolean>(EXPECTED_FALSE), EXPECTED_FALSE },
@@ -185,9 +185,9 @@ std::vector<std::pair<std::string, Dimension>> FONT_SIZE_PX_TEST_PLAN = {
     { "invalid", Dimension(0) },
 };
 std::vector<std::pair<std::string, Dimension>> FONT_SIZE_VP_TEST_PLAN = {
-    { "10vp", Dimension(10, DimensionUnit::VP) },
-    { "0vp", Dimension(0, DimensionUnit::VP) },
-    { "-10vp", Dimension(-10, DimensionUnit::VP) },
+    { "10vp", Dimension(10) },
+    { "0vp", Dimension(0) },
+    { "-10vp", Dimension(-10) },
     { "", Dimension(0) },
     { "invalid", Dimension(0) },
 };
@@ -750,8 +750,8 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1
     ASSERT_NE(accessor_->setTransform0, nullptr);
     auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     auto arkS = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
-    for (const auto& [x, expectedX] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->setTransform0(peer_, x, arkD, arkD, y, arkD, arkD);
@@ -801,13 +801,13 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
     ASSERT_NE(accessor_->transform, nullptr);
     auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     auto arkS = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
-    for (const auto& [x, expectedX] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, x, arkD, arkD, y, arkD, arkD);
-            EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
+            EXPECT_FLOAT_EQ(target.scaleX, expectedX);
+            EXPECT_FLOAT_EQ(target.scaleY, expectedY);
         }
     }
     for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
@@ -815,8 +815,8 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, arkS, x, y, arkS, arkD, arkD);
-            EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
+            EXPECT_FLOAT_EQ(target.skewX, expectedX);
+            EXPECT_FLOAT_EQ(target.skewY, expectedY);
         }
     }
     for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
@@ -824,8 +824,8 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, arkS, arkD, arkD, arkS, x, y);
-            EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
+            EXPECT_FLOAT_EQ(target.translateX, expectedX);
+            EXPECT_FLOAT_EQ(target.translateY, expectedY);
         }
     }
     // with density
@@ -836,8 +836,8 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, arkS, arkD, arkD, arkS, x, y);
-            EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
-            EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
+            EXPECT_FLOAT_EQ(target.translateX, expectedX * density);
+            EXPECT_FLOAT_EQ(target.translateY, expectedY * density);
         }
     }
 }
@@ -855,7 +855,7 @@ HWTEST_F(CanvasRendererAccessorTest, globalCompositeOperationSetterGetterTest, T
         accessor_->setGlobalCompositeOperation(peer_, &actual);
         auto globalCompositeOperation = accessor_->getGlobalCompositeOperation(peer_);
         auto compositeStr = Converter::Convert<std::string>(globalCompositeOperation);
-        EXPECT_EQ(alpha, expectedStr);
+        EXPECT_EQ(compositeStr, expectedStr);
     }
 }
 
@@ -977,9 +977,20 @@ HWTEST_F(CanvasRendererAccessorTest, shadowBlurSetterGetterTest, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowColor, nullptr);
-    for (const auto& [actual, expected] : ARK_STRING_COLOR_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetShadowColor(expected)).Times(1);
+    for (const auto& [actual, expectedStr] : ARK_STRING_COLOR_TEST_PLAN) {
+        Color target;
+        if (expectedStr.empty()) {
+            EXPECT_CALL(*renderingModel_, SetShadowColor(_)).Times(0);
+        } else {
+            EXPECT_CALL(*renderingModel_, SetShadowColor(_)).WillOnce(SaveArg<0>(&target));
+        }
         accessor_->setShadowColor(peer_, &actual);
+        if (expectedStr.empty()) {
+            continue;
+        }
+        EXPECT_EQ(target.ToString(), expectedStr);
+        auto result = Converter::Convert<std::string>(accessor_->getShadowColor(peer_));
+        EXPECT_EQ(result, expectedStr);
     }
 }
 

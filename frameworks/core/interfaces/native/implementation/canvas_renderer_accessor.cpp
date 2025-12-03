@@ -632,7 +632,7 @@ Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation(), Converter::FC);
 }
 void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
@@ -657,7 +657,7 @@ Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_Can
         case ParamType::COLOR:
         case ParamType::INT32:
             return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
-                Converter::ArkValue<Ark_String>(peerImpl->GetFillStyleString()));
+                peerImpl->GetFillStyleString(), Converter::FC);
         case ParamType::CANVAS_GRADIENT:
             return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
                 peerImpl->GetFillStyleGradient());
@@ -702,7 +702,7 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
 Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
     auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
-        Converter::ArkValue<Ark_String>("#000000"));
+        "#000000");
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
@@ -712,7 +712,7 @@ Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_C
         case ParamType::COLOR:
         case ParamType::INT32:
             return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
-                Converter::ArkValue<Ark_String>(peerImpl->GetStrokeStyleString()));
+                peerImpl->GetStrokeStyleString(), Converter::FC);
         case ParamType::CANVAS_GRADIENT:
             return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
                 peerImpl->GetStrokeStyleGradient());
@@ -760,7 +760,7 @@ Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetFilter());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFilter(), Converter::FC);
 }
 void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
@@ -797,7 +797,7 @@ Ark_String GetImageSmoothingQualityImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetImageSmoothingQuality());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetImageSmoothingQuality(), Converter::FC);
 }
 void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -815,7 +815,7 @@ Ark_String GetLineCapImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetLineCap());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineCap(), Converter::FC);
 }
 void SetLineCapImpl(Ark_CanvasRenderer peer,
                     const Ark_String* lineCap)
@@ -850,7 +850,7 @@ Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetLineJoin());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineJoin(), Converter::FC);
 }
 void SetLineJoinImpl(Ark_CanvasRenderer peer,
                      const Ark_String* lineJoin)
@@ -921,7 +921,7 @@ Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetShadowColor());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetShadowColor(), Converter::FC);
 }
 void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
@@ -974,7 +974,7 @@ Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetDirection());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetDirection(), Converter::FC);
 }
 void SetDirectionImpl(Ark_CanvasRenderer peer,
                       const Ark_String* direction)
@@ -992,7 +992,7 @@ Ark_String GetFontImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetFont());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFont(), Converter::FC);
 }
 void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)
@@ -1010,7 +1010,7 @@ Ark_String GetTextAlignImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetTextAlign());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextAlign(), Converter::FC);
 }
 void SetTextAlignImpl(Ark_CanvasRenderer peer,
                       const Ark_String* textAlign)
@@ -1028,7 +1028,7 @@ Ark_String GetTextBaselineImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetTextBaseline());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextBaseline(), Converter::FC);
 }
 void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                          const Ark_String* textBaseline)
