@@ -44,6 +44,8 @@ group("core_pattern_unittest") {
     "dialog:dialog_test_ng",
     "divider:divider_test_ng",
     "flex:flex_test_ng",
+    "flex:flex_overflow_test_ng",
+    "flex:wrap_overflow_test_ng",
     "folder_stack:folder_stack_test_ng",
     "form:ace_form_test",
     "form_link:form_link_test",

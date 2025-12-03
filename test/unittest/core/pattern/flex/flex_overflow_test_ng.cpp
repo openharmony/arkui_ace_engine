@@ -35,7 +35,7 @@ class FlexOverflowTestNG : public FlexNewTestNG {};
  */
 HWTEST_F(FlexOverflowTestNG, FlexLayoutAlgorithmLayoutWithOverflowTest, TestSize.Level0)
 {
-    auto frameNode = CreateFlexRow([this](FlexModelNG model) {
+    auto frameNode = CreateFlexWrapRow([this](FlexModelNG model) {
         model.SetDirection(FlexDirection::ROW);
         ViewAbstract::SetWidth(CalcLength(200.0f));
         ViewAbstract::SetHeight(CalcLength(100.0f));
@@ -43,30 +43,91 @@ HWTEST_F(FlexOverflowTestNG, FlexLayoutAlgorithmLayoutWithOverflowTest, TestSize
         // Add children that might cause overflow
         CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(150.0f));
-            ViewAbstract::SetHeight(CalcLength(50.0f));
+            ViewAbstract::SetHeight(CalcLength(60.0f));
         });
         CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(150.0f));
-            ViewAbstract::SetHeight(CalcLength(50.0f));
+            ViewAbstract::SetHeight(CalcLength(60.0f));
         });
     });
-
     CreateLayoutTask(frameNode);
     auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    // Perform layout which should now collect overflow information
-    EXPECT_NE(layoutAlgorithm, nullptr);
-    if (layoutAlgorithm) {
-        layoutAlgorithm->Layout(AceType::RawPtr(frameNode));
-    }
-
     // The algorithm should have collected overflow data during layout
     // Verify that no crash occurs and the overflow collection logic is executed
     
     const auto& vOverflowHandler = pattern->GetOrCreateVerticalOverflowHandler(
         AceType::WeakClaim(AceType::RawPtr(frameNode)));
     EXPECT_NE(vOverflowHandler, nullptr);
-    EXPECT_TRUE(vOverflowHandler->IsHorizontalOverflow());
+    EXPECT_TRUE(vOverflowHandler->IsVerticalOverflow());
+}
+/**
+ * @tc.name: FlexLayoutAlgorithmLayoutWithOverflowContentTest
+ * @tc.desc: Test overflow content detection in Flex layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexOverflowTestNG, FlexLayoutAlgorithmLayoutWithOverflowContentTest, TestSize.Level0)
+{
+    auto frameNode = CreateFlexWrapRow([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+        model.SetWrapDirection(WrapDirection::VERTICAL);
+        ViewAbstract::SetWidth(CalcLength(100.0f));  // Small container
+        ViewAbstract::SetHeight(CalcLength(100.0f));
+
+        // Add children that exceed container size to potentially trigger overflow
+        CreateText(u"longtext1", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(80.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+        CreateText(u"longtext2", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(80.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+        CreateText(u"longtext3", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(80.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+    });
+
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    
+    CreateLayoutTask(frameNode);
+
+    const auto& vOverflowHandler = pattern->GetOrCreateVerticalOverflowHandler(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_NE(vOverflowHandler, nullptr);
+    EXPECT_TRUE(vOverflowHandler->IsOverflow());
+}
+
+/**
+ * @tc.name: FlexLayoutAlgorithmIsRowDirectionTest
+ * @tc.desc: Test the new IsRowDirection helper method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexOverflowTestNG, FlexLayoutAlgorithmIsRowDirectionTest, TestSize.Level0)
+{
+    auto frameNode = CreateFlexRow([](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+    });
+    CreateLayoutTask(frameNode);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+
+    // Test ROW direction
+    flexLayoutAlgorithm->direction_ = FlexDirection::ROW;
+    EXPECT_TRUE(flexLayoutAlgorithm->IsRowDirection());
+
+    // Test ROW_REVERSE direction
+    flexLayoutAlgorithm->direction_ = FlexDirection::ROW_REVERSE;
+    EXPECT_TRUE(flexLayoutAlgorithm->IsRowDirection());
+
+    // Test COLUMN direction
+    flexLayoutAlgorithm->direction_ = FlexDirection::COLUMN;
+    EXPECT_FALSE(flexLayoutAlgorithm->IsRowDirection());
+
+    // Test COLUMN_REVERSE direction
+    flexLayoutAlgorithm->direction_ = FlexDirection::COLUMN_REVERSE;
+    EXPECT_FALSE(flexLayoutAlgorithm->IsRowDirection());
 }
 }
