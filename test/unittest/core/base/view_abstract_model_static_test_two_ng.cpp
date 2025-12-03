@@ -67,4 +67,203 @@ HWTEST_F(ViewAbstractModelStaticTestNg, SetBackgroundImagePosition, TestSize.Lev
     ViewAbstractModelStatic::SetBackgroundImagePosition(frameNode, bgImgPosition, true);
     EXPECT_FALSE(renderContext->GetBackgroundImagePosition().has_value());
 }
+
+/**
+ * @tc.name: CheckMenuIsShow001
+ * @tc.desc: Test CheckMenuIsShow returns false when targetNode is nullptr and isShowInSubWindow is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    int32_t targetId = 1;
+    RefPtr<FrameNode> targetNode = nullptr;
+    bool isBuildFuncNull = false;
+    EXPECT_FALSE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
+}
+
+/**
+ * @tc.name: CheckMenuIsShow002
+ * @tc.desc: Test CheckMenuIsShow returns false when subwindow is nullptr and isShowInSubWindow is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow002, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = true;
+    int32_t targetId = 1;
+    RefPtr<FrameNode> targetNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    bool isBuildFuncNull = false;
+    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    EXPECT_FALSE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
+}
+
+/**
+ * @tc.name: CheckMenuIsShow003
+ * @tc.desc: Test CheckMenuIsShow returns false when overlayManager is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow003, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    int32_t targetId = 1;
+    RefPtr<FrameNode> targetNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    bool isBuildFuncNull = false;
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    targetNode->context_ = AceType::RawPtr(pipeline);
+    pipeline->overlayManager_ = nullptr;
+    EXPECT_FALSE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
+}
+
+/**
+ * @tc.name: CheckMenuIsShow004
+ * @tc.desc: Test CheckMenuIsShow returns false when menuNode is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow004, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    int32_t targetId = 1;
+    RefPtr<FrameNode> targetNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    bool isBuildFuncNull = false;
+    auto rootNode = AceType::MakeRefPtr<FrameNode>("root", 0, AceType::MakeRefPtr<Pattern>());
+    auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    pipeline->overlayManager_ = overlayManager;
+    targetNode->context_ = AceType::RawPtr(pipeline);
+    // overlayManager->GetMenuNode return nullptr
+    EXPECT_FALSE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
+}
+
+/**
+ * @tc.name: CheckMenuIsShow005
+ * @tc.desc: Test CheckMenuIsShow returns true when all objects are valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow005, TestSize.Level1)
+{
+    // Arrange
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    menuParam.hasTransitionEffect = false;
+    int32_t targetId = 1;
+    bool isBuildFuncNull = false;
+    auto targetNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
+    auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    pipeline->overlayManager_ = overlayManager;
+    targetNode->context_ = AceType::RawPtr(pipeline);
+    auto menuNode = AceType::MakeRefPtr<FrameNode>("menu", targetId, AceType::MakeRefPtr<Pattern>());
+    auto wrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(targetId);
+    menuNode->pattern_ = wrapperPattern;
+    overlayManager->menuMap_[targetId] = menuNode;
+    EXPECT_TRUE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
+}
+
+/**
+ * @tc.name: BindMenu_CheckMenuIsShowTrue_BuildFuncNull
+ * @tc.desc: Test BindMenu when CheckMenuIsShow returns true and buildFunc/params are empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_CheckMenuIsShowTrue_BuildFuncNull, TestSize.Level1)
+{
+    int32_t targetId = 1;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    auto rootNode = AceType::MakeRefPtr<FrameNode>("root", 0, AceType::MakeRefPtr<Pattern>());
+    auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    pipeline->overlayManager_ = overlayManager;
+    frameNode->context_ = AceType::RawPtr(pipeline);
+
+    std::vector<NG::OptionParam> params;
+    std::function<void()> buildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    menuParam.hasTransitionEffect = false;
+
+    ViewAbstractModelStatic::BindMenu(AceType::RawPtr(frameNode), std::move(params), std::move(buildFunc), menuParam);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_FALSE(gestureHub->bindMenuStatus_.isBindCustomMenu);
+}
+
+/**
+ * @tc.name: BindMenu_CheckMenuIsShowFalse_MenuIsShowTrue
+ * @tc.desc: Test BindMenu when CheckMenuIsShow returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_CheckMenuIsShowFalse_MenuIsShowTrue, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("tag", 1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    frameNode->context_ = AceType::RawPtr(pipeline);
+
+    std::vector<NG::OptionParam> params;
+    params.emplace_back(NG::OptionParam{});
+    std::function<void()> buildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    menuParam.isShow = true;
+    menuParam.hasTransitionEffect = false;
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ViewAbstractModelStatic::BindMenu(AceType::RawPtr(frameNode), std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_TRUE(!gestureHub->bindMenuStatus_.isBindCustomMenu);
+}
+
+/**
+ * @tc.name: BindMenu_isBuildFuncNullTrue
+ * @tc.desc: Test BindMenu when isBuildFuncNull is true, gestureHub should be called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_isBuildFuncNullTrue, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("tag", 1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    frameNode->context_ = AceType::RawPtr(pipeline);
+
+    std::vector<NG::OptionParam> params;
+    std::function<void()> buildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ViewAbstractModelStatic::BindMenu(AceType::RawPtr(frameNode), std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_TRUE(!gestureHub->bindMenuStatus_.isBindCustomMenu);
+}
+
+/**
+ * @tc.name: BindMenu_BindMenuGestureBranch
+ * @tc.desc: Test BindMenu when buildFunc is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_BindMenuGestureBranch, TestSize.Level1)
+{
+    int32_t targetId = 1;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("tag", targetId, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
+    auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
+    pipeline->overlayManager_ = overlayManager;
+    overlayManager->menuMap_[targetId] = frameNode;
+    auto wrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(targetId);
+    frameNode->pattern_ = wrapperPattern;
+
+    std::vector<NG::OptionParam> params;
+    params.emplace_back(NG::OptionParam{});
+    std::function<void()> buildFunc = nullptr;
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    menuParam.setShow = true;
+    menuParam.isShow = false;
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ViewAbstractModelStatic::BindMenu(AceType::RawPtr(frameNode), std::move(params), std::move(buildFunc), menuParam);
+    EXPECT_EQ(gestureHub->showMenu_, nullptr);
+}
 } // namespace OHOS::Ace::NG
