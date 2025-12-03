@@ -1002,4 +1002,70 @@ HWTEST_F(RichEditorBaseTestNg, GetRichEditorController001, TestSize.Level0)
     ASSERT_NE(controller, nullptr);
 }
 
+/**
+ * @tc.name: SetEnableHapticFeedback001
+ * @tc.desc: test SetEnableHapticFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetEnableHapticFeedback001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetEnableHapticFeedback(true);
+    EXPECT_TRUE(richEditorPattern->isEnableHapticFeedback_);
+
+    richEditorModel.SetEnableHapticFeedback(false);
+    EXPECT_FALSE(richEditorPattern->isEnableHapticFeedback_);
+}
+
+/**
+ * @tc.name: SetBarState001
+ * @tc.desc: test SetBarState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetBarState001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorLayoutProperty = richEditorNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(richEditorLayoutProperty, nullptr);
+
+    richEditorModel.SetBarState(DisplayMode::AUTO);
+    auto barState = richEditorLayoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+    EXPECT_EQ(barState, DisplayMode::AUTO);
+}
+
+/**
+ * @tc.name: SetBarState
+ * @tc.desc: test SetBarState002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetBarState002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorLayoutProperty = richEditorNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(richEditorLayoutProperty, nullptr);
+
+    richEditorModel.SetBarState(richEditorNode, DisplayMode::ON);
+    auto barState = richEditorLayoutProperty->GetDisplayModeValue(DisplayMode::ON);
+    EXPECT_EQ(barState, DisplayMode::ON);
+}
+
 } // namespace OHOS::Ace::NG

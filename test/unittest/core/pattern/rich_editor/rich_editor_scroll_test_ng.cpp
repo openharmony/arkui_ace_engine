@@ -589,12 +589,14 @@ HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollTestOneNg, SetScrollBarColor001, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
+    
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
     auto color = Color::BLACK;
 
     richEditorModel.SetScrollBarColor(color);
