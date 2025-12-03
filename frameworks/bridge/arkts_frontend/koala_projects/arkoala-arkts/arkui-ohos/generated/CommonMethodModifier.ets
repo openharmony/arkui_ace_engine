@@ -8823,6 +8823,9 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        // instructive change start
+        this.backgroundEffectClear();
+        // instructive change end
         if (((this._flagArray[178]) == (0)) || ((this._backdropBlur_0_0value) !== (radius)) || (true) || (true))
         {
             this._flagArray[178] = 1
