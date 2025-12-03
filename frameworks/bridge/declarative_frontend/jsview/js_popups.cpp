@@ -902,8 +902,9 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
     return builderIndex;
 }
 
-void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, const JSCallbackInfo& info, std::function<void()>& onAppear,
-    std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+void JSViewAbstract::ParseOverlayCallback(const JSRef<JSObject>& paramObj, const JSCallbackInfo& info,
+    std::function<void()>& onAppear, std::function<void()>& onDisappear,
+    std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
     std::function<void(const int32_t& info)>& onWillDismiss)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
