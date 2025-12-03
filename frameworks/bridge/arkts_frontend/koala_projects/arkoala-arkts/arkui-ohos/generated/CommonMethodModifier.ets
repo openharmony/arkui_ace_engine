@@ -8647,13 +8647,15 @@ export class CommonMethodModifier implements CommonMethod {
 
     // instructive change start
     backgroundEffectClear() {
-        this._backgroundBlurStyle_0_0value = undefined
-        this._backgroundBlurStyle_0_1value = undefined
-        this._backgroundBlurStyle_0_2value = undefined
+        // backgroundBlurStyle clear
+        this._flagArray[166] = 0;
 
-        this._backgroundEffect_1_0value = undefined
-        this._backgroundEffect_1_1value = undefined
-        this._backgroundEffect_0_0value = undefined
+        // backgroundEffect clear
+        this._flagArray[167] = 0;
+        this._flagArray[19] = 0;
+
+        // backdropBlur clear
+        this._flagArray[178] = 0;
     }
     // instructive change end
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
