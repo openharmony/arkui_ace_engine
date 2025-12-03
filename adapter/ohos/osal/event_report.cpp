@@ -114,6 +114,7 @@ constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
+constexpr char MAINWINDOW_TRANSPARENT_DETECTED[] = "MAINWINDOW_TRANSPARENT_DETECTED";
 constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
 constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
 constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
@@ -625,6 +626,20 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UIEXTENSION_TRANSPARENT_DETECTED,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PAGE_NAME, pageUrl,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_MODULE_NAME, moduleName);
+}
+
+void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, MAINWINDOW_TRANSPARENT_DETECTED,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PAGE_NAME, pageUrl,
         EVENT_KEY_VERSION_CODE, app_version_code,

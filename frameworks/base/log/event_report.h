@@ -258,6 +258,8 @@ public:
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
+    static void ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+            const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
     static void ReportRichEditorInfo(const RichEditorInfo& richEditorInfo);
     static void ReportScrollableErrorEvent(
