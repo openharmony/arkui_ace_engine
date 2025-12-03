@@ -230,7 +230,8 @@ BorderRadiusProperty Convert(const Ark_RichEditorLayoutStyle& src)
 template<>
 MarginProperty Convert(const Ark_RichEditorLayoutStyle& src)
 {
-    MarginProperty ret;
+    CalcDimension length;
+    MarginProperty ret = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     auto margins = Converter::OptConvert<PaddingProperty>(src.margin);
     return margins.value_or(ret);
 }
@@ -241,7 +242,7 @@ ImageSpanAttribute Convert(const Ark_RichEditorImageSpanStyle& src)
     ImageSpanAttribute ret;
     ret.size = Converter::OptConvert<ImageSpanSize>(src.size);
     ret.verticalAlign = Converter::OptConvert<VerticalAlign>(src.verticalAlign);
-    ret.objectFit = Converter::OptConvert<ImageFit>(src.objectFit);
+    ret.objectFit = (Converter::OptConvert<ImageFit>(src.objectFit)).value_or(ImageFit::COVER);
     ret.borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.layoutStyle);
     ret.marginProp = Converter::OptConvert<MarginProperty>(src.layoutStyle);
     return ret;
@@ -612,12 +613,19 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src,
     bool isBuilderSpan = src.valueString == u" " && src.valuePixelMap == nullptr;
     dst.valuePixelMap = ArkValue<Opt_image_PixelMap>(image_PixelMapPeer::Create(src.valuePixelMap));
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
+    auto imageStyle = src.imageStyle;
+    auto verticalAlign = imageStyle.verticalAlign;
+    bool isVerticalAlignVaild = verticalAlign >= static_cast<int32_t>(VerticalAlign::TOP)
+        && verticalAlign <= static_cast<int32_t>(VerticalAlign::BASELINE);
+    if (!isVerticalAlignVaild) {
+        imageStyle.verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM);
+    }
     ImageStyleResult builderStyle {
         .size = {src.imageStyle.size[0], src.imageStyle.size[1]},
         .verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM)
     };
     dst.imageStyle = isBuilderSpan ? ArkValue<Ark_RichEditorImageSpanStyleResult>(builderStyle)
-        : ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
+        : ArkValue<Ark_RichEditorImageSpanStyleResult>(imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Int32>(src.offsetInSpan[0]);
     dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
 }
@@ -691,14 +699,7 @@ Opt_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
     auto locOptions = Converter::OptConvertPtr<ImageSpanOptions>(options).value_or(ImageSpanOptions{});
     std::optional<ImageSourceInfo> info;
     Converter::VisitUnion(*value,
-        [&info](const Ark_NativePointer& val) {
-            auto pixelMap = reinterpret_cast<PixelMap*>(val);
-            CHECK_NULL_VOID(pixelMap);
-            RefPtr<PixelMap> PixelMapRef = AceType::Claim(pixelMap);
-            CHECK_NULL_VOID(PixelMapRef);
-            info = ImageSourceInfo(PixelMapRef);
-        },
-        [&info](const Ark_ResourceStr& val) {
+        [&info](const auto& val) {
             info = Converter::OptConvert<ImageSourceInfo>(val);
         },
         []() {}
