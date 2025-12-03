@@ -435,6 +435,14 @@ export class LinearStyleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableSmoothEffect  = value.enableSmoothEffect
+        if (valueHolderForEnableSmoothEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableSmoothEffectTmpValue  = valueHolderForEnableSmoothEffect!
+            valueSerializer.writeBoolean(valueHolderForEnableSmoothEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStrokeWidth  = value.strokeWidth
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -484,6 +492,12 @@ export class LinearStyleOptions_serializer {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableSmoothEffectTmpBuf : boolean | undefined = undefined
+        if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -518,7 +532,7 @@ export class LinearStyleOptions_serializer {
             strokeRadiusTmpBuf = (strokeRadiusTmpBuf_ as string | number | Resource)
         }
         const strokeRadiusTmpResult : PX | VP | LPX | Resource | undefined = strokeRadiusTmpBuf
-        let value : LinearStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult} as LinearStyleOptions)
+        let value : LinearStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult} as LinearStyleOptions)
         return value
     }
 }
@@ -645,6 +659,14 @@ export class RingStyleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableSmoothEffect  = value.enableSmoothEffect
+        if (valueHolderForEnableSmoothEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableSmoothEffectTmpValue  = valueHolderForEnableSmoothEffect!
+            valueSerializer.writeBoolean(valueHolderForEnableSmoothEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStrokeWidth  = value.strokeWidth
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -690,6 +712,12 @@ export class RingStyleOptions_serializer {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableSmoothEffectTmpBuf : boolean | undefined = undefined
+        if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -719,7 +747,7 @@ export class RingStyleOptions_serializer {
             statusTmpBuf = ProgressStatus.fromValue(valueDeserializer.readInt32())
         }
         const statusTmpResult : ProgressStatus | undefined = statusTmpBuf
-        let value : RingStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, strokeWidth: strokeWidthTmpResult, shadow: shadowTmpResult, status: statusTmpResult} as RingStyleOptions)
+        let value : RingStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, strokeWidth: strokeWidthTmpResult, shadow: shadowTmpResult, status: statusTmpResult} as RingStyleOptions)
         return value
     }
 }
@@ -731,6 +759,14 @@ export class CapsuleStyleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEnableScanEffectTmpValue  = valueHolderForEnableScanEffect!
             valueSerializer.writeBoolean(valueHolderForEnableScanEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableSmoothEffect  = value.enableSmoothEffect
+        if (valueHolderForEnableSmoothEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableSmoothEffectTmpValue  = valueHolderForEnableSmoothEffect!
+            valueSerializer.writeBoolean(valueHolderForEnableSmoothEffectTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -843,6 +879,12 @@ export class CapsuleStyleOptions_serializer {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableSmoothEffectTmpBuf : boolean | undefined = undefined
+        if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
         const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderColorTmpBuf : ResourceColor | undefined = undefined
         if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -922,7 +964,7 @@ export class CapsuleStyleOptions_serializer {
             borderRadiusTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const borderRadiusTmpResult : LengthMetrics | undefined = borderRadiusTmpBuf
-        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
+        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
         return value
     }
 }

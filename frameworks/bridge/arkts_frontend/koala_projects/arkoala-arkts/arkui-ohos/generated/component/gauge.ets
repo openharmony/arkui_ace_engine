@@ -187,9 +187,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDescriptionAttribute(value: CustomBuilder | undefined): void {
+    setDescriptionAttribute(value: CustomBuilder | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
@@ -199,9 +199,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: GaugeShadowOptions | undefined): void {
+    setTrackShadowAttribute(value: GaugeShadowOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             GaugeShadowOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -271,10 +271,10 @@ export interface GaugeAttribute extends CommonMethod {
     strokeWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeWidth")
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         throw new Error("Unimplemented method description")
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         throw new Error("Unimplemented method trackShadow")
     }
     indicator(value: GaugeIndicatorOptions | null | undefined): this {
@@ -296,8 +296,8 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     endAngle_value?: double | undefined
     colors_value?: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined
     strokeWidth_value?: Length | undefined
-    description_value?: CustomBuilder | undefined
-    trackShadow_value?: GaugeShadowOptions | undefined
+    description_value?: CustomBuilder | null | undefined
+    trackShadow_value?: GaugeShadowOptions | null | undefined
     indicator_value?: GaugeIndicatorOptions | null | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<GaugeConfiguration> | undefined
@@ -320,10 +320,10 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     strokeWidth(value: Length | undefined): this {
         return this
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         return this
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         return this
     }
     indicator(value: GaugeIndicatorOptions | null | undefined): this {
@@ -396,17 +396,17 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         }
         return this
     }
-    public description(value: CustomBuilder | undefined): this {
+    public description(value: CustomBuilder | null | undefined): this {
         if (this.checkPriority("description")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | null | undefined)
             this.getPeer()?.setDescriptionAttribute(value_casted)
             return this
         }
         return this
     }
-    public trackShadow(value: GaugeShadowOptions | undefined): this {
+    public trackShadow(value: GaugeShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
-            const value_casted = value as (GaugeShadowOptions | undefined)
+            const value_casted = value as (GaugeShadowOptions | null | undefined)
             this.getPeer()?.setTrackShadowAttribute(value_casted)
             return this
         }

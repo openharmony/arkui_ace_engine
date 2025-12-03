@@ -19320,8 +19320,8 @@ typedef struct Opt_ChainAnimationOptions {
 } Opt_ChainAnimationOptions;
 typedef struct Ark_ColorStop {
     /* kind: Interface */
-    Ark_ResourceColor color;
-    Ark_Length offset;
+    Opt_ResourceColor color;
+    Opt_Length offset;
 } Ark_ColorStop;
 typedef struct Opt_ColorStop {
     Ark_Tag tag;
@@ -19556,6 +19556,7 @@ typedef struct Opt_LeadingMarginPlaceholder {
 typedef struct Ark_LinearStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
     Opt_Union_String_Number_Resource strokeRadius;
 } Ark_LinearStyleOptions;
@@ -19780,6 +19781,7 @@ typedef struct Opt_RichEditorSymbolSpanOptions {
 typedef struct Ark_RingStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
     Opt_Boolean shadow;
     Opt_ProgressStatus status;
@@ -20822,6 +20824,7 @@ typedef struct Opt_CancelButtonOptions {
 typedef struct Ark_CapsuleStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_ResourceColor borderColor;
     Opt_Length borderWidth;
     Opt_String content;
