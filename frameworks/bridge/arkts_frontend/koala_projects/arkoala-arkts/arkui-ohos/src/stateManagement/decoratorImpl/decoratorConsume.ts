@@ -44,11 +44,10 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.sourceProvide_!.registerWatchToSource(this);
         }
     }
-    
+
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
-        const value = this.sourceProvide_!.get();
-        return value;
+        return this.sourceProvide_!.get();
     }
 
     public set(newValue: T): void {

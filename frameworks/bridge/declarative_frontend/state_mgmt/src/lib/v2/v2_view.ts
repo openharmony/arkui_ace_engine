@@ -425,7 +425,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // Resets the consumer value when the component is reinitialized on reuse
      public resetConsumer<T>(varName: string, consumerVal: T): void {
-        let providerInfo = ProviderConsumerUtilV2.findProvider(this, varName);
+        const info = ObserveV2.getObserve().getDecoratorInfo(this, varName);
+        if (!info.startsWith('@Consumer')) {
+            stateMgmtConsole.warn('Should use resetConsumer only to reset @Consumer');
+            return;
+        }
+        const aliasName = info.substring(/** '@Consumer(' */10, info.length - 1); // @Consumer(aliasName)
+        let providerInfo = ProviderConsumerUtilV2.findProvider(this, aliasName);
         if (!providerInfo) {
           ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
           ObserveV2.getObserve().fireChange(this, varName);
@@ -958,5 +964,22 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             );
             If.pop();
         }, If);
+    }
+
+    __setTSCard__Internal(property: string, value: Object): void {
+        // should only work for @Local/@Provider/@Consumer/@Param@Once decorated variable
+        if (!this.__checkValidDecorator__Internal(property)) {
+            stateMgmtConsole.warn(`Invalid property ${property} to update V2 card`);
+            return;
+        }
+        this[property] = value;
+    }
+
+    __checkValidDecorator__Internal(property: string): boolean {
+        const info = ObserveV2.getObserve().getDecoratorInfo(this, property);
+        if (info === '@Local' || info === '@Param@Once' || info.startsWith('@Provider') || info.startsWith('@Consumer')) {
+            return true;
+        }
+        return false;
     }
 }
