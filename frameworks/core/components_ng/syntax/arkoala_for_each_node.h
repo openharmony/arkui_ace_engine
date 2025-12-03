@@ -38,6 +38,7 @@ public:
     }
 
     void FinishRender();
+    void FlushUpdateAndMarkDirty() override;
 
     // used for drag move operation.
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;

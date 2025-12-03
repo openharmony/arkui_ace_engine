@@ -109,16 +109,19 @@ TEST_F(ArkoalaForEachNodeTest, ArkoalaForEachNodeTest002)
 {
     /**
      * @tc.steps: step1. Test ForEach node dump info
+     * ForEach does not have dump info
      */
-    auto forEachNode = CreateForEachNode(GetNextId());
-    EXPECT_NE(forEachNode, nullptr);
-    forEachNode->DumpInfo();
+    auto node = CreateForEachNode(GetNextId());
+    EXPECT_NE(node, nullptr);
+    node->DumpInfo();
 
     /**
      * @tc.steps: step2. Test Repeat node dump info
+     * Repeat dump info is "VirtualScroll: false"
      */
     auto repeatNode = CreateRepeatNode(GetNextId());
     EXPECT_NE(repeatNode, nullptr);
     repeatNode->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "VirtualScroll: false\n");
 }
 } // namespace OHOS::Ace::NG
