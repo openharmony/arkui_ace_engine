@@ -613,14 +613,14 @@ InteropAsyncWork KoalaCreateWork(
     InteropNativePointer handle,
     void (*execute)(InteropNativePointer handle),
     void (*complete)(InteropNativePointer handle)
-) {
+)
+{
     return {
         new KoalaWork(vmContext, handle, execute, complete),
         DoQueue,
         DoCancel,
     };
 }
-
 const InteropAsyncWorker* GetAsyncWorker() {
     static InteropAsyncWorker worker = {
         KoalaCreateWork
