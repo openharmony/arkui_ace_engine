@@ -10235,9 +10235,12 @@ ArkUIIgnoreLayoutSafeAreaOpts GetIgnoreLayoutSafeArea(ArkUINodeHandle node)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, ignoreOpts);
     NG::IgnoreLayoutSafeAreaOpts& opts = *(layoutProperty->GetIgnoreLayoutSafeAreaOpts());
+    if (!layoutProperty->IsIgnoreOptsValid()) {
+        return ignoreOpts;
+    }
     ignoreOpts = {
         .type = opts.type,
-        .edges = opts.rawEdges,
+        .edges = opts.edges,
     };
     return ignoreOpts;
 }
