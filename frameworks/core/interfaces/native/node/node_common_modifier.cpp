@@ -1289,6 +1289,13 @@ void SetBorderRadius(
     ViewAbstract::SetBorderRadius(frameNode, borderRadius);
 }
 
+void SetRenderStrategy(ArkUINodeHandle node, ArkUI_Int32 renderStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderStrategy(frameNode, static_cast<RenderStrategy>(renderStrategy));
+}
+
 void ResetBorderRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10855,6 +10862,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowForceDark = ResetAllowForceDark,
         .getAllowForceDark = GetAllowForceDark,
         .getPixelRound = GetPixelRound,
+        .setRenderStrategy = SetRenderStrategy,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
         .setChainWeight = SetChainWeight,

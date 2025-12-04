@@ -1986,9 +1986,15 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> renderStrategy = runtimeCallInfo->GetCallArgRef(NUM_5);
+    ArkUI_Int32 renderStrategyNumber = 0;
+    if (renderStrategy->IsNumber()) {
+        renderStrategyNumber = renderStrategy->ToNumber(vm)->Value();
+    }
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getCommonModifier()->setRenderStrategy(nativeNode, renderStrategyNumber);
         return panda::JSValueRef::Undefined(vm);
     }
     CalcDimension topLeft;
@@ -2018,6 +2024,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     ParseMirrorDimen(values, units, NUM_3, isMirror ? bottomLeft : bottomRight);
     auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(nativeNode, values, units, SIZE_OF_FOUR, rawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setRenderStrategy(nativeNode, renderStrategyNumber);
     return panda::JSValueRef::Undefined(vm);
 }
 

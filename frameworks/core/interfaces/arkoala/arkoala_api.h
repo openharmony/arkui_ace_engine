@@ -3113,6 +3113,7 @@ struct ArkUICommonModifier {
     void (*resetAllowForceDark)(ArkUINodeHandle node);
     ArkUI_Bool (*getAllowForceDark)(ArkUINodeHandle node);
     ArkUI_Bool (*getPixelRound)(ArkUINodeHandle node, ArkUI_Int32* result);
+    void (*setRenderStrategy)(ArkUINodeHandle node, const ArkUI_Int32 renderStrategy);
     void (*setSystemMaterial)(ArkUINodeHandle node, void* material);
     void (*resetSystemMaterial)(ArkUINodeHandle node);
     void (*setChainWeight)(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical);
