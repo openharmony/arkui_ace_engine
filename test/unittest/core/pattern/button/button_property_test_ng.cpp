@@ -1065,7 +1065,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest024, TestSize.Level1)
     auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
     ASSERT_NE(buttonLayoutProperty, nullptr);
     frameNode.children_.push_back(textNode);
-    frameNode.accessibilityProperty_ = accessibilityProperty;
+    frameNode.GetOrCreateAccessibilityProperty() = accessibilityProperty;
     frameNode.layoutProperty_ = buttonLayoutProperty;
     /**
      * @tc.steps: step2. try call SetLabel.
@@ -1098,7 +1098,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest025, TestSize.Level1)
     auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
     ASSERT_NE(buttonLayoutProperty, nullptr);
     frameNode.children_.push_back(textNode);
-    frameNode.accessibilityProperty_ = accessibilityProperty;
+    frameNode.GetOrCreateAccessibilityProperty() = accessibilityProperty;
     frameNode.layoutProperty_ = buttonLayoutProperty;
     /**
      * @tc.steps: step2. try call SetFontSize.
