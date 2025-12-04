@@ -608,7 +608,7 @@ static void DoCancel(void* handle) {
     ((KoalaWork*)handle)->Cancel();
 }
 
-InteropAsyncWork koalaCreateWork(
+InteropAsyncWork KoalaCreateWork(
     InteropVMContext vmContext,
     InteropNativePointer handle,
     void (*execute)(InteropNativePointer handle),
@@ -623,7 +623,7 @@ InteropAsyncWork koalaCreateWork(
 
 const InteropAsyncWorker* GetAsyncWorker() {
     static InteropAsyncWorker worker = {
-        koalaCreateWork
+        KoalaCreateWork
     };
     return &worker;
 }
