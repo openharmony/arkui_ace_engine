@@ -82,10 +82,8 @@ inline int InteropPrintToBufferN(char *buffer, size_t bufSize, const char *forma
 inline int InteropPrintVlistToBufferN(char *buffer, size_t bufSize, const char *format, va_list vlist)
 {
     int ret = vsnprintf_s(buffer, bufSize, bufSize - 1, format, vlist);
-    if (ret == EINVAL) {
-        LOGE("log format failed");
-    } else {
-        LOGE("FATAL: %{public}s", buffer);
+    if (ret < 0) {
+        INTEROP_FATAL("WriteToString: vsnprintf_s format failed! Error code: %d", ret);
     }
     return ret;
 }
