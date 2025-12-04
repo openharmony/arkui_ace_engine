@@ -225,6 +225,9 @@ export class FocusController {
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
         throw Error("setKeyProcessingMode not implemented in FocusController!")
     }
+    public isActive(): boolean {
+        throw Error('isActive not implemented in FocusController!')
+    }
 }
 
 export class ComponentSnapshot {

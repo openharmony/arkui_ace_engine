@@ -178,6 +178,15 @@ static void setKeyProcessingMode(ani_env* env, ani_enum_item mode)
     focusManager->SetKeyProcessingMode(static_cast<OHOS::Ace::NG::KeyProcessingMode>(keyProcessingMode));
 }
 
+static ani_boolean isActive(ani_env* env)
+{
+    auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    return focusManager->GetIsFocusActive();
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     if (vm == nullptr) {
@@ -198,6 +207,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "activate", nullptr, reinterpret_cast<void*>(activate) },
         ani_native_function { "setAutoFocusTransfer", nullptr, reinterpret_cast<void*>(setAutoFocusTransfer) },
         ani_native_function { "setKeyProcessingMode", nullptr, reinterpret_cast<void*>(setKeyProcessingMode) },
+        ani_native_function { "isActive", nullptr, reinterpret_cast<void*>(isActive) },
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;
