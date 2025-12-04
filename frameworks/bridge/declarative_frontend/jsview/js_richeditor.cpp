@@ -2351,15 +2351,6 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
 }
 
-void JSRichEditorController::DeleteBackward(const JSCallbackInfo& args)
-{
-    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    CHECK_NULL_VOID(richEditorController);
-    richEditorController->DeleteBackward();
-}
-
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -2662,6 +2653,14 @@ void JSRichEditorBaseController::GetCaretOffset(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
     }
+}
+
+void JSRichEditorBaseController::DeleteBackward(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->DeleteBackward();
 }
 
 void JSRichEditorBaseController::GetCaretRect(const JSCallbackInfo& args)
@@ -3359,6 +3358,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "deleteBackward", &JSRichEditorStyledStringController::DeleteBackward);
     JSClass<JSRichEditorStyledStringController>::Method(
         "stopEditing", &JSRichEditorStyledStringController::StopEditing);
     JSClass<JSRichEditorStyledStringController>::Method(

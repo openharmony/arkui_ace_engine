@@ -161,6 +161,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void DeleteBackward(const JSCallbackInfo& args);
     void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
@@ -243,7 +244,6 @@ public:
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
-    void DeleteBackward(const JSCallbackInfo& args);
     void ToStyledString(const JSCallbackInfo& args);
     void FromStyledString(const JSCallbackInfo& args);
 
