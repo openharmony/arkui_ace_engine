@@ -422,4 +422,18 @@ void ProgressModelStatic::SetTextDefaultStyle(FrameNode* frameNode, const RefPtr
     textNode->MarkModifyDone();
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
 }
+
+void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserInitiatedBgColor(value.has_value());
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
