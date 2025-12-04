@@ -24,6 +24,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -51,10 +52,15 @@ const int32_t SHADOWOPTIONS_EXIST = 1001;
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
+    // After Api22, alpha is handled on the cangjie.
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        return result;
+    } else {
+        if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+            result = origin | COLOR_ALPHA_VALUE;
+        }
+        return result;
     }
-    return result;
 }
 
 RefPtr<OHOS::Ace::CJFrontendAbstract> CheckFrontendLegality(int32_t size, CButtonInfo* buttonsInfo)
