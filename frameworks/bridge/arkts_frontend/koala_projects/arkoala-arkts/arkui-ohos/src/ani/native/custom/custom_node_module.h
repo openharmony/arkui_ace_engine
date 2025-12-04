@@ -24,6 +24,8 @@ public:
     static ani_status BindNativeCustomComponent(ani_env *env);
 private:
     static ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj);
+    static void CustomNodeSetBuildFunction(
+        ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object buildFunc);
 };
 } // namespace OHOS::Ace::Ani
 

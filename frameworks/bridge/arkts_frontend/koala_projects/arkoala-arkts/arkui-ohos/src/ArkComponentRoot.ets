@@ -20,6 +20,8 @@ import { ArkCustomComponent } from './ArkCustomComponent';
 import { InteropNativeModule } from '@koalaui/interop';
 import { __context, GlobalStateManager, StateManager } from '@koalaui/runtime';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
+import { CallbackTransformer } from './CallbackTransformer';
+import { KPointer } from '@koalaui/interop';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -34,9 +36,37 @@ export function ArkComponentRoot(
     content: (node: PeerNode) => void
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
-    NodeAttach<PeerNode>(
-        () => ArkCustomComponentRootPeer.create(component),
-        (node: PeerNode) => {
+    NodeAttach<ArkCustomComponentRootPeer>(
+        () => {
+            const node = ArkCustomComponentRootPeer.create(component);
+            if (component.isCustomLayout) {
+                return node;
+            }
+
+            const func = CallbackTransformer.transformFromCustomBuilder(@memo (): void => {
+                rememberDisposable(() => {
+                    ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                        component.aboutToAppear();
+                    });
+                    return true;
+                }, (_: boolean | undefined) => {
+                    scheduleCallback(() => {
+                        component.aboutToDisappear();
+                    });
+                });
+                content(node);
+            });
+            node.setBuildFunction((): Long => {
+                const ptr = func(node.peer.ptr);
+                node.setChildPeerPtr(ptr);
+                return new Long(ptr);
+            });
+            return node;
+        },
+        (node: ArkCustomComponentRootPeer) => {
+            if (!component.isCustomLayout) {
+                return;
+            }
             rememberDisposable(() => {
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                     component.aboutToAppear();
