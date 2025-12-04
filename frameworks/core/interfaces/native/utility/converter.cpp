@@ -2819,9 +2819,9 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
-    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    widthProperty.startDimen = Converter::OptConvert<Dimension>(src.start);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
-    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    widthProperty.endDimen = Converter::OptConvert<Dimension>(src.end);
 
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     widthProperty.leftDimen =
@@ -2830,7 +2830,7 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
         isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
 
     widthProperty.multiValued = true;
-    
+
     return widthProperty;
 }
 

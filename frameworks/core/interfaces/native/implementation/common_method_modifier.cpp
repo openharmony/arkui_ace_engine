@@ -783,6 +783,8 @@ void FixBorderWidthProperty(BorderWidthProperty& prop, bool nonPercent, bool non
     FixBorderWidthDimension(prop.topDimen, nonPercent, nonNegative, resetZero);
     FixBorderWidthDimension(prop.rightDimen, nonPercent, nonNegative, resetZero);
     FixBorderWidthDimension(prop.bottomDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.startDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.endDimen, nonPercent, nonNegative, resetZero);
 }
 
 namespace GeneratedModifier {

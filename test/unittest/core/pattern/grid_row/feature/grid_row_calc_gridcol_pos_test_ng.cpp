@@ -276,8 +276,14 @@ HWTEST_F(GridrowCalcGridcolPosTestNg, GetChildAlignmentTest01, TestSize.Level0)
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol1->GetLayoutProperty());
     EXPECT_EQ(childAlign, FlexAlign::FLEX_START);
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol2->GetLayoutProperty());
+    /**
+     * @tc.expected: childAlign is FlexAlign::FLEX_START
+     */
     EXPECT_EQ(childAlign, FlexAlign::FLEX_START);
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol3->GetLayoutProperty());
+    /**
+     * @tc.expected: childAlign is FlexAlign::CENTER
+     */
     EXPECT_EQ(childAlign, FlexAlign::CENTER);
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol4->GetLayoutProperty());
     EXPECT_EQ(childAlign, FlexAlign::FLEX_END);
