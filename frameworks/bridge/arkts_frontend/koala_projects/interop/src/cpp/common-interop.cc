@@ -324,7 +324,7 @@ KStringPtr impl_LoadView(const KStringPtr& className, const KStringPtr& params) 
     static LoadView_t impl = nullptr;
     if (!impl) impl = reinterpret_cast<LoadView_t>(getImpl(nullptr, "LoadView"));
     const char* result = impl(className.c_str(), params.c_str());
-    return KStringPtr(result, InteropStringLength(result), true);
+    return KStringPtr(result, strlen(result), true);
 }
 KOALA_INTEROP_2(LoadView, KStringPtr, KStringPtr, KStringPtr)
 #endif  // KOALA_ANI
@@ -735,7 +735,7 @@ KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KByte*, KInt, KInt)
 #if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
 KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
     auto string = (const char*)data;
-    KStringPtr result(string, InteropStringLength(string), false);
+    KStringPtr result(string, strlen(string), false);
     return result;
 }
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)

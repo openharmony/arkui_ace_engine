@@ -769,7 +769,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
         ani_boolean useNativeLog = ANI_FALSE;
         ani_string appUrlString {};
-        status = env->String_NewUTF8(appUrl, InteropStringLength(appUrl), &appUrlString);
+        status = env->String_NewUTF8(appUrl, strlen(appUrl), &appUrlString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -783,7 +783,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_string appParamsString {};
-        status = env->String_NewUTF8(appParams, InteropStringLength(appParams), &appParamsString);
+        status = env->String_NewUTF8(appParams, strlen(appParams), &appParamsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -1045,7 +1045,7 @@ extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, 
         application_emit_event_t application_emit_event = (application_emit_event_t)g_vmEntry.emitEvent;
         const char *kotlinString = application_emit_event(app, type, target, arg0, arg1);
 
-        size_t bufferSize = InteropStringLength(kotlinString) + 1;
+        size_t bufferSize = strlen(kotlinString) + 1;
         char *result = (char*)malloc(bufferSize);
         InteropStringCopy(result, bufferSize, kotlinString);
 
@@ -1105,7 +1105,7 @@ extern "C" DLL_EXPORT void RestartWith(const char* page)
             return;
         }
         ani_string pageString {};
-        auto status = env->String_NewUTF8(page, InteropStringLength(page), &pageString);
+        auto status = env->String_NewUTF8(page, strlen(page), &pageString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return;
@@ -1129,12 +1129,12 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
             return strdup("Cannot find loadView() method");
         }
         ani_string classNameString {};
-        auto status = env->String_NewUTF8(className, InteropStringLength(className), &classNameString);
+        auto status = env->String_NewUTF8(className, strlen(className), &classNameString);
         if (status != ANI_OK) {
             return strdup("Cannot make ANI string");
         }
         ani_string paramsString {};
-        status = env->String_NewUTF8(params, InteropStringLength(params), &paramsString);
+        status = env->String_NewUTF8(params, strlen(params), &paramsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return strdup("Cannot make ANI string");

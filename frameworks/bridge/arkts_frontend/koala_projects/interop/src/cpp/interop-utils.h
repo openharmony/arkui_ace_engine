@@ -89,9 +89,4 @@ inline int InteropPrintVlistToBufferN(char *buffer, size_t bufSize, const char *
     return ret;
 }
 
-inline size_t InteropStringLength(const char *str)
-{
-    return strnlen_s(str, UINT_MAX);
-}
-
 #endif // _INTEROP_UTILS_H_
