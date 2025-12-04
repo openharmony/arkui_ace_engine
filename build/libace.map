@@ -532,6 +532,7 @@
       OHOS::Ace::NG::ConvertToPx*;
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::MaterialUtils::*;
+      OHOS::Ace::UiMaterial::*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -541,6 +542,8 @@
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       OHOS::Ace::NG::ComponentSnapshot::*;
       virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
+      vtable?for?OHOS::Ace::UiMaterial;
+      VTT?for?OHOS::Ace::UiMaterial;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";

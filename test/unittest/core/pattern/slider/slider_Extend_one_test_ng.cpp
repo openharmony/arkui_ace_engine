@@ -19,6 +19,7 @@
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "ui/properties/ui_material.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"

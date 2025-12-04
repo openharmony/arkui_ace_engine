@@ -5622,6 +5622,9 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
     CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
         auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
         auto materialType = materialTypeOpt.value_or(MaterialType::NONE);

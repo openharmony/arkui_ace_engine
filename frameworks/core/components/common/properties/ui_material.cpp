@@ -83,4 +83,14 @@ bool MaterialUtils::CallSetMaterial(NG::FrameNode* node, const UiMaterial* mater
     }
     return false;
 }
+RefPtr<UiMaterial> UiMaterial::Copy() const
+{
+    auto result = AceType::MakeRefPtr<UiMaterial>();
+    CopyTo(result);
+    return result;
+}
+void UiMaterial::CopyTo(RefPtr<UiMaterial>& other) const
+{
+    other->SetType(type_);
+}
 } // namespace OHOS::Ace

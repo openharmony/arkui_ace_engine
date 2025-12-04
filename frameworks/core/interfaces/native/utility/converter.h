@@ -944,6 +944,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src);
+    template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src);
     template<> void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!

@@ -35,6 +35,7 @@ import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./component/gesture"
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
 export class CommonMethodModifier implements CommonMethod {
@@ -209,6 +210,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onTouchIntercept_0_0value?: ((value0: TouchEvent) => HitTestMode) | undefined
     _onSizeChange_0_0value?: SizeChangeCallback | undefined
     _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
+    _systemMaterial_0_0value?: uiMaterial.Material | undefined
     _customProperty_0_0value?: string
     _customProperty_0_1value?: CustomProperty
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
@@ -3976,6 +3978,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[203] != 0)
+        {
+            switch (flagArray[203] as int32) {
+                case 1: {
+                    peer.setSystemMaterialAttribute((this._systemMaterial_0_0value as uiMaterial.Material | undefined));
+                    flagArray[203] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[203] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[203] = 0;
+                    peer.setSystemMaterialAttribute((undefined as uiMaterial.Material | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6644,6 +6664,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[203] != 0)
+        {
+            switch (flagArray[203] as int32) {
+                case 1:
+                case 3: {
+                    this.systemMaterial(modifier._systemMaterial_0_0value);
+                    break;
+                }
+                default: {
+                    this.systemMaterial((undefined as uiMaterial.Material | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9178,6 +9211,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[202] = 3
+        }
+        return this
+    }
+    systemMaterial(value: uiMaterial.Material | undefined): this {
+        if (((this._flagArray[203]) == (0)) || (true))
+        {
+            this._flagArray[203] = 1
+            this._systemMaterial_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[203] = 3
         }
         return this
     }
