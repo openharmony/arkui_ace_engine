@@ -559,7 +559,6 @@ HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext001, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(node, nullptr);
     frameNode->MountToParent(node);
-    bool isTargetNodeInSubwindow = false;
     auto pipelineContext = MockPipelineContext::GetCurrent();
     frameNode->context_ = AceType::RawPtr(pipelineContext);
     MockSystemProperties::g_isSuperFoldDisplayDevice = true;
@@ -572,35 +571,8 @@ HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext001, TestSize.Level1)
     AceEngine::Get().AddContainer(0, containerOne);
     AceEngine::Get().AddContainer(1, containerTwo);
     SubwindowManager::GetInstance()->AddParentContainerId(0, 1);
-    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
+    auto context = dialogManager.GetMainPipelineContext(frameNode);
     EXPECT_EQ(context, pipelineContext);
-}
-
-/**
- * @tc.name: GetMainPipelineContext002
- * @tc.desc: Test GetMainPipelineContext
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext002, TestSize.Level1)
-{
-    DialogManager dialogManager;
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(node, nullptr);
-    frameNode->MountToParent(node);
-    bool isTargetNodeInSubwindow = true;
-    auto pipelineContext = MockPipelineContext::GetCurrent();
-    frameNode->context_ = AceType::RawPtr(pipelineContext);
-    auto pipeline = frameNode->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
-    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
-    containerOne->isSubContainer_ = true;
-    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
-    AceEngine::Get().AddContainer(0, containerOne);
-    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
-    EXPECT_EQ(context, AceType::Claim(pipeline));
 }
 
 /**

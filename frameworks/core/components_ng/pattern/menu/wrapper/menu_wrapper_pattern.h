@@ -499,6 +499,8 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.showInSubWindow = dumpInfo.showInSubWindow;
+        dumpInfo_.canExpandCurrentWindow = dumpInfo.canExpandCurrentWindow;
         dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
         dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
@@ -699,6 +701,15 @@ public:
     {
         dragMenuLiftAnimationFinish_ = state;
     }
+    
+    void SetMenuWindowRect(const Rect& menuWindowRect)
+    {
+        menuWindowRect_ = menuWindowRect;
+    }
+    Rect GetMenuWindowRect() const
+    {
+        return menuWindowRect_;
+    }
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -814,6 +825,7 @@ private:
     bool hasCustomOutlineColor_ = false;
     bool isClearLastMenuItem_ = true;
     bool dragMenuLiftAnimationFinish_ = true;
+    Rect menuWindowRect_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG
