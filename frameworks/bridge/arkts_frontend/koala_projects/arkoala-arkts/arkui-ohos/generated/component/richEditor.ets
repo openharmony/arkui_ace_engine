@@ -642,6 +642,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (spanType !== undefined) {
@@ -1079,6 +1091,9 @@ export interface RichEditorAttribute extends CommonMethod {
     stopBackPress(value: boolean | undefined): this {
         throw new Error("Unimplemented method stopBackPress")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error("Unimplemented method bindSelectionMenu")
     }
@@ -1123,6 +1138,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: int32 | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined
     setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
         return this
@@ -1215,6 +1231,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
         return this
     }
     stopBackPress(value: boolean | undefined): this {
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
         return this
     }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
@@ -1555,6 +1574,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("stopBackPress")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setStopBackPressAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
             return this
         }
         return this

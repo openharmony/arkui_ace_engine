@@ -460,6 +460,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {

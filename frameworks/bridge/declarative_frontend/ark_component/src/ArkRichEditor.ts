@@ -493,6 +493,20 @@ class RichEditorEnableAutoSpacingModifier extends ModifierWithKey<Optional<boole
   }
 }
 
+class RichEditorCompressLeadingPunctuationModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().richEditor.setCompressLeadingPunctuation(node, this.value);
+    }
+  }
+}
+
 class RichEditorUndoStyleModifier extends ModifierWithKey<Optional<UndoStyle>> {
   constructor(value: Optional<UndoStyle>) {
     super(value);
@@ -656,6 +670,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnableAutoSpacingModifier.identity, RichEditorEnableAutoSpacingModifier, enable);
+    return this;
+  }
+  compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorCompressLeadingPunctuationModifier.identity, RichEditorCompressLeadingPunctuationModifier, enable);
     return this;
   }
   undoStyle(style: Optional<UndoStyle>): RichEditorAttribute {

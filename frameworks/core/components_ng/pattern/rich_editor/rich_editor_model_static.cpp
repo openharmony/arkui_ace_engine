@@ -164,6 +164,16 @@ void RichEditorModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, bool i
     pattern->SetEnableHapticFeedback(isEnabled);
 }
 
+void RichEditorModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty,
+        CompressLeadingPunctuation, enabled.value_or(false), frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled.value_or(false));
+}
+
 void RichEditorModelStatic::SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
     const std::optional<bool>& supportAvoidance)
 {
