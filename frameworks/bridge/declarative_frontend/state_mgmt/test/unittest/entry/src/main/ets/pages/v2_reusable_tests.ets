@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ResetStateVarsOnReuseTestsV2 } from '../../v2_tests/resetStateVarsOnReuseTestsV2'
+import { ResetReuseTestsV2 } from '../../v2_tests/resetReuseTestsV2'
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
 
@@ -70,7 +70,7 @@ struct ReusableV2Child {
   }
   aboutToAppear() {
     setTimeout(() => {
-        TestRunner.bind(this)(new ResetStateVarsOnReuseTestsV2('resetVarsOnReuse'));
+        TestRunner.bind(this)(new ResetReuseTestsV2('resetVarsOnReuse'));
         router.back();
         PageController.notifyPageFinished();
     }, 100);
