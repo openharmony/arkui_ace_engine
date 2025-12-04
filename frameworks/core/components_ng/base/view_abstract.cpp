@@ -7116,6 +7116,7 @@ void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
 void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetFocusable, frameNode, focusable);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
