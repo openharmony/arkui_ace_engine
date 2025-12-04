@@ -1253,6 +1253,24 @@ void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSText::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSText::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetFallbackLineSpacing(enabled);
+}
+
 void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
 {
     TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
@@ -1412,6 +1430,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
+    JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

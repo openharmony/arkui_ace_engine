@@ -105,6 +105,8 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetTextVerticalAlign(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

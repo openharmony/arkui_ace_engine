@@ -2765,6 +2765,42 @@ bool TextFieldModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetIncludeFontPadding(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled);
+}
+
+void TextFieldModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, IncludeFontPadding, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled);
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, FallbackLineSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
 {
     CHECK_NULL_VOID(frameNode);

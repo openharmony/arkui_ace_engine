@@ -954,6 +954,8 @@ public:
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(IncludeFontPadding, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(FallbackLineSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
 
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);

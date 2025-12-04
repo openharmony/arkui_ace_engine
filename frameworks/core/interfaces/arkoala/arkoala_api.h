@@ -3460,6 +3460,12 @@ struct ArkUITextModifier {
     void (*setTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
     ArkUI_Int32 (*getTextDirection)(ArkUINodeHandle node);
     void (*resetTextDirection)(ArkUINodeHandle node);
+    void (*setIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool includeFontPadding);
+    void (*resetIncludeFontPadding)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIncludeFontPadding)(ArkUINodeHandle node);
+    void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
+    void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -5231,6 +5237,12 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
     ArkUI_Int32 (*getTextAreaDirection)(ArkUINodeHandle node);
     void (*resetTextAreaDirection)(ArkUINodeHandle node);
+    void (*setIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool includeFontPadding);
+    void (*resetIncludeFontPadding)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIncludeFontPadding)(ArkUINodeHandle node);
+    void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
+    void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5485,6 +5497,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
     ArkUI_Int32 (*getTextInputDirection)(ArkUINodeHandle node);
     void (*resetTextInputDirection)(ArkUINodeHandle node);
+    void (*setIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool includeFontPadding);
+    void (*resetIncludeFontPadding)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIncludeFontPadding)(ArkUINodeHandle node);
+    void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
+    void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -6577,6 +6595,10 @@ struct ArkUISearchModifier {
     void (*setSearchDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
     ArkUI_Int32 (*getSearchDirection)(ArkUINodeHandle node);
     void (*resetSearchDirection)(ArkUINodeHandle node);
+    void (*setIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool includeFontPadding);
+    void (*resetIncludeFontPadding)(ArkUINodeHandle node);
+    void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
+    void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

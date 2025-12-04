@@ -105,6 +105,8 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
@@ -248,6 +250,10 @@ public:
     static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);

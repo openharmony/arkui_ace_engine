@@ -12107,6 +12107,42 @@ class SearchCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 SearchCompressLeadingPunctuationModifier.identity = Symbol('searchCompressLeadingPunctuation');
 
+class SearchIncludeFontPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().search.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchIncludeFontPaddingModifier.identity = Symbol('searchIncludeFontPadding');
+
+class SearchFallbackLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().search.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchFallbackLineSpacingModifier.identity = Symbol('searchIncludeFontPadding');
+
 class SearchMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12441,6 +12477,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, SearchCompressLeadingPunctuationModifier.identity, SearchCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  includeFontPadding(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchIncludeFontPaddingModifier.identity, SearchIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchFallbackLineSpacingModifier.identity, SearchFallbackLineSpacingModifier, value);
     return this;
   }
   margin(value) {
@@ -14904,6 +14948,42 @@ class TextEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextEnableAutoSpacingModifier.identity = Symbol('textEnableAutoSpacing');
 
+class TextIncludeFontPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().text.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextIncludeFontPaddingModifier.identity = Symbol('textIncludeFontPadding');
+
+class TextFallbackLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().text.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextFallbackLineSpacingModifier.identity = Symbol('textFallbackLineSpacing');
+
 class TextShaderStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15250,6 +15330,14 @@ class ArkTextComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextEnableAutoSpacingModifier.identity, TextEnableAutoSpacingModifier, value);
+    return this;
+  }
+  includeFontPadding(value) {
+    modifierWithKey(this._modifiersWithKeys, TextIncludeFontPaddingModifier.identity, TextIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextFallbackLineSpacingModifier.identity, TextFallbackLineSpacingModifier, value);
     return this;
   }
   shaderStyle(value) {
@@ -16649,6 +16737,42 @@ class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 TextAreaCompressLeadingPunctuationModifier.identity = Symbol('textAreaCompressLeadingPunctuation');
 
+class TextAreaIncludeFontPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textArea.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaIncludeFontPaddingModifier.identity = Symbol('textAreaIncludeFontPadding');
+
+class TextAreaFallbackLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaFallbackLineSpacingModifier.identity = Symbol('textAreaFallbackLineSpacing');
+
 class TextAreaScrollBarColorModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -17105,6 +17229,14 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaCompressLeadingPunctuationModifier.identity, TextAreaCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  includeFontPadding(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaIncludeFontPaddingModifier.identity, TextAreaIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFallbackLineSpacingModifier.identity, TextAreaFallbackLineSpacingModifier, value);
     return this;
   }
   scrollBarColor(value) {
@@ -18714,6 +18846,42 @@ class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 TextInputCompressLeadingPunctuationModifier.identity = Symbol('textInputCompressLeadingPunctuation');
 
+class TextInputIncludeFontPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textInput.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputIncludeFontPaddingModifier.identity = Symbol('textInputIncludeFontPadding');
+
+class TextInputFallbackLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputFallbackLineSpacingModifier.identity = Symbol('textInputFallbackLineSpacing');
+
 class TextInputOnSecurityStateChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19218,6 +19386,14 @@ class ArkTextInputComponent extends ArkComponent {
   }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputCompressLeadingPunctuationModifier.identity, TextInputCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  includeFontPadding(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputIncludeFontPaddingModifier.identity, TextInputIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputFallbackLineSpacingModifier.identity, TextInputFallbackLineSpacingModifier, value);
     return this;
   }
   onSecurityStateChange(callback) {

@@ -92,6 +92,8 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
         style.ellipsis = ELLIPSIS;
     }
     style.enableAutoSpace = paraStyle.enableAutoSpacing;
+    style.includeFontPadding = paraStyle.includeFontPadding;
+    style.fallbackLineSpacing = paraStyle.fallbackLineSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =

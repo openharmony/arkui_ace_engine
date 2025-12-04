@@ -1705,6 +1705,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableAutoSpacing));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableAutoSpacing));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetIncludeFontPadding));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetIncludeFontPadding));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFallbackLineSpacing));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFallbackLineSpacing));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShaderStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetShaderStyle));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShaderStyle"),
@@ -1952,6 +1960,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCompressLeadingPunctuation));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCompressLeadingPunctuation));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetIncludeFontPadding));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetIncludeFontPadding));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFallbackLineSpacing));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetFallbackLineSpacing));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetMargin));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
@@ -2654,6 +2670,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCompressLeadingPunctuation));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCompressLeadingPunctuation));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetIncludeFontPadding));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetIncludeFontPadding));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFallbackLineSpacing));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFallbackLineSpacing));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setController"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetController));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
@@ -3091,6 +3115,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCompressLeadingPunctuation));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCompressLeadingPunctuation));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetIncludeFontPadding));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetIncludeFontPadding));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFallbackLineSpacing));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFallbackLineSpacing));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSecurityStateChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnSecurityStateChange));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSecurityStateChange"),

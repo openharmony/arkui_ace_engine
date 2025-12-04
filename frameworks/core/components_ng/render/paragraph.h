@@ -192,6 +192,8 @@ struct ParagraphStyle {
     bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
     bool compressLeadingPunctuation = false;
+    bool includeFontPadding = false;
+    bool fallbackLineSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -203,7 +205,8 @@ struct ParagraphStyle {
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
                enableAutoSpacing == others.enableAutoSpacing &&
-               compressLeadingPunctuation == others.compressLeadingPunctuation;
+               compressLeadingPunctuation == others.compressLeadingPunctuation &&
+               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -235,6 +238,10 @@ struct ParagraphStyle {
         result += enableAutoSpacing;
         result += ", compressLeadingPunctuation: ";
         result += compressLeadingPunctuation;
+        result += ", includeFontPadding: ";
+        result += includeFontPadding;
+        result += ", fallbackLineSpacing: ";
+        result += fallbackLineSpacing;
         return result;
     }
 };
