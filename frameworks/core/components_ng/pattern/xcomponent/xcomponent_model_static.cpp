@@ -235,6 +235,7 @@ void XComponentStaticPattern::RegisterSurfaceInitEvent()
         pattern->HandleSurfaceInitEvent();
     };
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSurfaceInitEvent(std::move(surfaceInitEvent));
