@@ -490,31 +490,30 @@ export class FrameNode implements MaterializedBase {
     public getLayoutPosition(): NodePosition {
         return FrameNodeExtender.getLayoutPosition(this);
     }
-   public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigBorderWidth(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
+        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth_serialize(this);
+        return {
+            top: borderWidth.top, left: borderWidth.left,
+            bottom: borderWidth.bottom, right: borderWidth.right
+        };
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigPadding(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let padding = FrameNodeExtender.getUserConfigPadding_serialize(this)
+        return {
+            top: padding.top, left: padding.left,
+            bottom: padding.bottom, right: padding.right
+        }
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigMargin(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let margin = FrameNodeExtender.getUserConfigMargin_serialize(this)
+        return {
+            top: margin.top, left: margin.left,
+            bottom: margin.bottom, right: margin.right
+        }
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        let sizeTLengthMetrics: SizeTLengthMetrics = FrameNodeExtender.getUserConfigSize(this);
-        let result: SizeT<LengthMetrics> = {
-            width: sizeTLengthMetrics.width,
-            height: sizeTLengthMetrics.height
-        };
-        return result;
+        let size = FrameNodeExtender.getUserConfigSize_serialize(this)
+        return { width: size.width, height: size.height }
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
