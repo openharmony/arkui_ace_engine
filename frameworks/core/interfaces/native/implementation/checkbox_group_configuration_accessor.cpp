@@ -76,6 +76,7 @@ void SetNameImpl(Ark_CheckBoxGroupConfiguration peer,
     const Ark_String* name)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(name);
     peer->name_ = Converter::Convert<std::string>(*name);
 }
 Ark_SelectStatus GetStatusImpl(Ark_CheckBoxGroupConfiguration peer)
