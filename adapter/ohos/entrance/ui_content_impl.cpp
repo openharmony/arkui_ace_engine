@@ -3340,7 +3340,7 @@ void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
+void UIContentImpl::LinkKeyFrameNode()
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3348,12 +3348,17 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         CHECK_NULL_VOID(window_);
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
+        auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
         CHECK_NULL_VOID(keyFrameNode);
         keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
         TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
@@ -3363,10 +3368,6 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
 #endif
 #endif
     TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
-    auto rootElement = context->GetRootElement();
-    CHECK_NULL_VOID(rootElement);
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
-    CHECK_NULL_VOID(rosenRenderContext);
     rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
@@ -3378,6 +3379,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
     TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
     cachedAnimateFlag_.store(true);
     cachedConfig_ = config;
+    cachedConfig_.SetKeyFrameConfigCacheState(true);
     cachedReason_ = reason;
     cachedRsTransaction_ = rsTransaction;
     cachedAvoidAreas_ = avoidAreas;
@@ -3407,6 +3409,13 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(context);
+        auto rootElement = context->GetRootElement();
+        CHECK_NULL_VOID(rootElement);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+        CHECK_NULL_VOID(rosenRenderContext);
+        rosenRenderContext->SetHasKeyFrameCache(false);
     }
     cachedAnimateFlag_.store(false);
 }
@@ -3470,10 +3479,10 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         return;
     }
     rosenRenderContext->CreateKeyFrameNode();
-    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
-    if (addNodeCallback_ && keyFrameNode_) {
+    auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
+    if (addNodeCallback_ && keyFrameNode) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-        addNodeCallback_(keyFrameNode_, rsTransaction);
+        addNodeCallback_(keyFrameNode, rsTransaction);
     }
     CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
@@ -3497,24 +3506,27 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_RETURN(context, true);
 
+    bool fromAnimateCache = config.GetKeyFrameConfig().fromAnimateCache_;
     bool animateRes = true;
     auto rootElement = context->GetRootElement();
     CHECK_NULL_RETURN(rootElement, true);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_RETURN(rosenRenderContext, true);
+    if ((reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) &&
+        !rosenRenderContext->GetIsDraggingFlag()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe start policy");
+        rosenRenderContext->SetIsDraggingFlag(true);
+        KeyFrameDragStartPolicy(context);
+        return true;
+    }
+
     switch (reason) {
-        case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetKeyFrameNode()) {
-                    rosenRenderContext->SetReDraggingFlag(true);
-                }
-                rosenRenderContext->SetIsDraggingFlag(true);
-                KeyFrameDragStartPolicy(context);
-            }
-            return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
-            rosenRenderContext->SetIsDraggingFlag(false);
-            rosenRenderContext->SetReDraggingFlag(false);
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe stop policy: from cache %{public}d", fromAnimateCache);
+            if (!fromAnimateCache) {
+                rosenRenderContext->SetIsDraggingFlag(false);
+            }
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
@@ -3523,6 +3535,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
             if (!animateRes) {
                 CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
+                rosenRenderContext->SetHasKeyFrameCache(true);
                 return true;
             }
             return false;

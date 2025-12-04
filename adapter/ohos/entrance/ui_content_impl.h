@@ -435,7 +435,7 @@ public:
         void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
 
-    void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode) override;
+    void LinkKeyFrameNode() override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
@@ -575,7 +575,6 @@ protected:
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
     std::function<void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
-    std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode> keyFrameNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;
     OHOS::Rosen::WindowSizeChangeReason cachedReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;

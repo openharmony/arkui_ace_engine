@@ -24,6 +24,7 @@ struct KeyFrameConfig {
     bool enableKeyFrame_ = false;
     int32_t animationDuration_ = 0;
     int32_t animationDelay_ = 0;
+    bool fromAnimateCache_ = false;
 };
 
 class ViewportConfig {
@@ -140,6 +141,11 @@ public:
         keyFrameConfig_.enableKeyFrame_ = enableKeyFrame;
         keyFrameConfig_.animationDuration_ = animationDuration;
         keyFrameConfig_.animationDelay_ = animationDelay;
+    }
+
+    void SetKeyFrameConfigCacheState(bool fromAnimateCache)
+    {
+        keyFrameConfig_.fromAnimateCache_ = fromAnimateCache;
     }
 
     KeyFrameConfig GetKeyFrameConfig() const

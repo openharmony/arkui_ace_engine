@@ -7659,9 +7659,8 @@ void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 
 void RosenRenderContext::RemoveKeyFrameNode()
 {
-    if (reDraggingFlag_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
-        reDraggingFlag_ = false;
+    if (GetIsDraggingFlag() || GetHasKeyFrameCache()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for dragging or has animate cache");
         return;
     }
     if (keyFrameNode_) {

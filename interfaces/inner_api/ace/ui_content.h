@@ -590,7 +590,7 @@ public:
     virtual void AddKeyFrameNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
-    virtual void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>&) {};
+    virtual void LinkKeyFrameNode() {};
 
     // intent framework
     virtual void SetIntentParam(const std::string& intentInfoSerialized,

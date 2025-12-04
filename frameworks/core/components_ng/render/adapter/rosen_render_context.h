@@ -526,14 +526,14 @@ public:
         isDraggingFlag_ = isDraggingFlag;
     }
 
-    bool GetReDraggingFlag() const
+    bool GetHasKeyFrameCache() const
     {
-        return reDraggingFlag_;
+        return hasKeyFrameCache_;
     }
 
-    void SetReDraggingFlag(bool reDraggingFlag)
+    void SetHasKeyFrameCache(bool hasCache)
     {
-        reDraggingFlag_ = reDraggingFlag;
+        hasKeyFrameCache_ = hasCache;
     }
 
     bool IsOnRenderTree() override
@@ -899,7 +899,7 @@ protected:
     std::function<void()> callbackAnimateEnd_ = nullptr;
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
-    bool reDraggingFlag_ = false;
+    bool hasKeyFrameCache_ = false;
     PipelineContext* pipeline_;
 
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
