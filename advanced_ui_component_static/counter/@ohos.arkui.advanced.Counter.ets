@@ -104,11 +104,11 @@ export class CommonOptions {
 }
 
 export class InlineStyleOptions extends CommonOptions {
-  public value?: double;
-  public min?: double;
-  public max?: double;
+  public value?: int;
+  public min?: int;
+  public max?: int;
   public textWidth?: double;
-  public onChange?: (value: double) => void;
+  public onChange?: (value: int) => void;
 }
 
 export class NumberStyleOptions extends InlineStyleOptions {
@@ -235,8 +235,8 @@ class CounterConstant {
   public static readonly KEYCODE_MOVE_END: number = 2082;
   public static readonly KEYCODE_TAB: number = 2049;
   public static readonly KEYCODE_ESC: number = 2070;
-  public static readonly COUNTER_MIN_VALUE: number = 0;
-  public static readonly COUNTER_MAX_VALUE: number = 999;
+  public static readonly COUNTER_MIN_VALUE: int = 0;
+  public static readonly COUNTER_MAX_VALUE: int = 999;
   public static readonly JANUARY: int = 1;
   public static readonly FEBRUARY: int = 2;
   public static readonly MARCH: int = 3;
@@ -283,7 +283,7 @@ export struct CounterComponent {
   @State hasFocusText3: boolean = false
   @State subBtnFocusWidth: string = '0vp'
   @State addBtnFocusWidth: string = '0vp'
-  @State value: double = 0;
+  @State value: int = 0;
   @State year: int = 0;
   @State month: int = 0;
   @State day: int = 0;
@@ -296,8 +296,8 @@ export struct CounterComponent {
   @State hasInputText2: boolean = false;
   @State hasInputText3: boolean = false;
   @State textWidth: double = 0;
-  @State min: double = CounterConstant.COUNTER_MIN_VALUE as double;
-  @State max: double = CounterConstant.COUNTER_MAX_VALUE as double;
+  @State min: int = CounterConstant.COUNTER_MIN_VALUE as int;
+  @State max: int = CounterConstant.COUNTER_MAX_VALUE as int;
   private maxYear: int = CounterConstant.COUNTER_MAX_YEAR;
   private minYear: int = CounterConstant.COUNTER_MIN_YEAR;
   private numberStrList: Array<string> = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
@@ -307,7 +307,7 @@ export struct CounterComponent {
   private onFocusDecrease?: () => void;
   private onBlurIncrease?: () => void;
   private onBlurDecrease?: () => void;
-  private onChange?: (value: double) => void;
+  private onChange?: (value: int) => void;
   private onDateChange?: (date: DateData) => void;
   private timeoutID1: int = -1;
   private timeoutID2: int = -1;
@@ -320,9 +320,9 @@ export struct CounterComponent {
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
-  private initFlag: boolean = true;
   private increaseStrCache: string | undefined = undefined;
   private reduceStrCache: string | undefined = undefined;
+  private lastOptionValue: int = -1;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -420,17 +420,17 @@ export struct CounterComponent {
     if (this.numberStyleOptions.label === undefined) {
       this.numberStyleOptions.label = '';
     }
-    if (this.initFlag) {
-      this.initFlag = false;
-      this.value = this.numberStyleOptions.value ?? 0;
+    if (this.numberStyleOptions.value !== undefined && this.numberStyleOptions.value !== this.lastOptionValue) {
+      this.lastOptionValue = this.numberStyleOptions.value as int;
+      this.value = this.numberStyleOptions.value as int;
       this.onChange?.(this.value);
       this.inputValue = String(this.value);
     }
     if (this.numberStyleOptions.min !== undefined) {
-      this.min = this.numberStyleOptions.min as double;
+      this.min = (this.numberStyleOptions.min as int) >= 0 ? (this.numberStyleOptions.min as int) : CounterConstant.COUNTER_MIN_VALUE;
     }
     if (this.numberStyleOptions.max !== undefined) {
-      this.max = this.numberStyleOptions.max as double;
+      this.max = (this.numberStyleOptions.max as int) >= 0 ? (this.numberStyleOptions.max as int) : CounterConstant.COUNTER_MAX_VALUE;
     }
     if (this.min > this.max) {
       this.min = this.max;
@@ -491,17 +491,17 @@ export struct CounterComponent {
   }
 
   private updateInlineStyleOptions() {
-    if (this.initFlag) {
-      this.initFlag = false;
-      this.value = this.inlineStyleOptions.value ?? 0;
+    if (this.inlineStyleOptions.value !== undefined && this.inlineStyleOptions.value !== this.lastOptionValue) {
+      this.lastOptionValue = this.inlineStyleOptions.value as int;
+      this.value = this.inlineStyleOptions.value as int;
       this.onChange?.(this.value);
       this.inputValue = String(this.value);
     }
     if (this.inlineStyleOptions.min !== undefined) {
-      this.min = this.inlineStyleOptions.min as double;
+      this.min = (this.inlineStyleOptions.min as int) >= 0 ? (this.inlineStyleOptions.min as int) : CounterConstant.COUNTER_MIN_VALUE;
     }
     if (this.inlineStyleOptions.max !== undefined) {
-      this.max = this.inlineStyleOptions.max as double;
+      this.max = (this.inlineStyleOptions.max as int) >= 0 ? (this.inlineStyleOptions.max as int) : CounterConstant.COUNTER_MAX_VALUE;
     }
     if (this.min > this.max) {
       this.min = this.max;
@@ -567,9 +567,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.year !== undefined) {
       const yearValue = this.dateStyleOptions.year as int;
       if (yearValue >= this.minYear && yearValue <= this.maxYear) {
-        if (this.year === 0) {
-          this.year = yearValue;
-        }
+        this.year = yearValue;
       } else {
         this.year = CounterConstant.COUNTER_MIN_YEAR;
       }
@@ -579,9 +577,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.month !== undefined) {
       const monthValue = this.dateStyleOptions.month as int;
       if (monthValue <= CounterConstant.COUNTER_MAX_MONTH && monthValue >= CounterConstant.COUNTER_MIN_MONTH) {
-        if (this.month === 0) {
-          this.month = monthValue;
-        }
+        this.month = monthValue;
       } else {
         this.month = CounterConstant.COUNTER_INITIAL_MONTH;
       }
@@ -591,9 +587,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.day !== undefined) {
       const dateValue = this.dateStyleOptions.day as int;
       if (dateValue <= this.getDayNumber() && dateValue >= CounterConstant.COUNTER_MIN_DAY) {
-        if (this.day === 0) {
-          this.day = dateValue;
-        }
+        this.day = dateValue;
       }  else {
         this.day = CounterConstant.COUNTER_INITIAL_DAY;
       }
@@ -2031,22 +2025,24 @@ export struct CounterComponent {
                   clearTimeout(this.timeoutID1);
                   this.timeoutID1 = -1;
                 }
-                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                  Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue);
+                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
+                if (this.inputValue !== '' && inputValueToInt <= this.max &&
+                  inputValueToInt >= this.min) {
+                  this.value = inputValueToInt;
                   this.onChange?.(this.value);
                   this.hasInputText1 = false;
                 } else {
-                  if (Number(this.inputValue) > this.max ||
-                    (Number(this.inputValue) < this.min &&
+                  if (inputValueToInt > this.max ||
+                    (inputValueToInt < this.min &&
                       this.inputValue.length <= String(this.min).length)) {
                     this.inputValue = c;
                   }
                   if (value.length < this.getMaxLength()) {
                     this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                        Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue);
+                      const inputValueInTimer: int = Double.toInt(Number.parseInt(this.inputValue));
+                      if (this.inputValue !== '' && inputValueInTimer <= this.max &&
+                        inputValueInTimer >= this.min) {
+                        this.value = inputValueInTimer;
                         this.onChange?.(this.value);
                       }
                       this.inputValue = String(this.value);
@@ -2064,8 +2060,9 @@ export struct CounterComponent {
                 }
                 this.hasInputText1 = false;
                 this.value -= 1;
-                if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue);
+                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
+                if (inputValueToInt >= this.min && inputValueToInt <= this.max) {
+                  this.value = inputValueToInt;
                   this.onChange?.(this.value);
                   this.updateInlineEnableSate();
                 } else {
@@ -2179,22 +2176,24 @@ export struct CounterComponent {
                   clearTimeout(this.timeoutID1);
                   this.timeoutID1 = -1;
                 }
-                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                  Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue);
+                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
+                if (this.inputValue !== '' && inputValueToInt <= this.max &&
+                  inputValueToInt >= this.min) {
+                  this.value = inputValueToInt;
                   this.onChange?.(this.value);
                   this.hasInputText1 = false;
                 } else {
-                  if (Number(this.inputValue) > this.max ||
-                    (Number(this.inputValue) < this.min &&
+                  if (inputValueToInt > this.max ||
+                    (inputValueToInt < this.min &&
                       this.inputValue.length <= String(this.min).length)) {
                     this.inputValue = c;
                   }
                   if (value.length < this.getMaxLength()) {
                     this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
-                        Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue);
+                      const inputValueInTimer: int = Double.toInt(Number.parseInt(this.inputValue));
+                      if (this.inputValue !== '' && inputValueInTimer <= this.max &&
+                        inputValueInTimer >= this.min) {
+                        this.value = inputValueInTimer;
                         this.onChange?.(this.value);
                       }
                       this.inputValue = String(this.value)
@@ -2212,8 +2211,9 @@ export struct CounterComponent {
                 }
                 this.hasInputText1 = false;
                 this.value -= 1;
-                if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue);
+                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
+                if (inputValueToInt >= this.min && inputValueToInt <= this.max) {
+                  this.value = inputValueToInt;
                   this.onChange?.(this.value);
                   this.updateInlineEnableSate();
                 } else {
