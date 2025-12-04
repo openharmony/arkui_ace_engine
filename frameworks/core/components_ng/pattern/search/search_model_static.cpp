@@ -686,4 +686,13 @@ void SearchModelStatic::SetCancelSymbolIcon(FrameNode *frameNode,
     pattern->SetCancelSymbolIcon();
 }
 
+void SearchModelStatic::SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue)
+{
+    SearchModelNG::SetIncludeFontPadding(frameNode, optValue.value_or(false));
+}
+
+void SearchModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, std::optional<bool>& optValue)
+{
+    SearchModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
+}
 } // namespace OHOS::Ace::NG

@@ -110,6 +110,8 @@ public:
     static void SetMargin(FrameNode* frameNode);
     static void SetBackBorder(FrameNode* frameNode);
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
+    static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue);
 private:
 
 };
