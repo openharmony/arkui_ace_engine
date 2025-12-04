@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,9 @@ public:
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
     void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    void OnTextureRefresh(int32_t instanceId, int64_t textureId);
+#endif
     void NativeXComponentInit()
     {
         if (!isTypedNode_) {
@@ -394,6 +397,9 @@ protected:
     bool isCNode_ = false;
     bool useNodeHandleAccessibilityProvider_ = false;
     RefPtr<RenderSurface> renderSurface_;
+#ifdef RENDER_EXTRACT_SUPPORTED
+    WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
+#endif
     OffsetF localPosition_;
     OffsetF surfaceOffset_;
     SizeF drawSize_;
