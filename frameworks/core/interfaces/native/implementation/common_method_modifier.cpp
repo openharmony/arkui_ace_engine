@@ -56,6 +56,7 @@
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
@@ -5098,8 +5099,10 @@ void SetOverlayImpl(Ark_NativePointer node,
                 ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
                 }, node);
         },
-        [](const Ark_ComponentContent& src) {
-            LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
+        [frameNode, overlay](const Ark_ComponentContent& src) {
+            FrameNodePeer* nodePeer = src ? reinterpret_cast<FrameNodePeer *>(src) : nullptr;
+            auto uiNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+            ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
         },
         [frameNode]() {
             ViewAbstractModelStatic::ResetOverlay(frameNode);
