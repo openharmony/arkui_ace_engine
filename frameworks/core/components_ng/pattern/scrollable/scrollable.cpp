@@ -746,10 +746,11 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         }
     }
 #endif
-    auto mainDelta = info.GetMainDelta();
+    auto mainDelta = info.GetMainDelta() + prevRemainDelta_;
     lastMainDelta_ = mainDelta;
-    auto isReverse = isReverseCallback_ && isReverseCallback_();
-    mainDelta = isReverse ? Round(-mainDelta) : Round(mainDelta);
+    auto prevMainDelta = isReverseCallback_ && isReverseCallback_() ? -mainDelta : mainDelta;
+    mainDelta = Round(prevMainDelta);
+    prevRemainDelta_ = prevMainDelta - mainDelta;
     JankFrameReport::GetInstance().RecordFrameUpdate();
     auto source = SCROLL_FROM_UPDATE;
     auto isAxisEvent = IsMouseWheelScroll(info);
