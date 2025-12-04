@@ -49,6 +49,7 @@ public:
     using OnGestureSwipeEvent = std::function<void(int32_t, const AnimationCallbackInfo&)>;
     using OnAnimationStartEvent =
         std::function<void(int32_t ngIndex, int32_t ngTargetIndex, const AnimationCallbackInfo& info)>;
+    using OnTabBarItemsChangeEvent = std::function<void()>;
     Tabs();
     Tabs(RefPtr<FrameNode>& node);
     ~Tabs();
@@ -63,6 +64,7 @@ public:
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option);
     void SetTabBarTranslate(const NG::TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
+    void SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event);
     void UpdateDividerOpacity(const double opacity);
 
     void UpdateTabBarBrightness(const BrightnessOption& brightnessOption);
