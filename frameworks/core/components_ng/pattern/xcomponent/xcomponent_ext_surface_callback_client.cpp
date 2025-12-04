@@ -36,4 +36,13 @@ void XComponentExtSurfaceCallbackClient::ProcessSurfaceDestroy()
     CHECK_NULL_VOID(xcPattern);
     xcPattern->OnSurfaceDestroyed();
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void XComponentExtSurfaceCallbackClient::ProcessTextureRefresh(int32_t instanceId, int64_t textureId)
+{
+    auto xcPattern = weakXComponentPattern_.Upgrade();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->OnTextureRefresh(instanceId, textureId);
+}
+#endif
 } // namespace OHOS::Ace::NG
