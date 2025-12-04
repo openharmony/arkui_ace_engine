@@ -470,6 +470,7 @@ std::function<void(NG::LayoutConstraintF& layoutConstraint)> ConvertFunOnMeasure
         CHECK_NULL_VOID(vm);
         CHECK_NULL_VOID(callbackAni);
         ani_env* env = nullptr;
+        GetAniEnv(vm, &env);
         CHECK_NULL_VOID(env);
         auto layoutConstraintAni = CreateLayoutConstraintF(env, constraint);
         if (!layoutConstraintAni) {
@@ -559,6 +560,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawCallback
         CHECK_NULL_VOID(vm);
         CHECK_NULL_VOID(callbackAni);
         ani_env* env = nullptr;
+        GetAniEnv(vm, &env);
         CHECK_NULL_VOID(env);
         auto drawingContext = CreateDrawingContext(env, context);
         if (!drawingContext) {
