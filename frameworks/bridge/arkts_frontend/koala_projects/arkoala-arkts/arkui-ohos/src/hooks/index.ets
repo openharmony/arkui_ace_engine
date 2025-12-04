@@ -44,7 +44,7 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
@@ -83,6 +83,32 @@ import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 
 export function hookId(component: object, value?: string) {}
+
+export interface KeyboardShortcut { value?: string | FunctionKey; keys?: Array<ModifierKey>; action?: () => void; }
+
+export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array<KeyboardShortcut>): void {
+  if (shortcuts && shortcuts.length > 0) {
+    for (let i = 0; i < shortcuts.length; i++) {
+      const shortcut = shortcuts[i];
+      peer.setKeyboardShortcutAttribute(
+        shortcut.value as string | FunctionKey | undefined,
+        shortcut.keys as Array<ModifierKey> | undefined,
+        shortcut.action as (() => void) | undefined
+      );
+    }
+  }
+}
+
+export function hookMergeKeyboardShortcuts(
+  targetModifier: CommonMethodModifier,
+  sourceShortcuts: Array<KeyboardShortcut>): void {
+  if (sourceShortcuts && sourceShortcuts.length > 0) {
+    for (let i = 0; i < sourceShortcuts.length; i++) {
+      const shortcut = sourceShortcuts[i];
+      targetModifier.keyboardShortcut(shortcut.value, shortcut.keys, shortcut.action);
+    }
+  }
+}
 
 export function hookGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
