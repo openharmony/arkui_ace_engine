@@ -722,6 +722,34 @@ void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
     RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, false);
 }
 
+void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, value);
+}
+
+void ResetRichEditorIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetRichEditorFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, value);
+}
+
+void ResetRichEditorFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
 void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -825,6 +853,10 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
         .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
         .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
+        .setRichEditorIncludeFontPadding = SetRichEditorIncludeFontPadding,
+        .resetRichEditorIncludeFontPadding = ResetRichEditorIncludeFontPadding,
+        .setRichEditorFallbackLineSpacing = SetRichEditorFallbackLineSpacing,
+        .resetRichEditorFallbackLineSpacing = ResetRichEditorFallbackLineSpacing,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,

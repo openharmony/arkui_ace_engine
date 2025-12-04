@@ -462,6 +462,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
     compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
+    includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
+    fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

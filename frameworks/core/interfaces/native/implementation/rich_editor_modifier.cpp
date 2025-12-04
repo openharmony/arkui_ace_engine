@@ -751,6 +751,22 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, convValue.value_or(true));
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, convValue.value_or(true));
+}
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
                               const Opt_CustomNodeBuilder* content,
@@ -871,6 +887,8 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
         RichEditorAttributeModifier::SetStopBackPressImpl,
         RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
+        RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
+        RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,

@@ -2346,6 +2346,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCompressLeadingPunctuation));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCompressLeadingPunctuation));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetIncludeFontPadding));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetIncludeFontPadding));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFallbackLineSpacing));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetFallbackLineSpacing));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUndoStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetUndoStyle));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUndoStyle"),

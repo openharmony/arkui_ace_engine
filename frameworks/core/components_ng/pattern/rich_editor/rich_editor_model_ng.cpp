@@ -666,6 +666,26 @@ void RichEditorModelNG::SetCompressLeadingPunctuation(bool enabled)
     pattern->SetCompressLeadingPunctuation(enabled);
 }
 
+void RichEditorModelNG::SetIncludeFontPadding(bool isIncludeFontPadding)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(bool isFallbackLineSpacing)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFallbackLineSpacing(isFallbackLineSpacing);
+}
+
 void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -707,6 +727,24 @@ void RichEditorModelNG::SetCompressLeadingPunctuation(FrameNode* frameNode, bool
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool isIncludeFontPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool isFallbackLineSpacing)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetFallbackLineSpacing(isFallbackLineSpacing);
 }
 
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)

@@ -1543,6 +1543,24 @@ void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
 }
 
+void JSRichEditor::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool includeFontPadding = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        includeFontPadding = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetIncludeFontPadding(includeFontPadding);
+}
+
+void JSRichEditor::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool fallbackLineSpacing = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        fallbackLineSpacing = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetFallbackLineSpacing(fallbackLineSpacing);
+}
+
 bool JSRichEditor::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
 {
     bool ret = JSContainerBase::ParseColorMetricsToColor(jsValue, result, resObj);
@@ -1671,6 +1689,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
     JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
+    JSClass<JSRichEditor>::StaticMethod("includeFontPadding", &JSRichEditor::SetIncludeFontPadding);
+    JSClass<JSRichEditor>::StaticMethod("fallbackLineSpacing", &JSRichEditor::SetFallbackLineSpacing);
     JSClass<JSRichEditor>::StaticMethod("singleLine", &JSRichEditor::SetSingleLine);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
