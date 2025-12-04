@@ -191,7 +191,7 @@ public:
 
     virtual void ProcessCustomKeyboard(bool matched, int32_t nodeId) {}
 
-    virtual void CloseTextCustomKeyboard(int32_t nodeId) {}
+    virtual void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) {}
 
     virtual void OnVirtualKeyboardAreaChanged() {}
 

@@ -69,7 +69,7 @@ void TextFieldManagerNG::ProcessCustomKeyboard(bool matched, int32_t nodeId)
     textBasePattern->ProcessCustomKeyboard(matched, nodeId);
 }
 
-void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId)
+void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension)
 {
     auto preNode = preNode_.Upgrade();
     CHECK_NULL_VOID(preNode);
@@ -77,7 +77,7 @@ void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId)
     CHECK_NULL_VOID(prePattern);
     auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
     CHECK_NULL_VOID(textBasePattern);
-    textBasePattern->CloseTextCustomKeyboard(nodeId);
+    textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
 }
 
 bool TextFieldManagerNG::OnBackPressed()

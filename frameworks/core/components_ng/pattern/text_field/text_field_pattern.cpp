@@ -1675,11 +1675,13 @@ void TextFieldPattern::ProcessCustomKeyboard(bool matched, int32_t nodeId)
     }
 }
 
-void TextFieldPattern::CloseTextCustomKeyboard(int32_t nodeId)
+void TextFieldPattern::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension)
 {
     auto preNode = GetHost();
     CHECK_NULL_VOID(preNode);
-    if ((HasCustomKeyboard()) && GetIsCustomKeyboardAttached() && nodeId != preNode->GetId()) {
+    bool isCloseCustomKeyboard =
+        HasCustomKeyboard() && GetIsCustomKeyboardAttached() && (nodeId != preNode->GetId() || isUIExtension);
+    if (isCloseCustomKeyboard) {
         CloseCustomKeyboard();
     }
 }

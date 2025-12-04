@@ -39,7 +39,7 @@ public:
     void CloseKeyboardInProcess();
     void CloseKeyboardInPipelineDestroy();
     void CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode);
-    void CloseCustomKeyboard();
+    void CloseCustomKeyboard(bool isUIExtension = false);
     // Hide the keyboard across processes
     void HideKeyboardAcrossProcesses();
     void ProcessModalPageScene();

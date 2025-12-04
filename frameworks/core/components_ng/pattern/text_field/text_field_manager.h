@@ -268,7 +268,7 @@ public:
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     bool NeedCloseKeyboard();
     void ProcessCustomKeyboard(bool matched, int32_t nodeId);
-    void CloseTextCustomKeyboard(int32_t nodeId);
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension);
 
     int32_t GetFocusFieldOrientation() const
     {
