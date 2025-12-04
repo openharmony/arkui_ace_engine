@@ -69,7 +69,10 @@ export function ArkComponentRoot(
             }
             rememberDisposable(() => {
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                    ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
                     component.aboutToAppear();
+                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                 });
                 return true;
             }, (_: boolean | undefined) => {
