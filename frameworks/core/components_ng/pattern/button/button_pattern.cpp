@@ -197,6 +197,9 @@ void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const
         V2::ConvertWrapTextHeightAdaptivePolicyToString(
             layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
             .c_str());
+    if (layoutProperty->GetTextAlign().has_value()) {
+        labelJsValue->Put("textAlign", V2::ConvertWrapTextAlignToString(layoutProperty->GetTextAlignValue()).c_str());
+    }
     labelJsValue->Put("font", fontJsValue->ToString().c_str());
     json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
 
@@ -379,8 +382,17 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
+    UpdateTextAlignProperty(layoutProperty, textLayoutProperty);
     // update text style defined by buttonStyle and control size
     UpdateTextStyle(layoutProperty, textLayoutProperty);
+}
+
+void ButtonPattern::UpdateTextAlignProperty(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (layoutProperty->GetTextAlign().has_value()) {
+        textLayoutProperty->UpdateTextAlign(layoutProperty->GetTextAlign().value());
+    }
 }
 
 void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType)
@@ -606,7 +618,6 @@ void ButtonPattern::InitButtonLabel()
     } else {
         textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
     }
-
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
@@ -1047,6 +1058,10 @@ void ButtonPattern::DumpInfo()
     if (layoutProperty->HasHeightAdaptivePolicy()) {
         DumpLog::GetInstance().AddDesc(
             "HeightAdaptivePolicy: " + ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
+    }
+    if (layoutProperty->HasTextAlign()) {
+        DumpLog::GetInstance().AddDesc(
+            "TextAlign: " + StringUtils::ToString(layoutProperty->GetTextAlignValue()));
     }
 
     DumpSubInfo(layoutProperty);

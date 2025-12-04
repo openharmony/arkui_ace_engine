@@ -123,6 +123,8 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, float maxFontScale);
     static float GetMinFontScale(FrameNode* frameNode);
     static float GetMaxFontScale(FrameNode* frameNode);
+    void ResetTextAlign() override;
+    static void ResetTextAlign(FrameNode* frameNode);
 
 private:
     static void CreateWithLabel(const std::string& label);

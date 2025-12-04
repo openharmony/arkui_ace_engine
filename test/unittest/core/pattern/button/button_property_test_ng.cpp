@@ -1107,4 +1107,47 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest025, TestSize.Level1)
     buttonModelNG.SetFontSize(&frameNode, FONT_SIZE);
     EXPECT_EQ(buttonModelNG.GetFontSize(&frameNode), FONT_SIZE);
 }
+
+/**
+ * @tc.name: ButtonPropertyTest026
+ * @tc.desc: Test textAlign properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create modelNg with label.
+     */
+    ButtonParameters buttonParameters;
+    buttonParameters.textAlign = std::make_optional(TextAlign::CENTER);
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. Call SetTextAlign.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    buttonModelNG.SetLabelStyle(frameNode, buttonParameters);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    /**
+     * @tc.steps: step3. Get LayoutProperty.
+     */
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step4. Call UpdateTextAlignProperty.
+     */
+    buttonPattern->UpdateTextAlignProperty(buttonLayoutProperty, textLayoutProperty);
+    /**
+     * @tc.steps: step5. ASSERT textLayoutProperty`s TextAlign.
+     */
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::START), TextAlign::CENTER);
+}
 } // namespace OHOS::Ace::NG

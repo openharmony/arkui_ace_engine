@@ -112,6 +112,7 @@ bool ParseAllBorderRadius(const JSRef<JSObject>& object, std::optional<CalcDimen
 } // namespace
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
@@ -347,6 +348,18 @@ void JSButton::CompleteParameters(ButtonParameters& buttonParameters)
     }
 }
 
+bool JSButton::SetTextAlign(JSRef<JSVal>& textAlign, ButtonParameters& buttonParameters)
+{
+    if (!textAlign->IsNull() && textAlign->IsNumber()) {
+        auto textAlignValue = textAlign->ToNumber<int32_t>();
+        if (textAlignValue >= 0 && textAlignValue < static_cast<int32_t>(TEXT_ALIGN.size())) {
+            buttonParameters.textAlign = TEXT_ALIGN[textAlignValue];
+            return true;
+        }
+    }
+    return false;
+}
+
 void JSButton::SetLableStyle(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -385,6 +398,11 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
     JSRef<JSVal> font = obj->GetProperty("font");
     GetFontContent(font, buttonParameters);
+
+    JSRef<JSVal> textAlign = obj->GetProperty("textAlign");
+    if (!SetTextAlign(textAlign, buttonParameters)) {
+        ButtonModel::GetInstance()->ResetTextAlign();
+    }
 
     CompleteParameters(buttonParameters);
     ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);

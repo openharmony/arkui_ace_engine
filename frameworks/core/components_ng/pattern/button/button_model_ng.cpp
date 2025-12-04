@@ -874,6 +874,28 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
     if (buttonParameters.fontStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
     }
+    if (buttonParameters.textAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, buttonParameters.textAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    }
+}
+
+void ButtonModelNG::ResetTextAlign()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetTextAlign(frameNode);
+}
+
+void ButtonModelNG::ResetTextAlign(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetTextAlign();
 }
 
 void ButtonModelNG::SetSize(

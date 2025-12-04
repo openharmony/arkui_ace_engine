@@ -56,6 +56,7 @@ public:
         value->propMinFontSize_ = CloneMinFontSize();
         value->propMaxFontSize_ = CloneMaxFontSize();
         value->propHeightAdaptivePolicy_ = CloneHeightAdaptivePolicy();
+        value->propTextAlign_ = CloneTextAlign();
         return value;
     }
 
@@ -76,6 +77,7 @@ public:
         ResetMinFontSize();
         ResetMaxFontSize();
         ResetHeightAdaptivePolicy();
+        ResetTextAlign();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ButtonType, PROPERTY_UPDATE_MEASURE);
@@ -99,6 +101,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoDisable, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinFontScale, float, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxFontScale, float, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextAlign, Ace::TextAlign, PROPERTY_UPDATE_NORMAL);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutProperty);
