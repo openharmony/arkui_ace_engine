@@ -734,6 +734,38 @@ void ViewAbstractModelNG::SetBackground(std::function<void()>&& buildFunc)
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
 }
 
+void ViewAbstractModelNG::SetBackgroundWithResourceObj(
+    std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj)
+{
+    auto buildFuncCopy = buildFunc;
+    SetBackground(std::move(buildFunc));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("backgroundWithBuilder");
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode), buildFunc = std::move(buildFuncCopy)](
+        const RefPtr<ResourceObject> &resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::function<RefPtr<UINode>()> buildNodeFunc;
+        if (buildFunc) {
+            buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+                NG::ScopedViewStackProcessor builderViewStackProcessor;
+                buildFunc();
+                auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+                return customNode;
+            };
+        }
+        frameNode->SetBackgroundFunction(std::move(buildNodeFunc));
+        frameNode->UpdateBackground();
+    };
+    pattern->AddResObj("backgroundWithBuilder", resObj, std::move(updateFunc));
+}
+
 void ViewAbstractModelNG::SetCustomBackgroundColor(const Color& color)
 {
     NG::ViewAbstract::SetCustomBackgroundColor(color);
