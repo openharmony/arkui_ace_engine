@@ -1,4 +1,4 @@
-+/*
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ declare class UIUtilsImpl {
   static instance(): UIUtilsImpl;
 }
 
-export class ResetStateVarsOnReuseTestsV2 implements ITestFile {
+export class ResetReuseTestsV2 implements ITestFile {
 
   private idString : string = '';
 
