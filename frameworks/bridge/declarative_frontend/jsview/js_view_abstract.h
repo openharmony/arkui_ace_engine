@@ -249,13 +249,15 @@ public:
         NG::SheetHeight& detent, bool isReset, RefPtr<ResourceObject>& resObj);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
-    static void ParseCallback(const JSRef<JSObject>& paramObj,
+    static void ParseCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void(const float)>& callbackDidChange, const char* prop);
-    static void ParseLifeCycleCallback(const JSRef<JSObject>& paramObj, std::function<void()>& lifeCycleCallBack,
+    static void ParseLifeCycleCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
+        std::function<void()>& lifeCycleCallBack,
         const char* prop);
-    static void ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
+    static void ParseSpringBackCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void()>& sheetSpringBack, const char* prop);
-    static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+    static void ParseSheetCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
+        std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
         std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
@@ -270,8 +272,9 @@ public:
     static panda::Local<panda::JSValueRef> JsSheetSpringBack(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseModalTransitonEffect(
         const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
-    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, const JSCallbackInfo& info,
+        std::function<void()>& onAppear, std::function<void()>& onDisappear,
+        std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
         std::function<void(const int32_t& info)>& onWillDismiss);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
