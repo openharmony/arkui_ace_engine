@@ -18,9 +18,13 @@
 
 #include <vector>
 
+#include "ui/base/ace_type.h"
+
 namespace OHOS::Ace {
 
-class UiMaterial {
+class UiMaterial : public AceType {
+    DECLARE_ACE_TYPE(UiMaterial, AceType);
+
 public:
     UiMaterial() = default;
     virtual ~UiMaterial() = default;
