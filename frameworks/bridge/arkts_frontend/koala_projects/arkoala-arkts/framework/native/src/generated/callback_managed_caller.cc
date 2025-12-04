@@ -5036,6 +5036,37 @@ void callManagedContentWillScrollCallbackSync(Ark_VMContext vmContext, Ark_Int32
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCustomBuilderT_Arkui_Component_Enums_ResponseType(Ark_Int32 resourceId, Ark_ResponseType t, Ark_NativePointer parentNode, Callback_Pointer_Void continuation)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_ResponseType>(t));
+    argsSerializer.writePointer(parentNode);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCustomBuilderT_Arkui_Component_Enums_ResponseTypeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ResponseType t, Ark_NativePointer parentNode, Callback_Pointer_Void continuation)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_ResponseType>(t));
+    argsSerializer.writePointer(parentNode);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCustomBuilderT_I32(Ark_Int32 resourceId, Ark_Int32 t)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8583,6 +8614,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilder);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallback);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallback);
+        case Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType: return reinterpret_cast<Ark_NativePointer>(callManagedCustomBuilderT_Arkui_Component_Enums_ResponseType);
         case Kind_CustomBuilderT_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCustomBuilderT_I32);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilder);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilder);
@@ -8907,6 +8939,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilderSync);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallbackSync);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallbackSync);
+        case Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType: return reinterpret_cast<Ark_NativePointer>(callManagedCustomBuilderT_Arkui_Component_Enums_ResponseTypeSync);
         case Kind_CustomBuilderT_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCustomBuilderT_I32Sync);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilderSync);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilderSync);

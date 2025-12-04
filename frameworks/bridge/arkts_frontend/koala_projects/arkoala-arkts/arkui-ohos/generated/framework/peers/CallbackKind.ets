@@ -203,6 +203,7 @@ export enum CallbackKind {
     Kind_CheckBoxModifierBuilder = 1317697111,
     Kind_ContentDidScrollCallback = 1532328438,
     Kind_ContentWillScrollCallback = -2146044511,
+    Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType = 1778486756,
     Kind_CustomBuilderT_I32 = 1207302595,
     Kind_CustomNodeBuilder = 1766817632,
     Kind_DataPanelModifierBuilder = -238036926,

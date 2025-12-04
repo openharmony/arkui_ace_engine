@@ -1510,6 +1510,8 @@ typedef struct ContentDidScrollCallback ContentDidScrollCallback;
 typedef struct Opt_ContentDidScrollCallback Opt_ContentDidScrollCallback;
 typedef struct ContentWillScrollCallback ContentWillScrollCallback;
 typedef struct Opt_ContentWillScrollCallback Opt_ContentWillScrollCallback;
+typedef struct CustomBuilderT_Arkui_Component_Enums_ResponseType CustomBuilderT_Arkui_Component_Enums_ResponseType;
+typedef struct Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType;
 typedef struct CustomBuilderT_I32 CustomBuilderT_I32;
 typedef struct Opt_CustomBuilderT_I32 Opt_CustomBuilderT_I32;
 typedef struct CustomNodeBuilder CustomNodeBuilder;
@@ -12033,6 +12035,16 @@ typedef struct Opt_ContentWillScrollCallback {
     Ark_Tag tag;
     ContentWillScrollCallback value;
 } Opt_ContentWillScrollCallback;
+typedef struct CustomBuilderT_Arkui_Component_Enums_ResponseType {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_ResponseType t, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ResponseType t, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation);
+} CustomBuilderT_Arkui_Component_Enums_ResponseType;
+typedef struct Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType {
+    Ark_Tag tag;
+    CustomBuilderT_Arkui_Component_Enums_ResponseType value;
+} Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType;
 typedef struct CustomBuilderT_I32 {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -22914,6 +22926,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                 const Opt_ResponseType* responseType,
                                 const Opt_ContextMenuOptions* options);
     void (*setBindContextMenu1)(Ark_NativePointer node,
+                                const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+                                const Opt_ContextMenuOptions* options);
+    void (*setBindContextMenu2)(Ark_NativePointer node,
                                 const Opt_Boolean* isShown,
                                 const Opt_CustomNodeBuilder* content,
                                 const Opt_ContextMenuOptions* options);

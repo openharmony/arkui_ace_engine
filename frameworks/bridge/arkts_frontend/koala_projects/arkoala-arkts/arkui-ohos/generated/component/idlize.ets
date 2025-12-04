@@ -31,7 +31,7 @@ import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
 import { Resource_serializer } from "./../framework/resource"
 import { VoidCallback, SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
-import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType } from "./enums"
+import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType, ResponseType } from "./enums"
 import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
@@ -5098,6 +5098,7 @@ export interface IndicatorStyle {
     mask?: boolean;
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
+export type CustomBuilderT_Arkui_Component_Enums_ResponseType = (t: ResponseType, parentNode: KPointer) => KPointer;
 export interface NodeEdgesLengthMetrics {
     top: LengthMetrics | undefined;
     left: LengthMetrics | undefined;

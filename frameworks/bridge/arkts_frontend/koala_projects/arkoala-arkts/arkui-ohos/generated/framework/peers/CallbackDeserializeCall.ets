@@ -56,7 +56,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
@@ -67,7 +67,7 @@ import { CallbackTransformer } from "./../../CallbackTransformer"
 import { extractors } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { DrawContext, Size } from "arkui.Graphics"
-import { HitTestMode, Edge, ScrollSource } from "./../../component/enums"
+import { HitTestMode, ResponseType, Edge, ScrollSource } from "./../../component/enums"
 import { MarqueeState } from "./../../component/text"
 import { CustomBuilder, CustomBuilderT, PageMapBuilder } from "./../../component/builder"
 import { RefreshStatus } from "./../../component/refresh"
@@ -1996,6 +1996,27 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
     const _callResult  = _call(result)
     continuationResult(_callResult)
 }
+export function deserializeAndCallCustomBuilderT_Arkui_Component_Enums_ResponseType(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT_Arkui_Component_Enums_ResponseType)
+    let t : ResponseType = ResponseType.fromValue(thisDeserializer.readInt32())
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writePointer(value);
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(t, parentNode)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallCustomBuilderT_I32(thisDeserializer: DeserializerBase): void {
     // const _resourceId : int32 = thisDeserializer.readInt32()
     // const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT<int32>)
@@ -3748,6 +3769,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType: return deserializeAndCallCustomBuilderT_Arkui_Component_Enums_ResponseType(thisDeserializer);
         case CallbackKind.Kind_CustomBuilderT_I32: return deserializeAndCallCustomBuilderT_I32(thisDeserializer);
         case CallbackKind.Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
         case CallbackKind.Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);

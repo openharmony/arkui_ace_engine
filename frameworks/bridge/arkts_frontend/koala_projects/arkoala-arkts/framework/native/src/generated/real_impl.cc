@@ -2379,6 +2379,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBindContextMenu1Impl(Ark_NativePointer node,
+                                 const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+                                 const Opt_ContextMenuOptions* options)
+    {
+    }
+    void SetBindContextMenu2Impl(Ark_NativePointer node,
                                  const Opt_Boolean* isShown,
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_ContextMenuOptions* options)
@@ -8652,6 +8657,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBindMenu1Impl,
             CommonMethodModifier::SetBindContextMenu0Impl,
             CommonMethodModifier::SetBindContextMenu1Impl,
+            CommonMethodModifier::SetBindContextMenu2Impl,
             CommonMethodModifier::SetBindContentCover0Impl,
             CommonMethodModifier::SetBindContentCover1Impl,
             CommonMethodModifier::SetBindSheetImpl,

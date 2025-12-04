@@ -15,7 +15,7 @@
 
 import { __context, StateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
-import { WrappedBuilder } from "./builder"
+import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
 import { InteropNativeModule } from '@koalaui/interop'
 import { default as uiObserver } from '@ohos/arkui/observer';
