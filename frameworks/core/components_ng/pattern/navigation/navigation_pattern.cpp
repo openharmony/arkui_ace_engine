@@ -2948,13 +2948,8 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             if (newTopNavDestination && newTopNavDestination->GetTransitionType() == PageTransitionType::ENTER_POP) {
                 newTopNavDestination->SetIsOnAnimation(false);
             }
-            auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_VOID(preDestinationPattern);
-            auto shallowBuilder = preDestinationPattern->GetShallowBuilder();
-            if (shallowBuilder && !preIsHomeDest) {
-                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-            }
             if (!preIsHomeDest) {
+                preTopNavDestination->CleanContent();
                 auto parent = preTopNavDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination);
