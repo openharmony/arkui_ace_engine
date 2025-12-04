@@ -147,7 +147,7 @@ const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result) {
             if (result) {
                 char buffer[256];
                 InteropPrintToBufferN(buffer, sizeof(buffer), "FATAL: API version mismatch, expected %d got %d",
-                    version, impl->version);
+                    version, (int)impl->version);
                 *result = buffer;
             } else {
                 LOGE("API version mismatch for API %d: expected %d got %d", kind, version, impl->version);
