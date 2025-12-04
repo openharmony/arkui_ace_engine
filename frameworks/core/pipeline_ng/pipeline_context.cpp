@@ -6407,9 +6407,9 @@ void PipelineContext::GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>
 
 bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 {
-    std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG,
-        V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG, V2::MENU_WRAPPER_ETS_TAG,
-        V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+    static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
+        V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
+        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
 
     if (targetTags.find(tag) != targetTags.end()) {
         return true;
@@ -6438,7 +6438,7 @@ void PipelineContext::GetComponentOverlayInspector(
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     bool hasOverlay = false;
     auto childNodes = rootNode_->GetChildren();
-    for (auto child : childNodes) {
+    for (const auto &child : childNodes) {
         auto tag = child->GetTag();
         if (IsTagInOverlay(tag)) {
             hasOverlay = true;
@@ -6458,7 +6458,9 @@ void PipelineContext::GetComponentOverlayInspector(
         if (root->Contains("$children") && root->GetValue("$children") && root->GetValue("$children")->IsArray() &&
             root->GetValue("$children")->GetArraySize() > 0) {
             auto overlayChildrenArrayValue = root->GetValue("$children")->GetArrayItem(0)->GetValue("$children");
-            overlayChildrenArrayValue->Put(subRoot);
+            if (overlayChildrenArrayValue) {
+                overlayChildrenArrayValue->Put(subRoot);
+            }
         } else {
             overlayChildrenArray->Put(subRoot);
         }
@@ -6493,6 +6495,9 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
             UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
         }
     };
+    ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d][config.accessibilityInfo:%d]["
+                     "config.cacheNodes:%d]",
+        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes);
     if (onlyNeedVisible) {
         RefPtr<NG::FrameNode> topNavNode = nullptr;
         uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
@@ -6503,7 +6508,9 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                 root->PutRef("$children", std::move(array));
             }
             auto childrenJson = root->GetValue("$children");
-            topNavNode->DumpSimplifyTreeWithParamConfig(0, root, true, config);
+            auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+            topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
+            childrenJson->Put(topNavDestinationJson);
         } else {
             rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
         }
