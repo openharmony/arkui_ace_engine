@@ -15,12 +15,8 @@
 
 #include <ani.h>
 #include <string>
-#include <unistd.h>
 #include "base/log/log.h"
-#include "core/components_ng/pattern/form/form_model_static_ng.h"
-#include "core/common/form_manager.h"
 #include "ani_common_want.h"
-#include "want.h"
 #include "form_mgr.h"
 #include "form_mgr_errors.h"
 #include "ets_error_utils.h"
