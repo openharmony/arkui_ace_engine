@@ -1023,6 +1023,7 @@ HWTEST_F(WebPatternWebTest, HandleTouchDown, TestSize.Level1)
 #endif
 }
 
+
 /**
  * @tc.name: HandleTouchUp
  * @tc.desc: HandleTouchUp.
