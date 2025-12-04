@@ -423,6 +423,20 @@ HWTEST_F(FrameNodeTestNg, CalculateCachedTransformRelativeOffsetTest, TestSize.L
 }
 
 /**
+ * @tc.name: RecordExposureInnerTest
+ * @tc.desc: Test the function RecordExposureInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, RecordExposureInnerTest, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->CalculateCachedTransformRelativeOffset(0);
+    frameNode->exposureProcessor_ = AceType::MakeRefPtr<Recorder::ExposureProcessor>("test", "");
+    frameNode->RecordExposureInner();
+    EXPECT_FALSE(frameNode->exposureProcessor_->IsNeedRecord());
+}
+
+/**
  * @tc.name: ProcessVisibleAreaChangeEventTest
  * @tc.desc: Test the function ProcessVisibleAreaChangeEvent
  * @tc.type: FUNC
