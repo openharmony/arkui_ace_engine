@@ -4744,7 +4744,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
-                               const Opt_CustomNodeBuilder* value,
+                               const Opt_Union_CustomBuilder_ComponentContent* value,
                                const Opt_KeyboardOptions* options)
     {
     }

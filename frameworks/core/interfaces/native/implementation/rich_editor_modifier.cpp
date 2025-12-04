@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/copy_event_peer.h"
 #include "core/interfaces/native/implementation/cut_event_peer.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
@@ -232,6 +233,8 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr int32_t SELECTOR_CUSTOM_BUILDER = 0;
+constexpr int32_t SELECTOR_COMPONENT_CONTENT = 1;
 namespace RichEditorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -768,27 +771,47 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         }, node);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_CustomNodeBuilder* value,
+                           const Opt_Union_CustomBuilder_ComponentContent* value,
                            const Opt_KeyboardOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_KeyboardOptions>(options);
     std::optional<bool> supportAvoidance;
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
     }
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
         RichEditorModelStatic::SetCustomKeyboard(frameNode, nullptr, std::nullopt);
+        RichEditorModelStatic::SetCustomKeyboardWithNode(frameNode, nullptr, std::nullopt);
         return;
     }
-    CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-        auto builder = [uiNode]() {
-            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        RichEditorModelStatic::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
-        }, node);
+    if (value->value.selector == SELECTOR_CUSTOM_BUILDER) {
+        const CustomNodeBuilder& builder = value->value.value0;
+        CallbackHelper helper(builder);
+        helper.BuildAsync(
+            [frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+                if (auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode)) {
+                    RichEditorModelStatic::SetCustomKeyboardWithNode(
+                        frameNode, AceType::RawPtr(customKeyboard), supportAvoidance.value_or(false));
+                }
+            },
+            node);
+        RichEditorModelStatic::SetCustomKeyboard(frameNode, nullptr, std::nullopt);
+    } else if (value->value.selector == SELECTOR_COMPONENT_CONTENT) {
+        const Ark_ComponentContent& arkContent = value->value.value1;
+        auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
+        CHECK_NULL_VOID(contentPeer);
+        if (auto customKeyboard = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
+            RichEditorModelStatic::SetCustomKeyboardWithNode(
+                frameNode, AceType::RawPtr(customKeyboard), supportAvoidance.value_or(false));
+        } else {
+            RichEditorModelStatic::SetCustomKeyboardWithNode(frameNode, nullptr, std::nullopt);
+        }
+    } else {
+        RichEditorModelStatic::SetCustomKeyboard(frameNode, nullptr, std::nullopt);
+        RichEditorModelStatic::SetCustomKeyboardWithNode(frameNode, nullptr, std::nullopt);
+    }
 }
 void SetPlaceholderImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,

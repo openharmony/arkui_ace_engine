@@ -1594,6 +1594,12 @@ void TextFieldPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterLosingFocus_ = true;
     UpdateBlurReason();
+    bool isCloseCustomKeyboard = blurReason_ == BlurReason::WINDOW_BLUR &&
+                                 ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+    if (isCloseCustomKeyboard) {
+        CloseKeyboard(true);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d on blur, close custom keyboard", host->GetId());
+    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
@@ -4393,6 +4399,8 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowFocusChangedCallback(node->GetId());
+    CHECK_NULL_VOID(keyboardOverlay_);
+    keyboardOverlay_->CloseKeyboard(node->GetId());
 }
 
 void TextFieldPattern::CloseSelectOverlay()
