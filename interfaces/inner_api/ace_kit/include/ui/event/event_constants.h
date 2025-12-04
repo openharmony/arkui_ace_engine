@@ -37,6 +37,9 @@ enum class TouchType : size_t {
     HOVER_CANCEL,
     PROXIMITY_IN,
     PROXIMITY_OUT,
+    LEVITATE_MOVE,
+    LEVITATE_IN_WINDOW,
+    LEVITATE_OUT_WINDOW,
     UNKNOWN,
 };
 
