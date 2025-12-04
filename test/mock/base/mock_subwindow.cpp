@@ -17,6 +17,7 @@
 
 namespace OHOS::Ace {
 RefPtr<MockSubwindow> MockSubwindow::subwindow_;
+bool isReceiveDragEventEnabled_ = true;
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t /*instanceId*/)
 {
     if (!MockSubwindow::subwindow_) {
@@ -33,5 +34,16 @@ void MockSubwindow::SetUp()
 void MockSubwindow::TearDown()
 {
     subwindow_ = nullptr;
+}
+
+bool MockSubwindow::SetReceiveDragEventEnabled(bool enabled)
+{
+    isReceiveDragEventEnabled_ = enabled;
+    return true;
+}
+
+bool MockSubwindow::GetIsReceiveDragEventEnabled()
+{
+    return isReceiveDragEventEnabled_;
 }
 } // namespace OHOS::Ace

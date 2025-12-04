@@ -166,8 +166,20 @@ public:
     {
     }
 
+    bool SetReceiveDragEventEnabled(bool enabled) override
+    {
+        isReceiveDragEventEnabled_ = enabled;
+        return true;
+    }
+
+    bool GetIsReceiveDragEventEnabled() override
+    {
+        return isReceiveDragEventEnabled_;
+    }
+
 private:
     int32_t childContainerId_ = -1;
+    bool isReceiveDragEventEnabled_ = true;
 
     void CheckOffsetOption(const NG::MenuParam& menuParam)
     {
