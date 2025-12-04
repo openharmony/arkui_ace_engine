@@ -18,6 +18,8 @@
 
 #include <cstring>
 #include <cstdio>
+#include <limits>
+#include "interop-logging.h"
 #include "securec.h"
 
 inline errno_t InteropStringCopy(char *dest, size_t destsz, const char *src)
@@ -78,7 +80,7 @@ inline int InteropPrintToBufferN(char *buffer, size_t bufsz, const char *format,
 
 inline int InteropPrintVlistToBufferN(char *buffer, size_t bufsz, const char *format, va_list vlist)
 {
-    int ret = vsnprintf_s(buffer, bufsz, format, vlist);
+    int ret = vsnprintf_s(buffer, bufsz, bufsz - 1, format, vlist);
     if (ret == EINVAL) {
         LOGE("log format failed");
     } else {
