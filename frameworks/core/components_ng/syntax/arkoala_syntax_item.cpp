@@ -19,4 +19,12 @@ namespace OHOS::Ace::NG {
 
 ArkoalaSyntaxItem::ArkoalaSyntaxItem(int32_t nodeId) : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, nodeId) {}
 
+void ArkoalaSyntaxItem::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UINode::MarkDirtyNode(extraFlag);
+}
+
 } // namespace OHOS::Ace::NG
