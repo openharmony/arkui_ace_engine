@@ -633,6 +633,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
