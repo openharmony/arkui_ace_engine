@@ -108,7 +108,7 @@ void FormRenderer::SetUICotentProperty(const OHOS::AAFwk::Want &want)
         backgroundColor_.c_str());
 }
 
-void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want &want, const OHOS::AppExecFwk::FormJsInfo &formJsInfo)
 {
     SetUICotentProperty(want);
     uiContent_->RunFormPage();
@@ -150,7 +150,7 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     RunFormPageInner(want, formJsInfo);
 }
 
-void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
 {
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
