@@ -1226,7 +1226,7 @@ class FrameNode extends Disposable {
         getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
-            throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
+            throw { message: "The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
         }
         if (flag !== ERROR_CODE_NO_ERROR) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -1279,7 +1279,7 @@ class FrameNode extends Disposable {
         getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
-            throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
+            throw { message: "The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
         }
         if (flag === undefined || flag !== ERROR_CODE_NO_ERROR) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };

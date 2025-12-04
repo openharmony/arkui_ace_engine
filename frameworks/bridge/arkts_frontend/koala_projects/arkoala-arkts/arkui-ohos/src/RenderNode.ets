@@ -357,7 +357,7 @@ export class RenderNode implements MaterializedBase {
         }
         let result = RenderNodeExtender.appendChild(this, node_casted);
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-            const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
+            const error = Error("The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.");
             throw new BusinessError(100025, error);
         }
         this.childrenList.push(node)
@@ -382,7 +382,7 @@ export class RenderNode implements MaterializedBase {
             childrenListStartPosition = indexOfSibling + 1;
         }
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-            const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
+            const error = Error("The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.");
             throw new BusinessError(100025, error);
         }
         this.childrenList.splice(childrenListStartPosition, 0, child);

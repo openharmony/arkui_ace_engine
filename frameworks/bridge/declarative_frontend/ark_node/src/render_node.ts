@@ -718,7 +718,7 @@ class RenderNode extends Disposable {
     node.parentRenderNode = new WeakRef(this);
     let result = getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
@@ -744,7 +744,7 @@ class RenderNode extends Disposable {
       result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
