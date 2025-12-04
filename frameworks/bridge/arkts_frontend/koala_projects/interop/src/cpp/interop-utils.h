@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <climits>
 #include "interop-logging.h"
+#include "interop-types.h"
 #include "securec.h"
 
 inline errno_t InteropStringCopy(char *dest, size_t destSize, const char *src)
