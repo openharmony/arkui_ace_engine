@@ -320,10 +320,14 @@ class MonitorV2 {
    */
   public value<T>(path?: string): IMonitorValue<T> {
     if (path) {
-      return this.values_.get(path) as IMonitorValue<T>;
+      const monitorValue = this.values_.get(path);
+      if (monitorValue === undefined) {
+        return undefined;
+      }
+      return monitorValue.isWildcard() ? undefined : monitorValue as IMonitorValue<T>;
     }
     for (let monitorValue of this.values_.values()) {
-      if (monitorValue.isDirty()) {
+      if (monitorValue.isDirty() && !monitorValue.isWildcard()) {
         return monitorValue as MonitorValueV2<T> as IMonitorValue<T>;
       }
     }
