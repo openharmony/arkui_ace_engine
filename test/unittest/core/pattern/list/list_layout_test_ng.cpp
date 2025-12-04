@@ -3684,9 +3684,9 @@ HWTEST_F(ListLayoutTestNg, FadingEdge009, TestSize.Level1)
     auto paintMethod = UpdateContentModifier();
     EXPECT_FALSE(paintMethod->isFadingTop_);
     EXPECT_TRUE(paintMethod->isFadingBottom_);
-    auto renderContext = paintMethod->overlayRenderContext_;
-    EXPECT_TRUE(renderContext);
-    auto& gradientProp = renderContext->GetOrCreateGradient();
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    ASSERT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
     EXPECT_TRUE(gradientProp);
     NG::Gradient gradient;
     if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
@@ -3697,6 +3697,9 @@ HWTEST_F(ListLayoutTestNg, FadingEdge009, TestSize.Level1)
     EXPECT_TRUE(gradient.GetColors()[0].GetColor() == Color::TRANSPARENT);
     EXPECT_EQ(gradient.GetColors()[1].GetDimension().Value(), 0);
     EXPECT_TRUE(gradient.GetColors()[1].GetColor() == Color::WHITE);
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_TRUE(renderContext);
+    EXPECT_EQ(renderContext->GetBackBlendApplyType().value(), BlendApplyType::OFFSCREEN_WITH_BACKGROUND);
 }
 
 /**
