@@ -18866,7 +18866,7 @@ const ArkUI_AttributeItem* GetMaintainVisibleContentPosition(ArkUI_NodeHandle no
 int32_t SetSwiperItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[0].i32)) {
+    if (actualSize < 0 || !InRegion(-1, NUM_2, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -18876,7 +18876,12 @@ int32_t SetSwiperItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         swipeByGroup = item->value[1].i32;
     }
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperSwipeByGroup(node->uiNodeHandle, swipeByGroup);
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperFillType(node->uiNodeHandle, item->value[0].i32);
+    // -1 indicates that there is no effective breakpoint management.
+    if (item->value[0].i32 != -1) {
+        fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperFillType(node->uiNodeHandle, item->value[0].i32);
+    } else {
+        fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperFillType(node->uiNodeHandle);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
