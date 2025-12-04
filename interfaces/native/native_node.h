@@ -2940,6 +2940,19 @@ typedef enum {
     NODE_TEXT_FALLBACK_LINE_SPACING = 1050,
 
     /**
+     * @brief Set the marquee options of text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the marquee options of text. The parameter type is {@link ArkUI_TextMarqueeOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the marquee options of text. The parameter type is {@link ArkUI_TextMarqueeOptions}.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_MARQUEE_OPTIONS = 1051,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

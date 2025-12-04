@@ -251,6 +251,11 @@ enum class MarqueeStartPolicy {
     ON_FOCUS,
 };
 
+enum class MarqueeUpdatePolicy {
+    DEFAULT = 0,
+    PRESERVE_POSITION,
+};
+
 enum class TextDataDetectType {
     INVALID = -1,
     PHONE_NUMBER = 0,

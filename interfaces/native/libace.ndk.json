@@ -4630,5 +4630,85 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextContentBaseController_ScrollToVisible"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStep"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStep"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetSpacing"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetSpacing"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetLoop"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetLoop"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetFromStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetFromStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetDelay"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetDelay"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetFadeout"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetFadeout"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStartPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStartPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy"
     }
 ]

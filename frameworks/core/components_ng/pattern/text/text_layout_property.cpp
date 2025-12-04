@@ -90,6 +90,11 @@ std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
                            ? "MarqueeStartPolicy.DEFAULT"
                            : "MarqueeStartPolicy.ON_FOCUS");
 
+    jsonValue->Put("spacing", GetTextMarqueeSpacing().value_or(CalcDimension()).ToString().c_str());
+    jsonValue->Put("updatePolicy",
+        GetTextMarqueeUpdatePolicy().value_or(MarqueeUpdatePolicy::DEFAULT) == MarqueeUpdatePolicy::DEFAULT
+                           ? "MarqueeUpdatePolicy.DEFAULT"
+                           : "MarqueeUpdatePolicy.PRESERVE_POSITION");
     return jsonValue->ToString();
 }
 
@@ -102,6 +107,8 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
     UpdateTextMarqueeDelay(json->GetInt("delay"));
     UpdateTextMarqueeFadeout(json->GetBool("fadeout"));
     UpdateTextMarqueeStartPolicy(V2::ConvertWrapStringToMarqueeStartPolicy(json->GetString("startPolicy")));
+    UpdateTextMarqueeUpdatePolicy(V2::ConvertWrapStringToMarqueeUpdatePolicy(json->GetString("updatePolicy")));
+    UpdateTextMarqueeSpacing(Dimension::FromString(json->GetString("spacing")));
 }
 
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

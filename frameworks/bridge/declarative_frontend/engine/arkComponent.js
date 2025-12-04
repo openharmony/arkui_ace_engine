@@ -14856,7 +14856,8 @@ class TextMarqueeOptionsModifier extends ModifierWithKey {
       getUINativeModule().text.resetMarqueeOptions(node);
     } else {
       getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
-        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy,
+        this.value.marqueeUpdatePolicy, this.value.spacing);
     }
   }
   checkObjectDiff() {

@@ -118,6 +118,8 @@ struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeFadeout, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStartPolicy, MarqueeStartPolicy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeUpdatePolicy, MarqueeUpdatePolicy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeSpacing, CalcDimension);
 };
 
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
@@ -210,6 +212,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeFadeout, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeUpdatePolicy, MarqueeUpdatePolicy, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeSpacing, CalcDimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);

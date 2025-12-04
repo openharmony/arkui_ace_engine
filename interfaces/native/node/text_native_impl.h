@@ -57,6 +57,19 @@ struct ArkUI_TextSelectionMenuOptions {
     void* onMenuHide;
     void* onMenuHideUserData;
 };
+
+struct ArkUI_TextMarqueeOptions {
+    bool start;
+    float step;
+    float spacing;
+    int32_t loop;
+    bool fromStart;
+    int32_t delay;
+    bool fadeout;
+    ArkUI_MarqueeStartPolicy marqueeStartPolicy;
+    ArkUI_MarqueeUpdatePolicy marqueeUpdatePolicy;
+};
+
 #ifdef __cplusplus
 }
 #endif

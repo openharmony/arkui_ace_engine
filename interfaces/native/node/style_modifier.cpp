@@ -154,6 +154,7 @@ constexpr int32_t DYNAMIC_RANGE_MODE_CONSTRAINT = 1;
 constexpr int32_t DYNAMIC_RANGE_MODE_STANDARD = 2;
 const std::vector<int32_t> DYNAMIC_RANGE_MODE_ARRAY = { DYNAMIC_RANGE_MODE_HIGH, DYNAMIC_RANGE_MODE_CONSTRAINT,
     DYNAMIC_RANGE_MODE_STANDARD };
+constexpr float RACE_SPACE_WIDTH_VAL = 48.0f;
 constexpr int32_t ORIENTATION_AUTO = 0;
 constexpr int32_t ORIENTATION_UP = 1;
 constexpr int32_t ORIENTATION_RIGHT = 2;
@@ -13525,6 +13526,57 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetTextMarqueeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* marqueeOptions = reinterpret_cast<ArkUI_TextMarqueeOptions*>(item->object);
+    CHECK_NULL_RETURN(marqueeOptions, ERROR_CODE_PARAM_INVALID);
+    auto option = std::make_unique<ArkUITextMarqueeOptions>();
+
+    option->step = marqueeOptions->step;
+    option->delay = marqueeOptions->delay;
+    option->loop = marqueeOptions->loop;
+    option->marqueeStartPolicy = static_cast<ArkUI_Int32>(marqueeOptions->marqueeStartPolicy);
+    option->start = marqueeOptions->start;
+    option->fromStart = marqueeOptions->fromStart;
+    option->fadeout = marqueeOptions->fadeout;
+    option->marqueeUpdatePolicy = static_cast<ArkUI_Int32>(marqueeOptions->marqueeUpdatePolicy);
+    option->spacing.value = GreatOrEqual(marqueeOptions->spacing, 0.0f) ?
+        marqueeOptions->spacing : RACE_SPACE_WIDTH_VAL;
+    option->spacing.units = static_cast<int32_t>(DimensionUnit::VP);
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMarqueeOptions(node->uiNodeHandle,
+        option.get(), nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextMarqueeOptions(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextMarqueeOptions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextMarqueeOptions(ArkUI_NodeHandle node)
+{
+    ArkUI_TextMarqueeOptions* option = new ArkUI_TextMarqueeOptions();
+    auto* fullImpl = GetFullImpl();
+    ArkUITextMarqueeOptions marqueeOptions =
+        fullImpl->getNodeModifiers()->getTextModifier()->getTextMarqueeOptions(node->uiNodeHandle);
+    option->step = marqueeOptions.step;
+    option->delay = marqueeOptions.delay;
+    option->loop = marqueeOptions.loop;
+    option->marqueeStartPolicy = static_cast<ArkUI_MarqueeStartPolicy>(marqueeOptions.marqueeStartPolicy);
+    option->start = marqueeOptions.start;
+    option->fromStart = marqueeOptions.fromStart;
+    option->fadeout = marqueeOptions.fadeout;
+    option->marqueeUpdatePolicy = static_cast<ArkUI_MarqueeUpdatePolicy>(marqueeOptions.marqueeUpdatePolicy);
+    option->spacing = marqueeOptions.spacing.value;
+    g_attributeItem.object = option;
+    return &g_attributeItem;
+}
+
 int32_t SetVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -19013,7 +19065,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
         nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection, nullptr,
-        SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, nullptr, SetTextDirection };
+        SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextMarqueeOptions, SetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19032,7 +19084,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
         nullptr, nullptr, GetTextTextSelection, nullptr, GetCompressLeadingPunctuation, GetIncludeFontPadding,
-        GetFallbackLineSpacing, nullptr, GetTextDirection };
+        GetFallbackLineSpacing, GetTextMarqueeOptions, GetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19053,8 +19105,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines,
         ResetSelectDetectorEnable, nullptr, ResetMinLineHeight, ResetMaxLineHeight,
         ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection,
-        nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, nullptr,
-        ResetTextDirection };
+        nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
+        ResetTextMarqueeOptions, ResetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

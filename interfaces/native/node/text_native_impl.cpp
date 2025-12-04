@@ -457,6 +457,138 @@ void OH_ArkUI_TextContentBaseController_ScrollToVisible(
             controller->node->uiNodeHandle, start, end);
     }
 }
+ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create()
+{
+    ArkUI_TextMarqueeOptions* option = new ArkUI_TextMarqueeOptions();
+    option->step = -1.0f;
+    option->delay = 0;
+    option->loop = -1;
+    option->marqueeStartPolicy = ArkUI_MarqueeStartPolicy::ARKUI_MARQUEESTARTPOLICY_DEFAULT;
+    option->start = true;
+    option->fromStart = true;
+    option->fadeout = false;
+    option->marqueeUpdatePolicy = ArkUI_MarqueeUpdatePolicy::ARKUI_MARQUEEUPDATEPOLICY_DEFAULT;
+    option->spacing = -1.0f;
+    return option;
+}
+
+void OH_ArkUI_TextMarqueeOptions_Dispose(ArkUI_TextMarqueeOptions* option)
+{
+    if (!option) {
+        return;
+    }
+    delete option;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStart(ArkUI_TextMarqueeOptions* option, bool start)
+{
+    CHECK_NULL_VOID(option);
+    option->start = start;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetStart(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->start;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStep(ArkUI_TextMarqueeOptions* option, float step)
+{
+    CHECK_NULL_VOID(option);
+    option->step = step;
+}
+
+float OH_ArkUI_TextMarqueeOptions_GetStep(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0.0f);
+    return option->step;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetSpacing(ArkUI_TextMarqueeOptions* option, float spacing)
+{
+    CHECK_NULL_VOID(option);
+    option->spacing = spacing;
+}
+
+float OH_ArkUI_TextMarqueeOptions_GetSpacing(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0.0f);
+    return option->spacing;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetLoop(ArkUI_TextMarqueeOptions* option, int32_t loop)
+{
+    CHECK_NULL_VOID(option);
+    option->loop = loop;
+}
+
+int32_t OH_ArkUI_TextMarqueeOptions_GetLoop(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0);
+    return option->loop;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetFromStart(ArkUI_TextMarqueeOptions* option, bool fromStart)
+{
+    CHECK_NULL_VOID(option);
+    option->fromStart = fromStart;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetFromStart(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->fromStart;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetDelay(ArkUI_TextMarqueeOptions* option, int32_t delay)
+{
+    CHECK_NULL_VOID(option);
+    option->delay = delay;
+}
+
+int32_t OH_ArkUI_TextMarqueeOptions_GetDelay(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0);
+    return option->delay;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetFadeout(ArkUI_TextMarqueeOptions* option, bool fadeout)
+{
+    CHECK_NULL_VOID(option);
+    option->fadeout = fadeout;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetFadeout(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->fadeout;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStartPolicy(ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeStartPolicy startPolicy)
+{
+    CHECK_NULL_VOID(option);
+    option->marqueeStartPolicy = startPolicy;
+}
+
+ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, ArkUI_MarqueeStartPolicy::ARKUI_MARQUEESTARTPOLICY_DEFAULT);
+    return option->marqueeStartPolicy;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
+    ArkUI_MarqueeUpdatePolicy updatePolicy)
+{
+    CHECK_NULL_VOID(option);
+    option->marqueeUpdatePolicy = updatePolicy;
+}
+
+ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, ArkUI_MarqueeUpdatePolicy::ARKUI_MARQUEEUPDATEPOLICY_DEFAULT);
+    return option->marqueeUpdatePolicy;
+}
+
 #ifdef __cplusplus
 }
 #endif

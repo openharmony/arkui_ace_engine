@@ -6768,6 +6768,216 @@ void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseCont
 void OH_ArkUI_TextContentBaseController_ScrollToVisible(
     ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
 
+/**    
+ * @brief Enumerates the MarqueeStartPolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Start marquee in any case. This is the default policy. */
+    ARKUI_MARQUEESTARTPOLICY_DEFAULT = 0,
+    /** Start marquee only when get focus. */
+    ARKUI_MARQUEESTARTPOLICY_ONFOCUS = 1
+} ArkUI_MarqueeStartPolicy;
+
+/**
+ * @brief Enumerates the MarqueeUpdatePolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Reset scroll position and restart scroll. */
+    ARKUI_MARQUEEUPDATEPOLICY_DEFAULT = 0,
+    /** Preserve scroll position, just change to new text. */
+    ARKUI_MARQUEEUPDATEPOLICY_PRESERVEPOSITION = 1
+} ArkUI_MarqueeUpdatePolicy;
+
+/**
+ * @brief Defines the marquee options of text.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_TextMarqueeOptions ArkUI_TextMarqueeOptions;
+
+/**
+ * @brief Create a option object for marquee animation of text.
+ *
+ * @return A pointer to the option object.
+ * @since 23
+ */
+ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create();
+
+/**
+ * @brief Dispose a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_Dispose(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param start Flag of is need to start marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStart(ArkUI_TextMarqueeOptions* option, bool start);
+
+/**
+ * @brief Gets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param step The step size of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStep(ArkUI_TextMarqueeOptions* option, float step);
+
+/**
+ * @brief Gets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the step size of the marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetStep(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param spacing The spacing between two rounds of marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetSpacing(ArkUI_TextMarqueeOptions* option, float spacing);
+
+/**
+ * @brief Gets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the spacing between two rounds of marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetSpacing(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param loop The rounds of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetLoop(ArkUI_TextMarqueeOptions* option, int32_t loop);
+
+/**
+ * @brief Gets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the rounds of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetLoop(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fromStart The running direction of the marquee, true means running from start.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFromStart(ArkUI_TextMarqueeOptions* option, bool fromStart);
+
+/**
+ * @brief Gets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fromStart flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFromStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param delay The delay time between each round of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetDelay(ArkUI_TextMarqueeOptions* option, int32_t delay);
+
+/**
+ * @brief Gets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the delay time between each round of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetDelay(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fadeout The flag of whether the text is faded out.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFadeout(ArkUI_TextMarqueeOptions* option, bool fadeout);
+
+/**
+ * @brief Gets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fadeout flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFadeout(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The start policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStartPolicy(ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeStartPolicy startPolicy);
+
+/**
+ * @brief Gets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The update policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
+    ArkUI_MarqueeUpdatePolicy updatePolicy);
+
+/**
+ * @brief Gets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the update policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
 #ifdef __cplusplus
 };
 #endif

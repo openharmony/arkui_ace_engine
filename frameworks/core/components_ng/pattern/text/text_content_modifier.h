@@ -143,13 +143,14 @@ private:
     float GetTextRacePercent();
     TextDirection GetTextRaceDirection() const;
     TextDirection GetTextRaceDirectionByContent() const;
-    void ResetTextRacePercent();
+    void ResetTextRacePercent(bool restart = false);
     bool SetTextRace(const MarqueeOption& option);
     void ResumeTextRace(bool bounce);
-    void SetTextRaceAnimation(const AnimationOption& option);
+    void SetTextRaceAnimation(const AnimationOption& option, float finalPercent);
     void PauseTextRace();
     bool AllowTextRace();
     void DetermineTextRace();
+    std::optional<double> CalcResetPercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
@@ -279,6 +280,7 @@ private:
     int32_t marqueeDuration_ = 0;
     float marqueeGradientPercent_ = 0.0f;
     float marqueeRaceMaxPercent_ = 0.0f;
+    std::optional<float> lastParagraph1StartPosition_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };
