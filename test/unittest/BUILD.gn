@@ -1371,6 +1371,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_mask_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_wrapper_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.cpp",

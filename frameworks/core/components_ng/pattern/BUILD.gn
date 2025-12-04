@@ -558,6 +558,7 @@ build_component_ng("pattern_ng") {
     "shape/shape_paint_property.cpp",
     "sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
     "sheet/content_cover/sheet_content_cover_object.cpp",
+    "sheet/sheet_mask_accessibility_property.cpp",
     "sheet/sheet_object.cpp",
     "sheet/sheet_wrapper_accessibility_property.cpp",
     "sheet/side/sheet_presentation_side_layout_algorithm.cpp",
