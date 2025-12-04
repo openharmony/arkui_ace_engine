@@ -511,6 +511,12 @@ export interface AccessibilitySpanOptions {
     accessibilityDescription?: ResourceStr;
     accessibilityLevel?: string;
 }
+export enum TextDirection {
+    LTR = 0,
+    RTL = 1,
+    DEFAULT = 2,
+    AUTO = 3
+}
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
         let valueSerializer : SerializerBase = buffer

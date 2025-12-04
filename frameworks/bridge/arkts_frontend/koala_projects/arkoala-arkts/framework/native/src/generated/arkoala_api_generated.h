@@ -6699,6 +6699,8 @@ typedef enum Ark_TextAlign {
     ARK_TEXT_ALIGN_START = 0,
     ARK_TEXT_ALIGN_END = 2,
     ARK_TEXT_ALIGN_JUSTIFY = 3,
+    ARK_TEXT_ALIGN_LEFT = 4,
+    ARK_TEXT_ALIGN_RIGHT = 5,
 } Ark_TextAlign;
 typedef struct Opt_TextAlign {
     Ark_Tag tag;
@@ -6773,6 +6775,16 @@ typedef struct Opt_TextDeleteDirection {
     Ark_Tag tag;
     Ark_TextDeleteDirection value;
 } Opt_TextDeleteDirection;
+typedef enum Ark_TextDirection {
+    ARK_TEXT_DIRECTION_LTR = 0,
+    ARK_TEXT_DIRECTION_RTL = 1,
+    ARK_TEXT_DIRECTION_DEFAULT = 2,
+    ARK_TEXT_DIRECTION_AUTO = 3,
+} Ark_TextDirection;
+typedef struct Opt_TextDirection {
+    Ark_Tag tag;
+    Ark_TextDirection value;
+} Opt_TextDirection;
 typedef enum Ark_TextHeightAdaptivePolicy {
     ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST = 0,
     ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST = 1,
@@ -21287,6 +21299,7 @@ typedef struct Ark_ParagraphStyleInterface {
     Opt_WordBreak wordBreak;
     Opt_Union_LengthMetrics_LeadingMarginPlaceholder leadingMargin;
     Opt_LengthMetrics paragraphSpacing;
+    Opt_TextDirection textDirection;
 } Ark_ParagraphStyleInterface;
 typedef struct Opt_ParagraphStyleInterface {
     Ark_Tag tag;
@@ -21400,6 +21413,7 @@ typedef struct Ark_RichEditorParagraphStyle {
     Opt_WordBreak wordBreak;
     Opt_LineBreakStrategy lineBreakStrategy;
     Opt_Float64 paragraphSpacing;
+    Opt_TextDirection textDirection;
 } Ark_RichEditorParagraphStyle;
 typedef struct Opt_RichEditorParagraphStyle {
     Ark_Tag tag;
@@ -28027,6 +28041,7 @@ typedef struct GENERATED_ArkUIParagraphStyleAccessor {
     Opt_WordBreak (*getWordBreak)(Ark_ParagraphStyle peer);
     Opt_Union_F64_LeadingMarginPlaceholder (*getLeadingMargin)(Ark_ParagraphStyle peer);
     Opt_Float64 (*getParagraphSpacing)(Ark_ParagraphStyle peer);
+    Opt_TextDirection (*getTextDirection)(Ark_ParagraphStyle peer);
 } GENERATED_ArkUIParagraphStyleAccessor;
 
 typedef struct GENERATED_ArkUIPasteEventAccessor {

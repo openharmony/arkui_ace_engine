@@ -821,6 +821,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
     template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
+    template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src);

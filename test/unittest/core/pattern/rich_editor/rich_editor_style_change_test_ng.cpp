@@ -31,9 +31,27 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const Dimension IMAGE_WIDTH = 50.0_vp;
-    const Dimension IMAGE_HEIGHT = 50.0_vp;
-    const ImageSpanSize TEST_IMAGE_SIZE_1 = { .width = 50.0_vp, .height = 50.0_vp };
+const Dimension IMAGE_WIDTH = 50.0_vp;
+const Dimension IMAGE_HEIGHT = 50.0_vp;
+const ImageSpanSize TEST_IMAGE_SIZE_1 = { .width = 50.0_vp, .height = 50.0_vp };
+
+const LeadingMargin TEST_LEADING_MARGIN = {
+    .size = LeadingMarginSize(Dimension(20, DimensionUnit::VP), Dimension(30, DimensionUnit::VP)),
+    .pixmap = nullptr
+};
+const struct UpdateParagraphStyle TEST_PARAGRAPH_STYLE_1 = {
+    .textAlign = TextAlign::CENTER,
+    .leadingMargin = TEST_LEADING_MARGIN,
+    .wordBreak = WordBreak::BREAK_WORD,
+    .lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY,
+    .paragraphSpacing = Dimension(10, DimensionUnit::VP),
+    .textDirection = TextDirection::RTL,
+};
+const struct UpdateParagraphStyle TEST_PARAGRAPH_STYLE_2 = {
+    .textAlign = TextAlign::END,
+    .leadingMargin = TEST_LEADING_MARGIN,
+    .textDirection = TextDirection::LTR,
+};
 }
 
 class RichEditorStyleChangeTestNg : public RichEditorCommonTestNg {
@@ -380,4 +398,56 @@ HWTEST_F(RichEditorStyleChangeTestNg, UpdateParagraphStyle001, TestSize.Level0)
     EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
 }
 
+/**
+ * @tc.name: UpdateParagraphStyle002
+ * @tc.desc: test paragraph style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleChangeTestNg, UpdateParagraphStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize UpdateParagraphStyle
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    TextStyle style;
+    options.style = style;
+    options.paraStyle = TEST_PARAGRAPH_STYLE_1;
+
+    /**
+     * @tc.steps: step3. test AddTextSpan
+     */
+    auto index = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 5);
+    EXPECT_EQ(index, 5);
+
+    /**
+     * @tc.steps: step4. check paragraph style
+     */
+    auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    auto textStyle = info.selection_.resultObjects.begin()->textStyle;
+    EXPECT_EQ(static_cast<TextAlign>(textStyle.textAlign), TextAlign::CENTER);
+    EXPECT_EQ(static_cast<WordBreak>(textStyle.wordBreak), WordBreak::BREAK_WORD);
+    EXPECT_NE(textStyle.paragraphSpacing, std::nullopt);
+    EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
+    EXPECT_EQ(static_cast<TextDirection>(textStyle.textDirection.value()), TextDirection::RTL);
+
+    /**
+     * @tc.steps: step5. update paragraph style and check it
+     */
+    richEditorController->UpdateParagraphStyle(0, sizeof(INIT_VALUE_1), TEST_PARAGRAPH_STYLE_2);
+    auto paragraphInfo = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<TextAlign>(paragraphInfo[0].textAlign), TextAlign::END);
+    EXPECT_EQ(static_cast<TextDirection>(paragraphInfo[0].textDirection.value()), TextDirection::LTR);
+}
 }

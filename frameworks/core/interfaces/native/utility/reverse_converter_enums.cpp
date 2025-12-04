@@ -383,6 +383,18 @@ void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src)
     }
 }
 
+void AssignArkValue(Ark_TextDirection& dst, const TextDirection& src)
+{
+    switch (src) {
+        case TextDirection::LTR: dst = ARK_TEXT_DIRECTION_LTR; break;
+        case TextDirection::RTL: dst = ARK_TEXT_DIRECTION_RTL; break;
+        case TextDirection::INHERIT: dst = ARK_TEXT_DIRECTION_DEFAULT; break;
+        case TextDirection::AUTO: dst = ARK_TEXT_DIRECTION_AUTO; break;
+        default: dst = static_cast<Ark_TextDirection>(-1);
+            LOGE("Unexpected enum value in TextDirection: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
 {
     switch (src) {
@@ -753,8 +765,8 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
 void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
 {
     switch (src) {
-        case TextAlign::LEFT: dst = ARK_TEXT_ALIGN_START; break;
-        case TextAlign::RIGHT: dst = ARK_TEXT_ALIGN_END; break;
+        case TextAlign::LEFT: dst = ARK_TEXT_ALIGN_LEFT; break;
+        case TextAlign::RIGHT: dst = ARK_TEXT_ALIGN_RIGHT; break;
         case TextAlign::CENTER: dst = ARK_TEXT_ALIGN_CENTER; break;
         case TextAlign::JUSTIFY: dst = ARK_TEXT_ALIGN_JUSTIFY; break;
         case TextAlign::START: dst = ARK_TEXT_ALIGN_START; break;

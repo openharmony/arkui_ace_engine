@@ -196,6 +196,7 @@ UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src)
     ret.leadingMargin = Converter::OptConvert<LeadingMargin>(src.leadingMargin);
     ret.wordBreak = Converter::OptConvert<WordBreak>(src.wordBreak);
     ret.lineBreakStrategy = Converter::OptConvert<LineBreakStrategy>(src.lineBreakStrategy);
+    ret.textDirection = Converter::OptConvert<TextDirection>(src.textDirection);
     return ret;
 }
 
@@ -492,6 +493,12 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
     dst.paragraphSpacing = Converter::ArkValue<Opt_Float64>(src.paragraphSpacing);
+    if (src.textDirection.has_value()) {
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
+            static_cast<TextDirection>(src.textDirection.value()));
+    } else {
+        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+    }
 }
 
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& src, ConvContext *ctx)
@@ -510,6 +517,12 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
     dst.paragraphSpacing = Converter::ArkValue<Opt_Float64>(src.paragraphSpacing);
+    if (src.textDirection.has_value()) {
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
+            static_cast<TextDirection>(src.textDirection.value()));
+    } else {
+        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+    }
 }
 
 void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src, ConvContext *ctx)
