@@ -3066,7 +3066,7 @@ export interface WebKeyboardOptions {
 }
 export interface WebKeyboardCallbackInfo {
     controller: WebKeyboardController;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
@@ -7528,14 +7528,14 @@ export class WebKeyboardCallbackInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const controllerTmpResult : WebKeyboardController = (WebKeyboardController_serializer.read(valueDeserializer) as WebKeyboardController)
         const attributesTmpBufSizeVar : int32 = valueDeserializer.readInt32()
-        let attributesTmpBuf : Map<string, string> = new Map<string, string>()
+        let attributesTmpBuf : Record<string, string> = {}
         // TODO: TS map resize
         for (let attributesTmpBufIVar = 0; attributesTmpBufIVar < attributesTmpBufSizeVar; attributesTmpBufIVar++) {
             const attributesTmpBufKeyVar : string = (valueDeserializer.readString() as string)
             const attributesTmpBufValueVar : string = (valueDeserializer.readString() as string)
-            attributesTmpBuf.set(attributesTmpBufKeyVar, attributesTmpBufValueVar)
+            attributesTmpBuf[attributesTmpBufKeyVar] = attributesTmpBufValueVar
         }
-        const attributesTmpResult : Map<string, string> = attributesTmpBuf
+        const attributesTmpResult : Record<string, string> = attributesTmpBuf
         let value : WebKeyboardCallbackInfo = ({controller: controllerTmpResult, attributes: attributesTmpResult} as WebKeyboardCallbackInfo)
         return value
     }
