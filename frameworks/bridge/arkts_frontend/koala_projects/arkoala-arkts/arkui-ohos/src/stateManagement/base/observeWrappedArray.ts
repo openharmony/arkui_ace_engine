@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, OBSERVE, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { UIUtils } from '../utils';
-import { uiUtils, UIUtilsImpl } from './uiUtilsImpl';
+import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
     public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
     public static readonly OB_LENGTH = '__OB_LENGTH';
@@ -71,7 +71,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     public shouldAddRef(): boolean {
-        return (OBSERVE.renderingComponent > 0) && (this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId));
+        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     override get length(): int {
@@ -102,13 +102,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        const value = this.store_[idx];
-        if (!value || typeof value !== 'object') {
-            return value;
-        }
-        const makeobserved = uiUtils.makeObservedEntrance(value, this.allowDeep_, this.isAPI_);
+        const makeobserved = uiUtils.makeObservedEntrance(this.store_[idx], this.allowDeep_, this.isAPI_);
         this.store_[idx] = makeobserved;
-        return makeobserved;
+        return this.store_[idx];
     }
 
     // [] operator

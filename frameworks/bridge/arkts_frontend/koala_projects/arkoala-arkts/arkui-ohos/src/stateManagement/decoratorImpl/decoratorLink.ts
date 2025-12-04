@@ -69,7 +69,11 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
 
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
-        return this.sourceGet_();
+        const value = this.sourceGet_();
+        if (this.shouldAddRef()) {
+            uiUtils.builtinContainersAddRefAnyKey(value);
+        }
+        return value;
     }
 
     public set(newValue: T): void {

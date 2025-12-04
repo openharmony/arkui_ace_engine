@@ -3,9 +3,6 @@
     "pages/Index",
     "pages/v2_tests",
     "pages/v1_tests",
-    "pages/repeat_tests",
-    "pages/v2_card_tests",
-    "pages/v2_reusable_tests",
-    "pages/performance_tests"
+    "pages/repeat_tests"
   ]
 }

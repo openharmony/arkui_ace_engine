@@ -250,11 +250,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
-
-  public __isV2__Internal(): boolean {
-    return this instanceof ViewV2;
-  }
-
+  
   // globally unique id, this is different from compilerAssignedUniqueChildId!
   id__(): number {
     return this.id_;
