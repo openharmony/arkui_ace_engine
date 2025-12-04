@@ -21,7 +21,32 @@
 #include "frameworks/base/utils/multi_thread.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
+constexpr double PRECISION_RESPONSEREGION_COMP = -1.0001f;
+
+bool IsResponseRegionOverRectWithPrecision(const RectF& responseRect, const RectF& origRect)
+{
+    auto responseLeft = responseRect.Left();
+    auto responseTop = responseRect.Top();
+    auto responseRight = responseRect.Right();
+    auto responseBottom = responseRect.Bottom();
+
+    auto origLeft = origRect.Left();
+    auto origTop = origRect.Top();
+    auto origRight = origRect.Right();
+    auto origBottom = origRect.Bottom();
+    if (LessNotEqualCustomPrecision(origLeft, responseLeft, PRECISION_RESPONSEREGION_COMP) ||
+        LessNotEqualCustomPrecision(origTop, responseTop, PRECISION_RESPONSEREGION_COMP) ||
+        LessNotEqualCustomPrecision(responseRight, origRight, PRECISION_RESPONSEREGION_COMP) ||
+        LessNotEqualCustomPrecision(responseBottom, origBottom, PRECISION_RESPONSEREGION_COMP)) {
+        return false;
+    }
+    return true;
+}
+} // namespace
+
+
 std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 {
     static const AceAction allActions[] = {
@@ -314,7 +339,7 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
         }
         return true;
     }
-    if (!IsAccessibilityCompInResponseRegion(rect, origRect)) {
+    if (!IsResponseRegionOverRectWithPrecision(rect, origRect)) {
         return false;
     }
     return true;
@@ -332,8 +357,13 @@ NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(boo
             static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
         auto& rect = responseRegionList.back();
-        rectInt = { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
-            static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
+        if (IsAccessibilityCompInResponseRegion(rect, origRect)) {
+            rectInt = { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
+                static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
+        } else {
+            rectInt = { static_cast<int32_t>(origRect.Left()), static_cast<int32_t>(origRect.Top()),
+                static_cast<int32_t>(origRect.Width()), static_cast<int32_t>(origRect.Height()) };
+        }
     } else {
         RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, rectInt);
@@ -342,10 +372,14 @@ NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(boo
             static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
         auto& rect = responseRegionList.back();
-        rectInt = { static_cast<int32_t>(rect.GetX() - origRect.GetX()),
-            static_cast<int32_t>(rect.GetY() - origRect.GetY()),
-            static_cast<int32_t>(rect.Width()),
-            static_cast<int32_t>(rect.Height()) };
+        if (IsAccessibilityCompInResponseRegion(rect, origRect)) {
+            rectInt = { static_cast<int32_t>(rect.GetX() - origRect.GetX()),
+                static_cast<int32_t>(rect.GetY() - origRect.GetY()),
+                static_cast<int32_t>(rect.Width()),
+                static_cast<int32_t>(rect.Height()) };
+        } else {
+            rectInt = { 0, 0, static_cast<int32_t>(origRect.Width()), static_cast<int32_t>(origRect.Height()) };
+        }
     }
     return  rectInt;
 }

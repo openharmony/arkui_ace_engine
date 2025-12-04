@@ -1261,6 +1261,29 @@ void InitAccessibilityEnabledAndScreenReadEnabled()
     client->IsScreenReaderEnabled(isScreenReadEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(isScreenReadEnabled);
 }
+
+void UpdateFocusRectToRenderContext(
+    const RefPtr<NG::FrameNode>& frameNode,
+    const RefPtr<NG::RenderContext>& renderContext,
+    const NG::RectT<int32_t>& rectInt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto isVirtualNode = frameNode->IsAccessibilityVirtualNode();
+    if (!isVirtualNode) {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateAccessibilityFocusRect(rectInt);
+        return;
+    }
+    auto weakNode = frameNode->GetVirtualNodeParent();
+    auto refUiNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refUiNode);
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(refUiNode);
+    CHECK_NULL_VOID(parentNode);
+    auto parentRenderContext = parentNode->GetRenderContext();
+    CHECK_NULL_VOID(parentRenderContext);
+    parentRenderContext->UpdateAccessibilityFocusRect(rectInt);
+}
+            
 } // namespace
 
 
@@ -9056,10 +9079,11 @@ void JsAccessibilityManager::UpdateAccessibilityNodeRect(const RefPtr<NG::FrameN
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
-    if (isFocus && !frameNode->IsAccessibilityVirtualNode() && !frameNode->IsDrawFocusOnTop()) {
-        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
-            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
-            renderContext->UpdateAccessibilityFocusRect(rectInt);
+    if (isFocus && !frameNode->IsDrawFocusOnTop()) {
+        auto isVirtualNode = frameNode->IsAccessibilityVirtualNode();
+        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(isVirtualNode)) {
+            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(isVirtualNode);
+            UpdateFocusRectToRenderContext(frameNode, renderContext, rectInt);
         } else {
             renderContext->UpdateAccessibilityRoundRect();
         }
