@@ -34,6 +34,11 @@ void FfiOHOSAceFrameworkRegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs
     CJRuntimeDelegate::GetInstance()->RegisterCJFuncsV2(callback);
 }
 
+void FfiOHOSAceFrameworkRegisterCJFuncsV3(void (*callback)(AtCPackageV3* cjFuncs))
+{
+    CJRuntimeDelegate::GetInstance()->RegisterCJFuncsV3(callback);
+}
+
 void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs)
 {
     CJRuntimeDelegate::GetInstance()->RegisterCJXCompCtrFuncs(cjCtrFuncs);
