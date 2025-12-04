@@ -3832,7 +3832,12 @@ void SetOnDragStartImpl(Ark_NativePointer node,
 
         auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
             if (auto fnode = weakNode.Upgrade(); fnode) {
-                result.customNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
+                auto uiNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+                result.customNode = CreateProxyNode(uiNode);
+#else
+                result.customNode = uiNode;
+#endif
             }
         };
         auto parseDragI = [&result, weakNode](const Ark_DragItemInfo& value) {
@@ -3841,7 +3846,12 @@ void SetOnDragStartImpl(Ark_NativePointer node,
             auto fnode = weakNode.Upgrade();
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
             if (builder && fnode) {
-                result.customNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+                auto uiNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+                result.customNode = CreateProxyNode(uiNode);
+#else
+                result.customNode = uiNode;
+#endif
             }
         };
         auto handler = [&parseCustBuilder, &parseDragI](Ark_Union_CustomBuilder_DragItemInfo arkResult) {
