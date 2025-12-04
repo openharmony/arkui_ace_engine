@@ -890,6 +890,31 @@ Alignment Convert(const Ark_LocalizedAlignment& src)
 }
 
 template<>
+std::string Convert(const Ark_LocalizedAlignment& src)
+{
+    switch (src) {
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_START:
+            return "top_start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP:
+            return "top";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_END:
+            return "top_end";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_START:
+            return "start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_CENTER:
+            return "center";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_END:
+            return "end";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_START:
+            return "bottom_start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM:
+            return "bottom";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_END:
+            return "bottom_end";
+    }
+}
+
+template<>
 void AssignCast(std::optional<BackgroundImageSizeType>& dst, const Ark_ImageSize& src)
 {
     switch (src) {
@@ -4038,16 +4063,16 @@ void SetAlignImpl(Ark_NativePointer node,
     }
     switch (optValue->selector) {
         case CASE_0: {
-            auto alignValue = optValue->value0;
-            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            auto alignmentValue = optValue->value0;
+            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignmentValue);
             if (result) {
                 ViewAbstractModelStatic::SetAlign(frameNode, result.value());
             }
             break;
         }
         case CASE_1: {
-            auto alignValue = optValue->value1;
-            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            auto localizedAlignmentValue = optValue->value1;
+            auto result = Converter::OptConvert<std::string>(localizedAlignmentValue);
             if (result) {
                 ViewAbstractModelStatic::SetAlign(frameNode, result.value());
             }

@@ -1156,6 +1156,13 @@ void ViewAbstractModelStatic::SetAlign(FrameNode* frameNode, Alignment alignment
     ViewAbstract::SetAlign(frameNode, alignment);
 }
 
+void ViewAbstractModelStatic::SetAlign(FrameNode* frameNode, std::string localizedAlignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlign(frameNode, localizedAlignment);
+    ViewAbstract::SetIsMirrorable(frameNode, true);
+}
+
 void ViewAbstractModelStatic::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);

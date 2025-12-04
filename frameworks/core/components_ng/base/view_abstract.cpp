@@ -3139,9 +3139,19 @@ void ViewAbstract::SetIsMirrorable(bool isMirrorable)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable);
 }
 
+void ViewAbstract::SetIsMirrorable(FrameNode* frameNode, bool isMirrorable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable, frameNode);
+}
+
 void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
+
+void ViewAbstract::SetAlign(FrameNode* frameNode, std::string localizedAlignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LocalizedAlignment, localizedAlignment, frameNode);
 }
 
 void ViewAbstract::SetLayoutGravity(FrameNode* frameNode, Alignment alignment)
