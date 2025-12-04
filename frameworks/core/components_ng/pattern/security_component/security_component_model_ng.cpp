@@ -1201,15 +1201,4 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, frameNode);
     }
 }
-
-void SecurityComponentModelNG::SetFocusBox()
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true);
-}
-
-void SecurityComponentModelNG::SetFocusBox(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true, frameNode);
-}
 } // namespace OHOS::Ace::NG

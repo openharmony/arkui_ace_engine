@@ -2710,7 +2710,6 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     SecurityComponentModelNG::SetHeightAdaptivePolicy(
         frameNode.GetRawPtr(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     SecurityComponentModelNG::SetUserCancelEvent(frameNode.GetRawPtr(), true);
-    SecurityComponentModelNG::SetFocusBox(frameNode.GetRawPtr());
 
     ASSERT_EQ(property->GetAlignment().value_or(Alignment::CENTER_RIGHT), Alignment::CENTER_LEFT);
     ASSERT_EQ(property->GetMaxFontScale().value_or(0.0), 1.5);
@@ -2721,7 +2720,6 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     ASSERT_EQ(property->GetHeightAdaptivePolicy().value_or(
         TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     ASSERT_EQ(property->GetUserCancelEvent().value_or(false), true);
-    ASSERT_EQ(property->GetFocusBoxFlag().value_or(false), true);
 }
 
 /**
