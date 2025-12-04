@@ -9815,6 +9815,17 @@ void WebPattern::OnStatusBarClick()
     }
 }
 
+void WebPattern::CleanupWebPatternResource(int32_t webId)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::CleanupWebPatternResource");
+    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(webId);
+    if (offlineWebInited_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RemoveWindowStateChangedCallback(offlineWebNodeId_);
+    }
+}
+
 void SnapshotTouchReporter::OnAppear()
 {
     appearTime_ = GetMilliseconds();
