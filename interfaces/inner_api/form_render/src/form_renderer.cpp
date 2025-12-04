@@ -101,7 +101,7 @@ void FormRenderer::SetUICotentProperty(const OHOS::AAFwk::Want &want)
     }
  
     HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
-               "backgroundColor_:%{public}s",
+        "backgroundColor_:%{public}s",
         static_cast<int32_t>(renderingMode_),
         static_cast<int32_t>(enableBlurBackground_),
         static_cast<int32_t>(formLocation_),
@@ -112,11 +112,6 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
 {
     SetUICotentProperty(want);
     uiContent_->RunFormPage();
-
-    backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
-    if (!backgroundColor_.empty()) {
-        uiContent_->SetFormBackgroundColor(backgroundColor_);
-    }
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -155,7 +150,7 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     RunFormPageInner(want, formJsInfo);
 }
 
-void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
 {
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
@@ -170,7 +165,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
-        want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));
+        want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
 }
 
 int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -562,7 +557,6 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
         config->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     }
-
     uiContent_->UpdateConfiguration(config);
 }
 

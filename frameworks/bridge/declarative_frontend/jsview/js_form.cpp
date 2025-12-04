@@ -190,6 +190,12 @@ void JSForm::SetColorMode(const JSCallbackInfo& info)
     }
  
     auto colorMode = info[0]->ToNumber<int32_t>();
+    // -1: MODE_AUTO, 0: MODE_DARK, 1: MODE_LIGHT
+    if (colorMode < -1 || colorMode > 1) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "colorMode error");
+        return;
+    }
+ 
     FormModel::GetInstance()->SetColorMode(colorMode);
 }
 

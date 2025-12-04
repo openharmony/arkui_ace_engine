@@ -332,7 +332,7 @@ private:
         const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
     void InitFormRenderDiedCallback();
     void RequestRender();
-    void UpdateColorMode(const RequestFormInfo& info);
+    void UpdateColorMode(int32_t colorMode);
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -373,7 +373,7 @@ private:
     std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
     std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
     float formViewScale_ = 1.0f;
-    int32_t formColorMode_ = -1;
+    int32_t formColorMode_ = -1; // -1: MODE_AUTO
     enum {
         VALUE_TYPE_INT = 5,
         VALUE_TYPE_DOUBLE = 8,

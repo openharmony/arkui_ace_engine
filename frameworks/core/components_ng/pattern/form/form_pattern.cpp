@@ -872,7 +872,7 @@ float FormPattern::CalculateViewScale(float width, float height, float layoutWid
     float widthScale = NearEqual(layoutWidth, width) ? DEFAULT_VIEW_SCALE : layoutWidth / width;
     float heightScale = NearEqual(layoutHeight, height) ?  DEFAULT_VIEW_SCALE : layoutHeight / height;
     float viewScale = (widthScale >= heightScale) ? widthScale : heightScale;
-    viewScale = (viewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE : viewScale;
+    viewScale = LessOrEqual(viewScale, 0.0f) ? DEFAULT_VIEW_SCALE : viewScale;
     return viewScale;
 }
 
@@ -1071,7 +1071,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     }
     UpdateSpecialStyleCfg();
     UpdateConfiguration();
-    UpdateColorMode(info);
+    UpdateColorMode(info.colorMode);
 }
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
@@ -2214,12 +2214,12 @@ void FormPattern::UpdateConfiguration()
     }
 }
 
-void FormPattern::UpdateColorMode(const RequestFormInfo& info)
+void FormPattern::UpdateColorMode(int32_t colorMode)
 {
-    if (cardInfo_.colorMode != info.colorMode) {
-        cardInfo_.colorMode = info.colorMode;
+    if (cardInfo_.colorMode != colorMode) {
+        cardInfo_.colorMode = colorMode;
         if (formManagerBridge_) {
-            formManagerBridge_->SetColorMode(info.colorMode);
+            formManagerBridge_->SetColorMode(colorMode);
         }
     }
 }
