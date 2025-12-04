@@ -33,7 +33,6 @@ constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float NORMAL_WIDTH = 4.f;
-constexpr float MAIN_DELTA = 10.0f;
 } // namespace
 
 void ScrollBarTestNg::SetUpTestSuite()
@@ -1354,35 +1353,5 @@ HWTEST_F(ScrollBarTestNg, ResetScrollBarColorTest001, TestSize.Level1)
     ScrollBarModelNG::ResetScrollBarColor(AceType::RawPtr(frameNode_));
     scrollBarColor = paintProperty->GetScrollBarColor();
     EXPECT_EQ(scrollBarColor, std::nullopt);
-}
-
-/**
- * @tc.name: OverDragTest001
- * @tc.desc: Test ScrollBarPattern over drag
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, OverDragTest001, TestSize.Level1)
-{
-    CreateStack();
-    CreateScroll();
-    ScrollModelNG::SetEdgeEffect(AceType::RawPtr(scrollNode_), EdgeEffect::SPRING, true, EffectEdge::ALL);
-    scrollPattern_->OnModifyDone();
-    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
-    CreateDone();
-
-    pattern_->SetControlDistance(SCROLL_HEIGHT);
-    pattern_->scrollableDistance_ = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
-    GestureEvent info;
-    info.SetMainDelta(-MAIN_DELTA);
-    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
-
-    pattern_->HandleDragStart(info);
-    pattern_->HandleDragUpdate(info);
-    FlushUITasks();
-    EXPECT_EQ(scrollPattern_->GetCurrentPosition(), MAIN_DELTA);
-
-    pattern_->HandleDragEnd(info);
-    FlushUITasks();
-    MockAnimationManager::GetInstance().Tick();
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@ ace_unittest("scroll_bar_test_ng") {
     "scroll_bar_accessibility_test_ng.cpp",
     "scroll_bar_event_test_ng.cpp",
     "scroll_bar_layout_test_ng.cpp",
+    "scroll_bar_over_drag_test_ng.cpp",
     "scroll_bar_test_ng.cpp",
   ]
 
