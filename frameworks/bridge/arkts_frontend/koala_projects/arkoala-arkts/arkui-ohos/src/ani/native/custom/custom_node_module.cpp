@@ -70,8 +70,9 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
 
     env->WeakReference_Create(buildFunc, weakRef.get());
 
-    auto node = AceType::Claim(reinterpret_cast<NG::CustomNode *>(ptr));
-    node->SetRenderFunction([vm, weakRef](int64_t, bool&) -> RefPtr<NG::UINode> {
+    auto node = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    auto base = AceType::DynamicCast<NG::CustomNodeBase>(node);
+    base->SetRenderFunction([vm, weakRef](int64_t, bool&) -> RefPtr<NG::UINode> {
         ACE_SCOPED_TRACE("CustomNode renderFunction");
 
         ani_env *env = nullptr;
