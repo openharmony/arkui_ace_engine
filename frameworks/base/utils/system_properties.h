@@ -664,6 +664,8 @@ public:
 
     static bool IsPCMode();
 
+    static bool IsAutoFillSupport();
+
     static bool ConfigChangePerform();
 
     static void SetConfigChangePerform();
@@ -959,6 +961,7 @@ private:
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;
+    static bool isAutoFillSupport_;
 };
 
 } // namespace OHOS::Ace

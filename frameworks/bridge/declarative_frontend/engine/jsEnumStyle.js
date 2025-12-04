@@ -2444,6 +2444,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get autoFill() {
+    return new TextMenuItemId('OH_DEFAULT_AUTO_FILL');
+  }
+
   static get TRANSLATE() {
     return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }

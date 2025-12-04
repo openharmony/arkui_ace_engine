@@ -782,7 +782,7 @@ bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWin
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
 bool SystemProperties::isPCMode_ = false;
-
+bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -964,6 +964,7 @@ void SystemProperties::InitDeviceInfo(
     InitDeviceTypeBySystemProperty();
     GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
     isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
+    isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1407,6 +1408,11 @@ ACE_WEAK_SYM bool SystemProperties::GetCompatibleInputTransEnabled()
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
 {
     return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

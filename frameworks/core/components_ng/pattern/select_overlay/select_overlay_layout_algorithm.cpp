@@ -260,6 +260,9 @@ void SelectOverlayLayoutAlgorithm::LayoutExtensionMenu(
     CHECK_NULL_VOID(extensionMenu);
     extensionMenu->Layout();
     CheckHideBackOrMoreButton(extensionMenu, button);
+    auto extensionSubMenu = layoutWrapper->GetOrCreateChildByIndex(3);
+    CHECK_NULL_VOID(extensionSubMenu);
+    extensionSubMenu->Layout();
 }
 
 void SelectOverlayLayoutAlgorithm::CheckHideBackOrMoreButton(

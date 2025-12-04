@@ -343,7 +343,14 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_VOID(itemNode);
     auto pipeline = itemNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-
+    bool isSelectOverlayExtensionMenu = false;
+    auto menuItemPattern = itemNode->GetPattern<MenuItemPattern>();
+    if (menuItemPattern) {
+        auto topLevelMenuPattern = menuItemPattern->GetMenuPattern(true);
+        if (topLevelMenuPattern) {
+            isSelectOverlayExtensionMenu = topLevelMenuPattern->IsSelectOverlayExtensionMenu();
+        }
+    }
     auto children = row->GetAllChildrenWithBuild();
     CHECK_EQUAL_VOID(isOption_ && !showDefaultSelectedIcon_ && children.empty(), true);
     
@@ -357,7 +364,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
             theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_
     );
     float iconContentPadding = 0.0f;
-    if (!isOption_) {
+    if (!isOption_ && !isSelectOverlayExtensionMenu) {
         iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     }
 

@@ -308,6 +308,17 @@ public:
         return options_;
     }
 
+    void AddMenuItemNode(const RefPtr<FrameNode>& menuItem)
+    {
+        CHECK_NULL_VOID(menuItem);
+        menuItems_.emplace_back(menuItem);
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetMenuItems() const
+    {
+        return menuItems_;
+    }
+
     std::vector<RefPtr<FrameNode>>& GetEmbeddedMenuItems()
     {
         return embeddedMenuItems_;
@@ -346,7 +357,11 @@ public:
     bool HideStackExpandMenu(const OffsetF& position) const;
 
     void HideStackMenu() const;
-
+    void HideAllEmbeddedMenuItems(bool isNeedAnimation);
+    void SetNeedDivider()
+    {
+        isNeedDivider_ = true;
+    }
     void MountOption(const RefPtr<FrameNode>& option);
 
     void RemoveOption();
@@ -828,6 +843,7 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
+    std::vector<RefPtr<FrameNode>> menuItems_;
     std::optional<int32_t> foldStatusChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverCallbackId_;
 

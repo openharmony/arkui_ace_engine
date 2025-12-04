@@ -461,7 +461,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
                 clip->ProcessPasteDataRecord(pasteDataRecord, resText, hasPlainRecord, isFromAutoFill);
             }
             if (resText.empty() && !isFromAutoFill) {
-                taskExecutor->PostTask([callback, isFromAutoFill](){ callback("", isFromAutoFill); },
+                taskExecutor->PostTask([callback, isFromAutoFill]() { callback("", isFromAutoFill); },
                     TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed");
                 return;
             }

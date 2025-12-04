@@ -64,6 +64,16 @@ void SelectOverlayClient::InitMenuCallback()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::SELECT_ALL);
     };
+    selectOverlayInfo_.menuCallback.onAutoFill = [weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::AUTO_FILL);
+    };
+    selectOverlayInfo_.menuCallback.autoFillSubMenuCallback.onPasswordVault = [weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::PASSWORD_VAULT);
+    };
     selectOverlayInfo_.menuCallback.onPaste = [weak = WeakClaim(this)]() {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);

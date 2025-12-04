@@ -9065,8 +9065,10 @@ void RichEditorPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWr
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyFillRequestSuccess, autoFillType:%{public}d, triggerType:%{public}d",
         static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
-    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap);
-    IF_TRUE(triggerType == AceAutoFillTriggerType::PASTE_REQUEST, PasteStr(nodeWrap->GetValue()));
+    bool isPasteByAutoFill = triggerType == AceAutoFillTriggerType::PASTE_REQUEST ||
+        triggerType == AceAutoFillTriggerType::MANUAL_REQUEST;
+    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap && isPasteByAutoFill);
+    PasteStr(nodeWrap->GetValue());
 }
 
 void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
@@ -9163,6 +9165,17 @@ void RichEditorPattern::ProcessAutoFillOnPaste()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessAutoFillOnPaste");
     ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+}
+
+void RichEditorPattern::HandleOnPasswordVault()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnPasswordVault");
+    ProcessAutoFill(AceAutoFillTriggerType::MANUAL_REQUEST);
+}
+
+bool RichEditorPattern::IsShowAutoFill()
+{
+    return SystemProperties::IsAutoFillSupport();
 }
 
 std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>

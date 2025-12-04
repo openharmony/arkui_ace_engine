@@ -145,6 +145,16 @@ public:
         return isSelected_;
     }
 
+    void SetSubSelectMenuBuilder(const std::function<RefPtr<UINode>()>& subBuilderFunc)
+    {
+        subSelectMenuBuilderFunc_ = subBuilderFunc;
+    }
+
+    std::function<RefPtr<UINode>()>& GetSubSelectMenuBuilder()
+    {
+        return subSelectMenuBuilderFunc_;
+    }
+
     void SetSubBuilder(const std::function<void()>& subBuilderFunc)
     {
         subBuilderFunc_ = subBuilderFunc;
@@ -576,6 +586,7 @@ friend class ServiceCollaborationMenuAceHelper;
     int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;
+    std::function<RefPtr<UINode>()> subSelectMenuBuilderFunc_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> optionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> optionSelectedApply_ = nullptr;
 
