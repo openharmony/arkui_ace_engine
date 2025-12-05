@@ -769,7 +769,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
         ani_boolean useNativeLog = ANI_FALSE;
         ani_string appUrlString {};
-        status = env->String_NewUTF8(appUrl, interop_strlen(appUrl), &appUrlString);
+        status = env->String_NewUTF8(appUrl, interop_string_length(appUrl), &appUrlString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -783,7 +783,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_string appParamsString {};
-        status = env->String_NewUTF8(appParams, interop_strlen(appParams), &appParamsString);
+        status = env->String_NewUTF8(appParams, interop_string_length(appParams), &appParamsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -1045,9 +1045,9 @@ extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, 
         application_emit_event_t application_emit_event = (application_emit_event_t)g_vmEntry.emitEvent;
         const char *kotlinString = application_emit_event(app, type, target, arg0, arg1);
 
-        size_t bufferSize = interop_strlen(kotlinString) + 1;
+        size_t bufferSize = interop_string_length(kotlinString) + 1;
         char *result = (char*)malloc(bufferSize);
-        interop_strcpy(result, bufferSize, kotlinString);
+        interop_string_copy(result, bufferSize, kotlinString);
 
         kotlin_ExportedSymbols *env = reinterpret_cast<kotlin_ExportedSymbols*>(g_vmEntry.env);
         env->DisposeString(kotlinString);
@@ -1105,7 +1105,7 @@ extern "C" DLL_EXPORT void RestartWith(const char* page)
             return;
         }
         ani_string pageString {};
-        auto status = env->String_NewUTF8(page, interop_strlen(page), &pageString);
+        auto status = env->String_NewUTF8(page, interop_string_length(page), &pageString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return;
@@ -1129,12 +1129,12 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
             return strdup("Cannot find loadView() method");
         }
         ani_string classNameString {};
-        auto status = env->String_NewUTF8(className, interop_strlen(className), &classNameString);
+        auto status = env->String_NewUTF8(className, interop_string_length(className), &classNameString);
         if (status != ANI_OK) {
             return strdup("Cannot make ANI string");
         }
         ani_string paramsString {};
-        status = env->String_NewUTF8(params, interop_strlen(params), &paramsString);
+        status = env->String_NewUTF8(params, interop_string_length(params), &paramsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return strdup("Cannot make ANI string");

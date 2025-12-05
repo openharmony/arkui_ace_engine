@@ -20,7 +20,7 @@
 #include <cstdio>
 #include "securec.h"
 
-inline errno_t interop_strcpy(char *dest, size_t destsz, const char *src)
+inline errno_t interop_string_copy(char *dest, size_t destsz, const char *src)
 {
     errno_t ret = strcpy_s(dest, reinterpret_cast<rsize_t>(destsz), src);
     if (ret > 0) {
@@ -29,7 +29,7 @@ inline errno_t interop_strcpy(char *dest, size_t destsz, const char *src)
     return ret;
 }
 
-inline errno_t interop_strcat(char *dest, size_t destsz, const char *src)
+inline errno_t interop_string_concatenate(char *dest, size_t destsz, const char *src)
 {
     errno_t ret = strcat_s(dest, reinterpret_cast<rsize_t>(destsz), src);
     if (ret > 0) {
@@ -38,7 +38,7 @@ inline errno_t interop_strcat(char *dest, size_t destsz, const char *src)
     return ret;
 }
 
-inline errno_t interop_memcpy(void *dest, size_t destsz, const void *src, size_t count)
+inline errno_t interop_memory_copy(void *dest, size_t destsz, const void *src, size_t count)
 {
     errno_t ret = memcpy_s(dest, reinterpret_cast<rsize_t>(destsz), src, count);
     if (ret > 0) {
@@ -47,7 +47,7 @@ inline errno_t interop_memcpy(void *dest, size_t destsz, const void *src, size_t
     return ret;
 }
 
-inline errno_t interop_memset(void *dest, size_t destsz, int ch, size_t count)
+inline errno_t interop_memory_set(void *dest, size_t destsz, int ch, size_t count)
 {
     errno_t ret = memset_s(dest, reinterpret_cast<rsize_t>(destsz), ch, count);
     if (ret > 0) {
@@ -57,7 +57,7 @@ inline errno_t interop_memset(void *dest, size_t destsz, int ch, size_t count)
 }
 
 template <typename... T>
-inline int interop_sprintf(char *buffer, size_t bufsz, const char *format, T... args)
+inline int interop_print_to_buffer(char *buffer, size_t bufsz, const char *format, T... args)
 {
     int ret = sprintf_s(buffer, reinterpret_cast<rsize_t>(bufsz), format, args...);
     if (ret < 0) {
@@ -67,7 +67,7 @@ inline int interop_sprintf(char *buffer, size_t bufsz, const char *format, T... 
 }
 
 template <typename... T>
-inline int interop_snprintf(char *buffer, size_t bufsz, const char *format, T... args)
+inline int interop_print_to_buffer_n(char *buffer, size_t bufsz, const char *format, T... args)
 {
     int ret = snprintf_s(buffer, bufsz, format, args...);
     if (ret < 0) {
@@ -76,7 +76,7 @@ inline int interop_snprintf(char *buffer, size_t bufsz, const char *format, T...
     return ret;
 }
 
-inline int interop_vsnprintf(char *buffer, size_t bufsz, const char *format, va_list vlist)
+inline int interop_print_vlist_to_buffer_n(char *buffer, size_t bufsz, const char *format, va_list vlist)
 {
     int ret = vsnprintf_s(buffer, bufsz, format, vlist);
     if (ret == EINVAL) {
@@ -87,7 +87,7 @@ inline int interop_vsnprintf(char *buffer, size_t bufsz, const char *format, va_
     return ret;
 }
 
-inline size_t interop_strlen(const char *str)
+inline size_t interop_string_length(const char *str)
 {
     return strnlen_s(str, UINT_MAX);
 }
