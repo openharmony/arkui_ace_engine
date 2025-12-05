@@ -104,6 +104,18 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullToRefresh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+        setPullUpToCancelRefreshAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RefreshAttribute_setPullUpToCancelRefresh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnOffsetChangeAttribute(value: ((value0: double) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -163,6 +175,9 @@ export interface RefreshAttribute extends CommonMethod {
     pullToRefresh(value: boolean | undefined): this {
         throw new Error("Unimplemented method pullToRefresh")
     }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
+        throw new Error("Unimplemented method pullUpToCancelRefresh")
+    }
     onOffsetChange(value: ((value0: double) => void) | undefined): this {
         throw new Error("Unimplemented method onOffsetChange")
     }
@@ -178,6 +193,7 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     onRefreshing_value?: (() => void) | undefined
     refreshOffset_value?: double | undefined
     pullToRefresh_value?: boolean | undefined
+    pullUpToCancelRefresh_value?: boolean | undefined
     onOffsetChange_value?: ((value0: double) => void) | undefined
     pullDownRatio_value?: double | undefined
     attributeModifier_value?: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -194,6 +210,9 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
         return this
     }
     pullToRefresh(value: boolean | undefined): this {
+        return this
+    }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
         return this
     }
     onOffsetChange(value: ((value0: double) => void) | undefined): this {
@@ -251,6 +270,14 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         if (this.checkPriority("pullToRefresh")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setPullToRefreshAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public pullUpToCancelRefresh(value: boolean | undefined): this {
+        if (this.checkPriority("pullUpToCancelRefresh")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setPullUpToCancelRefreshAttribute(value_casted)
             return this
         }
         return this

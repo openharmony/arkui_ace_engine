@@ -52,6 +52,7 @@ public:
     void SetLoadingText(const std::string& loadingText) override;
     void SetRefreshOffset(const Dimension& offset) override {};
     void SetPullToRefresh(bool isPullToRefresh) override {};
+    void SetPullUpToCancelRefresh(bool isPullUpToCancelRefresh) override {};
 private:
     static RefPtr<RefreshComponent> GetComponent();
 };

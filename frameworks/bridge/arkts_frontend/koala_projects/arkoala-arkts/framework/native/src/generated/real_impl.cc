@@ -4601,6 +4601,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Boolean* value)
     {
     }
+    void SetPullUpToCancelRefreshImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
     void SetOnOffsetChangeImpl(Ark_NativePointer node,
                                const Opt_Callback_F64_Void* value)
     {
@@ -9591,6 +9595,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RefreshAttributeModifier::SetOnRefreshingImpl,
             RefreshAttributeModifier::SetRefreshOffsetImpl,
             RefreshAttributeModifier::SetPullToRefreshImpl,
+            RefreshAttributeModifier::SetPullUpToCancelRefreshImpl,
             RefreshAttributeModifier::SetOnOffsetChangeImpl,
             RefreshAttributeModifier::SetPullDownRatioImpl,
         };

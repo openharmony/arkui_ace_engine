@@ -63,6 +63,20 @@ void ResetPullToRefresh(ArkUINodeHandle node)
     RefreshModelNG::SetPullToRefresh(frameNode, true);
 }
 
+void SetPullUpToCancelRefresh(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullUpToCancelRefresh(frameNode, value);
+}
+
+void ResetPullUpToCancelRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullUpToCancelRefresh(frameNode, true);
+}
+
 void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -114,6 +128,13 @@ ArkUI_Bool GetPullToRefresh(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullToRefresh(frameNode));
+}
+
+ArkUI_Bool GetPullUpToCancelRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullUpToCancelRefresh(frameNode));
 }
 
 void SetRefreshOnStateChangeCallback(ArkUINodeHandle node, void* callback)
@@ -226,12 +247,15 @@ const ArkUIRefreshModifier* GetRefreshModifier()
         .resetRefreshOffset = ResetRefreshOffset,
         .setPullToRefresh = SetPullToRefresh,
         .resetPullToRefresh = ResetPullToRefresh,
+        .setPullUpToCancelRefresh = SetPullUpToCancelRefresh,
+        .resetPullUpToCancelRefresh = ResetPullUpToCancelRefresh,
         .setRefreshContent = SetRefreshContent,
         .setPullDownRatio = SetPullDownRatio,
         .resetPullDownRatio = ResetPullDownRatio,
         .getPullDownRatio = GetPullDownRatio,
         .getRefreshOffset = GetRefreshOffset,
         .getPullToRefresh = GetPullToRefresh,
+        .getPullUpToCancelRefresh = GetPullUpToCancelRefresh,
         .setRefreshOnStateChangeCallback = SetRefreshOnStateChangeCallback,
         .resetRefreshOnStateChangeCallback = ResetRefreshOnStateChangeCallback,
         .setOnRefreshingCallback = SetOnRefreshingCallback,

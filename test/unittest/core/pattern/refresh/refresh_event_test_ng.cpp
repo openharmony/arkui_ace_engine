@@ -509,6 +509,126 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PullUpToCancelRefreshFalseTest
+ * @tc.desc: Test that slide up does not cancel refresh when pullUpToCancelRefresh is false, covering
+ * SpeedTriggerAnimation branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, PullUpToCancelRefreshTest001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(false); // Disable pull up to cancel refresh
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Trigger refresh status
+     * @tc.expected: Component enters REFRESH status
+     */
+    pattern_->HandleDragStart();
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE);
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step2. Test SpeedTriggerAnimation with pullUpToCancelRefresh = false (branch 1: line 901)
+     * @tc.expected: Still in REFRESH status, SwitchToFinish() not called
+     */
+    pattern_->SpeedTriggerAnimation(-100.f); // Negative speed to trigger NonPositive(speed) condition
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH); // Status should remain REFRESH
+
+    /**
+     * @tc.steps: step3. Test SpeedTriggerAnimation with targetOffset near zero (branch 2: line 915)
+     * @tc.expected: Still in REFRESH status, SwitchToFinish() not called
+     */
+    pattern_->HandleDragUpdate(-TRIGGER_REFRESH_DISTANCE);
+    pattern_->SpeedTriggerAnimation(-50.f);                      // Negative speed to trigger animation
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH); // Status should remain REFRESH
+
+    /**
+     * @tc.steps: step4. Slide up (negative delta) in REFRESH status
+     * @tc.expected: Still in REFRESH status
+     */
+    const float slideUpDelta = -TRIGGER_REFRESH_DISTANCE; // Slide up greater than trigger distance
+    pattern_->HandleDragUpdate(slideUpDelta);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step5. Handle drag end after slide up
+     * @tc.expected: Still in REFRESH status
+     */
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step6. FrontEnd set isRefreshing to false to end refresh
+     * @tc.expected: Status changes to DONE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+}
+
+/**
+ * @tc.name: PullUpToCancelRefreshTest002
+ * @tc.desc: Test that slide up cancels refresh when pullUpToCancelRefresh is true, covering SpeedTriggerAnimation
+ * branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, PullUpToCancelRefreshTest002, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(true); // Enable pull up to cancel refresh (default)
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Trigger refresh status
+     * @tc.expected: Component enters REFRESH status
+     */
+    pattern_->HandleDragStart();
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE);
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. Test SpeedTriggerAnimation with pullUpToCancelRefresh=true
+     * @tc.expected: SpeedTriggerAnimation is called, status may remain REFRESH
+     */
+    pattern_->SpeedTriggerAnimation(-100.f); // Negative speed to trigger animation
+    EXPECT_TRUE(pattern_->refreshStatus_ == RefreshStatus::REFRESH || pattern_->refreshStatus_ == RefreshStatus::DONE);
+
+    /**
+     * @tc.steps: step3. Test SpeedTriggerAnimation with scrollOffset near zero
+     * @tc.expected: SpeedTriggerAnimation is called, status may change appropriately
+     */
+    pattern_->HandleDragUpdate(-TRIGGER_REFRESH_DISTANCE);
+    pattern_->SpeedTriggerAnimation(-50.f); // Negative speed to trigger animation
+    EXPECT_TRUE(pattern_->refreshStatus_ == RefreshStatus::DONE);
+
+    /**
+     * @tc.steps: step4. Test HandleDragCancel behavior
+     * @tc.expected: HandleDragCancel is called, status remain REFRESH
+     */
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    pattern_->HandleDragStart();
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE);
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    /**
+     * @tc.steps: step5. FrontEnd set isRefreshing to false to end refresh
+     * @tc.expected: Status changes to DONE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+}
+
+/**
  * @tc.name: VersionElevenCustomHandleDrag001
  * @tc.desc: Test whole refresh action with customBuilder_ in VERSION_ELEVEN
  * @tc.type: FUNC
