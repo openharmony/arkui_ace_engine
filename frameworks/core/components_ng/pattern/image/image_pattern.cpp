@@ -46,6 +46,7 @@ constexpr size_t URL_KEEP_TOTAL_LENGTH = 30;
 constexpr int32_t NEED_MASK_INDEX = 3;
 constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
 constexpr size_t NEED_MASK_START_OFFSET = 2;
+constexpr int32_t INVALID_ID = -1;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -946,7 +947,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline && host->IsActive()) {
+        if (pipeline && host->GetId() != INVALID_ID) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
