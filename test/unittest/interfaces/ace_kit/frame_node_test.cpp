@@ -973,4 +973,27 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest122, TestSize.Level1)
     auto stack = Stack::Create(frameNode);
     EXPECT_NE(stack, nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeTestTest123
+ * @tc.desc: test GetLocalColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest123, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST123";
+    const int32_t id = 123;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test GetLocalColorMode.
+     */
+    auto colorMode = frameNode->GetLocalColorMode();
+    EXPECT_EQ(colorMode, Ace::Kit::ColorMode::COLOR_MODE_UNDEFINED);
+}
 } // namespace OHOS::Ace
