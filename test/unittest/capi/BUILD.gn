@@ -114,6 +114,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/custom_dialog_controller_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng_static.cpp",
