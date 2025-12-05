@@ -23,6 +23,8 @@ ohos_shared_library("ace_network") {
     "netmanager_base:net_conn_manager_if",
     "netmanager_base:net_conn_parcel",
     "netstack:http_client",
+    "napi:ace_napi",
+    "request:preload_napi",
     "request:preload_native",
     "samgr:samgr_proxy",
   ]

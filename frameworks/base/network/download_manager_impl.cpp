@@ -17,6 +17,7 @@
 #include "http_client.h"
 #include "net_conn_client.h"
 #include "request_preload.h"
+#include "preload_napi.h"
 
 #include "base/network/download_manager.h"
 
@@ -299,7 +300,9 @@ public:
                 taskId.c_str(), error.GetMessage().c_str());
             std::string errorMsg = "Http task of url " + url + " failed, response code " +
                                    std::to_string(error.GetCode()) + ", msg from netStack: " + error.GetMessage();
-            failCallback(errorMsg, { ImageErrorCode::GET_IMAGE_ASYNC_HTTP_FAILED, "async http task of uri failed." },
+            failCallback(errorMsg,
+                { ImageErrorCode::GET_IMAGE_ASYNC_HTTP_FAILED, "async http task of uri failed.",
+                    error.GetDownloadInfo() },
                 true, instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
@@ -371,7 +374,7 @@ public:
                                        std::to_string(error.GetCode()) + ", msg from netStack: " + error.GetMessage();
                 downloadCondition->errorMsg = errorMsg;
                 downloadCondition->errorInfo = { ImageErrorCode::GET_IMAGE_SYNC_HTTP_FAILED,
-                    "sync http task of uri failed." };
+                    "sync http task of uri failed.", error.GetDownloadInfo() };
                 downloadCondition->downloadSuccess = false;
             }
             downloadCondition->cv.notify_all();
@@ -442,6 +445,12 @@ public:
             return true;
         }
         return false;
+    }
+
+    void* WrapDownloadInfoToNapiValue(void* env, const ImageErrorInfo& errorInfo) override
+    {
+        return reinterpret_cast<void*>(
+            Request::BuildDownloadInfo(reinterpret_cast<napi_env>(env), *(errorInfo.downloadInfo)));
     }
 
 private:

@@ -68,6 +68,11 @@ public:
     {
         return false;
     }
+
+    void* WrapDownloadInfoToNapiValue(void* env, const ImageErrorInfo& errorInfo) override
+    {
+        return nullptr;
+    }
 };
 
 DownloadManager* DownloadManager::GetInstance()

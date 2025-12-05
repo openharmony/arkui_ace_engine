@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "base/network/download_manager.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #ifndef PREVIEW
 #include <dlfcn.h>
 #endif
@@ -139,6 +141,23 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
     businessErrorObj->SetProperty<int32_t>("code", static_cast<int32_t>(eventInfo.GetErrorInfo().errorCode));
     businessErrorObj->SetProperty("message", eventInfo.GetErrorInfo().errorMessage);
     obj->SetPropertyObject("error", businessErrorObj);
+    if (!eventInfo.GetErrorInfo().downloadInfo) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    auto container = Container::Current();
+    if (!eventInfo.GetErrorInfo().downloadInfo || !container || container->IsSceneBoardWindow()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto downloadInfoNapiValue = DownloadManager::GetInstance()->WrapDownloadInfoToNapiValue(
+        reinterpret_cast<void*>(nativeEngine), eventInfo.GetErrorInfo());
+    auto downloadInfoJsValue =
+        JsConverter::ConvertNapiValueToJsVal(reinterpret_cast<napi_value>(downloadInfoNapiValue));
+    obj->SetPropertyObject("downloadInfo", downloadInfoJsValue);
     return JSRef<JSVal>::Cast(obj);
 }
 
