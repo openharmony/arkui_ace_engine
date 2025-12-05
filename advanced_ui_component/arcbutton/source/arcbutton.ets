@@ -184,7 +184,7 @@ interface ArcButtonThemeInterface {
 export class ArcButtonProgressConfig {
   @Trace public value: number;
   @Trace public total?:number;
-  @Trace public color?: ColorMetrics;
+  @Trace public color?: ResourceColor;
 
   constructor(options: ArcButtonProgressConfig) {
     this.value = options.value;
@@ -238,6 +238,8 @@ export class ArcButtonOptions {
     this.onClick = options.onClick ?? (() => {
     })
     if(options.progressConfig) {
+      this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(
+        Constants.EMPHASIZED_DISABLE_BTN_COLOR);
       this.progressConfig = new ArcButtonProgressConfig(options.progressConfig);
     } else {
       this.progressConfig = undefined;
@@ -261,7 +263,7 @@ export struct ArcButton {
   @Local private fontSize: string = '';
   @Local private progressValue:number = 0;
   @Local private progressTotal:number = 100;
-  @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
+  @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
   private btnNormalColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnPressColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnDisableColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
@@ -293,7 +295,11 @@ export struct ArcButton {
     if(this.options.progressConfig) {
       this.progressValue = this.options.progressConfig.value;
       if(this.options.progressConfig.color) {
-        this.progressColor = this.options.progressConfig.color;
+        this.progressColor = ColorMetrics.resourceColor(this.options.progressConfig.color);
+      } else if (this.options.backgroundColor !== undefined) {
+        this.progressColor = this.options.backgroundColor;
+      } else {
+        this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
       }
       if(this.options.progressConfig.total) {
         this.progressTotal = this.options.progressConfig.total;
@@ -539,10 +545,11 @@ export struct ArcButton {
         Progress({value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule})
           .width('100%')
           .height('100%')
-          .rotate({ angle: !this.isUp ? 0 : 180 })
+          .rotate({ angleX: !this.isUp ? 0 : 180 })
           .clipShape(new Path({ commands: this.pathString }))
-          .backgroundColor(this.btnColor.color)
-          .color(this.progressColor?.color)
+          .backgroundColor(
+            ColorMetrics.rgba(this.progressColor.red,this.progressColor.green,this.progressColor.blue, 0.25))
+          .color(this.progressColor.color)
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
           .shadow(this.getShadow())
       } else  {
@@ -666,7 +673,7 @@ class DataProcessUtil {
     } else {
       m = -1;
     }
-    
+
     //计算截距
     let intercept: number = 0;
     if (m !== -1) {
