@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "core/components_ng/syntax/repeat_model_ng.h"
+#include "core/components_ng/syntax/repeat_node.h"
 
 
 namespace OHOS::Ace::NG {
@@ -890,5 +892,35 @@ HWTEST_F(GridLayoutTestNg, ItemFillPolicy002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 3), 0);
     EXPECT_EQ(GetChildY(frameNode_, 4), 0);
     EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: GridLazyEmptyBranchTest001
+ * @tc.desc: Test when grid get empty child from LazyForEach
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLazyEmptyBranchTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
+    auto wrapper0 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper0, nullptr);
+
+
+    model.SetSupportLazyLoadingEmptyBranch(true);
+    auto layoutProperty = frameNode_->GetLayoutProperty<GridLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper1, nullptr);
+
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode_->AddChild(repeatNode);
+    auto wrapper2 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_NE(wrapper2, nullptr);
 }
 } // namespace OHOS::Ace::NG

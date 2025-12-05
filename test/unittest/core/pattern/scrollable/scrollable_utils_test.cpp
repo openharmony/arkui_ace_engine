@@ -22,11 +22,32 @@
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_model_ng.h"
+#include "core/components_ng/syntax/repeat_node.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+class DummyNode : public UINode {
+    DECLARE_ACE_TYPE(DummyNode, UINode);
+
+public:
+    static RefPtr<DummyNode> CreateNode(const std::string& tag, int32_t nodeId)
+    {
+        auto spanNode = MakeRefPtr<DummyNode>(tag, nodeId);
+        return spanNode;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit DummyNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId) {}
+    ~DummyNode() override = default;
+};
+
 class ScrollableUtilsTest : public TestNG {
 public:
     void SetUp() override;
@@ -34,6 +55,12 @@ public:
 
     void FillChildren(int32_t count, Axis axis, SizeF size);
     void ClearChildren();
+
+    RefPtr<FrameNode> CreateScrollable();
+    RefPtr<FrameNode> CreateScrollableChild();
+    RefPtr<UINode> CreateScrollableChildUINode();
+    RefPtr<LazyForEachNode> CreateLazyForEachNode();
+    RefPtr<RepeatNode> CreateRepeatNode();
 
 private:
     RefPtr<FrameNode> scrollable_;
@@ -81,6 +108,35 @@ void ScrollableUtilsTest::ClearChildren()
 {
     lazyNode_->builder_->cachedItems_.clear();
     lazyNode_->builder_->outOfBoundaryNodes_.clear();
+}
+
+RefPtr<FrameNode> ScrollableUtilsTest::CreateScrollable()
+{
+    return FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
+}
+
+RefPtr<FrameNode> ScrollableUtilsTest::CreateScrollableChild()
+{
+    return FrameNode::CreateFrameNode("ScrollableChild", -1, AceType::MakeRefPtr<Pattern>());
+}
+
+RefPtr<LazyForEachNode> ScrollableUtilsTest::CreateLazyForEachNode()
+{
+    auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    return AceType::MakeRefPtr<LazyForEachNode>(-1, lazyBuilder);
+}
+
+RefPtr<UINode> ScrollableUtilsTest::CreateScrollableChildUINode()
+{
+    return DummyNode::CreateNode("ScrollableChildUINode", -1);
+}
+
+RefPtr<RepeatNode> ScrollableUtilsTest::CreateRepeatNode()
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+
+    return AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
 }
 
 /**
@@ -338,5 +394,119 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset002, TestSize.Level1)
     };
     auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     EXPECT_EQ(notMove, 0.0f);
+}
+
+/**
+ * @tc.name: IsChildLazy001
+ * @tc.desc: Test when scrollable node doesn't have lazy child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy001, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto child = CreateScrollableChild();
+    scrollable->AddChild(child);
+    /**
+     * @tc.steps: step1. when scrollable node doesn't have lazy child.
+     * @tc.expected: return false.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, false);
+}
+
+/**
+ * @tc.name: IsChildLazy002
+ * @tc.desc: Test when scrollable have lazy child. But lazy child is under FrameNode child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy002, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto frameChild = CreateScrollableChild();
+    auto lazyChild = CreateLazyForEachNode();
+    frameChild->AddChild(lazyChild);
+    scrollable->AddChild(frameChild);
+    /**
+     * @tc.steps: step1. when scrollable have lazy child. But lazy child is under FrameNode child.
+     * @tc.expected: return false.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, false);
+}
+
+/**
+ * @tc.name: IsChildLazy003
+ * @tc.desc: Test when scrollable have lazy child. And lazy child is under UINode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy003, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto dummyNode = CreateScrollableChildUINode();
+    auto lazyChild = CreateLazyForEachNode();
+    dummyNode->AddChild(lazyChild);
+    scrollable->AddChild(dummyNode);
+    /**
+     * @tc.steps: step1. when scrollable have lazy child. But lazy child is under FrameNode child.
+     * @tc.expected: return true.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, true);
+}
+
+/**
+ * @tc.name: IsChildLazy004
+ * @tc.desc: Test when scrollable have lazy child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy004, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto lazyChild = CreateLazyForEachNode();
+    scrollable->AddChild(lazyChild);
+    /**
+     * @tc.steps: step1. when scrollable have lazy child.
+     * @tc.expected: return true.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, true);
+}
+
+/**
+ * @tc.name: IsChildLazy005
+ * @tc.desc: Test when scrollable have both repeat and lazy child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy005, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto repeatChild = CreateRepeatNode();
+    auto lazyChild = CreateLazyForEachNode();
+    scrollable->AddChild(repeatChild);
+    scrollable->AddChild(lazyChild);
+    /**
+     * @tc.steps: step1. when scrollable have both repeat and lazy child.
+     * @tc.expected: return true.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, true);
+}
+
+/**
+ * @tc.name: IsChildLazy006
+ * @tc.desc: Test when scrollable have repeat child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, IsChildLazy006, TestSize.Level1)
+{
+    auto scrollable = CreateScrollable();
+    auto repeatChild = CreateRepeatNode();
+    scrollable->AddChild(repeatChild);
+    /**
+     * @tc.steps: step1. when scrollable have repeat child.
+     * @tc.expected: return true.
+     */
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    EXPECT_EQ(isLazy, true);
 }
 } // namespace OHOS::Ace::NG
