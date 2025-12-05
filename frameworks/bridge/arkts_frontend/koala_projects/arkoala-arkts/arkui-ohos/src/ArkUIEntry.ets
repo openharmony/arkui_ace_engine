@@ -14,7 +14,7 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler, scheduleCallback } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
@@ -330,7 +330,10 @@ export class Application {
         let result : boolean = false
         switch (type as MessageType) {
             case MessageType.DELETE_DETACHED_ROOT: {
-                result = destroyUiDetachedRoot(ptr, this.instanceId);
+                result = true
+                scheduleCallback(() => {
+                    destroyUiDetachedRoot(ptr, this.instanceId)
+                })
                 break
             }
             default: {
