@@ -582,10 +582,14 @@ class ObserveV2 {
     }
     // Ignore for SynMonitor
     // Map/Set always fire in pairs SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY and  ObserveV2.OB_LENGTH
-    // Condition below will ignore all attrs for Map and Set with the exception OB_LENGTH
-    // For Map and Set we trigger SyncMonitors only for attribure - ObserveV2.OB_LENGTH
+    // Condition below will ignore all attrs for Map and Set with the exception of
+    // OB_LENGTH and OB_MAP_SET_MONITOR_ANY_PROPERTY
+    // For Map and Set we trigger SyncMonitors only two attribures:
+    // ObserveV2.OB_LENGTH and OB_MAP_SET_MONITOR_ANY_PROPERTY
     if ((targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) &&
-      (attrName === ObserveV2.OB_LENGTH || (!(target instanceof Map) && !(target instanceof Set)))) {
+      (attrName === ObserveV2.OB_LENGTH ||
+      attrName === SetMapProxyHandler.OB_MAP_SET_MONITOR_ANY_PROPERTY ||
+      (!(target instanceof Map) && !(target instanceof Set)))) {
       if (changedIdSet === undefined) {
         changedIdSet = new Set<number>();
       }
