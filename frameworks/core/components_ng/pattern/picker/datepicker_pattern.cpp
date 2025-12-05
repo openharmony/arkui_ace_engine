@@ -654,25 +654,30 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
+
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
     if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        const auto normalStyle = pickerTheme->GetOptionStyle(false, false);
         pickerProperty->UpdateColor(
             GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     }
 
     if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        const auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
         pickerProperty->UpdateDisappearColor(
             GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        const auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     }
 
     if (isPicker_) {
@@ -681,6 +686,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         }
         return;
     }
+
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto buttonTitleNode = buttonTitleNode_.Upgrade();
     CHECK_NULL_VOID(buttonTitleNode);

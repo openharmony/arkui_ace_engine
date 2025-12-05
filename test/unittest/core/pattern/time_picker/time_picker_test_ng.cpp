@@ -1440,4 +1440,84 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPatternScrollOption001, TestSi
     columnPattern_->ScrollOption(10.0f);
     EXPECT_EQ(columnPattern_->GetEnterIndex(), 1);
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate_UserSetNormalColor
+ * @tc.desc: When user sets normal text color, OnColorConfigurationUpdate should not override it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate_UserSetNormalColor, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    // set normal text style as user-set color
+    PickerTextStyle normalStyle;
+    normalStyle.textColor = Color::RED;
+    normalStyle.textColorSetByUser = true;
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, normalStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->GetColor().has_value());
+    EXPECT_EQ(Color::RED, pickerProperty->GetColor().value());
+
+    // ensure theme manager returns a picker theme (not used to override user color)
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateAllChildNode();
+    pickerPattern->SetPickerTag(false);
+
+    // calling OnColorConfigurationUpdate should not override user-set normal color
+    pickerPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(Color::RED, pickerProperty->GetColor().value());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate_UpdateSelectedWhenConfigChange
+ * @tc.desc: When ConfigChangePerform is true and user did not set selected color, it should be updated from theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate_UpdateSelectedWhenConfigChange, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::GREEN;
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->GetSelectedColor().has_value());
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateAllChildNode();
+    pickerPattern->SetPickerTag(false);
+
+    g_isConfigChangePerform = true;
+    // ensure selected color is not user set
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    EXPECT_FALSE(pickerProperty->GetSelectedTextColorSetByUser().value_or(false));
+
+    pickerPattern->OnColorConfigurationUpdate();
+    // After update, selected color should be set from theme
+    EXPECT_TRUE(pickerProperty->GetSelectedColor().has_value());
+    EXPECT_NE(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+}
 } // namespace OHOS::Ace::NG
