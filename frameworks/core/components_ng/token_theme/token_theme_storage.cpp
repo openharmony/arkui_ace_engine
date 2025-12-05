@@ -249,4 +249,13 @@ void TokenThemeStorage::SetIsThemeColorSetByUser(int32_t themeId, bool isDark, i
     }
     themeIdMap[isDark][index] = isColorSetByUser;
 }
+
+void TokenThemeStorage::InitDarkThemeIdMap(int32_t themeId, bool isDark)
+{
+    auto& themeIdMap = themeColorSetByUser_[themeId];
+    if (themeIdMap.find(isDark) == themeIdMap.end()) {
+        themeIdMap[isDark] = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+    }
+    themeIdMap[isDark] = themeIdMap[!isDark];
+}
 } // namespace OHOS::Ace::NG
