@@ -782,7 +782,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
+            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
             this.applyOptionsFinish('ImageAttribute');
