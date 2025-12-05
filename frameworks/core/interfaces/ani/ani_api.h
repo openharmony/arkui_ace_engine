@@ -686,6 +686,7 @@ struct ArkUIAniXComponentModifier {
 
 struct ArkUIAniConditionScopeModifier {
     ani_long (*constructConditionScope)(ani_int);
+    void (*markDirty)(ani_long);
 };
 
 struct ArkUIAniComponentConentModifier {

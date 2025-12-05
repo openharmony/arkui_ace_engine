@@ -29,10 +29,18 @@ ani_long ConstructConditionScope(ani_int id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
+void MarkDirty(ani_long ptr)
+{
+    auto* node = reinterpret_cast<NG::ConditionScopeNode*>(ptr);
+    CHECK_NULL_VOID(node);
+    node->FlushUpdateAndMarkDirty();
+}
+
 const ArkUIAniConditionScopeModifier* GetConditionScopeAniModifier()
 {
     static const ArkUIAniConditionScopeModifier impl = {
-        .constructConditionScope = ConstructConditionScope
+        .constructConditionScope = ConstructConditionScope,
+        .markDirty = MarkDirty
     };
     return &impl;
 }
