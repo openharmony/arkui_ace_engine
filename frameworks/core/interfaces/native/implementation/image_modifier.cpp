@@ -22,7 +22,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/interfaces/native/implementation/content_transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
 
@@ -123,28 +122,17 @@ void SetImageOptionsImpl(Ark_NativePointer node,
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void SetAltImpl(Ark_NativePointer node, const Opt_Union_String_Resource_PixelMap_ImageAlt* value)
+void SetAltImpl(Ark_NativePointer node,
+                const Opt_Union_String_Resource_PixelMap* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value->tag != INTEROP_TAG_UNDEFINED && value->value.selector == SELECTOR_ID_3) {
-        auto imageAltPlaceholder = Converter::OptConvert<ImageSourceInfo>(value->value.value3.placeholder);
-        if (imageAltPlaceholder.has_value() &&
-            ImageSourceInfo::ResolveURIType(imageAltPlaceholder->GetSrc()) != SrcType::NETWORK) {
-            ImageModelStatic::SetAltPlaceholder(frameNode, imageAltPlaceholder);
-        }
-        auto imageAltError = Converter::OptConvert<ImageSourceInfo>(value->value.value3.error);
-        if (imageAltError.has_value()) {
-            ImageModelStatic::SetAltError(frameNode, imageAltError);
-        }
-    } else {
-        auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
-        if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
-            ImageModelStatic::SetAlt(frameNode, std::nullopt);
-            return;
-        }
-        ImageModelStatic::SetAlt(frameNode, info);
+    auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
+    if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
+        ImageModelStatic::SetAlt(frameNode, std::nullopt);
+        return;
     }
+    ImageModelStatic::SetAlt(frameNode, info);
 }
 void SetMatchTextDirectionImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
@@ -453,29 +441,7 @@ void SetOrientationImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<ImageRotateOrientation>(value);
     ImageModelStatic::SetOrientation(frameNode, convValue);
 }
-void SetSupportSvg2Impl(Ark_NativePointer node, const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (convValue) {
-        ImageModelStatic::SetSupportSvg2(frameNode, convValue.value());
-    } else {
-        ImageModelStatic::SetSupportSvg2(frameNode, false);
-    }
-}
-void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitionEffect* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (optValue.has_value()) {
-        auto* peer = optValue.value();
-        CHECK_NULL_VOID(peer);
-        ImageModelStatic::SetContentTransition(frameNode, peer->type_);
-    }
-}
-} // namespace ImageAttributeModifier
+} // ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
@@ -508,8 +474,6 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetPrivacySensitiveImpl,
         ImageAttributeModifier::SetEnhancedImageQualityImpl,
         ImageAttributeModifier::SetOrientationImpl,
-        ImageAttributeModifier::SetSupportSvg2Impl,
-        ImageAttributeModifier::SetContentTransitionImpl,
     };
     return &ArkUIImageModifierImpl;
 }

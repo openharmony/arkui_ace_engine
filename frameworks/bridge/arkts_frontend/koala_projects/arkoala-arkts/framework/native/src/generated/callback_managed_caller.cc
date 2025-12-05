@@ -6450,27 +6450,6 @@ void callManagedOnPasteCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceI
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void callManagedOnPickerCallback(Ark_Int32 resourceId, Ark_Int32 selectedIndex)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_OnPickerCallback);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(selectedIndex);
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedOnPickerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 selectedIndex)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_OnPickerCallback);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(selectedIndex);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-}
 void callManagedOnRadioChangeCallback(Ark_Int32 resourceId, Ark_Boolean isChecked)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8688,7 +8667,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnOverrideErrorPageCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideErrorPageCallback);
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallback);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallback);
-        case Kind_OnPickerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPickerCallback);
         case Kind_OnRadioChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRadioChangeCallback);
         case Kind_OnRatingChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRatingChangeCallback);
         case Kind_OnRenderProcessNotRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessNotRespondingCallback);
@@ -9014,7 +8992,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnOverrideErrorPageCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideErrorPageCallbackSync);
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallbackSync);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallbackSync);
-        case Kind_OnPickerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPickerCallbackSync);
         case Kind_OnRadioChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRadioChangeCallbackSync);
         case Kind_OnRatingChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRatingChangeCallbackSync);
         case Kind_OnRenderProcessNotRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessNotRespondingCallbackSync);

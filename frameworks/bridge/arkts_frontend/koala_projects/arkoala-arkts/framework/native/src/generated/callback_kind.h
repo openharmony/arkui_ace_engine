@@ -269,7 +269,6 @@ typedef enum CallbackKind {
     Kind_OnOverrideErrorPageCallback = 1599140581,
     Kind_OnOverrideUrlLoadingCallback = 865258467,
     Kind_OnPasteCallback = 1738363337,
-    Kind_OnPickerCallback = 505363900,
     Kind_OnRadioChangeCallback = 511412333,
     Kind_OnRatingChangeCallback = -551895045,
     Kind_OnRenderProcessNotRespondingCallback = 47282303,

@@ -42,7 +42,6 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/web/web_event.h"
 #include "core/components/web/web_property.h"
-#include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -630,7 +629,6 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_Resource& src);
     template<> PaddingProperty Convert(const Ark_String& src);
-    template<> PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src);
     template<> PickerRangeType Convert(const Ark_Resource& src);
     template<> PickerRangeType Convert(const Array_Array_String& src);
     template<> PickerRangeType Convert(const Array_String& src);
@@ -815,7 +813,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<ImageRenderMode>& dst, const Ark_ImageRenderMode& src);
     template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& value);
-    template<> void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value);
     template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src);
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src);
@@ -854,7 +851,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<ParticleEmitterShape>& dst, const Ark_ParticleEmitterShape& src);
     template<> void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
-    template<> void AssignCast(std::optional<PickerIndicatorType>& dst, const Ark_PickerIndicatorType& src);
     template<> void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src);

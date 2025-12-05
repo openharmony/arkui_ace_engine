@@ -5382,24 +5382,6 @@ void deserializeAndCallSyncOnPasteCallback(Ark_VMContext vmContext, KSerializerB
     Ark_PasteEvent event = PasteEvent_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, content, event);
 }
-void deserializeAndCallOnPickerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnPickerCallback))));
-    thisDeserializer.readPointer();
-    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
-    _call(_resourceId, selectedIndex);
-}
-void deserializeAndCallSyncOnPickerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnPickerCallback))));
-    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
-    callSyncMethod(vmContext, resourceId, selectedIndex);
-}
 void deserializeAndCallOnRadioChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7392,7 +7374,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnOverrideErrorPageCallback: return deserializeAndCallOnOverrideErrorPageCallback(thisArray, thisLength);
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisArray, thisLength);
-        case Kind_OnPickerCallback: return deserializeAndCallOnPickerCallback(thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisArray, thisLength);
         case Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisArray, thisLength);
         case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallOnRenderProcessNotRespondingCallback(thisArray, thisLength);
@@ -7719,7 +7700,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnOverrideErrorPageCallback: return deserializeAndCallSyncOnOverrideErrorPageCallback(vmContext, thisArray, thisLength);
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
-        case Kind_OnPickerCallback: return deserializeAndCallSyncOnPickerCallback(vmContext, thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnRatingChangeCallback: return deserializeAndCallSyncOnRatingChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallSyncOnRenderProcessNotRespondingCallback(vmContext, thisArray, thisLength);

@@ -27,10 +27,8 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
@@ -2544,16 +2542,6 @@ static PaddingProperty PaddingPropertyFromCalcLength(const std::optional<CalcLen
     return dst;
 }
 
-template<typename T>
-static RefPtr<T> GetTheme()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    return pipelineContext->GetTheme<T>();
-}
-
 template<>
 PaddingProperty Convert(const Ark_LengthMetrics& src)
 {
@@ -2570,57 +2558,6 @@ template<>
 PaddingProperty Convert(const Ark_String& src)
 {
     return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
-}
-
-template<>
-PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src)
-{
-    PickerIndicatorStyle dst;
-    auto type = Converter::OptConvert<PickerIndicatorType>(src.type);
-    dst.type = static_cast<int32_t>(type.value_or(PickerIndicatorType::BACKGROUND));
-    auto pickerTheme = GetTheme<ContainerPickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, dst);
-    dst.strokeWidth = pickerTheme->GetStrokeWidth();
-    dst.dividerColor = pickerTheme->GetIndicatorDividerColor();
-    dst.startMargin = Dimension();
-    dst.endMargin = Dimension();
-    dst.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
-    dst.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
-
-    auto strokeWidth = Converter::OptConvert<Dimension>(src.strokeWidth);
-    if ((strokeWidth.has_value()) && GreatOrEqual(strokeWidth->Value(), 0.0f) &&
-        (strokeWidth->Unit() != DimensionUnit::PERCENT)) {
-        dst.strokeWidth = strokeWidth.value();
-        dst.isDefaultDividerWidth = false;
-    }
-    auto dividerColor = Converter::OptConvert<Color>(src.dividerColor);
-    if (dividerColor.has_value()) {
-        dst.dividerColor = dividerColor.value();
-        dst.isDefaultDividerColor = false;
-    }
-    auto startMargin = Converter::OptConvert<Dimension>(src.startMargin);
-    if ((startMargin.has_value()) && GreatOrEqual(startMargin->Value(), 0.0f) &&
-        (startMargin->Unit() != DimensionUnit::PERCENT)) {
-        dst.startMargin = startMargin.value();
-        dst.isDefaultStartMargin = false;
-    }
-    auto endMargin = Converter::OptConvert<Dimension>(src.endMargin);
-    if ((endMargin.has_value()) && GreatOrEqual(endMargin->Value(), 0.0f) &&
-        (endMargin->Unit() != DimensionUnit::PERCENT)) {
-        dst.endMargin = endMargin.value();
-        dst.isDefaultEndMargin = false;
-    }
-    auto backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
-    if (backgroundColor.has_value()) {
-        dst.backgroundColor = backgroundColor.value();
-        dst.isDefaultBackgroundColor = false;
-    }
-    auto borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
-    if (borderRadius.has_value()) {
-        dst.borderRadius = borderRadius;
-        dst.isDefaultBorderRadius = false;
-    }
-    return dst;
 }
 
 template<>
@@ -3679,12 +3616,6 @@ void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& v
     } else {
         LOGE("Invalid peer value at Ark_image_PixelMap");
     }
-}
-
-template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value)
-{
-    dst = ImageSourceInfo();
 }
 
 template<>

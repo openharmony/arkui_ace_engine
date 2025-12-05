@@ -2427,16 +2427,6 @@ void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
 }
 
 template<>
-void AssignCast(std::optional<PickerIndicatorType>& dst, const Ark_PickerIndicatorType& src)
-{
-    switch (src) {
-        case ARK_PICKER_INDICATOR_TYPE_DIVIDER: dst = PickerIndicatorType::DIVIDER; break;
-        case ARK_PICKER_INDICATOR_TYPE_BACKGROUND: dst = PickerIndicatorType::BACKGROUND; break;
-        default: LOGE("Unexpected enum value in Ark_PickerIndicatorType: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src)
 {
     switch (src) {
