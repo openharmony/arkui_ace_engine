@@ -93,7 +93,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
+    setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
@@ -119,6 +119,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         } else if (src instanceof ImageContent) {
             thisSerializer.writeInt8((3).toByte())
             const srcForIdx3  = src as ImageContent
+            thisSerializer.writeInt32(srcForIdx3.valueOf())
+        } else if (src === undefined) {
+            thisSerializer.writeInt8((3).toByte())
+            const srcForIdx3  = ImageContent.EMPTY
             thisSerializer.writeInt32(srcForIdx3.valueOf())
         }
         if (imageAIOptions !== undefined) {
@@ -559,7 +563,7 @@ export interface ImageSourceSize {
     height: double;
 }
 export interface ImageAttribute extends CommonMethod {
-    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         throw new Error("Unimplemented method setImageOptions")
     }
     alt(value: string | Resource | image.PixelMap | undefined): this {
@@ -674,7 +678,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     enhancedImageQuality_value?: image.ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
     attributeModifier_value?: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined
-    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         return this
     }
     alt(value: string | Resource | image.PixelMap | undefined): this {
@@ -782,9 +786,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return (this.peer as ArkImagePeer)
     }
-    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
+            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
             this.applyOptionsFinish('ImageAttribute');
