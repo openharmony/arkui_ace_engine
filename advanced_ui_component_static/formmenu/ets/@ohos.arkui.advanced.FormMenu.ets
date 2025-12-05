@@ -39,8 +39,8 @@ async function querySnapshot (want: Want, componentId: string): Promise<void> {
         let screenY = compInfo?.screenOffset.y.toFixed(2);
         !want.parameters && (want.parameters = {});
         let wantParam = want.parameters;
-        if (wantParam != undefined && width != undefined && height != undefined
-            && screenX != undefined && screenY != undefined) {
+        if (wantParam != undefined && width != undefined && height != undefined &&
+            screenX != undefined && screenY != undefined) {
             wantParam['ohos.extra.param.key.add_form_to_host_width'] = width;
             wantParam['ohos.extra.param.key.add_form_to_host_height'] = height;
             wantParam['ohos.extra.param.key.add_form_to_host_screenx'] = screenX;
@@ -87,7 +87,7 @@ export function AddFormMenuItem(want: Want, componentId: string, options?: AddFo
         .onClick((e: ClickEvent) => {
             await querySnapshot(want, componentId);
             let formBindingData = options?.formBindingData;
-            let dataStr: string = formBindingData ? JSON.stringify(formBindingData.data) : "";
+            let dataStr: string = formBindingData ? JSON.stringify(formBindingData.data) : '';
             let callback = options?.callback;
             let call = callback ? new AsyncCallbackWrapper<string>(callback) : undefined;
             taskpool.execute((): void => {
