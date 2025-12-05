@@ -2019,6 +2019,19 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavigationMenu {
+  menu: Array<NavigationMenuItem> | undefined;
+  options: NavigationMenuOptions | undefined;
+
+  constructor() {
+    this.menu = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkNavigationMenu): boolean {
+    return (this.menu === another.menu) && (this.options === another.options);
+  }
+}
+
 class ArkNavBackButton {
   icon: any;
   text: ResourceStr | undefined;
