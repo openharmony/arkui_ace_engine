@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_XML_PARSER_BASE_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_XML_PARSER_BASE_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_PARSER_BASE_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_PARSER_BASE_H
 
 #include <string>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+
+namespace OHOS::AppExecFwk {
+struct Metadata;
+}
 
 namespace OHOS::Ace {
 enum ParseXmlNodeIndex : uint32_t {
@@ -43,19 +47,21 @@ enum ParseErrCode {
     PARSE_PROD_FILE_LOAD_FAIL,
     PARSE_GET_ROOT_FAIL,
     PARSE_GET_CHILD_FAIL,
+    PARSE_NOT_SUPPORT,
 };
 
-class ConfigXMLParserBase {
+class ConfigParserBase {
 public:
-    virtual ~ConfigXMLParserBase();
+    virtual ~ConfigParserBase();
 
-    virtual ParseErrCode ParseFeatureParam(xmlNode& node)
-    {
-        return PARSE_NO_PARAM;
-    }
+    // meta data parse first
+    virtual ParseErrCode ParseMetaData(const AppExecFwk::Metadata& metaData);
+
+    virtual ParseErrCode ParseFeatureParam(xmlNode& node);
 
 protected:
     std::string ExtractPropertyValue(const std::string& propName, xmlNode& node);
+    bool parseWithMetaData_ = false;
 
 private:
     void Destroy();
@@ -74,4 +80,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_CONFIG_XML_PARSER_BASE_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_PARSER_BASE_H

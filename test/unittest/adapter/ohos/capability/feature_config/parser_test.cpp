@@ -24,6 +24,9 @@
 using namespace testing;
 using namespace testing::ext;
 
+#include "bundlemgr/bundle_mgr_proxy.h"
+
+namespace OHOS::Ace {
 class ParserTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -31,9 +34,30 @@ public:
     void SetUp() {};
     void TearDown() {};
 
-    OHOS::Ace::SyncLoadParser syncLoadParser;
-    OHOS::Ace::UINodeGcParamParser uiNodeGcParamParser;
+    SyncLoadParser syncLoadParser;
+    UINodeGcParamParser uiNodeGcParamParser;
+
+    std::vector<OHOS::AppExecFwk::Metadata> metaData;
 };
+
+class TestParser : public ConfigParserBase {
+public:
+    TestParser() = default;
+    ~TestParser() = default;
+};
+
+/**
+ * @tc.name  : ConfigParserBase_Virtual_Func
+ * @tc.number: ParserTest_000
+ */
+HWTEST_F(ParserTest, ConfigParserBase_Virtual_Func, TestSize.Level0)
+{
+    TestParser testParser;
+    xmlNode node;
+    OHOS::AppExecFwk::Metadata data;
+    EXPECT_EQ(testParser.ParseFeatureParam(node), PARSE_NOT_SUPPORT);
+    EXPECT_EQ(testParser.ParseMetaData(data), PARSE_NOT_SUPPORT);
+}
 
 /**
  * @tc.name  : IsValidDigits_ShouldReturnTrue_WhenStringIsValidDigits
@@ -60,7 +84,7 @@ HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringIsValidDigits,
  */
 HWTEST_F(ParserTest, STATIC_VALUE, TestSize.Level1)
 {
-    auto& instance = OHOS::Ace::FeatureParamManager::GetInstance();
+    auto& instance = FeatureParamManager::GetInstance();
     instance.SetSyncLoadEnableParam(true, 80);
     auto enable = instance.IsSyncLoadEnabled();
     auto time = instance.GetSyncloadResponseDeadline();
@@ -81,15 +105,66 @@ HWTEST_F(ParserTest, ParseFeatureParam, TestSize.Level1)
 {
     xmlNode node;
     auto ret = syncLoadParser.ParseFeatureParam(node);
-    EXPECT_EQ(ret, OHOS::Ace::PARSE_TYPE_ERROR);
+    EXPECT_EQ(ret, PARSE_TYPE_ERROR);
 
     node.type = xmlElementType::XML_ELEMENT_NODE;
     const std::string valueKeyStr = "value";
     const std::string valueValStr = "50";
     xmlSetProp(&node, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStr.c_str()));
     ret = syncLoadParser.ParseFeatureParam(node);
-    EXPECT_EQ(ret, OHOS::Ace::PARSE_EXEC_SUCCESS);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
 
     ret = uiNodeGcParamParser.ParseFeatureParam(node);
-    EXPECT_EQ(ret, OHOS::Ace::PARSE_EXEC_SUCCESS);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
 }
+
+/**
+ * @tc.name: ParseFeatureParam uiNodeGcParamParser Metadata
+ * @tc.desc: ParseFeatureParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParserTest, ParseFeatureParamParseMetaData, TestSize.Level1)
+{
+    // init mata data
+    OHOS::AppExecFwk::Metadata dataTrue = { "UINodeGcParamParser", "true", "" };
+    OHOS::AppExecFwk::Metadata dataFalse = { "UINodeGcParamParser", "false", "" };
+
+    // init xml data
+    xmlNode nodeTrue;
+    nodeTrue.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string valueKeyStr = "enable";
+    const std::string valueValStrTrue = "true";
+    xmlSetProp(&nodeTrue, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStrTrue.c_str()));
+
+    xmlNode nodeFalse;
+    nodeFalse.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string valueValStrFalse = "false";
+    xmlSetProp(&nodeFalse, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStrFalse.c_str()));
+
+    // parse xml data
+    uiNodeGcParamParser.ParseFeatureParam(nodeTrue);
+    EXPECT_TRUE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    uiNodeGcParamParser.ParseFeatureParam(nodeFalse);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    // Priority ： (xml false) > (meta data ture & false) > (xml true)
+    // xml false will get false value
+    uiNodeGcParamParser.ParseMetaData(dataTrue);
+    uiNodeGcParamParser.ParseFeatureParam(nodeFalse);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    uiNodeGcParamParser.ParseMetaData(dataFalse);
+    uiNodeGcParamParser.ParseFeatureParam(nodeFalse);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    // xml true will follow meta data ret
+    uiNodeGcParamParser.ParseMetaData(dataTrue);
+    uiNodeGcParamParser.ParseFeatureParam(nodeTrue);
+    EXPECT_TRUE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    uiNodeGcParamParser.ParseMetaData(dataFalse);
+    uiNodeGcParamParser.ParseFeatureParam(nodeTrue);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+}
+} // namespace OHOS::Ace

@@ -16,12 +16,24 @@
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
 ParseErrCode UINodeGcParamParser::ParseFeatureParam(xmlNode& node)
 {
-    auto& instance = FeatureParamManager::GetInstance();
-    instance.SetUINodeGcEnabled(ExtractPropertyValue("enable", node) == "true");
+    bool xmlEnable = ExtractPropertyValue("enable", node) == "true";
+    // Priority ： (xml false) > (meta data ture & false) > (xml true)
+    if (!parseWithMetaData_ || !xmlEnable) {
+        FeatureParamManager::GetInstance().SetUINodeGcEnabled(xmlEnable);
+    }
+
+    return PARSE_EXEC_SUCCESS;
+}
+
+ParseErrCode UINodeGcParamParser::ParseMetaData(const AppExecFwk::Metadata& metaData)
+{
+    parseWithMetaData_ = true;
+    FeatureParamManager::GetInstance().SetUINodeGcEnabled(metaData.value == "true");
     return PARSE_EXEC_SUCCESS;
 }
 

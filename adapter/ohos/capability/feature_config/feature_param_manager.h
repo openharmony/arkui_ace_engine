@@ -21,14 +21,18 @@
 #include "base/utils/singleton.h"
 #include "base/utils/noncopyable.h"
 
+namespace OHOS::AppExecFwk {
+struct Metadata;
+}
+
 namespace OHOS::Ace {
-class ConfigXMLParserBase;
+class ConfigParserBase;
 class FeatureParamManager final : public Singleton<FeatureParamManager> {
     DECLARE_SINGLETON(FeatureParamManager);
     ACE_DISALLOW_MOVE(FeatureParamManager);
 
 public:
-    void Init(const std::string& bundleName);
+    void Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData);
 
     // SyncLoadParser
     void SetSyncLoadEnableParam(bool enabled, uint32_t deadline);
@@ -42,15 +46,17 @@ public:
     bool IsDialogCorrectionEnabled() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
 private:
+    void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
     void UICorrectionParamParseEntry(const std::string& bundleName);
-    static const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> featureParamMap_;
+    static const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> featureParamMap_;
+    static const std::unordered_map<std::string, std::string> metaDataMappingMap_;
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
-    std::shared_ptr<ConfigXMLParserBase> featureParser_;
-    std::shared_ptr<ConfigXMLParserBase> uiCorrectionParser_;
+    std::shared_ptr<ConfigParserBase> featureParser_;
+    std::shared_ptr<ConfigParserBase> uiCorrectionParser_;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
@@ -59,7 +65,7 @@ private:
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
 
-    friend class ConfigXMLParserBase;
+    friend class ConfigParserBase;
     friend class SyncLoadParser;
 };
 } // namespace OHOS::Ace

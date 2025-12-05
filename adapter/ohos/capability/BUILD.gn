@@ -31,7 +31,7 @@ template("ace_capability_ohos_source_set") {
       "environment/environment_proxy_impl.cpp",
 
       # xml parser
-      "feature_config/config_xml_parser_base.cpp",
+      "feature_config/config_parser_base.cpp",
       "feature_config/feature_param_manager.cpp",
       "feature_config/features/sync_load_parser.cpp",
       "feature_config/features/ui_correction_parser.cpp",

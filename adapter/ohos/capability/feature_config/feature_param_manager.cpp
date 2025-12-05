@@ -15,12 +15,13 @@
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_parser_base.h"
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_correction_parser.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
 #define ADD_PARSER_MODEL(cls)         \
@@ -28,25 +29,50 @@ namespace OHOS::Ace {
         #cls, std::make_shared<cls>() \
     }
 
-const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
+const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODEL(UINodeGcParamParser),
     ADD_PARSER_MODEL(SyncLoadParser),
     ADD_PARSER_MODEL(UICorrectionParser),
 };
 
+const std::unordered_map<std::string, std::string> FeatureParamManager::metaDataMappingMap_ = {
+    { "idle_delete", "UINodeGcParamParser" },
+};
+
 FeatureParamManager::FeatureParamManager() = default;
 FeatureParamManager::~FeatureParamManager() = default;
 
-void FeatureParamManager::Init(const std::string& bundleName)
+void FeatureParamManager::Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData)
 {
+    MetaDataParseEntry(metaData);
     FeatureParamParseEntry(bundleName);
     UICorrectionParamParseEntry(bundleName);
+}
+
+void FeatureParamManager::MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+{
+    for (const auto& meta : metaData) {
+        auto metaIt = metaDataMappingMap_.find(meta.name);
+        if (metaIt == metaDataMappingMap_.end()) {
+            continue;
+        }
+        auto featureIt = featureParamMap_.find(metaIt->second);
+        if (featureIt == featureParamMap_.end()) {
+            continue;
+        }
+
+        auto ret = featureIt->second->ParseMetaData(meta);
+        if (ret != PARSE_EXEC_SUCCESS) {
+            LOGW("meta data name:%{public}s value:%{public}s resource:%{public}s ret:%{public}d",
+                meta.name.c_str(), meta.value.c_str(), meta.resource.c_str(), static_cast<int32_t>(ret));
+        }
+    }
 }
 
 void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleName)
 {
     if (!uiCorrectionParser_) {
-        uiCorrectionParser_ = std::make_shared<ConfigXMLParserBase>();
+        uiCorrectionParser_ = std::make_shared<ConfigParserBase>();
     }
     if (uiCorrectionParser_->LoadUICorrectionConfigXML() != PARSE_EXEC_SUCCESS) {
         LOGW("ArkUiFeatureParamManager failed to load UI correction config file");
@@ -60,7 +86,7 @@ void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleN
 void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
 {
     if (!featureParser_) {
-        featureParser_ = std::make_shared<ConfigXMLParserBase>();
+        featureParser_ = std::make_shared<ConfigParserBase>();
     }
 
     if (featureParser_->LoadPerformanceConfigXML() != PARSE_EXEC_SUCCESS) {
