@@ -1078,11 +1078,15 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void FreezeUINodeById(const std::string& id, bool isFreeze);
     static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
+    static void SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);

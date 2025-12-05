@@ -1153,7 +1153,7 @@ int32_t SetPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1260,8 +1260,8 @@ int32_t SetMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
             node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left,
-            nullptr);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1551,7 +1551,7 @@ int32_t SetPositionEdges(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     FillVecFromEdges(options, edges->right);
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setPositionEdges(
-        node->uiNodeHandle, true, options.data(), nullptr);
+        node->uiNodeHandle, true, options.data(), nullptr, false);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2166,7 +2166,7 @@ int32_t SetBorderWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderWidth(
-            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr);
+            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -2234,7 +2234,7 @@ int32_t SetBorderRadius(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
-            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr);
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -2299,7 +2299,7 @@ int32_t SetBorderWidthPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
             node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderWidth(
-            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr);
+            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -2357,7 +2357,7 @@ int32_t SetBorderRadiusPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
-            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr);
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -2404,7 +2404,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else {
         std::vector<RefPtr<ResourceObject>> resObj;
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(node->uiNodeHandle, colors[NUM_0],
-            colors[NUM_1], colors[NUM_2], colors[NUM_3], static_cast<void*>(&resObj));
+            colors[NUM_1], colors[NUM_2], colors[NUM_3], static_cast<void*>(&resObj), false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -4264,8 +4264,8 @@ int32_t SetPaddingPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     struct ArkUISizeType right = { item->value[rightIndex].f32, UNIT_PERCENT };
     struct ArkUISizeType bottom = { item->value[bottomIndex].f32, UNIT_PERCENT };
     struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
-    fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left,
-        nullptr);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(
+        node->uiNodeHandle, &top, &right, &bottom, &left, nullptr, false);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4309,7 +4309,7 @@ int32_t SetMarginPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left,
-            nullptr);
+            nullptr, false);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -12337,7 +12337,7 @@ int32_t SetMarkAnchor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     CalcDimension yDimension(0, static_cast<DimensionUnit>(unit));
     yDimension.SetValue(item->value[NUM_1].f32);
     fullImpl->getNodeModifiers()->getCommonModifier()->setMarkAnchor(node->uiNodeHandle, xDimension.Value(),
-        unit, yDimension.Value(), unit, nullptr, nullptr);
+        unit, yDimension.Value(), unit, nullptr, nullptr, false);
     return ERROR_CODE_NO_ERROR;
 }
 
