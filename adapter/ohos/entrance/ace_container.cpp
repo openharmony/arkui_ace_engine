@@ -1417,21 +1417,26 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
+    auto&& densityChangeCallback = [id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density, id]() {
-            context->OnSurfaceDensityChanged(density);
-            if (context->IsNeedReloadDensity()) {
-                auto container = Container::GetContainer(id);
-                CHECK_NULL_VOID(container);
-                auto aceContainer = DynamicCast<AceContainer>(container);
-                CHECK_NULL_VOID(aceContainer);
-                aceContainer->NotifyDensityUpdate(density);
-                context->SetIsNeedReloadDensity(false);
+        auto container = Container::GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto callback = [container, density]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->OnSurfaceDensityChanged(density);
+                if (pipelineContext->IsNeedReloadDensity()) {
+                    auto aceContainer = DynamicCast<AceContainer>(container);
+                    CHECK_NULL_VOID(aceContainer);
+                    aceContainer->NotifyDensityUpdate(density);
+                    pipelineContext->SetIsNeedReloadDensity(false);
+                }
             }
         };
-        auto taskExecutor = context->GetTaskExecutor();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
