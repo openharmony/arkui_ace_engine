@@ -395,6 +395,8 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
       flag |= (1 << 2);
     } else if (classType.getMethod(i)?.getName() === "drawForeground") {
       flag |= (1 << 3);
+    } else if (classType.getMethod(i)?.getName() === 'drawOverlay') {
+      flag |= (1 << 4);
     }
   }
   if (flag) {

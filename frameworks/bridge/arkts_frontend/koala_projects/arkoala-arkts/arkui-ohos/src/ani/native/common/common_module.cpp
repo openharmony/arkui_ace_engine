@@ -43,6 +43,7 @@ const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
+const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -380,6 +381,27 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawForeGrou
     };
 }
 
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawOverlayFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+{
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawOverlay",
+            "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier)
 {
@@ -400,10 +422,12 @@ void SetDrawModifier(
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
     void* fnDrawForegroundFun = nullptr;
+    void* fnDrawOverlayFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawBehindFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawContentFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawFrontFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawForegroundFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawOverlayFun = nullptr;
     if (flag & FLAG_DRAW_BEHIND) {
         auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
@@ -420,6 +444,10 @@ void SetDrawModifier(
         auto fnDrawForegroundAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawForegroundFun = ConvertFnObjDrawForeGroundFun(vm, fnDrawForegroundAni, drawModifierRef);
     }
+    if (flag & FLAG_DRAW_OVERLAY) {
+        auto fnDrawOverlayAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
+        drawOverlayFun = ConvertFnObjDrawOverlayFun(vm, fnDrawOverlayAni, drawModifierRef);
+    }
     if (drawBehindFun != nullptr) {
         fnDrawBehindFun = &drawBehindFun;
     }
@@ -432,8 +460,11 @@ void SetDrawModifier(
     if (drawForegroundFun != nullptr) {
         fnDrawForegroundFun = &drawForegroundFun;
     }
+    if (drawOverlayFun != nullptr) {
+        fnDrawOverlayFun = &drawOverlayFun;
+    }
     modifier->getArkUIAniDrawModifier()->setDrawModifier(
-        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun);
+        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun, fnDrawOverlayFun);
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
