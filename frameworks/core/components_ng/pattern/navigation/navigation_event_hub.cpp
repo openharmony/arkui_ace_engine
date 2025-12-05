@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 void NavigationEventHub::FireOnAppear()
@@ -25,5 +26,31 @@ void NavigationEventHub::FireOnAppear()
     auto pagePath = navigationNode->GetNavigationPathInfo();
     ACE_SCOPED_TRACE_COMMERCIAL("Navigation Main Page: %s", pagePath.c_str());
     EventHub::FireOnAppear();
+}
+
+void NavigationEventHub::FireNavBarStateChangeEvent(bool isVisible)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navigation);
+    if (isVisible_.has_value()) {
+        if (isVisible_.value() != isVisible) {
+            UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(),
+                "onNavBarStateChange");
+            if (onNavBarStateChangeEvent_) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Visible State Change %{public}s",
+                    isVisible ? "false -> true" : "true -> false");
+                onNavBarStateChangeEvent_(isVisible);
+            }
+        }
+    } else {
+        UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(),
+            "onNavBarStateChange");
+        if (onNavBarStateChangeEvent_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set NavBar Visible State as %{public}s",
+                isVisible ? "true" : "false");
+            onNavBarStateChangeEvent_(isVisible);
+        }
+    }
+    isVisible_ = isVisible;
 }
 } // namespace OHOS::Ace::NG
