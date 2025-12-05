@@ -589,6 +589,35 @@ ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_Text
     return option->marqueeUpdatePolicy;
 }
 
+
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create()
+{
+    ArkUI_SelectedDragPreviewStyle* options = new ArkUI_SelectedDragPreviewStyle();
+    return options;
+}
+
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config)
+{
+    if (!config) {
+        return;
+    }
+    delete config;
+    config = nullptr;
+}
+
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color)
+{
+    CHECK_NULL_VOID(config);
+    config->color = {1, color};
+}
+
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config)
+{
+    CHECK_NULL_RETURN(config, -1);
+    return config->color.value;
+}
 #ifdef __cplusplus
 }
 #endif

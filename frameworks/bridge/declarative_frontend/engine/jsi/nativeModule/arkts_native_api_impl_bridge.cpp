@@ -801,6 +801,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetTextDirection));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetTextDirection));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectedDragPreviewStyle));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectedDragPreviewStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     RegisterStackAttributes(object, vm);
@@ -1380,6 +1384,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextDirection));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextDirection));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectedDragPreviewStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectedDragPreviewStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
@@ -1823,6 +1831,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextDirection));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextDirection));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectedDragPreviewStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectedDragPreviewStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -7447,6 +7459,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextDirection));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextDirection));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectedDragPreviewStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectedDragPreviewStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

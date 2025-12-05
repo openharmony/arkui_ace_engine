@@ -2965,6 +2965,21 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_DIRECTION = 1052,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the {@link Arkui_AttributeItem} parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value {@link Arkui_AttributeItem}: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_SELECTED_DRAG_PREVIEW_STYLE = 1053,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -4084,6 +4099,20 @@ typedef enum {
     NODE_TEXT_INPUT_DIRECTION = 7047,
 
     /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_INPUT_SELECTED_DRAG_PREVIEW_STYLE = 7048,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4633,6 +4662,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_DIRECTION = 8044,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_AREA_SELECTED_DRAG_PREVIEW_STYLE = 8045,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.

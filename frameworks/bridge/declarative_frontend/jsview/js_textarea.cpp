@@ -134,6 +134,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
     JSClass<JSTextArea>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
     JSClass<JSTextArea>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
+    JSClass<JSTextArea>::StaticMethod("selectedDragPreviewStyle", &JSTextField::SetSelectedDragPreviewStyle);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

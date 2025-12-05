@@ -7026,6 +7026,44 @@ void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* optio
  */
 ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
 
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
+
 #ifdef __cplusplus
 };
 #endif

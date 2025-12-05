@@ -114,6 +114,8 @@ public:
     void SetColorShaderStyle(const Color& value) override;
     void ResetGradientShaderStyle() override;
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -273,6 +275,9 @@ public:
     static void ResetLineHeightMultiply(FrameNode* frameNode);
     static void ResetMinimumLineHeight(FrameNode* frameNode);
     static void ResetMaximumLineHeight(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -106,6 +106,11 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
+    void SetSelectedDragPreviewColor(const std::optional<Color>& value)
+    {
+        dragBackgroundColor_ = value;
+    }
+
     void SetIsFirstHandleAnimated(bool isFirstHandleAnimated)
     {
         isFirstHandleAnimated_ = isFirstHandleAnimated;
@@ -148,6 +153,7 @@ protected:
     RefPtr<PropertyColor> handleColor_;
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<PropertyInt> selectedColor_;
+    std::optional<Color> dragBackgroundColor_;
 private:
     DragAnimType type_ = DragAnimType::DEFAULT;
     RefPtr<AnimatablePropertyFloat> shadowOpacity_;

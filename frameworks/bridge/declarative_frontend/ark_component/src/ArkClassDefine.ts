@@ -2170,3 +2170,13 @@ class ArkChainWeight {
     );
   }
 }
+
+class ArkSelectedDragPreviewStyle {
+    color?: ResourceColor;
+    constructor() {
+      this.color = undefined;
+    }
+    isEqual(another: SelectedDragPreviewStyle): boolean {
+      return this.color === another.color;
+    }
+}

@@ -221,6 +221,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         jsonNumericTransiton->Put("enableBlur", enableBlur.c_str());
         json->PutExtAttr("numericTextTransitionOptions", jsonNumericTransiton->ToString().c_str(), filter);
     }
+    json->PutExtAttr("selectedDragPreviewStyle",
+        GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
