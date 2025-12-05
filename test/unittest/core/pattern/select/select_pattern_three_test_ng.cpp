@@ -1078,6 +1078,138 @@ HWTEST_F(SelectPatternTheTestNg, SetArrowColor, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto frameNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step2. Test OnInjectionEvent with command.
+     * @tc.expected: step2. the function runs RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{}}"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{\"index\":-1}}"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with command.
+     * @tc.expected: step3. the function runs RET_SUCCESS
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{\"index\":1}}"), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+    /**
+     * @tc.steps: step4. Test OnInjectionEvent with duplicate command.
+     * @tc.expected: step4. the function runs RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{\"index\":1}}"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+    /**
+     * @tc.steps: step5. Test OnInjectionEvent with large index.
+     * @tc.expected: step5. the function runs RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{\"index\":10}}"), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto frameNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test OnInjectionEvent with command.
+     * @tc.expected: step2. the function runs RET_SUCCESS
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"onSelect\",\"params\":{\"index\":1}}"), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+    EXPECT_EQ(selectPattern->selectValue_, OPTION_TEXT_2);
+}
+
+/**
+ * @tc.name: ReportOnChangeEventTest001
+ * @tc.desc: Test ReportOnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ReportOnChangeEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    EXPECT_EQ(selectPattern->ReportOnSelectEvent(0, OPTION_TEXT), true);
+}
+
+/**
+ * @tc.name: ToJsonTest001
+ * @tc.desc: Test SelectJsonUtil ToJson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ToJsonTest001, TestSize.Level1)
+{
+    SelectJsonUtil util;
+    util.index = 3;
+    util.value = "test";
+    auto result = SelectJsonUtil::ToJson(util);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetString("cmd"), "onSelect");
+}
+
+/**
+ * @tc.name: FromJsonTest001
+ * @tc.desc: Test SelectJsonUtil FromJson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, FromJsonTest001, TestSize.Level1)
+{
+    auto params = JsonUtil::Create();
+    ASSERT_NE(params, nullptr);
+    params->Put("index", 3);
+    auto json = JsonUtil::Create();
+    ASSERT_NE(json, nullptr);
+    json->Put("cmd", "onSelect");
+    json->Put("params", params);
+
+    auto jsonUtil = SelectJsonUtil::FromJson(json);
+    EXPECT_EQ(jsonUtil.index.has_value(), true);
+    EXPECT_EQ(jsonUtil.index.value(), 3);
+}
+
+/**
  * @tc.name: UpdateSelectedOptionFontFromPattern
  * @tc.desc: Test SelectPattern UpdateSelectedOptionFontFromPattern.
  * @tc.type: FUNC
