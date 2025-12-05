@@ -18,6 +18,7 @@ import {
     ArkTogglePeer, ToggleOptions, ToggleAttribute, SwitchStyle, ToggleConfiguration, ResourceColor
 } from "../framework";
 import { ContentModifier } from "#handwritten";
+import { hookToggleContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
 
 export class ArkToggleNode extends ArkBaseNode implements ToggleAttribute {
     constructParam(...param: Object[]): this {
@@ -48,6 +49,7 @@ export class ArkToggleNode extends ArkBaseNode implements ToggleAttribute {
     }
     contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<ToggleConfiguration> | undefined);
+        hookToggleContentModifier(this.getPeer(), value_casted);
         this.markDirty();
         return this;
     }

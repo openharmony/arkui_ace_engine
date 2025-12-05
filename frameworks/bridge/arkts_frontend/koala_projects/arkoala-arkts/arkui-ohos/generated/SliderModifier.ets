@@ -91,6 +91,8 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<SliderConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -509,6 +511,24 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSliderContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<SliderConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSliderContentModifier(peer, (undefined as ContentModifier<SliderConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SliderModifier): void {
         super.mergeModifier(modifier)
@@ -812,6 +832,19 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<SliderConfiguration> | undefined));
+                }
+            }
+        }
     }
     blockColor(value: ResourceColor | LinearGradient | undefined): this {
         if (((this._blockColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -1067,6 +1100,17 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         } else
         {
             this._showTips_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
