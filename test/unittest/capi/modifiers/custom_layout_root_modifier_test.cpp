@@ -120,8 +120,8 @@ HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Leve
         EXPECT_TRUE(convChildren.empty());
 
         Ark_SizeResult result = {
-            .width = Converter::ArkValue<Ark_Number>(35.0f),
-            .height = Converter::ArkValue<Ark_Number>(40.0f),
+            .width = Converter::ArkValue<Ark_Float64>(35.0f),
+            .height = Converter::ArkValue<Ark_Float64>(40.0f),
         };
         CallbackHelper(continuation).InvokeSync(result);
     };

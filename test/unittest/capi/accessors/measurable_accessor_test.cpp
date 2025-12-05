@@ -239,7 +239,7 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTest, TestSize.Level1)
         .right = CalcLength(60.25f, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateMargin(margin);
-    Opt_DirectionalEdgesT directional = accessor_->getMargin(peer_);
+    Opt_DirectionalEdgesT_F64 directional = accessor_->getMargin(peer_);
     auto directionalOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(directionalOpt.has_value());
     auto result = directionalOpt.value();
@@ -263,7 +263,7 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTestRTL, TestSize.Level1)
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateMargin(margin);
-    Opt_DirectionalEdgesT directional = accessor_->getMargin(peer_);
+    Opt_DirectionalEdgesT_F64 directional = accessor_->getMargin(peer_);
     auto directionalOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(directionalOpt.has_value());
     auto result = directionalOpt.value();
@@ -285,7 +285,7 @@ HWTEST_F(MeasurableAccessorTest, GetPaddingTest, TestSize.Level1)
         .right = CalcLength(60.25f, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdatePadding(padding);
-    Opt_DirectionalEdgesT directional = accessor_->getPadding(peer_);
+    Opt_DirectionalEdgesT_F64 directional = accessor_->getPadding(peer_);
     auto paddingOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(paddingOpt.has_value());
     auto result = paddingOpt.value();
@@ -309,7 +309,7 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTest, TestSize.Level1)
         .rightDimen = Dimension(3.5, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateBorderWidth(borderWidth);
-    Opt_DirectionalEdgesT directional = accessor_->getBorderWidth(peer_);
+    Opt_DirectionalEdgesT_F64 directional = accessor_->getBorderWidth(peer_);
     auto borderWidthOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(borderWidthOpt.has_value());
     auto result = borderWidthOpt.value();
@@ -332,7 +332,7 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateBorderWidth(borderWidth);
-    Opt_DirectionalEdgesT directional = accessor_->getBorderWidth(peer_);
+    Opt_DirectionalEdgesT_F64 directional = accessor_->getBorderWidth(peer_);
     auto borderWidthOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(borderWidthOpt.has_value());
     auto result = borderWidthOpt.value();
@@ -347,10 +347,9 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
  */
 HWTEST_F(MeasurableAccessorTest, GetUniqueIdTest, TestSize.Level1)
 {
-    Opt_Number id = accessor_->getUniqueId(peer_);
-    auto res = Converter::OptConvert<int32_t>(id);
-    ASSERT_TRUE(res.has_value());
-    EXPECT_EQ(res.value(), CHILD_NODE_ID);
+    auto id = accessor_->getUniqueId(peer_);
+    auto res = Converter::OptConvert<int64_t>(id);
+    EXPECT_EQ(res, CHILD_NODE_ID);
 }
 
 } // namespace OHOS::Ace::NG

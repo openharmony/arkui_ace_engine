@@ -32,9 +32,9 @@ namespace {
         std::make_pair("#FFFF0000", 1.f),
     };
 
-    std::vector<std::pair<Ark_Color, float>> validValues2 = {
-        std::make_pair(Ark_Color::ARK_COLOR_BLUE, 0.5f),
-        std::make_pair(Ark_Color::ARK_COLOR_RED, 1.f),
+    std::vector<std::pair<Ark_arkui_component_enums_Color, float>> validValues2 = {
+        std::make_pair(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, 0.5f),
+        std::make_pair(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, 1.f),
     };
 
     std::vector<std::pair<int32_t, float>> validValues3 = {
@@ -119,7 +119,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues2) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<0>(pairItem)),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<0>(pairItem)),
             .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);

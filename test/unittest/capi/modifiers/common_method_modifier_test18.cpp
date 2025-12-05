@@ -208,7 +208,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.0),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0),
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -241,7 +241,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 
     // negative value
     arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(-1.0),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0),
     };
     arkOptions = { .builder = *arkBuilder,
         .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
@@ -272,7 +272,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -692,7 +692,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_BLUE),
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -733,7 +733,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
             TEST_COLOR_BLUE_STR),
     };
 
@@ -776,7 +776,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Resource>(
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Resource>(
             TEST_COLOR_RESOURCE),
     };
 
@@ -819,7 +819,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
             ARK_COLORING_STRATEGY_PRIMARY),
     };
 
@@ -863,7 +863,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // invalid value
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
             Converter::INVALID_ENUM_VAL<Ark_ColoringStrategy>),
     };
 

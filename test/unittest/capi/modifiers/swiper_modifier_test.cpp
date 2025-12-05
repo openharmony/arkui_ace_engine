@@ -105,22 +105,22 @@ HWTEST_F(SwiperModifierTest, setIndexTest, TestSize.Level1)
     static const std::string DEFAULT_VALUE("0");
     ASSERT_NE(modifier_->setIndex, nullptr);
 
-    auto input = ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(123456);
+    auto input = ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(123456);
     modifier_->setIndex(node_, &input);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "123456");
 
-    input = ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(0);
+    input = ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(0);
     modifier_->setIndex(node_, &input);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "0");
 
-    input = ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(1);
+    input = ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(1);
     modifier_->setIndex(node_, &input);
     auto checkVal4 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "1");
 
-    input = ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(-1);
+    input = ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(-1);
     modifier_->setIndex(node_, &input);
     auto checkVal5 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
@@ -407,7 +407,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColor, TestSize.Le
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -925,7 +925,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setCurveTestBuiltIn, TestSize.Level1)
     EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
 
     auto arkCurveEasyIn =
-        ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN);
+        ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN);
     modifier_->setCurve(node_, &arkCurveEasyIn);
     auto checkEasyIO = GetAttrValue<std::string>(node_, PROP_NAME);
     auto expectedCurveEasyIn =
@@ -937,14 +937,14 @@ HWTEST_F(SwiperModifierTest, DISABLED_setCurveTestBuiltIn, TestSize.Level1)
     EXPECT_EQ(checkNull, Curves::ToString(expectedCurveEasyIn));
 
     auto arkCurveLinear =
-        ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_LINEAR);
+        ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_LINEAR);
     modifier_->setCurve(node_, &arkCurveLinear);
     auto checkLinear = GetAttrValue<std::string>(node_, PROP_NAME);
     auto expectedCurveLinear =
         Framework::CreateCurve(Framework::CurveIntToString(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR));
     EXPECT_EQ(checkLinear, Curves::ToString(expectedCurveLinear));
 
-    auto arkCurveInv = ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(INVALID_ENUM_VAL<Ark_curves_Curve>);
+    auto arkCurveInv = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(INVALID_ENUM_VAL<Ark_curves_Curve>);
     modifier_->setCurve(node_, &arkCurveInv);
     auto checkInv = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInv, DEFAULT_VALUE);
@@ -963,13 +963,13 @@ HWTEST_F(SwiperModifierTest, DISABLED_setCurveTestCustom, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
 
-    auto arkCurveCustom = ArkUnion<Opt_Union_Curve_String_ICurve, Ark_String>("interpolating-spring(1, 1, 28, 34)");
+    auto arkCurveCustom = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>("interpolating-spring(1, 1, 28, 34)");
     modifier_->setCurve(node_, &arkCurveCustom);
     auto checkCustStr = GetAttrValue<std::string>(node_, PROP_NAME);
     // this can't be exactly check due to SwiperPaintProperty::ToJsonValue supports the built-in Curves only
     EXPECT_NE(checkCustStr, DEFAULT_VALUE);
 
-    auto arkCurveInv = ArkUnion<Opt_Union_Curve_String_ICurve, Ark_String>("invalidCurveDefinition");
+    auto arkCurveInv = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>("invalidCurveDefinition");
     modifier_->setCurve(node_, &arkCurveInv);
     auto checkInv = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInv, DEFAULT_VALUE);

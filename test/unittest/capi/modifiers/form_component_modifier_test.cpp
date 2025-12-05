@@ -182,8 +182,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
                           const std::string& input, const Ark_Float64& value, const std::string& expectedStr) {
         Ark_FormSize inputValueSize = initValueSize;
         inputValueSize.width = value;
-        auto optValue = Converter::ArkValue<Opt_FormSize>(inputValueSize);
-        modifier_->setSize(node_, &optValue);
+        modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
@@ -211,8 +210,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, T
                           const std::string& input, const Ark_Float64& value, const std::string& expectedStr) {
         Ark_FormSize inputValueSize = initValueSize;
         inputValueSize.height = value;
-        auto optValue = Converter::ArkValue<Opt_FormSize>(inputValueSize);
-        modifier_->setSize(node_, &optValue);
+        modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);

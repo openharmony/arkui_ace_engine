@@ -664,7 +664,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColo
 {
     // color as ark_color
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
     Ark_PopupMaskType literalColor = { .color = colorArkColor };
     auto arkUnionMask = Converter::ArkUnion<
         Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
@@ -819,7 +819,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorDef
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
-        .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_I64>(Ark_Empty())
+        .popupColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_I64>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
@@ -847,11 +847,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorCol
 {
     // color as arkcolor
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_I64, Ark_Color>(ARK_COLOR_BLUE);
+    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_I64, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
 
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
-        .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_I64>(arkUnionPopupColor)
+        .popupColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_I64>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
@@ -870,10 +870,10 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorCol
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 
     // color as string
-    arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_I64, Ark_String>(TEST_COLOR_BLUE_STR);
+    arkUnionPopupColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_I64, Ark_String>(TEST_COLOR_BLUE_STR);
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
-        .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_I64>(arkUnionPopupColor)
+        .popupColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_I64>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
@@ -895,11 +895,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNum
 {
     // color as number
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_I64, Ark_Int64>(
+    auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_I64, Ark_Int64>(
         TEST_COLOR_BLUE_NUM);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
-        .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_I64>(arkUnionPopupColor)
+        .popupColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_I64>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
@@ -921,7 +921,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNum
     TypeHelper::WriteToUnion<Ark_Resource>(arkUnionPopupColor) = TEST_COLOR_RESOURCE;
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
-        .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_I64>(arkUnionPopupColor)
+        .popupColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_I64>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 

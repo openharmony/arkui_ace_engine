@@ -267,7 +267,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -313,7 +313,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -358,7 +358,7 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositio
         std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -405,7 +405,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestS
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -456,7 +456,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -479,7 +479,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
     };
 
     for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -513,7 +513,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -536,7 +536,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -565,7 +565,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, Tes
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -609,7 +609,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, T
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -651,7 +651,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
@@ -700,7 +700,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
 #endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
     initValuePointLight.illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));

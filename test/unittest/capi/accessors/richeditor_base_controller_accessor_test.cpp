@@ -293,7 +293,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setSelectionTest, TestSize.Level1
     auto end = Converter::ArkValue<Ark_Int32>(TEST_END);
     Opt_SelectionOptions optsOpt;
     optsOpt.value.menuPolicy.value = Ark_MenuPolicy::ARK_MENU_POLICY_SHOW;
-    accessor_->setSelection(peer_, &start, &end, &optsOpt);
+    accessor_->setSelection(peer_, start, end, &optsOpt);
 }
 
 /**

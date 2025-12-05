@@ -626,8 +626,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnEditingChangeTest, TestSize
             .result = Converter::Convert<bool>(parameter),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Boolean_Void>(onChange, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<arkui_component_common_Callback_Boolean_Void>(onChange, frameNode->GetId());
+    auto optCallback = Converter::ArkValue<Opt_arkui_component_common_Callback_Boolean_Void>(arkCallback);
     modifier_->setOnEditingChange(node_, &optCallback);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_TRUE(eventHub);

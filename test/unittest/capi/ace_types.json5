@@ -376,7 +376,7 @@
         },
         {
             "name": "ColorsEnum",
-            "type": "Ark_Color",
+            "type": "Ark_arkui_component_enums_Color",
             "validValues": [
                 ["ARK_COLOR_WHITE", "#FFFFFFFF"],
                 ["ARK_COLOR_BLACK", "#FF000000"],
@@ -392,14 +392,14 @@
                 ["ARK_COLOR_TRANSPARENT", "#00000000"]
             ],
             "invalidValues": [
-                "static_cast<Ark_Color>(-1)",
-                "static_cast<Ark_Color>(INT_MAX)"
+                "static_cast<Ark_arkui_component_enums_Color>(-1)",
+                "static_cast<Ark_arkui_component_enums_Color>(INT_MAX)"
             ]
         },
         {
             // Set 20% opacity (0x33) if alpha==0xFF
             "name": "ColorsAlpha20Enum",
-            "type": "Ark_Color",
+            "type": "Ark_arkui_component_enums_Color",
             "validValues": [
                 ["ARK_COLOR_WHITE", "#33FFFFFF"],
                 ["ARK_COLOR_BLACK", "#33000000"],
@@ -415,8 +415,8 @@
                 ["ARK_COLOR_TRANSPARENT", "#00000000"]
             ],
             "invalidValues": [
-                "static_cast<Ark_Color>(-1)",
-                "static_cast<Ark_Color>(INT_MAX)"
+                "static_cast<Ark_arkui_component_enums_Color>(-1)",
+                "static_cast<Ark_arkui_component_enums_Color>(INT_MAX)"
             ]
         },
         {
@@ -2762,7 +2762,7 @@
                                 {
                                     "name": "color",
                                     "default": "#FF000000",
-                                    "type": "Ark_Color"
+                                    "type": "Ark_arkui_component_enums_Color"
                                 }
                             ]
                         }

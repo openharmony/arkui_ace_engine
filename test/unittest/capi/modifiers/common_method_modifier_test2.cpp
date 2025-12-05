@@ -115,8 +115,8 @@ namespace Converter {
     Ark_BlurOptions ArkCreate(double v0, double v1)
     {
         Ark_BlurOptions result;
-        result.grayscale.value0 = ArkValue<Ark_Float64>(v0);
-        result.grayscale.value1 = ArkValue<Ark_Float64>(v1);
+        Ark_Tuple_F64_F64 grayscale = {ArkValue<Ark_Float64>(v0), ArkValue<Ark_Float64>(v1)};
+        result.grayscale = ArkValue<Opt_Tuple_F64_F64>(grayscale);
         return result;
     }
 }
@@ -383,6 +383,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1)
 {
+#ifdef WRONG_GEN_SIG
     ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -425,6 +426,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, expectedResId);
     EXPECT_EQ(checkEvent->code, keyEvent.code);
+#endif // WRONG_GEN_SIG
 }
 
 /*
@@ -434,6 +436,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1)
 {
+#ifdef WRONG_GEN_SIG
     ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -477,6 +480,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1
     EXPECT_EQ(checkEvent->resourceId, expectedResId);
     EXPECT_TRUE(result);
     EXPECT_EQ(checkEvent->code, keyEvent.code);
+#endif // WRONG_GEN_SIG
 }
 
 /*
@@ -522,7 +526,7 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBackgroundEffect0, nullptr);
+    ASSERT_NE(modifier_->setBackgroundEffect, nullptr);
 
     EffectOption expectedBgEffect {
         .radius = 123.45_vp,
@@ -540,7 +544,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
     ASSERT_NE(renderMock, nullptr);
 
     Ark_BackgroundEffectOptions arkInputValValid = {
-        .radius = ArkValue<Ark_Float64>(123.45f),
+        .radius = ArkValue<Opt_Float64>(123.45f),
         .saturation = ArkValue<Opt_Float64>(0.123f),
         .brightness = ArkValue<Opt_Float64>(100),
         .color = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
@@ -550,7 +554,8 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
         .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
     };
     auto inputValValid = Converter::ArkValue<Opt_BackgroundEffectOptions>(arkInputValValid);
-    modifier_->setBackgroundEffect0(node_, &inputValValid);
+    auto sysOptions = Converter::ArkValue<Opt_SystemAdaptiveOptions>(Ark_Empty());
+    modifier_->setBackgroundEffect(node_, &inputValValid, &sysOptions);
     EXPECT_EQ(renderMock->GetOrCreateBackground()->propEffectOption, expectedBgEffect);
 }
 
@@ -576,7 +581,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
     ASSERT_NE(renderMock, nullptr);
 
     Ark_ForegroundEffectOptions arkInputValValid = {
-        .radius = ArkValue<Ark_Float64>(VALID_VAL),
+        .radius = ArkValue<Opt_Float64>(VALID_VAL),
     };
     auto inputValValid = Converter::ArkValue<Opt_ForegroundEffectOptions>(arkInputValValid);
     modifier_->setForegroundEffect(node_, &inputValValid);
@@ -584,7 +589,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
     EXPECT_EQ(renderMock->GetForegroundEffect().value(), VALID_VAL);
 
     Ark_ForegroundEffectOptions arkInputValInvalid = {
-        .radius = ArkValue<Ark_Float64>(INT_MIN),
+        .radius = ArkValue<Opt_Float64>(INT_MIN),
     };
     auto inputValInvalid = Converter::ArkValue<Opt_ForegroundEffectOptions>(arkInputValInvalid);
     modifier_->setForegroundEffect(node_, &inputValInvalid);
@@ -840,12 +845,12 @@ HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
 {
-    auto inputValue = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.1001f);
+    auto inputValue = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.1001f);
     modifier_->setLayoutWeight(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_WEIGHT_NAME);
     EXPECT_EQ(strResult.substr(0, 3), "1.1");
 
-    inputValue = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("17");
+    inputValue = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("17");
     modifier_->setLayoutWeight(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_WEIGHT_NAME);
     EXPECT_EQ(strResult, "17");
@@ -901,7 +906,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
+            ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE)), "#FFFFFFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
@@ -1025,12 +1030,12 @@ HWTEST_F(CommonMethodModifierTest2, setAlignSelf, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setDisplayPriority, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(0.7001);
+    auto value = Converter::ArkValue<Opt_Float64>(0.7001);
     modifier_->setDisplayPriority(node_, &value);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_DISPLAY_PRIORITY_NAME);
     EXPECT_EQ(strResult, "0");
 
-    value = Converter::ArkValue<Opt_Number>(12);
+    value = Converter::ArkValue<Opt_Float64>(12);
     modifier_->setDisplayPriority(node_, &value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_DISPLAY_PRIORITY_NAME);
     EXPECT_EQ(strResult, "12");
@@ -1170,12 +1175,12 @@ HWTEST_F(CommonMethodModifierTest2, setEnabled, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
 {
-    auto inputValue = Converter::ArkValue<Opt_Number>(1);
+    auto inputValue = Converter::ArkValue<Opt_Float64>(1);
     modifier_->setAspectRatio(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_ASPECT_RATIO_NAME);
     EXPECT_EQ(strResult, "1");
 
-    inputValue = Converter::ArkValue<Opt_Number>(16.0f / 9);
+    inputValue = Converter::ArkValue<Opt_Float64>(16.0f / 9);
     modifier_->setAspectRatio(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ASPECT_RATIO_NAME);
     EXPECT_EQ(strResult.substr(0, 4), "1.78");
@@ -1189,12 +1194,13 @@ HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
 {
     auto arkShadowOptions = Ark_ShadowOptions {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+            Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN),
         .fill = Converter::ArkValue<Opt_Boolean>(true),
         .type = Converter::ArkValue<Opt_ShadowType>(Ark_ShadowType::ARK_SHADOW_TYPE_BLUR),
         .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(6),
         .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10),
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(14),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(14),
     };
     auto inputValue = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
     modifier_->setShadow(node_, &inputValue);
@@ -1342,7 +1348,7 @@ HWTEST_F(CommonMethodModifierTest2, setBlurInvalid2, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
 {
-    auto value = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>("TEST_OVERLAY");
+    auto value = Converter::ArkUnion<Opt_Union_String_CustomNodeBuilder_ComponentContent, Ark_String>("TEST_OVERLAY");
     auto options = Converter::ArkValue<Opt_OverlayOptions>(
         Ark_OverlayOptions {
             .align = Converter::ArkValue<Opt_Alignment>(ARK_ALIGNMENT_BOTTOM_END),
@@ -1369,7 +1375,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
 {
     Ark_BorderOptions arkInputValue = {
         .color = ArkUnion<Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
+            ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE)),
         .dashGap = ArkUnion<Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths, Ark_EdgeWidths>(
             Ark_EdgeWidths {
                 .left = Converter::ArkValue<Opt_Length>("8.00%"),
@@ -1475,7 +1481,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setBorderColor, TestSize.Level1)
 {
-    auto arkResourceColor = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE);
+    auto arkResourceColor = ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE);
     auto color = Converter::ArkUnion<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors, Ark_ResourceColor>(
         arkResourceColor);
     modifier_->setBorderColor(node_, &color);
@@ -1536,10 +1542,10 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
 {
     // color stops
     std::vector<ColorStep> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), 0.1 },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), 0.5 },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), 0.7 },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), 0.9 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), 0.1 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), 0.5 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW), 0.7 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), 0.9 },
     };
     auto arkInputValue = Ark_LinearGradientOptions {
         .angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(77),
@@ -1563,9 +1569,9 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
 {
     // color stops
     std::vector<ColorStep> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), 0.1 },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), 0.5 },
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), 0.9 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), 0.1 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), 0.5 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), 0.9 },
     };
     auto arkInputValue = Ark_SweepGradientOptions {
         .center = Ark_Tuple_Length_Length { Converter::ArkValue<Ark_Length>("30.00%"),

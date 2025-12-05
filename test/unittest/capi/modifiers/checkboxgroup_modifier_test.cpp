@@ -100,7 +100,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal1, "false");
-    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelectAll(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal2, "true");

@@ -84,9 +84,9 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     std::string expectedStr = CHECK_RESOURCE_LOCAL_STR;
-    auto inputStr = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
+    auto inputStr = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_String>(
         Converter::ArkValue<Ark_String>(expectedStr));
-    auto optInputStr = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputStr);
+    auto optInputStr = Converter::ArkValue<Opt_Union_String_Resource_image_PixelMap>(inputStr);
     modifier_->setAlt(frameNode, &optInputStr);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
@@ -106,8 +106,8 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
 
     std::string expectedStr = CHECK_RESOURCE_THEME_STR;
     auto expectedArkResource = Converter::ArkCreate<Ark_Resource>(IMAGE_RES_ID, ResourceType::STRING);
-    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(expectedArkResource);
-    auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputArkResource);
+    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_Resource>(expectedArkResource);
+    auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_image_PixelMap>(inputArkResource);
     modifier_->setAlt(frameNode, &optInputArkResource);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
@@ -129,7 +129,7 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
     Ark_image_PixelMap expectedPixelMap = &pixelMapPeer;
-    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap,
+    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_image_PixelMap,
         Ark_image_PixelMap>(expectedPixelMap);
     modifier_->setAlt(frameNode, &optInputArkPixelMap);
 

@@ -112,24 +112,24 @@ std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeIn
     { "INT_MAX", static_cast<Ark_ButtonType>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
-    { "ARK_COLOR_WHITE", ARK_COLOR_WHITE, "Color.White" },
-    { "ARK_COLOR_BLACK", ARK_COLOR_BLACK, "Color.Black" },
-    { "ARK_COLOR_BLUE", ARK_COLOR_BLUE, "Color.Blue" },
-    { "ARK_COLOR_BROWN", ARK_COLOR_BROWN, "Color.Brown" },
-    { "ARK_COLOR_GRAY", ARK_COLOR_GRAY, "Color.Gray" },
-    { "ARK_COLOR_GREEN", ARK_COLOR_GREEN, "Color.Green" },
-    { "ARK_COLOR_GREY", ARK_COLOR_GREY, "Color.Grey" },
-    { "ARK_COLOR_ORANGE", ARK_COLOR_ORANGE, "Color.Orange" },
-    { "ARK_COLOR_PINK", ARK_COLOR_PINK, "Color.Pink" },
-    { "ARK_COLOR_RED", ARK_COLOR_RED, "Color.Red" },
-    { "ARK_COLOR_YELLOW", ARK_COLOR_YELLOW, "Color.Yellow" },
-    { "ARK_COLOR_TRANSPARENT", ARK_COLOR_TRANSPARENT, "Color.Transparent" },
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> testFixtureEnumColorValidValues = {
+    { "ARK_COLOR_WHITE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, "Color.White" },
+    { "ARK_COLOR_BLACK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, "Color.Black" },
+    { "ARK_COLOR_BLUE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, "Color.Blue" },
+    { "ARK_COLOR_BROWN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, "Color.Brown" },
+    { "ARK_COLOR_GRAY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, "Color.Gray" },
+    { "ARK_COLOR_GREEN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, "Color.Green" },
+    { "ARK_COLOR_GREY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, "Color.Grey" },
+    { "ARK_COLOR_ORANGE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, "Color.Orange" },
+    { "ARK_COLOR_PINK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, "Color.Pink" },
+    { "ARK_COLOR_RED", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, "Color.Red" },
+    { "ARK_COLOR_YELLOW", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, "Color.Yellow" },
+    { "ARK_COLOR_TRANSPARENT", ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, "Color.Transparent" },
 };
 
-std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInvalidValues = {
-    { "-1", static_cast<Ark_Color>(-1) },
-    { "INT_MAX", static_cast<Ark_Color>(INT_MAX) },
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureEnumColorInvalidValues = {
+    { "-1", static_cast<Ark_arkui_component_enums_Color>(-1) },
+    { "INT_MAX", static_cast<Ark_arkui_component_enums_Color>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>> testFixtureEnumColoringStrategyValidValues = {

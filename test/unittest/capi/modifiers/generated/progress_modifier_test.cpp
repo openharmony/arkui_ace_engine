@@ -410,7 +410,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
 
     // Initial setup
     initValueColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -426,7 +426,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
@@ -456,7 +456,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize
 
     // Initial setup
     initValueColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueColor](
                           const std::string& input, const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -477,7 +477,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                              ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
@@ -852,7 +852,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -865,7 +865,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -884,7 +884,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -908,7 +908,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -921,7 +921,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -943,7 +943,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -962,7 +962,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -975,7 +975,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1015,7 +1015,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1028,7 +1028,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1072,7 +1072,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1085,7 +1085,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1126,7 +1126,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1139,7 +1139,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1184,7 +1184,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1197,7 +1197,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1238,7 +1238,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1251,7 +1251,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1291,7 +1291,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1304,7 +1304,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1340,7 +1340,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1353,7 +1353,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1390,7 +1390,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1403,7 +1403,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1438,7 +1438,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1451,7 +1451,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1486,7 +1486,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1499,7 +1499,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1518,7 +1518,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1542,7 +1542,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1555,7 +1555,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1577,7 +1577,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -1597,7 +1597,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1610,7 +1610,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
@@ -1646,7 +1646,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
 
     // Initial setup
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
@@ -1659,7 +1659,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 

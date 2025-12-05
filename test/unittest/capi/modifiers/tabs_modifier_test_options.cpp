@@ -65,7 +65,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
     Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
-        .index = Converter::ArkValue<Opt_Union_I32_Bindable>(Ark_Empty())
+        .index = Converter::ArkValue<Opt_Union_I32_Bindable_I32>(Ark_Empty())
     };
     auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
@@ -104,7 +104,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
     Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
-        .index = Converter::ArkValue<Opt_Union_I32_Bindable>(Ark_Empty())
+        .index = Converter::ArkValue<Opt_Union_I32_Bindable_I32>(Ark_Empty())
     };
     auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
@@ -147,7 +147,7 @@ HWTEST_F(TabsModifierTestOptions, DISABLED_setTabsOptionsTestIndex, TestSize.Lev
     Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
-        .index = Converter::ArkValue<Opt_Union_I32_Bindable>(Ark_Empty())
+        .index = Converter::ArkValue<Opt_Union_I32_Bindable_I32>(Ark_Empty())
     };
 
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
@@ -160,7 +160,7 @@ HWTEST_F(TabsModifierTestOptions, DISABLED_setTabsOptionsTestIndex, TestSize.Lev
     };
 
     for (const auto& [value, expected] : testPlan) {
-        options.index = Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(value);
+        options.index = Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(value);
         auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
         modifier_->setTabsOptions(node_, &optionsOpt);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME);

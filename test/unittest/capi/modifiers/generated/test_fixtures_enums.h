@@ -42,8 +42,8 @@ extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode, std::string>> te
 extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode>> testFixtureEnumButtonStyleModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonType, std::string>> testFixtureEnumButtonTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues;
-extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> testFixtureEnumColorValidValues;
+extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureEnumColorInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
     testFixtureEnumColoringStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues;

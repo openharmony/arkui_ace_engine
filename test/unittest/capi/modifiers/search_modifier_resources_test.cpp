@@ -520,11 +520,11 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setLetterSpacingTestResource, Tes
  */
 HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestFamily, TestSize.Level1)
 {
-    Ark_Font font;
+    Ark_arkui_component_units_Font font;
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[family, expected] : FONT_FAMILY_TEST_PLAN_RESOURCES) {
         font.family = family;
-        auto fontOpt = ArkValue<Opt_Font>(font);
+        auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
@@ -540,11 +540,11 @@ HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestFamily, TestSize.Lev
  */
 HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestSize, TestSize.Level1)
 {
-    Ark_Font font;
+    Ark_arkui_component_units_Font font;
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[arkLength, expected]: ARK_LENGTH_TEST_PLAN) {
         font.size = ArkValue<Opt_Length>(arkLength);
-        auto fontOpt = ArkValue<Opt_Font>(font);
+        auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
@@ -560,11 +560,11 @@ HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestSize, TestSize.Level
  */
 HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontFamily, TestSize.Level1)
 {
-    Ark_Font font;
+    Ark_arkui_component_units_Font font;
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[family, expected] : FONT_FAMILY_TEST_PLAN_RESOURCES) {
         font.family = family;
-        auto fontOpt = ArkValue<Opt_Font>(font);
+        auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);
@@ -580,11 +580,11 @@ HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontFamily, TestSize.Level1
  */
 HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontSizeResource, TestSize.Level1)
 {
-    Ark_Font font;
+    Ark_arkui_component_units_Font font;
     std::unique_ptr<JsonValue> jsonValue;
     for (const auto &[arkLength, expected]: ARK_LENGTH_TEST_PLAN) {
         font.size = ArkValue<Opt_Length>(arkLength);
-        auto fontOpt = ArkValue<Opt_Font>(font);
+        auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         jsonValue = GetJsonValue(node_);
         auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);

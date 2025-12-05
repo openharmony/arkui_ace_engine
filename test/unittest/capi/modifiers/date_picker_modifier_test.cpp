@@ -190,7 +190,7 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 // color
 typedef std::tuple<Opt_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -295,7 +295,7 @@ class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePicker
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -336,7 +336,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontStyle, TestSize.Lev
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -395,7 +395,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTexFontWeight, TestSize.Le
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -436,7 +436,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextFontFamily, TestSize.L
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -526,7 +526,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_textStyleTestDefaultValues, TestSize.L
 HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -567,7 +567,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontStyle, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -626,7 +626,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTexFontWeight, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -667,7 +667,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextFontFamily, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -757,7 +757,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_selectedTextStyleTestDefaultValues, Te
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -798,7 +798,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontStyle, TestSize.Leve
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -857,7 +857,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTexFontWeight, TestSize.Lev
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -898,7 +898,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextFontFamily, TestSize.Le
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -991,7 +991,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
         Ark_DatePickerOptions arkOptions = {
             .start = Converter::ArkValue<Opt_Date>(std::get<0>(actual)),
             .end = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
-            .selected = Converter::ArkUnion<Opt_Union_Date_Bindable, Ark_Date>(std::get<2>(actual)),
+            .selected = Converter::ArkUnion<Opt_Union_Date_Bindable_Date, Ark_Date>(std::get<2>(actual)),
         };
         auto optOptions = Converter::ArkValue<Opt_DatePickerOptions>(arkOptions);
         modifier_->setDatePickerOptions(node_, &optOptions);
@@ -1097,7 +1097,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleTestDefaultValues
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1136,7 +1136,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontStyle, TestSi
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1193,7 +1193,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontWeight, TestS
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1232,7 +1232,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleFontFamily, TestS
 HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleTextFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1342,7 +1342,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleTestDefaultValues, TestSiz
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1381,7 +1381,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontStyle, TestSize.Level1
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1438,7 +1438,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontWeight, TestSize.Level
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1477,7 +1477,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontFamily, TestSize.Level
 HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1587,7 +1587,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleTestDefaultValues,
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1626,7 +1626,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontStyle, TestSiz
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1683,7 +1683,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontWeight, TestSi
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };
@@ -1722,7 +1722,7 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontFamily, TestSi
 HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
+    Ark_arkui_component_units_Font font = { .family = FONT_FAMILY_TEST_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first };

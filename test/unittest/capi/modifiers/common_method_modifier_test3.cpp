@@ -418,7 +418,8 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskValidValues, TestSize.Level1
         {
             Converter::ArkValue<Ark_Float64>(0), "0",
             Converter::ArkValue<Ark_Float64>(100), "100",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "0xFFFF0000",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), "0xFFFF0000",
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
         {
@@ -465,7 +466,8 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
         {
             Converter::ArkValue<Ark_Float64>(255), "255",
             Converter::ArkValue<Ark_Float64>(99.5f), "99.5",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), Color::TRANSPARENT.ToString(),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT), Color::TRANSPARENT.ToString(),
             Converter::ArkValue<Ark_Boolean>(true), "true"
         },
         {
@@ -505,6 +507,7 @@ HWTEST_F(CommonMethodModifierTest3, setFocusBoxTest, TestSize.Level1)
     auto style = Converter::ArkValue<Opt_FocusBoxStyle>(Ark_FocusBoxStyle {
         .margin = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 10.f),
         .strokeWidth = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 5.f),
+        .strokeColor = Converter::ArkValue<Opt_ColorMetrics>(Ark_Empty()),
     });
     modifier_->setFocusBox(node_, &style);
     const auto json = GetJsonValue(node_);

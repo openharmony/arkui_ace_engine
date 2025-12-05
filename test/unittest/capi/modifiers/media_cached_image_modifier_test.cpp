@@ -34,7 +34,7 @@ namespace {
     const auto ATTRIBUTE_SRC_NAME("src");
     const auto ATTRIBUTE_SRC_DEFAULT_VALUE("");
 
-    using imageOptions = Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
+    using imageOptions = Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 } // namespace
 
 class MediaCachedImageModifierTest : public ModifierTestBase<GENERATED_ArkUIMediaCachedImageModifier,
@@ -167,7 +167,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestASTCResourc
     ConvContext ctx;
     std::vector<std::string> vecSrc { "test" };
     Ark_ASTCResource resource {
-        .column = ArkValue<Ark_Number>(frameNode->GetId()),
+        .column = ArkValue<Ark_Int32>(frameNode->GetId()),
         .sources = ArkValue<Array_String>(vecSrc, &ctx)
     };
     auto arkValue =

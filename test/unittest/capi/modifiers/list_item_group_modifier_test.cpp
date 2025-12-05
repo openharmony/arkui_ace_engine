@@ -172,12 +172,13 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
-    // set valid values, color as Ark_Color aka int
+    // set valid values, color as Ark_arkui_component_enums_Color aka int
     Ark_ListDividerOptions dividerOptions = {
         .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(55.5),
         .endMargin = Converter::ArkValue<Opt_Length>(77.),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);

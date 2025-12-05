@@ -402,13 +402,13 @@ HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
     std::string strResult;
 
     // check true value
-    auto optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
     EXPECT_EQ(strResult, "true");
 
     // check false value
-    optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
+    optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(false);
     modifier_->setSelected(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
     EXPECT_EQ(strResult, "false");

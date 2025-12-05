@@ -877,18 +877,18 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidColorValues, TestSize.Level1)
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -1464,10 +1464,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightValidValues, TestSize.Le
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
     for (auto &[value, expectValue]: FONT_WEIGHT_TEST_PLAN1) {
         fontLabel.weight = ArkValue<Opt_Union_FontWeight_I32_String>(value);
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
@@ -1491,14 +1491,14 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontWeightInvalidValues, 
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
     const std::vector<std::pair<Opt_Union_FontWeight_I32_String, std::string>> testPlan = {
         { ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(1000), ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
         { ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("1000"), ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
     };
     for (auto &[value, expectValue]: testPlan) {
         fontLabel.weight = value;
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
@@ -1521,10 +1521,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleValidValues, TestSize.Lev
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
     for (auto &[value, expectValue]: OPT_FONT_STYLE_TEST_PLAN) {
         fontLabel.style = value;
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
@@ -1547,7 +1547,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
 
     const std::vector<OptArkFontStyleTest> testPlan = {
         { ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(2)), ATTRIBUTE_LABEL_STYLE_FONT_STYLE_DEFAULT_VALUE },
@@ -1555,7 +1555,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
 
     for (auto &[value, expectValue]: testPlan) {
         fontLabel.style = value;
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
@@ -1578,7 +1578,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlanValid = {
         { ArkValue<Opt_Length>(1.0),  "1.00fp" },
@@ -1593,7 +1593,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
 
     for (const auto &[value, expectValue]: testPlanValid) {
         fontLabel.size = value;
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
@@ -1615,7 +1615,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontSizeInvalidValues, Te
     std::string resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlanInvalid = {
         { ArkValue<Opt_Length>("23.00%"), ATTRIBUTE_LABEL_STYLE_FONT_SIZE_DEFAULT_VALUE },
@@ -1623,11 +1623,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontSizeInvalidValues, Te
         { ArkValue<Opt_Length>("-5.0px"), ATTRIBUTE_LABEL_STYLE_FONT_SIZE_DEFAULT_VALUE },
     };
     fontLabel.size = ArkValue<Opt_Length>(2.45);
-    inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+    inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
     auto initialValue = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     for (const auto &[value, expectValue]: testPlanInvalid) {
         fontLabel.size = value;
-        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &initialValue);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
@@ -1648,14 +1648,14 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
     Ark_ButtonLabelStyle inputValueLabelStyle;
-    Ark_Font fontLabel;
+    Ark_arkui_component_units_Font fontLabel;
 
     auto inputStringValue = "testFamily";
     auto inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
     auto inputValue = ArkUnion<Opt_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     fontLabel.family = inputValue;
-    inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+    inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
     auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
@@ -1669,7 +1669,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     inputValue = ArkUnion<Opt_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     fontLabel.family = inputValue;
-    inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+    inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
     optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
@@ -1683,7 +1683,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     inputValue = ArkUnion<Opt_Union_String_Resource, Ark_String>(inputArkStringValue);
 
     fontLabel.family = inputValue;
-    inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+    inputValueLabelStyle.font = ArkValue<Opt_arkui_component_units_Font>(fontLabel);
     optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);

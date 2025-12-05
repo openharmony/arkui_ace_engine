@@ -178,20 +178,20 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Lev
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColorBlend, nullptr);
-    using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
+    using OneTestStep = std::tuple<Opt_Union_arkui_component_enums_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_WHITE), "#FFFFFFFF"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BLACK), "#FF000000"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BLUE), "#FF0000FF"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BROWN), "#FFA52A2A"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GRAY), "#FF808080"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GREEN), "#FF008000"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GREY), "#FF808080"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_ORANGE), "#FFFFA500"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_PINK), "#FFFFC0CB"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_RED), "#FFFF0000"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_YELLOW), "#FFFFFF00"},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_TRANSPARENT),
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK), "#FF000000"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN), "#FFA52A2A"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY), "#FF808080"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), "#FF008000"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY), "#FF808080"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE), "#FFFFA500"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK), "#FFFFC0CB"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), "#FFFF0000"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW), "#FFFFFF00"},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT),
             "#00000000"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
@@ -210,10 +210,10 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestS
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColorBlend, nullptr);
-    using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
+    using OneTestStep = std::tuple<Opt_Union_arkui_component_enums_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_String>(""), ""},
-        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_String>("failValue"), ""},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_String>(""), ""},
+        {Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource, Ark_String>("failValue"), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setColorBlend(node_, &inputValue);

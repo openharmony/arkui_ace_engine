@@ -185,14 +185,14 @@ static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = 
 
 class CommonMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
-    GENERATED_ARKUI_BLANK // test common methods on frameNode for Blank component
+    GENERATED_ARKUI_COLUMN // test common methods on frameNode for Column component
     > {
 public:
     RefPtr<RenderContext> render_;
 
     void *CreateNodeImpl() override
     {
-        return nodeModifiers_->getDividerModifier()->construct(GetId(), 0);
+        return nodeModifiers_->getColumnModifier()->construct(GetId(), 0);
     }
 
     void SetUp() override
@@ -518,7 +518,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveT
     EXPECT_EQ(transition, nullptr);
 
     // verify valid type
-    inputOptionCurveValue = ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN);
+    inputOptionCurveValue = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN);
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
     ASSERT_TRUE(transition && transition->curve);
@@ -526,7 +526,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveT
     EXPECT_EQ(transition->curve->ToString(), nameCurveEasyIn);
 
     // verify invalid type - expect default
-    inputOptionCurveValue = ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(
+    inputOptionCurveValue = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(
         static_cast<Ark_curves_Curve>(INT_MIN));
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
@@ -554,7 +554,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveC
 
     // verify valid custom
     inputOptionCurveValue =
-        ArkUnion<Opt_Union_Curve_String_ICurve, Ark_String>("interpolating-spring(1, 1, 28, 34)");
+        ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>("interpolating-spring(1, 1, 28, 34)");
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
     ASSERT_TRUE(transition && transition->curve);
@@ -563,7 +563,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveC
 
     // verify invalid custom - expect default
     inputOptionCurveValue =
-        ArkUnion<Opt_Union_Curve_String_ICurve, Ark_String>("invalidCurveDefinition");
+        ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>("invalidCurveDefinition");
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
     ASSERT_TRUE(transition && transition->curve);
@@ -588,7 +588,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveU
     EXPECT_EQ(GetTransition(), nullptr);
 
     // verify undef Curve - expect default
-    inputOptionCurveValue = ArkUnion<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    inputOptionCurveValue = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve>(Ark_Empty());
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     auto transition = GetTransition();
     ASSERT_TRUE(transition && transition->curve);
@@ -733,7 +733,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundColorTest, TestSize.Lev
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     using TestInpType = Ark_ResourceColor;
     static const std::vector<std::pair<TestInpType, std::string>> testPlan = {
-        { ArkUnion<TestInpType, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<TestInpType, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<TestInpType, Ark_Int32>(0x123456), "#FF123456" },
         { ArkUnion<TestInpType, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<TestInpType, Ark_String>("65535"), "#FF00FFFF" },
@@ -775,7 +775,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLengthValues, Test
 {
     std::string strResult;
     for (const auto &[optMargin, expected]: LENGTH_TEST_PLAN) {
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Length>(optMargin);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Length>(optMargin);
         modifier_->setMargin(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         EXPECT_EQ(strResult, expected);
@@ -795,7 +795,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLeftLengthValues, 
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -822,7 +822,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidTopLengthValues, T
         inputValue.top = Converter::ArkValue<Opt_Length>(arkMargin);
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -849,7 +849,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidTopRightValues, Te
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(arkMargin);
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -876,7 +876,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidBottomLengthValues
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(arkMargin);
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -904,7 +904,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLocalizedMarginVal
     auto optDirection = Converter::ArkValue<Opt_Direction>(ARK_DIRECTION_LTR);
     modifier_->setDirection(node_, &optDirection);
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_LocalizedPadding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_LocalizedPadding>(inputValue);
         modifier_->setMargin(node_, &value);
 
         UpdateFrameNode(); // apply localized values
@@ -919,7 +919,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLocalizedMarginVal
     optDirection = Converter::ArkValue<Opt_Direction>(ARK_DIRECTION_RTL);
     modifier_->setDirection(node_, &optDirection);
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        auto value = Converter::ArkUnion<Opt_Union_Margin_Length_LocalizedMargin, Ark_LocalizedPadding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_LocalizedPadding>(inputValue);
         modifier_->setMargin(node_, &value);
 
         UpdateFrameNode(); // apply localized values
@@ -1355,7 +1355,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestValidValues, Te
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(true);
     // color stops
     std::vector<ColorStep> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), 0.1 },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), 0.1 },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), 0.25 },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), 0.5 },
     };
@@ -1678,18 +1678,18 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestValidValues, 
 {
     Ark_String str = Converter::ArkValue<Ark_String>("path");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
-    auto src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
-    Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(Ark_Empty());
+    auto src = Converter::ArkUnion<Opt_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(resStr);
+    auto repeat = ARK_IMAGE_REPEAT_NO_REPEAT;
 
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 
     auto resName = NamedResourceId("bi_public_ok", ResourceType::STRING);
     resStr = CreateResourceUnion<Ark_ResourceStr>(resName);
-    src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
+    src = Converter::ArkUnion<Opt_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(resStr);
 
-    modifier_->setBackgroundImage2(node_, &src, nullptr);
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path_to_background_image, ImageRepeat.NoRepeat");
 }
@@ -1703,24 +1703,24 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestRepeatValidVa
 {
     Ark_String str = Converter::ArkValue<Ark_String>("path");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
-    auto src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
-    Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_X);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    auto src = Converter::ArkUnion<Opt_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(resStr);
+    auto repeat = ARK_IMAGE_REPEAT_X;
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.X");
 
-    repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_Y);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    repeat = ARK_IMAGE_REPEAT_Y;
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.Y");
 
-    repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_XY);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    repeat = ARK_IMAGE_REPEAT_XY;
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.XY");
 
-    repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_NO_REPEAT);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    repeat = ARK_IMAGE_REPEAT_NO_REPEAT;
+    modifier_->setBackgroundImage2(node_, &src, repeat);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 }
@@ -2331,15 +2331,15 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOnVisibleAreaChangeTest, TestSize
 
     std::vector<double> ratioVec;
     ratioVec.push_back(0.5f);
-    auto numberArrayResult = Converter::ArkValue<Opt_Array_Float64>(ratioVec, Converter::FC);
+    auto numberArrayResult = Converter::ArkValue<Opt_Array_F64>(ratioVec, Converter::FC);
 
     std::vector<double> ratioVecInvalid1;
     ratioVecInvalid1.push_back(-0.5f);
-    auto numberArrayResultInvalid1 = Converter::ArkValue<Opt_Array_Float64>(ratioVecInvalid1, Converter::FC);
+    auto numberArrayResultInvalid1 = Converter::ArkValue<Opt_Array_F64>(ratioVecInvalid1, Converter::FC);
 
     std::vector<double> ratioVecInvalid2;
     ratioVecInvalid2.push_back(1.5f);
-    auto numberArrayResultInvalid2 = Converter::ArkValue<Opt_Array_Float64>(ratioVecInvalid2, Converter::FC);
+    auto numberArrayResultInvalid2 = Converter::ArkValue<Opt_Array_F64>(ratioVecInvalid2, Converter::FC);
 
     EXPECT_EQ(checkEvent.size(), 0);
 
@@ -2376,7 +2376,7 @@ HWTEST_F(CommonMethodModifierTest, setAnimationDefaultValues, TestSize.Level1)
     param.tempo = Converter::ArkValue<Opt_Float64>(Ark_Empty());
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
-    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_curves_Curve_String_curves_ICurve>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
     optParam = Converter::ArkValue<Opt_AnimateParam>(param);
 
@@ -2436,7 +2436,7 @@ HWTEST_F(CommonMethodModifierTest, setOpenAnimationValidValues, TestSize.Level1)
     param.tempo = Converter::ArkValue<Opt_Float64>(2.5f);
     param.playMode = Converter::ArkValue<Opt_PlayMode>(ARK_PLAY_MODE_REVERSE);
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(ARK_FINISH_CALLBACK_TYPE_LOGICALLY);
-    param.curve = Converter::ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE);
+    param.curve = Converter::ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE);
     Ark_ExpectedFrameRateRange efrr;
     efrr.min = Converter::ArkValue<Ark_Int32>(30);
     efrr.max = Converter::ArkValue<Ark_Int32>(120);
@@ -2478,7 +2478,7 @@ HWTEST_F(CommonMethodModifierTest, setAnimationInvalidValues, TestSize.Level1)
     param.tempo = Converter::ArkValue<Opt_Float64>(0.0f);
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
-    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_curves_Curve_String_curves_ICurve>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
     optParam = Converter::ArkValue<Opt_AnimateParam>(param);
 

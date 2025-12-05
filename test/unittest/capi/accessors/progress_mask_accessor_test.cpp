@@ -106,7 +106,7 @@ HWTEST_F(ProgressMaskAccessorTest, ctorValidTest, TestSize.Level1)
         {
             Converter::ArkValue<Ark_Number>(0), 0,
             Converter::ArkValue<Ark_Number>(100), 100,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), Color::RED
         },
         {
             Converter::ArkValue<Ark_Number>(20.5f), 20.5f,
@@ -142,12 +142,12 @@ HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
         {
             Converter::ArkValue<Ark_Number>(-1), DEFAULT_VALUE,
             Converter::ArkValue<Ark_Number>(-1), DEFAULT_MAX_VALUE,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color(-1)), DEFAULT_COLOR
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(Ark_arkui_component_enums_Color(-1)), DEFAULT_COLOR
         },
         {
             Converter::ArkValue<Ark_Number>(-100), DEFAULT_VALUE,
             Converter::ArkValue<Ark_Number>(10), 10,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), Color::RED
         },
         {
             Converter::ArkValue<Ark_Number>(10), 10,
@@ -226,7 +226,7 @@ HWTEST_F(ProgressMaskAccessorTest, updateProgressInvalidTest, TestSize.Level1)
 HWTEST_F(ProgressMaskAccessorTest, updateColorValidTest, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_ResourceColor, Color>> validValues {
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED},
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), Color::RED},
         {Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff)},
         {Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), Color::FromString("#123456")},
     };
@@ -249,7 +249,7 @@ HWTEST_F(ProgressMaskAccessorTest, updateColorInvalidTest, TestSize.Level1)
 {
     const std::vector<Ark_ResourceColor> validValues {
         Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""),
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color(-1)),
+        Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(Ark_arkui_component_enums_Color(-1)),
     };
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);

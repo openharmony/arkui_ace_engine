@@ -99,14 +99,14 @@ HWTEST_F(TextBaseControllerAccessorTest, SetSelectionTest, TestSize.Level1)
     ASSERT_NE(accessor_->setSelection, nullptr);
     constexpr int32_t SELECTION_START = 1;
     constexpr int32_t SELECTION_END = 2;
-    auto selectionStartArk = Converter::ArkValue<Ark_Number>(SELECTION_START);
-    auto selectionEndArk = Converter::ArkValue<Ark_Number>(SELECTION_END);
+    auto selectionStartArk = Converter::ArkValue<Ark_Int32>(SELECTION_START);
+    auto selectionEndArk = Converter::ArkValue<Ark_Int32>(SELECTION_END);
     auto menuPolicyArkOpt =
         Converter::ArkValue<Opt_MenuPolicy>(Converter::ArkValue<Ark_MenuPolicy>(MenuPolicy::SHOW));
     Ark_SelectionOptions optionsArk = {.menuPolicy = menuPolicyArkOpt};
     const Opt_SelectionOptions optionsArkOpt = Converter::ArkValue<Opt_SelectionOptions>(optionsArk);
 
-    accessor_->setSelection(peer_, &selectionStartArk, &selectionEndArk, &optionsArkOpt);
+    accessor_->setSelection(peer_, selectionStartArk, selectionEndArk, &optionsArkOpt);
     EXPECT_EQ(g_checkSetSelection.selectionStart, SELECTION_START);
     EXPECT_EQ(g_checkSetSelection.selectionEnd, SELECTION_END);
     EXPECT_EQ(g_checkSetSelection.isForward, false);

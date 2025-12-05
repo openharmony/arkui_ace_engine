@@ -908,12 +908,12 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
-    // set valid values, color as Ark_Color aka int
     Ark_DividerStyle dividerOptions = {
         .strokeWidth = Converter::ArkValue<Opt_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(55.5),
         .endMargin = Converter::ArkValue<Opt_Length>("77px"),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -1057,14 +1057,16 @@ HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestDefaultValues, TestSize.Lev
 HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
+    Ark_Tuple_F64_F64 grayscale =
+        {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)};
     Ark_BackgroundEffectOptions inputValValid = {
-        .radius = Converter::ArkValue<Ark_Float64>(EFFECT_RADIUS),
+        .radius = Converter::ArkValue<Opt_Float64>(EFFECT_RADIUS),
         .saturation = Converter::ArkValue<Opt_Float64>(EFFECT_SATURATION),
         .brightness = Converter::ArkValue<Opt_Float64>(EFFECT_BRIGHTNESS),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
+            .grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(grayscale)
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
@@ -1154,13 +1156,15 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle1TestValidValues, TestSize.L
     ASSERT_NE(modifier_->setBarBackgroundBlurStyle1, nullptr);
 
     auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_REGULAR);
+    Ark_Tuple_F64_F64 grayscale =
+        {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)};
 
     Ark_BackgroundBlurStyleOptions inputOptionValid = {
         .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .scale = Converter::ArkValue<Opt_Float64>(SCALE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
+            .grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(grayscale)
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
@@ -1220,7 +1224,8 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTestDefaultValues, TestSize.Leve
 
 // Color values for attribute 'barBackgroundColor' of method 'barBackgroundColor'
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> barBackgroundColorValues = {
-    {"ARK_COLOR_BLUE", Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), COLOR_BLUE},
+    {"ARK_COLOR_BLUE", Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), COLOR_BLUE},
     {"0x123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456"},
     {"#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344"},
     {"incorrect_color", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT},

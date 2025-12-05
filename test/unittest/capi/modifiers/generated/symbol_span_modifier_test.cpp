@@ -114,15 +114,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
-    Opt_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_F64_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_String_Resource& value) {
-        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const Opt_Union_F64_String_Resource& value) {
+        Opt_Union_F64_String_Resource inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
@@ -133,13 +133,13 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Le
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(value));
     }
 }
 
@@ -150,15 +150,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Le
  */
 HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Opt_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_F64_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
-                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
-        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const std::string& input, const Opt_Union_F64_String_Resource& value) {
+        Opt_Union_F64_String_Resource inputValueFontSize = initValueFontSize;
 
         modifier_->setFontSize(node_, &inputValueFontSize);
         inputValueFontSize = value;
@@ -170,18 +170,18 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_String_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_F64_String_Resource>());
 }
 
 /*

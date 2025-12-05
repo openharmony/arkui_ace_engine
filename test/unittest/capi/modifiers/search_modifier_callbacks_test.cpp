@@ -122,7 +122,7 @@ public:
 HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestSize.Level1)
 {
     Ark_SearchOptions options = {};
-    options.value = ArkValue<Opt_Union_String_Bindable>(Ark_Empty());
+    options.value = ArkValue<Opt_Union_String_Bindable_String>(Ark_Empty());
     options.placeholder = ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr);
     options.icon = ArkValue<Opt_String>(Ark_Empty());
 
@@ -408,7 +408,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnEditChangeTest, TestSize.Leve
     auto onEditChange = [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
         checkEvent = Converter::Convert<bool>(isEditChange);
     };
-    auto inputValue = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange);
+    auto inputValue = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange);
     modifier_->setOnEditChange(node_, &inputValue);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);

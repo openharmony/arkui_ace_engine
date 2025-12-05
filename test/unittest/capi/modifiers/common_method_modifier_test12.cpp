@@ -78,9 +78,9 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreviewTestDefaultValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestCustomBuilderTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreviewTestCustomBuilderTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview0, nullptr);
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -88,9 +88,10 @@ HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestCustomBuilderTe
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
 
-    auto unionValue = Converter::ArkUnion<Opt_Union_CustomBuilder_DragItemInfo_String,
+    auto unionValue = Converter::ArkUnion<Opt_Union_CustomNodeBuilder_DragItemInfo_String,
         CustomNodeBuilder>(builder);
-    modifier_->setDragPreview0(node_, &unionValue);
+    auto config = Converter::ArkValue<Opt_PreviewConfiguration>(Ark_Empty());
+    modifier_->setDragPreview(node_, &unionValue, &config);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
@@ -102,9 +103,9 @@ HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestCustomBuilderTe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestDragItemInfoTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreviewTestDragItemInfoTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview0, nullptr);
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     // CustomNodeBuilder
@@ -124,9 +125,10 @@ HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestDragItemInfoTes
         .extraInfo = Converter::ArkValue<Opt_String>(expectedExtraInfo),
         .pixelMap = Converter::ArkValue<Opt_image_PixelMap>(expectedPixelMap)};
 
-    auto unionValue = Converter::ArkUnion<Opt_Union_CustomBuilder_DragItemInfo_String,
+    auto unionValue = Converter::ArkUnion<Opt_Union_CustomNodeBuilder_DragItemInfo_String,
         Ark_DragItemInfo>(dragItemInfo);
-    modifier_->setDragPreview0(node_, &unionValue);
+    auto config = Converter::ArkValue<Opt_PreviewConfiguration>(Ark_Empty());
+    modifier_->setDragPreview(node_, &unionValue, &config);
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
@@ -140,17 +142,19 @@ HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestDragItemInfoTes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestString, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreviewTestString, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDragPreview0, nullptr);
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     std::string expectedString{"DragPreview_String"};
     auto arkExpectedString = Converter::ArkValue<Ark_String>(expectedString);
 
-    auto unionValue = Converter::ArkUnion<Opt_Union_CustomBuilder_DragItemInfo_String, Ark_String>(arkExpectedString);
-    modifier_->setDragPreview0(node_, &unionValue);
+    auto unionValue = Converter::ArkUnion<
+        Opt_Union_CustomNodeBuilder_DragItemInfo_String, Ark_String>(arkExpectedString);
+    auto config = Converter::ArkValue<Opt_PreviewConfiguration>(Ark_Empty());
+    modifier_->setDragPreview(node_, &unionValue, &config);
 
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
@@ -223,7 +227,7 @@ HWTEST_F(CommonMethodModifierTest12, setOverlayTestValidValues, TestSize.Level1)
     };
 
     std::string expectedStr = "overlay string";
-    auto unionStringValue = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>(
+    auto unionStringValue = Converter::ArkUnion<Opt_Union_String_CustomNodeBuilder_ComponentContent, Ark_String>(
         expectedStr, Converter::FC);
     Ark_OverlayOffset arkOverlayOffset = {
         .x = Converter::ArkValue<Opt_Float64>(5.),
@@ -257,7 +261,7 @@ HWTEST_F(CommonMethodModifierTest12, setOverlayTestValidValues, TestSize.Level1)
 
     // test CustomNodeBuilder
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
-    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent,
+    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_String_CustomNodeBuilder_ComponentContent,
         CustomNodeBuilder>(builderHelper.GetBuilder());
     modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, nullptr);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), 1);

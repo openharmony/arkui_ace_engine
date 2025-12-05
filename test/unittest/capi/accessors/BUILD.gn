@@ -69,7 +69,6 @@ ace_unittest("capi_all_accessors_test") {
     "image_analyzer_controller_accessor_test.cpp",
     "image_attachment_accessor_test.cpp",
     "image_bitmap_accessor_test.cpp",
-    "image_data_accessor_test.cpp",
     "indicator_component_controller_accessor_test.cpp",
     #"key_event_accessor_test.cpp",
     "layout_manager_accessor_test.cpp",

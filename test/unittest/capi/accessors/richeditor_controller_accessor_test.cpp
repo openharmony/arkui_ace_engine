@@ -87,7 +87,7 @@ void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpa
 }
 void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const OHOS::Ace::ImageSpanAttribute& src)
 {
-    dst.margin = Converter::ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(src.marginProp);
+    dst.margin = Converter::ArkUnion<Opt_Union_Dimension_Padding, Ark_Padding>(src.marginProp);
 }
 void AssignArkValue(Ark_RichEditorImageSpanStyle& dst, const OHOS::Ace::ImageSpanAttribute& src)
 {
@@ -629,9 +629,10 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.L
     auto inputValueOptions = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
     Ark_ShadowOptions shadow = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.5f),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.5f),
         .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FF81AABB"),
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+            Ark_String>("#FF81AABB"),
         .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(2.5f),
         .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(3.5f),
         .fill = Converter::ArkValue<Opt_Boolean>(true)

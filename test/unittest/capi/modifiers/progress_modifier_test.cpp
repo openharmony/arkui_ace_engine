@@ -182,7 +182,7 @@ HWTEST_F(ProgressModifierTest, setValueTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, setValueTestValidValues, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(8.);
+    auto value = Converter::ArkValue<Opt_Float64>(8.);
     modifier_->setValue(node_, &value);
 
     std::string strResult;
@@ -198,7 +198,7 @@ HWTEST_F(ProgressModifierTest, setValueTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, setValueTestInvalidValues, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(254.);
+    auto value = Converter::ArkValue<Opt_Float64>(254.);
     modifier_->setValue(node_, &value);
 
     std::string strResult;
@@ -245,19 +245,19 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1
         "[{\"color\":\"#11223344\",\"offset\":\"0.000000\"},{\"color\":\"#11223344\",\"offset\":\"1.000000\"}]");
 
     Ark_LinearGradient gradient{};
-#ifdef WRONG_TYPE
-    Ark_Tuple_ResourceColor_Number gradientValue1;
+    Ark_Tuple_ResourceColor_F64 gradientValue1;
     gradientValue1.value0 = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#44223311");
-    gradientValue1.value1 = Converter::ArkValue<Ark_Number>(0.5f);
+    gradientValue1.value1 = Converter::ArkValue<Ark_Float64>(0.5f);
 
-    Ark_Tuple_ResourceColor_Number gradientValue2;
+    Ark_Tuple_ResourceColor_F64 gradientValue2;
     gradientValue2.value0 = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#33112244");
-    gradientValue2.value1 = Converter::ArkValue<Ark_Number>(0.9f);
+    gradientValue2.value1 = Converter::ArkValue<Ark_Float64>(0.9f);
 
-    std::vector<Ark_Tuple_ResourceColor_Number> colors = { gradientValue1, gradientValue2 };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorsHolder(colors);
+#ifdef WRONG_GEN_SIG
+    std::vector<Ark_Tuple_ResourceColor_F64> colors = { gradientValue1, gradientValue2 };
+    Converter::ArkArrayHolder<Ark_Tuple_ResourceColor_F64> colorsHolder(colors);
     gradient.colors = colorsHolder.ArkValue();
-#endif
+#endif // WRONG_GEN_SIG
 
     options = Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
     modifier_->setColor(node_, &options);
@@ -456,7 +456,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
     capsuleStyle.content = Converter::ArkValue<Opt_String>("content");
     capsuleStyle.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#23456134");
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(true);
-    capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
+    capsuleStyle.font = Converter::ArkValue<Opt_arkui_component_units_Font>(Ark_Empty());
     capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
     options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
@@ -501,14 +501,14 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize
     capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
-    Ark_Font font;
+    Ark_arkui_component_units_Font font;
     Ark_Union_String_Resource family = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("Family"));
     font.family = Converter::ArkValue<Opt_Union_String_Resource>(family);
     font.size = Converter::ArkValue<Opt_Length>("9px");
     font.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC);
     font.weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD);
-    capsuleStyle.font = Converter::ArkValue<Opt_Font>(font);
+    capsuleStyle.font = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
     options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_CapsuleStyleOptions>(capsuleStyle);
@@ -598,7 +598,7 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleValidBorderRadiusValues, TestSize.
     capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>();
     capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>();
-    capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
+    capsuleStyle.font = Converter::ArkValue<Opt_arkui_component_units_Font>(Ark_Empty());
 
     capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Dimension(11, DimensionUnit::VP));
     auto options =

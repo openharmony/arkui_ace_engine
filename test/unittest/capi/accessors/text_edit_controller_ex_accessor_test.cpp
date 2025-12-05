@@ -81,7 +81,7 @@ HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*peer_, GetCaretOffset()).Times(1).WillOnce(Return(OFFSET));
-    Opt_Number caretOffset = accessor_->getCaretOffset(peer_);
+    auto caretOffset = accessor_->getCaretOffset(peer_);
     auto checkValue = Converter::OptConvert<int32_t>(caretOffset);
     EXPECT_EQ(checkValue, OFFSET);
 }
@@ -94,9 +94,9 @@ HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 HWTEST_F(TextEditControllerExAccessorTest, SetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setCaretOffset, nullptr);
-    auto offset = Converter::ArkValue<Ark_Number>(OFFSET);
+    auto offset = Converter::ArkValue<Ark_Int32>(OFFSET);
     EXPECT_CALL(*peer_, SetCaretOffset(OFFSET)).Times(1).WillOnce(Return(true));
-    Opt_Boolean caretOffset = accessor_->setCaretOffset(peer_, &offset);
+    auto caretOffset = accessor_->setCaretOffset(peer_, offset);
     auto checkValueOpt = Converter::GetOpt(caretOffset);
     ASSERT_TRUE(checkValueOpt.has_value());
     auto checkValue = checkValueOpt.value();

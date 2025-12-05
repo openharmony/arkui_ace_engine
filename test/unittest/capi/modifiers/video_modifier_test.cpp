@@ -98,7 +98,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setOptionsSrcTestValidValues, TestSize.Leve
     Ark_VideoOptions options;
     options.src = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("source_str"));
-    options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
+    options.previewUri = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(Ark_Empty());
     options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
@@ -195,7 +195,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setOptionsProgressRateTestValidValues, Test
 
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
-    options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
+    options.previewUri = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(Ark_Empty());
     options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
@@ -238,7 +238,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setOptionsPreviewUriTestValidValues, TestSi
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
-    options.previewUri = Converter::ArkUnion<Opt_Union_String_PixelMap_Resource, Ark_String>(
+    options.previewUri = Converter::ArkUnion<Opt_Union_String_image_PixelMap_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("preview_uri_source"));
     options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
@@ -266,7 +266,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
-    options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
+    options.previewUri = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(Ark_Empty());
     options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
@@ -304,7 +304,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestInvalidValues, TestSize
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
-    options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
+    options.previewUri = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(Ark_Empty());
     options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
@@ -939,8 +939,9 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onError, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<VoidCallback>(onError, frameNode->GetId());
+    auto optCallback = Converter::ArkUnion<
+        Opt_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void, VoidCallback>(arkCallback);
     modifier_->setOnError(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);

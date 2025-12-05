@@ -461,7 +461,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onPatternComplete = [](Ark_Int32 nodeId, const Array_Int32 input) {
+    auto onPatternComplete = [](Ark_Int32 nodeId, const Array_I32 input) {
         checkEvent = {
             .nodeId = nodeId,
             .input = Converter::Convert<std::vector<int32_t>>(input),
@@ -599,7 +599,12 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultJsonOptions;
     std::string resultStr;
-    Opt_CircleStyleOptions realInputValue = Converter::ArkValue<Opt_CircleStyleOptions>(Ark_CircleStyleOptions{});
+    Opt_CircleStyleOptions realInputValue = Converter::ArkValue<Opt_CircleStyleOptions>(Ark_CircleStyleOptions{
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .enableWaveEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
+        .enableForeground = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
+        .radius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+    });
 
     for (auto [passed, checkVal, expected]: styleColorValidValues) {
         realInputValue.value.color = checkVal;

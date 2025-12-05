@@ -111,7 +111,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
 {
     Ark_ImageFrameInfo array[] = {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_String>(
                 ATTRIBUTE_IMAGES_SRC_TEST_VALUE),
             .width = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("100px"),
@@ -120,7 +120,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
             .duration = Converter::ArkValue<Opt_Int32>(1),
         },
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_Resource>(
                 CreateResource(IMAGES_OK_STR.c_str(), ResourceType::STRING)),
             .width = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("100px"),
@@ -173,7 +173,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     pixelMapPeer.pixelMap = pixelMap;
     Ark_ImageFrameInfo array[] = {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_image_PixelMap>(&pixelMapPeer),
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_image_PixelMap>(&pixelMapPeer),
             .width = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(ATTRIBUTE_SIZE_TEST_VALUE),

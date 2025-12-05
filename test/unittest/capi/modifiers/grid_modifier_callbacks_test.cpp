@@ -225,7 +225,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
-        const Callback_Opt_CustomBuilder_Void continuation
+        const Callback_Opt_CustomNodeBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);
@@ -287,7 +287,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
-        const Callback_Opt_CustomBuilder_Void continuation
+        const Callback_Opt_CustomNodeBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);

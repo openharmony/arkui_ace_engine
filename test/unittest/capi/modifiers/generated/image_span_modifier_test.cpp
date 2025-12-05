@@ -71,15 +71,15 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestDefaultValues, T
  */
 HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceStr_PixelMap initValueValue;
+    Ark_Union_ResourceStr_image_PixelMap initValueValue;
 
     // Initial setup
-    initValueValue = ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(
+    initValueValue = ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(
         ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
 
     auto checkValue = [this, &initValueValue](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_ResourceStr_PixelMap& value) {
-        Ark_Union_ResourceStr_PixelMap inputValueValue = initValueValue;
+                          const Ark_Union_ResourceStr_image_PixelMap& value) {
+        Ark_Union_ResourceStr_image_PixelMap inputValueValue = initValueValue;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -94,11 +94,11 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
+            ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
+            ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
 }
 
@@ -109,14 +109,14 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues
  */
 HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceStr_PixelMap initValueValue;
+    Ark_Union_ResourceStr_image_PixelMap initValueValue;
 
     // Initial setup
-    initValueValue = ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(
+    initValueValue = ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(
         ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
 
-    auto checkValue = [this, &initValueValue](const std::string& input, const Ark_Union_ResourceStr_PixelMap& value) {
-        Ark_Union_ResourceStr_PixelMap inputValueValue = initValueValue;
+    auto checkValue = [this, &initValueValue](const std::string& input, const Ark_Union_ResourceStr_image_PixelMap& value) {
+        Ark_Union_ResourceStr_image_PixelMap inputValueValue = initValueValue;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -130,9 +130,9 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueInvalidValu
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_Empty>(nullptr));
 }
 
 /*

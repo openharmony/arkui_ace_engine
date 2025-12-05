@@ -103,7 +103,7 @@ const int CUSTOM_COLOR_INT(0xFF123456);
 const auto CHECK_COLOR_COLOR("#FF008000");
 const auto TEST_STRING("testString");
 
-const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
 const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
 
@@ -391,7 +391,7 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
 HWTEST_F(SearchModifierTest, setSearchOptionsValidValues, TestSize.Level1)
 {
     Ark_SearchOptions options = {};
-    options.value = ArkUnion<Opt_Union_String_Bindable, Ark_String>(TEST_STRING);
+    options.value = ArkUnion<Opt_Union_String_Bindable_String, Ark_String>(TEST_STRING);
     options.placeholder = ArkUnion<Opt_ResourceStr, Ark_String>(TEST_STRING);
     options.icon = ArkValue<Opt_String>(TEST_STRING);
     auto optOptions = ArkValue<Opt_SearchOptions>(options);
@@ -445,18 +445,18 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT), "#00000000" },
     };
 
     Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
@@ -1070,20 +1070,20 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1110,20 +1110,20 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1150,20 +1150,20 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1190,20 +1190,20 @@ HWTEST_F(SearchModifierTest, DISABLED_setPlaceholderFontTestSize, TestSize.Level
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
         auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1230,20 +1230,20 @@ HWTEST_F(SearchModifierTest, setTextFontTestStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
@@ -1267,20 +1267,20 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
@@ -1304,20 +1304,20 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);
@@ -1341,20 +1341,20 @@ HWTEST_F(SearchModifierTest, DISABLED_setTextFontTestFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
-    auto fontOpt = ArkValue<Opt_Font>(font);
+    auto fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
     auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
     auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
     auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        fontOpt = ArkValue<Opt_Font>(font);
+        fontOpt = ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
         auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
         auto textFont = JsonUtil::ParseJsonString(textFontJSON);

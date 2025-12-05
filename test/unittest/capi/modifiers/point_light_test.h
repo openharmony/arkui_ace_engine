@@ -74,20 +74,20 @@ namespace OHOS::Ace::NG::PointLight {
     };
 
     // Fixture 'NumberAnything' for type 'Ark_Number'
-    const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureIntensityValidValues = {
-        { "1.0", ArkValue<Ark_Number>(1.0f), 1.f },
-        { "0.0", ArkValue<Ark_Number>(0), 0.f },
-        { "0.1", ArkValue<Ark_Number>(0.1f), 0.1f },
-        { "0.99", ArkValue<Ark_Number>(0.99f), 0.99f },
-        { "1.0", ArkValue<Ark_Number>(1), 1.f },
+    const std::vector<std::tuple<std::string, Ark_Float64, double>> testFixtureIntensityValidValues = {
+        { "1.0", ArkValue<Ark_Float64>(1.0f), 1.f },
+        { "0.0", ArkValue<Ark_Float64>(0), 0.f },
+        { "0.1", ArkValue<Ark_Float64>(0.1f), 0.1f },
+        { "0.99", ArkValue<Ark_Float64>(0.99f), 0.99f },
+        { "1.0", ArkValue<Ark_Float64>(1), 1.f },
     };
 
-    const std::vector<std::tuple<std::string, Ark_Number>> testFixtureIntensityInvalidValues = {
-        { "100", ArkValue<Ark_Number>(100) },
-        { "-0.01", ArkValue<Ark_Number>(-0.01f) },
-        { "-100", ArkValue<Ark_Number>(-100) },
-        { "12.34", ArkValue<Ark_Number>(12.34f) },
-        { "-56.78", ArkValue<Ark_Number>(-56.78f) },
+    const std::vector<std::tuple<std::string, Ark_Float64>> testFixtureIntensityInvalidValues = {
+        { "100", ArkValue<Ark_Float64>(100) },
+        { "-0.01", ArkValue<Ark_Float64>(-0.01f) },
+        { "-100", ArkValue<Ark_Float64>(-100) },
+        { "12.34", ArkValue<Ark_Float64>(12.34f) },
+        { "-56.78", ArkValue<Ark_Float64>(-56.78f) },
     };
 
     const std::vector<std::tuple<std::string,
@@ -108,55 +108,58 @@ namespace OHOS::Ace::NG::PointLight {
         { "INT_MAX", static_cast<Ark_IlluminatedType>(INT_MAX) },
     };
 
-    // Fixture 'NumberAnything' for type 'Ark_Number'
-    const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureBloomValidValues = {
-        { "100", ArkValue<Ark_Number>(100), "100" },
-        { "0", ArkValue<Ark_Number>(0), "0" },
-        { "-100", ArkValue<Ark_Number>(-100), "-100" },
-        { "12.34", ArkValue<Ark_Number>(12.34), "12.34" },
-        { "-56.78", ArkValue<Ark_Number>(-56.78), "-56.78" },
+    // Fixture 'NumberAnything' for type 'Ark_Float64'
+    const std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureBloomValidValues = {
+        { "100", ArkValue<Ark_Float64>(100), "100" },
+        { "0", ArkValue<Ark_Float64>(0), "0" },
+        { "-100", ArkValue<Ark_Float64>(-100), "-100" },
+        { "12.34", ArkValue<Ark_Float64>(12.34), "12.34" },
+        { "-56.78", ArkValue<Ark_Float64>(-56.78), "-56.78" },
     };
 
-    // Fixture 'ColorsEnum' for type 'Ark_Color'
-    const std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {
-        { "ARK_COLOR_WHITE", ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { "ARK_COLOR_BLACK", ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { "ARK_COLOR_BLUE", ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { "ARK_COLOR_BROWN", ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { "ARK_COLOR_GRAY", ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { "ARK_COLOR_GREEN", ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { "ARK_COLOR_GREY", ArkValue<Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { "ARK_COLOR_ORANGE", ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { "ARK_COLOR_PINK", ArkValue<Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { "ARK_COLOR_RED", ArkValue<Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { "ARK_COLOR_YELLOW", ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { "ARK_COLOR_TRANSPARENT", ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    // Fixture 'ColorsEnum' for type 'Ark_arkui_component_enums_Color'
+    const std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+        testFixtureColorsEnumValidValues = {
+        { "ARK_COLOR_WHITE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, "#FFFFFFFF" },
+        { "ARK_COLOR_BLACK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, "#FF000000" },
+        { "ARK_COLOR_BLUE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, "#FF0000FF" },
+        { "ARK_COLOR_BROWN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, "#FFA52A2A" },
+        { "ARK_COLOR_GRAY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, "#FF808080" },
+        { "ARK_COLOR_GREEN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, "#FF008000" },
+        { "ARK_COLOR_GREY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, "#FF808080" },
+        { "ARK_COLOR_ORANGE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, "#FFFFA500" },
+        { "ARK_COLOR_PINK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, "#FFFFC0CB" },
+        { "ARK_COLOR_RED", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, "#FFFF0000" },
+        { "ARK_COLOR_YELLOW", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, "#FFFFFF00" },
+        { "ARK_COLOR_TRANSPARENT", ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, "#00000000" },
     };
 
-    const std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues = {
-        { "static_cast<Ark_Color>(-1)", ArkValue<Ark_Color>(static_cast<Ark_Color>(-1)) },
-        { "static_cast<Ark_Color>(INT_MAX)", ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
+    const std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureColorsEnumInvalidValues = {
+        { "-1", static_cast<Ark_arkui_component_enums_Color>(-1) },
+        { "INT_MAX", static_cast<Ark_arkui_component_enums_Color>(INT_MAX) },
     };
 
-    // Fixture 'ColorsAlpha20Enum' for type 'Ark_Color'
-    const std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsAlpha20EnumValidValues = {
-        { "ARK_COLOR_WHITE", ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#33FFFFFF" },
-        { "ARK_COLOR_BLACK", ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#33000000" },
-        { "ARK_COLOR_BLUE", ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#330000FF" },
-        { "ARK_COLOR_BROWN", ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#33A52A2A" },
-        { "ARK_COLOR_GRAY", ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#33808080" },
-        { "ARK_COLOR_GREEN", ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#33008000" },
-        { "ARK_COLOR_GREY", ArkValue<Ark_Color>(ARK_COLOR_GREY), "#33808080" },
-        { "ARK_COLOR_ORANGE", ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#33FFA500" },
-        { "ARK_COLOR_PINK", ArkValue<Ark_Color>(ARK_COLOR_PINK), "#33FFC0CB" },
-        { "ARK_COLOR_RED", ArkValue<Ark_Color>(ARK_COLOR_RED), "#33FF0000" },
-        { "ARK_COLOR_YELLOW", ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#33FFFF00" },
-        { "ARK_COLOR_TRANSPARENT", ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    // Fixture 'ColorsAlpha20Enum' for type 'Ark_arkui_component_enums_Color'
+    const std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+        testFixtureColorsAlpha20EnumValidValues = {
+        { "ARK_COLOR_WHITE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, "#33FFFFFF" },
+        { "ARK_COLOR_BLACK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, "#33000000" },
+        { "ARK_COLOR_BLUE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, "#330000FF" },
+        { "ARK_COLOR_BROWN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, "#33A52A2A" },
+        { "ARK_COLOR_GRAY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, "#33808080" },
+        { "ARK_COLOR_GREEN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, "#33008000" },
+        { "ARK_COLOR_GREY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, "#33808080" },
+        { "ARK_COLOR_ORANGE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, "#33FFA500" },
+        { "ARK_COLOR_PINK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, "#33FFC0CB" },
+        { "ARK_COLOR_RED", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, "#33FF0000" },
+        { "ARK_COLOR_YELLOW", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, "#33FFFF00" },
+        { "ARK_COLOR_TRANSPARENT", ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, "#00000000" },
     };
 
-    const std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20EnumInvalidValues = {
-        { "static_cast<Ark_Color>(-1)", ArkValue<Ark_Color>(static_cast<Ark_Color>(-1)) },
-        { "static_cast<Ark_Color>(INT_MAX)", ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
+    const std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>>
+        testFixtureColorsAlpha20EnumInvalidValues = {
+        { "-1", static_cast<Ark_arkui_component_enums_Color>(-1) },
+        { "INT_MAX", static_cast<Ark_arkui_component_enums_Color>(INT_MAX) },
     };
 
     // Fixture 'ColorsStr' for type 'Ark_String'

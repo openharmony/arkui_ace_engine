@@ -824,7 +824,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontColorTestValidValu
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value), expectedStr);
     }
 }
 
@@ -863,7 +863,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontColorTestInvalidValues, Tes
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
 
     // Check invalid union
@@ -915,7 +915,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconColorTestValidValu
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value), expectedStr);
     }
 }
 
@@ -954,7 +954,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestInvalidValues, Tes
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
 
     // Check invalid union
@@ -993,21 +993,21 @@ std::vector<std::tuple<std::string, Ark_Int32, std::string>> backgroundColorNumV
     { "0xBE7AC0DE", Converter::ArkValue<Ark_Int32>(0xBE7AC0DE), "#BE7AC0DE" },
 };
 
-// Fixture 'ColorsEnum' for type 'Ark_Color'
+// Fixture 'ColorsEnum' for type 'Ark_arkui_component_enums_Color'
 // Expect that low values of alpha will be changed to 0xFF
-std::vector<std::tuple<std::string, Ark_Color, std::string>> backgroundColorEnumValidValues = {
-    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-    { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#FF000000" },
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> backgroundColorEnumValidValues = {
+    { "ARK_COLOR_WHITE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, "#FFFFFFFF" },
+    { "ARK_COLOR_BLACK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, "#FF000000" },
+    { "ARK_COLOR_BLUE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, "#FF0000FF" },
+    { "ARK_COLOR_BROWN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, "#FFA52A2A" },
+    { "ARK_COLOR_GRAY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, "#FF808080" },
+    { "ARK_COLOR_GREEN", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, "#FF008000" },
+    { "ARK_COLOR_GREY", ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, "#FF808080" },
+    { "ARK_COLOR_ORANGE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, "#FFFFA500" },
+    { "ARK_COLOR_PINK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, "#FFFFC0CB" },
+    { "ARK_COLOR_RED", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, "#FFFF0000" },
+    { "ARK_COLOR_YELLOW", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, "#FFFFFF00" },
+    { "ARK_COLOR_TRANSPARENT", ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, "#FF000000" },
 };
 
 /*
@@ -1041,7 +1041,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestValidValues,
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: backgroundColorEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value), expectedStr);
     }
 }
 
@@ -1080,7 +1080,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
 
     // Check invalid union
@@ -1310,7 +1310,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestValidVa
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value), expectedStr);
     }
 }
 
@@ -1349,7 +1349,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestInvalidValues, T
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
 
     // Check invalid union

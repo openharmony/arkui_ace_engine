@@ -209,7 +209,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<std::pair<Ark_ResourceColor, std::string>> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },

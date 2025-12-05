@@ -69,21 +69,21 @@ inline const std::vector<float> VALID_MATRIX = { 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
 inline const std::vector<float> VALID_MATRIX_0 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 inline const std::vector<float> VALID_MATRIX_1 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-inline ArkArrayHolder<Array_Float64> EMPTY_HOLDER(EMPTY_VECTOR);
-inline ArkArrayHolder<Array_Float64> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
-inline ArkArrayHolder<Array_Float64> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
-inline ArkArrayHolder<Array_Float64> VALID_HOLDER_0(VALID_MATRIX_0);
-inline ArkArrayHolder<Array_Float64> VALID_HOLDER_1(VALID_MATRIX_1);
-inline ArkArrayHolder<Array_Float64> VALID_HOLDER_2(VALID_MATRIX);
-inline ArkArrayHolder<Array_Float64> DEFAULT_VALUE_MATRIX(INVALID_MATRIX_MORE);
+inline ArkArrayHolder<Array_F64> EMPTY_HOLDER(EMPTY_VECTOR);
+inline ArkArrayHolder<Array_F64> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
+inline ArkArrayHolder<Array_F64> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
+inline ArkArrayHolder<Array_F64> VALID_HOLDER_0(VALID_MATRIX_0);
+inline ArkArrayHolder<Array_F64> VALID_HOLDER_1(VALID_MATRIX_1);
+inline ArkArrayHolder<Array_F64> VALID_HOLDER_2(VALID_MATRIX);
+inline ArkArrayHolder<Array_F64> DEFAULT_VALUE_MATRIX(INVALID_MATRIX_MORE);
 
-const std::vector<std::tuple<std::string, Array_Float64, std::optional<std::vector<float>>>> floatMatrixTest {
-    { "EMPTY_VECTOR", ArkValue<Array_Float64>(EMPTY_HOLDER.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_0", ArkValue<Array_Float64>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
-    { "INVALID_HOLDER_0", ArkValue<Array_Float64>(INVALID_HOLDER_0.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_1", ArkValue<Array_Float64>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
-    { "INVALID_HOLDER_1", ArkValue<Array_Float64>(INVALID_HOLDER_1.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_2", ArkValue<Array_Float64>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
+const std::vector<std::tuple<std::string, Array_F64, std::optional<std::vector<float>>>> floatMatrixTest {
+    { "EMPTY_VECTOR", ArkValue<Array_F64>(EMPTY_HOLDER.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_0", ArkValue<Array_F64>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
+    { "INVALID_HOLDER_0", ArkValue<Array_F64>(INVALID_HOLDER_0.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_1", ArkValue<Array_F64>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
+    { "INVALID_HOLDER_1", ArkValue<Array_F64>(INVALID_HOLDER_1.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_2", ArkValue<Array_F64>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
 };
 
 const MarginProperty MARGIN_PADDING_PROPERTY = { .left = TEST_CALC_LENGTH,
@@ -107,7 +107,7 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
         .topRight = ArkValue<Opt_Length>(TEST_DIMENSION)
     };
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
         .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
         .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorderRadiuses),
     };
@@ -117,7 +117,7 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 {
     const Ark_LengthMetrics lengthMetrics = ArkValue<Ark_LengthMetrics>(Dimension::FromString(TEST_DIMENSION));
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
         .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
         .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(lengthMetrics),
     };
@@ -127,7 +127,7 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleOptional()
 {
     Ark_ImageAttachmentLayoutStyle imageLayoutStyle = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
         .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
         .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
     };
@@ -170,6 +170,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestPixelMap, TestSize.Level1)
 
     Ark_ImageAttachmentInterface content {
         .value = arkPixelMap,
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -192,6 +197,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
         };
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -232,6 +241,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
         };
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -261,6 +274,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
     for (auto& [input, test, expected] : testFixtureVerticalAlignValidValues) {
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -282,6 +299,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
     for (auto& [input, test, expected] : testFixtureVerticalAlignInvalidValues) {
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -302,6 +323,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
     for (auto& [input, test, expected] : testFixtureObjectFitValidValues) {
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -323,6 +348,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
     for (auto& [input, test, expected] : testFixtureObjectFitInvalidValues) {
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -342,6 +371,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level
 {
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleOptional(),
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -362,6 +395,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
 {
     Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleLengthMetrics(),
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -385,6 +422,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
 {
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleFilled(),
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -414,6 +455,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
         auto unionValue = Converter::ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(peerFilter);
         const Ark_ImageAttachmentInterface content {
             .colorFilter = unionValue,
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -454,6 +499,11 @@ HWTEST_F(ImageAttachmentAccessorTest, getValueTest, TestSize.Level1)
 
     Ark_ImageAttachmentInterface content {
         .value = arkPixelMap,
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -478,6 +528,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getSizeTest, TestSize.Level1)
         };
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -506,6 +560,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestValidValues, TestSize.
     for (auto& [input, test, expected] : testFixtureVerticalAlignValidValues) {
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -525,6 +583,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSiz
     for (auto& [input, test, expected] : testFixtureVerticalAlignInvalidValues) {
         Ark_ImageAttachmentInterface content {
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -544,6 +606,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestValidValues, TestSize.Leve
     for (auto& [input, test, expected] : testFixtureObjectFitValidValues) {
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -563,6 +629,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
     for (auto& [input, test, expected] : testFixtureObjectFitInvalidValues) {
         Ark_ImageAttachmentInterface content {
             .objectFit = ArkValue<Opt_ImageFit>(test),
+            .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
@@ -582,6 +652,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level
     auto expected = OptConvert<Ark_ImageAttachmentLayoutStyle>(getImageLayoutStyleOptional());
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleOptional(),
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -606,6 +680,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
     auto expected = OptConvert<Ark_ImageAttachmentLayoutStyle>(getImageLayoutStyleFilled());
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleFilled(),
+        .colorFilter = Converter::ArkValue<Opt_ColorFilterType>(Ark_Empty()),
+        .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+        .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+        .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
     };
     auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
         Ark_ImageAttachmentInterface>(content);
@@ -635,6 +713,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getColorFilterTestColorFilter, TestSize.Le
         auto unionValue = ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(peerFilter);
         const Ark_ImageAttachmentInterface content {
             .colorFilter = unionValue,
+            .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(Ark_Empty()),
+            .objectFit = Converter::ArkValue<Opt_ImageFit>(Ark_Empty()),
+            .size = Converter::ArkValue<Opt_SizeOptions>(Ark_Empty()),
+            .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(Ark_Empty()),
         };
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);

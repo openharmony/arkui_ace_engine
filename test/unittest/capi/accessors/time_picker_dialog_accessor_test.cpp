@@ -56,7 +56,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesT
     arkOptions.backgroundColor =
         Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR));
     Ark_ShadowOptions shadow = {
-        .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(TEST_COLOR),
+        .color = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(TEST_COLOR),
         .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
         .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
         .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_RADIUS_SIZE),
@@ -191,7 +191,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorSettingDataTest, 
         .size = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(TEST_SIZE)),
     };
     Ark_PickerTextStyle style = {
-        .font = Converter::ArkValue<Opt_Font>(font)
+        .font = Converter::ArkValue<Opt_arkui_component_units_Font>(font)
     };
     arkOptions.textStyle = Converter::ArkValue<Opt_PickerTextStyle>(style);
     arkOptions.disappearTextStyle = Converter::ArkValue<Opt_PickerTextStyle>(style);

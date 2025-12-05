@@ -1682,7 +1682,8 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleColorTest, TestSize.Level1)
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
             .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_Color>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern,
+            Ark_arkui_component_enums_Color>(actual);
         accessor_->setStrokeStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_TRUE(targetFlag);

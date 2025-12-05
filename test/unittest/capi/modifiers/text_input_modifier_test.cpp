@@ -92,7 +92,7 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
         };
 
         Ark_TextInputOptions textInputOptions = {};
-        textInputOptions.text = ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable_Bindable, Ark_ResourceStr>(
+        textInputOptions.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
             ArkUnion<Ark_ResourceStr, Ark_String>(input));
         auto inputValue = ArkValue<Opt_TextInputOptions>(textInputOptions);
         modifier_->setTextInputOptions(node_, &inputValue);
@@ -288,7 +288,7 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
     auto text = ArkUnion<Ark_ResourceStr, Ark_String>(textTestValue);
 
     options.placeholder = ArkValue<Opt_ResourceStr>(placeholder);
-    options.text = ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable_Bindable, Ark_ResourceStr>(
+    options.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
         ArkValue<Ark_ResourceStr>(text));
     options.controller = ArkValue<Opt_TextInputController>();
 
@@ -322,7 +322,7 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Leve
     EXPECT_EQ(peer->GetController(), nullptr);
 
     options.placeholder = ArkValue<Opt_ResourceStr>();
-    options.text = ArkValue<Opt_Union_ResourceStr_Bindable_Bindable_Bindable>();
+    options.text = ArkValue<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String>();
     options.controller = ArkValue<Opt_TextInputController>(peer);
 
     auto optOptions = ArkValue<Opt_TextInputOptions>(options);
@@ -349,7 +349,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setOnEditChangeTest, TestSize.Level1)
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
     };
-    auto arkCallback = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange, id);
+    auto arkCallback = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange, id);
     modifier_->setOnEditChange(node_, &arkCallback);
     eventHub->FireOnEditChanged(true);
     ASSERT_TRUE(checkData.has_value());
@@ -378,7 +378,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setOnSecurityStateChangeTest, TestSize.
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
     };
-    auto arkCallback = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange, id);
+    auto arkCallback = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange, id);
     modifier_->setOnSecurityStateChange(node_, &arkCallback);
     eventHub->FireOnSecurityStateChanged(true);
     ASSERT_TRUE(checkData.has_value());

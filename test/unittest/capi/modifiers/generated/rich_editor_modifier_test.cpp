@@ -888,7 +888,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueVali
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
@@ -933,7 +933,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueInva
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const Opt_ResourceStr& value) {
         Opt_ResourceStr inputValueValue = initValueValue;
@@ -976,7 +976,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1028,7 +1028,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Opt_ResourceStr inputValueValue = initValueValue;
@@ -1084,7 +1084,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_FontWeight_Number_String& value) {
@@ -1136,7 +1136,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
@@ -1187,7 +1187,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_String_Resource& value) {
@@ -1234,7 +1234,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const Opt_Union_String_Resource& value) {
@@ -1283,7 +1283,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
@@ -1329,7 +1329,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const Opt_FontStyle& value) {
         Opt_ResourceStr inputValueValue = initValueValue;
@@ -1375,7 +1375,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1394,7 +1394,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1428,7 +1428,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(WriteTo(initValueStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
     WriteTo(initValueStyle).fontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
                           const std::string& input, const Opt_ResourceColor& value) {
@@ -1451,7 +1451,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

@@ -264,7 +264,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 {
     std::string testColor = "#11123456";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -279,7 +279,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize.Level1)
 {
     int32_t testColor = 0xff008000;
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -296,7 +296,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSiz
 {
     float testColor = 286405718.0;
     auto testNumber = Converter::ArkValue<Ark_Int32>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Int32>(testNumber);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_Int32>(testNumber);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -317,13 +317,13 @@ HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarColor_SetBadColorString, testing:
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(before, after);
     // nullptr to data
     str = {.length = 12334, .chars = nullptr};
-    colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
+    colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_String>(str);
     modifier_->setScrollBarColor(node_, &colorUnion);
     after = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(before, after);

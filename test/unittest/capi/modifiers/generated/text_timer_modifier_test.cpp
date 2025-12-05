@@ -247,7 +247,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.L
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -262,7 +262,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.L
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -286,7 +286,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorInvalidValues, TestSize
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueFontColor = initValueFontColor;
@@ -304,7 +304,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorInvalidValues, TestSize
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -714,7 +714,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -762,7 +762,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -812,7 +812,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsTypeVali
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -857,7 +857,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsTypeInva
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -901,7 +901,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorVal
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -913,7 +913,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorVal
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
+                          const Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).color = value;
@@ -926,17 +926,17 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorVal
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDummyColoringStrategyValidValues) {
         checkValue(
-            input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(value));
+            input, expected, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(value));
     }
 }
 
@@ -956,7 +956,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorInv
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -968,7 +968,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorInv
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
-                          const std::string& input, const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
+                          const std::string& input, const Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
@@ -982,15 +982,15 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsColorInv
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>());
+    checkValue("undefined", ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>());
 }
 
 /*
@@ -1009,7 +1009,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsOffsetXV
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -1057,7 +1057,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsOffsetXI
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -1103,7 +1103,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsOffsetYV
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -1151,7 +1151,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsOffsetYI
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -1197,7 +1197,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsFillVali
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
@@ -1242,7 +1242,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowShadowOptionsFillInva
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_arkui_component_enums_Color>(
             std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(WriteTo(initValueTextShadow)).offsetX =
         ArkUnion<Opt_Union_Number_Resource, Ark_Number>(

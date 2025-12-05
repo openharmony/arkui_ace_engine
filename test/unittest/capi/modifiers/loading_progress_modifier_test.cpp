@@ -66,7 +66,7 @@ HWTEST_F(LoadingProgressModifierTest, DISABLED_setColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, THEME_LOADING_COLOR.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);

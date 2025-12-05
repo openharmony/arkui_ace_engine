@@ -72,7 +72,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -94,7 +94,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        inputValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(value);
+        inputValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(value);
         modifier_->setSliderOptions(node, &realInputValue);
         auto jsonValueFull = GetJsonValue(node);
         auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
@@ -119,7 +119,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -135,7 +135,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Union_F64_Bindable& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Union_F64_Bindable_F64& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -152,12 +152,12 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(std::get<1>(value)),
             std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Union_F64_Bindable>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Union_F64_Bindable_F64>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
 }
 
 /*
@@ -170,7 +170,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -217,7 +217,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -267,7 +267,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -314,7 +314,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -364,7 +364,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepValidValues, TestSiz
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -411,7 +411,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepInvalidValues, TestS
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -460,7 +460,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -507,7 +507,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -553,7 +553,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionValidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -601,7 +601,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionInvalidValues, 
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -647,7 +647,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseValidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -694,7 +694,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseInvalidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Float64>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
@@ -781,7 +781,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockColorTestBlockColorValidValues, Te
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -815,7 +815,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -875,7 +875,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues,
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -914,7 +914,7 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSi
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1029,7 +1029,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValu
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1068,7 +1068,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestInvalidValues, Tes
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1416,7 +1416,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockBorderColorTestBlockBorderColorVal
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1450,7 +1450,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1581,7 +1581,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setStepColorTestStepColorValidValues, Test
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1615,7 +1615,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));

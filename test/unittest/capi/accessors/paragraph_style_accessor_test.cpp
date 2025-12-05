@@ -52,6 +52,7 @@ public:
         interface.maxLines = Converter::ArkValue<Opt_Int32>(TEST_LINES_NUM);
         interface.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
         interface.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
+        interface.paragraphSpacing = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
 
         // Margin holder
         NG::LeadingMargin margin {.size = LeadingMarginSize(Dimension(TEST_MARGIN), Dimension(TEST_MARGIN_2))};

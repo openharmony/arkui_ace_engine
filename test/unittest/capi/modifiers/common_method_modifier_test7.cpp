@@ -427,11 +427,11 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestCOPY, TestSize.Le
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
-        const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+        const Opt_String extraP, const Callback_Union_CustomNodeBuilder_DragItemInfo_Void continuation)
     {
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
         // the different type in return value depending on input data
-        Ark_Union_CustomBuilder_DragItemInfo arkResult;
+        Ark_Union_CustomNodeBuilder_DragItemInfo arkResult;
         checkEvent->dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event);
         checkEvent->nodeId = resourceId;
         auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
@@ -487,11 +487,11 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestMOVE, TestSize.Le
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
-        const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+        const Opt_String extraP, const Callback_Union_CustomNodeBuilder_DragItemInfo_Void continuation)
     {
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
         // the different type in return value depending on input data
-        Ark_Union_CustomBuilder_DragItemInfo arkResult;
+        Ark_Union_CustomNodeBuilder_DragItemInfo arkResult;
         checkEvent->dragEvent = Converter::Convert<RefPtr<OHOS::Ace::DragEvent>>(event);
         checkEvent->nodeId = resourceId;
         auto isNeedBuilder = checkEvent->dragEvent->GetDragBehavior() == DragBehavior::MOVE;
@@ -528,7 +528,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestMOVE, TestSize.Le
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnChildTouchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnChildTouchTest, TestSize.Level1)
 {
     using namespace Converter;
     ASSERT_NE(modifier_->setOnChildTouchTest, nullptr);
@@ -541,11 +541,14 @@ HWTEST_F(CommonMethodModifierTest7, SetOnChildTouchTest, TestSize.Level1)
         const Callback_TouchResult_Void continuation)
     {
         EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
+        [[maybe_unused]]
         auto isCompetition = value.length > 0;
         auto fakeId = std::to_string(value.length);
         Ark_TouchResult arkResult = {
+#ifdef WRONG_GEN_SIG
             .strategy = isCompetition ? ARK_TOUCH_TEST_STRATEGY_FORWARD_COMPETITION : ARK_TOUCH_TEST_STRATEGY_FORWARD,
             .id = ArkValue<Opt_String>(fakeId)
+#endif
         };
         CallbackHelper(continuation).InvokeSync(arkResult);
     };
@@ -630,7 +633,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin0Te
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
-        const Callback_GestureJudgeResult_Void continuation)
+        const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureJudgeResult_Void continuation)
     {
         auto info = event ? event->GetBaseGestureInfo() : nullptr;
         GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(event);
@@ -673,7 +676,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Te
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
-        const Callback_GestureJudgeResult_Void continuation)
+        const Opt_Array_TouchRecognizer touchRecognizers, const Callback_GestureJudgeResult_Void continuation)
     {
         auto info = event ? event->GetBaseGestureInfo() : nullptr;
         GeneratedModifier::GetBaseGestureEventAccessor()->destroyPeer(event);

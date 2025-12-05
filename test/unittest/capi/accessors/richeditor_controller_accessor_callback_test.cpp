@@ -169,7 +169,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
     auto optOptions = GetImageSpanOptions(gesture);
 
     auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
-    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
+    auto value = Converter::ArkUnion<Ark_Union_image_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onClick, nullptr);
@@ -212,7 +212,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnDoub
     auto optOptions = GetImageSpanOptions(gesture);
 
     auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
-    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
+    auto value = Converter::ArkUnion<Ark_Union_image_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
@@ -256,7 +256,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
     auto optOptions = GetImageSpanOptions(gesture);
 
     auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
-    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
+    auto value = Converter::ArkUnion<Ark_Union_image_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onLongPress, nullptr);
@@ -306,7 +306,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, Test
     auto test = [this, &callbackValue](bool isHover, SourceType type) {
         auto optOptions = GetImageSpanOptions(callbackValue);
         auto resourceStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(STR_URL);
-        auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
+        auto value = Converter::ArkUnion<Ark_Union_image_PixelMap_ResourceStr, Ark_ResourceStr>(resourceStr);
         ASSERT_EQ(g_mouseOptions.onHover, nullptr);
         accessor_->addImageSpan(peer_, &value, &optOptions);
         ASSERT_NE(g_mouseOptions.onHover, nullptr);

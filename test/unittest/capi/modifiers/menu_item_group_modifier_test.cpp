@@ -95,10 +95,10 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsStringTest, TestSize.
 
     auto headerStr = Converter::ArkValue<Ark_String>("Header");
     auto headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(headerStr);
-    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(headerResStr);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, Ark_ResourceStr>(headerResStr);
     auto footerStr = Converter::ArkValue<Ark_String>("Footer");
     auto footerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(footerStr);
-    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(footerResStr);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, Ark_ResourceStr>(footerResStr);
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
     auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
@@ -122,11 +122,11 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSiz
 
     const auto RES_NAME_HEADER = NamedResourceId{"header", ResourceType::STRING};
     Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
-    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(headerResStr);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, Ark_ResourceStr>(headerResStr);
 
     const auto RES_NAME_FOOTER = NamedResourceId{"footer", ResourceType::STRING};
     Ark_ResourceStr footerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_FOOTER);
-    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(footerResStr);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, Ark_ResourceStr>(footerResStr);
 
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
     auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
@@ -146,10 +146,10 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsCustomBuilderTest, Te
 {
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();
-    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, CustomNodeBuilder>(builder);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, CustomNodeBuilder>(builder);
 
     auto builder2 = getBuilderCb(false);
-    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, CustomNodeBuilder>(builder2);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomNodeBuilder, CustomNodeBuilder>(builder2);
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
     auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
     checkEventH = std::nullopt;

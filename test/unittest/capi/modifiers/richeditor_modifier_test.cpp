@@ -89,7 +89,7 @@ static const auto ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE = UINT_MAX;
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -366,12 +366,12 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTest, TestSize.Level1)
 
     Converter::ConvContext ctx;
     Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
-    Ark_Font label;
+    Ark_arkui_component_units_Font label;
     label.size = Converter::ArkValue<Opt_Length>("30px");
     label.weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(TEST_FONT_WEIGHT);
     label.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
     Ark_PlaceholderStyle style;
-    style.font = Converter::ArkValue<Opt_Font>(label);
+    style.font = Converter::ArkValue<Opt_arkui_component_units_Font>(label);
     style.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(TEST_COLOR);
     auto optStyle = Converter::ArkValue<Opt_PlaceholderStyle>(style);
 

@@ -92,8 +92,8 @@ const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
 const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
 const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
 
-const auto SELECTED_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(1);
-const auto INVALID_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(-1);
+const auto SELECTED_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Int32>(1);
+const auto INVALID_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Int32>(-1);
 
 // length values
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -200,7 +200,7 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testIntRe
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testWeightStringValidValues;
 extern std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable;
 
-const Ark_Font TEST_ARK_FONT = {
+const Ark_arkui_component_units_Font TEST_ARK_FONT = {
     .size = ArkValue<Opt_Length>("12.0px"),
     .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
     .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),

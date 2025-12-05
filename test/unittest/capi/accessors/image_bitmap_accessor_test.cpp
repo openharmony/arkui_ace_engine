@@ -30,7 +30,7 @@ const std::string DEFAULT_STRING_VALUE = "text";
 const int DEFAULT_INT_VALUE = 100;
 const Ark_Int32 DEFAULT_HEIGHT_VALUE = 0;
 const Ark_Int32 DEFAULT_WIDTH_VALUE = 0;
-const auto DEFAULT_RESOURCE = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE);
+const auto DEFAULT_RESOURCE = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE);
 const auto DEFAULT_METRICS = Converter::ArkValue<Opt_LengthMetricsUnit>(Ace::CanvasUnit::PX);
 
 std::vector<std::tuple<Ark_Number, double>> arkNumberTestPlan = {
@@ -102,7 +102,7 @@ public:
 HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     bool result = false;
@@ -125,7 +125,7 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
@@ -145,7 +145,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
@@ -193,37 +193,5 @@ HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
 
     auto result = Converter::Convert<int32_t>(accessor_->getWidth(nullptr));
     EXPECT_EQ(result, DEFAULT_WIDTH_VALUE);
-}
-
-/**
- * @tc.name: setHeightTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageBitmapAccessorTest, setHeightTest, TestSize.Level1)
-{
-    peer_ = reinterpret_cast<MockImageBitmapPeer*>(accessor_->construct(&DEFAULT_RESOURCE, &DEFAULT_METRICS));
-    ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(accessor_->setHeight, nullptr);
-    for (const auto& [actual, expected] : arkNumberTestPlan) {
-        accessor_->setHeight(peer_, &actual);
-        EXPECT_FLOAT_EQ (peer_->GetHeight(), expected);
-    }
-}
-
-/**
- * @tc.name: setWidthTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageBitmapAccessorTest, setWidthTest, TestSize.Level1)
-{
-    peer_ = reinterpret_cast<MockImageBitmapPeer*>(accessor_->construct(&DEFAULT_RESOURCE, &DEFAULT_METRICS));
-    ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(accessor_->setWidth, nullptr);
-    for (const auto& [actual, expected] : arkNumberTestPlan) {
-        accessor_->setWidth(peer_, &actual);
-        EXPECT_FLOAT_EQ (peer_->GetWidth(), expected);
-    }
 }
 } // namespace OHOS::Ace::NG

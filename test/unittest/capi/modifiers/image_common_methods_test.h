@@ -25,6 +25,6 @@ namespace ColorFilter {
 constexpr auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
 constexpr auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
 
-extern const std::vector<std::tuple<std::string, Array_Float64, std::vector<float>>> floatMatrixTest;
+extern const std::vector<std::tuple<std::string, Array_F64, std::vector<float>>> floatMatrixTest;
 } // namespace ColorFilter
 } // namespace OHOS::Ace::NG

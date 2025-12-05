@@ -197,7 +197,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarColorTestScrol
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Color_Number_String& value) {
@@ -212,7 +212,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarColorTestScrol
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(value));
@@ -233,7 +233,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](
                           const std::string& input, const Opt_Union_Color_Number_String& value) {
@@ -252,7 +252,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
         checkValue(input, ArkUnion<Opt_Union_Color_Number_String, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_Color_Number_String, Ark_Empty>(nullptr));
