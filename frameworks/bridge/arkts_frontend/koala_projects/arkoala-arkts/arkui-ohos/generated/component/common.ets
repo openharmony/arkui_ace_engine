@@ -522,6 +522,74 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         thisSerializer.release()
     }
 }
+export class ContentTransitionEffectInternal {
+    public static fromPtr(ptr: KPointer): ContentTransitionEffect {
+        return new ContentTransitionEffect(ptr)
+    }
+}
+export class ContentTransitionEffect implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static get IDENTITY(): ContentTransitionEffect {
+        return ContentTransitionEffect.getIDENTITY()
+    }
+    static set IDENTITY(IDENTITY: ContentTransitionEffect) {
+        ContentTransitionEffect.setIDENTITY(IDENTITY)
+    }
+    static get OPACITY(): ContentTransitionEffect {
+        return ContentTransitionEffect.getOPACITY()
+    }
+    static set OPACITY(OPACITY: ContentTransitionEffect) {
+        ContentTransitionEffect.setOPACITY(OPACITY)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ContentTransitionEffect.getFinalizer())
+    }
+    constructor() {
+        this(ContentTransitionEffect.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ContentTransitionEffect_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ContentTransitionEffect_getFinalizer()
+    }
+    private static getIDENTITY_serialize(): ContentTransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._ContentTransitionEffect_getIDENTITY()
+        const obj : ContentTransitionEffect = ContentTransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static setIDENTITY_serialize(IDENTITY: ContentTransitionEffect): void {
+        ArkUIGeneratedNativeModule._ContentTransitionEffect_setIDENTITY(toPeerPtr(IDENTITY))
+    }
+    private static getOPACITY_serialize(): ContentTransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._ContentTransitionEffect_getOPACITY()
+        const obj : ContentTransitionEffect = ContentTransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static setOPACITY_serialize(OPACITY: ContentTransitionEffect): void {
+        ArkUIGeneratedNativeModule._ContentTransitionEffect_setOPACITY(toPeerPtr(OPACITY))
+    }
+    private static getIDENTITY(): ContentTransitionEffect {
+        return ContentTransitionEffect.getIDENTITY_serialize()
+    }
+    private static setIDENTITY(IDENTITY: ContentTransitionEffect): void {
+        const IDENTITY_casted = IDENTITY as (ContentTransitionEffect)
+        ContentTransitionEffect.setIDENTITY_serialize(IDENTITY_casted)
+        return
+    }
+    private static getOPACITY(): ContentTransitionEffect {
+        return ContentTransitionEffect.getOPACITY_serialize()
+    }
+    private static setOPACITY(OPACITY: ContentTransitionEffect): void {
+        const OPACITY_casted = OPACITY as (ContentTransitionEffect)
+        ContentTransitionEffect.setOPACITY_serialize(OPACITY_casted)
+        return
+    }
+}
 export interface DismissPopupAction {
     reason: DismissReason
     dismiss(): void
@@ -11195,6 +11263,17 @@ export function vp2px(value: number): number {
 }
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
+}
+export class ContentTransitionEffect_serializer {
+    public static write(buffer: SerializerBase, value: ContentTransitionEffect): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ContentTransitionEffect {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ContentTransitionEffectInternal.fromPtr(ptr)
+    }
 }
 export class ForegroundEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {

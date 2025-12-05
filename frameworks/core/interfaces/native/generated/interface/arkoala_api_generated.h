@@ -329,6 +329,9 @@ typedef struct Opt_ComponentContentBase Opt_ComponentContentBase;
 typedef struct ConsoleMessagePeer ConsoleMessagePeer;
 typedef struct ConsoleMessagePeer* Ark_ConsoleMessage;
 typedef struct Opt_ConsoleMessage Opt_ConsoleMessage;
+typedef struct ContentTransitionEffectPeer ContentTransitionEffectPeer;
+typedef struct ContentTransitionEffectPeer* Ark_ContentTransitionEffect;
+typedef struct Opt_ContentTransitionEffect Opt_ContentTransitionEffect;
 typedef struct ControllerHandlerPeer ControllerHandlerPeer;
 typedef struct ControllerHandlerPeer* Ark_ControllerHandler;
 typedef struct Opt_ControllerHandler Opt_ControllerHandler;
@@ -558,6 +561,9 @@ typedef struct Opt_PatternLockController Opt_PatternLockController;
 typedef struct PermissionRequestPeer PermissionRequestPeer;
 typedef struct PermissionRequestPeer* Ark_PermissionRequest;
 typedef struct Opt_PermissionRequest Opt_PermissionRequest;
+typedef struct PickerModifierPeer PickerModifierPeer;
+typedef struct PickerModifierPeer* Ark_PickerModifier;
+typedef struct Opt_PickerModifier Opt_PickerModifier;
 typedef struct PinchRecognizerPeer PinchRecognizerPeer;
 typedef struct PinchRecognizerPeer* Ark_PinchRecognizer;
 typedef struct Opt_PinchRecognizer Opt_PinchRecognizer;
@@ -1630,6 +1636,8 @@ typedef struct OnOverrideUrlLoadingCallback OnOverrideUrlLoadingCallback;
 typedef struct Opt_OnOverrideUrlLoadingCallback Opt_OnOverrideUrlLoadingCallback;
 typedef struct OnPasteCallback OnPasteCallback;
 typedef struct Opt_OnPasteCallback Opt_OnPasteCallback;
+typedef struct OnPickerCallback OnPickerCallback;
+typedef struct Opt_OnPickerCallback Opt_OnPickerCallback;
 typedef struct OnRadioChangeCallback OnRadioChangeCallback;
 typedef struct Opt_OnRadioChangeCallback Opt_OnRadioChangeCallback;
 typedef struct OnRatingChangeCallback OnRatingChangeCallback;
@@ -2244,6 +2252,8 @@ typedef struct Ark_ParticlesInner Ark_ParticlesInner;
 typedef struct Opt_ParticlesInner Opt_ParticlesInner;
 typedef struct Ark_PathOptions Ark_PathOptions;
 typedef struct Opt_PathOptions Opt_PathOptions;
+typedef struct Ark_PickerOptions Ark_PickerOptions;
+typedef struct Opt_PickerOptions Opt_PickerOptions;
 typedef struct Ark_PixelRoundPolicy Ark_PixelRoundPolicy;
 typedef struct Opt_PixelRoundPolicy Opt_PixelRoundPolicy;
 typedef struct Ark_PluginComponentTemplate Ark_PluginComponentTemplate;
@@ -2725,6 +2735,8 @@ typedef struct Ark_GridColOptions Ark_GridColOptions;
 typedef struct Opt_GridColOptions Opt_GridColOptions;
 typedef struct Ark_HistoricalPoint Ark_HistoricalPoint;
 typedef struct Opt_HistoricalPoint Opt_HistoricalPoint;
+typedef struct Ark_ImageAlt Ark_ImageAlt;
+typedef struct Opt_ImageAlt Opt_ImageAlt;
 typedef struct Ark_ImageError Ark_ImageError;
 typedef struct Opt_ImageError Opt_ImageError;
 typedef struct Ark_ImageFrameInfo Ark_ImageFrameInfo;
@@ -2974,6 +2986,8 @@ typedef struct Ark_Union_SheetSize_Length Ark_Union_SheetSize_Length;
 typedef struct Opt_Union_SheetSize_Length Opt_Union_SheetSize_Length;
 typedef struct Ark_Union_SheetTitleOptions_CustomBuilder Ark_Union_SheetTitleOptions_CustomBuilder;
 typedef struct Opt_Union_SheetTitleOptions_CustomBuilder Opt_Union_SheetTitleOptions_CustomBuilder;
+typedef struct Ark_Union_String_Resource_PixelMap_ImageAlt Ark_Union_String_Resource_PixelMap_ImageAlt;
+typedef struct Opt_Union_String_Resource_PixelMap_ImageAlt Opt_Union_String_Resource_PixelMap_ImageAlt;
 typedef struct Ark_Union_TitleHeight_Length Ark_Union_TitleHeight_Length;
 typedef struct Opt_Union_TitleHeight_Length Opt_Union_TitleHeight_Length;
 typedef struct Ark_VideoOptions Ark_VideoOptions;
@@ -3312,6 +3326,8 @@ typedef struct Ark_ParagraphStyleInterface Ark_ParagraphStyleInterface;
 typedef struct Opt_ParagraphStyleInterface Opt_ParagraphStyleInterface;
 typedef struct Ark_PickerDialogButtonStyle Ark_PickerDialogButtonStyle;
 typedef struct Opt_PickerDialogButtonStyle Opt_PickerDialogButtonStyle;
+typedef struct Ark_PickerIndicatorStyle Ark_PickerIndicatorStyle;
+typedef struct Opt_PickerIndicatorStyle Opt_PickerIndicatorStyle;
 typedef struct Ark_PickerTextStyle Ark_PickerTextStyle;
 typedef struct Opt_PickerTextStyle Opt_PickerTextStyle;
 typedef struct PinchGestureEventPeer PinchGestureEventPeer;
@@ -5800,6 +5816,14 @@ typedef struct Opt_PerfMonitorSourceType {
     Ark_Tag tag;
     Ark_PerfMonitorSourceType value;
 } Opt_PerfMonitorSourceType;
+typedef enum Ark_PickerIndicatorType {
+    ARK_PICKER_INDICATOR_TYPE_BACKGROUND = 0,
+    ARK_PICKER_INDICATOR_TYPE_DIVIDER = 1,
+} Ark_PickerIndicatorType;
+typedef struct Opt_PickerIndicatorType {
+    Ark_Tag tag;
+    Ark_PickerIndicatorType value;
+} Opt_PickerIndicatorType;
 typedef enum Ark_PixelRoundCalcPolicy {
     ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND = 0,
     ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL = 1,
@@ -7498,6 +7522,10 @@ typedef struct Opt_ConsoleMessage {
     Ark_Tag tag;
     Ark_ConsoleMessage value;
 } Opt_ConsoleMessage;
+typedef struct Opt_ContentTransitionEffect {
+    Ark_Tag tag;
+    Ark_ContentTransitionEffect value;
+} Opt_ContentTransitionEffect;
 typedef struct Opt_ControllerHandler {
     Ark_Tag tag;
     Ark_ControllerHandler value;
@@ -8018,6 +8046,10 @@ typedef struct Opt_PermissionRequest {
     Ark_Tag tag;
     Ark_PermissionRequest value;
 } Opt_PermissionRequest;
+typedef struct Opt_PickerModifier {
+    Ark_Tag tag;
+    Ark_PickerModifier value;
+} Opt_PickerModifier;
 typedef struct Opt_PinchRecognizer {
     Ark_Tag tag;
     Ark_PinchRecognizer value;
@@ -12673,6 +12705,16 @@ typedef struct Opt_OnPasteCallback {
     Ark_Tag tag;
     OnPasteCallback value;
 } Opt_OnPasteCallback;
+typedef struct OnPickerCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
+} OnPickerCallback;
+typedef struct Opt_OnPickerCallback {
+    Ark_Tag tag;
+    OnPickerCallback value;
+} Opt_OnPickerCallback;
 typedef struct OnRadioChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15433,6 +15475,14 @@ typedef struct Opt_PathOptions {
     Ark_Tag tag;
     Ark_PathOptions value;
 } Opt_PathOptions;
+typedef struct Ark_PickerOptions {
+    /* kind: Interface */
+    Opt_Int32 selectedIndex;
+} Ark_PickerOptions;
+typedef struct Opt_PickerOptions {
+    Ark_Tag tag;
+    Ark_PickerOptions value;
+} Opt_PickerOptions;
 typedef struct Ark_PixelRoundPolicy {
     /* kind: Interface */
     Opt_PixelRoundCalcPolicy start;
@@ -17964,6 +18014,15 @@ typedef struct Opt_HistoricalPoint {
     Ark_Tag tag;
     Ark_HistoricalPoint value;
 } Opt_HistoricalPoint;
+typedef struct Ark_ImageAlt {
+    /* kind: Interface */
+    Opt_Union_ResourceStr_PixelMap placeholder;
+    Opt_Union_ResourceStr_PixelMap error;
+} Ark_ImageAlt;
+typedef struct Opt_ImageAlt {
+    Ark_Tag tag;
+    Ark_ImageAlt value;
+} Opt_ImageAlt;
 typedef struct Ark_ImageError {
     /* kind: Interface */
     Ark_Int32 componentWidth;
@@ -19229,6 +19288,20 @@ typedef struct Opt_Union_SheetTitleOptions_CustomBuilder {
     Ark_Tag tag;
     Ark_Union_SheetTitleOptions_CustomBuilder value;
 } Opt_Union_SheetTitleOptions_CustomBuilder;
+typedef struct Ark_Union_String_Resource_PixelMap_ImageAlt {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Resource value1;
+        Ark_image_PixelMap value2;
+        Ark_ImageAlt value3;
+    };
+} Ark_Union_String_Resource_PixelMap_ImageAlt;
+typedef struct Opt_Union_String_Resource_PixelMap_ImageAlt {
+    Ark_Tag tag;
+    Ark_Union_String_Resource_PixelMap_ImageAlt value;
+} Opt_Union_String_Resource_PixelMap_ImageAlt;
 typedef struct Ark_Union_TitleHeight_Length {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -21316,6 +21389,20 @@ typedef struct Opt_PickerDialogButtonStyle {
     Ark_Tag tag;
     Ark_PickerDialogButtonStyle value;
 } Opt_PickerDialogButtonStyle;
+typedef struct Ark_PickerIndicatorStyle {
+    /* kind: Interface */
+    Ark_PickerIndicatorType type;
+    Opt_LengthMetrics strokeWidth;
+    Opt_ResourceColor dividerColor;
+    Opt_LengthMetrics startMargin;
+    Opt_LengthMetrics endMargin;
+    Opt_ResourceColor backgroundColor;
+    Opt_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
+} Ark_PickerIndicatorStyle;
+typedef struct Opt_PickerIndicatorStyle {
+    Ark_Tag tag;
+    Ark_PickerIndicatorStyle value;
+} Opt_PickerIndicatorStyle;
 typedef struct Ark_PickerTextStyle {
     /* kind: Interface */
     Opt_ResourceColor color;
@@ -23378,7 +23465,7 @@ typedef struct GENERATED_ArkUIImageModifier {
                             const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
                             const Opt_ImageAIOptions* imageAIOptions);
     void (*setAlt)(Ark_NativePointer node,
-                   const Opt_Union_String_Resource_PixelMap* value);
+                   const Opt_Union_String_Resource_PixelMap_ImageAlt* value);
     void (*setMatchTextDirection)(Ark_NativePointer node,
                                   const Opt_Boolean* value);
     void (*setFitOriginalSize)(Ark_NativePointer node,
@@ -23431,6 +23518,10 @@ typedef struct GENERATED_ArkUIImageModifier {
                                     const Opt_image_ResolutionQuality* value);
     void (*setOrientation)(Ark_NativePointer node,
                            const Opt_ImageRotateOrientation* value);
+    void (*setSupportSvg2)(Ark_NativePointer node,
+                           const Opt_Boolean* value);
+    void (*setContentTransition)(Ark_NativePointer node,
+                                 const Opt_ContentTransitionEffect* value);
 } GENERATED_ArkUIImageModifier;
 
 typedef struct GENERATED_ArkUIImageAnimatorModifier {
@@ -23925,6 +24016,23 @@ typedef struct GENERATED_ArkUIPatternLockModifier {
     void (*setSkipUnselectedPoint)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
 } GENERATED_ArkUIPatternLockModifier;
+
+typedef struct GENERATED_ArkUIPickerModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setPickerOptions)(Ark_NativePointer node,
+                             const Opt_PickerOptions* options);
+    void (*setOnChange)(Ark_NativePointer node,
+                        const Opt_OnPickerCallback* value);
+    void (*setOnScrollStop)(Ark_NativePointer node,
+                            const Opt_OnPickerCallback* value);
+    void (*setCanLoop)(Ark_NativePointer node,
+                       const Opt_Boolean* value);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    const Opt_Boolean* value);
+    void (*setSelectionIndicator)(Ark_NativePointer node,
+                                  const Opt_PickerIndicatorStyle* value);
+} GENERATED_ArkUIPickerModifier;
 
 typedef struct GENERATED_ArkUIPluginComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -26668,6 +26776,16 @@ typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
     void (*resetContentModifierCheckBoxGroup)(Ark_NativePointer node);
 } GENERATED_ArkUIContentModifierHelperAccessor;
 
+typedef struct GENERATED_ArkUIContentTransitionEffectAccessor {
+    void (*destroyPeer)(Ark_ContentTransitionEffect peer);
+    Ark_ContentTransitionEffect (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_ContentTransitionEffect (*getIDENTITY)();
+    void (*setIDENTITY)(Ark_ContentTransitionEffect IDENTITY);
+    Ark_ContentTransitionEffect (*getOPACITY)();
+    void (*setOPACITY)(Ark_ContentTransitionEffect OPACITY);
+} GENERATED_ArkUIContentTransitionEffectAccessor;
+
 typedef struct GENERATED_ArkUIControllerHandlerAccessor {
     void (*destroyPeer)(Ark_ControllerHandler peer);
     Ark_ControllerHandler (*construct)();
@@ -28097,6 +28215,12 @@ typedef struct GENERATED_ArkUIPersistentStorageBackendAccessor {
     void (*clear)();
 } GENERATED_ArkUIPersistentStorageBackendAccessor;
 
+typedef struct GENERATED_ArkUIPickerModifierAccessor {
+    void (*destroyPeer)(Ark_PickerModifier peer);
+    Ark_PickerModifier (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+} GENERATED_ArkUIPickerModifierAccessor;
+
 typedef struct GENERATED_ArkUIPinchGestureEventAccessor {
     void (*destroyPeer)(Ark_PinchGestureEvent peer);
     Ark_PinchGestureEvent (*construct)();
@@ -29421,6 +29545,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIPasteButtonModifier* (*getPasteButtonModifier)();
     const GENERATED_ArkUIPathModifier* (*getPathModifier)();
     const GENERATED_ArkUIPatternLockModifier* (*getPatternLockModifier)();
+    const GENERATED_ArkUIPickerModifier* (*getPickerModifier)();
     const GENERATED_ArkUIPluginComponentModifier* (*getPluginComponentModifier)();
     const GENERATED_ArkUIPolygonModifier* (*getPolygonModifier)();
     const GENERATED_ArkUIPolylineModifier* (*getPolylineModifier)();
@@ -29508,6 +29633,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUICommonShapeAccessor* (*getCommonShapeAccessor)();
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
+    const GENERATED_ArkUIContentTransitionEffectAccessor* (*getContentTransitionEffectAccessor)();
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
     const GENERATED_ArkUICopyEventAccessor* (*getCopyEventAccessor)();
     const GENERATED_ArkUICustomDialogControllerAccessor* (*getCustomDialogControllerAccessor)();
@@ -29596,6 +29722,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPatternLockControllerAccessor* (*getPatternLockControllerAccessor)();
     const GENERATED_ArkUIPermissionRequestAccessor* (*getPermissionRequestAccessor)();
     const GENERATED_ArkUIPersistentStorageBackendAccessor* (*getPersistentStorageBackendAccessor)();
+    const GENERATED_ArkUIPickerModifierAccessor* (*getPickerModifierAccessor)();
     const GENERATED_ArkUIPinchGestureEventAccessor* (*getPinchGestureEventAccessor)();
     const GENERATED_ArkUIPinchRecognizerAccessor* (*getPinchRecognizerAccessor)();
     const GENERATED_ArkUIPixelMapMockAccessor* (*getPixelMapMockAccessor)();
@@ -29745,6 +29872,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_PASTE_BUTTON,
     GENERATED_ARKUI_PATH,
     GENERATED_ARKUI_PATTERN_LOCK,
+    GENERATED_ARKUI_PICKER,
     GENERATED_ARKUI_PLUGIN_COMPONENT,
     GENERATED_ARKUI_POLYGON,
     GENERATED_ARKUI_POLYLINE,
