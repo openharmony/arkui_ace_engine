@@ -8447,7 +8447,7 @@ typedef enum {
      * The event is triggered when the component is touched. \n
      * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
      * {@link ArkUI_TouchTestInfo} object. \n
-     * @since 23
+     * @since 22
      */
     NODE_ON_CHILD_TOUCH_TEST = 32,
 
@@ -9873,7 +9873,7 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
  * @param nodeEvent Indicates the pointer to an <b>ArkUI_NodeEvent</b> object.
  * @return Returns the pointer to an <b>ArkUI_TouchTestInfo</b> object.
  *         Returns <b>null</b> if the parameter passed in is invalid or is not a touch test info.
- * @since 23
+ * @since 22
  */
 ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent);
 
