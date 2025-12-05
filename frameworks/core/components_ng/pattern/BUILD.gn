@@ -796,6 +796,7 @@ build_component_ng("pattern_ng") {
   deps = [
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
+    "$ace_root/advanced_ui_component/imageGeneratorDialog/interfaces:imageGeneratorDialog",
   ]
 
   if (!build_ohos_sdk && !is_arkui_x) {

@@ -6070,11 +6070,13 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     CHECK_NULL_VOID(sheetContentNode);
-    auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
-    if (titleBuilder) {
-        titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
+    RefPtr<FrameNode> titleBuilder = nullptr;
+    if (buildtitleNodeFunc) {
+        titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
+        if (titleBuilder) {
+            titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
+        }
     }
-
     CHECK_NULL_VOID(targetNode);
     auto sheetNode = SheetView::CreateSheetPage(
         targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);

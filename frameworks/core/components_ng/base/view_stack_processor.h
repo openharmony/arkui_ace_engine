@@ -470,6 +470,16 @@ public:
         return customWindowMaskNode_;
     }
 
+    void SetImageGeneratorDialogNode(const RefPtr<UINode>& node)
+    {
+        imageGeneratorDialogNode_ = node;
+    }
+
+    const RefPtr<UINode> GetImageGeneratorDialogNode() const
+    {
+        return imageGeneratorDialogNode_;
+    }
+
     void SetCustomButtonNode(const RefPtr<UINode>& customButtonNode)
     {
         customButtonNode_ = customButtonNode;
@@ -569,6 +579,7 @@ private:
     RefPtr<UINode> customButtonNode_;
     RefPtr<UINode> customAppBarNode_;
     RefPtr<UINode> customWindowMaskNode_;
+    RefPtr<UINode> imageGeneratorDialogNode_;
 
     RefPtr<GestureProcessor> gestureStack_;
 
