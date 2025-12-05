@@ -2004,6 +2004,7 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, ParagraphSpacing);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextVerticalAlign);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDirection);
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
         if (!needLeadingMargin) {
@@ -3098,6 +3099,10 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
             if (auto textVerticalAlign = (*it)->GetTextVerticalAlign(); textVerticalAlign.has_value()) {
                 textVerticalAlignOpt = static_cast<int32_t>(textVerticalAlign.value());
             }
+            std::optional<int32_t> textDirectionOpt;
+            if (auto textDirection = (*it)->GetTextDirection(); textDirection.has_value()) {
+                textDirectionOpt = static_cast<int32_t>(textDirection.value());
+            }
             res.emplace_back(ParagraphInfo {
                 .leadingMarginPixmap = lm.pixmap,
                 .leadingMarginSize = { lm.size.Width().ToString(),
@@ -3107,6 +3112,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                 .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
                 .paragraphSpacing = spacingOpt,
                 .textVerticalAlign = textVerticalAlignOpt,
+                .textDirection = textDirectionOpt,
                 .range = { paraStart, (*it)->GetSpanItem()->position },
             });
             paraStart = (*it)->GetSpanItem()->position;
@@ -3229,6 +3235,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
     spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
     spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+    spanNode->UpdateTextDirection(style.textDirection.value_or(TextDirection::INHERIT));
     auto paragraphSpacing = spanNode->GetParagraphSpacing();
     if (style.paragraphSpacing.has_value()) {
         spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
@@ -4754,6 +4761,8 @@ void RichEditorPattern::CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem
     textStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     auto verticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     IF_TRUE(verticalAlign.has_value(), textStyle.textVerticalAlign = static_cast<int32_t>(verticalAlign.value()));
+    auto textDirection = spanItem->textLineStyle->GetTextDirection();
+    IF_TRUE(textDirection.has_value(), textStyle.textDirection = static_cast<int32_t>(textDirection.value()));
 }
 
 ImageStyleResult RichEditorPattern::GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem)
@@ -5137,6 +5146,7 @@ struct UpdateParagraphStyle RichEditorPattern::GetParagraphStyle(const RefPtr<Sp
     paraStyle.lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy();
     paraStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     paraStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
+    paraStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
     return paraStyle;
 }
 
@@ -11571,6 +11581,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.lineBreakStrategy = (*it)->textLineStyle->GetLineBreakStrategy();
             paraStyle.paragraphSpacing = (*it)->textLineStyle->GetParagraphSpacing();
             paraStyle.textVerticalAlign = (*it)->textLineStyle->GetTextVerticalAlign();
+            paraStyle.textDirection = (*it)->textLineStyle->GetTextDirection();
             spanParaStyle = paraStyle;
         }
     } else if (spanNode && spanNode->GetSpanItem()) {
@@ -11583,6 +11594,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
             paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
             paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
+            paraStyle.textDirection = spanNode->GetTextDirection();
             spanParaStyle = paraStyle;
         }
     }
@@ -11806,6 +11818,8 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
         Dimension(paraStyle->paragraphSpacing.value().ConvertToFp(), DimensionUnit::FP));
     IF_TRUE(paraStyle->textVerticalAlign.has_value(), textStyleResult.textVerticalAlign =
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
+    IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =
+        static_cast<int32_t>(paraStyle->textDirection.value()));
     retInfo.SetTextStyle(textStyleResult);
 }
 

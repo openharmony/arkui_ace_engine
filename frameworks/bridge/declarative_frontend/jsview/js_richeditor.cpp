@@ -60,6 +60,7 @@ namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+constexpr int32_t INHERIT_INDEX = 2;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 static std::atomic<int32_t> spanStringControllerStoreIndex_;
 
@@ -292,6 +293,9 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
         paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
             textStyleResult.textVerticalAlign.value());
     }
+    if (textStyleResult.textDirection.has_value()) {
+        paragraphStyleObj->SetProperty<int32_t>("textDirection", textStyleResult.textDirection.value());
+    }
     return paragraphStyleObj;
 }
 
@@ -381,6 +385,9 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     }
     if (info.textVerticalAlign.has_value()) {
         obj->SetProperty<int32_t>("textVerticalAlign", info.textVerticalAlign.value());
+    }
+    if (info.textDirection.has_value()) {
+        obj->SetProperty<int32_t>("textDirection", info.textDirection.value());
     }
     return obj;
 }
@@ -2451,7 +2458,7 @@ void JSRichEditorBaseController::ParseTextAlignParagraphStyle(const JSRef<JSObje
     auto textAlignObj = styleObject->GetProperty("textAlign");
     if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
         auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
-        if (align < TextAlign::START || align > TextAlign::JUSTIFY) {
+        if (align < TextAlign::START || align > TextAlign::RIGHT) {
             align = TextAlign::START;
         }
         style.textAlign = align;
@@ -2484,6 +2491,23 @@ void JSRichEditorBaseController::ParseTextVerticalAlign(const JSRef<JSObject>& s
     style.textVerticalAlign = textVerticalAlign;
 }
 
+void JSRichEditorBaseController::ParseTextDirection(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto textDirectionObj = styleObject->GetProperty("textDirection");
+    if (textDirectionObj->IsNull() || !textDirectionObj->IsNumber()) {
+        return;
+    }
+
+    int32_t index = textDirectionObj->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        style.textDirection = TEXT_DIRECTIONS[INHERIT_INDEX];
+        return;
+    }
+    style.textDirection = TEXT_DIRECTIONS[index];
+}
+
 bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2497,6 +2521,7 @@ bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styl
     }
     ParseParagraphSpacing(styleObject, style);
     ParseTextVerticalAlign(styleObject, style);
+    ParseTextDirection(styleObject, style);
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]
