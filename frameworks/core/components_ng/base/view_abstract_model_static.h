@@ -291,6 +291,7 @@ public:
     static void SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, std::string localizedAlignment);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
