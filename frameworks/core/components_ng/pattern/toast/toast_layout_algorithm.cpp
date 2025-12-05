@@ -154,21 +154,11 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
     auto keyboardOffset = deviceHeight - keyboardInset;
     if (toastPattern->IsAlignedWithHostWindow() && GreatNotEqual(keyboardInset, 0)) {
         deviceHeight = toastPattern->GetUiExtensionHostWindowRect().Height();
-
-        auto currentId = Container::CurrentId();
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, layoutConstraint);
-        if (container->IsSubContainer()) {
-            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-            CHECK_NULL_RETURN(parentContainer, layoutConstraint);
-            CHECK_NULL_RETURN(parentContainer->IsUIExtensionWindow(), layoutConstraint);
-            auto toastSubwindow = SubwindowManager::GetInstance()->GetToastSubwindow(parentContainer);
-            if (toastSubwindow) {
-                auto parentWindowRect = toastSubwindow->GetParentWindowRect();
-                keyboardOffset = deviceHeight - keyboardInset - toastPattern->GetUiExtensionHostWindowRect().Bottom() +
-                                 parentWindowRect.Bottom();
-            }
+        auto toastSubwindow = SubwindowManager::GetInstance()->GetSubwindowById(frameNode->GetInstanceId());
+        if (toastSubwindow) {
+            auto parentWindowRect = toastSubwindow->GetParentWindowRect();
+            keyboardOffset = deviceHeight - keyboardInset - toastPattern->GetUiExtensionHostWindowRect().Bottom() +
+                             parentWindowRect.Bottom();
         }
     }
     if (GreatNotEqual(keyboardInset, 0) && (toastPattern->IsDefaultToast() || toastPattern->IsTopMostToast())) {
