@@ -21,7 +21,6 @@
 #include "form_mgr_errors.h"
 #include "ets_error_utils.h"
 
-
 namespace {
     const char ANI_FORMMENU_NS[] = "arkui.FormMenu.formMenuItem";
     constexpr const char* ASYNC_CALLBACK_WRAPPER_CLASS_NAME = "arkui.FormMenu.AsyncCallbackWrapper";
@@ -32,13 +31,21 @@ std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
-
+    if (strSize <= 0) {
+        LOGE("ani string is empty");
+        return "";
+    }
     std::vector<char> buffer(strSize + 1); // +1 for null terminator
     char* utf8Buffer = buffer.data();
-
     ani_size bytes_written = 0;
-    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytes_written);
-
+    ani_status status = env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytes_written);
+    if (status != ANI_OK) {
+        LOGE("String_GetUTF8 failed, status: %{public}d", status);
+        return "";
+    }
+    if (bytes_written > strSize) {
+        bytes_written = strSize;
+    }
     utf8Buffer[bytes_written] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
@@ -183,7 +190,6 @@ void InvokeAsyncWithBusinessError(ani_env *env, ani_object obj, int32_t internal
 static void requestPublishFormWithSnapshot([[maybe_unused]] ani_env* env, ani_object wantObj,
     ani_string formBindingDataStr, ani_object callback)
 {
-    LOGI(" call.");
     int64_t formId = 0;
     std::string errMsg;
     OHOS::AAFwk::Want want;

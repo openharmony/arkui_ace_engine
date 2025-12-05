@@ -28,7 +28,7 @@ import Want from '@ohos.app.ability.Want';
 
 const tag = 'AddFormMenuItem::ets::';
 
-function querySnapshot (want: Want, componentId: string): boolean {
+async function querySnapshot (want: Want, componentId: string): Promise<void> {
     let uiContext = UIContext.getFocusedUIContext();
     let compInfo = uiContext?.getComponentUtils().getRectangleById(componentId);
     let imagePackageApi: image.ImagePacker = image.createImagePacker();
@@ -39,8 +39,8 @@ function querySnapshot (want: Want, componentId: string): boolean {
         let screenY = compInfo?.screenOffset.y.toFixed(2);
         !want.parameters && (want.parameters = {});
         let wantParam = want.parameters;
-        if (wantParam != undefined && width != undefined && height != undefined &&
-            screenX != undefined && screenY != undefined) {
+        if (wantParam != undefined && width != undefined && height != undefined
+            && screenX != undefined && screenY != undefined) {
             wantParam['ohos.extra.param.key.add_form_to_host_width'] = width;
             wantParam['ohos.extra.param.key.add_form_to_host_height'] = height;
             wantParam['ohos.extra.param.key.add_form_to_host_screenx'] = screenX;
@@ -61,11 +61,10 @@ function querySnapshot (want: Want, componentId: string): boolean {
             }
         }
     } catch (err) {
-        hilog.error(0x0000, tag, 'get pixelmap string error:' + err);
+        hilog.error(0x0000, tag, 'get pixelmap string error:' + JSON.stringify(err));
     } finally {
         imagePackageApi?.release();
     }
-    return true;
 }
 
 export interface FormMenuItemStyle {
@@ -85,16 +84,16 @@ export function AddFormMenuItem(want: Want, componentId: string, options?: AddFo
         menuItemOptions = {startIcon: $r('sys.media.ohos_ic_public_add'), content: $r('sys.string.ohos_add_form_to_desktop')}
     }
     MenuItem(menuItemOptions)
-    .onClick((e: ClickEvent) => {
-        querySnapshot(want, componentId);
-        let formBindingData = options?.formBindingData;
-        let dataStr: string = formBindingData ? JSON.stringify(formBindingData.data) : '';
-        let callback = options?.callback;
-        let call = callback ? new AsyncCallbackWrapper<string>(callback) : undefined;
-        taskpool.execute((): void => {
-            formMenuItem.requestPublishFormWithSnapshot(want, dataStr, call);
-        });
-    })  
+        .onClick((e: ClickEvent) => {
+            await querySnapshot(want, componentId);
+            let formBindingData = options?.formBindingData;
+            let dataStr: string = formBindingData ? JSON.stringify(formBindingData.data) : "";
+            let callback = options?.callback;
+            let call = callback ? new AsyncCallbackWrapper<string>(callback) : undefined;
+            taskpool.execute((): void => {
+                formMenuItem.requestPublishFormWithSnapshot(want, dataStr, call);
+            });
+        })  
 }
  
 
