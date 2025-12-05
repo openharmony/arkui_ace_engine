@@ -1085,8 +1085,8 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
     dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
-        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value());
-        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin);
+        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value(), Converter::FC);
+        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin, Converter::FC);
     }
     dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
