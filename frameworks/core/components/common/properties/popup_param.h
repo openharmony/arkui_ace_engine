@@ -471,6 +471,16 @@ public:
     {
         return shadow_;
     }
+    
+    void SetIsShadowStyle(bool isShadowStyle)
+    {
+        isShadowStyle_ = isShadowStyle;
+    }
+
+    bool IsShadowStyle()
+    {
+        return isShadowStyle_;
+    }
 
     void SetErrorArrowWidth(bool setErrorArrowWidth)
     {
@@ -812,6 +822,7 @@ private:
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
     bool isWithTheme_ = false;
+    bool isShadowStyle_ = false;
     TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;
