@@ -997,6 +997,26 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest139, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeRenderNodeTest140
+ * @tc.desc: Test SetContentModifierOnDraw function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest140, TestSize.Level1)
+{
+    auto contentModifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(contentModifier, nullptr);
+
+    static bool drawCallbackCalled = false;
+    auto drawCallback = [](ArkUI_DrawContext* context, void* userData) {
+        drawCallbackCalled = true;
+    };
+
+    int userData = 123;
+    auto result = OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(nullptr, &userData, drawCallback);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
  * @tc.name: NativeRenderNodeTest201
  * @tc.desc: Test renderNode function.
  * @tc.type: FUNC

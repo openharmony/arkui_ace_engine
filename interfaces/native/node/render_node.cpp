@@ -604,6 +604,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, Ark
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderWidth(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderWidth)->leftWidth)), reinterpret_cast<float*>(&((*borderWidth)->topWidth)),
         reinterpret_cast<float*>(&((*borderWidth)->rightWidth)),
@@ -628,6 +629,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderColor(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->topColor)),
@@ -643,6 +645,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderRadius(node->renderNodeHandle,
         borderRadius->topLeftRadius, borderRadius->topRightRadius,
         borderRadius->bottomLeftRadius, borderRadius->bottomRightRadius);
@@ -655,6 +658,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderRadius(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderRadius)->topLeftRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->topRightRadius)),
@@ -1146,7 +1150,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(ArkUI_RenderContentModifierHandle modifier, void* userData,
     void (*callback)(ArkUI_DrawContext* context, void* userData))
 {
-    CHECK_NULL_RETURN(modifier, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN(modifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setModifierOnDraw(

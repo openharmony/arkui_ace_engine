@@ -627,7 +627,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 
     DecomposedTransform transform;
     if (!TransformUtil::DecomposeTransform(transform, matrix4)) {
-        return ERROR_CODE_PARAM_INVALID;
+        return ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
 
     Rosen::Vector4f perspectiveValue { transform.perspective[0], transform.perspective[1],
