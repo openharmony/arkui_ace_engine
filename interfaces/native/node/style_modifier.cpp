@@ -17383,6 +17383,20 @@ int32_t SetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node, const ArkUI_
     return ERROR_CODE_NO_ERROR;
 }
 
+void ResetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
+        node->uiNodeHandle, false);
+}
+
+const ArkUI_AttributeItem* GetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getSupportLazyLoadingEmptyBranch(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 int32_t SetGridItemOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
@@ -19499,7 +19513,7 @@ void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
         ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad,
         ResetGridAlignItems, ResetGridLayoutOptions, ResetGridColumnTemplateItemFillPolicy, ResetGridEditMode,
-        ResetGridSupportAnimation, ResetGridMultiSelectable };
+        ResetGridSupportAnimation, ResetGridMultiSelectable, ResetGridSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19534,7 +19548,7 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
         GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad, GetGridAlignItems,
         GetGridLayoutOptions, GetGridColumnTemplateItemFillPolicy, GetGridEditMode, GetGridSupportAnimation,
-        GetGridMultiSelectable };
+        GetGridMultiSelectable, GetGridSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
