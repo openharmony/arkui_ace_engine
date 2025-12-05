@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
+#include "interfaces/inner_api/ui_session/param_config.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -50,6 +51,13 @@ enum class MoveStep {
     NEXT = 0,
     PREV,
     NONE
+};
+
+enum class SwiperCommand {
+    INVALID = 0,
+    FORWARD,
+    BACKWARD,
+    INDEX
 };
 
 using SwiperHoverFlag = uint32_t;
@@ -123,6 +131,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
+    static SwiperCommand ParseCommand(const std::string& command);
+    static int32_t ParseIndexFromCommand(const std::string& command);
+    void ReportComponentChangeEvent(bool result, SwiperCommand type);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     virtual std::string GetArcDotIndicatorStyle() const { return ""; }
     // ArcSwiper will implement this interface in order to set transitionAnimation disable
@@ -534,6 +546,9 @@ public:
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json,
+        ParamConfig config = ParamConfig()) override;
+    const char* GetScrollAbility();
     void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
     void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
     void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);

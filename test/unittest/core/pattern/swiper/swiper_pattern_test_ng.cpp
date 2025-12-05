@@ -2402,4 +2402,156 @@ HWTEST_F(SwiperPatternTestNg, HandleTargetIndex002, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
 }
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    CreateSwiper();
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), false);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Test OnInjection function.
+     * @tc.expected: Set the command json and check the results.
+     */
+    std::vector<std::string> jsonInvalid = {
+        "",                                                            // Empty input
+        R"({})",                                                       // Empty JSON
+        R"({"c":1})",                                                  // Missing cmd
+        R"({"cmd":1})",                                                // Wrong cmd type
+        R"({"cmd":"c"})",                                              // Invalid cmd value
+        R"({"cmd":"change","p":1})",                                   // Missing params
+        R"({"cmd":"change","params":1})",                              // Wrong params type
+        R"({"cmd":"change","params":{"t":1}})",                        // Missing type
+        R"({"cmd":"change","params":{"type":1}})",                     // Wrong type type
+        R"({"cmd":"change","params":{"type":"i"}})",                   // Invalid type value
+        R"({"cmd":"change","params":{"type":"index"}})",               // Missing index
+        R"({"cmd":"change","params":{"type":"index","i":1}})",         // Missing index field
+        R"({"cmd":"change","params":{"type":"index","index":1}})",     // Wrong index type
+        R"({"cmd":"change","params":{"type":"index","index":"1.5"}})", // Invalid index format
+        R"({"cmd":"change","params":{"type":"index","index":"5"}})",   // Index out of range
+        R"({"cmd":"change","params":{"type":"index","index":"-1"}})",  // Negative index
+    };
+    for (const auto& json : jsonInvalid) {
+        int32_t result = pattern_->OnInjectionEvent(json);
+        EXPECT_EQ(result, RET_FAILED);
+    }
+
+    std::string jsonCommand = R"({"cmd":"change","params":{"type":"backward"}})";
+    int32_t result = pattern_->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = R"({"cmd":"change","params":{"type":"forward"}})";
+    result = pattern_->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    jsonCommand = R"({"cmd":"change","params":{"type":"forward"}})";
+    result = pattern_->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = R"({"cmd":"change","params":{"type":"backward"}})";
+    result = pattern_->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    jsonCommand = R"({"cmd":"change","params":{"type":"index","index":"1"}})";
+    result = pattern_->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_FALSE(pattern_->fastCurrentIndex_.has_value());
+}
+
+/**
+ * @tc.name: GetScrollAbility001
+ * @tc.desc: test GetScrollAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, GetScrollAbility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     * @tc.expected: Create Swiper successfully and it is unable to scroll.
+     */
+    CreateSwiper();
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), true);
+    CreateSwiperItems(1);
+    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+
+    /**
+     * @tc.steps: step2. Add Swiper items and turn next.
+     * @tc.expected: Swiper can scroll bidirectionally.
+     */
+    CreateSwiperItems(3);
+    CreateSwiperDone();
+    pattern_->ChangeIndex(1, false);
+    EXPECT_EQ(pattern_->GetScrollAbility(), "bidirectional");
+
+    /**
+     * @tc.steps: step3. Disable Swiper.
+     * @tc.expected: Swiper is unable to scroll.
+     */
+    layoutProperty_->UpdateDisableSwipe(true);
+    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+}
+
+/**
+ * @tc.name: GetScrollAbility002
+ * @tc.desc: test GetScrollAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, GetScrollAbility002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node and set displayCount equal to totalCount.
+     * @tc.expected: Swiper is unable to scroll.
+     */
+    CreateSwiper();
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), true);
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    CreateSwiperItems(3);
+    CreateSwiperDone();
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
+    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+}
+
+/**
+ * @tc.name: DumpSimplifyInfoOnlyForParamConfig001
+ * @tc.desc: test DumpSimplifyInfoOnlyForParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, DumpSimplifyInfoOnlyForParamConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init auto-linear Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    pattern_->contentMainSize_ = 50.0;
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    model.SetLoop(AceType::RawPtr(frameNode_), false);
+    CreateItemWithSize(20.f, SWIPER_HEIGHT);
+    CreateItemWithSize(30.f, SWIPER_HEIGHT);
+    CreateItemWithSize(40.f, SWIPER_HEIGHT);
+    CreateItemWithSize(50.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Check scrollable.
+     * @tc.expected: Swiper is only forward or only backward.
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    pattern_->DumpSimplifyInfoOnlyForParamConfig(json, { true, true, true });
+    EXPECT_EQ(json->GetString("scrollAbility"), "forward");
+    EXPECT_EQ(json->GetString("scrollAxis"), "horizontal");
+    EXPECT_EQ(json->GetBool("isLoop"), false);
+    auto jsonCommand = R"({"cmd":"change","params":{"type":"forward"}})";
+    EXPECT_EQ(pattern_->OnInjectionEvent(jsonCommand), RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG
