@@ -155,8 +155,8 @@ public:
     static ArkUINativeModuleValue IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTsCard start
-    static ArkUINativeModuleValue CreateTypedFrameNodeLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue CreateTypedFrameNodeFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTsCard end
 };
 

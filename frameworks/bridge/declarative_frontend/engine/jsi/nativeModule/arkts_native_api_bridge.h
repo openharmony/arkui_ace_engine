@@ -124,12 +124,23 @@ private:
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    // ArkTSCard start
-    static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterGlobalMethods(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNativeUtils(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterColumnAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterStackAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCheckboxGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSymbolGlyphAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    // ArkTSCard start
+    static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard end
 };
 } // namespace OHOS::Ace::NG
