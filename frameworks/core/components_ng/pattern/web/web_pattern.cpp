@@ -5086,7 +5086,9 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
     }
-    HideMagnifier();
+    if (info.GetChangedTouches().front().GetFingerId() == showMagnifierFingerId_) {
+        HideMagnifier();
+    }
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
