@@ -1005,7 +1005,7 @@ void ImagePattern::LoadImageDataIfNeed()
         auto altErrorImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
         LoadAltErrorImage(altErrorImageSourceInfo);
     }
-    if (loadingCtx_->NeedAlt()) {
+    if (loadingCtx_ && loadingCtx_->NeedAlt()) {
         if (imageLayoutProperty->GetAltPlaceholder()) {
             auto altImageSourceInfo = imageLayoutProperty->GetAltPlaceholder().value_or(ImageSourceInfo(""));
             isLoadAlt_ = false;
