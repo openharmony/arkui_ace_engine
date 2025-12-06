@@ -81,6 +81,9 @@ import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#
 import { ListHandWritten } from "./ListHandWritten"
 import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
+import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
+import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
+import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
 
 export function hookId(component: object, value?: string) {}
 
@@ -736,4 +739,14 @@ export function hookJavaScriptProxy(
 export function hookVideoOnError(
   component: ArkVideoComponent | ArkVideoPeer, value: VoidCallback | ErrorCallback | undefined): void {
     VideoOpsHandWritten.hookSetVideoOnErrorImpl(component, value);
+}
+
+export function hookSaveButtonOnClick(
+  receiver: ArkSaveButtonComponent | ArkSaveButtonPeer, value: SaveButtonCallback | undefined): void {
+    SaveButtonOpsHandWritten.hookSaveButtonOnClickImpl(receiver, value);
+}
+
+export function hookPasteButtonOnClick(
+  receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
+    PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
 }

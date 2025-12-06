@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier, extractors, hookSaveButtonOnClick } from '#handwritten'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSaveButtonPeer, SaveButtonCallback, SaveButtonOnClickResult, SaveButtonAttribute } from "./component/saveButton"
@@ -60,7 +60,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             switch (this._onClick_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClickAttribute((this._onClick_0_0value as SaveButtonCallback | undefined));
+                    hookSaveButtonOnClick(peer, (this._onClick_0_0value as SaveButtonCallback | undefined));
                     this._onClick_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -70,7 +70,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
                 }
                 default: {
                     this._onClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClickAttribute((undefined as SaveButtonCallback | undefined));
+                    hookSaveButtonOnClick(peer, (undefined as SaveButtonCallback | undefined));
                 }
             }
         }

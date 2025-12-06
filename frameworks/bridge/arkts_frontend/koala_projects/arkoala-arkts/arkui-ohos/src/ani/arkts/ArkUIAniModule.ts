@@ -45,6 +45,7 @@ import { DrawModifier } from "#handwritten"
 import { JavaScriptProxy } from '#generated';
 import { ErrorCallback } from '@ohos.base';
 import { int32 } from '@koalaui/compat';
+import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 
 export class ArkUIAniModule {
     static {
@@ -413,4 +414,8 @@ export class ArkUIAniModule {
     native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
 
     native static _ApplyThemeScopeId(self: KPointer, themeScopeId: KInt): void
+
+    // for SecurityComponent
+    native static _SaveButton_SetOnClickCallback(ptr: KPointer, value: SaveButtonCallback | undefined): void
+    native static _PasteButton_SetOnClickCallback(ptr: KPointer, value: PasteButtonCallback | undefined): void
 }

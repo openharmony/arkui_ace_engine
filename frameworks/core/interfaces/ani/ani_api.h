@@ -725,6 +725,14 @@ struct ArkUIAniTraceModifier {
     void (*asyncTraceEnd)(const std::string& traceName, int taskId);
 };
 
+struct ArkUIAniSaveButtonModifier {
+    void (*setSaveButtonOnClickCallback)(ani_env* env, ArkUINodeHandle node, void* callback);
+};
+
+struct ArkUIAniPasteButtonModifier {
+    void (*setPasteButtonOnClickCallback)(ani_env* env, ArkUINodeHandle node, void* callback);
+};
+
 struct ArkUIAniUINodeOnUpdateDoneAniModifier {
     void (*onUpdateDone)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
     void (*setUINodeIsStatic)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
@@ -798,6 +806,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniXBarModifier* (*getXBarAniModifier)();
     const ArkUIAniCommonNodeAniModifier* (*getCommonNodeAniModifier)();
     const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
+    const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
+    const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

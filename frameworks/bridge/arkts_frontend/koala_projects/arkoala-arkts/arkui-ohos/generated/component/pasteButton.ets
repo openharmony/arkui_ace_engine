@@ -24,7 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { extractors, hookPasteButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, hookPasteButtonAttributeModifier, AttributeModifier, AttributeUpdater, hookPasteButtonOnClick } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -130,8 +130,7 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
     }
     public onClick(value: PasteButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
-            const value_casted = value as (PasteButtonCallback | undefined)
-            this.getPeer()?.setOnClickAttribute(value_casted)
+            hookPasteButtonOnClick(this, value)
             return this
         }
         return this
