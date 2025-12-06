@@ -83,7 +83,7 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     uiContent_->SetFormViewScale(uiWidth, uiHeight, formViewScale_);
 }
 
-void FormRenderer::SetUICotentProperty(const OHOS::AAFwk::Want &want)
+void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
 {
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));

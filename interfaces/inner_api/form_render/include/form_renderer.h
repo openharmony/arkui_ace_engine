@@ -78,7 +78,7 @@ private:
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RemoveFormDeathRecipient();
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
-    void SetUICotentProperty(const OHOS::AAFwk::Want &want);
+    void SetUIContentProperty(const OHOS::AAFwk::Want &want);
 
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
