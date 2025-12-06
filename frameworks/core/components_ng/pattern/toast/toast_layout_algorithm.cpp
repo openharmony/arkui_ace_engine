@@ -140,6 +140,13 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
     CHECK_NULL_RETURN(frameNode, layoutConstraint);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();
     CHECK_NULL_RETURN(toastPattern, layoutConstraint);
+    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(text, layoutConstraint);
+    text->Measure(layoutConstraint);
+    auto textGeometryNode = text->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeometryNode, layoutConstraint);
+    auto originTextHeight = textGeometryNode->GetMarginFrameSize().Height();
+    toastPattern->SetOriginalTextHeight(originTextHeight);
     auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, layoutConstraint);
     auto context = toastPattern->GetToastContext();

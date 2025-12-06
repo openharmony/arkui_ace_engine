@@ -235,39 +235,15 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto context = GetToastContext();
-    CHECK_NULL_RETURN(context, Dimension(0.0));
+    CHECK_NULL_RETURN(layoutWrapper, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
-    auto rootHeight = wrapperRect_.Height();
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
-    Dimension offsetY;
-    // Get toastBottom and update defaultBottom_
-    auto toastBottom = GetBottomValue(layoutWrapper);
-    if (!toastProp->HasToastAlignment()) {
-        if (context->GetMinPlatformVersion() > API_VERSION_9) {
-            offsetY = Dimension(rootHeight - toastBottom - textHeight);
-        } else {
-            offsetY = Dimension(rootHeight - toastBottom);
-        }
-    } else {
-        Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
-        if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
-            alignment == Alignment::TOP_RIGHT) {
-            offsetY = Dimension(0.0f);
-        } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
-                   alignment == Alignment::CENTER_RIGHT) {
-            offsetY = Dimension((rootHeight - textHeight) / 2.0f);
-        } else {
-            offsetY = Dimension(rootHeight - textHeight);
-        }
-    }
-    // add toast wrapper rect's offsetY.
-    offsetY += Dimension(wrapperRect_.Top());
+    Dimension offsetY = InitOffsetY(layoutWrapper, textHeight);
     bool needResizeBottom = false;
-    AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
+    AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom, layoutWrapper);
     needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
     if (needResizeBottom && !GreatNotEqual(offsetY.ConvertToPx(), limitPos_.ConvertToPx())) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
@@ -275,8 +251,8 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
-void ToastPattern::AdjustOffsetForKeyboard(
-    Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom)
+void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight,
+    bool& needResizeBottom, const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -310,7 +286,7 @@ void ToastPattern::AdjustOffsetForKeyboard(
         }
     }
     if ((IsDefaultToast() || IsTopMostToast()) && GreatNotEqual(keyboardInset, 0) &&
-        (offsetY.Value() + textHeight > keyboardOffset)) {
+        (InitOffsetY(layoutWrapper, originalTextHeight_).ConvertToPx() + originalTextHeight_ > keyboardOffset)) {
         needResizeBottom = true;
         offsetY = Dimension(keyboardOffset - toastBottom - textHeight);
     }
@@ -318,6 +294,40 @@ void ToastPattern::AdjustOffsetForKeyboard(
         "toast device height: %{public}.2f, keyboardOffset: %{public}d, "
         "textHeight: %{public}.2f, offsetY: %{public}.2f",
         deviceHeight, (uint32_t)keyboardOffset, textHeight, offsetY.Value());
+}
+
+Dimension ToastPattern::InitOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper, double textHeight)
+{
+    CHECK_NULL_RETURN(layoutWrapper, Dimension(0.0));
+    auto context = GetToastContext();
+    CHECK_NULL_RETURN(context, Dimension(0.0));
+    auto rootHeight = wrapperRect_.Height();
+    auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(toastProp, Dimension(0.0));
+    Dimension offsetY;
+    // Get toastBottom and update defaultBottom_
+    auto toastBottom = GetBottomValue(layoutWrapper);
+    if (!toastProp->HasToastAlignment()) {
+        if (context->GetMinPlatformVersion() > API_VERSION_9) {
+            offsetY = Dimension(rootHeight - toastBottom - textHeight);
+        } else {
+            offsetY = Dimension(rootHeight - toastBottom);
+        }
+    } else {
+        Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+        if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
+            alignment == Alignment::TOP_RIGHT) {
+            offsetY = Dimension(0.0f);
+        } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
+                   alignment == Alignment::CENTER_RIGHT) {
+            offsetY = Dimension((rootHeight - textHeight) / 2.0f);
+        } else {
+            offsetY = Dimension(rootHeight - textHeight);
+        }
+    }
+    // add toast wrapper rect's offsetY.
+    offsetY += Dimension(wrapperRect_.Top());
+    return offsetY;
 }
 
 double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
