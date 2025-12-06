@@ -74,7 +74,6 @@ public:
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
     void ExecuteAboutToReuse(void* params);
-    bool ExecuteTriggerLifecycle(int32_t eventId);
     void ExecuteSetActive(bool active, bool isReuse = false);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
@@ -125,7 +124,6 @@ private:
     JSWeak<JSFunc> jsHasNodeUpdateFunc_;
     JSWeak<JSFunc> jsTransitionFunc_;
     JSWeak<JSVal> jsRenderResult_;
-    JSWeak<JSFunc> jsTriggerLifecycleFunc_;
 
     JSWeak<JSFunc> jsOnHideFunc_;
     JSWeak<JSFunc> jsOnShowFunc_;
