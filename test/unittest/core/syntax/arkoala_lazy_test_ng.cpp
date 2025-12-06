@@ -451,6 +451,22 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
 }
 
 /**
+ * @tc.name: ArkoalaLazyNodeTest018
+ * @tc.desc: Test ArkoalaLazyNode ForEachL1NodeWithOnMove.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest018)
+{
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, TOTAL_COUNT);
+    std::list<RefPtr<UINode>> ret;
+    repeatNode->ForEachL1NodeWithOnMove([&ret, this](const RefPtr<UINode>& node) {
+        ret.push_back(node);
+    });
+    EXPECT_EQ(ret.size(), TOTAL_COUNT);
+}
+
+/**
  * @tc.name: ConvertFromToIndex001
  * @tc.desc: Test ArkoalaLazyNode ConvertFromToIndex and ConvertFromToIndexRevert.
  * @tc.type: FUNC
