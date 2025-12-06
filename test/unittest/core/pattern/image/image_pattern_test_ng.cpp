@@ -2922,4 +2922,28 @@ HWTEST_F(ImagePatternTestNg, TestImagePatternLoadImageTest001, TestSize.Level0)
     EXPECT_FALSE(imagePattern->isOrientationChange_);
     EXPECT_FALSE(imagePattern->renderedImageInfo_.renderSuccess);
 }
+
+/**
+ * @tc.name: ImagePatternLoadImageDataIfNeed001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    imagePattern->LoadImageDataIfNeed();
+}
 } // namespace OHOS::Ace::NG
