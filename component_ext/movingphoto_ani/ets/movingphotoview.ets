@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-import photoAccessHelper from "@ohos.file.photoAccessHelper";
-import { NodeAttach } from "@koalaui/runtime/memo/node";
-import { remember } from "@koalaui/runtime/memo/remember";
-import { Finalizable } from "@koalaui/interop/Finalizable";
-import { int32 } from "@koalaui/common";
-import { ImageAIOptions } from "arkui.component.imageCommon";
-import { ArkCommonMethodPeer, ArkCommonMethodComponent } from "arkui/component/common";
-import { CommonMethod } from "arkui.component.common";
-import { ImageFit } from "arkui.component.enums";
-import { ComponentBase } from "arkui/ComponentBase";
-import { PeerNode } from "arkui/PeerNode";
-import { memo } from "@koalaui/runtime/annotations";
+import photoAccessHelper from '@ohos.file.photoAccessHelper';
+import { NodeAttach } from '@koalaui/runtime/memo/node';
+import { remember } from '@koalaui/runtime/memo/remember';
+import { Finalizable } from '@koalaui/interop/Finalizable';
+import { int32 } from '@koalaui/common';
+import { ImageAIOptions } from 'arkui.component.imageCommon';
+import { ArkCommonMethodPeer, ArkCommonMethodComponent } from 'arkui/component/common';
+import { CommonMethod } from 'arkui.component.common';
+import { ImageFit } from 'arkui.component.enums';
+import { ComponentBase } from 'arkui/ComponentBase';
+import { PeerNode } from 'arkui/PeerNode';
+import { memo } from '@koalaui/runtime/annotations';
 
 type KPointer = long;
 
@@ -177,7 +177,8 @@ export class ArkMovingPhotoViewComponent extends ArkCommonMethodComponent implem
     }
 
     public objectFit(value: ImageFit): this {
-        MovingPhotoNative.objectFit(this.getPeer().peer.ptr, value);
+        let result: int = value;
+        MovingPhotoNative.objectFit(this.getPeer().peer.ptr, result);
         return this;
     }
 
@@ -263,7 +264,7 @@ export class MovingPhotoNative {
     native static createMovingPhoto(peerId: int32, flags: int32): KPointer;
     native static setMovingPhotoViewOptions(node: KPointer, value: MovingPhotoViewOptions | undefined): void;
     native static muted(node: KPointer, value: boolean | undefined): void;
-    native static objectFit(node: KPointer, value: ImageFit): void;
+    native static objectFit(node: KPointer, value: int | undefined): void;
     native static autoPlayPeriod(node: KPointer, startTime: double, endTime: double): void;
     native static autoPlay(node: KPointer, value: boolean | undefined): void;
     native static repeatPlay(node: KPointer, value: boolean | undefined): void;
