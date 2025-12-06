@@ -111,7 +111,7 @@ void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
 
 void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want &want, const OHOS::AppExecFwk::FormJsInfo &formJsInfo)
 {
-    SetUICotentProperty(want);
+    SetUIContentProperty(want);
     uiContent_->RunFormPage();
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
