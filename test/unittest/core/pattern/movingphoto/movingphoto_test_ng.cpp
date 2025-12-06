@@ -1324,4 +1324,62 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
     int32_t childCount = frameNode->GetTotalChildCount();
     EXPECT_EQ(childCount, 1);
 }
+
+/**
+ * @tc.name: MovingPhotoPatternTest029
+ * @tc.desc: Test setMovingController
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create controller
+     */
+    MovingPhotoModelNG movingphoto;
+    auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
+    movingphoto.Create(movingPhotoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    ASSERT_NE(movingPhotoPattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step2. set movingController
+     * @tc.expected: step2. get controller is equeals to experted
+     */
+    movingPhotoPattern->SetMovingPhotoController(movingPhotoController);
+    EXPECT_EQ(movingPhotoPattern->GetMovingPhotoController(), movingPhotoController);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest030
+ * @tc.desc: Test setMovingController Ani
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create controller
+     */
+    MovingPhotoModelNG movingphoto;
+    auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
+    movingphoto.Create(movingPhotoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    ASSERT_NE(movingPhotoPattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step2. set movingController
+     * @tc.expected: step2. get controller is equeals to experted
+     */
+    movingPhotoPattern->SetMovingPhotoController(movingPhotoController);
+    EXPECT_EQ(movingPhotoPattern->GetMovingPhotoController(), movingPhotoController);
+}
 } //namespace OHOS::Ace::NG

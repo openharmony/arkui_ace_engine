@@ -18,5 +18,6 @@ group("component_ext") {
     "arc_scroll_bar:arcscrollbar",
     "arc_swiper:arcswiper",
     "movingphoto:movingphotoview",
+    "movingphotO_ani:movingphotoview_ani",
   ]
 }
