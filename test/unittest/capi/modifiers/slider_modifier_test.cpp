@@ -773,7 +773,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockColorTestBlockColorValidValues, Te
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
@@ -867,7 +867,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues,
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
@@ -1021,7 +1021,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValu
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
@@ -1408,7 +1408,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockBorderColorTestBlockBorderColorVal
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
@@ -1573,7 +1573,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setStepColorTestStepColorValidValues, Test
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value),

@@ -141,8 +141,8 @@ const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
 typedef std::tuple<Opt_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_BLACK = {
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK },
@@ -150,8 +150,8 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_BLACK = {
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_WHITE = {
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE },

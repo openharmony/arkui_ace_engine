@@ -762,10 +762,10 @@ export class BaseShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const widthForIdx0  = width as string
             thisSerializer.writeString(widthForIdx0)
-        } else if (width instanceof number) {
+        } else if (width instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const widthForIdx1  = width as number
-            thisSerializer.writeNumber(widthForIdx1)
+            const widthForIdx1  = width as double
+            thisSerializer.writeFloat64(widthForIdx1)
         } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const widthForIdx2  = width as Resource
@@ -782,10 +782,10 @@ export class BaseShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const heightForIdx0  = height as string
             thisSerializer.writeString(heightForIdx0)
-        } else if (height instanceof number) {
+        } else if (height instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const heightForIdx1  = height as number
-            thisSerializer.writeNumber(heightForIdx1)
+            const heightForIdx1  = height as double
+            thisSerializer.writeFloat64(heightForIdx1)
         } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const heightForIdx2  = height as Resource
@@ -934,10 +934,10 @@ export class CommonShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const colorForIdx0  = color as Color
             thisSerializer.writeInt32(colorForIdx0.getOrdinal())
-        } else if (color instanceof number) {
+        } else if (color instanceof int32) {
             thisSerializer.writeInt8((1).toByte())
-            const colorForIdx1  = color as number
-            thisSerializer.writeNumber(colorForIdx1)
+            const colorForIdx1  = color as int32
+            thisSerializer.writeInt32(colorForIdx1)
         } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toByte())
             const colorForIdx2  = color as string
@@ -6529,10 +6529,10 @@ export class ParticlePropertyAnimationColorInner_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForFromForIdx0  = valueHolderForFrom as Color
             valueSerializer.writeInt32(valueHolderForFromForIdx0.getOrdinal())
-        } else if (valueHolderForFrom instanceof number) {
+        } else if (valueHolderForFrom instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForFromForIdx1  = valueHolderForFrom as number
-            valueSerializer.writeNumber(valueHolderForFromForIdx1)
+            const valueHolderForFromForIdx1  = valueHolderForFrom as int32
+            valueSerializer.writeInt32(valueHolderForFromForIdx1)
         } else if (valueHolderForFrom instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForFromForIdx2  = valueHolderForFrom as string
@@ -6547,10 +6547,10 @@ export class ParticlePropertyAnimationColorInner_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForToForIdx0  = valueHolderForTo as Color
             valueSerializer.writeInt32(valueHolderForToForIdx0.getOrdinal())
-        } else if (valueHolderForTo instanceof number) {
+        } else if (valueHolderForTo instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForToForIdx1  = valueHolderForTo as number
-            valueSerializer.writeNumber(valueHolderForToForIdx1)
+            const valueHolderForToForIdx1  = valueHolderForTo as int32
+            valueSerializer.writeInt32(valueHolderForToForIdx1)
         } else if (valueHolderForTo instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForToForIdx2  = valueHolderForTo as string
@@ -6584,11 +6584,11 @@ export class ParticlePropertyAnimationColorInner_serializer {
     public static read(buffer: DeserializerBase): ParticlePropertyAnimationColorInner {
         let valueDeserializer : DeserializerBase = buffer
         const fromTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let fromTmpBuf : Color | number | string | Resource | undefined
+        let fromTmpBuf : Color | int32 | string | Resource | undefined
         if (fromTmpBufUnionSelector == (0).toChar()) {
             fromTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (fromTmpBufUnionSelector == (1).toChar()) {
-            fromTmpBuf = (valueDeserializer.readNumber() as number)
+            fromTmpBuf = valueDeserializer.readInt32()
         } else if (fromTmpBufUnionSelector == (2).toChar()) {
             fromTmpBuf = (valueDeserializer.readString() as string)
         } else if (fromTmpBufUnionSelector == (3).toChar()) {
@@ -6596,13 +6596,13 @@ export class ParticlePropertyAnimationColorInner_serializer {
         } else {
             throw new Error("One of the branches for fromTmpBuf has to be chosen through deserialisation.")
         }
-        const fromTmpResult : ResourceColor = (fromTmpBuf as Color | number | string | Resource)
+        const fromTmpResult : ResourceColor = (fromTmpBuf as Color | int32 | string | Resource)
         const toTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let toTmpBuf : Color | number | string | Resource | undefined
+        let toTmpBuf : Color | int32 | string | Resource | undefined
         if (toTmpBufUnionSelector == (0).toChar()) {
             toTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (toTmpBufUnionSelector == (1).toChar()) {
-            toTmpBuf = (valueDeserializer.readNumber() as number)
+            toTmpBuf = valueDeserializer.readInt32()
         } else if (toTmpBufUnionSelector == (2).toChar()) {
             toTmpBuf = (valueDeserializer.readString() as string)
         } else if (toTmpBufUnionSelector == (3).toChar()) {
@@ -6610,7 +6610,7 @@ export class ParticlePropertyAnimationColorInner_serializer {
         } else {
             throw new Error("One of the branches for toTmpBuf has to be chosen through deserialisation.")
         }
-        const toTmpResult : ResourceColor = (toTmpBuf as Color | number | string | Resource)
+        const toTmpResult : ResourceColor = (toTmpBuf as Color | int32 | string | Resource)
         const startMillisTmpResult : int32 = valueDeserializer.readInt32()
         const endMillisTmpResult : int32 = valueDeserializer.readInt32()
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -6779,10 +6779,10 @@ export class ParticleColorPropertyOptionsInner_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRange_0ForIdx0  = valueHolderForRange_0 as Color
             valueSerializer.writeInt32(valueHolderForRange_0ForIdx0.getOrdinal())
-        } else if (valueHolderForRange_0 instanceof number) {
+        } else if (valueHolderForRange_0 instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRange_0ForIdx1  = valueHolderForRange_0 as number
-            valueSerializer.writeNumber(valueHolderForRange_0ForIdx1)
+            const valueHolderForRange_0ForIdx1  = valueHolderForRange_0 as int32
+            valueSerializer.writeInt32(valueHolderForRange_0ForIdx1)
         } else if (valueHolderForRange_0 instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForRange_0ForIdx2  = valueHolderForRange_0 as string
@@ -6797,10 +6797,10 @@ export class ParticleColorPropertyOptionsInner_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRange_1ForIdx0  = valueHolderForRange_1 as Color
             valueSerializer.writeInt32(valueHolderForRange_1ForIdx0.getOrdinal())
-        } else if (valueHolderForRange_1 instanceof number) {
+        } else if (valueHolderForRange_1 instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRange_1ForIdx1  = valueHolderForRange_1 as number
-            valueSerializer.writeNumber(valueHolderForRange_1ForIdx1)
+            const valueHolderForRange_1ForIdx1  = valueHolderForRange_1 as int32
+            valueSerializer.writeInt32(valueHolderForRange_1ForIdx1)
         } else if (valueHolderForRange_1 instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForRange_1ForIdx2  = valueHolderForRange_1 as string
@@ -6830,11 +6830,11 @@ export class ParticleColorPropertyOptionsInner_serializer {
     public static read(buffer: DeserializerBase): ParticleColorPropertyOptionsInner {
         let valueDeserializer : DeserializerBase = buffer
         const rangeTmpBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let rangeTmpBufValue0TempBuf : Color | number | string | Resource | undefined
+        let rangeTmpBufValue0TempBuf : Color | int32 | string | Resource | undefined
         if (rangeTmpBufValue0TempBufUnionSelector == (0).toChar()) {
             rangeTmpBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (rangeTmpBufValue0TempBufUnionSelector == (1).toChar()) {
-            rangeTmpBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+            rangeTmpBufValue0TempBuf = valueDeserializer.readInt32()
         } else if (rangeTmpBufValue0TempBufUnionSelector == (2).toChar()) {
             rangeTmpBufValue0TempBuf = (valueDeserializer.readString() as string)
         } else if (rangeTmpBufValue0TempBufUnionSelector == (3).toChar()) {
@@ -6842,13 +6842,13 @@ export class ParticleColorPropertyOptionsInner_serializer {
         } else {
             throw new Error("One of the branches for rangeTmpBufValue0TempBuf has to be chosen through deserialisation.")
         }
-        const rangeTmpBufValue0 : ResourceColor = (rangeTmpBufValue0TempBuf as Color | number | string | Resource)
+        const rangeTmpBufValue0 : ResourceColor = (rangeTmpBufValue0TempBuf as Color | int32 | string | Resource)
         const rangeTmpBufValue1TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let rangeTmpBufValue1TempBuf : Color | number | string | Resource | undefined
+        let rangeTmpBufValue1TempBuf : Color | int32 | string | Resource | undefined
         if (rangeTmpBufValue1TempBufUnionSelector == (0).toChar()) {
             rangeTmpBufValue1TempBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (rangeTmpBufValue1TempBufUnionSelector == (1).toChar()) {
-            rangeTmpBufValue1TempBuf = (valueDeserializer.readNumber() as number)
+            rangeTmpBufValue1TempBuf = valueDeserializer.readInt32()
         } else if (rangeTmpBufValue1TempBufUnionSelector == (2).toChar()) {
             rangeTmpBufValue1TempBuf = (valueDeserializer.readString() as string)
         } else if (rangeTmpBufValue1TempBufUnionSelector == (3).toChar()) {
@@ -6856,7 +6856,7 @@ export class ParticleColorPropertyOptionsInner_serializer {
         } else {
             throw new Error("One of the branches for rangeTmpBufValue1TempBuf has to be chosen through deserialisation.")
         }
-        const rangeTmpBufValue1 : ResourceColor = (rangeTmpBufValue1TempBuf as Color | number | string | Resource)
+        const rangeTmpBufValue1 : ResourceColor = (rangeTmpBufValue1TempBuf as Color | int32 | string | Resource)
         const rangeTmpResult : [ ResourceColor, ResourceColor ] = ([rangeTmpBufValue0, rangeTmpBufValue1] as [ ResourceColor, ResourceColor ])
         const distributionTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let distributionTypeTmpBuf : DistributionType | undefined = undefined
@@ -7005,10 +7005,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForMaskColorTmpValue instanceof number) {
+            } else if (valueHolderForMaskColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMaskColorTmpValueForIdx1)
+                const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx1)
             } else if (valueHolderForMaskColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMaskColorTmpValueForIdx2  = valueHolderForMaskColorTmpValue as string
@@ -7061,10 +7061,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -7200,10 +7200,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as int32
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
@@ -7447,11 +7447,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         let maskColorTmpBuf : ResourceColor | undefined = undefined
         if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maskColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maskColorTmpBuf_ : Color | number | string | Resource | undefined
+            let maskColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (maskColorTmpBuf_UnionSelector == (0).toChar()) {
                 maskColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (maskColorTmpBuf_UnionSelector == (1).toChar()) {
-                maskColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maskColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (maskColorTmpBuf_UnionSelector == (2).toChar()) {
                 maskColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (maskColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -7459,7 +7459,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             } else {
                 throw new Error("One of the branches for maskColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            maskColorTmpBuf = (maskColorTmpBuf_ as Color | number | string | Resource)
+            maskColorTmpBuf = (maskColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -7490,11 +7490,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -7502,7 +7502,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const cornerRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -7622,11 +7622,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
             let borderColorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let borderColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    borderColorTmpBuf_BufU = valueDeserializer.readInt32()
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -7634,7 +7634,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 } else {
                     throw new Error("One of the branches for borderColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | number | string | Resource)
+                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
                 borderColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {

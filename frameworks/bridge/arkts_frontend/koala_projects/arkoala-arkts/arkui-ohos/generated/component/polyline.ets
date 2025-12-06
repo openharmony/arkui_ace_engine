@@ -73,10 +73,10 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_0ForIdx0  = valueTmpValueTmpElement_0 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_0ForIdx0)
-                } else if (valueTmpValueTmpElement_0 instanceof number) {
+                } else if (valueTmpValueTmpElement_0 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElement_0ForIdx1)
+                    const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElement_0ForIdx1)
                 } else if (valueTmpValueTmpElement_0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as Resource
@@ -87,10 +87,10 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_1ForIdx0  = valueTmpValueTmpElement_1 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_1ForIdx0)
-                } else if (valueTmpValueTmpElement_1 instanceof number) {
+                } else if (valueTmpValueTmpElement_1 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElement_1ForIdx1)
+                    const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElement_1ForIdx1)
                 } else if (valueTmpValueTmpElement_1 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as Resource

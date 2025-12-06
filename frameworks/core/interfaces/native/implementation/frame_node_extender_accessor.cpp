@@ -485,10 +485,10 @@ void SetMeasuredSizeImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(size);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    auto widthValue = Converter::Convert<int32_t>(size->width);
-    auto heightValue = Converter::Convert<int32_t>(size->height);
-    peerNode->GetGeometryNode()->SetFrameWidth(widthValue);
-    peerNode->GetGeometryNode()->SetFrameHeight(heightValue);
+    auto widthValue = Converter::Convert<float>(size->width);
+    auto heightValue = Converter::Convert<float>(size->height);
+    peerNode->GetGeometryNode()->SetFrameWidth(static_cast<int32_t>(widthValue));
+    peerNode->GetGeometryNode()->SetFrameHeight(static_cast<int32_t>(heightValue));
 }
 
 void SetLayoutPositionImpl(Ark_FrameNode peer,

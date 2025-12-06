@@ -3428,7 +3428,7 @@ void deserializeAndCallCallback_T_Void_Arkui_Component_Units_Length(KSerializerB
         value0TmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
     } else if (value0TmpBufUnionSelector == 1) {
         value0TmpBuf.selector = 1;
-        value0TmpBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        value0TmpBuf.value1 = thisDeserializer.readFloat64();
     } else if (value0TmpBufUnionSelector == 2) {
         value0TmpBuf.selector = 2;
         value0TmpBuf.value2 = Resource_serializer::read(thisDeserializer);
@@ -3452,7 +3452,7 @@ void deserializeAndCallSyncCallback_T_Void_Arkui_Component_Units_Length(Ark_VMCo
         value0TmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
     } else if (value0TmpBufUnionSelector == 1) {
         value0TmpBuf.selector = 1;
-        value0TmpBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        value0TmpBuf.value1 = thisDeserializer.readFloat64();
     } else if (value0TmpBufUnionSelector == 2) {
         value0TmpBuf.selector = 2;
         value0TmpBuf.value2 = Resource_serializer::read(thisDeserializer);

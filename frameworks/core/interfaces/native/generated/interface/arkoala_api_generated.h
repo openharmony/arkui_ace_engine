@@ -2609,8 +2609,6 @@ typedef struct Ark_Union_String_I32_I64_F64_Resource Ark_Union_String_I32_I64_F6
 typedef struct Opt_Union_String_I32_I64_F64_Resource Opt_Union_String_I32_I64_F64_Resource;
 typedef struct Ark_Union_String_I32_Resource_Buffer Ark_Union_String_I32_Resource_Buffer;
 typedef struct Opt_Union_String_I32_Resource_Buffer Opt_Union_String_I32_Resource_Buffer;
-typedef struct Ark_Union_String_Number_Resource Ark_Union_String_Number_Resource;
-typedef struct Opt_Union_String_Number_Resource Opt_Union_String_Number_Resource;
 typedef struct Ark_Union_String_PixelMap_Resource Ark_Union_String_PixelMap_Resource;
 typedef struct Opt_Union_String_PixelMap_Resource Opt_Union_String_PixelMap_Resource;
 typedef struct Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier;
@@ -8240,8 +8238,8 @@ typedef struct Opt_SearchController {
 } Opt_SearchController;
 typedef struct Ark_Size {
     /* kind: Interface */
-    Ark_Number width;
-    Ark_Number height;
+    Ark_Float32 width;
+    Ark_Float32 height;
 } Ark_Size;
 typedef struct Opt_Size {
     Ark_Tag tag;
@@ -9112,7 +9110,7 @@ typedef struct Ark_VP {
     Ark_Int32 selector;
     union {
         Ark_String value0;
-        Ark_Number value1;
+        Ark_Float64 value1;
     };
 } Ark_VP;
 typedef struct Opt_VP {
@@ -13558,8 +13556,8 @@ typedef struct Opt_BaselineOffsetStyle {
 } Opt_BaselineOffsetStyle;
 typedef struct Ark_Bias {
     /* kind: Interface */
-    Opt_Number horizontal;
-    Opt_Number vertical;
+    Opt_Float64 horizontal;
+    Opt_Float64 vertical;
 } Ark_Bias;
 typedef struct Opt_Bias {
     Ark_Tag tag;
@@ -13747,8 +13745,8 @@ typedef struct Opt_CaretOffset {
 } Opt_CaretOffset;
 typedef struct Ark_ChainWeightOptions {
     /* kind: Interface */
-    Opt_Number horizontal;
-    Opt_Number vertical;
+    Opt_Float64 horizontal;
+    Opt_Float64 vertical;
 } Ark_ChainWeightOptions;
 typedef struct Opt_ChainWeightOptions {
     Ark_Tag tag;
@@ -14793,7 +14791,7 @@ typedef struct Opt_LayoutConstraint {
 typedef struct Ark_LengthMetrics {
     /* kind: Interface */
     Ark_LengthUnit unit;
-    Ark_Number value;
+    Ark_Float64 value;
 } Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics {
     Ark_Tag tag;
@@ -15711,7 +15709,7 @@ typedef struct Ark_ResourceColor {
     Ark_Int32 selector;
     union {
         Ark_Color value0;
-        Ark_Number value1;
+        Ark_Int32 value1;
         Ark_String value2;
         Ark_Resource value3;
     };
@@ -18067,7 +18065,7 @@ typedef struct Ark_Length {
     Ark_Int32 selector;
     union {
         Ark_String value0;
-        Ark_Number value1;
+        Ark_Float64 value1;
         Ark_Resource value2;
     };
 } Ark_Length;
@@ -19717,7 +19715,7 @@ typedef struct Ark_LinearStyleOptions {
     Opt_Boolean enableScanEffect;
     Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
-    Opt_Union_String_Number_Resource strokeRadius;
+    Opt_Union_String_F64_Resource strokeRadius;
 } Ark_LinearStyleOptions;
 typedef struct Opt_LinearStyleOptions {
     Ark_Tag tag;
@@ -26692,7 +26690,7 @@ typedef struct GENERATED_ArkUIColorContentAccessor {
 
 typedef struct GENERATED_ArkUIColorFilterAccessor {
     void (*destroyPeer)(Ark_ColorFilter peer);
-    Ark_ColorFilter (*construct)(const Array_Number* value);
+    Ark_ColorFilter (*construct)(const Array_Float64* value);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIColorFilterAccessor;
 

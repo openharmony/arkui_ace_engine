@@ -1663,17 +1663,17 @@ export function deserializeAndCallCallback_T_Void_Arkui_Component_Units_Length(t
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Length) => void))
     const value0TmpBufUnionSelector : int32 = thisDeserializer.readInt8()
-    let value0TmpBuf : string | number | Resource | undefined
+    let value0TmpBuf : string | double | Resource | undefined
     if (value0TmpBufUnionSelector == (0).toChar()) {
         value0TmpBuf = (thisDeserializer.readString() as string)
     } else if (value0TmpBufUnionSelector == (1).toChar()) {
-        value0TmpBuf = (thisDeserializer.readNumber() as number)
+        value0TmpBuf = thisDeserializer.readFloat64()
     } else if (value0TmpBufUnionSelector == (2).toChar()) {
         value0TmpBuf = Resource_serializer.read(thisDeserializer)
     } else {
         throw new Error("One of the branches for value0TmpBuf has to be chosen through deserialisation.")
     }
-    let value0 : Length = (value0TmpBuf as string | number | Resource)
+    let value0 : Length = (value0TmpBuf as string | double | Resource)
     _call(value0)
 }
 export function deserializeAndCallCallback_T_Void_Arkui_Component_Units_ResourceStr(thisDeserializer: DeserializerBase): void {

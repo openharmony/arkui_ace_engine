@@ -274,17 +274,17 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestValidNumberValues, TestSiz
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff000000), "#FF000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff0000ff), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff808080), "#FF808080" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff008000), "#FF008000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffa500), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffff0000), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffff00), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x00000000), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -366,8 +366,8 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestInvalidNumberValues, TestS
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff + 1), "#00000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000 - 1), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffffff + 1), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x00000000 - 1), "#FFFFFFFF" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {

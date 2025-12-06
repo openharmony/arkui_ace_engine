@@ -67,7 +67,7 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
 {
     NG::IconOptions options;
     auto iconColor = Converter::OptConvert<Color>(src.color);
-    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
+    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
     auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
         options.UpdateSrc(iconSrc->content, iconSrc->moduleName, iconSrc->bundleName);
@@ -87,7 +87,7 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 {
     SearchButtonOptions buttonOptions;
     buttonOptions.color = OptConvert<Color> (src.fontColor);
-    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.fontSize);
+    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.fontSize);
     buttonOptions.autoDisable = OptConvert<bool> (src.autoDisable);
     return buttonOptions;
 }

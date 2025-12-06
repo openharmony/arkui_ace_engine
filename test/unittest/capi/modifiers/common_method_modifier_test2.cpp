@@ -540,7 +540,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
         .radius = ArkValue<Ark_Float64>(123.45f),
         .saturation = ArkValue<Opt_Float64>(0.123f),
         .brightness = ArkValue<Opt_Float64>(100),
-        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
+        .color = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
         .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = ArkCreate<Opt_BlurOptions>(20., 30.),
         .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
@@ -899,9 +899,9 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+            ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+            ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f)), "#00000000" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(

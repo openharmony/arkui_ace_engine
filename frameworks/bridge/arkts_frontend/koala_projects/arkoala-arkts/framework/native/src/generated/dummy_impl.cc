@@ -28613,7 +28613,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ColorFilter ConstructImpl(const Array_Number* value)
+    Ark_ColorFilter ConstructImpl(const Array_Float64* value)
     {
         if (!needGroupedLog(1))
         {

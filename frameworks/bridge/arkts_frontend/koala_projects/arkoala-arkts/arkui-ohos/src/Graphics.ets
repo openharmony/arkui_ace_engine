@@ -228,7 +228,7 @@ export class ColorMetrics {
             }
             return colorMetrics;
         } else if (typeof color === 'number') {
-            return ColorMetrics.numeric(color as number);
+            return ColorMetrics.numeric(color as int32 as number);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
             if (ColorMetrics.isHexFormat(colorValue)) {

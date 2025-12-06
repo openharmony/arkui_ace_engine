@@ -5747,13 +5747,7 @@ export class TypeChecker {
         return XComponentType.fromValue(ordinal)
     }
     static isArray_Number(value: Object | string | number | undefined): boolean {
-        if (Array.isArray(value)) {
-            const array = value as Array<Object>
-            if (array.length == 0) return true
-            const e = array[0]
-            return e instanceof number
-        }
-        return false
+        return value instanceof Array
     }
     static isArray_Rectangle(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
@@ -5840,13 +5834,7 @@ export class TypeChecker {
         return false
     }
     static isArray_Float64(value: Object | string | number | undefined): boolean {
-        if (Array.isArray(value)) {
-            const array = value as Array<Object>
-            if (array.length == 0) return true
-            const e = array[0]
-            return e instanceof double
-        }
-        return false
+        return value instanceof Array
     }
     static isArray_Int32(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {

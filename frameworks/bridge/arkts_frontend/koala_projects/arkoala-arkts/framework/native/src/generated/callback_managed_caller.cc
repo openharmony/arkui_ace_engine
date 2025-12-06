@@ -4126,7 +4126,7 @@ void callManagedCallback_T_Void_Arkui_Component_Units_Length(Ark_Int32 resourceI
     } else if (value0.selector == 1) {
         argsSerializer.writeInt8(1);
         const auto value0ForIdx1 = value0.value1;
-        argsSerializer.writeNumber(value0ForIdx1);
+        argsSerializer.writeFloat64(value0ForIdx1);
     } else if (value0.selector == 2) {
         argsSerializer.writeInt8(2);
         const auto value0ForIdx2 = value0.value2;
@@ -4147,7 +4147,7 @@ void callManagedCallback_T_Void_Arkui_Component_Units_LengthSync(Ark_VMContext v
     } else if (value0.selector == 1) {
         argsSerializer.writeInt8(1);
         const auto value0ForIdx1 = value0.value1;
-        argsSerializer.writeNumber(value0ForIdx1);
+        argsSerializer.writeFloat64(value0ForIdx1);
     } else if (value0.selector == 2) {
         argsSerializer.writeInt8(2);
         const auto value0ForIdx2 = value0.value2;

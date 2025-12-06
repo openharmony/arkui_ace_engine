@@ -110,8 +110,8 @@ template<>
 SliderBlockSizeOptions Convert(const Ark_SizeOptions& src)
 {
     return {
-        .width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP),
-        .height = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.height, DimensionUnit::VP)
+        .width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.width, DimensionUnit::VP),
+        .height = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.height, DimensionUnit::VP)
     };
 }
 
@@ -276,7 +276,7 @@ void SetTrackThicknessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidatePositive(convValue);
     SliderModelStatic::SetThickness(frameNode, convValue);
 }
@@ -311,7 +311,7 @@ void SetBlockBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetBlockBorderWidth(frameNode, convValue);
 }
@@ -328,7 +328,7 @@ void SetTrackBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
@@ -377,7 +377,7 @@ void SetStepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetStepSize(frameNode, convValue);
 }

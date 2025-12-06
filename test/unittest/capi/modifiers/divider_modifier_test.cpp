@@ -45,8 +45,8 @@ public:
 using OneColorStep = std::tuple<Ark_ResourceColor, std::string>;
 const std::vector<OneColorStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Int32>(0x123456)), "#FF123456" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Int32>(0.5f)), "#00000000" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0x123456)), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0.5f)), "#00000000" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("65535")), "#FF00FFFF" },
     { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"aa.bb.cc", ResourceType::COLOR}),

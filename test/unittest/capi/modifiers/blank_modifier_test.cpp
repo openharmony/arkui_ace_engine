@@ -44,12 +44,12 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor optNumberInt = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456);
+    Opt_ResourceColor optNumberInt = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456);
     modifier_->setColor(node_, &optNumberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123456");
 
-    Opt_ResourceColor optNumberFlt = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor optNumberFlt = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setColor(node_, &optNumberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");

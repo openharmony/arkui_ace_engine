@@ -72,13 +72,13 @@ HWTEST_F(LoadingProgressModifierTest, DISABLED_setColorTest, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
+    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123401);
     auto optNumberInt = Converter::ArkValue<Opt_ResourceColor>(numberInt);
     modifier_->setColor(node_, &optNumberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
+    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f);
     auto optNumberFlt = Converter::ArkValue<Opt_ResourceColor>(numberFlt);
     modifier_->setColor(node_, &optNumberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
