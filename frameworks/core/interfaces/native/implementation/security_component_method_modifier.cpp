@@ -425,7 +425,6 @@ void SetFocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CommonMethodModifier::SetFocusBoxImpl(node, style);
-    SecurityComponentModelNG::SetFocusBox(frameNode);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
