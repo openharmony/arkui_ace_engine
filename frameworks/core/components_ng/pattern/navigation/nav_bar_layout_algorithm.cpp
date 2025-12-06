@@ -275,8 +275,8 @@ void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     size.SetWidth(contentChildSize.Width());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
-    MeasureAdaptiveLayoutChildren(
-        layoutWrapper, size, transferedTitleBarHeight, transferedToolBarHeight + transferedToolBarDividerHeight);
+    MeasureAdaptiveLayoutChildren(layoutWrapper, contentChildSize, transferedTitleBarHeight,
+        transferedToolBarHeight + transferedToolBarDividerHeight);
 }
 
 void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -326,16 +326,6 @@ void NavBarLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
         (opts.edges & LAYOUT_SAFE_AREA_EDGE_HORIZONTAL) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM);
     if (!isVerticalCanExtend.first && !isVerticalCanExtend.second && !isHorizontalExtend) {
         return;
-    }
-
-    ExpandEdges sae = hostNode->GetAccumulatedSafeAreaExpand(true, opts);
-    if (!isVerticalCanExtend.first) {
-        realSize.MinusHeight(titleBarHeight);
-        realSize.MinusHeight(sae.top.value_or(0.0f));
-    }
-    if (!isVerticalCanExtend.second) {
-        realSize.MinusHeight(toolBarHeight);
-        realSize.MinusHeight(sae.bottom.value_or(0.0f));
     }
 
     auto childConstraint = navBarLayoutProperty->CreateChildConstraint();
