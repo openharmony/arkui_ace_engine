@@ -55,9 +55,9 @@ NG::MovingPhotoController* MovingPhotoAni::GetMovingPhotoController(ani_env* env
     return reinterpret_cast<NG::MovingPhotoController*>(ptr);
 }
 
-void MovingPhotoAni::DestroyPeerImpl(MovingPhotoControllerPeer* peer)
+void MovingPhotoAni::DestroyPeerImpl(NG::MovingPhotoController* peer)
 {
-    if () {
+    if (peer) {
         peer->DecRefCount();
     }
 }

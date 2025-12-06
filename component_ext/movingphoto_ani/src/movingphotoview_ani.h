@@ -84,7 +84,7 @@ public:
     static ani_long CreateMovingPhotoController([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object);
 
 private:
-    static void DestroyPeerImpl(void* peer);
+    static void DestroyPeerImpl(OHOS::Ace::NG::MovingPhotoController* peer);
     struct MovingPhotoControllerPeer {
         OHOS::Ace::RefPtr<OHOS::Ace::NG::MovingPhotoController> controller;
     };

@@ -46,10 +46,6 @@ ani_status AniAsyncEvent::Call(ani_size argc, ani_ref *argv)
 
     ani_ref result {};
     status = env_->FunctionalObject_Call(static_cast<ani_fn_object>(ref_), argc, argv, &result);
-    if (status != ANI_OK) {
-
-    }
-
     env_->DestroyLocalScope();
     return status;
 }
