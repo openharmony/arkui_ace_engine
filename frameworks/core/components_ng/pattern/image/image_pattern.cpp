@@ -623,6 +623,7 @@ void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
     auto obj = loadingCtx_->GetImageObject();
     CHECK_NULL_VOID(obj);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProperty && (renderProperty->HasImageResizableSlice() ||
         renderProperty->HasImageResizableLattice());
