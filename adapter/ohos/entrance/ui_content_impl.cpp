@@ -3794,11 +3794,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto updateforceSplitTask = [context, width = config.Width()]() {
+    auto updateforceSplitTask = [weakContext = WeakPtr(context)]() {
+        auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->UpdateIsInForceSplitMode(width);
+        forceSplitMgr->UpdateIsInForceSplitMode();
     };
     auto updateDensityTask = [container, modifyConfig]() {
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
@@ -5496,9 +5497,9 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(
-    bool isForceSplit, const std::string& homePage, bool isRouter, bool ignoreOrientation)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit %{public}d", isForceSplit);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5506,58 +5507,78 @@ void UIContentImpl::SetForceSplitEnable(
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, ignoreOrientation);
-        if (isRouter) {
-            auto stageManager = context->GetStageManager();
-            CHECK_NULL_VOID(stageManager);
-            stageManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
-            return;
-        }
-        auto navManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navManager);
-        navManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
         return;
     }
-    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
-        isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
+    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
 }
 
-void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
+void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                                        const std::optional<AppForceSplitConfig>& appConfig)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    NG::ForceSplitConfig config;
-    if (!NG::ForceSplitUtils::ParseForceSplitConfig(configJsonStr, config)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (forceSplitMgr->HasSetForceSplitConfig()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "ForceSplit config can only be setted for once time!");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d", config.isArkUIHookEnabled,
-        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
-    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
-    if (navManager) {
+    CHECK_NULL_VOID(navManager);
+    if (appConfig.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using app forceSplitConfig");
+        NG::ForceSplitConfig config;
+        if (!NG::ForceSplitUtils::ParseAppForceSplitConfig(appConfig->isRouter, appConfig->configJsonStr, config)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse app forceSplit config!");
+            return;
+        }
+        NG::ForceSplitUtils::LogAppForceSplitConfig(appConfig->isRouter, config);
+        context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+        forceSplitMgr->SetIsRouter(appConfig->isRouter);
+        forceSplitMgr->SetHomePageName(config.homePage);
+        forceSplitMgr->SetRelatedPageName(config.relatedPage);
+        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        if (!(appConfig->isRouter)) {
+            navManager->SetForceSplitNavigationId(config.navigationId);
+            navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+            navManager->SetDividerDisabled(config.navigationDisableDivider);
+        }
+        return;
+    }
+    if (!systemConfig.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is not supported.");
+        context->SetIsArkUIHookEnabled(false);
+        forceSplitMgr->IsForceSplitEnable(false);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using system forceSplitConfig");
+    NG::ForceSplitConfig config;
+    if (!NG::ForceSplitUtils::ParseSystemForceSplitConfig(systemConfig->configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse system forceSplit config!");
+        return;
+    }
+    NG::ForceSplitUtils::LogSystemForceSplitConfig(systemConfig->isRouter, systemConfig->homePage, config);
+    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    forceSplitMgr->SetIsRouter(systemConfig->isRouter);
+    forceSplitMgr->SetHomePageName(systemConfig->homePage);
+    forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);
         navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
         navManager->SetDividerDisabled(config.navigationDisableDivider);
-    }
-    auto forceSplitMgr = context->GetForceSplitManager();
-    if (forceSplitMgr) {
-        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
     }
 }
 

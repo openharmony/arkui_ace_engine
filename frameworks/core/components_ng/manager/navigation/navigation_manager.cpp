@@ -63,11 +63,21 @@ void NavigationManager::IsTargetForceSplitNav(const RefPtr<FrameNode>& navigatio
      * or if there is already a force split navigation,
      * return directly.
      */
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
     auto existForceSplitNav = GetExistForceSplitNav();
-    if (!IsForceSplitSupported() || existForceSplitNav.first) {
+    if (!forceSplitMgr->IsForceSplitSupported(false) || existForceSplitNav.first) {
         return;
     }
 
+    // Only the Navigation in the main page could possibly be the target navigation.
+    auto navPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navPattern);
+    if (!navPattern->GetNavBasePageNode()) {
+        return;
+    }
     /**
      * If id and depth are not configured, the target force split navigation is the outermost navigation.
      * It is necessary to determine whether the current navigation is the outermost navigation.
@@ -311,52 +321,6 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
     auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
-}
-
-void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
-{
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set navigation force split %{public}s, homePage:%{public}s, "
-        "ignoreOrientation:%{public}d", (isForceSplit ? "enable" : "disable"), homePage.c_str(), ignoreOrientation);
-    /**
-     * As long as the application supports force split, regardless of whether it is enabled or not,
-     * the SetForceSplitleEnable interface will be called.
-     */
-    isForceSplitSupported_ = true;
-    if (isForceSplitEnable_ == isForceSplit && homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) {
-        return;
-    }
-    isForceSplitEnable_ = isForceSplit;
-    homePageName_ = homePage;
-    ignoreOrientation_ = ignoreOrientation;
-
-    auto listeners = forceSplitListeners_;
-    for (auto& listener : listeners) {
-        if (listener.second) {
-            listener.second();
-        }
-    }
-}
-
-bool NavigationManager::GetIgnoreOrientation() const
-{
-    if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation forceSplit ignore Orientation");
-        return true;
-    }
-    return ignoreOrientation_;
-}
-
-void NavigationManager::AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener)
-{
-    forceSplitListeners_[nodeId] = std::move(listener);
-}
-
-void NavigationManager::RemoveForceSplitListener(int32_t nodeId)
-{
-    auto it = forceSplitListeners_.find(nodeId);
-    if (it != forceSplitListeners_.end()) {
-        forceSplitListeners_.erase(it);
-    }
 }
 
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()

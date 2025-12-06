@@ -83,18 +83,18 @@ void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
     const std::string& curTopPageName, const RefPtr<PipelineContext>& context)
 {
     CHECK_NULL_VOID(context);
-    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
-    CHECK_NULL_VOID(stageManager);
-    if (!stageManager->IsForceSplitSupported()) {
-        return;
-    }
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(true)) {
+        return;
+    }
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
     stageManager->UpdateIsTopFullScreenPage(forceSplitMgr->IsFullScreenPage(curTopPageName));
     if (stageManager->IsTopFullScreenPageChanged()) {
         forceSplitMgr->NotifyForceFullScreenChange(stageManager->IsTopFullScreenPage());
         // try to update mode immediately
-        stageManager->OnForceSplitConfigUpdate();
+        forceSplitMgr->NotifyForceSplitStateChange();
     }
 }
 
@@ -250,11 +250,11 @@ bool ParallelPageRouterManager::DetectPrimaryPage(const RouterPageInfo& target, 
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
 
-    if (!stageManager->IsForceSplitSupported()) {
-        TAG_LOGE(AceLogTag::ACE_ROUTER, "No need for home page recognition");
+    if (!forceSplitMgr->IsForceSplitSupported(true)) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "No need for home page recognition");
         return false;
     }
 
@@ -269,10 +269,9 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, false);
-
-    std::string homePageConfig = stageManager->GetHomePageConfig();
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    std::string homePageConfig = forceSplitMgr->GetHomePageName();
     std::string pageInfo = target.url;
     if (!homePageConfig.empty()) {
         if (strcmp(homePageConfig.c_str(), pageInfo.c_str()) == 0) {
@@ -345,9 +344,9 @@ RefPtr<FrameNode> ParallelPageRouterManager::LoadPlaceHolderPage()
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto id = windowManager->GetAppIconId();
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    auto id = forceSplitMgr->GetAppIconId();
     auto pixelMap = themeConstants->GetPixelMap(id);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);

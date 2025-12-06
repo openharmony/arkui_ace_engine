@@ -84,8 +84,9 @@ void NavigationPatternTestSevenNg::SetForceSplitEnabled(bool enable)
 {
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = enable;
 }
 
@@ -898,7 +899,7 @@ HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForDestForceSplit002, TestSize.
     pathList.push_back(testPair2);
     pattern->forceSplitSuccess_ = true;
     pattern->forceSplitUseNavBar_ = false;
-    pattern->homeNode_ = nullptr;
+    pattern->forceSplitHomeDest_ = nullptr;
     navProperty->UpdateHideNavBar(true);
 
     navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -965,7 +966,7 @@ HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForDestForceSplit003, TestSize.
     pattern->forceSplitSuccess_ = true;
     pattern->forceSplitUseNavBar_ = false;
     pattern->navBarIsHome_ = false;
-    pattern->homeNode_ = WeakPtr(dest1);
+    pattern->forceSplitHomeDest_ = WeakPtr(dest1);
     navProperty->UpdateHideNavBar(false);
 
     navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -1644,7 +1645,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle003, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    pattern->homeNode_ = WeakPtr(dest);
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
     auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
@@ -1688,7 +1689,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle004, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    pattern->homeNode_ = WeakPtr(dest);
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
     auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
@@ -1732,7 +1733,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle005, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    pattern->homeNode_ = WeakPtr(dest);
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
     auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
@@ -1774,7 +1775,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle006, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    pattern->homeNode_ = WeakPtr(dest);
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
     auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();

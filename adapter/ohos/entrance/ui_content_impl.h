@@ -381,9 +381,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) override;
-    void SetForceSplitConfig(const std::string& configJsonStr) override;
+    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                             const std::optional<AppForceSplitConfig>& appConfig) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {

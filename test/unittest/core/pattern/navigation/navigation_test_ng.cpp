@@ -1723,7 +1723,7 @@ HWTEST_F(NavigationTestNg, NavigationCommonTitleTest001, TestSize.Level1)
 
 /**
  * @tc.name: CreatePrimaryContentIfNeeded001
- * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => true
+ * @tc.desc: Branch: if (!forceSplitMgr->IsForceSplitSupported(false)) { => true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded001, TestSize.Level1)
@@ -1731,7 +1731,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded001, TestSize.Level1)
     MockPipelineContextGetTheme();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     NavigationModelNG navigationModel;
     auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
@@ -1743,13 +1743,14 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded001, TestSize.Level1)
     ASSERT_NE(navigationStack, nullptr);
     pattern->SetNavigationStack(navigationStack);
 
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = false;
     ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
 }
 
 /**
  * @tc.name: CreatePrimaryContentIfNeeded002
- * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => false
+ * @tc.desc: Branch: if (!forceSplitMgr->IsForceSplitSupported(false)) { => false
  *                   if (navigationGroupNode->GetPrimaryContentNode()) { => true
  * @tc.type: FUNC
  */
@@ -1758,7 +1759,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded002, TestSize.Level1)
     MockPipelineContextGetTheme();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     NavigationModelNG navigationModel;
     auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
@@ -1773,6 +1774,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded002, TestSize.Level1)
         V2::PRIMARY_CONTENT_NODE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
     ASSERT_NE(contentNode, nullptr);
 
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = true;
     navNode->primaryContentNode_ = contentNode;
     ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));
@@ -1780,7 +1782,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded002, TestSize.Level1)
 
 /**
  * @tc.name: CreatePrimaryContentIfNeeded003
- * @tc.desc: Branch: if (!manager->IsForceSplitSupported()) { => false
+ * @tc.desc: Branch: if (!forceSplitMgr->IsForceSplitSupported(false)) { => false
  *                   if (navigationGroupNode->GetPrimaryContentNode()) { => false
  * @tc.type: FUNC
  */
@@ -1789,7 +1791,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded003, TestSize.Level1)
     MockPipelineContextGetTheme();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     NavigationModelNG navigationModel;
     auto navNode = NavigationGroupNode::GetOrCreateGroupNode(
@@ -1801,6 +1803,7 @@ HWTEST_F(NavigationTestNg, CreatePrimaryContentIfNeeded003, TestSize.Level1)
     ASSERT_NE(navigationStack, nullptr);
     pattern->SetNavigationStack(navigationStack);
 
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = true;
     navNode->primaryContentNode_ = nullptr;
     ASSERT_TRUE(navigationModel.CreatePrimaryContentIfNeeded(navNode));

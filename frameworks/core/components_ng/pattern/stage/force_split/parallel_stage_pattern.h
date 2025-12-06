@@ -78,12 +78,10 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
 
-    void OnForceSplitConfigUpdate() override;
-
 private:
     void FireModeChangeCallback();
     void CreateDividerNodeIfNeeded();
-    bool CalculateMode(double width);
+    bool CalculateMode();
     void OnDirectionConfigurationUpdate() override;
 
     WeakPtr<FrameNode> primaryPageNode_;

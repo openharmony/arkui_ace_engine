@@ -31,8 +31,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension TEST_WIDTH = 605.0_vp;
-
 RefPtr<ForceSplitManager> GetForceSplitManager()
 {
     auto pipeline = MockPipelineContext::GetCurrent();
@@ -75,7 +73,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode001, TestSize.Level1)
 
     context->SetIsCurrentInForceSplitMode(false);
     manager->isForceSplitSupported_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
+    manager->UpdateIsInForceSplitMode();
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
 
@@ -104,7 +102,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode002, TestSize.Level1)
     context->SetIsCurrentInForceSplitMode(false);
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = true;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
+    manager->UpdateIsInForceSplitMode();
     EXPECT_TRUE(context->IsCurrentInForceSplitMode());
     windowManager->windowGetModeCallback_ = std::move(backupCallback);
 }
@@ -126,247 +124,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode003, TestSize.Level1)
     context->SetIsCurrentInForceSplitMode(false);
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
-    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
-}
-
-/**
- * @tc.name: GetIgnoreOrientation001
- * @tc.desc: Branch: if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) { => true
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, GetIgnoreOrientation001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    auto backupProperty = SystemProperties::forceSplitIgnoreOrientationEnabled_;
-    SystemProperties::forceSplitIgnoreOrientationEnabled_ = true;
-    auto ignore = manager->GetIgnoreOrientation();
-    EXPECT_TRUE(ignore);
-    SystemProperties::forceSplitIgnoreOrientationEnabled_ = backupProperty;
-}
-
-/**
- * @tc.name: GetIgnoreOrientation002
- * @tc.desc: Branch: if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) { => false
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, GetIgnoreOrientation002, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    auto backupProperty = SystemProperties::forceSplitIgnoreOrientationEnabled_;
-    SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
-    manager->ignoreOrientation_ = false;
-    auto ignore = manager->GetIgnoreOrientation();
-    EXPECT_FALSE(ignore);
-
-    manager->ignoreOrientation_ = true;
-    ignore = manager->GetIgnoreOrientation();
-    EXPECT_TRUE(ignore);
-
-    SystemProperties::forceSplitIgnoreOrientationEnabled_ = backupProperty;
-}
-
-/**
- * @tc.name: SetForceSplitEnable001
- * @tc.desc: Test SetForceSplitEnable with various parameter combinations
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    // Test enabling force split without ignoring orientation
-    manager->SetForceSplitEnable(true, false);
-    EXPECT_TRUE(manager->IsForceSplitSupported());
-    EXPECT_TRUE(manager->IsForceSplitEnable());
-    EXPECT_FALSE(manager->GetIgnoreOrientation());
-
-    // Test enabling force split with ignoring orientation
-    manager->SetForceSplitEnable(true, true);
-    EXPECT_TRUE(manager->IsForceSplitSupported());
-    EXPECT_TRUE(manager->IsForceSplitEnable());
-    EXPECT_TRUE(manager->GetIgnoreOrientation());
-
-    // Test disabling force split without ignoring orientation
-    manager->SetForceSplitEnable(false, false);
-    EXPECT_TRUE(manager->IsForceSplitSupported());
-    EXPECT_FALSE(manager->IsForceSplitEnable());
-    EXPECT_FALSE(manager->GetIgnoreOrientation());
-
-    // Test disabling force split with ignoring orientation
-    manager->SetForceSplitEnable(false, true);
-    EXPECT_TRUE(manager->IsForceSplitSupported());
-    EXPECT_FALSE(manager->IsForceSplitEnable());
-    EXPECT_TRUE(manager->GetIgnoreOrientation());
-}
-
-/**
- * @tc.name: UpdateIsInForceSplitModeWithMainWindow001
- * @tc.desc: Test force split mode when not in main window
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithMainWindow001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: not main window, should not enable force split
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(false));
-    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
-    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
-
-    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
-}
-
-/**
- * @tc.name: UpdateIsInForceSplitModeWithOrientation001
- * @tc.desc: Test force split mode with portrait orientation
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithOrientation001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: portrait orientation, should not enable force split
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
-    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
-    windowManager->windowGetModeCallback_ = []() {
-        return WindowMode::WINDOW_MODE_UNDEFINED; };
-
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
-
-    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
-}
-
-/**
- * @tc.name: UpdateIsInForceSplitModeWithOrientationIgnored001
- * @tc.desc: Test force split mode with portrait orientation but ignoring orientation
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithOrientationIgnored001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: portrait orientation but ignoring orientation, should enable force split
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
-    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
-    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = true;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
-    EXPECT_TRUE(context->IsCurrentInForceSplitMode());
-}
-
-/**
- * @tc.name: UpdateIsInForceSplitModeWithUndefinedOrientation001
- * @tc.desc: Test force split mode with undefined orientation
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithUndefinedOrientation001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: undefined orientation, should not enable force split
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
-    SystemProperties::orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
-    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
-    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
-}
-
-/**
- * @tc.name: UpdateIsInForceSplitModeWithWidthThreshold001
- * @tc.desc: Test force split mode with width below threshold
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithWidthThreshold001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: width below 600vp threshold, should not enable force split
-    constexpr Dimension SMALL_WIDTH = 500.0_vp;
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
-    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
-    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(SMALL_WIDTH.ConvertToPx()));
+    manager->UpdateIsInForceSplitMode();
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
 
@@ -395,8 +153,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithSplitScreen001, Te
     context->SetIsCurrentInForceSplitMode(false);
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = false;
-    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
+    manager->UpdateIsInForceSplitMode();
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
 } // namespace OHOS::Ace::NG

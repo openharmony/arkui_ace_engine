@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,29 +32,57 @@ public:
     ForceSplitManager() = default;
     ~ForceSplitManager() = default;
 
-    void SetForceSplitEnable(bool isForceSplit, bool ignoreOrientation);
-
     void SetPipelineContext(const WeakPtr<PipelineContext>& pipeline)
     {
         pipeline_ = pipeline;
     }
-    bool IsForceSplitSupported() const
+    bool HasSetForceSplitConfig() const
     {
-        return isForceSplitSupported_;
+        return hasSetForceSplitConfig_;
     }
-    bool IsForceSplitEnable() const
+    void SetIsRouter(bool isRouter)
     {
-        return isForceSplitEnable_;
+        isRouter_ = isRouter;
     }
-    bool GetIgnoreOrientation() const;
 
-    void UpdateIsInForceSplitMode(int32_t width);
+    void SetForceSplitSupported(bool isForceSplitSupported)
+    {
+        isForceSplitSupported_ = isForceSplitSupported;
+        hasSetForceSplitConfig_ = true;
+    }
+    bool IsForceSplitSupported(bool isRouter) const
+    {
+        return isForceSplitSupported_ && isRouter_ == isRouter;
+    }
+    void SetForceSplitEnable(bool isForceSplit);
+    bool IsForceSplitEnable(bool isRouter) const
+    {
+        return isForceSplitEnable_ && isRouter_ == isRouter;
+    }
 
+    void UpdateIsInForceSplitMode();
+
+    void SetHomePageName(const std::string& homePage)
+    {
+        homePageName_ = homePage;
+    }
+    void SetRelatedPageName(const std::string& relatedPage)
+    {
+        relatedPageName_ = relatedPage;
+    }
+    const std::string& GetHomePageName() const
+    {
+        return homePageName_;
+    }
+    const std::string& GetRelatedPageName() const
+    {
+        return relatedPageName_;
+    }
+    
     void SetFullScreenPages(std::set<std::string>&& pages)
     {
         fullScreenPages_ = std::move(pages);
     }
-
     bool IsFullScreenPage(const std::string& name) const
     {
         return fullScreenPages_.find(name) != fullScreenPages_.end();
@@ -61,12 +90,34 @@ public:
 
     void NotifyForceFullScreenChange(bool isForceFullScreen);
 
+    void AddForceSplitStateListener(int32_t nodeId, std::function<void()>&& listener);
+    void RemoveForceSplitStateListener(int32_t nodeId);
+    void NotifyForceSplitStateChange();
+
+    bool HasRelatedPage() const
+    {
+        return !relatedPageName_.empty();
+    }
+    int32_t GetAppIconId() const
+    {
+        return appIconId_;
+    }
+    void SetAppIconId(int32_t id)
+    {
+        appIconId_ = id;
+    }
+
 private:
     WeakPtr<PipelineContext> pipeline_;
+    bool hasSetForceSplitConfig_ = false;
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
-    bool ignoreOrientation_ = false;
+    bool isRouter_ = false;
     std::set<std::string> fullScreenPages_;
+    std::string homePageName_;
+    std::string relatedPageName_;
+    std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
+    int32_t appIconId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

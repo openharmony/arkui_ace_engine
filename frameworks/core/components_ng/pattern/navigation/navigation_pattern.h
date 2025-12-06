@@ -550,9 +550,9 @@ public:
     }
     bool IsForceSplitSupported(const RefPtr<PipelineContext>& context);
 
-    RefPtr<NavDestinationGroupNode> GetHomeNode() const
+    RefPtr<NavDestinationGroupNode> GetForceSplitHomeDestination() const
     {
-        return homeNode_.Upgrade();
+        return forceSplitHomeDest_.Upgrade();
     }
     const std::vector<WeakPtr<NavDestinationGroupNode>>& GetPrimaryNodes() const
     {
@@ -567,7 +567,7 @@ public:
         primaryNodesToBeRemoved_ = primaryNodesToBeRemoved;
     }
     void RecognizeHomePageIfNeeded();
-    void TryForceSplitIfNeeded(const SizeF& frameSize);
+    void TryForceSplitIfNeeded();
     void SwapNavDestinationAndProxyNode(bool needFireLifecycle);
     bool IsPrimaryNode(const RefPtr<NavDestinationGroupNode>& destNode) const;
     // Only used for the toolbar in 'container_modal' component
@@ -622,7 +622,7 @@ public:
     void FireNavigateChangeCallback();
 
 private:
-    void UpdateCanForceSplitLayout(const SizeF& frameSize);
+    void UpdateCanForceSplitLayout();
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
         NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
     void ClearNavigationCustomTransition();
@@ -806,6 +806,8 @@ private:
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
     void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
     NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -817,8 +819,6 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -896,7 +896,7 @@ private:
     std::optional<bool> homeNodeTouched_;
     bool navBarIsHome_ = false;
     bool isTargetForceSplitNav_ = false;
-    WeakPtr<NavDestinationGroupNode> homeNode_;
+    WeakPtr<NavDestinationGroupNode> forceSplitHomeDest_;
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;

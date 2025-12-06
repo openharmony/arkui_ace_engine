@@ -691,8 +691,6 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
-    static bool GetForceSplitIgnoreOrientationEnabled();
-
     static std::optional<bool> GetArkUIHookEnabled();
 
     static bool WaterFlowUseSegmentedLayout();
@@ -917,7 +915,6 @@ private:
     static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
-    static bool forceSplitIgnoreOrientationEnabled_;
     static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
