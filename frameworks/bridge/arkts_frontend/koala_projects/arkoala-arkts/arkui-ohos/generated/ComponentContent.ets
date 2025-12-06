@@ -17,11 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { extractors } from "#handwritten"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
+export class ComponentContentBase_serializer {
+    public static write(buffer: SerializerBase, value: ComponentContentBase): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toComponentContentBasePtr(value))
+    }
+    public static read(buffer: DeserializerBase): ComponentContentBase {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromComponentContentBasePtr(ptr)
+    }
+}
 export class ComponentContent_serializer {
     public static write(buffer: SerializerBase, value: ComponentContent): void {
         let valueSerializer : SerializerBase = buffer
