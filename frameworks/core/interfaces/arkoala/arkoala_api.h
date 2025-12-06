@@ -7632,6 +7632,10 @@ struct ArkUIFrameNodeModifier {
     void (*resetFocusDependence)(ArkUINodeHandle node);
     void (*applyAttributesFinish)(ArkUINodeHandle node);
     ArkUI_Bool (*isOnRenderTree)(ArkUINodeHandle node);
+    ArkUI_Int32 (*convertPositionToWindow)(
+        ArkUINodeHandle node, ArkUI_Int32 position[2], ArkUI_Int32 (*windowPosition)[2]);
+    ArkUI_Int32 (*convertPositionFromWindow)(
+        ArkUINodeHandle node, ArkUI_Int32 windowPosition[2], ArkUI_Int32 (*position)[2]);
 };
 
 struct ArkUINodeContentEvent {

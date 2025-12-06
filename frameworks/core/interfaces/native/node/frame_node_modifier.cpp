@@ -214,6 +214,30 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
     return true;
 }
 
+ArkUI_Int32 ConvertPositionToWindow(ArkUINodeHandle node, ArkUI_Int32 position[2], ArkUI_Int32 (*windowPosition)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    auto offset = frameNode->ConvertPositionToWindow({ PipelineBase::Vp2PxWithCurrentDensity(position[0]),
+                                                PipelineBase::Vp2PxWithCurrentDensity(position[1]) }, false);
+    (*windowPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    (*windowPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 ConvertPositionFromWindow(ArkUINodeHandle node, ArkUI_Int32 windowPosition[2], ArkUI_Int32 (*position)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    auto offset = frameNode->ConvertPositionToWindow({ PipelineBase::Vp2PxWithCurrentDensity(windowPosition[0]),
+                                               PipelineBase::Vp2PxWithCurrentDensity(windowPosition[1]) }, true);
+    (*position)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    (*position)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
@@ -1215,6 +1239,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .resetFocusDependence = ResetFocusDependence,
         .applyAttributesFinish = ApplyAttributesFinish,
         .isOnRenderTree = IsOnRenderTree,
+        .convertPositionToWindow = ConvertPositionToWindow,
+        .convertPositionFromWindow = ConvertPositionFromWindow,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

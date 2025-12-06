@@ -4108,6 +4108,14 @@
         "name": "OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NaviteModule_ConvertPositionToWindow"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NaviteModule_ConvertPositionFromWindow"
+    },
+    {
         "first_introduced": "21",
         "name": "OH_ArkUI_PositionEdges_Create"
     },
