@@ -17,7 +17,7 @@
 #include <regex>
 
 #include <ani_signature_builder.h>
-#include "log/hds_log.h"
+
 #include "ani_utils.h"
 
 namespace OHOS::Ace {
