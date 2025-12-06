@@ -48,6 +48,16 @@ void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPo
 }
 
 template<>
+void AssignCast(std::optional<MarqueeUpdatePolicy>& dst, const Ark_MarqueeUpdatePolicy& src)
+{
+    switch (src) {
+        case ARK_MARQUEE_UPDATE_POLICY_DEFAULT: dst = MarqueeUpdatePolicy::DEFAULT; break;
+        case ARK_MARQUEE_UPDATE_POLICY_PRESERVE_POSITION: dst = MarqueeUpdatePolicy::PRESERVE_POSITION; break;
+        default: LOGE("Unexpected enum value in Ark_MarqueeUpdatePolicy: %{public}d", src);
+    }
+}
+
+template<>
 inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
 {
     FontSettingOptions options;
@@ -103,6 +113,15 @@ TextMarqueeOptions Convert(const Ark_TextMarqueeOptions& src)
         options.UpdateTextMarqueeStartPolicy(optStartPolicy.value());
     }
 
+    auto optUpdatePolicy = OptConvert<MarqueeUpdatePolicy>(src.marqueeUpdatePolicy);
+    if (optUpdatePolicy) {
+        options.UpdateTextMarqueeUpdatePolicy(optUpdatePolicy.value());
+    }
+
+    auto optSpacing = OptConvert<CalcDimension>(src.spacing);
+    if (optSpacing && !optSpacing.value().IsNegative()) {
+        options.UpdateTextMarqueeSpacing(optSpacing.value());
+    }
     return options;
 }
 

@@ -97,7 +97,7 @@ import { ListItemGroupStyle, ListItemGroupOptions } from "./../../component/list
 import { ListItemStyle, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../../component/listItem"
 import { Scroller, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollDirection, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, ScrollToIndexOptions, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions } from "./../../component/scroll"
 import { LoadingProgressConfiguration, LoadingProgressStyle } from "./../../component/loadingProgress"
-import { MarqueeStartPolicy, MarqueeState, TextController, TextAttribute, TextOptions, TextOverflowOptions, TextResponseType, TextSpanType, TextMarqueeOptions } from "./../../component/text"
+import { MarqueeStartPolicy, MarqueeState, MarqueeUpdatePolicy, TextController, TextAttribute, TextOptions, TextOverflowOptions, TextResponseType, TextSpanType, TextMarqueeOptions } from "./../../component/text"
 import { ModelType, SceneOptions } from "./../../component/component3d"
 import { MultiAppMode, ModuleMetadata, ApplicationInfo } from "bundleManager.ApplicationInfo"
 import { NavDestinationActiveReason, NavDestinationMode, NavigationSystemTransitionType, NavDestinationTransition, NavDestinationModuleInfo, NavDestinationContext, NestedScrollInfo, RouteMapConfig, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./../../component/navDestination"
@@ -1756,6 +1756,9 @@ export class TypeChecker {
     static isMarqueeState(value: Object | string | number | undefined): boolean {
         return value instanceof MarqueeState
     }
+    static isMarqueeUpdatePolicy(value: Object | string | number | undefined): boolean {
+        return value instanceof MarqueeUpdatePolicy
+    }
     static isMarqueeUpdateStrategy(value: Object | string | number | undefined): boolean {
         return value instanceof MarqueeUpdateStrategy
     }
@@ -3262,8 +3265,8 @@ export class TypeChecker {
     static isTextInputStyle(value: Object | string | number | undefined): boolean {
         return value instanceof TextInputStyle
     }
-    static isTextMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
-        return value instanceof TextMarqueeOptions
+    static isTextMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
+         return value instanceof TextMarqueeOptions
     }
     static isTextMenuItem(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof TextMenuItem
@@ -4695,6 +4698,12 @@ export class TypeChecker {
     }
     static MarqueeState_FromNumeric(ordinal: int32): MarqueeState {
         return MarqueeState.fromValue(ordinal)
+    }
+    static MarqueeUpdatePolicy_ToNumeric(value: MarqueeUpdatePolicy): int32 {
+        return value.valueOf()
+    }
+    static MarqueeUpdatePolicy_FromNumeric(ordinal: int32): MarqueeUpdatePolicy {
+        return MarqueeUpdatePolicy.fromValue(ordinal)
     }
     static MarqueeUpdateStrategy_ToNumeric(value: MarqueeUpdateStrategy): int32 {
         return value.valueOf()

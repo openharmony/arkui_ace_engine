@@ -1648,8 +1648,7 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
 
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
-        auto delayDouble = delay->ToNumber<double>();
-        auto delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delay->ToNumber<double>());
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1671,6 +1670,25 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
     if (getStartPolicy->IsNumber()) {
         auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
         options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
+
+    auto getUpdatePolicy = paramObject->GetProperty("marqueeUpdatePolicy");
+    if (getUpdatePolicy->IsNumber()) {
+        auto updatePolicy = static_cast<MarqueeUpdatePolicy>(getUpdatePolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeUpdatePolicy(updatePolicy);
+    }
+
+    auto getSpacing = paramObject->GetProperty("spacing");
+    if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
+        CalcDimension value;
+        UnRegisterResource("MarqueeSpacing");
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()) {
+            options.UpdateTextMarqueeSpacing(value);
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<CalcDimension>("MarqueeSpacing", resObj, value);
+        }
     }
 }
 

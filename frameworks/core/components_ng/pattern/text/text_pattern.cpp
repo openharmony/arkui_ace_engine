@@ -7070,6 +7070,18 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
                 }
             }
         },
+
+        { "MarqueeSpacing", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        prop->ResetTextMarqueeSpacing();
+                    } else {
+                        prop->UpdateTextMarqueeSpacing(*realValue);
+                    }
+                }
+            }
+        },
         
         { "LineSpacing", [](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {

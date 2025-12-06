@@ -4414,6 +4414,12 @@ let MarqueeStartPolicy;
   MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
 })(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
+let MarqueeUpdatePolicy;
+(function (MarqueeUpdatePolicy) {
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.PRESERVE_POSITION = 1] = 'PRESERVE_POSITION';
+})(MarqueeUpdatePolicy || (MarqueeUpdatePolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus.CREATE = 0;

@@ -2325,6 +2325,8 @@ struct ArkUITextMarqueeOptions {
     ArkUI_Bool start;
     ArkUI_Bool fromStart;
     ArkUI_Bool fadeout;
+    ArkUI_Int32 marqueeUpdatePolicy;
+    struct ArkUIDimensionType spacing;
 };
 
 struct ArkUITabBarBackgroundEffect {
@@ -3420,8 +3422,9 @@ struct ArkUITextModifier {
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
     void (*setTextEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextEnableHapticFeedback)(ArkUINodeHandle node);
-    void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value);
+    void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value, void* spacingRawPtr);
     void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
+    ArkUITextMarqueeOptions (*getTextMarqueeOptions)(ArkUINodeHandle node);
     void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);

@@ -1292,17 +1292,23 @@ export enum MarqueeStartPolicy {
     DEFAULT = 0,
     ON_FOCUS = 1
 }
+export enum MarqueeUpdatePolicy {
+    DEFAULT = 0,
+    PRESERVE_POSITION = 1
+}
 export interface TextOptions {
     controller: TextController;
 }
 export interface TextMarqueeOptions {
     start: boolean;
     step?: double;
+    spacing?: LengthMetrics;
     loop?: int32;
     fromStart?: boolean;
     delay?: int32;
     fadeout?: boolean;
     marqueeStartPolicy?: MarqueeStartPolicy;
+    marqueeUpdatePolicy?: MarqueeUpdatePolicy;
 }
 
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
@@ -1790,6 +1796,14 @@ export class TextMarqueeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSpacing  = value.spacing
+        if (valueHolderForSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpacingTmpValue  = valueHolderForSpacing!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForLoop  = value.loop
         if (valueHolderForLoop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1830,6 +1844,14 @@ export class TextMarqueeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForMarqueeUpdatePolicy  = value.marqueeUpdatePolicy
+        if (valueHolderForMarqueeUpdatePolicy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarqueeUpdatePolicyTmpValue  = (valueHolderForMarqueeUpdatePolicy as MarqueeUpdatePolicy)
+            valueSerializer.writeInt32(valueHolderForMarqueeUpdatePolicyTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextMarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -1840,6 +1862,12 @@ export class TextMarqueeOptions_serializer {
             stepTmpBuf = valueDeserializer.readFloat64()
         }
         const stepTmpResult : double | undefined = stepTmpBuf
+        const spacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spacingTmpBuf : LengthMetrics | undefined = undefined
+        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spacingTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        }
+        const spacingTmpResult : LengthMetrics | undefined = spacingTmpBuf
         const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let loopTmpBuf : int32 | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1870,7 +1898,13 @@ export class TextMarqueeOptions_serializer {
             marqueeStartPolicyTmpBuf = MarqueeStartPolicy.fromValue(valueDeserializer.readInt32())
         }
         const marqueeStartPolicyTmpResult : MarqueeStartPolicy | undefined = marqueeStartPolicyTmpBuf
-        let value : TextMarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, delay: delayTmpResult, fadeout: fadeoutTmpResult, marqueeStartPolicy: marqueeStartPolicyTmpResult} as TextMarqueeOptions)
+        const marqueeUpdatePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marqueeUpdatePolicyTmpBuf : MarqueeUpdatePolicy | undefined = undefined
+        if ((marqueeUpdatePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            marqueeUpdatePolicyTmpBuf = MarqueeUpdatePolicy.fromValue(valueDeserializer.readInt32())
+        }
+        const marqueeUpdatePolicyTmpResult : MarqueeUpdatePolicy | undefined = marqueeUpdatePolicyTmpBuf
+        let value : TextMarqueeOptions = ({start: startTmpResult, step: stepTmpResult, spacing: spacingTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, delay: delayTmpResult, fadeout: fadeoutTmpResult, marqueeStartPolicy: marqueeStartPolicyTmpResult, marqueeUpdatePolicy: marqueeUpdatePolicyTmpResult} as TextMarqueeOptions)
         return value
     }
 }

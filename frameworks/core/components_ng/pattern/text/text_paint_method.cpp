@@ -69,6 +69,10 @@ void TextPaintMethod::DoStartTextRace()
     option.delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
     option.fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
     option.startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(theme->GetMarqueeStartPolicy());
+    option.updatePolicy = layoutProperty->GetTextMarqueeUpdatePolicy().value_or(MarqueeUpdatePolicy::DEFAULT);
+    if (layoutProperty->HasTextMarqueeSpacing()) {
+        option.spacing = layoutProperty->GetTextMarqueeSpacing().value();
+    }
 
     textContentModifier_->StartTextRace(option);
 }

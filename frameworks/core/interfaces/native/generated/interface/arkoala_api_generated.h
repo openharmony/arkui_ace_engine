@@ -2418,8 +2418,6 @@ typedef struct Ark_TextClockOptions Ark_TextClockOptions;
 typedef struct Opt_TextClockOptions Opt_TextClockOptions;
 typedef struct Ark_TextContentControllerOptions Ark_TextContentControllerOptions;
 typedef struct Opt_TextContentControllerOptions Opt_TextContentControllerOptions;
-typedef struct Ark_TextMarqueeOptions Ark_TextMarqueeOptions;
-typedef struct Opt_TextMarqueeOptions Opt_TextMarqueeOptions;
 typedef struct Ark_TextMenuOptions Ark_TextMenuOptions;
 typedef struct Opt_TextMenuOptions Opt_TextMenuOptions;
 typedef struct Ark_TextRange Ark_TextRange;
@@ -2911,6 +2909,8 @@ typedef struct Ark_TextChangeOptions Ark_TextChangeOptions;
 typedef struct Opt_TextChangeOptions Opt_TextChangeOptions;
 typedef struct Ark_TextDecorationOptions Ark_TextDecorationOptions;
 typedef struct Opt_TextDecorationOptions Opt_TextDecorationOptions;
+typedef struct Ark_TextMarqueeOptions Ark_TextMarqueeOptions;
+typedef struct Opt_TextMarqueeOptions Opt_TextMarqueeOptions;
 typedef struct Ark_TextMenuItem Ark_TextMenuItem;
 typedef struct Opt_TextMenuItem Opt_TextMenuItem;
 typedef struct Ark_TextPickerRangeContent Ark_TextPickerRangeContent;
@@ -5445,6 +5445,14 @@ typedef struct Opt_MarqueeState {
     Ark_Tag tag;
     Ark_MarqueeState value;
 } Opt_MarqueeState;
+typedef enum Ark_MarqueeUpdatePolicy {
+    ARK_MARQUEE_UPDATE_POLICY_DEFAULT = 0,
+    ARK_MARQUEE_UPDATE_POLICY_PRESERVE_POSITION = 1,
+} Ark_MarqueeUpdatePolicy;
+typedef struct Opt_MarqueeUpdatePolicy {
+    Ark_Tag tag;
+    Ark_MarqueeUpdatePolicy value;
+} Opt_MarqueeUpdatePolicy;
 typedef enum Ark_MarqueeUpdateStrategy {
     ARK_MARQUEE_UPDATE_STRATEGY_DEFAULT = 0,
     ARK_MARQUEE_UPDATE_STRATEGY_PRESERVE_POSITION = 1,
@@ -16200,20 +16208,6 @@ typedef struct Opt_TextContentControllerOptions {
     Ark_Tag tag;
     Ark_TextContentControllerOptions value;
 } Opt_TextContentControllerOptions;
-typedef struct Ark_TextMarqueeOptions {
-    /* kind: Interface */
-    Ark_Boolean start;
-    Opt_Float64 step;
-    Opt_Int32 loop;
-    Opt_Boolean fromStart;
-    Opt_Int32 delay;
-    Opt_Boolean fadeout;
-    Opt_MarqueeStartPolicy marqueeStartPolicy;
-} Ark_TextMarqueeOptions;
-typedef struct Opt_TextMarqueeOptions {
-    Ark_Tag tag;
-    Ark_TextMarqueeOptions value;
-} Opt_TextMarqueeOptions;
 typedef struct Ark_TextMenuOptions {
     /* kind: Interface */
     Opt_TextMenuShowMode showMode;
@@ -18865,6 +18859,22 @@ typedef struct Opt_TextDecorationOptions {
     Ark_Tag tag;
     Ark_TextDecorationOptions value;
 } Opt_TextDecorationOptions;
+typedef struct Ark_TextMarqueeOptions {
+    /* kind: Interface */
+    Ark_Boolean start;
+    Opt_Float64 step;
+    Opt_LengthMetrics spacing;
+    Opt_Int32 loop;
+    Opt_Boolean fromStart;
+    Opt_Int32 delay;
+    Opt_Boolean fadeout;
+    Opt_MarqueeStartPolicy marqueeStartPolicy;
+    Opt_MarqueeUpdatePolicy marqueeUpdatePolicy;
+} Ark_TextMarqueeOptions;
+typedef struct Opt_TextMarqueeOptions {
+    Ark_Tag tag;
+    Ark_TextMarqueeOptions value;
+} Opt_TextMarqueeOptions;
 typedef struct Ark_TextMenuItem {
     /* kind: Interface */
     Ark_ResourceStr content;

@@ -967,51 +967,26 @@ void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
     SetMarqueeOptions(frameNode, options);
 }
 
+#define UPDATE_OR_RESET_MARQUEE_PROPERTY(Property) \
+    if (options.Has##Property()) { \
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY( \
+            TextLayoutProperty, Property, options.Get##Property##Value(), frameNode); \
+    } else { \
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Property, frameNode); \
+    }
+
 void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options)
 {
     CHECK_NULL_VOID(frameNode);
-    if (options.HasTextMarqueeStart()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, frameNode);
-    }
-    if (options.HasTextMarqueeStep()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStep, options.GetTextMarqueeStepValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, frameNode);
-    }
-    if (options.HasTextMarqueeLoop()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeLoop, options.GetTextMarqueeLoopValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, frameNode);
-    }
-    if (options.HasTextMarqueeDirection()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeDirection, options.GetTextMarqueeDirectionValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, frameNode);
-    }
-    if (options.HasTextMarqueeDelay()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
-    }
-    if (options.HasTextMarqueeFadeout()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeFadeout, options.GetTextMarqueeFadeoutValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeFadeout, frameNode);
-    }
-    if (options.HasTextMarqueeStartPolicy()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStartPolicy, options.GetTextMarqueeStartPolicyValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStartPolicy, frameNode);
-    }
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStart);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStep);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeLoop);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeDirection);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeDelay);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeFadeout);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStartPolicy);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeUpdatePolicy);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeSpacing);
 }
 
 void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
@@ -1064,6 +1039,12 @@ TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
     }
     if (layoutProperty->HasTextMarqueeStartPolicy()) {
         options.UpdateTextMarqueeStartPolicy(layoutProperty->GetTextMarqueeStartPolicy().value());
+    }
+    if (layoutProperty->HasTextMarqueeUpdatePolicy()) {
+        options.UpdateTextMarqueeUpdatePolicy(layoutProperty->GetTextMarqueeUpdatePolicy().value());
+    }
+    if (layoutProperty->HasTextMarqueeSpacing()) {
+        options.UpdateTextMarqueeSpacing(layoutProperty->GetTextMarqueeSpacing().value());
     }
 
     return options;
