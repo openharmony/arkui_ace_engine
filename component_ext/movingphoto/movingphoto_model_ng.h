@@ -72,7 +72,6 @@ public:
     static void SetMovingPhotoFormat(MovingPhotoNode* framenode, MovingPhotoFormat format);
     static void SetDynamicRangeMode(MovingPhotoNode* framenode, DynamicRangeMode rangeMode);
     static void SetWaterMask(MovingPhotoNode* framenode, bool enabled);
-    static void GetXmageHeight(MovingPhotoNode* framenode);
     static void SetXmagePosition(MovingPhotoNode* framenode);
     static void SetMovingPhotoController(MovingPhotoNode *framenode, const RefPtr<MovingPhotoController> &controller);
 private:

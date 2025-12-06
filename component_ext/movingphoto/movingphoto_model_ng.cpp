@@ -490,14 +490,6 @@ void MovingPhotoModelNG::SetDynamicRangeMode(MovingPhotoNode* frameNode, Dynamic
     movingPhotoPattern->SetDynamicRangeMode(rangeMode);
 }
 
-void MovingPhotoModelNG::GetXmageHeight(MovingPhotoNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(movingPhotoPattern);
-    movingPhotoPattern->GetXmageHeight();
-}
-
 void MovingPhotoModelNG::SetXmagePosition(MovingPhotoNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
