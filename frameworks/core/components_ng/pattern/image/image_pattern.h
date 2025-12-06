@@ -170,6 +170,8 @@ public:
 
     void UpdateOrientation();
 
+    void PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host);
+
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;

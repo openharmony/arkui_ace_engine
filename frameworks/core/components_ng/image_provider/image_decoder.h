@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_IMAGE_DECODER_H
 
 #include "ui/base/geometry/ng/size_t.h"
+
+#include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -31,6 +33,7 @@ struct ImageDecoderConfig {
     bool isHdrDecoderNeed_ = false;
     PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
 };
+
 class ImageDecoder : public virtual AceType {
 public:
     // decode image using Skia, return true if process is successful.
@@ -44,6 +47,7 @@ public:
     static WeakPtr<PixelMap> GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);
     static void RemoveFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);
     static void ClearPixelMapCache();
+
 private:
     static void AddToPixelMapCache(
         const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap);
@@ -51,6 +55,8 @@ private:
     static std::shared_ptr<RSImage> ResizeDrawingImage(
         const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig);
     static void SwapDecodeSize(const RefPtr<ImageObject>& obj, int32_t& width, int32_t& height);
+    static void HandleDecodeFormat(
+        const RefPtr<ImageObject>& obj, const RefPtr<ImageSource>& imageSource, PixelMapConfig& config);
 
     static RefPtr<CanvasImage> QueryCompressedCache(
         const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig);
