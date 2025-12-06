@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, DrawModifier, TouchTestInfo, TouchResult, extractors, GestureModifier, GestureType, Gesture, GestureGroup, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from "#handwritten"
+import { AttributeModifier, DrawModifier, TouchTestInfo, TouchResult, extractors, GestureModifier, GestureType, Gesture, GestureGroup, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty, hookKeyboardShortcut, hookMergeKeyboardShortcuts, KeyboardShortcut } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
@@ -300,6 +300,7 @@ export class CommonMethodModifier implements CommonMethod {
     _keyboardShortcut_0_0value?: string | FunctionKey | undefined
     _keyboardShortcut_0_1value?: Array<ModifierKey> | undefined
     _keyboardShortcut_0_2value?: (() => void) | undefined
+    _keyboardShortcutList: Array<KeyboardShortcut> = []
     _accessibilityGroup_0_0value?: boolean | undefined
     _accessibilityGroup_0_1value?: AccessibilityOptions | undefined
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
@@ -3613,7 +3614,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[198] != 0) {
             switch (flagArray[198]) {
                 case 1: {
-                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined | undefined));
+                    hookKeyboardShortcut(peer, this._keyboardShortcutList);
                     flagArray[198] = 2;
                     break;
                 }
@@ -6074,7 +6075,7 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[198]) {
                 case 1:
                 case 3: {
-                    this.keyboardShortcut(modifier._keyboardShortcut_0_0value, modifier._keyboardShortcut_0_1value, modifier._keyboardShortcut_0_2value);
+                    hookMergeKeyboardShortcuts(this, modifier._keyboardShortcutList);
                     break;
                 }
                 default: {
@@ -8145,6 +8146,7 @@ export class CommonMethodModifier implements CommonMethod {
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         if (((this._flagArray[198]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[198] = 1
+            this._keyboardShortcutList.push({value: value, keys: keys, action: action})
             this._keyboardShortcut_0_0value = value
             this._keyboardShortcut_0_1value = keys
             this._keyboardShortcut_0_2value = action
