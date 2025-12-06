@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "configuration_convertor.h"
+#include "configuration.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"

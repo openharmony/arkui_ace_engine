@@ -19,6 +19,7 @@
 #include "form_renderer_hilog.h"
 #include "form_event_report.h"
 #include "base/utils/utils.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace Ace {
