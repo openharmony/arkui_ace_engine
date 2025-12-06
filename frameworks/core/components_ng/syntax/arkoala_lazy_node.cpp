@@ -198,7 +198,11 @@ const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach 
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const
     // need to order the child.
-    ForEachL1Node([&](int32_t index, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    if (!moveFromTo_) {
+        ForEachL1Node([&](int32_t index, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    } else {
+        ForEachL1NodeWithOnMove([&](const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+    }
 
     return children_;
 }
@@ -573,6 +577,27 @@ void ArkoalaLazyNode::ForEachL1Node(
         CHECK_NULL_CONTINUE(node);
         if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
             cbFunc(index, node);
+        }
+    }
+}
+
+void ArkoalaLazyNode::ForEachL1NodeWithOnMove(const std::function<void(const RefPtr<UINode>& node)>& cbFunc) const
+{
+    std::map<int32_t, int32_t> mappedNode4Index;
+    for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
+        const auto index = it->first;
+        const auto mappedIndex = ConvertFromToIndexRevert(index);
+        const RefPtr<UINode> node = it->second;
+        CHECK_NULL_CONTINUE(node);
+        if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
+            mappedNode4Index.emplace(mappedIndex, index);
+        }
+    }
+    for (const auto& iter : mappedNode4Index) {
+        const auto index = iter.second;
+        const auto nodePtr = node4Index_.Get(index);
+        if (nodePtr) {
+            cbFunc(nodePtr.value());
         }
     }
 }
