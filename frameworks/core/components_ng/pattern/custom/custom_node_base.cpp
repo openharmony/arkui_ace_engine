@@ -31,8 +31,15 @@ CustomNodeBase::~CustomNodeBase()
     }
     if (destroyFunc_) {
         ACE_SCOPED_TRACE("CustomNodeBase:Destroy [%s]", GetJSViewName().c_str());
+        FireTriggerLifecycleFunc(LifeCycleEvent::ON_DELETE);
         destroyFunc_();
     }
+}
+
+bool CustomNodeBase::FireTriggerLifecycleFunc(int32_t eventId)
+{
+    ACE_SCOPED_TRACE("FireTriggerLifecycleFunc, eventId = [%d], name = [%s]", eventId, GetJSViewName().c_str());
+    return triggerLifecycleFunc_ && triggerLifecycleFunc_(eventId);
 }
 
 void CustomNodeBase::FireOnAppear()
@@ -46,6 +53,7 @@ void CustomNodeBase::FireOnAppear()
 void CustomNodeBase::FireOnDisappear()
 {
     if (destroyFunc_) {
+        FireTriggerLifecycleFunc(LifeCycleEvent::ON_DELETE);
         destroyFunc_();
     }
 }
@@ -55,6 +63,11 @@ void CustomNodeBase::FireDidBuild()
     if (didBuildFunc_) {
         didBuildFunc_();
     }
+}
+
+void CustomNodeBase::SetTriggerLifecycleFunction(std::function<bool(int32_t)>&& triggerLifecycleFunc)
+{
+    triggerLifecycleFunc_ = std::move(triggerLifecycleFunc);
 }
 
 void CustomNodeBase::SetAppearFunction(std::function<void()>&& appearFunc)

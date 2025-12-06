@@ -107,6 +107,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
+  protected __lifecycle__Internal: CustomComponentLifecycle;
+
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
@@ -125,6 +127,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
     this.id_ = elmtId === UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+    this.__lifecycle__Internal = new CustomComponentLifecycle(this);
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -142,6 +145,16 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
     this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
+    this.aboutToInit();
+  }
+
+  public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
+    let res: boolean = this.__lifecycle__Internal.handleEvent(eventId);
+    return res;
+  }
+
+  public getLifecycle(): CustomComponentLifecycle {
+    return this.__lifecycle__Internal;
   }
 
   public static create(view: PUV2ViewBase): void {
@@ -307,7 +320,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   abstract aboutToBeDeleted(): void;
 
   aboutToReuse(_: Object): void { }
+  public aboutToRecover(params?: Record<string, Object>): void { }
   aboutToRecycle(): void { }
+  public aboutToReclaim(): void { }
+  public aboutToInit(): void { }
+  public aboutToExpand(): void { }
+  public aboutToAttach(): void { }
+  public aboutToDetach(): void { }
+  public aboutToDelete(): void { }
 
   public isDeleting(): boolean {
     return this.isDeleting_;

@@ -50,6 +50,7 @@ bool CustomNode::Render(int64_t deadline)
         if (!CheckFireOnAppear()) {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
+            FireTriggerLifecycleFunc(LifeCycleEvent::ON_EXPAND);
             if (deadline > 0 && GetSysTimestamp() > deadline) {
                 std::swap(renderFunction, renderFunction_);
                 return false;
@@ -85,13 +86,14 @@ bool CustomNode::Render(int64_t deadline)
                 child->MountToParent(Claim(this));
             }
         }
-        {
-            ACE_SCOPED_TRACE("CustomNode::DidBuild");
-            FireDidBuild();
-        }
+        NodeDidBuild();
     }
     {
         FireRecycleRenderFunc();
+    }
+    if (needMountToMainTree_) {
+        FireTriggerLifecycleFunc(LifeCycleEvent::ON_ATTACH);
+        needMountToMainTree_ = false;
     }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto child = GetFirstChild();
@@ -102,6 +104,32 @@ bool CustomNode::Render(int64_t deadline)
     }
     needMarkParent_ = needMarkParentBak;
     return true;
+}
+
+void CustomNode::NodeDidBuild()
+{
+    ACE_SCOPED_TRACE("CustomNode::DidBuild");
+    FireTriggerLifecycleFunc(LifeCycleEvent::ON_EXPANDED);
+    FireDidBuild();
+    isDidBuild_ = true;
+}
+
+void CustomNode::OnAttachToMainTree(bool)
+{
+    if (!isDidBuild() || HasRecycleRenderFunc()) {
+        // To mount a node to Main tree, must build or reuse to enable the node to enter the expand state first.
+        needMountToMainTree_ = true;
+    }
+    UINode::OnAttachToMainTree();
+}
+
+void CustomNode::OnDetachFromMainTree(bool, PipelineContext*)
+{
+    UINode::OnDetachFromMainTree();
+    if (!needMountToMainTree_) {
+        // if needMountToMainTree_ is true, the node is not mounted to main tree yet.
+        FireTriggerLifecycleFunc(LifeCycleEvent::ON_DETACH);
+    }
 }
 
 void CustomNode::FireCustomDisappear()
