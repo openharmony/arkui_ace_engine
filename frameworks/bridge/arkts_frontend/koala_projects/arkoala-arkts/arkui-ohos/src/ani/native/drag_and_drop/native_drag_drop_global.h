@@ -59,5 +59,6 @@ void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOp
 // extractors
 ani_long ExtractorFromUnifiedDataToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_object data);
 ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool& isSuccess);
 } // namespace OHOS::Ace::Ani
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL
