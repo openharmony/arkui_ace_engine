@@ -6479,6 +6479,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     auto transition = tabContentAnimatedTransition.transition;
 
     if (!transition) {
+        LoadCompleteManagerStopCollect();
         OnCustomAnimationFinish(fromIndex, toIndex, false);
         return;
     }
@@ -6490,6 +6491,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnCustomAnimationFinish(fromIndex, toIndex, hasOnChanged);
+        swiperPattern->LoadCompleteManagerStopCollect();
     });
 
     transition(proxy);

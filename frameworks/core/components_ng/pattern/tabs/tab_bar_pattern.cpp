@@ -1588,6 +1588,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
+        LoadCompleteManagerStartCollect(index);
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
