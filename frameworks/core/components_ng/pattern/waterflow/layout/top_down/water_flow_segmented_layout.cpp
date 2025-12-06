@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/event_report.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -40,6 +41,19 @@ bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfo
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
             childrenCnt, info->segmentTails_.back() + 1);
+
+        auto host = wrapper_->GetHostNode();
+        CHECK_NULL_RETURN(host, false);
+        int32_t hostId = host->GetAccessibilityId();
+        if (hostId == info->GetReportedHostId()) {
+            return false;
+        }
+        std::string subErrorType = "Id = " + std::to_string(host->GetAccessibilityId()) +
+                                    ", Sections number = " + std::to_string(childrenCnt) +
+                                    ", LazyForEach/Repeat number =" + std::to_string(info->segmentTails_.back() + 1);
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::CHILDREN_COUNT_DISMATDH,
+            subErrorType);
+        info->SetReportedHostId(hostId);
         return false;
     }
     return true;

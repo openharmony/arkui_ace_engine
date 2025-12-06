@@ -205,6 +205,16 @@ public:
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    int32_t GetReportedHostId() const
+    {
+        return reportedHostId_;
+    }
+
+    void SetReportedHostId(int32_t reportedHostId)
+    {
+        reportedHostId_ = reportedHostId;
+    }
+
     virtual void InvalidatedOffset() = 0;
 
     /**
@@ -264,6 +274,7 @@ public:
     int32_t repeatDifference_ = 0;
     int32_t firstRepeatCount_ = 0;
     int32_t childrenCount_ = 0;
+    int32_t reportedHostId_ = 0;
 
     // unfold the LazyVGrid during the position calculation.
     bool duringPositionCalc_ = false;

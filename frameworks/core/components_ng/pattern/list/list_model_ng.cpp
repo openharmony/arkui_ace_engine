@@ -19,6 +19,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -625,6 +626,10 @@ bool ListModelNG::GetShowCached(FrameNode* frameNode)
 
 void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::CALL_SET_CACHE_RANGE);
     CacheRange range { min, max };
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, range, frameNode);
 }

@@ -147,11 +147,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     auto optionCanOverScroll = obj->GetProperty("canOverScroll");
     bool canStayOverScroll = optionCanOverScroll->IsBoolean() ? optionCanOverScroll->ToBoolean() : false;
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling ScrollTo function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
     if (direction == Axis::FREE &&
@@ -194,11 +190,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling ScrollEdge function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     if (scrollController->GetScrollDirection() == Axis::FREE) { // allow scrolling to left and right edges
         if (edge == AlignDeclaration::Edge::START) {
@@ -253,11 +245,7 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling ScrollToIndex function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     // 2: parameters count, 1: parameter index
     auto smoothArg = args[1];
     if (args.Length() >= 2 && smoothArg->IsBoolean()) {
@@ -302,11 +290,7 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
         smooth = smoothValue->ToBoolean();
     }
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling ScrollPage function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     ContainerScope scope(instanceId_);
     scrollController->ScrollPage(!next, smooth);
 }
@@ -314,11 +298,7 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling CurrentOffset function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     auto retObj = JSRef<JSObject>::New();
     ContainerScope scope(instanceId_);
     auto offset = scrollController->GetCurrentOffset();
@@ -340,11 +320,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
         return;
     }
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling ScrollBy function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
 
     ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
@@ -371,11 +347,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
 void JSScroller::IsAtEnd(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
-    if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling IsAtEnd function");
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     ContainerScope scope(instanceId_);
     bool isAtEnd = scrollController->IsAtEnd();
     auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));

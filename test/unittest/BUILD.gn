@@ -764,6 +764,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
+    "$ace_root/test/mock/base/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/animation/mock_animation_manager.cpp",
