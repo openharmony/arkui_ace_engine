@@ -135,7 +135,7 @@ namespace OHOS::Ace::NG::Converter {
     ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src)
     {
         return {
-            .offset = Dimension(src->offsetRemain)
+            .offset = Converter::Convert<Dimension>(src->offsetRemain)
         };
     }
 
