@@ -830,11 +830,13 @@ std::optional<Msdp::DeviceStatus::DragData> EnvelopedDragData(std::shared_ptr<Dr
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    const int32_t materialId = NG::DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
     return Msdp::DeviceStatus::DragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dragNumber, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag,
+        materialId };
 }
 
 void SetDragSizeAndData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,

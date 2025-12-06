@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -181,11 +183,12 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     auto isDragDelay = (dragAction->dataLoadParams != nullptr);
+    auto materialId = DragDropFuncWrapper::ParseUiMaterial(dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
-        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialId };
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -422,6 +425,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
             }
         }
     }
+    option.options.material = imageContext->GetSystemMaterial();
 }
 
 void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option, bool isMultiSelectionEnabled)
@@ -501,6 +505,14 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
     arkExtraInfoJson->Put("shadow_corner", shadow.GetBlurRadius());
     arkExtraInfoJson->Put("shadow_elevation", shadow.GetElevation());
     arkExtraInfoJson->Put("shadow_is_hardwareacceleration", shadow.GetHardwareAcceleration());
+}
+
+int32_t DragDropFuncWrapper::ParseUiMaterial(const DragPreviewOption& option)
+{
+    int32_t materialId = -1;
+    CHECK_NULL_RETURN(option.options.material, materialId);
+    materialId = MaterialUtils::CallGetMaterialId(AceType::RawPtr(option.options.material));
+    return materialId;
 }
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
@@ -999,6 +1011,10 @@ void DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(
     if (optionsFromModifier.borderRadius.has_value()) {
         target->UpdateBorderRadius(optionsFromModifier.borderRadius.value());
         target->UpdateClipEdge(true);
+    }
+
+    if (optionsFromModifier.material) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(targetNode), AceType::RawPtr(optionsFromModifier.material));
     }
 }
 
