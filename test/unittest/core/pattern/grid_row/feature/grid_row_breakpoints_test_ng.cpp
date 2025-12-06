@@ -461,4 +461,21 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize_SelfDefine_01,
      */
     EXPECT_EQ(result, V2::GridSizeType::XL);
 }
+
+/**
+ * @tc.name: ProcessGridSizeTypeNULLPipelineContext
+ * @tc.desc: Test ProcessGridSizeType will not crash when the pipeline context is NULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeTypeNULLPipelineContext, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    Size size(1000, 1000);
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, nullptr);
+    /**
+     * @tc.expected: breakpoint is changed to UNDEFINED when the pipeline context is NULL
+     */
+    EXPECT_EQ(result, V2::GridSizeType::UNDEFINED);
+}
 } // namespace OHOS::Ace::NG
