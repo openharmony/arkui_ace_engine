@@ -2685,9 +2685,11 @@ ArkUINativeModuleValue WebBridge::SetOnWindowNewExt(ArkUIRuntimeCallInfo* runtim
     std::function<void(WebWindowNewExtEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
                                                               func = panda::CopyableGlobal(vm, func)](
                                                               WebWindowNewExtEvent& event) {
+        auto frameNodeUpgrade = weak.Upgrade();
+        CHECK_NULL_VOID(frameNodeUpgrade);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(weak);
+        PipelineContext::SetCallBackNode(frameNodeUpgrade);
         const char* keys[] = { "isAlert", "isUserTrigger", "targetUrl", "handler", "windowFeatures",
             "navigationPolicy" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateJSWindowNewExtHandler(event);
@@ -2718,6 +2720,9 @@ ArkUINativeModuleValue WebBridge::ResetOnWindowNewExt(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetOnWindowNewExt(nativeNode);
     return panda::JSValueRef::Undefined(vm);
