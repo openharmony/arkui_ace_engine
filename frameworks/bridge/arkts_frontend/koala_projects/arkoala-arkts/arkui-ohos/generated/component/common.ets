@@ -167,7 +167,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setSourceTool(sourceTool)
     }
     get getModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._BaseEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
@@ -614,7 +619,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setUseCustomDropAnimation(useCustomDropAnimation)
     }
     get getModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._DragEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
@@ -913,7 +923,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setIntentionCode(intentionCode)
     }
     get getModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._KeyEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
@@ -22351,8 +22366,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand(hand_NonNull)
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
-        return
+        // instructive change start
+        ArkUIAniModule._ClickEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -23226,8 +23242,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
-        return
+        // instructive change start
+        ArkUIAniModule._TouchEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
