@@ -24241,6 +24241,10 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                              const Opt_Boolean* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
+    void (*setIncludeFontPadding)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);                                      
     void (*setBindSelectionMenu)(Ark_NativePointer node,
                                  const Opt_RichEditorSpanType* spanType,
                                  const Opt_CustomNodeBuilder* content,

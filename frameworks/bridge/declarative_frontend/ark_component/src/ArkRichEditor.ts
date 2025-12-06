@@ -521,6 +521,34 @@ class RichEditorUndoStyleModifier extends ModifierWithKey<Optional<UndoStyle>> {
   }
 }
 
+class RichEditorIncludeFontPaddingModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetIncludeFontPadding(node);
+    } else {
+      getUINativeModule().richEditor.setIncludeFontPadding(node, this.value);
+    }
+  }
+}
+
+class RichEditorFallbackLineSpacingModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetFallbackLineSpacing(node);
+    } else {
+      getUINativeModule().richEditor.setFallbackLineSpacing(node, this.value);
+    }
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -678,6 +706,14 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   undoStyle(style: Optional<UndoStyle>): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
+    return this;
+  }
+  includeFontPadding(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorIncludeFontPaddingModifier.identity, RichEditorIncludeFontPaddingModifier, enable);
+    return this;
+  }
+  fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
     return this;
   }
 }

@@ -430,6 +430,8 @@ public:
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};
     virtual void SetScrollBarColor(std::optional<Color> value) {};
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
     virtual void SetSingleLine(bool iaEnable) {};
 
 private:

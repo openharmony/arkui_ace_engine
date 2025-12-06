@@ -120,6 +120,12 @@ public:
     static ArkUINativeModuleValue SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
+    static ArkUINativeModuleValue SetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+    static ArkUINativeModuleValue SetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
     static ArkUINativeModuleValue SetUndoStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetUndoStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 

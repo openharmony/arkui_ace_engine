@@ -10727,6 +10727,34 @@ class RichEditorScrollBarColorModifier extends ModifierWithKey {
 }
 RichEditorScrollBarColorModifier.identity= Symbol('richEditorScrollBarColor');
 
+class RichEditorIncludeFontPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetIncludeFontPadding(node);
+    } else {
+      getUINativeModule().richEditor.setIncludeFontPadding(node, this.value);
+    }
+  }
+}
+RichEditorIncludeFontPaddingModifier.identity = Symbol('richEditorIncludeFontPadding');
+
+class RichEditorFallbackLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetFallbackLineSpacing(node);
+    } else {
+      getUINativeModule().richEditor.setFallbackLineSpacing(node, this.value);
+    }
+  }
+}
+RichEditorFallbackLineSpacingModifier.identity = Symbol('richEditorFallbackLineSpacing');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10903,6 +10931,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   scrollBarColor(style) {
     modifierWithKey(this._modifiersWithKeys, RichEditorScrollBarColorModifier.identity, RichEditorScrollBarColorModifier, style);
+    return this;
+  }
+  includeFontPadding(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorIncludeFontPaddingModifier.identity, RichEditorIncludeFontPaddingModifier, enable);
+    return this;
+  }
+  fallbackLineSpacing(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
     return this;
   }
 }

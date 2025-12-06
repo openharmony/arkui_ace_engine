@@ -4787,6 +4787,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Opt_Boolean* value)
     {
     }
+    void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+    }
+    void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
+    {
+    }
     void SetBindSelectionMenuImpl(Ark_NativePointer node,
                                   const Opt_RichEditorSpanType* spanType,
                                   const Opt_CustomNodeBuilder* content,
@@ -9658,6 +9666,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
             RichEditorAttributeModifier::SetStopBackPressImpl,
             RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
+            RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
+            RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,

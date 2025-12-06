@@ -10956,6 +10956,8 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
     json->PutExtAttr("enableAutoSpacing", isEnableAutoSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("compressLeadingPunctuation", isCompressLeadingPunctuation_ ? "true" : "false", filter);
+    json->PutExtAttr("includeFontPadding", isIncludeFontPadding_ ? "true" : "false", filter);
+    json->PutExtAttr("fallbackLineSpacing", isFallbackLineSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
 }

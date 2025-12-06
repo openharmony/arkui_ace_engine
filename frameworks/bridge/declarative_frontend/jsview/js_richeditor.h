@@ -99,6 +99,8 @@ public:
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSingleLine(const JSCallbackInfo& info);
     static bool ParseJsColorWithResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);

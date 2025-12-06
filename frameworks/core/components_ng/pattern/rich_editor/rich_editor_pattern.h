@@ -1327,6 +1327,28 @@ public:
         return isStopBackPress_;
     }
 
+    void SetIncludeFontPadding(bool isIncludeFontPadding)
+    {
+        CHECK_NULL_VOID(isIncludeFontPadding_ != isIncludeFontPadding);
+        isIncludeFontPadding_ = isIncludeFontPadding;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
+    }
+
+    void SetFallbackLineSpacing(bool isFallbackLineSpacing)
+    {
+        CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
+        isFallbackLineSpacing_ = isFallbackLineSpacing;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
@@ -1946,6 +1968,8 @@ private:
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
+    bool isIncludeFontPadding_ = false;
+    bool isFallbackLineSpacing_ = false;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
     RefPtr<UINode> customKeyboardNode_;
