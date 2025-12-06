@@ -36,6 +36,8 @@ namespace OHOS::Ace {
 
 using namespace icu;
 
+constexpr int32_t INVALID_PRECISION = -1;
+
 struct LocaleProxy final {
     LocaleProxy(const char* language, const char* countryOrRegion, const char* variant, const char* keywordsAndValues)
         : instance(language, countryOrRegion, variant, keywordsAndValues)
@@ -1028,6 +1030,59 @@ void Localization::ParseLocaleTag(
     language = locale.getLanguage();
     script = locale.getScript();
     region = locale.getCountry();
+}
+
+bool Localization::ConvertToDouble(const std::string& str, double& outValue)
+{
+    char* end;
+    errno = 0;
+    double value = std::strtod(str.c_str(), &end);
+    if (!IsValidValue(end, str)) {
+        return false;
+    }
+    outValue = value;
+    return true;
+}
+
+bool Localization::IsValidValue(const char* end, const std::string& str)
+{
+    if (end == str.c_str() || errno == ERANGE || *end != '\0') {
+        return false;
+    }
+    return true;
+}
+
+bool Localization::LocalizeNumber(std::string &inputOutputNum, const int32_t precision)
+{
+    WaitingForInit();
+    if (!locale_) {
+        return false;
+    }
+
+    icu::number::LocalizedNumberFormatter numberFormat = icu::number::NumberFormatter::withLocale(locale_->instance);
+    numberFormat = numberFormat.grouping(UNumberGroupingStrategy::UNUM_GROUPING_OFF);
+    numberFormat = numberFormat.roundingMode(UNUM_ROUND_HALFUP);
+
+    if (precision != INVALID_PRECISION) {
+        numberFormat = numberFormat.precision(icu::number::Precision::fixedFraction(precision));
+    }
+
+    double num = 0.0;
+    if (!Localization::ConvertToDouble(inputOutputNum, num)) {
+        LOGW("Failed to convert string to double: %{private}s", inputOutputNum.c_str());
+        return false;
+    }
+
+    UErrorCode status = U_ZERO_ERROR;
+    UnicodeString formattedNum = numberFormat.formatDouble(num, status).toString(status);
+    if (U_FAILURE(status)) {
+        LOGW("LocalizeNumber formatDouble failed, status = %{public}d", status);
+        return false;
+    }
+
+    inputOutputNum.clear();
+    UnicodeString2String(formattedNum, inputOutputNum);
+    return true;
 }
 
 } // namespace OHOS::Ace

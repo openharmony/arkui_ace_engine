@@ -909,6 +909,7 @@ public:
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
+    static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
 
 private:
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
