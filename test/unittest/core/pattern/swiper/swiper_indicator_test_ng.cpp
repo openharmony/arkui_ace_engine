@@ -1046,6 +1046,43 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0021, TestSize.Level
 }
 
 /**
+ * @tc.name: SwiperIndicatorPatternTestNg0022
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0022, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(3);
+    model.SetSwipeByGroup(false);
+    model.SetLoop(true);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    indicatorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    auto controller = indicatorPattern->GetIndicatorController();
+    controller->SetSwiperNode(frameNode_);
+
+    GestureEvent info;
+    info.mainDelta_ = 1.0f;
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoSwiper;
+    infoSwiper.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoSwiper;
+    pattern_->currentIndex_ = 0;
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+    pattern_->currentIndex_ = 5;
+    touchEventInfo.touches_.front().localLocation_.SetX(2.0f);
+    indicatorPattern->dragStartPoint_.SetX(1.0f);
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+}
+
+/**
  * @tc.name: SwiperPatternDisplayIndicatorTotalCount001
  * @tc.desc: DisplayIndicatorTotalCount when SwipeByGroup is false and loop is false
  * @tc.type: FUNC

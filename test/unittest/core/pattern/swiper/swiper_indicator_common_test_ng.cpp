@@ -486,15 +486,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern013, TestSize.Level1)
     EXPECT_EQ(pattern_->RealTotalCount(), 4);
     layoutProperty_->UpdateDisplayCount(2);
     ChangeIndex(2);
-    /**
-     * @tc.steps: step3. Call HandleLongDragUpdate when CheckIsTouchBottom returns true
-     * @tc.expected: return from HandleLongDragUpdate
-     */
-    indicatorPattern->dragStartPoint_.SetX(0.0f);
-    indicatorPattern->dragStartPoint_.SetY(0.0f);
-    touchLocationInfo.SetLocalLocation(Offset(100.f, 100.f));
-    indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
-    EXPECT_EQ(indicatorPattern->touchBottomType_, TouchBottomType::END);
 }
 
 /**
