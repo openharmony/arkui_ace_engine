@@ -569,8 +569,8 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestDefaultValues, TestS
 // Valid values for attribute 'color' of method 'activateCircleStyle'
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> styleColorValidValues = {
     {"\"#123456\"", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#123456"), "#FF123456"},
-    {"0x11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x11223344), "#11223344"},
-    {"-1", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(-1), "#FFFFFFFF"},
+    {"0x11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x11223344), "#11223344"},
+    {"-1", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(-1), "#FFFFFFFF"},
 };
 
 // Valid values for attribute 'radius' of method 'activateCircleStyle'

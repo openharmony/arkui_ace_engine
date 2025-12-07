@@ -248,7 +248,7 @@ export class ArkPickerComponent extends ArkCommonMethodComponent implements Pick
     }
     public attributeModifier(value: AttributeModifier<PickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookPickerAttributeModifier(this, value);
+        hookPickerAttributeModifier(this, value);
         })
         return this
     }
@@ -321,10 +321,10 @@ export class PickerIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDividerColorTmpValueForIdx0  = valueHolderForDividerColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForDividerColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForDividerColorTmpValue instanceof number) {
+            } else if (valueHolderForDividerColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForDividerColorTmpValueForIdx1  = valueHolderForDividerColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForDividerColorTmpValueForIdx1)
+                const valueHolderForDividerColorTmpValueForIdx1  = valueHolderForDividerColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForDividerColorTmpValueForIdx1)
             } else if (valueHolderForDividerColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDividerColorTmpValueForIdx2  = valueHolderForDividerColorTmpValue as string
@@ -361,10 +361,10 @@ export class PickerIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -404,18 +404,18 @@ export class PickerIndicatorStyle_serializer {
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
         const dividerColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dividerColorTmpBuf : ResourceColor | undefined = undefined
         if ((dividerColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const dividerColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let dividerColorTmpBuf_ : Color | number | string | Resource | undefined
+            let dividerColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (dividerColorTmpBuf_UnionSelector == (0).toChar()) {
                 dividerColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (dividerColorTmpBuf_UnionSelector == (1).toChar()) {
-                dividerColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                dividerColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (dividerColorTmpBuf_UnionSelector == (2).toChar()) {
                 dividerColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (dividerColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -423,30 +423,30 @@ export class PickerIndicatorStyle_serializer {
             } else {
                 throw new Error("One of the branches for dividerColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            dividerColorTmpBuf = (dividerColorTmpBuf_ as Color | number | string | Resource)
+            dividerColorTmpBuf = (dividerColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const dividerColorTmpResult : ResourceColor | undefined = dividerColorTmpBuf
         const startMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startMarginTmpBuf : LengthMetrics | undefined = undefined
         if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startMarginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startMarginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startMarginTmpResult : LengthMetrics | undefined = startMarginTmpBuf
         const endMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMarginTmpBuf : LengthMetrics | undefined = undefined
         if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endMarginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            endMarginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const endMarginTmpResult : LengthMetrics | undefined = endMarginTmpBuf
         const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -454,7 +454,7 @@ export class PickerIndicatorStyle_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -463,7 +463,7 @@ export class PickerIndicatorStyle_serializer {
             const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let borderRadiusTmpBuf_ : LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                borderRadiusTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                borderRadiusTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
                 borderRadiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {

@@ -271,7 +271,7 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDotPaintValid, TestSize.Le
         ._selectedItemWidth = ArkValue<Opt_Length>(123.4f),
         ._selectedItemHeight = ArkValue<Opt_Length>(123.4f),
         ._mask = ArkValue<Opt_Boolean>(true),
-        ._color = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)),
+        ._color = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)),
         ._selectedColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")),
     };
 
@@ -439,7 +439,7 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitLayoutInvalid, TestSi
 HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitPaintValid, TestSize.Level1)
 {
     Ark_DigitIndicator arkDigitIndicator {
-        ._fontColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)),
+        ._fontColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)),
         ._selectedFontColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")),
         ._digitFont = ArkValue<Opt_Font>(Ark_Font {
             .size = ArkValue<Opt_Length>(123.4f),

@@ -103,8 +103,8 @@ const auto CHECK_COLOR_COLOR("#FF008000");
 const auto TEST_STRING("testString");
 
 const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
-const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_INT);
-const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_FLOAT);
+const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
+const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_FLOAT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
 
 const Opt_ResourceColor OPT_COLOR_COLOR = Converter::ArkValue<Opt_ResourceColor>(COLOR_COLOR);
@@ -571,17 +571,17 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff), "#FFFFFFFF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff000000), "#FF000000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), "#FF0000FF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff808080), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff008000), "#FF008000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffa500), "#FFFFA500" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffff0000), "#FFFF0000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffff00), "#FFFFFF00" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x00000000), "#00000000" },
     };
 
     Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
@@ -649,8 +649,8 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidNumberValues, TestSize.Le
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff + 1), "#00000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000 - 1), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0xffffffff + 1), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x00000000 - 1), "#FFFFFFFF" },
     };
 
     Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;

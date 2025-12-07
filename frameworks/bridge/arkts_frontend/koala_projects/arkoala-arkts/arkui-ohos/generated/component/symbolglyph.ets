@@ -120,10 +120,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
                     thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueTmpValueTmpElement instanceof number) {
+                } else if (valueTmpValueTmpElement instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as int32
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string

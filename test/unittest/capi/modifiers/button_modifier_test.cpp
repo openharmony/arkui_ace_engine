@@ -930,17 +930,17 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestValidNumberValues, TestSiz
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff), "#FFFFFFFF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff000000), "#FF000000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), "#FF0000FF" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff808080), "#FF808080" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff008000), "#FF008000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffa500), "#FFFFA500" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffff0000), "#FFFF0000" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffff00), "#FFFFFF00" },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x00000000), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -997,14 +997,14 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestInvalidNumberValues, TestS
     std::string resultStr;
     Ark_ResourceColor arkResColor;
 
-    arkResColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    arkResColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff + 1);
     auto optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
     modifier_->setFontColor(node_, &optResColor);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(resultStr, "#00000000");
 
-    arkResColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000 - 1);
+    arkResColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x00000000 - 1);
     optResColor = Converter::ArkValue<Opt_ResourceColor>(arkResColor);
     modifier_->setFontColor(node_, &optResColor);
     jsonValue = GetJsonValue(node_);

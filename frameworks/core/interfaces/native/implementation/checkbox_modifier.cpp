@@ -153,7 +153,7 @@ void SetMarkImpl(Ark_NativePointer node,
         CheckBoxModelStatic::ResetCheckMarkColor(frameNode);
     }
 
-    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
     if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
         size = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
     }
@@ -164,7 +164,7 @@ void SetMarkImpl(Ark_NativePointer node,
     auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
     auto width = optValue->strokeWidth.tag == INTEROP_TAG_UNDEFINED
         ? defaultStroke
-        : Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+        : Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
     if (!width.has_value() || (width.value().Unit() == DimensionUnit::PERCENT) || (width.value().IsNegative())) {
         width = defaultStroke;
     }
