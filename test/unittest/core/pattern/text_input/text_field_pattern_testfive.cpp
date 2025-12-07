@@ -766,6 +766,13 @@ HWTEST_F(TextFieldPatternTestFive, TextEmojiInputTest001, TestSize.Level0)
 
     EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 3, test3, false), u"😅\xD83D");
     EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 3, test3, true), u"😅\xD83D");
+
+    // check get emoji length at end and use empty string
+    TextEmojiProcessor::GetEmojiLengthAtEnd(U"", true);
+    // check get emoji length at end and use empty string
+    TextEmojiProcessor::GetEmojiLengthAtEnd(U"", false);
+    // check get emoji length at end and use normal string
+    TextEmojiProcessor::GetEmojiLengthAtEnd(U"123", false);
 }
 
 /**
