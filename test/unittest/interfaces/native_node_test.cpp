@@ -10843,6 +10843,47 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_002, TestSize.
 }
 
 /**
+ * @tc.name: NativeNodeTest_NODE_RESPONSE_REGION_LIST_003
+ * @tc.desc: Test NODE_RESPONSE_REGION_LIST function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float size = 100.0f;
+    ArkUI_NumberValue value[] = { { .f32 = size } };
+    ArkUI_AttributeItem sizeItem = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+
+    ArkUI_NumberValue value2[] =
+    { 
+        { .i32 = -1 }, { .f32 = 0.0f }, { .f32 = 10.0f }, { .f32 = 10.0f }, { .f32 = 10.0f },
+        { .i32 = 0 }, { .f32 = -10.0f }, { .f32 = 0.0f }, { .f32 = 20.0f }, { .f32 = 20.0f },
+        { .i32 = 1 }, { .f32 = 10.0f }, { .f32 = 20.0f }, { .f32 = 50.0f }, { .f32 = 50.0f },
+        { .i32 = 2 }, { .f32 = 80.0f }, { .f32 = 60.0f }, { .f32 = 30.0f }, { .f32 = 30.0f },
+        { .i32 = 3 }, { .f32 = 20.0f }, { .f32 = 30.0f }, { .f32 = 60.0f }, { .f32 = 60.0f }
+    };
+    ArkUI_AttributeItem regionListItem = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &sizeItem);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &sizeItem);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_RESPONSE_REGION_LIST, &regionListItem);
+    auto regionListVal = nodeAPI->getAttribute(rootNode, NODE_RESPONSE_REGION_LIST);
+    EXPECT_EQ(regionListVal->size, 20);
+}
+
+/**
  * @tc.name: NativeNodeTest_MonopolizeEvents_001
  * @tc.desc: Test NODE_MONOPOLIZE_EVENTS function.
  * @tc.type: FUNC
