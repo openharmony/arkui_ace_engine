@@ -683,6 +683,8 @@ void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
         case ARK_TEXT_ALIGN_START: dst = TextAlign::START; break;
         case ARK_TEXT_ALIGN_END: dst = TextAlign::END; break;
         case ARK_TEXT_ALIGN_JUSTIFY: dst = TextAlign::JUSTIFY; break;
+        case ARK_TEXT_ALIGN_LEFT: dst = TextAlign::LEFT; break;
+        case ARK_TEXT_ALIGN_RIGHT: dst = TextAlign::RIGHT; break;
         default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
     }
 }
@@ -1343,6 +1345,18 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
         case ARK_LINE_BREAK_STRATEGY_GREEDY: dst = LineBreakStrategy::GREEDY; break;
         case ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY: dst = LineBreakStrategy::HIGH_QUALITY; break;
         default: LOGE("Unexpected enum value in Ark_LineBreakStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src)
+{
+    switch (src) {
+        case ARK_TEXT_DIRECTION_LTR: dst = TextDirection::LTR; break;
+        case ARK_TEXT_DIRECTION_RTL: dst = TextDirection::RTL; break;
+        case ARK_TEXT_DIRECTION_DEFAULT: dst = TextDirection::INHERIT; break;
+        case ARK_TEXT_DIRECTION_AUTO: dst = TextDirection::AUTO; break;
+        default: LOGE("Unexpected enum value in Ark_TextDirection: %{public}d", src);
     }
 }
 

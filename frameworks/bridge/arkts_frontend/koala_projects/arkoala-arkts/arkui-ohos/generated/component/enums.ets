@@ -433,7 +433,9 @@ export enum TextAlign {
     Start = 0,
     END = 2,
     End = 2,
-    JUSTIFY = 3
+    JUSTIFY = 3,
+    LEFT = 4,
+    RIGHT = 5
 }
 export enum TextOverflow {
     NONE = 0,

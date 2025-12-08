@@ -16112,6 +16112,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_TextDirection GetTextDirectionImpl(Ark_ParagraphStyle peer)
+    {
+        return {};
+    }
     } // ParagraphStyleAccessor
     namespace Path2DAccessor {
     void DestroyPeerImpl(Ark_Path2D peer)
@@ -21287,6 +21291,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ParagraphStyleAccessor::GetWordBreakImpl,
             ParagraphStyleAccessor::GetLeadingMarginImpl,
             ParagraphStyleAccessor::GetParagraphSpacingImpl,
+            ParagraphStyleAccessor::GetTextDirectionImpl,
         };
         return &ParagraphStyleAccessorImpl;
     }

@@ -34405,6 +34405,20 @@ KInteropReturnBuffer impl_ParagraphStyle_getParagraphSpacing(Ark_NativePointer t
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(ParagraphStyle_getParagraphSpacing, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_ParagraphStyle_getTextDirection(Ark_NativePointer thisPtr) {
+        Ark_ParagraphStyle self = reinterpret_cast<Ark_ParagraphStyle>(thisPtr);
+        const auto &retValue = GetAccessors()->getParagraphStyleAccessor()->getTextDirection(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(static_cast<Ark_TextDirection>(retValueTmpValue));
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(ParagraphStyle_getTextDirection, KInteropReturnBuffer, Ark_NativePointer)
 void impl_ParticleHelper_SetDisturbanceFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto disturbanceFieldsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

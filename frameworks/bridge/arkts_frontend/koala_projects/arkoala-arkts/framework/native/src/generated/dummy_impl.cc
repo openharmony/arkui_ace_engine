@@ -38371,6 +38371,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_TextDirection GetTextDirectionImpl(Ark_ParagraphStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getTextDirection(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // ParagraphStyleAccessor
     namespace PasteEventAccessor {
     void DestroyPeerImpl(Ark_PasteEvent peer)
@@ -48508,6 +48520,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ParagraphStyleAccessor::GetWordBreakImpl,
             ParagraphStyleAccessor::GetLeadingMarginImpl,
             ParagraphStyleAccessor::GetParagraphSpacingImpl,
+            ParagraphStyleAccessor::GetTextDirectionImpl,
         };
         return &ParagraphStyleAccessorImpl;
     }

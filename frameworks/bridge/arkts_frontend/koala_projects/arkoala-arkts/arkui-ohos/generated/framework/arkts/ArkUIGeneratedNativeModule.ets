@@ -5229,6 +5229,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ParagraphStyle_getLeadingMargin(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getParagraphSpacing(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _ParagraphStyle_getTextDirection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ParticleHelper_SetDisturbanceFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

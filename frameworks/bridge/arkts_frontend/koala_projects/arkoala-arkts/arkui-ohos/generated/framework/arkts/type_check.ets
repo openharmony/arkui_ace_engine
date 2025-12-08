@@ -25,7 +25,7 @@ import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, Sel
 import { AttributeModifier, extractors, DrawModifier, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
 import { AttributeUpdaterFlag } from "./../../AttributeUpdaterFlag"
 import { AudioSessionType, BlankScreenDetectionMethod, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuDataMediaType, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, DetectedBlankScreenReason, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, GestureFocusMode, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedParamStatus, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PdfLoadResult, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, UrlRegexRule, ViewportFit, WebBypassVsyncCondition, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, WebRotateEffect, AdsBlockedDetails, BlankScreenDetails, BlankScreenDetectionConfig, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedParamItem, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, BlankScreenDetectionEventInfo, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedMouseInfo, NativeEmbedTouchInfo } from "./../../component/web"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig } from "./../../component/textCommon"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig } from "./../../component/textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, LocalizedBarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
@@ -2185,10 +2185,10 @@ export class TypeChecker {
     static isPanRecognizer(value: Object | string | number | undefined): boolean {
         return value instanceof PanRecognizer
     }
-    static isParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof ParagraphStyle
     }
-    static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof ParagraphStyleInterface
     }
     static isParticleAnnulusRegionInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
@@ -2581,7 +2581,7 @@ export class TypeChecker {
     static isRichEditorParagraphResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof RichEditorParagraphResult
     }
-    static isRichEditorParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isRichEditorParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof RichEditorParagraphStyle
     }
     static isRichEditorParagraphStyleOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -3249,6 +3249,9 @@ export class TypeChecker {
     }
     static isTextDeleteDirection(value: Object | string | number | undefined): boolean {
         return value instanceof TextDeleteDirection
+    }
+    static isTextDirection(value: Object | string | number | undefined): boolean {
+        return value instanceof TextDirection
     }
     static isTextEditControllerEx(value: Object | string | number | undefined): boolean {
         return value instanceof TextEditControllerEx
@@ -5496,6 +5499,12 @@ export class TypeChecker {
     }
     static TextDeleteDirection_FromNumeric(ordinal: int32): TextDeleteDirection {
         return TextDeleteDirection.fromValue(ordinal)
+    }
+    static TextDirection_ToNumeric(value: TextDirection): int32 {
+        return value.valueOf()
+    }
+    static TextDirection_FromNumeric(ordinal: int32): TextDirection {
+        return TextDirection.fromValue(ordinal)
     }
     static TextHeightAdaptivePolicy_ToNumeric(value: TextHeightAdaptivePolicy): int32 {
         return value.valueOf()

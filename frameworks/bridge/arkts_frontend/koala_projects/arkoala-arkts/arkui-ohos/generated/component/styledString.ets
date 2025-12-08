@@ -32,6 +32,7 @@ import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.dra
 import { default as image } from "@ohos.multimedia.image"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
+import { TextDirection } from "./textCommon"
 import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -541,6 +542,7 @@ export class ParagraphStyle implements MaterializedBase {
     readonly wordBreak?: WordBreak | undefined
     readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
     readonly paragraphSpacing?: double | undefined
+    readonly textDirection?: TextDirection | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -550,6 +552,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.wordBreak = this.getWordBreak()
         this.leadingMargin = this.getLeadingMargin()
         this.paragraphSpacing = this.getParagraphSpacing()
+        this.textDirection = this.getTextDirection()
     }
     constructor(value?: ParagraphStyleInterface) {
         this(false, ParagraphStyle.construct(value))
@@ -590,6 +593,9 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getParagraphSpacing(): double | undefined {
         return this.getParagraphSpacing_serialize()
+    }
+    private getTextDirection(): TextDirection | undefined {
+        return this.getTextDirection_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
@@ -675,6 +681,17 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private getTextDirection_serialize(): TextDirection | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextDirection(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextDirection | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextDirection.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : TextDirection | undefined = buffer
         return returnResult
     }
 }
@@ -1152,6 +1169,7 @@ export interface ParagraphStyleInterface {
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
     paragraphSpacing?: LengthMetrics;
+    textDirection?: TextDirection;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
@@ -1864,6 +1882,14 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
@@ -1918,7 +1944,13 @@ export class ParagraphStyleInterface_serializer {
             paragraphSpacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
-        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
+        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as ParagraphStyleInterface)
         return value
     }
 }
