@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { LinearGradient_serializer, LinearGradient } from "./dataPanel"
 import { SizeOptions_serializer, ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./units"
@@ -39,9 +39,42 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
+import { ColorMetrics } from "arkui.Graphics"
 import { SliderModifier } from "./../SliderModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
+import { ColorMetrics_serializer } from "./../Graphics"
+export class ColorMetricsLinearGradientInternal {
+    public static fromPtr(ptr: KPointer): ColorMetricsLinearGradient {
+        return new ColorMetricsLinearGradient(false, ptr)
+    }
+}
+export class ColorMetricsLinearGradient implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ColorMetricsLinearGradient.getFinalizer())
+    }
+    constructor(colorStops: Array<ColorMetricsStop>) {
+        this(false, ColorMetricsLinearGradient.construct(colorStops))
+    }
+    static construct(colorStops: Array<ColorMetricsStop>): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((colorStops.length).toInt())
+        for (let colorStopsCounterI = 0; colorStopsCounterI < colorStops.length; colorStopsCounterI++) {
+            const colorStopsTmpElement : ColorMetricsStop = colorStops[colorStopsCounterI]
+            ColorMetricsStop_serializer.write(thisSerializer, colorStopsTmpElement)
+        }
+        const retval  = ArkUIGeneratedNativeModule._ColorMetricsLinearGradient_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ColorMetricsLinearGradient_getFinalizer()
+    }
+}
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     attributeSet?: SliderModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -459,6 +492,18 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTrackColorMetricsAttribute(value: ColorMetricsLinearGradient | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetricsLinearGradient_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SliderAttribute_setTrackColorMetrics(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setShowSteps1Attribute(value: boolean | undefined, options?: SliderShowStepOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -559,6 +604,10 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
     step: double;
     triggerChange: SliderTriggerChangeCallback;
 }
+export interface ColorMetricsStop {
+    color: ColorMetrics;
+    offset: Length;
+}
 export interface SliderCustomContentOptions {
     accessibilityText?: ResourceStr;
     accessibilityDescription?: ResourceStr;
@@ -639,6 +688,9 @@ export interface SliderAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
     }
+    trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
+        throw new Error("Unimplemented method trackColorMetrics")
+    }
     showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
         throw new Error("Unimplemented method showSteps")
     }
@@ -676,6 +728,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     slideRange_value?: SlideRange | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
+    trackColorMetrics_value?: ColorMetricsLinearGradient | undefined
     attributeModifier_value?: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined
     setSliderOptions(options?: SliderOptions): this {
         return this
@@ -738,6 +791,9 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
         return this
     }
     showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
@@ -952,6 +1008,14 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
+    public trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
+        if (this.checkPriority("trackColorMetrics")) {
+            const value_casted = value as (ColorMetricsLinearGradient | undefined)
+            this.getPeer()?.setTrackColorMetricsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public showTips(value: boolean | undefined, content?: ResourceStr): this {
         if (this.checkPriority("showTips")) {
             const value_casted = value as (boolean | undefined)
@@ -993,7 +1057,17 @@ export function SliderImpl(
         content_?.()
     })
 }
-
+export class ColorMetricsLinearGradient_serializer {
+    public static write(buffer: SerializerBase, value: ColorMetricsLinearGradient): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ColorMetricsLinearGradient {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ColorMetricsLinearGradientInternal.fromPtr(ptr)
+    }
+}
 export class SlideRange_serializer {
     public static write(buffer: SerializerBase, value: SlideRange): void {
         let valueSerializer : SerializerBase = buffer
@@ -1564,6 +1638,45 @@ export class SliderSuffixOptions_serializer {
         }
         const accessibilityGroupTmpResult : boolean | undefined = accessibilityGroupTmpBuf
         let value : SliderSuffixOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult, accessibilityGroup: accessibilityGroupTmpResult} as SliderSuffixOptions)
+        return value
+    }
+}
+export class ColorMetricsStop_serializer {
+    public static write(buffer: SerializerBase, value: ColorMetricsStop): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForColor  = value.color
+        ColorMetrics_serializer.write(valueSerializer, valueHolderForColor)
+        const valueHolderForOffset  = value.offset
+        if (valueHolderForOffset instanceof string) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
+            valueSerializer.writeString(valueHolderForOffsetForIdx0)
+        } else if (valueHolderForOffset instanceof number) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForOffsetForIdx1  = valueHolderForOffset as number
+            valueSerializer.writeNumber(valueHolderForOffsetForIdx1)
+        } else if (valueHolderForOffset instanceof Resource) {
+            valueSerializer.writeInt8((2).toByte())
+            const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForOffsetForIdx2)
+        }
+    }
+    public static read(buffer: DeserializerBase): ColorMetricsStop {
+        let valueDeserializer : DeserializerBase = buffer
+        const colorTmpResult : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
+        const offsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let offsetTmpBuf : string | number | Resource | undefined
+        if (offsetTmpBufUnionSelector == (0).toInt()) {
+            offsetTmpBuf = (valueDeserializer.readString() as string)
+        } else if (offsetTmpBufUnionSelector == (1).toInt()) {
+            offsetTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (offsetTmpBufUnionSelector == (2).toInt()) {
+            offsetTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for offsetTmpBuf has to be chosen through deserialisation.")
+        }
+        const offsetTmpResult : Length = (offsetTmpBuf as string | number | Resource)
+        let value : ColorMetricsStop = ({color: colorTmpResult, offset: offsetTmpResult} as ColorMetricsStop)
         return value
     }
 }

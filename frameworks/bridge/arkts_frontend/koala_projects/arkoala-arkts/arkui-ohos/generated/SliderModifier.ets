@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookSliderContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from "./component/slider"
+import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions, ColorMetricsLinearGradient } from "./component/slider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./component/units"
@@ -79,6 +79,8 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _trackColorMetrics_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _trackColorMetrics_0_0value?: ColorMetricsLinearGradient | undefined
     _showSteps_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showSteps_1_0value?: boolean | undefined
     _showSteps_1_1value?: SliderShowStepOptions | undefined
@@ -439,6 +441,24 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (this._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTrackColorMetricsAttribute((this._trackColorMetrics_0_0value as ColorMetricsLinearGradient | undefined));
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTrackColorMetricsAttribute((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
         if (this._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._showSteps_1_flag) {
@@ -780,6 +800,19 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (modifier._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.trackColorMetrics(modifier._trackColorMetrics_0_0value);
+                    break;
+                }
+                default: {
+                    this.trackColorMetrics((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
         if (modifier._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._showSteps_1_flag) {
@@ -1111,6 +1144,17 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
+        if (((this._trackColorMetrics_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._trackColorMetrics_0_0value) !== (value)))
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.UPDATE
+            this._trackColorMetrics_0_0value = value
+        } else
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

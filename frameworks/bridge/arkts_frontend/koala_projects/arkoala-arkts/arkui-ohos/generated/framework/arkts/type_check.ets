@@ -123,7 +123,7 @@ import { ScrollBarDirection, ScrollBarOptions } from "./../../component/scrollBa
 import { SecurityComponentLayoutDirection } from "./../../component/securityComponent"
 import { SelectStatus, CheckboxGroupOptions, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { SideBarContainerType, SideBarPosition, ButtonIconOptions, ButtonStyle } from "./../../component/sidebar"
-import { SliderBlockType, SliderChangeMode, SliderInteraction, SliderStyle, SlideRange, SliderConfiguration, SliderTriggerChangeCallback, SliderShowStepOptions, SliderStepItemAccessibility, SliderBlockStyle, SliderOptions, SliderPrefixOptions, SliderCustomContentOptions, SliderSuffixOptions } from "./../../component/slider"
+import { ColorMetricsStop, ColorMetricsLinearGradient, SliderBlockType, SliderChangeMode, SliderInteraction, SliderStyle, SlideRange, SliderConfiguration, SliderTriggerChangeCallback, SliderShowStepOptions, SliderStepItemAccessibility, SliderBlockStyle, SliderOptions, SliderPrefixOptions, SliderCustomContentOptions, SliderSuffixOptions } from "./../../component/slider"
 import { SubMenuExpandingMode } from "./../../component/menu"
 import { SwiperAnimationEvent, SwiperAnimationMode, SwiperContentTransitionProxy, SwiperContentWillScrollResult, SwiperController, SwiperDisplayMode, SwiperNestedScrollMode, AutoPlayOptions, SwiperAutoFill, SwiperContentAnimatedTransition, ArrowStyle, DotIndicator, Indicator, DigitIndicator } from "./../../component/swiper"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
@@ -657,6 +657,12 @@ export class TypeChecker {
     }
     static isColorMetrics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof ColorMetrics
+    }
+    static isColorMetricsLinearGradient(value: Object | string | number | undefined): boolean {
+        return value instanceof ColorMetricsLinearGradient
+    }
+    static isColorMetricsStop(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ColorMetricsStop
     }
     static isColorStop(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ColorStop
@@ -5765,6 +5771,9 @@ export class TypeChecker {
         return XComponentType.fromValue(ordinal)
     }
     static isArray_Number(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ColorMetricsStop(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Rectangle(value: Object | string | number | undefined): boolean {

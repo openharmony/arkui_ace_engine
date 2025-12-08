@@ -57,6 +57,8 @@ generated_sources = [
   "implementation/client_authentication_handler_accessor.cpp",
   "implementation/color_content_accessor.cpp",
   "implementation/color_filter_accessor.cpp",
+  "implementation/color_metrics_linear_gradient_accessor.cpp",
+  "implementation/color_metrics_linear_gradient_peer_impl.h",
   "implementation/column_modifier.cpp",
   "implementation/column_split_modifier.cpp",
   "implementation/common_method_modifier.cpp",
