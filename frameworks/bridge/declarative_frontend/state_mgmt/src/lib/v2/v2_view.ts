@@ -388,6 +388,36 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.monitorIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdateForAddMonitor_.clear()
         ObserveV2.getObserve().resetMonitorValues();
+
+        this.resetAllMonitorsOnReuse();
+    }
+
+    // 'resetMonitorValues' solution is not enough to ensure (for all path')  MonitorV2 
+    // MonitorValueV2.now + .before is in sync with current path value.
+    // - if object shared with parent component is still the same, but property has 
+    //   changed by @ReusableV2 was in recycle state, then  MonitorValueV2.now monitoring this 
+    //   property gets out of sync, lacks call to MonitorV2.analyzeProp
+    //   see ViewPU.resetParam, and ace-loader generated resetStateVarsOnReuse function
+    // - reset local state does not update MonitorValueV2.now of path monitoring the local state 
+    //   either.
+    // the solution is to run analyzeProp for all monitor path for all monitors of a component 
+    // when it gets reused
+    //
+    // this should be done for MonitorV2 objects created from @Monitor, from addMonitor API
+    // and from @SyncMonitor
+    // because this would be an incompatible change its currently only added for @SyncMonitor 
+    // for @Monitor, from addMonitor API remain to be done (in OH 7.0 release?!)
+    public resetAllMonitorsOnReuse(): void {
+        const refs = this[ObserveV2.SYNC_MONITOR_REFS] as object | undefined;
+        if (refs === undefined) {
+            return;
+        }
+        Object.keys(refs).forEach(monitorFuncName => {
+            stateMgmtConsole.log(`${this.debugInfo__()}: `)
+            let monitor = refs[monitorFuncName] as MonitorV2;
+            stateMgmtConsole.log(`Reuse of owning @ComponentV2: @SyncMonitor ${monitorFuncName}: updating MonitorV2Value.before/now to new state`);
+                monitor.recordDependenciesForProps();
+        })
     }
 
     // Resets the computed value when the reused component variables are reinitialized

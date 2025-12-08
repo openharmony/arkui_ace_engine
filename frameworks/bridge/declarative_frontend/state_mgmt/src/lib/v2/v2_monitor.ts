@@ -354,6 +354,15 @@ class MonitorV2 {
     return this;
   }
 
+  // re-record the dependencies for each path / MonitorValueV2
+  // invoked on @ReusableV2 re-use, see ViewV2.resetAllMonitorsOnReuse
+  public recordDependenciesForProps(): void {
+    this.values_.forEach((monitorValue: MonitorValueV2<unknown>) => {
+      // set initRun: true, pretend this is a first run, do not mark dirty on path value change  
+      this.recordDependenciesForProp(monitorValue, true);
+    });
+  }
+
   // Called by ObserveV2 once if any monitored path was dirty.
   // Executes the monitor function.
   public runMonitorFunction(): void {
