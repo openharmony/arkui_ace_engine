@@ -125,7 +125,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
 
     switch (frontEventKind)
     {
-        case Event_CallCallback: {
+        case Event_CallCallback:
             std::pair<int, CallbackBuffer> &callback = callbackCallSubqueue.front();
             serializer.writeInt32(callback.first);
             interop_memory_copy(
@@ -133,15 +133,15 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
                 size - serializer.length(),
                 callback.second.buffer, sizeof(CallbackBuffer::buffer));
             break;
-        }
+
         case Event_HoldManagedResource:
-        case Event_ReleaseManagedResource: {
+        case Event_ReleaseManagedResource:
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
             interop_memory_copy(
                 result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32)
             );
             break;
-        }
+
         default:
             INTEROP_FATAL("Unknown event kind");
     }
