@@ -276,21 +276,21 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest009, TestSize.Level1)
 {
     TouchJsonReport touchReport;
     touchReport.SetPoint(globalPoint);
-    touchReport.SetEventType("TouchScreen");
+    touchReport.SetEventType("Touch");
     touchReport.SetAction("down");
     TimeStamp time(std::chrono::nanoseconds(1000000));
     touchReport.SetTime(time);
     touchReport.SetWindowID(100);
     auto value = touchReport.GetJsonData();
     std::string JsonStr = value->ToString().c_str();
-    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"TouchScreen\",\"action\":\"down\","
+    std::string JsonStr1 = "{\"type\":\"event\",\"eventType\":\"Touch\",\"action\":\"down\","
                            "\"time\":1000000,\"windowId\":100,\"data\":{\"point\":[100,100]}}";
     EXPECT_EQ(JsonStr, JsonStr1);
 
     touchReport.SetAction("");
     auto value2 = touchReport.GetJsonData();
     std::string JsonStr2 = value2->ToString().c_str();
-    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"TouchScreen\",\"action\":\"\",\"time\":1000000,"
+    std::string JsonStr21 = "{\"type\":\"event\",\"eventType\":\"Touch\",\"action\":\"\",\"time\":1000000,"
                             "\"windowId\":100,\"data\":{\"point\":[100,100]}}";
     EXPECT_EQ(JsonStr2, JsonStr21);
 }
