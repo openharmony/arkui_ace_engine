@@ -450,7 +450,6 @@ export function convertDimensionStrToNumber(value: string, density: number): num
     let unitPart : string = ''
     if (match.length > 1 && match[1] !== undefined) {
         numericValue = Number.parseFloat(match[1] as string);
-        return numericValue
     }
     if (match.length > 2 && match[2] !== undefined) {
         unitPart = match[2] as string;
