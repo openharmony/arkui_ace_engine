@@ -23,6 +23,7 @@ README_zh.md @arkui_architecture
 .gitcode/ @arkui_architecture
 .gitcode/CODEOWNERS @liyujie43
 .gitcode/owner_config.json @liyujie43
+.gitcode/multi_thread_mapping.json @liyujie43
 
 [OpenHarmony adapter]
 adapter/ohos/build/ @arkui_architecture
