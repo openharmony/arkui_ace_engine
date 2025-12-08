@@ -489,6 +489,7 @@ static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::SELECT_ETS_TAG,
     V2::DIALOG_ETS_TAG,
     V2::POPUP_ETS_TAG,
+    V2::SHEET_MASK_TAG,
     V2::SHEET_WRAPPER_TAG,
 };
 
