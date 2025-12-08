@@ -170,7 +170,7 @@ template <>
 inline void WriteToString(std::string *result, const InteropMaterialized *value)
 {
   char hex[20];
-  interop_print_to_buffer_n(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
+  InteropPrintToBufferN(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
   result->append("\"");
   result->append("Materialized ");
   result->append(hex);
@@ -244,7 +244,7 @@ struct CustomDeserializer
   virtual InteropCustomObject deserialize(DeserializerBase *deserializer, const std::string &kind)
   {
     InteropCustomObject result;
-    interop_string_copy(result.kind, sizeof(result.kind), "error");
+    InteropStringCopy(result.kind, sizeof(result.kind), "error");
     return result;
   }
   CustomDeserializer *next = nullptr;
@@ -359,7 +359,7 @@ public:
     if (tag == INTEROP_TAG_UNDEFINED) LOGE("Undefined interop tag");
     // Skip undefined tag!.
     InteropCustomObject result;
-    interop_string_copy(result.kind, sizeof(result.kind), "Error");
+    InteropStringCopy(result.kind, sizeof(result.kind), "Error");
     interop_string_concatenate(result.kind, sizeof(result.kind), kind.c_str());
     return result;
   }
@@ -567,7 +567,7 @@ inline void WriteToString(std::string *result, InteropFloat32 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  interop_print_to_buffer_n(buf, sizeof buf, "%f", value);
+  InteropPrintToBufferN(buf, sizeof buf, "%f", value);
   result->append(buf);
 #elif !defined(__linux__)
   std::string storage;
@@ -584,7 +584,7 @@ inline void WriteToString(std::string *result, InteropFloat64 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  interop_print_to_buffer_n(buf, sizeof buf, "%f", value);
+  InteropPrintToBufferN(buf, sizeof buf, "%f", value);
   result->append(buf);
 #elif !defined(__linux__)
   std::string storage;
