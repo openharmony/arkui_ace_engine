@@ -1744,9 +1744,9 @@ public:
             auto node = node_.Upgrade();
             CHECK_NULL_VOID(node);
             taskExecutor->PostTask(
-                [viewDataWrap, node, autoFillType = autoFillType_]() {
+                [viewDataWrap, node, autoFillType = autoFillType_, triggerType = triggerType_]() {
                     if (node) {
-                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType);
+                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType, triggerType);
                     }
                 },
                 TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");

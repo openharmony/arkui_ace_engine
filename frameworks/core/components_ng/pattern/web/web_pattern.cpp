@@ -5401,6 +5401,20 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
     viewDataWrap->SetOtherAccount(viewDataCommon_->IsOtherAccount());
 }
 
+OHOS::NWeb::NWebAutoFillTriggerType ConvertAceAutoFillTriggerType(const AceAutoFillTriggerType& type)
+{
+    switch (type) {
+        case AceAutoFillTriggerType::AUTO_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::AUTO_REQUEST;
+        case AceAutoFillTriggerType::MANUAL_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::MANUAL_REQUEST;
+        case AceAutoFillTriggerType::PASTE_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::PASTE_REQUEST;
+        default:
+            return OHOS::NWeb::NWebAutoFillTriggerType::UNSPECIFIED;
+    }
+}
+
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
@@ -5414,8 +5428,9 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             continue;
         }
         auto type = nodeInfoWrap->GetAutoFillType();
-        // white list check
-        if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
+        if (triggerType == AceAutoFillTriggerType::PASTE_REQUEST) {
+            jsonNode->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
+        } else if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {  // white list check
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
             if (nodeInfoWrap->GetMetadata() != IS_HINT_TYPE) {
                 jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
@@ -5434,7 +5449,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
     auto otherAccount = viewDataWrap->GetOtherAccount();
     jsonNode->Put(AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT.c_str(), otherAccount);
-    delegate_->NotifyAutoFillViewData(jsonNode->ToString());
+    delegate_->NotifyAutoFillViewData(jsonNode->ToString(), ConvertAceAutoFillTriggerType(triggerType));
 
     // shift focus after autofill
     if (focusType != AceAutoFillType::ACE_UNSPECIFIED && !isPasswordFill_) {
@@ -5739,6 +5754,66 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+void WebPattern::FakePageNodeInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<PageNodeInfoWrap> nodeInfo = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    CHECK_NULL_VOID(nodeInfo);
+    pageNodeInfo_.clear();
+    nodeInfo->SetId(host->GetId());
+    nodeInfo->SetDepth(host->GetDepth());
+    nodeInfo->SetTag(host->GetTag());
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    NG::RectF pageNodeRect;
+    pageNodeRect.SetRect(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
+    nodeInfo->SetPageNodeRect(pageNodeRect);
+    nodeInfo->SetIsFocus(true);
+    pageNodeInfo_.emplace_back(nodeInfo);
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+}
+
+bool WebPattern::RequestAutoFill(bool& isPopup, bool isNewPassWord,
+    const AceAutoFillTriggerType& triggerType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "ProCessAutoFillOnPaste RequestAutoFill");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    if (container == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Get current container is nullptr.");
+        return false;
+    }
+
+    FakePageNodeInfo();
+
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_WEB, "onUIExtNodeDestroy called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(false);
+    };
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_WEB, "onUIExtNodeBindingCompleted called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(true);
+    };
+    AceAutoFillType autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
+    isAutoFillClosing_ = false;
+    auto resultCode = container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup,
+        autoFillSessionId_, false, onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
+    return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
 std::string WebPattern::GetAllTextInfo() const
