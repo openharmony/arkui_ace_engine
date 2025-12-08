@@ -30,7 +30,7 @@ import resourceManager from '@ohos.resourceManager'
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { BusinessError } from '@ohos.base';
-import { UIContext } from '@ohos.arkui.UIContext';
+import { UIContext, Context } from '@ohos.arkui.UIContext';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
@@ -280,9 +280,9 @@ struct ContentItemStruct {
       this.secondaryTextColors = $r('sys.color.composeListItem_left_secondary_text_focus_color');
       this.descriptionColors = $r('sys.color.composeListItem_left_secondary_text_focus_color');
     } else {
-      this.primaryTextColors = this.primaryTextColor;
-      this.secondaryTextColors = this.secondaryTextColor;
-      this.descriptionColors = this.descriptionColor;
+      this.primaryTextColors = $r('sys.color.ohos_id_color_text_primary');
+      this.secondaryTextColors = $r('sys.color.ohos_id_color_text_secondary');
+      this.descriptionColors = $r('sys.color.ohos_id_color_text_secondary');
     }
   }
 
@@ -386,7 +386,7 @@ struct ContentItemStruct {
           .fontColor(this.primaryTextColors)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
-            TextOverflow.Ellipsis
+              TextOverflow.Ellipsis
           })
           .fontWeight(FontWeight.Medium)
           .focusable(true)
@@ -404,7 +404,7 @@ struct ContentItemStruct {
           .fontColor(this.secondaryTextColors)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
-            TextOverflow.Ellipsis
+              TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
@@ -420,7 +420,7 @@ struct ContentItemStruct {
           .fontColor(this.descriptionColors)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
-            TextOverflow.Ellipsis
+              TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
@@ -450,10 +450,8 @@ struct ContentItemStruct {
   getItemSpace() {
     if (this.isColumnDirection()) {
       return LengthMetrics.resource($r('sys.float.padding_level1'));
-
     }
     return LengthMetrics.vp(this.itemRowSpace);
-
   }
 
   build() {
@@ -469,8 +467,8 @@ struct ContentItemStruct {
     .height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined)
     .margin({
       end: this.isParentColumnDirection() ?
-      LengthMetrics.vp(0) :
-      LengthMetrics.vp(16)
+        LengthMetrics.vp(0) :
+        LengthMetrics.vp(16)
     } as LocalizedMargin)
     .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) } as LocalizedPadding)
     .flexShrink(this.isParentColumnDirection() ? 0 : 1)
@@ -521,12 +519,7 @@ struct OperateItemStruct {
   @State secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
-  @Link @Watch('onPropChange') isChecked: boolean;
   private controller: OperateItemStructController = new OperateItemStructController();
-  @State @Watch('onPropChange') contentItem?: ContentItem = undefined;
-  @Link containerDirection: FlexDirection
-  @State flexTextWidth: number = 0
-  @State rowTextWidth: number = 0
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -541,7 +534,7 @@ struct OperateItemStruct {
       this.secondaryTextColors = this.secondaryTextColor;
     }
     this.iconColor = this.isFocus ? $r('sys.color.composeListItem_right_icon_focus_color') :
-    $r('sys.color.composeListItem_right_icon_normal_color');
+      $r('sys.color.composeListItem_right_icon_normal_color');
   }
 
   onPropChange(PropChange?: string): void {
@@ -722,7 +715,7 @@ struct OperateItemStruct {
       .fontColor(this.secondaryTextColors)
       .textOverflow({
         overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
-        TextOverflow.None
+          TextOverflow.None
       })
       .marqueeOptions({
         start: this.isFocus || this.parentIsHover,
@@ -936,7 +929,7 @@ struct OperateItemStruct {
             .focusable(true)
             .draggable(false)
             .constraintSize({
-              maxWidth: this.flexTextWidth
+              maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
           if (this.arrow?.symbolStyle) {
             SymbolGlyph()
@@ -965,9 +958,6 @@ struct OperateItemStruct {
             }
           }
         }
-        .onSizeChange((newValue: SizeOptions) => {
-          this.flexTextWidth = (newValue.width! as number) - OPERATEITEM_ARROW_WIDTH
-        } as SizeChangeCallback)
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
           end: LengthMetrics.vp(LISTITEM_PADDING)
@@ -979,7 +969,7 @@ struct OperateItemStruct {
             .fontColor(this.secondaryTextColors)
             .textOverflow({
               overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
-              TextOverflow.None
+                TextOverflow.None
             })
             .marqueeOptions({
               start: this.isFocus || this.parentIsHover,
@@ -990,7 +980,7 @@ struct OperateItemStruct {
             .focusable(true)
             .draggable(false)
             .constraintSize({
-              maxWidth: this.rowTextWidth
+              maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH + OPERATEITEM_ARROW_MARGIN_WIDTH}vp)`
             })
             .margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH } as Margin)
           if (this.arrow?.symbolStyle) {
@@ -1020,9 +1010,6 @@ struct OperateItemStruct {
             }
           }
         }
-        .onSizeChange((newValue: SizeOptions) => {
-          this.rowTextWidth = (newValue.width! as number) - (OPERATEITEM_ARROW_WIDTH + OPERATEITEM_ARROW_MARGIN_WIDTH)
-        } as SizeChangeCallback)
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
           end: LengthMetrics.vp(LISTITEM_PADDING)
@@ -1032,7 +1019,9 @@ struct OperateItemStruct {
     .shadow(undefined)
     .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
       (this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent) : HitTestMode.None)
-
+    .labelStyle({
+      maxLines: TEXT_MAX_LINE
+    })
     .backgroundColor(Color.Transparent)
     .constraintSize({ minHeight: TEXT_ARROW_HEIGHT })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
@@ -1121,14 +1110,16 @@ struct OperateItemStruct {
  * @returns string
  */
 
-
 function getAccessibilityText(resource: ResourceStr): string {
   try {
     let resourceString: string = '';
     if (typeof resource === 'string') {
       resourceString = resource as string;
     } else {
-      resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id);
+      let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+      if (uiContent) {
+        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
+      }
     }
     return resourceString;
   } catch (error) {
@@ -1282,40 +1273,9 @@ export struct ComposeListItem {
   aboutToAppear() {
     this.fontSizeScale = this.decideFontSizeScale();
     this.onPropChange();
-    try {
-      let context: UIContext = this.getUIContext();
-      if (context.getHostContext() !== undefined) {
-        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
-        this.applicationContext = hostContext.getApplicationContext();
-        try {
-          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
-        } catch (paramError) {
-          hilog.error(0x3900, 'Ace',
-            `ComposeListItem Faild to get environment param error `);
-        }
-      }
-    } catch (paramError) {
-      let code = (paramError as ClassCastError).code;
-      let message = (paramError as ClassCastError).message;
-      hilog.error(0x3900, 'Ace',
-        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
-    }
     if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
-  }
-
-  aboutToDisappear(): void {
-    if (this.callbackId) {
-      let context: UIContext = this.getUIContext();
-      if (context.getHostContext() !== undefined) {
-        this.applicationContext.offEnvironment(this.callbackId as Int,
-          (err: BusinessError<void> | null): void => {
-            hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
-          })
-      }
-    }
-    this.callbackId = 0;
   }
 
   calculatedRightWidth(): string {
@@ -1417,7 +1377,7 @@ export struct ComposeListItem {
   getMainSpace(): LengthMetrics {
     if (this.containerDirection === FlexDirection.Column) {
       return LengthMetrics.resource(this.isSingleLine() ? $r('sys.float.padding_level1') :
-      $r('sys.float.padding_level8'));
+        $r('sys.float.padding_level8'));
     }
     return LengthMetrics.vp(0);
   }
@@ -1492,28 +1452,38 @@ export struct ComposeListItem {
           });
         }
         if (this.operateItem !== null) {
-          OperateItemStruct({
-            icon: this.operateItem?.icon,
-            subIcon: this.operateItem?.subIcon,
-            button: this.operateItem?.button,
-            toggle: this.operateItem?.toggle,
-            checkBox: this.operateItem?.checkbox,
-            radio: this.operateItem?.radio,
-            image: this.operateItem?.image,
-            symbolStyle: this.operateItem?.symbolStyle,
-            text: this.operateItem?.text,
-            arrow: this.operateItem?.arrow,
-            parentCanFocus: this.canFocus,
-            parentCanTouch: this.canTouch,
-            parentIsHover: this.isHover,
-            parentFrontColor: this.frontColor,
-            parentIsActive: this.isActive,
-            parentCanHover: this.canHover,
-            rightWidth: this.calculatedRightWidth(),
-            parentDirection: this.containerDirection,
-            isFocus: this.isFocus,
-            controller: this.operateItemStructRef
+          Column() {
+            OperateItemStruct({
+              icon: this.operateItem?.icon,
+              subIcon: this.operateItem?.subIcon,
+              button: this.operateItem?.button,
+              toggle: this.operateItem?.toggle,
+              checkBox: this.operateItem?.checkbox,
+              radio: this.operateItem?.radio,
+              image: this.operateItem?.image,
+              symbolStyle: this.operateItem?.symbolStyle,
+              text: this.operateItem?.text,
+              arrow: this.operateItem?.arrow,
+              parentCanFocus: this.canFocus,
+              parentCanTouch: this.canTouch,
+              parentIsHover: this.isHover,
+              parentFrontColor: this.frontColor,
+              parentIsActive: this.isActive,
+              parentCanHover: this.canHover,
+              rightWidth: this.calculatedRightWidth(),
+              parentDirection: this.containerDirection,
+              isFocus: this.isFocus,
+              controller: this.operateItemStructRef
+            })
+          }
+          .flexShrink(0)
+          .onFocus(() => {
+            this.canFocus = false;
           })
+          .onBlur(() => {
+            this.canFocus = true;
+          })
+          .padding({ start: this.getOperateOffset() });
         }
       }
       .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
