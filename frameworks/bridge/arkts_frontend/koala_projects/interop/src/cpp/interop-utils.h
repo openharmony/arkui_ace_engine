@@ -18,38 +18,41 @@
 
 #include <cstring>
 #include <cstdio>
+#include <climits>
+#include "interop-logging.h"
+#include "interop-types.h"
 #include "securec.h"
 
-inline errno_t InteropStringCopy(char *dest, size_t destsz, const char *src)
+inline errno_t InteropStringCopy(char *dest, size_t destSize, const char *src)
 {
-    errno_t ret = strcpy_s(dest, reinterpret_cast<rsize_t>(destsz), src);
+    errno_t ret = strcpy_s(dest, destSize, src);
     if (ret > 0) {
         LOGE("strcpy_s error code: %d", ret);
     }
     return ret;
 }
 
-inline errno_t interop_string_concatenate(char *dest, size_t destsz, const char *src)
+inline errno_t interop_string_concatenate(char *dest, size_t destSize, const char *src)
 {
-    errno_t ret = strcat_s(dest, reinterpret_cast<rsize_t>(destsz), src);
+    errno_t ret = strcat_s(dest, destSize, src);
     if (ret > 0) {
         LOGE("strcat_s error code: %d", ret);
     }
     return ret;
 }
 
-inline errno_t interop_memory_copy(void *dest, size_t destsz, const void *src, size_t count)
+inline errno_t interop_memory_copy(void *dest, size_t destSize, const void *src, size_t count)
 {
-    errno_t ret = memcpy_s(dest, reinterpret_cast<rsize_t>(destsz), src, count);
+    errno_t ret = memcpy_s(dest, destSize, src, count);
     if (ret > 0) {
         LOGE("memcpy_s error code: %d", ret);
     }
     return ret;
 }
 
-inline errno_t interop_memory_set(void *dest, size_t destsz, int ch, size_t count)
+inline errno_t interop_memory_set(void *dest, size_t destSize, int ch, size_t count)
 {
-    errno_t ret = memset_s(dest, reinterpret_cast<rsize_t>(destsz), ch, count);
+    errno_t ret = memset_s(dest, destSize, ch, count);
     if (ret > 0) {
         LOGE("memset_s error code: %d", ret);
     }
@@ -57,9 +60,9 @@ inline errno_t interop_memory_set(void *dest, size_t destsz, int ch, size_t coun
 }
 
 template <typename... T>
-inline int InteropPrintToBuffer(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBuffer(char *buffer, size_t bufferSize, const char *format, T... args)
 {
-    int ret = sprintf_s(buffer, reinterpret_cast<rsize_t>(bufsz), format, args...);
+    int ret = sprintf_s(buffer, bufferSize, format, args...);
     if (ret < 0) {
         INTEROP_FATAL("WriteToString: sprintf_s format failed! Error code: %d", ret);
     }
@@ -67,29 +70,22 @@ inline int InteropPrintToBuffer(char *buffer, size_t bufsz, const char *format, 
 }
 
 template <typename... T>
-inline int InteropPrintToBufferN(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBufferN(char *buffer, size_t bufferSize, const char *format, T... args)
 {
-    int ret = snprintf_s(buffer, bufsz, format, args...);
+    int ret = snprintf_s(buffer, bufferSize, bufferSize - 1, format, args...);
     if (ret < 0) {
         INTEROP_FATAL("WriteToString: snprintf_s format failed! Error code: %d", ret);
     }
     return ret;
 }
 
-inline int InteropPrintVlistToBufferN(char *buffer, size_t bufsz, const char *format, va_list vlist)
+inline int InteropPrintVlistToBufferN(char *buffer, size_t bufferSize, const char *format, va_list vlist)
 {
-    int ret = vsnprintf_s(buffer, bufsz, format, vlist);
-    if (ret == EINVAL) {
-        LOGE("log format failed");
-    } else {
-        LOGE("FATAL: %{public}s", buffer);
+    int ret = vsnprintf_s(buffer, bufSize, bufSize - 1, format, vlist);
+    if (ret < 0) {
+        INTEROP_FATAL("WriteToString: vsnprintf_s format failed! Error code: %d", ret);
     }
     return ret;
-}
-
-inline size_t InteropStringLength(const char *str)
-{
-    return strnlen_s(str, UINT_MAX);
 }
 
 #endif // _INTEROP_UTILS_H_

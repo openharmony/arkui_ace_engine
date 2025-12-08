@@ -1914,7 +1914,7 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
       "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
-    CHECK_ANI_FATAL(env->String_NewUTF8(message, InteropStringLength(message), &messageObject));                     \
+    CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \
     CHECK_ANI_FATAL(env->GetUndefined(&undefined));                                                     \
     ani_object throwObject{};                                                                           \

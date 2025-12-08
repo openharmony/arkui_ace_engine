@@ -47,7 +47,7 @@ void oh_sk_file_log(oh_sk_log_type type, const char* msg, ...) {
 
     static char* path = nullptr;
     if (!path) {
-        size_t len = InteropStringLength(KOALAUI_OHOS_LOG_ROOT) + 100;
+        size_t len = strlen(KOALAUI_OHOS_LOG_ROOT) + 100;
         path = new char[len];
         APPLY_LOG_FILE_PATTERN(path, len, lt, ms, getpid());
         mkdir(KOALAUI_OHOS_LOG_ROOT, 0777);
