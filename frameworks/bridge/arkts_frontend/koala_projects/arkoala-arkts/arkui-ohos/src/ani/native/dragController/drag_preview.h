@@ -95,7 +95,7 @@ public:
             return false;
         }
         ani_method method;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &method)) {
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &method)) {
             HILOGE("AceDrag, find constructor method failed.");
             return false;
         }
