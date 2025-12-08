@@ -117,11 +117,9 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     if (callbackEventsQueue.empty()) {
         return 0;
     }
-
     SerializerBase serializer(result, size);
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
     serializer.writeInt32(frontEventKind);
-
     switch (frontEventKind)
     {
         case Event_CallCallback: {
@@ -136,13 +134,12 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
             break;
         }
         case Event_HoldManagedResource:
-        case Event_ReleaseManagedResource: {
+        case Event_ReleaseManagedResource:
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
             interop_memory_copy(
                 result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32)
             );
             break;
-        }
         default:
             INTEROP_FATAL("Unknown event kind");
     }
