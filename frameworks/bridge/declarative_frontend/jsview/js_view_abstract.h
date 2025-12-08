@@ -865,7 +865,8 @@ public:
     static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
-
+    static std::function<void(NG::DrawingContext& context)> GetDrawOverlayCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
     static void JsFocusScopeId(const JSCallbackInfo& info);

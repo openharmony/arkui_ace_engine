@@ -37,6 +37,8 @@ export class DrawModifier {
     public drawFront(drawContext: DrawContext): void { }
 
     public drawForeground(drawContext: DrawContext): void { }
+    
+    public drawOverlay(drawContext: DrawContext): void { }
 
     public invalidate(): void {
         let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();

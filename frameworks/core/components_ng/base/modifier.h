@@ -100,6 +100,7 @@ public:
     DrawModifierFunc drawContentFunc;
     DrawModifierFunc drawFrontFunc;
     DrawModifierFunc drawForegroundFunc;
+    DrawModifierFunc drawOverlayFunc;
 };
 
 template<typename T>
