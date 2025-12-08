@@ -33016,6 +33016,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangeModifier.identity, WebOnMicrophoneCaptureStateChangeModifier, callback);
     return this;
   }
+  enableAutoFill(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -34713,6 +34717,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey {
   }
 }
 WebOnMicrophoneCaptureStateChangeModifier.identity = Symbol('webOnMicrophoneCaptureStateChangeModifier');
+
+class WebEnableAutoFillModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().web.setEnableAutoFill(node, this.value);
+    }
+  }
+}
+WebEnableAutoFillModifier.identity = Symbol('webEnableAutoFillModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

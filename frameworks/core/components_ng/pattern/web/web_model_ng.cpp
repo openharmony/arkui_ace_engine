@@ -2642,6 +2642,21 @@ void WebModelNG::SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo
     webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetEnableAutoFill(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableAutoFill(isEnabled);
+}
+
+void WebModelNG::SetEnableAutoFill(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableAutoFill(isEnabled);
+}
+
 void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
     const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold)
 {

@@ -5748,6 +5748,8 @@ struct ArkUIWebModifier {
     void (*resetOnCameraCaptureStateChanged)(ArkUINodeHandle node);
     void (*setOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node);
+    void (*setEnableAutoFill)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableAutoFill)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

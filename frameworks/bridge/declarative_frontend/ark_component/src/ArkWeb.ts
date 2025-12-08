@@ -1639,6 +1639,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicro
   }
 }
 
+class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableAutoFill');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().web.setEnableAutoFill(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2198,6 +2212,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onMicrophoneCaptureStateChange(callback: OnMicrophoneCaptureStateChangeCallback): this {
     modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangeModifier.identity, WebOnMicrophoneCaptureStateChangeModifier, callback);
+    return this;
+  }
+  enableAutoFill(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
 }

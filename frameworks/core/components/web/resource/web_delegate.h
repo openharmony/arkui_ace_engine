@@ -1473,6 +1473,7 @@ public:
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
+    void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
