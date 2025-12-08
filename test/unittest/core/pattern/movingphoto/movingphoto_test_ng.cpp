@@ -102,6 +102,7 @@ void MovingphotoTestNg::SetUpTestSuite()
     g_testProperty.imageSrc = MOVINGPHOTO_IMAGE_SRC;
     g_testProperty.muted = MUTED_VALUE;
     g_testProperty.objectFit = MOVINGPHOTO_IMAGE_FIT;
+
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -276,6 +277,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest004, TestSize.Level1)
 
     auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNodeTemp);
+
     auto movingPhotoPatternTemp = AceType::DynamicCast<MovingPhotoPattern>(frameNodeTemp->GetPattern());
     CHECK_NULL_VOID(movingPhotoPatternTemp);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
@@ -1210,10 +1212,13 @@ HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
+
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
+
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
 
