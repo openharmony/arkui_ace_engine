@@ -772,7 +772,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     session->SetShowRecent(true);
     auto key = Rosen::defaultStatus;
-    session->scenePersistence_->isSavingSnapshot_[key] = true;
+    session->scenePersistence_->isSavingSnapshot_ = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
 
