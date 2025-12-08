@@ -271,6 +271,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
+    fireAboutToReuse(param?: RecordData): void {
+        this.aboutToReuse(param, this.initializers?.());
+    }
+
+    fireAboutToRecycle(): void {
+        this.aboutToRecycle();
+    }
+
+    override __aboutToReuse_Internal(param?: RecordData): void {
+        this.instance.__aboutToReuse_Internal(param);
+    }
+
+    override __aboutToRecycle_Internal(): void {
+        this.instance.__aboutToRecycle_Internal();
+    }
+
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
