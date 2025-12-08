@@ -1132,15 +1132,17 @@ void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
 void SliderModelNG::ResetTrackColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
-        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColorSetByUser, PROPERTY_UPDATE_RENDER);
 }
 
 void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
         TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
-        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, TrackBackgroundColorSetByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG
