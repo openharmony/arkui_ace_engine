@@ -20,6 +20,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/utils/utils.h"
+#include "base/i18n/localization.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -30,7 +31,6 @@
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
-#include "base/i18n/localization.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -155,6 +155,7 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t RES_TYPE_INDEX = 2;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
+constexpr int32_t FLOAT_PRECISION = 6;
 const std::string DEFAULT_STR = "-1";
 constexpr  int32_t REPLACEHOLDER_INDEX = 2;
 const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
@@ -1585,12 +1586,14 @@ std::string ArkTSUtils::GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::Arr
 
     if (type == "d" && item->IsNumber()) {
         std::string numStr = std::to_string(item->Int32Value(vm));
-        return localization->LocalizeNumber(numStr, 0) ? numStr : std::string();
+        std::string result;
+        return localization->LocalizeNumber(numStr, result, 0) ? result : std::string();
     }
 
     if (type == "f" && item->IsNumber()) {
         std::string numStr = std::to_string(item->ToNumber(vm)->Value());
-        return localization->LocalizeNumber(numStr, -1) ? numStr : std::string();
+        std::string result;
+        return localization->LocalizeNumber(numStr, result, FLOAT_PRECISION) ? result : std::string();
     }
 
     return std::string();
