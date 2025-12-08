@@ -6094,7 +6094,7 @@ void FrameNode::RecordExposureInner()
         }
     };
     std::vector<double> ratios = { exposureProcessor_->GetRatio() };
-    pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
+    pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false, true);
     exposureProcessor_->SetListenState(true);
 }
 
