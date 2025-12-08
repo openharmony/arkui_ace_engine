@@ -223,6 +223,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
 const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor();
 const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor();
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
+const GENERATED_ArkUIColorMetricsLinearGradientAccessor* GetColorMetricsLinearGradientAccessor();
 const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
@@ -548,6 +549,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetClientAuthenticationHandlerAccessor,
         GetColorContentAccessor,
         GetColorFilterAccessor,
+        GetColorMetricsLinearGradientAccessor,
         GetCommonShapeAccessor,
         GetConsoleMessageAccessor,
         GetContentModifierHelperAccessor,

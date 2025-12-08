@@ -315,6 +315,9 @@ typedef struct Opt_ColorContent Opt_ColorContent;
 typedef struct ColorFilterPeer ColorFilterPeer;
 typedef struct ColorFilterPeer* Ark_ColorFilter;
 typedef struct Opt_ColorFilter Opt_ColorFilter;
+typedef struct ColorMetricsLinearGradientPeer ColorMetricsLinearGradientPeer;
+typedef struct ColorMetricsLinearGradientPeer* Ark_ColorMetricsLinearGradient;
+typedef struct Opt_ColorMetricsLinearGradient Opt_ColorMetricsLinearGradient;
 typedef struct Ark_CommonMethod Ark_CommonMethod;
 typedef struct Opt_CommonMethod Opt_CommonMethod;
 typedef struct CommonShapePeer CommonShapePeer;
@@ -930,6 +933,8 @@ typedef struct Array_Buffer Array_Buffer;
 typedef struct Opt_Array_Buffer Opt_Array_Buffer;
 typedef struct Array_bundleManager_SupportWindowMode Array_bundleManager_SupportWindowMode;
 typedef struct Opt_Array_bundleManager_SupportWindowMode Opt_Array_bundleManager_SupportWindowMode;
+typedef struct Array_ColorMetricsStop Array_ColorMetricsStop;
+typedef struct Opt_Array_ColorMetricsStop Opt_Array_ColorMetricsStop;
 typedef struct Array_ColorStop Array_ColorStop;
 typedef struct Opt_Array_ColorStop Opt_Array_ColorStop;
 typedef struct Array_CustomObject Array_CustomObject;
@@ -3019,6 +3024,8 @@ typedef struct Ark_CaretStyle Ark_CaretStyle;
 typedef struct Opt_CaretStyle Opt_CaretStyle;
 typedef struct Ark_ChainAnimationOptions Ark_ChainAnimationOptions;
 typedef struct Opt_ChainAnimationOptions Opt_ChainAnimationOptions;
+typedef struct Ark_ColorMetricsStop Ark_ColorMetricsStop;
+typedef struct Opt_ColorMetricsStop Opt_ColorMetricsStop;
 typedef struct Ark_ColorStop Ark_ColorStop;
 typedef struct Opt_ColorStop Opt_ColorStop;
 typedef struct Ark_ColumnSplitDividerStyle Ark_ColumnSplitDividerStyle;
@@ -7504,6 +7511,10 @@ typedef struct Opt_ColorFilter {
     Ark_Tag tag;
     Ark_ColorFilter value;
 } Opt_ColorFilter;
+typedef struct Opt_ColorMetricsLinearGradient {
+    Ark_Tag tag;
+    Ark_ColorMetricsLinearGradient value;
+} Opt_ColorMetricsLinearGradient;
 typedef struct Ark_CommonMethod {
     /* kind: Interface */
     void *handle;
@@ -9261,6 +9272,15 @@ typedef struct Opt_Array_bundleManager_SupportWindowMode {
     Ark_Tag tag;
     Array_bundleManager_SupportWindowMode value;
 } Opt_Array_bundleManager_SupportWindowMode;
+typedef struct Array_ColorMetricsStop {
+    /* kind: ContainerType */
+    Ark_ColorMetricsStop* array;
+    Ark_Int32 length;
+} Array_ColorMetricsStop;
+typedef struct Opt_Array_ColorMetricsStop {
+    Ark_Tag tag;
+    Array_ColorMetricsStop value;
+} Opt_Array_ColorMetricsStop;
 typedef struct Array_ColorStop {
     /* kind: ContainerType */
     Ark_ColorStop* array;
@@ -19485,6 +19505,15 @@ typedef struct Opt_ChainAnimationOptions {
     Ark_Tag tag;
     Ark_ChainAnimationOptions value;
 } Opt_ChainAnimationOptions;
+typedef struct Ark_ColorMetricsStop {
+    /* kind: Interface */
+    Ark_ColorMetrics color;
+    Ark_Length offset;
+} Ark_ColorMetricsStop;
+typedef struct Opt_ColorMetricsStop {
+    Ark_Tag tag;
+    Ark_ColorMetricsStop value;
+} Opt_ColorMetricsStop;
 typedef struct Ark_ColorStop {
     /* kind: Interface */
     Opt_ResourceColor color;
@@ -24785,6 +24814,8 @@ typedef struct GENERATED_ArkUISliderModifier {
                                        const Opt_CrownSensitivity* value);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
                                     const Opt_Boolean* value);
+    void (*setTrackColorMetrics)(Ark_NativePointer node,
+                                 const Opt_ColorMetricsLinearGradient* value);
     void (*setShowSteps1)(Ark_NativePointer node,
                           const Opt_Boolean* value,
                           const Opt_SliderShowStepOptions* options);
@@ -26707,6 +26738,12 @@ typedef struct GENERATED_ArkUIColorFilterAccessor {
     Ark_ColorFilter (*construct)(const Array_Float64* value);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIColorFilterAccessor;
+
+typedef struct GENERATED_ArkUIColorMetricsLinearGradientAccessor {
+    void (*destroyPeer)(Ark_ColorMetricsLinearGradient peer);
+    Ark_ColorMetricsLinearGradient (*construct)(const Array_ColorMetricsStop* colorStops);
+    Ark_NativePointer (*getFinalizer)();
+} GENERATED_ArkUIColorMetricsLinearGradientAccessor;
 
 typedef struct GENERATED_ArkUICommonShapeAccessor {
     void (*destroyPeer)(Ark_CommonShape peer);
@@ -29644,6 +29681,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIClientAuthenticationHandlerAccessor* (*getClientAuthenticationHandlerAccessor)();
     const GENERATED_ArkUIColorContentAccessor* (*getColorContentAccessor)();
     const GENERATED_ArkUIColorFilterAccessor* (*getColorFilterAccessor)();
+    const GENERATED_ArkUIColorMetricsLinearGradientAccessor* (*getColorMetricsLinearGradientAccessor)();
     const GENERATED_ArkUICommonShapeAccessor* (*getCommonShapeAccessor)();
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();

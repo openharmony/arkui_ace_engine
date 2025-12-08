@@ -2067,6 +2067,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SliderAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SliderAttribute_setTrackColorMetrics(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SliderAttribute_setShowSteps1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SliderAttribute_setShowTips(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3823,6 +3825,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ColorFilter_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _ColorFilter_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _ColorMetricsLinearGradient_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _ColorMetricsLinearGradient_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _CommonShape_construct(): KPointer
     @ani.unsafe.Direct

@@ -17695,6 +17695,20 @@ void impl_SliderAttribute_setEnableHapticFeedback(Ark_NativePointer thisPtr, KSe
         GetNodeModifiers()->getSliderModifier()->setEnableHapticFeedback(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SliderAttribute_setEnableHapticFeedback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SliderAttribute_setTrackColorMetrics(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+    DeserializerBase thisDeserializer(thisArray, thisLength);
+    const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_ColorMetricsLinearGradient valueValueTempTmpBuf = {};
+    valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        valueValueTempTmpBuf.value = static_cast<Ark_ColorMetricsLinearGradient>(ColorMetricsLinearGradient_serializer::read(thisDeserializer));
+    }
+    Opt_ColorMetricsLinearGradient valueValueTemp = valueValueTempTmpBuf;;
+    GetNodeModifiers()->getSliderModifier()->setTrackColorMetrics(
+        self, static_cast<Opt_ColorMetricsLinearGradient*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SliderAttribute_setTrackColorMetrics, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SliderAttribute_setShowSteps1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -29062,6 +29076,23 @@ Ark_NativePointer impl_ColorFilter_getFinalizer() {
         return GetAccessors()->getColorFilterAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(ColorFilter_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_ColorMetricsLinearGradient_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 colorStopsValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_ColorMetricsStop colorStopsValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(colorStopsValueTempTmpBuf)>::type,
+        std::decay<decltype(*colorStopsValueTempTmpBuf.array)>::type>(&colorStopsValueTempTmpBuf, colorStopsValueTempTmpBufLength);
+        for (int colorStopsValueTempTmpBufBufCounterI = 0; colorStopsValueTempTmpBufBufCounterI < colorStopsValueTempTmpBufLength; colorStopsValueTempTmpBufBufCounterI++) {
+            colorStopsValueTempTmpBuf.array[colorStopsValueTempTmpBufBufCounterI] = ColorMetricsStop_serializer::read(thisDeserializer);
+        }
+        Array_ColorMetricsStop colorStopsValueTemp = colorStopsValueTempTmpBuf;;
+        return GetAccessors()->getColorMetricsLinearGradientAccessor()->construct(static_cast<Array_ColorMetricsStop*>(&colorStopsValueTemp));
+}
+KOALA_INTEROP_DIRECT_2(ColorMetricsLinearGradient_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ColorMetricsLinearGradient_getFinalizer() {
+        return GetAccessors()->getColorMetricsLinearGradientAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(ColorMetricsLinearGradient_getFinalizer, Ark_NativePointer)
 Ark_NativePointer impl_CommonShape_construct() {
         return GetAccessors()->getCommonShapeAccessor()->construct();
 }

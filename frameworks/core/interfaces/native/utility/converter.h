@@ -573,6 +573,7 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_Float64& src);
     template<> CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
+    template<> Color Convert(const Ark_ColorMetrics& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
     template<> Color Convert(const Ark_Int64& src);
@@ -804,6 +805,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<GestureFocusMode>& dst, const Ark_GestureFocusMode& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);
     template<> void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src);
+    template<> void AssignCast(std::optional<Gradient>& dst, const Ark_ColorMetricsLinearGradient& src);
     template<> void AssignCast(std::optional<Gradient>& dst, const Ark_LinearGradient& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
