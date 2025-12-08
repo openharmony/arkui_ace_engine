@@ -608,12 +608,16 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
+        handleImageError_ = false;
         FireMediaPlayerImageComplete();
+    } else {
+        handleImageError_ = true;
     }
 }
 
 void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
 {
+    handleImageError_ = true;
     auto errorStatus = info.GetErrorInfo();
     TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "OnHandleImageErrorEventCallback Start.");
     CHECK_NULL_VOID(errorStatus.errorMessage.c_str());
@@ -627,11 +631,14 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent start:%{public}d.", loadingStatus);
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
+        handleImageError_ = false;
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent EightyToHundredAnimation.");
             EightyToHundredAnimation();
         }
+    } else {
+        handleImageError_ = true;
     }
 }
 
@@ -2001,6 +2008,9 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
 
 void MovingPhotoPattern::StopAnimation()
 {
+    if(handleImageError_) {
+        return;
+    }
     isStopAnimation_ = false;
     startAnimationFlag_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
@@ -2197,6 +2207,10 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
 
 void MovingPhotoPattern::Start()
 {
+    if (handleImageError_) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleImageError %{public}.", handleImageError_);
+        return;
+    }
     TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto start play.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
