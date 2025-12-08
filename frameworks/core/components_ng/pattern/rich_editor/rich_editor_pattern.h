@@ -1133,7 +1133,7 @@ public:
     void ResetKeyboardIfNeed();
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     bool NeedCloseKeyboard() override;
-    void CloseTextCustomKeyboard(int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
 
     void HandleOnEnter() override
     {

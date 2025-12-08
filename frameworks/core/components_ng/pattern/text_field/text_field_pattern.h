@@ -1798,7 +1798,7 @@ public:
     bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     bool NeedCloseKeyboard() override;
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
-    void CloseTextCustomKeyboard(int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
     void SetPlaceholderColorInfo(const std::string& info)
     {

@@ -11500,14 +11500,15 @@ bool RichEditorPattern::NeedCloseKeyboard()
     return (customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
 }
 
-void RichEditorPattern::CloseTextCustomKeyboard(int32_t nodeId)
+void RichEditorPattern::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "CloseTextCustomKeyboard hostId=%{public}d nodeId=%{public}d NeedCloseKeyboard=%{public}d", host->GetId(),
         nodeId, NeedCloseKeyboard());
-    if (NeedCloseKeyboard() && nodeId != host->GetId()) {
+    bool isCloseCustomKeyboard = NeedCloseKeyboard() && (nodeId != host->GetId() || isUIExtension);
+    if (isCloseCustomKeyboard) {
         CloseCustomKeyboard();
     }
 }
