@@ -82,6 +82,7 @@ constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
+const Dimension DISTANCE = Dimension(16, DimensionUnit::PX);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -1341,5 +1342,90 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
     auto selectColor = optionPattern->GetBgColor();
     EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
     ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: SelectKeyboardAvoidMode001
+ * @tc.desc: Test Select KeyboardAvoidMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectKeyboardAvoidMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectModelInstance.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Set keyboard avoid mode and distance available value.
+     * @tc.expected: Keyboard avoid mode and distance will set success.
+     */
+    selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE);
+    selectModelInstance.SetMinKeyboardAvoidDistance(DISTANCE);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto layoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_TRUE(layoutProperty->HasMenuKeyboardAvoidMode());
+    EXPECT_EQ(layoutProperty->GetMenuKeyboardAvoidModeValue(), MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE);
+    ASSERT_TRUE(layoutProperty->HasMinKeyboardAvoidDistance());
+    EXPECT_EQ(layoutProperty->GetMinKeyboardAvoidDistanceValue(), DISTANCE);
+    /**
+     * @tc.steps: step3. Set keyboard avoid mode and distance std::nullopt.
+     * @tc.expected: Keyboard avoid mode and distance will reset.
+     */
+    selectModelInstance.SetKeyboardAvoidMode(std::nullopt);
+    selectModelInstance.SetMinKeyboardAvoidDistance(std::nullopt);
+    EXPECT_FALSE(layoutProperty->HasMenuKeyboardAvoidMode());
+    EXPECT_FALSE(layoutProperty->HasMinKeyboardAvoidDistance());
+}
+
+/**
+ * @tc.name: SelectKeyboardAvoidMode002
+ * @tc.desc: Test Select KeyboardAvoidMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectKeyboardAvoidMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    const std::string fontKey = "keyboardAvoidMode";
+    const std::string fontColorKey = "minKeyboardAvoidDistance";
+    InspectorFilter filter;
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto selectNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectNode, nullptr);
+    auto selectPattern = selectNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ToJsonMenuAvoidKeyboard.
+     * @tc.expected: The property cannot be obtained.
+     */
+    auto json = JsonUtil::Create(true);
+    selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
+    EXPECT_FALSE(json->Contains("keyboardAvoidMode"));
+    EXPECT_FALSE(json->Contains("minKeyboardAvoidDistance"));
+
+    /**
+     * @tc.steps: step3. Set available value and call ToJsonMenuAvoidKeyboard.
+     * @tc.expected: The property can be get.
+     */
+    selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE);
+    selectModelInstance.SetMinKeyboardAvoidDistance(DISTANCE);
+    selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
+    EXPECT_TRUE(json->Contains("keyboardAvoidMode"));
+    EXPECT_TRUE(json->Contains("minKeyboardAvoidDistance"));
+
+    /**
+     * @tc.steps: step4. change KeyboardAvoidMode and call ToJsonMenuAvoidKeyboard.
+     * @tc.expected: The property can be get.
+     */
+    selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::NONE);
+    selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
+    EXPECT_TRUE(json->Contains("keyboardAvoidMode"));
 }
 } // namespace OHOS::Ace::NG

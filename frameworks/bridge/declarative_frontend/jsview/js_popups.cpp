@@ -1314,16 +1314,30 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
     }
 }
 
-void JSViewPopups::ParseMenuAppearLifeCycleParam(
+void JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto aboutToAppearValue = menuOptions->GetProperty("aboutToAppear");
+    if (aboutToAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsAboutToAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToAppearValue));
+        auto aboutToAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToAppearFunc),
+                                 node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("aboutToAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.aboutToAppear = std::move(aboutToAppear);
+    }
+
     auto onWillAppearValue = menuOptions->GetProperty("onWillAppear");
     if (onWillAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnWillAppearValue =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppearValue));
         auto onWillAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillAppearValue),
-                                    node = frameNode]() {
+                                node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onWillAppear");
             PipelineContext::SetCallBackNode(node);
@@ -1331,13 +1345,31 @@ void JSViewPopups::ParseMenuAppearLifeCycleParam(
         };
         menuParam.onWillAppear = std::move(onWillAppear);
     }
+}
+
+void JSViewPopups::ParseMenuAppearLifeCycleParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
 
     auto onDidAppearValue = menuOptions->GetProperty("onDidAppear");
     if (onDidAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnDidAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppearValue));
         auto onDidAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDidAppearFunc),
-                                    node = frameNode]() {
+                               node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onDidAppear");
             PipelineContext::SetCallBackNode(node);
@@ -1347,16 +1379,30 @@ void JSViewPopups::ParseMenuAppearLifeCycleParam(
     }
 }
 
-void JSViewPopups::ParseMenuDisappearLifeCycleParam(
+void JSViewPopups::ParseMenuAboutToDisappearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto aboutToDisAppearValue = menuOptions->GetProperty("aboutToDisappear");
+    if (aboutToDisAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsAboutToDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToDisAppearValue));
+        auto aboutToDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToDisAppearFunc),
+                                    node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("aboutToDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.aboutToDisappear = std::move(aboutToDisappear);
+    }
+
     auto onWillDisappearValue = menuOptions->GetProperty("onWillDisappear");
     if (onWillDisappearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnWillDisappearValueFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappearValue));
         auto onWillDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnWillDisappearValueFunc),
-                                    node = frameNode]() {
+                                   node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onWillDisappear");
             PipelineContext::SetCallBackNode(node);
@@ -1364,13 +1410,32 @@ void JSViewPopups::ParseMenuDisappearLifeCycleParam(
         };
         menuParam.onWillDisappear = std::move(onWillDisappear);
     }
+}
+
+void JSViewPopups::ParseMenuDisappearLifeCycleParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
 
     auto onDidDisappearValue = menuOptions->GetProperty("onDidDisappear");
     if (onDidDisappearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnDidDisappearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappearValue));
         auto onDidDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDidDisappearFunc),
-                                    node = frameNode]() {
+                                  node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onDidDisappear");
             PipelineContext::SetCallBackNode(node);
@@ -1380,28 +1445,8 @@ void JSViewPopups::ParseMenuDisappearLifeCycleParam(
     }
 }
 
-void JSViewPopups::ParseMenuParam(
-    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void JSViewPopups::ParseBackgroundParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
-    auto offsetVal = menuOptions->GetProperty("offset");
-    if (offsetVal->IsObject()) {
-        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
-        JSViewPopups::ParseMenuOffsetParam(offsetObj, menuParam);
-    }
-
-    auto placementValue = menuOptions->GetProperty("placement");
-    if (placementValue->IsNumber()) {
-        auto placement = placementValue->ToNumber<int32_t>();
-        if (placement >= 0 && placement < static_cast<int32_t>(Placement::NONE)) {
-            menuParam.placement = static_cast<Placement>(placement);
-        }
-    }
-
-    auto enableHoverModeValue = menuOptions->GetProperty("enableHoverMode");
-    if (enableHoverModeValue->IsBoolean()) {
-        menuParam.enableHoverMode = enableHoverModeValue->ToBoolean();
-    }
-
     auto backgroundColorValue = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_COLOR));
     Color backgroundColor;
     RefPtr<ResourceObject> backgroundColorResObj;
@@ -1426,63 +1471,11 @@ void JSViewPopups::ParseMenuParam(
             menuParam.backgroundBlurStyle = blurStyle;
         }
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onAppearValue = menuOptions->GetProperty("onAppear");
-    if (onAppearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
-        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.onAppear = std::move(onAppear);
-    }
+}
 
-    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
-    if (onDisappearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnDisAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
-                               node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.onDisappear = std::move(onDisappear);
-    }
-    auto aboutToAppearValue = menuOptions->GetProperty("aboutToAppear");
-    if (aboutToAppearValue->IsFunction()) {
-        RefPtr<JsFunction> jsAboutToAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToAppearValue));
-        auto aboutToAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToAppearFunc),
-                                 node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("aboutToAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.aboutToAppear = std::move(aboutToAppear);
-    }
-
-    auto aboutToDisAppearValue = menuOptions->GetProperty("aboutToDisappear");
-    if (aboutToDisAppearValue->IsFunction()) {
-        RefPtr<JsFunction> jsAboutToDisAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToDisAppearValue));
-        auto aboutToDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToDisAppearFunc),
-                                    node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("aboutToDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.aboutToDisappear = std::move(aboutToDisappear);
-    }
-    JSViewPopups::ParseMenuAppearLifeCycleParam(info, menuOptions, menuParam);
-    JSViewPopups::ParseMenuDisappearLifeCycleParam(info, menuOptions, menuParam);
-
+void JSViewPopups::ParseTransitionParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
     auto menuTransition = menuOptions->GetProperty("transition");
     menuParam.hasTransitionEffect = false;
     if (menuTransition->IsObject()) {
@@ -1490,22 +1483,10 @@ void JSViewPopups::ParseMenuParam(
         menuParam.hasTransitionEffect = true;
         menuParam.transition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
     }
-    JSViewPopups::ParseMenuShowInSubWindowParam(menuOptions, menuParam);
-    JSViewPopups::ParseMenuArrowParam(menuOptions, menuParam);
-    JSViewPopups::ParseMenuBorderRadius(menuOptions, menuParam);
-    JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
-    JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
-    JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
-    JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
-    JSViewPopups::ParseMenuModalMode(menuOptions, menuParam);
-    JSViewPopups::ParseMenuPreviewScaleMode(menuOptions, menuParam);
-    JSViewPopups::ParseMenuAvailableLayoutArea(menuOptions, menuParam);
-    auto outlineWidthValue = menuOptions->GetProperty("outlineWidth");
-    JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
-    auto outlineColorValue = menuOptions->GetProperty("outlineColor");
-    JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
-    JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
+}
 
+void JSViewPopups::ParseAnchorPositionParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
     auto anchorPositionVal = menuOptions->GetProperty("anchorPosition");
     if (anchorPositionVal->IsObject()) {
         auto anchorPositionObj = JSRef<JSObject>::Cast(anchorPositionVal);
@@ -1525,6 +1506,81 @@ void JSViewPopups::ParseMenuParam(
             }
         }
     }
+}
+
+void JSViewPopups::ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto modeProperty = menuOptions->GetProperty("keyboardAvoidMode");
+    if (modeProperty->IsNumber()) {
+        auto mode = modeProperty->ToNumber<int32_t>();
+        if (mode == static_cast<int32_t>(NG::MenuKeyboardAvoidMode::NONE)) {
+            menuParam.keyboardAvoidMode = NG::MenuKeyboardAvoidMode::NONE;
+        } else if (mode == static_cast<int32_t>(NG::MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE)) {
+            menuParam.keyboardAvoidMode = NG::MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+        } else {
+            menuParam.keyboardAvoidMode = std::nullopt;
+        }
+    }
+    auto minKeyboardAvoidDistanceProperty = menuOptions->GetProperty("minKeyboardAvoidDistance");
+    if (minKeyboardAvoidDistanceProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(minKeyboardAvoidDistanceProperty, value) &&
+            value.IsNonNegative()) {
+            menuParam.minKeyboardAvoidDistance = value;
+        }
+    }
+}
+
+void JSViewPopups::ParseMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto offsetVal = menuOptions->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        JSViewPopups::ParseMenuOffsetParam(offsetObj, menuParam);
+    }
+
+    auto placementValue = menuOptions->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement < static_cast<int32_t>(Placement::NONE)) {
+            menuParam.placement = static_cast<Placement>(placement);
+        }
+    }
+    
+    auto enableHoverModeValue = menuOptions->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        menuParam.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+    JSViewPopups::ParseBackgroundParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuLifeCycleParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseTransitionParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuShowInSubWindowParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuArrowParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBorderRadius(menuOptions, menuParam);
+    JSViewPopups::ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
+    JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuModalMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuPreviewScaleMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuAvailableLayoutArea(menuOptions, menuParam);
+    auto outlineWidthValue = menuOptions->GetProperty("outlineWidth");
+    JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+    auto outlineColorValue = menuOptions->GetProperty("outlineColor");
+    JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
+    JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
+}
+
+void JSViewPopups::ParseMenuLifeCycleParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuAppearLifeCycleParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuAboutToDisappearLifeCycleParam(info, menuOptions, menuParam);
+    JSViewPopups::ParseMenuDisappearLifeCycleParam(info, menuOptions, menuParam);
 }
 
 void JSViewPopups::InitMenuParamColorMode(NG::MenuParam& menuParam)

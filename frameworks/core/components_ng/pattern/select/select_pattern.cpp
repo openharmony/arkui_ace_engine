@@ -259,7 +259,23 @@ void SelectPattern::ShowSelectMenu()
     }
     ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
+    ConfigMenuParam();
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::ConfigMenuParam()
+{
+    CHECK_NULL_VOID(menuWrapper_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menuparam = wrapperPattern->GetMenuParam();
+    menuparam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    menuparam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    wrapperPattern->SetMenuParam(menuparam);
 }
 
 void SelectPattern::ShowSelectMenuInSubWindow()
@@ -286,6 +302,7 @@ void SelectPattern::ShowSelectMenuInSubWindow()
     menuParam.isShowInSubWindow = true;
     menuParam.isShow = true;
     menuParam.setShow = true;
+    ConfigMenuParam();
     subwindowManager->ShowMenuNG(menuWrapper_, menuParam, host, offset);
 }
 
@@ -1774,6 +1791,26 @@ void SelectPattern::ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const
         json->Put("dividerMode", "FLOATING_ABOVE_MENU");
     } else if (mode.value() == DividerMode::EMBEDDED_IN_MENU) {
         json->Put("dividerMode", "EMBEDDED_IN_MENU");
+    }
+}
+
+void SelectPattern::ToJsonMenuAvoidKeyboard(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    if (keyboardAvoidMode.has_value()) {
+        if (keyboardAvoidMode.value() == MenuKeyboardAvoidMode::NONE) {
+            json->PutExtAttr("keyboardAvoidMode", "NONE", filter);
+        } else if (keyboardAvoidMode.value() == MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE) {
+            json->PutExtAttr("keyboardAvoidMode", "TRANSLATE_AND_RESIZE", filter);
+        }
+    }
+    auto minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    if (minKeyboardAvoidDistance.has_value()) {
+        json->PutExtAttr("minKeyboardAvoidDistance", minKeyboardAvoidDistance.value().ToString().c_str(), filter);
     }
 }
 
