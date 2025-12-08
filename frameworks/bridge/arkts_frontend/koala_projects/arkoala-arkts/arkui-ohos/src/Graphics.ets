@@ -144,6 +144,21 @@ export class ColorMetrics {
     get alpha(): int32 {
         return this.alpha_!;
     }
+    set red(red: int32) {
+        this.red_ = red;
+    }
+    set green(green: int32) {
+        this.green_ = green;
+    }
+    set blue(blue: int32) {
+        this.blue_ = blue;
+    }
+    set alpha(alpha: int32) {
+        this.alpha_ = alpha;
+    }
+    set resourceId(id: number) {
+        this.resourceId_ = id;
+    }
     private static clamp(value: number): number {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
     }
