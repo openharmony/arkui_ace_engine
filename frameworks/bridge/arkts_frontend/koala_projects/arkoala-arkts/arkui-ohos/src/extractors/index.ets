@@ -79,7 +79,7 @@ import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
-import { ComponentContent } from 'arkui.ComponentContent';
+import { ComponentContent, ComponentContentBase } from 'arkui.ComponentContent';
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -95,6 +95,14 @@ export namespace extractors {
   export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
     const x: Object = {};
     return x as ColorMetrics;
+  }
+
+  export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
+    return 123;
+  }
+  export function fromComponentContentBasePtr(ptr: KPointer): ComponentContentBase {
+    const x: Object = {};
+    return x as ComponentContentBase;
   }
 
   export function toDrawContextPtr(ptr: DrawContext): KPointer {
