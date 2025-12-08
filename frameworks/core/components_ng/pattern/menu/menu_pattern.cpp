@@ -515,7 +515,9 @@ void MenuPattern::BuildDivider()
     buildDividerTaskAdded_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isNeedDivider_ = false;
+    if (!IsSelectOverlayExtensionMenu()) {
+        isNeedDivider_ = false;
+    }
     auto uiNode = AceType::DynamicCast<UINode>(host);
     RefPtr<UINode> previousNode = nullptr;
     UpdateMenuItemChildren(uiNode, previousNode);
@@ -1112,6 +1114,18 @@ void MenuPattern::HideStackMenu() const
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapper->GetFirstChild());
     CHECK_NULL_VOID(menuNode);
     ShowStackMenuDisappearAnimation(menuNode, host, option);
+}
+
+void MenuPattern::HideAllEmbeddedMenuItems(bool isNeedAnimation)
+{
+    auto embeddedMenuItems = GetEmbeddedMenuItems();
+    for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
+        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
+        if (!menuItemPattern) {
+            continue;
+        }
+        menuItemPattern->HideEmbedded(isNeedAnimation);
+    }
 }
 
 void MenuPattern::HideSubMenu()

@@ -92,6 +92,7 @@ struct OptionParam {
 
     bool isAIMenuOption = false;
     bool isAskCeliaOption = false;
+    std::vector<OptionParam> subMenuItems = {};
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -124,6 +125,11 @@ struct OptionParam {
         bool enabledParam, uint32_t symbolId)
         : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
           symbolId(symbolId)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam, uint32_t symbolId, const std::vector<OptionParam>& subMenuItems)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
+          symbolId(symbolId), subMenuItems(subMenuItems)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)

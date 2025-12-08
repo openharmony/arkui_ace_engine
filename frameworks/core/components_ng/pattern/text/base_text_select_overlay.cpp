@@ -1341,6 +1341,18 @@ std::string BaseTextSelectOverlay::GetTranslateParamRectStr(RectF rect, EdgeF re
     return jsonValue->ToString();
 }
 
+void BaseTextSelectOverlay::HandleOnAutoFill(OptionMenuType type)
+{
+    CHECK_NULL_VOID(type == OptionMenuType::TOUCH_MENU);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto node = manager->GetSelectOverlayNode();
+    CHECK_NULL_VOID(node && !node->GetIsExtensionMenu());
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "HandleOnAutoFill");
+    node->SetSubToolbarStatus(SubToolbarStatus::NEEDEXPAND);
+    HideMenu(true);
+}
+
 void BaseTextSelectOverlay::HandleOnTranslate()
 {
     HideMenu(true);

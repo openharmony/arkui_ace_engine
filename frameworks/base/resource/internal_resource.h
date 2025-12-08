@@ -113,6 +113,8 @@ public:
         IC_COPY_SVG,
         IC_PASTE_SVG,
         IC_SELECT_ALL_SVG,
+        IC_AUTO_FILL_SVG,
+        IC_PASSWORD_VAULT_SVG,
         IC_SHARE_SVG,
         IC_TRANSLATE_SVG,
         IC_SEARCH_SVG,

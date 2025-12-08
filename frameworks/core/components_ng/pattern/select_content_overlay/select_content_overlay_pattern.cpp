@@ -290,32 +290,6 @@ void SelectContentOverlayPattern::SetIsHandleLineShow(bool isShow)
     }
 }
 
-void SelectContentOverlayPattern::UpdateMenuAccessibility(bool menuIsShow)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto containerId = GetContainerId();
-    RefPtr<PipelineContext> context = nullptr;
-    if (GetIsMenuShowInSubWindow() && containerId != -1) {
-        auto container = Container::GetContainer(containerId);
-        CHECK_NULL_VOID(container);
-        context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_VOID(context);
-    } else {
-        context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-    }
-    auto selectOverlayManager = context->GetSelectOverlayManager();
-    CHECK_NULL_VOID(selectOverlayManager);
-    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
-    CHECK_NULL_VOID(contentOverlayManager);
-    if (menuIsShow) {
-        contentOverlayManager->FocusFirstFocusableChildInMenu();
-    } else {
-        contentOverlayManager->NotifyAccessibilityOwner();
-    }
-}
-
 bool SelectContentOverlayPattern::IsDraggingSingleHandle()
 {
     return info_->isSingleHandle && (IsDraggingHandle(true) || IsDraggingHandle(false));

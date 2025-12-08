@@ -1458,6 +1458,8 @@ public:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     bool ProcessAutoFill(AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void ProcessAutoFillOnPaste();
+    void HandleOnPasswordVault();
+    bool IsShowAutoFill();
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override

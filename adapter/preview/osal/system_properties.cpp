@@ -300,6 +300,11 @@ bool SystemProperties::IsPCMode()
     return false;
 }
 
+bool SystemProperties::IsAutoFillSupport()
+{
+    return false;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return false;

@@ -116,6 +116,7 @@ bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
+bool SystemProperties::isAutoFillSupport_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -333,6 +334,11 @@ bool SystemProperties::GetResourceDecoupling()
 bool SystemProperties::IsPCMode()
 {
     return isPCMode_;
+}
+
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
 }
 
 bool SystemProperties::ConfigChangePerform()

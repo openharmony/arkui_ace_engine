@@ -881,13 +881,17 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
     auto extensionMenu = selectOverlayNode->extensionMenu_;
 
-    auto menuPattern = extensionMenu->GetPattern<MenuPattern>();
+    auto scrollNode = AceType::DynamicCast<FrameNode>(extensionMenu->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    auto options = menuPattern->GetMenuItems();
     EXPECT_EQ(options.size(), 2);
     for (size_t i = 0; i < options.size(); ++i) {
         auto pattern = options[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
+        ASSERT_NE(pattern, nullptr);
         EXPECT_TRUE(pattern->fontColor_.has_value());
     }
 }
