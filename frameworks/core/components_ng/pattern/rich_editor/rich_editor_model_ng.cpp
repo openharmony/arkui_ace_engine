@@ -776,6 +776,34 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
     richEditorPattern->UpdateScrollBarColor(value, true);
 }
 
+void RichEditorModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void RichEditorModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RichEditorLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color RichEditorModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void RichEditorModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void RichEditorModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
 void RichEditorModelNG::SetSingleLine(bool isEnable)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable);

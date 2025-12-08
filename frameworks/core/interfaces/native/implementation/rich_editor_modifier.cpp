@@ -796,6 +796,14 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         RichEditorModelStatic::BindSelectionMenu(frameNode, span, response, builder, convMenuParam);
         }, node);
 }
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetCustomKeyboardImpl(Ark_NativePointer node,
                            const Opt_Union_CustomBuilder_ComponentContent* value,
                            const Opt_KeyboardOptions* options)
@@ -892,6 +900,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
         RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+        RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
     };

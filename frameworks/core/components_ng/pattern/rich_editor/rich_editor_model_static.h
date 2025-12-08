@@ -39,6 +39,7 @@ public:
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
         const std::optional<bool>& supportAvoidance);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetCustomKeyboardWithNode(
         FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,

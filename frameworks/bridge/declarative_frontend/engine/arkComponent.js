@@ -10375,6 +10375,25 @@ class RichEditorOnWillChangeModifier extends ModifierWithKey {
 }
 RichEditorOnWillChangeModifier.identity = Symbol('richEditorOnWillChange');
 
+class RichEditorSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+RichEditorSelectedDragPreviewStyleModifier.identity = Symbol('richEditorSelectedDragPreviewStyle');
+
 class RichEditorOnDidChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10975,6 +10994,13 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   scrollBarColor(style) {
     modifierWithKey(this._modifiersWithKeys, RichEditorScrollBarColorModifier.identity, RichEditorScrollBarColorModifier, style);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedDragPreviewStyleModifier.identity,
+      RichEditorSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
   includeFontPadding(enable) {

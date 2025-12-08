@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
@@ -172,6 +173,15 @@ void RichEditorModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, 
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCompressLeadingPunctuation(enabled.value_or(false));
+}
+
+void RichEditorModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        RichEditorModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    RichEditorModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 void RichEditorModelStatic::SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,

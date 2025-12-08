@@ -25,7 +25,7 @@ import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInse
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback, ResourceColor, ResourceStr } from "./component/units"
-import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance } from "./component/textCommon"
+import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
 import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
@@ -114,6 +114,8 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _bindSelectionMenu_0_1value?: CustomBuilder | undefined
     _bindSelectionMenu_0_2value?: ResponseType | RichEditorResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
+    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customKeyboard_0_0value?: CustomBuilder | ComponentContent | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
@@ -736,6 +738,24 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (this._customKeyboard_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._customKeyboard_0_flag) {
@@ -1218,6 +1238,19 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (modifier._customKeyboard_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._customKeyboard_0_flag) {
@@ -1619,6 +1652,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         } else
         {
             this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedDragPreviewStyle_0_0value = value
+        } else
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

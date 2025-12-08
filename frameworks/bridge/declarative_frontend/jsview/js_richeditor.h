@@ -74,6 +74,7 @@ public:
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
     static void SetEnterKeyType(const JSCallbackInfo& info);

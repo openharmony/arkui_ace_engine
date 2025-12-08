@@ -13669,6 +13669,19 @@ void impl_RichEditorAttribute_setBindSelectionMenu(Ark_NativePointer thisPtr, KS
         Opt_SelectionMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getRichEditorModifier()->setBindSelectionMenu(self, static_cast<Opt_RichEditorSpanType*>(&spanTypeValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_Union_ResponseType_RichEditorResponseType*>(&responseTypeValueTemp), static_cast<Opt_SelectionMenuOptions*>(&optionsValueTemp));
 }
+void impl_RichEditorAttribute_setSelectedDragPreviewStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SelectedDragPreviewStyle valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = SelectedDragPreviewStyle_serializer::read(thisDeserializer);
+        }
+        Opt_SelectedDragPreviewStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getRichEditorModifier()->setSelectedDragPreviewStyle(self, static_cast<Opt_SelectedDragPreviewStyle*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(RichEditorAttribute_setSelectedDragPreviewStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 KOALA_INTEROP_DIRECT_V3(RichEditorAttribute_setBindSelectionMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RichEditorAttribute_setCustomKeyboard(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);

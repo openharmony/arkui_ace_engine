@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -719,6 +719,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSelectedDragPreviewStyleAttribute(value: SelectedDragPreviewStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SelectedDragPreviewStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setCustomKeyboardAttribute(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1128,6 +1140,9 @@ export interface RichEditorAttribute extends CommonMethod {
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error("Unimplemented method bindSelectionMenu")
     }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        throw new Error("Unimplemented method selectedDragPreviewStyle")
+    }
     customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
@@ -1173,6 +1188,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     includeFontPadding_value?: boolean | undefined
     fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined
+    selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
     setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
         return this
     }
@@ -1276,6 +1292,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
         return this
     }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
     customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
@@ -1648,6 +1667,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
             const responseType_casted = responseType as (ResponseType | RichEditorResponseType | undefined)
             const options_casted = options as (SelectionMenuOptions | undefined)
             this.getPeer()?.setBindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (this.checkPriority("selectedDragPreviewStyle")) {
+            const value_casted = value as (SelectedDragPreviewStyle | undefined)
+            this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
             return this
         }
         return this

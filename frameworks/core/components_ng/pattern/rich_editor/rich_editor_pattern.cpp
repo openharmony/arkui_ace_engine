@@ -9432,6 +9432,7 @@ void RichEditorPattern::CreateDragNode()
             info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
         }
     }
+    info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
@@ -10979,6 +10980,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("fallbackLineSpacing", isFallbackLineSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
+    json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -10986,6 +10988,15 @@ std::string RichEditorPattern::GetCustomKeyboardInJson() const
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("supportAvoidance", keyboardAvoidance_ ? "true" : "false");
     return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+Color RichEditorPattern::GetSelectedDragPreviewStyleColor() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color::WHITE);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::WHITE);
+    return layoutProperty->GetSelectedDragPreviewStyleValue(Color::WHITE);
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const

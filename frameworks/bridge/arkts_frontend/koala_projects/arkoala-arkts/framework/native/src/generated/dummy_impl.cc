@@ -11620,6 +11620,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSelectedDragPreviewStyle(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
                                const Opt_Union_CustomBuilder_ComponentContent* value,
                                const Opt_KeyboardOptions* options)
@@ -23254,6 +23266,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+            RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
         };
