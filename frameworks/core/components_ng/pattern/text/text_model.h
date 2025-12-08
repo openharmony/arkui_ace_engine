@@ -67,6 +67,8 @@ struct TextDetectConfig {
     Color entityDecorationColor;
     TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
     bool enablePreviewMenu = false;
+    bool entityColorFlag = false;
+    bool entityDecorationColorFlag = false;
 
     TextDetectConfig()
     {

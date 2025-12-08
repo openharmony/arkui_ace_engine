@@ -1638,14 +1638,20 @@ void TextBridge::ParseAIEntityColorAndPreview(
     TextDetectConfig textDetectConfig;
     Local<JSValueRef> entityColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor, colorResObj, nodeInfo);
+    auto colorFlagByUser = ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor,
+        colorResObj, nodeInfo);
     arkUITextDetectConfig.entityColor = textDetectConfig.entityColor.GetValue();
-
+    if (colorFlagByUser) {
+        textDetectConfig.entityColorFlag = true;
+    }
     Local<JSValueRef> entityDecorationTypeArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> entityDecorationColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     Local<JSValueRef> entityDecorationStyleArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     arkUITextDetectConfig.entityDecorationType = static_cast<int32_t>(textDetectConfig.entityDecorationType);
     arkUITextDetectConfig.entityDecorationColor = arkUITextDetectConfig.entityColor;
+    if (colorFlagByUser) {
+        textDetectConfig.entityDecorationColorFlag = true;
+    }
     arkUITextDetectConfig.entityDecorationStyle = static_cast<int32_t>(textDetectConfig.entityDecorationStyle);
 
     if (entityDecorationTypeArg->IsInt()) {
@@ -1653,6 +1659,7 @@ void TextBridge::ParseAIEntityColorAndPreview(
     }
     if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor,
         decColorResObj, nodeInfo)) {
+        textDetectConfig.entityDecorationColorFlag = true;
         arkUITextDetectConfig.entityDecorationColor = textDetectConfig.entityDecorationColor.GetValue();
     }
     if (entityDecorationStyleArg->IsInt()) {
