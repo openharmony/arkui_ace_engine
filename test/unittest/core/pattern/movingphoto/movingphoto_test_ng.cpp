@@ -1131,8 +1131,10 @@ HWTEST_F(MovingphotoTestNg, StartUpdateImageAnalyzer001, TestSize.Level1)
     EXPECT_TRUE(frameNode);
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
+
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
 
@@ -1177,10 +1179,13 @@ HWTEST_F(MovingphotoTestNg, UpdateAnalyzerUIConfig001, TestSize.Level1)
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
+
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
+
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
 
@@ -1212,18 +1217,13 @@ HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
-
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
-
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
-
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-
     movingphotoPattern->RefreshMovingPhoto();
-
     EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
 }
 
