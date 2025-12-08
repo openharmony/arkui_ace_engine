@@ -29,7 +29,6 @@ export struct CanvasHome {
             .fontColor("#000000")
             .fontSize(20)
             .fontWeight(700)
-          // .lineHeight(24)
         }
         .height('100%')
         .width('50%')
@@ -222,7 +221,6 @@ struct UserFunctionAreaTabBar {
           .fontColor("#000000")
           .fontSize(10)
           .fontWeight(500)
-        // .lineHeight(1)
       }
       .height(10)
     }

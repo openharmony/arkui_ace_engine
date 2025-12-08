@@ -22,23 +22,29 @@ extern const char _binary_imageGeneratorDialog_abc_start[];
 extern const char _binary_imageGeneratorDialog_abc_end[];
 
 namespace OHOS::Ace::Framework {
+thread_local bool abcInitialized_ = false;
+
 bool ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(int32_t instanceId)
 {
+    if (abcInitialized_) {
+        return true;
+    }
     uint8_t* binaryBuff = (uint8_t*)_binary_imageGeneratorDialog_abc_start;
     int32_t binarySize = _binary_imageGeneratorDialog_abc_end - _binary_imageGeneratorDialog_abc_start;
-    auto filePath = "/system/etc/abc/arkui/imageGeneratorDialog.abc";
     // run abc file
     RefPtr<Framework::JsEngine> jsEngine = nullptr;
     if (instanceId != -1) {
+        // to_do: instance -1 case return false
         jsEngine = EngineHelper::GetEngine(instanceId);
     } else {
         jsEngine = EngineHelper::GetCurrentEngine();
     }
     CHECK_NULL_RETURN(jsEngine, false);
-    if (!jsEngine->ExecuteJs(binaryBuff, binarySize, filePath)) {
+    if (!jsEngine->ExecuteJs(binaryBuff, binarySize)) {
         TAG_LOGE(AceLogTag::ACE_SIDEBAR, "[imageGenerator] execute abc file failed!");
         return false;
     }
+    abcInitialized_ = true;
     return true;
 }
 
