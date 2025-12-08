@@ -18,85 +18,74 @@
 
 #include <cstring>
 #include <cstdio>
+#include <climits>
+#include "interop-logging.h"
+#include "interop-types.h"
+#include "securec.h"
 
-#ifdef GO_UNSAFE
-    #include "securec.h"
-    #define USE_SAFE(name, ...) name##_s(__VA_ARGS__)
-#else
-    /* handle possible unsafe case */
-    #define USE_SAFE(name, ...) name(__VA_ARGS__)
-#endif
-
-inline char *interop_strcpy(char *dest, size_t destsz, const char *src)
+inline errno_t InteropStringCopy(char *dest, size_t destSize, const char *src)
 {
-#ifdef GO_UNSAFE
-    return reinterpret_cast<char(*)>(USE_SAFE(strcpy, dest, reinterpret_cast<rsize_t>(destsz), src));
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(strcpy, dest, src);
-#endif
+    errno_t ret = strcpy_s(dest, destSize, src);
+    if (ret > 0) {
+        LOGE("strcpy_s error code: %d", ret);
+    }
+    return ret;
 }
 
-inline char *interop_strcat(char *dest, size_t destsz, const char *src)
+inline errno_t interop_string_concatenate(char *dest, size_t destSize, const char *src)
 {
-#ifdef GO_UNSAFE
-    return reinterpret_cast<char(*)>(USE_SAFE(strcat, dest, reinterpret_cast<rsize_t>(destsz), src));
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(strcat, dest, src);
-#endif
+    errno_t ret = strcat_s(dest, destSize, src);
+    if (ret > 0) {
+        LOGE("strcat_s error code: %d", ret);
+    }
+    return ret;
 }
 
-inline void *interop_memcpy(void *dest, size_t destsz, const void *src, size_t count)
+inline errno_t interop_memory_copy(void *dest, size_t destSize, const void *src, size_t count)
 {
-#ifdef GO_UNSAFE
-    return reinterpret_cast<void(*)>(USE_SAFE(memcpy, dest, reinterpret_cast<rsize_t>(destsz), src, count));
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(memcpy, dest, src, count);
-#endif
+    errno_t ret = memcpy_s(dest, destSize, src, count);
+    if (ret > 0) {
+        LOGE("memcpy_s error code: %d", ret);
+    }
+    return ret;
 }
 
-inline void *interop_memset(void *dest, size_t destsz, int ch, size_t count)
+inline errno_t interop_memory_set(void *dest, size_t destSize, int ch, size_t count)
 {
-#ifdef GO_UNSAFE
-    return reinterpret_cast<void(*)>(USE_SAFE(memset, dest, reinterpret_cast<rsize_t>(destsz), ch, count))
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(memset, dest, ch, count);
-#endif
+    errno_t ret = memset_s(dest, destSize, ch, count);
+    if (ret > 0) {
+        LOGE("memset_s error code: %d", ret);
+    }
+    return ret;
 }
 
 template <typename... T>
-inline int interop_sprintf(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBuffer(char *buffer, size_t bufSize, const char *format, T... args)
 {
-#ifdef GO_UNSAFE
-    return USE_SAFE(sprintf, buffer, reinterpret_cast<rsize_t>(bufsz), format, args...);
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(sprintf, buffer, format, args...);
-#endif
+    int ret = sprintf_s(buffer, bufSize, format, args...);
+    if (ret < 0) {
+        INTEROP_FATAL("WriteToString: sprintf_s format failed! Error code: %d", ret);
+    }
+    return ret;
 }
 
 template <typename... T>
-inline int interop_snprintf(char *buffer, size_t bufsz, const char *format, T... args)
+inline int InteropPrintToBufferN(char *buffer, size_t bufSize, const char *format, T... args)
 {
-    return USE_SAFE(snprintf, buffer, bufsz, format, args...);
+    int ret = snprintf_s(buffer, bufSize, bufSize - 1, format, args...);
+    if (ret < 0) {
+        INTEROP_FATAL("WriteToString: snprintf_s format failed! Error code: %d", ret);
+    }
+    return ret;
 }
 
-inline int interop_vsnprintf(char *buffer, size_t bufsz, const char *format, va_list vlist)
+inline int InteropPrintVlistToBufferN(char *buffer, size_t bufSize, const char *format, va_list vlist)
 {
-    return USE_SAFE(vsnprintf, buffer, bufsz, format, vlist);
-}
-
-inline size_t interop_strlen(const char *str)
-{
-#ifdef GO_UNSAFE
-    return USE_SAFE(strnlen, str, UINT_MAX);
-#else
-    /* handle possible unsafe case */
-    return USE_SAFE(strlen, str);
-#endif
+    int ret = vsnprintf_s(buffer, bufSize, bufSize - 1, format, vlist);
+    if (ret < 0) {
+        INTEROP_FATAL("WriteToString: vsnprintf_s format failed! Error code: %d", ret);
+    }
+    return ret;
 }
 
 #endif // _INTEROP_UTILS_H_

@@ -84,7 +84,7 @@ extern "C" [[noreturn]] void InteropLogFatal(const char* format, ...) {
     va_list args;
     va_start(args, format);
     char buffer[4096];
-    interop_vsnprintf(buffer, sizeof(buffer) - 1, format, args);
+    InteropPrintVlistToBufferN(buffer, sizeof(buffer) - 1, format, args);
     LOGE("FATAL: %{public}s", buffer);
     va_end(args);
     abort();

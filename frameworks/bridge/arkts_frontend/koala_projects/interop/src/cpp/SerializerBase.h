@@ -70,7 +70,7 @@ private:
         if (!newData) {
             INTEROP_FATAL("Cannot allocate memory");
         }
-        interop_memcpy(newData, newLength, data, position);
+        interop_memory_copy(newData, newLength, data, position);
         free(data);
         data = newData;
         dataLength = newLength;
@@ -130,7 +130,7 @@ public:
     void writeInt32(InteropInt32 value) {
         check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value, sizeof(value));
+        interop_memory_copy(data + position, dataLength, &value, sizeof(value));
 #else
         *(reinterpret_cast<InteropInt32*>(data + position)) = value;
 #endif
@@ -140,7 +140,7 @@ public:
     void writeInt64(InteropInt64 value) {
         check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value, sizeof(value));
+        interop_memory_copy(data + position, dataLength, &value, sizeof(value));
 #else
         *(reinterpret_cast<InteropInt64*>(data + position)) = value;
 #endif
@@ -150,7 +150,7 @@ public:
     void writeUInt64(InteropUInt64 value) {
         check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value, sizeof(value));
+        interop_memory_copy(data + position, dataLength, &value, sizeof(value));
 #else
         *(reinterpret_cast<InteropUInt64*>(data + position)) = value;
 #endif
@@ -160,7 +160,7 @@ public:
     void writeFloat32(InteropFloat32 value) {
         check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value, sizeof(value));
+        interop_memory_copy(data + position, dataLength, &value, sizeof(value));
 #else
         *(reinterpret_cast<InteropFloat32*>(data + position)) = value;
 #endif
@@ -170,7 +170,7 @@ public:
     void writeFloat64(InteropFloat64 value) {
         check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value, sizeof(value));
+        interop_memory_copy(data + position, dataLength, &value, sizeof(value));
 #else
         *(reinterpret_cast<InteropFloat64*>(data + position)) = value;
 #endif
@@ -181,7 +181,7 @@ public:
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
         check(sizeof(value64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        interop_memcpy(data + position, dataLength, &value64, sizeof(value64));
+        interop_memory_copy(data + position, dataLength, &value64, sizeof(value64));
 #else
         *(reinterpret_cast<int64_t*>(data + position)) = value64;
 #endif
@@ -202,7 +202,7 @@ public:
     void writeString(InteropString value) {
         writeInt32(value.length + 1);
         check(value.length + 1);
-        interop_strcpy(reinterpret_cast<char*>(data + position), dataLength, value.chars);
+        InteropStringCopy(reinterpret_cast<char*>(data + position), dataLength, value.chars);
         position += value.length + 1;
     }
 
