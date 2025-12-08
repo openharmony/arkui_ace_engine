@@ -7082,9 +7082,19 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
     if (node) {
         UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
     } else {
-        auto webNode = webPattern->GetHost();
-        CHECK_NULL_VOID(webNode);
-        UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+        int64_t webId = webNode->GetAccessibilityId();
+        int32_t mode = 0;
+        std::list<AccessibilityElementInfo> infos;
+        SearchElementInfoByAccessibilityIdNG(webId, mode, infos, context, NG::UI_EXTENSION_OFFSET_MAX);
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "JsAccessibilityManager WebFocusMoveSearchNG infos.size: %{public}zu, webId:  %{public}" PRId64,
+            infos.size(),
+            webId);
+        if (!infos.empty()) {
+            info = infos.front();
+        } else {
+            UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+        }
     }
 }
 
