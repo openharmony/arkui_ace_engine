@@ -81,7 +81,7 @@ inline int InteropPrintToBufferN(char *buffer, size_t bufferSize, const char *fo
 
 inline int InteropPrintVlistToBufferN(char *buffer, size_t bufferSize, const char *format, va_list vlist)
 {
-    int ret = vsnprintf_s(buffer, bufSize, bufSize - 1, format, vlist);
+    int ret = vsnprintf_s(buffer, bufferSize, bufferSize - 1, format, vlist);
     if (ret < 0) {
         INTEROP_FATAL("WriteToString: vsnprintf_s format failed! Error code: %d", ret);
     }
