@@ -608,10 +608,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
-        handleImageError_ = false;
         FireMediaPlayerImageComplete();
-    } else {
-        handleImageError_ = true;
     }
 }
 
@@ -631,14 +628,11 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent start:%{public}d.", loadingStatus);
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
-        handleImageError_ = false;
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent EightyToHundredAnimation.");
             EightyToHundredAnimation();
         }
-    } else {
-        handleImageError_ = true;
     }
 }
 
