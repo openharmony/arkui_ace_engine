@@ -227,6 +227,8 @@ public:
         return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
+    bool IsSelectOverlayExtensionMenuWithSubMenu() const;
+
     bool IsSelectOverlayCustomMenu() const
     {
         return type_ == MenuType::SELECT_OVERLAY_CUSTOM_MENU;

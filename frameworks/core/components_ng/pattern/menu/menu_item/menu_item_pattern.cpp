@@ -2080,7 +2080,8 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
         return true;
     } else {
         auto canExpand =
-            GetSubBuilder() != nullptr && menuPattern && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
+            (GetSubBuilder() != nullptr || GetSubSelectMenuBuilder() != nullptr) && menuPattern &&
+            !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
             (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
         if (canExpand) {
             return true;

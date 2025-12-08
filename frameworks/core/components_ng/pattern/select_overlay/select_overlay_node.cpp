@@ -1360,7 +1360,7 @@ void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftRowNode, Option
 }
 
 RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, const int32_t targetNodeId,
-    bool isUsingMouse);
+    bool isUsingMouse, bool isSubMenu);
 
 void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std::string& content,
     const std::string& labelInfo, const RefPtr<SelectTheme>& theme, OptionParam& param, bool isPaste, bool isUsingMouse)
@@ -1404,7 +1404,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     if (!param.subMenuItems.empty()) {
         auto subMenuBuildCallback = [param, isUsingMouse]() mutable -> RefPtr<UINode> {
             auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            return CreateInnerMenuWithItems(param.subMenuItems, targetNodeId, isUsingMouse);
+            return CreateInnerMenuWithItems(param.subMenuItems, targetNodeId, isUsingMouse, true);
         };
         menuItemPattern->SetSubSelectMenuBuilder(subMenuBuildCallback);
     }
@@ -1525,6 +1525,26 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
     pasteButtonRenderContext->UpdateOpacity(1.0);
 }
 
+void CreateMenuItemPasteDivider(const RefPtr<FrameNode>& innerMenuNode, const RefPtr<FrameNode>& menuItem,
+    bool isUsingMouse, size_t index)
+{
+    if (menuItem && !isUsingMouse) {
+        if (index != 0) {
+            V2::ItemDivider divider;
+            GetExtensionMenuItemDividerInfo(menuItem, divider);
+            auto menuItemPaintProperty = menuItem->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(menuItemPaintProperty);
+            menuItemPaintProperty->UpdateStartMargin(divider.startMargin);
+            menuItemPaintProperty->UpdateEndMargin(divider.endMargin);
+            menuItemPaintProperty->UpdateDividerColor(divider.color);
+        } else {
+            auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
+            CHECK_NULL_VOID(menuPattern);
+            menuPattern->SetNeedDivider();
+        }
+    }
+}
+
 RefPtr<FrameNode> CreateMenuItemPaste(const std::string& labelInfo, const RefPtr<FrameNode>& innerMenuNode,
     OptionParam& param, size_t index, bool isUsingMouse)
 {
@@ -1560,21 +1580,7 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& labelInfo, const RefPtr
     SetPasteMenuItemEvent(menuItem, pasteNode, param, theme);
     auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode);
     CHECK_NULL_RETURN(relativeContainer, nullptr);
-    if (!isUsingMouse) {
-        if (index != 0) {
-            V2::ItemDivider divider;
-            GetExtensionMenuItemDividerInfo(menuItem, divider);
-            auto menuItemPaintProperty = menuItem->GetPaintProperty<MenuItemPaintProperty>();
-            CHECK_NULL_RETURN(menuItemPaintProperty, nullptr);
-            menuItemPaintProperty->UpdateStartMargin(divider.startMargin);
-            menuItemPaintProperty->UpdateEndMargin(divider.endMargin);
-            menuItemPaintProperty->UpdateDividerColor(divider.color);
-        } else {
-            auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
-            CHECK_NULL_RETURN(menuPattern, nullptr);
-            menuPattern->SetNeedDivider();
-        }
-    }
+    CreateMenuItemPasteDivider(innerMenuNode, menuItem, isUsingMouse, index);
     menuItem->MarkModifyDone();
     pasteNode->MarkModifyDone();
     relativeContainer->MountToParent(innerMenuNode);
@@ -1583,8 +1589,21 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& labelInfo, const RefPtr
 }
 #endif
 
+void CreateMenuItemDivider(const RefPtr<FrameNode>& menuItem, bool isUsingMouse, bool isSubMenu)
+{
+    if (menuItem && !isUsingMouse && isSubMenu) {
+        V2::ItemDivider divider;
+        GetExtensionMenuItemDividerInfo(menuItem, divider);
+        auto menuItemPaintProperty = menuItem->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(menuItemPaintProperty);
+        menuItemPaintProperty->UpdateStartMargin(divider.startMargin);
+        menuItemPaintProperty->UpdateEndMargin(divider.endMargin);
+        menuItemPaintProperty->UpdateDividerColor(divider.color);
+    }
+}
+
 RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& labelInfo,
-    RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse)
+    RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse, bool isSubMenu)
 {
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1610,13 +1629,14 @@ RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& 
     }
     renderContext->UpdateBorderRadius(border);
     SetupMenuItemChildrenAndFocus(menuItem, content, labelInfo, theme, param, false, isUsingMouse);
+    CreateMenuItemDivider(menuItem, isUsingMouse, isSubMenu);
     menuItem->MountToParent(innerMenuNode);
     menuItem->MarkModifyDone();
     return menuItem;
 }
 
 RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, const int32_t targetNodeId,
-    bool isUsingMouse)
+    bool isUsingMouse, bool isSubMenu)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -1631,6 +1651,11 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
         return AceType::MakeRefPtr<InnerMenuPattern>(targetNodeId, V2::MENU_ETS_TAG, MenuType::MULTI_MENU);
     });
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
+    if (!isUsingMouse && isSubMenu) {
+        auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        menuPattern->SetNeedDivider();
+    }
     RefPtr<FrameNode> menuItem = nullptr;
     for (size_t i = 0; i < params.size(); i++) {
 #ifdef OHOS_PLATFORM
@@ -1638,7 +1663,8 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
             menuItem = CreateMenuItemPaste(params[i].labelInfo, innerMenuNode, params[i], i, isUsingMouse);
         } else {
 #endif
-            menuItem = CreateMenuItem(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i, isUsingMouse);
+            menuItem = CreateMenuItem(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i, isUsingMouse,
+                isSubMenu);
 #ifdef OHOS_PLATFORM
         }
 #endif
@@ -1653,7 +1679,7 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params)
 {
     RefPtr<FrameNode> menuWrapper = nullptr;
     auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true);
+    auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true, false);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     menuWrapper = MenuView::Create(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
         { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU });
@@ -2475,7 +2501,7 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     CHECK_NULL_RETURN(backButton_, nullptr);
     auto buttonId = backButton_->GetId();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false);
+    auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false, false);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
 
     MenuModelNG::SetWidth(innerMenuNode.GetRawPtr(), EXTENSION_MENU_DEFAULT_WIDTH);
