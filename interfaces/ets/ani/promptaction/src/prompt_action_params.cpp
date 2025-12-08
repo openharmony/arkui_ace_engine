@@ -164,7 +164,7 @@ bool GetBoolParam(ani_env* env, ani_ref ref, bool& result)
     }
 
     ani_boolean resultValue;
-    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", ":z", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -194,7 +194,7 @@ bool GetInt32Param(ani_env* env, ani_ref ref, int32_t& result)
     }
 
     ani_int resultValue;
-    ani_status status = env->Object_CallMethodByName_Int(object, "toInt", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Int(object, "toInt", ":i", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -224,7 +224,7 @@ bool GetInt64Param(ani_env* env, ani_ref ref, int64_t& result)
     }
 
     ani_long resultValue;
-    ani_status status = env->Object_CallMethodByName_Long(object, "toLong", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Long(object, "toLong", ":l", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -254,7 +254,7 @@ bool GetDoubleParam(ani_env* env, ani_ref ref, double& result)
     }
 
     ani_double resultValue;
-    ani_status status = env->Object_CallMethodByName_Double(object, "toDouble", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Double(object, "toDouble", ":d", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
