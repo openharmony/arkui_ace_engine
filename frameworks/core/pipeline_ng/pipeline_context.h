@@ -1327,6 +1327,14 @@ public:
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
+    bool IsCustomNodeDeleteInTransition() const
+    {
+        return isCustomNodeDeleteInTransition_;
+    }
+    void SetIsCustomNodeDeleteInTransition(bool isCustomNodeDeleteInTransition)
+    {
+        isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1666,6 +1674,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool isCustomNodeDeleteInTransition_ = false;
     AxisEventChecker axisEventChecker_;
     std::set<WeakPtr<UINode>> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
