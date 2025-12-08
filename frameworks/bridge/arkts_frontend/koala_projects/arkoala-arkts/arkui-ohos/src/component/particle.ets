@@ -199,10 +199,10 @@ class ParticleToParticleInnerHelper {
         if (input === undefined) {
             return input;
         }
-        if (input instanceof Tuple) {
-            return (input as [number, number]);
+        if (input instanceof Array) {
+            return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationNumber(input as Array<ParticlePropertyAnimation<number>>);
         }
-        return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationNumber(input as Array<ParticlePropertyAnimation<number>>);
+        return input;
     }
     static ConvertParticlePropertyAnimationColor(input: Array<ParticlePropertyAnimation<ResourceColor>>): Array<ParticlePropertyAnimationColorInner> {
         let result: Array<ParticlePropertyAnimationColorInner> = new Array<ParticlePropertyAnimationColorInner>();
