@@ -2208,7 +2208,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
 void MovingPhotoPattern::Start()
 {
     if (handleImageError_) {
-        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleImageError %{public}.", handleImageError_);
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleImageError %{public}d.", handleImageError_);
         return;
     }
     TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto start play.");
