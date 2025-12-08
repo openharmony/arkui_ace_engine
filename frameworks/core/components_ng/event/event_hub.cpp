@@ -1292,8 +1292,16 @@ void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
         return;
     }
-    auto cb = ndkDrawCompletedCallback_;
-    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    executor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            auto cb = eventHub->ndkDrawCompletedCallback_;
+            if (cb) {
+                cb();
+            }
+        },
+        TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
 }
 
 void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
@@ -1310,7 +1318,15 @@ void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
         return;
     }
-    auto cb = ndkLayoutCallback_;
-    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    executor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            auto cb = eventHub->ndkLayoutCallback_;
+            if (cb) {
+                cb();
+            }
+        },
+        TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
 } // namespace OHOS::Ace::NG
