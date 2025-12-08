@@ -5686,7 +5686,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
             popupParam->SetIsShow(optShow.value_or(false));
-           ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+            ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         },
         [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
@@ -5694,18 +5694,20 @@ void SetBindPopupImpl(Ark_NativePointer node,
             onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
                 popupParam->SetIsShow(optShow.value_or(false));
-                CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
+                auto weakNode = AceType::WeakClaim(frameNode);
+                CallbackHelper(value.builder).BuildAsync([weakNode, popupParam](const RefPtr<UINode>& uiNode) {
+                    auto frameNode = weakNode.Upgrade();
                     ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
                     }, node);
             } else {
                 popupParam->SetIsShow(optShow.value_or(false));
-                ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+                ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
             }
         },
         [frameNode, optShow]() {
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
             popupParam->SetIsShow(optShow.value_or(false));
-            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+            ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         });
 }
 void BindMenuBase(Ark_NativePointer node,
