@@ -479,6 +479,11 @@ float ReadDragStartPanDistanceThreshold()
         DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
 }
 
+bool IsOpenYuvDecode()
+{
+    return system::GetBoolParameter("persist.ace.yuv.decode.enabled", false);
+}
+
 uint32_t ReadCanvasDebugMode()
 {
     return system::GetUintParameter("persist.ace.canvas.debug.mode", 0u);
@@ -781,6 +786,7 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPoint
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
+bool SystemProperties::isOpenYuvDecode_ = IsOpenYuvDecode();
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::IsOpIncEnable()

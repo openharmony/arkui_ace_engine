@@ -614,6 +614,9 @@ void ImagePattern::OnImageDataReady()
 
 void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
 {
+    if (!SystemProperties::IsOpenYuvDecode()) {
+        return;
+    }
     CHECK_NULL_VOID(loadingCtx_);
     auto obj = loadingCtx_->GetImageObject();
     CHECK_NULL_VOID(obj);

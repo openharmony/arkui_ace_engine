@@ -138,6 +138,7 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER
 bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
+bool SystemProperties::isOpenYuvDecode_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {

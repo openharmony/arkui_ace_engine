@@ -848,6 +848,11 @@ public:
         return prebuildInMultiFrameEnabled_;
     }
 
+    static bool IsOpenYuvDecode()
+    {
+        return isOpenYuvDecode_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -962,6 +967,7 @@ private:
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;
     static bool isAutoFillSupport_;
+    static bool isOpenYuvDecode_;
 };
 
 } // namespace OHOS::Ace

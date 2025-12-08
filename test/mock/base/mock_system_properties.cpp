@@ -117,6 +117,7 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
+bool SystemProperties::isOpenYuvDecode_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
