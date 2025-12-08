@@ -18,7 +18,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { ArkRatingPeer, RatingOptions, RatingAttribute, OnRatingChangeCallback, StarStyleOptions,
     RatingConfiguration } from "../framework";
 import { ContentModifier } from "#handwritten";
-import { hookRatingContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookRatingContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
