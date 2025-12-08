@@ -97,7 +97,8 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     std::lock_guard<std::recursive_mutex> _lock {g_eventQueueMutex};
     static bool needReleaseFront = false;
     KByte* result = (KByte*)buffer;
-    if (needReleaseFront) {
+    if (needReleaseFront)
+    {
         switch (callbackEventsQueue.front())
         {
             case Event_CallCallback:
@@ -117,9 +118,11 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     if (callbackEventsQueue.empty()) {
         return 0;
     }
+
     SerializerBase serializer(result, size);
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
     serializer.writeInt32(frontEventKind);
+
     switch (frontEventKind)
     {
         case Event_CallCallback: {
@@ -128,18 +131,17 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
             interop_memory_copy(
                 result + serializer.length(),
                 size - serializer.length(),
-                callback.second.buffer,
-                sizeof(CallbackBuffer::buffer)
-            );
+                callback.second.buffer, sizeof(CallbackBuffer::buffer));
             break;
         }
         case Event_HoldManagedResource:
-        case Event_ReleaseManagedResource:
+        case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
             interop_memory_copy(
                 result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32)
             );
             break;
+        }
         default:
             INTEROP_FATAL("Unknown event kind");
     }
