@@ -97,8 +97,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     std::lock_guard<std::recursive_mutex> _lock {g_eventQueueMutex};
     static bool needReleaseFront = false;
     KByte* result = (KByte*)buffer;
-    if (needReleaseFront)
-    {
+    if (needReleaseFront) {
         switch (callbackEventsQueue.front())
         {
             case Event_CallCallback:
@@ -139,7 +138,9 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         case Event_HoldManagedResource:
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
-            interop_memory_copy(result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32));
+            interop_memory_copy(
+                result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32)
+            );
             break;
         }
         default:

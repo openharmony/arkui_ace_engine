@@ -290,49 +290,47 @@ public:
     }
   }
 
-  template <typename T, typename E>
-  void resizeArray(T *array, int32_t length)
-  {
-    void *value = nullptr;
-    if (length > 0)
+    template <typename T, typename E>
+    void resizeArray(T *array, int32_t length)
     {
-      value = malloc(length * sizeof(E));
-      if (!value) {
-        INTEROP_FATAL("Cannot allocate memory");
-        return;
-      }
-      interop_memory_set(value, length * sizeof(E), 0, length * sizeof(E));
-      toClean.push_back(value);
+        void *value = nullptr;
+        if (length > 0) {
+            value = malloc(length * sizeof(E));
+            if (!value) {
+                INTEROP_FATAL("Cannot allocate memory");
+                return;
+            }
+            interop_memory_set(value, length * sizeof(E), 0, length * sizeof(E));
+            toClean.push_back(value);
+        }
+        array->length = length;
+        array->array = reinterpret_cast<E *>(value);
     }
-    array->length = length;
-    array->array = reinterpret_cast<E *>(value);
-  }
 
-  template <typename T, typename K, typename V>
-  void resizeMap(T *map, int32_t length)
-  {
-    void *keys = nullptr;
-    void *values = nullptr;
-    if (length > 0)
+    template <typename T, typename K, typename V>
+    void resizeMap(T *map, int32_t length)
     {
-      keys = malloc(length * sizeof(K));
-      if (!keys) {
-        INTEROP_FATAL("Cannot allocate memory");
-      }
-      interop_memory_set(keys, length * sizeof(K), 0, length * sizeof(K));
-      toClean.push_back(keys);
+        void *keys = nullptr;
+        void *values = nullptr;
+        if (length > 0) {
+            keys = malloc(length * sizeof(K));
+            if (!keys) {
+                INTEROP_FATAL("Cannot allocate memory");
+            }
+            interop_memory_set(keys, length * sizeof(K), 0, length * sizeof(K));
+            toClean.push_back(keys);
 
-      values = malloc(length * sizeof(V));
-      if (!values) {
-        INTEROP_FATAL("Cannot allocate memory");
-      }
-      interop_memory_set(values, length * sizeof(V), 0, length * sizeof(V));
-      toClean.push_back(values);
+            values = malloc(length * sizeof(V));
+            if (!values) {
+                INTEROP_FATAL("Cannot allocate memory");
+            }
+            interop_memory_set(values, length * sizeof(V), 0, length * sizeof(V));
+            toClean.push_back(values);
+        }
+        map->size = length;
+        map->keys = reinterpret_cast<K *>(keys);
+        map->values = reinterpret_cast<V *>(values);
     }
-    map->size = length;
-    map->keys = reinterpret_cast<K *>(keys);
-    map->values = reinterpret_cast<V *>(values);
-  }
 
   int32_t currentPosition() const { return this->position; }
 
