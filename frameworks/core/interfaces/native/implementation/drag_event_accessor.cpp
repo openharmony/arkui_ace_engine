@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -36,7 +35,7 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
-    void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
+    void AssignArkValue(Ark_DragResult& dst, const DragRet& src, ConvContext *ctx)
     {
         switch (src) {
             case DragRet::DRAG_SUCCESS: dst = ARK_DRAG_RESULT_DRAG_SUCCESSFUL; break;

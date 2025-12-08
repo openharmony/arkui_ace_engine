@@ -16,6 +16,8 @@
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

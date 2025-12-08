@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 #ifdef WEB_SUPPORTED
@@ -24,8 +23,8 @@
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #endif // WEB_SUPPORTED
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -117,7 +116,7 @@ ScriptRegexItems Convert(const Array_ScriptItem& src)
             scriptRegexItems.insert(std::make_pair(script, regexRules));
         }
     }
- 
+
     return scriptRegexItems;
 }
 

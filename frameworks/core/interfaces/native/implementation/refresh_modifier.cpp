@@ -15,7 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src)
+void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src, ConvContext *ctx)
 {
     switch (src) {
         case RefreshStatus::INACTIVE:

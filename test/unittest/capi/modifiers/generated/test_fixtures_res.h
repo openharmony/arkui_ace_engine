@@ -16,6 +16,7 @@
 #ifndef GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_RES_H
 #define GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_RES_H
 
+#include "core/components/theme/theme_style.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Fixtures {

@@ -19,7 +19,6 @@
 #include "arkoala_api_generated.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
@@ -30,6 +29,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/event_target_info_peer.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -188,7 +188,7 @@ void SetOnActionImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onActionEvent = [callback = CallbackHelper(*onAction)](GestureEvent& info) {
-        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        const auto gestureEvent = Converter::SyncEvent<Ark_GestureEvent>(info);
         callback.InvokeSync(gestureEvent.ArkValue());
     };
     gesturePtr->SetOnActionId(onActionEvent);
@@ -198,7 +198,7 @@ void SetOnActionStartImpl(Ark_NativePointer gesture, const Callback_GestureEvent
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onActionStartEvent = [callback = CallbackHelper(*onActionStart)](GestureEvent& info) {
-        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        const auto gestureEvent = Converter::SyncEvent<Ark_GestureEvent>(info);
         callback.InvokeSync(gestureEvent.ArkValue());
     };
     gesturePtr->SetOnActionStartId(onActionStartEvent);
@@ -208,7 +208,7 @@ void SetOnActionUpdateImpl(Ark_NativePointer gesture, const Callback_GestureEven
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onActionUpdateEvent = [callback = CallbackHelper(*onActionUpdate)](GestureEvent& info) {
-        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        const auto gestureEvent = Converter::SyncEvent<Ark_GestureEvent>(info);
         callback.InvokeSync(gestureEvent.ArkValue());
     };
     gesturePtr->SetOnActionUpdateId(onActionUpdateEvent);
@@ -218,7 +218,7 @@ void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_V
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onActionEndEvent = [callback = CallbackHelper(*onActionEnd)](GestureEvent& info) {
-        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        const auto gestureEvent = Converter::SyncEvent<Ark_GestureEvent>(info);
         callback.InvokeSync(gestureEvent.ArkValue());
     };
     gesturePtr->SetOnActionEndId(onActionEndEvent);
@@ -228,7 +228,7 @@ void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEven
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onActionCancelEvent = [callback = CallbackHelper(*onActionCancel)](GestureEvent& info) {
-        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        const auto gestureEvent = Converter::SyncEvent<Ark_GestureEvent>(info);
         callback.InvokeSync(gestureEvent.ArkValue());
     };
     gesturePtr->SetOnActionCancelId(onActionCancelEvent);

@@ -15,11 +15,24 @@
 
 #include <optional>
 
+// SORTED_SECTION
+#include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_v2/list/list_properties.h"
 
+#include "ace_engine_types.h"
 #include "arkoala_api_generated.h"
 #include "reverse_converter.h"
 
@@ -584,11 +597,6 @@ void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
     }
 }
 
-void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src)
-{
-    dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
-    dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
-}
 void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
 {
     if (src.type >= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_NONE) &&
@@ -599,6 +607,7 @@ void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
         LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
     }
 }
+
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {
     switch (src) {

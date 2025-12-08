@@ -18,7 +18,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_node.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -276,7 +276,7 @@ void SetOnSubmitImpl(Ark_NativePointer node, const Opt_SearchSubmitCallback* val
         PipelineContext::SetCallBackNode(node);
         Converter::ConvContext ctx;
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        const auto event = Converter::ArkSubmitEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_SubmitEvent>(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
         arkCallback.InvokeSync(arkStringValue, eventArkValue);
     };

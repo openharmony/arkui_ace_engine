@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -27,6 +26,25 @@
 #include "base/utils/utils.h"
 #include "pixel_map_peer.h"
 #include "canvas_rendering_context2d_peer_impl.h"
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src, ConvContext *ctx)
+{
+    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxAscent);
+    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxDescent);
+    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxLeft);
+    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxRight);
+    dst.alphabeticBaseline = Converter::ArkValue<Ark_Float64>(src.alphabeticBaseline);
+    dst.emHeightAscent = Converter::ArkValue<Ark_Float64>(src.emHeightAscent);
+    dst.emHeightDescent = Converter::ArkValue<Ark_Float64>(src.emHeightDescent);
+    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxAscent);
+    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxDescent);
+    dst.hangingBaseline = Converter::ArkValue<Ark_Float64>(src.hangingBaseline);
+    dst.ideographicBaseline = Converter::ArkValue<Ark_Float64>(src.ideographicBaseline);
+    dst.width = Converter::ArkValue<Ark_Float64>(src.width);
+    dst.height = Converter::ArkValue<Ark_Float64>(src.height);
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();

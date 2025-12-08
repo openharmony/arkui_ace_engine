@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_static.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace {
 enum class TextFontWeight {
