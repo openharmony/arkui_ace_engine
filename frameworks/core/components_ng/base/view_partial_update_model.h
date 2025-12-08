@@ -54,7 +54,6 @@ struct NodeInfoPU {
     std::function<void*()> getThisFunc;
     std::function<void()> recycleFunc;
     std::function<void(void*)> reuseFunc;
-    std::function<bool(int32_t)> triggerLifecycleFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;

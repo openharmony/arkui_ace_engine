@@ -111,19 +111,6 @@ public:
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc);
     void CallPageTransitionFunction() const;
 
-    void SetTriggerLifecycleFunction(std::function<bool(int32_t)>&& triggerLifecycleFunc);
-    bool FireTriggerLifecycleFunc(int32_t eventId);
-
-    enum LifeCycleEvent {
-        ON_EXPAND = 0,
-        ON_EXPANDED = 1,
-        ON_ATTACH = 2,
-        ON_DETACH = 3,
-        ON_RECYCLE = 4,
-        ON_REUSE = 5,
-        ON_DELETE = 6
-    };
-
     void SetClearAllRecycleFunc(std::function<void()>&& func);
 
     void SetReuseId(const std::string& reuseId);
@@ -155,7 +142,6 @@ private:
     std::function<void*()> getThisFunc_;
     std::function<void()> onRecycleFunc_;
     std::function<void(void*)> onReuseFunc_;
-    std::function<bool(int32_t)> triggerLifecycleFunc_;
     bool needRebuild_ = false;
     RecycleNodeInfo recycleInfo_;
 };
