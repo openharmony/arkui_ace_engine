@@ -846,7 +846,11 @@ export class TreeListener {
    * @since 11
    */
   public once(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
-    this._once_events.set(type, callback)
+    if (this._once_events.get(type)) {
+      this.off(type, callback);
+    } else {
+      this._once_events.set(type, callback)
+    }
   }
 
   /**
@@ -1264,7 +1268,7 @@ export struct TreeView {
     let eventInfo = new accessibility.EventInfo(
       'announceForAccessibility', // 表示主动播报的事件。
       bundleName as string, // 目标应用名；不可缺省。
-      'common',// 表示没有特定操作，用于主动聚焦、主动播报等场景。
+      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
     );
     eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
     accessibility.sendAccessibilityEvent(eventInfo);
@@ -1334,7 +1338,7 @@ export struct TreeView {
           start: this.itemPadding.left,
           end: this.itemPadding.right
         } as LocalizedPadding)
-        // .align(Alignment.Start)
+        .align(Alignment.Start)
         .onDragStart((event: DragEvent, extraParams?: string) => {
           this.accessibilityNodeType = AccessibilityNodeType.LIFT;
           if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
@@ -1501,10 +1505,6 @@ export struct TreeView {
     })
     /* DragEvent Drop. */
     .onDrop((event: DragEvent, extraParams?: string) => {
-      let nodeInfo1: NodeInfo[] = [];
-      for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
-        nodeInfo1.push(this.listNodeDataSource.listNode[i])
-      }
       this.accessibilityNodeType = AccessibilityNodeType.PLACE;
       this.listNodeDataSource.clearLastTimeoutExpand();
       let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
@@ -1606,9 +1606,6 @@ export struct TreeView {
       /* innerDrag is over. */
       this.listNodeDataSource.setIsInnerDrag(false);
       this.listNodeDataSource.notifyDataReload();
-      for (let i = 0; i < nodeInfo1.length; i++) {
-        this.listNodeDataSource.listNode.push(nodeInfo1[i])
-      }
       this.listNodeDataSource.listNode[currentFocusIndex.toInt()].fontColor =
         this.treeViewTheme.primaryTitleActiveFontColor;
       if (this.viewLastIndex !== -1 && currentNodeIndex !== this.viewLastIndex) {
@@ -2066,7 +2063,7 @@ export class TreeController {
         }
       }
       let addNodeResult: boolean = false;
-      let primaryTitle: string = "";
+      let primaryTitle: string | null = "";
       if (nodeParam.primaryTitle !== undefined) {
         if (typeof nodeParam.primaryTitle === 'string') {
           primaryTitle = nodeParam.primaryTitle as string;
@@ -2169,7 +2166,7 @@ export class TreeController {
   }
 }
 
-export class BasicDataSource implements IDataSource<NodeInfo> {
+class BasicDataSource implements IDataSource<NodeInfo> {
   private listeners: DataChangeListener[] = []
 
   public totalCount(): int {
@@ -3670,7 +3667,17 @@ export class ListNodeDataSource extends BasicDataSource {
               nodeInfo.setNodeIsShow(tmp[i].getNodeIsShow());
               nodeInfo.setListItemHeight(tmp[i].getListItemHeight());
               if (nodeInfo.getNodeItem().mainTitleNode && nodeInfo.getIsShowTitle()) {
-                nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
+                if(tmp[i].getNodeItem().mainTitleNode?.title !== undefined){
+                  if (typeof tmp[i].getNodeItem().mainTitleNode?.title === 'string') {
+                    nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
+                  } else {
+                    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+                    if (uiContent) {
+                      nodeInfo.getNodeItem().mainTitleNode.title =
+                        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                    }
+                  }
+                }
               }
               break;
             }
@@ -3760,12 +3767,16 @@ export class ListNodeDataSource extends BasicDataSource {
     let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
-    let currentNode: NodeItem = stack.shift() as NodeItem;
-    if (!found && currentNode) {
+    let currentNode: NodeItem | undefined = stack.shift() as NodeItem;
+    while (!found && currentNode) {
       found = callback(currentNode) === true;
-      if (!found && currentNode.children.length > 0) {
+      if (!found) {
         stack.unshift(...currentNode.children);
-        currentNode = stack.shift() as NodeItem;
+        if(stack.length > 0 ){
+          currentNode = stack.shift() as NodeItem;
+        } else {
+          currentNode = undefined
+        }
       }
     }
   }
@@ -3948,6 +3959,7 @@ export class ListNodeDataSource extends BasicDataSource {
       let index: number = current.indexOfParent;
       let deleteNodeAllChildNum: int = 0;
       if (index < 0) {
+        hilog.error(LOG_CODE, TAG, 'node does not exist.');
         return [];
       } else {
         deleteNodeAllChildNum = parent.children[index.toInt()].getChildNodeInfo().allChildNum + 1;
@@ -4267,21 +4279,20 @@ export class ListNodeDataSource extends BasicDataSource {
    *
    * @param callback dfs callback fuction
    */
-  dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean, root: NodeItem,
-    listNode: NodeInfo[]): void {
-    root = this._root;
+  public dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
+    root: NodeItem, listNode: NodeInfo[]): void {
     let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
-    let currentNode: NodeItem = stack.shift() as NodeItem;
-    if (!found && currentNode) {
+    let currentNode: NodeItem | undefined = stack.shift() as NodeItem;
+    while (!found && currentNode) {
       found = callback(currentNode, listNode) === true;
       if (!found) {
-        if (currentNode.children.length > 0) {
-          stack.unshift(...currentNode.children);
-          if (stack.shift() !== undefined) {
-            currentNode = stack.shift() as NodeItem;
-          }
+        stack.unshift(...currentNode.children);
+        if (stack.length > 0) {
+          currentNode = stack.shift() as NodeItem;
+        } else {
+          currentNode = undefined
         }
       }
     }
