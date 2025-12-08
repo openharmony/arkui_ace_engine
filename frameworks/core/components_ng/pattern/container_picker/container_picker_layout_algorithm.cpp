@@ -193,15 +193,21 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    startMainPos_ = std::max((height_ - pickerHeightBeforeRotate_) / HALF, 0.0f);
-    endMainPos_ = startMainPos_ + std::min(height_, pickerHeightBeforeRotate_);
-    if (Positive(currentDelta_)) {
-        endMainPos_ += currentDelta_;
-    } else {
-        startMainPos_ += currentDelta_;
-    }
     middleItemStartPos_ = (height_ - pickerItemHeight_) / HALF;
     middleItemEndPos_ = (height_ + pickerItemHeight_) / HALF;
+    int32_t halfOfDisplayCount = static_cast<int32_t>(DISPLAY_COUNT / 2.0f);
+    startMainPos_ = middleItemStartPos_ - pickerItemHeight_ * (halfOfDisplayCount - 1);
+    endMainPos_ = middleItemEndPos_ + pickerItemHeight_ * (halfOfDisplayCount - 1);
+    if (Positive(currentDelta_)) {
+        endMainPos_ += currentDelta_;
+        startMainPos_ -= pickerItemHeight_;
+    } else if (Negative(currentDelta_)) {
+        startMainPos_ += currentDelta_;
+        endMainPos_ += pickerItemHeight_;
+    } else {
+        startMainPos_ -= pickerItemHeight_;
+        endMainPos_ += pickerItemHeight_;
+    }
     if (reMeasure_) {
         middleItemStartPos_ += currentOffsetFromMiddle_;
         middleItemEndPos_ += currentOffsetFromMiddle_;
@@ -271,25 +277,28 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(LayoutWrapper* layoutWra
         endPos += currentOffsetFromMiddle_;
         itemPosition_.clear();
     }
-
     MeasureBelow(layoutWrapper, middleIndexInVisibleWindow_, startPos);
     MeasureAbove(layoutWrapper, middleIndexInVisibleWindow_ - 1, GetStartPosition());
+    if (Positive(currentDelta_)) {
+        RetainDisplayItems(false);
+    }
+    if (Negative(currentDelta_)) {
+        RetainDisplayItems(true);
+    }
 }
 
 void ContainerPickerLayoutAlgorithm::HandleOffScreenItems(LayoutWrapper* layoutWrapper)
 {
-    std::vector<int32_t> prevItemsIndex;
-    std::vector<int32_t> curItemsIndex;
-    for (const auto& pair : prevItemPosition_) {
-        prevItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, prevTotalItemCount_));
-    }
+    std::unordered_set<int32_t> curItemsIndex;
     for (const auto& pair : itemPosition_) {
-        curItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
+        curItemsIndex.insert(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
     }
-    std::sort(prevItemsIndex.begin(), prevItemsIndex.end());
-    std::sort(curItemsIndex.begin(), curItemsIndex.end());
-    std::set_difference(prevItemsIndex.begin(), prevItemsIndex.end(), curItemsIndex.begin(), curItemsIndex.end(),
-        std::back_inserter(offScreenItemsIndex_));
+    for (const auto& pair : prevItemPosition_) {
+        int32_t index = ContainerPickerUtils::GetLoopIndex(pair.first, prevTotalItemCount_);
+        if (curItemsIndex.find(index) == curItemsIndex.end()) {
+            offScreenItemsIndex_.push_back(index);
+        }
+    }
 
     for (int32_t index : offScreenItemsIndex_) {
         ResetOffscreenItemPosition(layoutWrapper, index);
@@ -315,13 +324,28 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
     childWrapper->Layout();
 }
 
+void ContainerPickerLayoutAlgorithm::RetainDisplayItems(bool atTop)
+{
+    if (itemPosition_.size() <= DISPLAY_COUNT + 1) {
+        return;
+    }
+    // Retain 8 items at most.
+    auto it = itemPosition_.begin();
+    if (atTop) {
+        std::advance(it, DISPLAY_COUNT + 1);
+        itemPosition_.erase(it, itemPosition_.end());
+    } else {
+        std::advance(it, itemPosition_.size() - DISPLAY_COUNT - 1);
+        itemPosition_.erase(itemPosition_.begin(), it);
+    }
+}
+
 void ContainerPickerLayoutAlgorithm::MeasureBelow(
     LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos, bool cachedLayout)
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
     float endMainPos = endMainPos_;
-    int32_t measuredCount = -1;
 
     auto currentIndex = startIndex - 1;
     do {
@@ -330,7 +354,6 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(
         if (!result) {
             break;
         }
-        ++measuredCount;
     } while (NeedMeasureBelow(currentStartPos, endMainPos));
     if (canOverScroll_ || isLoop_) {
         return;
@@ -348,7 +371,6 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(
     float currentEndPos = 0.0f;
     float startMainPos = startMainPos_;
     auto currentIndex = endIndex + 1;
-    int32_t measuredCount = 0;
 
     do {
         currentEndPos = currentStartPos;
@@ -356,7 +378,6 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(
         if (!result) {
             break;
         }
-        ++measuredCount;
     } while (NeedMeasureAbove(currentEndPos, startMainPos));
     if (canOverScroll_ || isLoop_) {
         return;
@@ -370,8 +391,7 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(
 bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(
     LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos)
 {
-    if ((currentIndex + 1 >= totalItemCount_ && !isLoop_) ||
-        (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_)) {
+    if (currentIndex + 1 >= totalItemCount_ && !isLoop_) {
         return false;
     }
 
@@ -382,9 +402,6 @@ bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(
         wrapper->Measure(childLayoutConstraint_);
     }
 
-    auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(pickerLayoutProperty, false);
-
     endPos = startPos + pickerItemHeight_;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
@@ -393,8 +410,6 @@ bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(
 bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(
     LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos)
 {
-    auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(pickerLayoutProperty, false);
     if (currentIndex - 1 < 0 && !isLoop_) {
         return false;
     }

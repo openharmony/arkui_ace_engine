@@ -198,6 +198,7 @@ private:
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
     void UpdateFadeItems(RefPtr<FrameNode> node, std::pair<int32_t, PickerItemInfo> pos);
+    void RetainDisplayItems(bool atTop);
 
     LayoutConstraintF childLayoutConstraint_;
     ContainerPickerUtils::PositionMap itemPosition_;
@@ -216,7 +217,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
-    float height_ = 0.0f; // usage: record picker real height
+    float height_ = 0.0f;           // usage: record picker real height
     float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
