@@ -776,6 +776,7 @@ public:
     {
         return menuLifeCycleCallbackMap_[targetId];
     }
+    bool CheckTargetIdIsValid(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -800,7 +801,6 @@ private:
     void SaveSheetPageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
-    bool CheckTargetIdIsValid(int32_t targetId);
     void UpdateSheetRender(
         const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
