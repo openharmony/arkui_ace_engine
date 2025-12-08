@@ -25,7 +25,7 @@ import {
 } from "../framework";
 import { Resource } from "global.resource";
 import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
-import { hookSelectContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookSelectContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {

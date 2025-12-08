@@ -25,7 +25,7 @@ import { ContentModifier } from "#handwritten";
 import { ArkSliderComponent, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from '#generated';
 import { ContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod} from '#handwritten';
 import { ComponentContent } from 'arkui.ComponentContent';
-import { hookSliderContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookSliderContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     constructParam(...param: Object[]): this {

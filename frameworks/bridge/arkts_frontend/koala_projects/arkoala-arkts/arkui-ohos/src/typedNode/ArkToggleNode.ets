@@ -18,7 +18,7 @@ import {
     ArkTogglePeer, ToggleOptions, ToggleAttribute, SwitchStyle, ToggleConfiguration, ResourceColor
 } from "../framework";
 import { ContentModifier } from "#handwritten";
-import { hookToggleContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookToggleContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkToggleNode extends ArkBaseNode implements ToggleAttribute {
     constructParam(...param: Object[]): this {
