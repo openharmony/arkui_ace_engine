@@ -64,6 +64,53 @@ public:
         }
     }
 
+    void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> pixelMapHDR, Rosen::CaptureError captureErrorCode) override
+    {
+        if (callback_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The callback_ is null");
+            auto node = node_.Upgrade();
+            CHECK_NULL_VOID(node);
+            Inspector::RemoveOffscreenNode(node);
+            return;
+        }
+        switch (captureErrorCode) {
+            case Rosen::CaptureError::AUTO_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The isAuto parameter of the color space or dynamic range "
+                                                            "mode is set to true for offscreen node snapshot.");
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
+                break;
+
+            case Rosen::CaptureError::COLOR_SPACE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided color space is not supported.");
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
+                break;
+
+            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided dynamic range mode is not supported.");
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
+                break;
+
+            default:
+                OnSurfaceCapture(pixelMap);
+                break;
+        }
+    }
+
     void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
         std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
@@ -109,6 +156,35 @@ public:
         cv_.notify_all();
     }
 
+    void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> pixelMapHDR, Rosen::CaptureError captureErrorCode) override
+    {
+        errorCode_ = ERROR_CODE_NO_ERROR;
+        switch (captureErrorCode) {
+            case Rosen::CaptureError::AUTO_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The isAuto parameter of the color space or dynamic range "
+                                                            "mode is set to true for offscreen node snapshot.");
+                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED;
+                break;
+
+            case Rosen::CaptureError::COLOR_SPACE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided color space is not supported.");
+                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
+                break;
+
+            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided dynamic range mode is not supported.");
+                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
+                break;
+
+            default:
+                OnSurfaceCapture(pixelMap);
+                break;
+        }
+    }
+
     void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
         std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
@@ -117,6 +193,9 @@ public:
         std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
         std::unique_lock<std::mutex> lock(mutex_);
         auto status = cv_.wait_for(lock, timeout);
+        if (ERROR_CODE_NO_ERROR != errorCode_) {
+            return { errorCode_, nullptr };
+        }
         if (status == std::cv_status::timeout) {
             return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
         }
@@ -130,6 +209,7 @@ private:
     mutable std::mutex mutex_;
     std::condition_variable cv_;
     std::shared_ptr<Media::PixelMap> pixelMap_;
+    int32_t errorCode_ = ERROR_CODE_NO_ERROR;
 };
 } // namespace
 
@@ -189,6 +269,18 @@ int32_t SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& o
         isRegionMirror ? nodeWidth - snapshotRegion.start : snapshotRegion.end,
         snapshotRegion.bottom);
     return ERROR_CODE_NO_ERROR;
+}
+
+void ConvertSnapshotOptionsToRSConfig(
+    const SnapshotOptions& options, Rosen::RSSurfaceCaptureConfig& rsConfig)
+{
+    rsConfig.scaleX = options.scale;
+    rsConfig.scaleY = options.scale;
+    rsConfig.isSync = options.waitUntilRenderFinished;
+    rsConfig.needErrorCode = true;
+    rsConfig.colorSpace = { options.colorSpaceModeOptions.colorSpaceMode, options.colorSpaceModeOptions.isAuto };
+    rsConfig.dynamicRangeMode = { options.dynamicRangeModeOptions.dynamicRangeMode,
+        options.dynamicRangeModeOptions.isAuto };
 }
 
 void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
@@ -290,8 +382,10 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
 {
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-            options.scale, options.scale, options.waitUntilRenderFinished);
+        Rosen::RSSurfaceCaptureConfig rsConfig;
+        ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+        rsInterface.TakeSurfaceCaptureForUIWithConfig(
+            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
         return;
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -300,8 +394,12 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
         callback(nullptr, setRegionReslut, nullptr);
         return;
     }
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
+
+    Rosen::RSSurfaceCaptureConfig rsConfig;
+    rsConfig.specifiedAreaRect = specifiedAreaRect;
+    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+    rsInterface.TakeSurfaceCaptureForUIWithConfig(
+        rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
 }
 
 void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options)
@@ -497,10 +595,10 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount,
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), param.options.regionMode);
     if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        rsInterface.TakeSurfaceCaptureForUI(
-            rsNode,
-            std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
-            param.options.scale, param.options.scale, param.options.waitUntilRenderFinished);
+        Rosen::RSSurfaceCaptureConfig rsConfig; 
+        ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
+        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode,
+            std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
         return;
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -509,10 +607,11 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         callback(nullptr, setRegionReslut, nullptr);
         return;
     }
-    rsInterface.TakeSurfaceCaptureForUI(
-        rsNode,
-        std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
-        param.options.scale, param.options.scale, param.options.waitUntilRenderFinished, specifiedAreaRect);
+    Rosen::RSSurfaceCaptureConfig rsConfig;
+    rsConfig.specifiedAreaRect = specifiedAreaRect;
+    ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
+    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode,
+        std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
@@ -555,8 +654,9 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
             node->GetInspectorIdValue("").c_str(), node->GetId(), rsNode->GetId());
     }
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-            options.scale, options.scale, options.waitUntilRenderFinished);
+        Rosen::RSSurfaceCaptureConfig rsConfig;
+        ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -564,8 +664,10 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     if (setRegionReslut != ERROR_CODE_NO_ERROR) {
         return {setRegionReslut, nullptr};
     }
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
+    Rosen::RSSurfaceCaptureConfig rsConfig;
+    rsConfig.specifiedAreaRect = specifiedAreaRect;
+    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
@@ -579,8 +681,9 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
             node->GetId(), rsNode->GetId());
     }
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-            options.scale, options.scale, options.waitUntilRenderFinished);
+        Rosen::RSSurfaceCaptureConfig rsConfig;
+        ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -588,8 +691,10 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
     if (setRegionReslut != ERROR_CODE_NO_ERROR) {
         return {setRegionReslut, nullptr};
     }
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-        options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
+    Rosen::RSSurfaceCaptureConfig rsConfig;
+    rsConfig.specifiedAreaRect = specifiedAreaRect;
+    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
@@ -803,9 +908,10 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         std::to_string(rsEndNode->GetId()).c_str());
 
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    auto isSystem = rsInterface.TakeUICaptureInRange(rsStartNode, rsEndNode, isStartRect,
-        std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-        options.scale, options.scale, options.waitUntilRenderFinished);
+    Rosen::RSSurfaceCaptureConfig rsConfig;
+    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+    auto isSystem = rsInterface.TakeUICaptureInRangeWithConfig(rsStartNode, rsEndNode, isStartRect,
+        std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
     if (!isSystem) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "No system permissions to take screenshot");
