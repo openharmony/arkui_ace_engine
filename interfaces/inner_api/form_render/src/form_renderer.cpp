@@ -667,7 +667,7 @@ void FormRenderer::SetUiContentParams(const OHOS::AAFwk::Want& want)
 {
     HILOG_INFO("call");
     if (uiContent_ == nullptr) {
-        HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
+        HILOG_ERROR("SetUiContentParams error, uiContent_ is null!");
         return;
     }
     if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY)) {
