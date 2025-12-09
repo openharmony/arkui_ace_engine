@@ -7694,7 +7694,7 @@ std::u16string TextFieldPattern::GetPlaceHolder() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, u"");
-    if (IsStyledPlaceholder()) {
+    if (placeholderResponseArea_) {
         return GetStyledPlaceHolderValue();
     }
     return layoutProperty->GetPlaceholderValue(u"");
@@ -7702,8 +7702,9 @@ std::u16string TextFieldPattern::GetPlaceHolder() const
 
 std::u16string TextFieldPattern::GetStyledPlaceHolderValue() const
 {
-    CHECK_NULL_RETURN(IsStyledPlaceholder(), u"");
+    CHECK_NULL_RETURN(placeholderResponseArea_, u"");
     auto textNode = placeholderResponseArea_->GetFrameNode();
+    CHECK_NULL_RETURN(textNode, u"");
     auto textPattern = textNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, u"");
     return textPattern->GetTextForDisplay();
