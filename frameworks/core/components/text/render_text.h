@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_RENDER_TEXT_H
 
 #include "base/geometry/dimension.h"
+#include "base/utils/macros.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
@@ -36,7 +37,7 @@ namespace OHOS::Ace {
 
 class TextComponent;
 
-class RenderText : public RenderNode, public TextOverlayBase, public DragDropEvent {
+class ACE_FORCE_EXPORT RenderText : public RenderNode, public TextOverlayBase, public DragDropEvent {
     DECLARE_ACE_TYPE(RenderText, RenderNode, TextOverlayBase, DragDropEvent);
 
 public:

@@ -18,7 +18,6 @@
 
 #include <memory>
 
-#include "core/components/declaration/badge/badge_declaration.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/clock/clock_declaration.h"
 #include "core/components/declaration/common/attribute.h"
@@ -122,11 +121,6 @@ public:
 
     // default value of common event
     static const std::shared_ptr<CommonMethod> DEFAULT_METHOD;
-
-    // default value of badge
-    static const std::shared_ptr<BadgeAttribute> DEFAULT_BADGE_ATTR;
-    static const std::shared_ptr<BadgeStyle> DEFAULT_BADGE_STYLE;
-    static const std::shared_ptr<BadgeEvent> DEFAULT_BADGE_EVENT;
 
     // default value of button
     static const std::shared_ptr<ButtonAttribute> DEFAULT_BUTTON_ATTR;

@@ -114,11 +114,6 @@ const std::shared_ptr<CommonCrownEvent> DeclarationConstants::DEFAULT_CROWN_EVEN
 // default common method
 const std::shared_ptr<CommonMethod> DeclarationConstants::DEFAULT_METHOD = std::make_shared<CommonMethod>();
 
-// default value of badge
-const std::shared_ptr<BadgeAttribute> DeclarationConstants::DEFAULT_BADGE_ATTR = std::make_shared<BadgeAttribute>();
-const std::shared_ptr<BadgeStyle> DeclarationConstants::DEFAULT_BADGE_STYLE = std::make_shared<BadgeStyle>();
-const std::shared_ptr<BadgeEvent> DeclarationConstants::DEFAULT_BADGE_EVENT = std::make_shared<BadgeEvent>();
-
 // default value of button
 const std::shared_ptr<ButtonAttribute> DeclarationConstants::DEFAULT_BUTTON_ATTR = std::make_shared<ButtonAttribute>();
 const std::shared_ptr<ButtonStyle> DeclarationConstants::DEFAULT_BUTTON_STYLE = std::make_shared<ButtonStyle>();

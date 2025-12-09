@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/utils/macros.h"
 #include "core/accessibility/accessibility_node.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/grid_layout/grid_layout_component.h"
@@ -66,7 +67,7 @@ public:
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
     RefPtr<ScrollComponent> GetStepperScrollComponent();
     RefPtr<BoxComponent> GetBoxComponent();
-    RefPtr<Component> GetMainComponent() const;
+    ACE_FORCE_EXPORT RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
@@ -92,7 +93,7 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the stack.
     // use flag: isCustomView to avoid creating redundant Components.
-    void Push(const RefPtr<Component>& component, bool isCustomView = false);
+    ACE_FORCE_EXPORT void Push(const RefPtr<Component>& component, bool isCustomView = false);
 
     // special versions of Push and Pop for JSGrid
     // maintains a stack of GridLayoutComponent
@@ -231,7 +232,7 @@ public:
      * Use reserved elementId for given component
      * sets the reserved lemntId to none
      */
-    void ClaimElementId(const RefPtr<Component>& component);
+    ACE_FORCE_EXPORT void ClaimElementId(const RefPtr<Component>& component);
 
     int32_t ClaimElementId()
     {

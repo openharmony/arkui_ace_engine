@@ -166,7 +166,6 @@ template("ace_core_source_set") {
       "common/window.cpp",
 
       # declaration
-      "components/declaration/badge/badge_declaration.cpp",
       "components/declaration/button/button_declaration.cpp",
       "components/declaration/canvas/canvas_declaration.cpp",
       "components/declaration/clock/clock_declaration.cpp",
@@ -378,7 +377,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/ability_component:ace_core_components_ability_$platform",
       "$ace_root/frameworks/core/components/align:ace_core_components_align_$platform",
       "$ace_root/frameworks/core/components/arc:ace_core_components_arc_$platform",
-      "$ace_root/frameworks/core/components/badge:ace_core_components_badge_$platform",
       "$ace_root/frameworks/core/components/box:ace_core_components_box_$platform",
       "$ace_root/frameworks/core/components/bubble:ace_core_components_bubble_$platform",
       "$ace_root/frameworks/core/components/button:ace_core_components_button_$platform",
@@ -415,7 +413,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/image:ace_core_components_image_$platform",
       "$ace_root/frameworks/core/components/indexer:ace_core_components_indexer_$platform",
       "$ace_root/frameworks/core/components/list:ace_core_components_list_$platform",
-      "$ace_root/frameworks/core/components/marquee:ace_core_components_marquee_$platform",
       "$ace_root/frameworks/core/components/menu:ace_core_components_menu_$platform",
       "$ace_root/frameworks/core/components/mouse_listener:ace_core_components_mouse_listener_$platform",
       "$ace_root/frameworks/core/components/navigation_bar:ace_core_components_navigation_bar_$platform",

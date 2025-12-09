@@ -18,7 +18,6 @@ build_component("inspector_v2") {
   sources = [
     "actionsheetdialog_composed_element.cpp",
     "alertdialog_composed_element.cpp",
-    "badge_composed_element.cpp",
     "blank_composed_element.cpp",
     "button_composed_element.cpp",
     "calendar_composed_element.cpp",
@@ -51,7 +50,6 @@ build_component("inspector_v2") {
     "list_item_composed_element.cpp",
     "list_item_group_composed_element.cpp",
     "loading_progress_composed_element.cpp",
-    "marquee_composed_element.cpp",
     "menu_composed_element.cpp",
     "navigation_composed_element.cpp",
     "navigation_menus_composed_element.cpp",

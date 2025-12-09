@@ -43,7 +43,7 @@ void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
     return nullptr;
 }
 
-bool DynamicModuleHelper::LoadLibrary()
+bool DynamicModuleHelper::DynamicLoadLibrary()
 {
     return false;
 }
