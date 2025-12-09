@@ -170,7 +170,7 @@ export class KeyEventTransfer {
         retValue.setProperty('metaKey', objectInternal.metaKey);
         retValue.setProperty('unicode', objectInternal.unicode);
         retValue.setProperty('timestamp', objectInternal.timestamp);
-        retValue.setProperty('intentionCode', objectInternal.intentionCode.valueOf());
+        retValue.setProperty('intentionCode', TypeChecker.IntentionCode_ToNumeric(objectInternal.intentionCode));
         return retValue;
     }
 }
