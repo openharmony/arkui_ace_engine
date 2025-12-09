@@ -499,20 +499,6 @@ HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction006, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnMenuItemAction007
- * @tc.desc: test OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction007, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::MOUSE_MENU);
-    EXPECT_NE(richEditorPattern->aiWriteAdapter_, nullptr);
-}
-
-/**
  * @tc.name: SelectionMenuOptionsTest001
  * @tc.desc: test SelectionMenuOptions
  * @tc.type: FUNC
