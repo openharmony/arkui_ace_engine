@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -5710,6 +5711,20 @@ void SetBindPopupImpl(Ark_NativePointer node,
             ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         });
 }
+void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto child = uiNode->GetFirstChild();
+    CHECK_NULL_VOID(child);
+    auto menuNode = child->GetFirstChild();
+    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
+        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<InnerMenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->OnModifyDone();
+    }
+}
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
     const bool setShow,
@@ -5745,6 +5760,7 @@ void BindMenuBase(Ark_NativePointer node,
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
                 auto builder = [uiNode]() {
+                    CallMenuOnModifyDone(uiNode);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
@@ -5806,6 +5822,7 @@ void BindContextMenuBase(Ark_NativePointer node,
                 [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
                     auto builder = [frameNode, uiNode]() {
                         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        CallMenuOnModifyDone(uiNode);
                         ViewStackProcessor::GetInstance()->Push(uiNode);
                     };
                     ViewAbstractModelStatic::BindContextMenuStatic(
