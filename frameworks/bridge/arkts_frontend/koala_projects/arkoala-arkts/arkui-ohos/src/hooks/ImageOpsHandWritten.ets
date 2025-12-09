@@ -13,13 +13,23 @@
  * limitations under the License.
  */
 
-import { SerializerBase, runtimeType, RuntimeType } from "@koalaui/interop"
+import { SerializerBase, runtimeType, RuntimeType, pointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated"
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ImageError, BusinessError } from "#generated"
 import { default as image } from "@ohos.multimedia.image"
 import { Resource } from "global.resource"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { DrawableDescriptor_serializer, image_PixelMap_serializer, Resource_serializer, ImageAIOptions_serializer } from "#generated"
+import { ArkUIAniModule } from "arkui.ani";
+import { int32 } from "@koalaui/common";
+
+class ImageErrorImpl implements ImageError {
+    componentWidth: int32;
+    componentHeight: int32;
+    message: string = "";
+    error?: BusinessError;
+    constructor() { }
+}
 
 export class ImageOpsHandWritten {
     static hookImageSetImageOptionsImpl(component: ArkImageComponent,
@@ -84,5 +94,18 @@ export class ImageOpsHandWritten {
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(peerPtr, thisSerializer.asBuffer(),
             thisSerializer.length())
         thisSerializer.release()
+    }
+
+    static hookImageOnErrorImpl(receiver: ArkImageComponent | ArkImagePeer, value: ImageErrorCallback | undefined): void {
+        let peerPtr: pointer;
+        if (receiver instanceof ArkImageComponent) {
+            peerPtr = receiver.getPeer().peer.ptr
+        } else if (receiver instanceof ArkImagePeer) {
+            peerPtr = receiver.peer.ptr
+        }
+        if (peerPtr === undefined) {
+            return;
+        }
+        ArkUIAniModule._Image_SetOnErrorCallback(peerPtr, value);
     }
 }

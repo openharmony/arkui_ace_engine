@@ -206,6 +206,7 @@ template("ace_core_interfaces_native_node") {
           "ani/security_component_ani_method.cpp",
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
+          "ani/image_ani_modifier.cpp",
         ]
       }
 

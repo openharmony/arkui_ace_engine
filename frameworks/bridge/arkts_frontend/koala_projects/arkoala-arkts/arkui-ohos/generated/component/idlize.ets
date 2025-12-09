@@ -93,7 +93,7 @@ import { GlobalScope } from "./../framework/GlobalScope"
 import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
-import { TextPickerDialogOptions_serializer, TextPickerDialogOptions,DividerOptions_serializer, DividerOptions } from "./textPicker"
+import { TextPickerDialogOptions_serializer, TextPickerDialogOptions, DividerOptions_serializer, DividerOptions, TextPickerDialogOptionsExt_serializer, TextPickerDialogOptionsExt } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
 import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 export class ActionSheet {
@@ -141,9 +141,17 @@ export class DialogExtender {
         ArkUIGeneratedNativeModule._DialogExtender_showTimePickerDialog(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static showTextPickerDialog_serialize(options: TextPickerDialogOptions): void {
+    static showTextPickerDialog_serialize(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        TextPickerDialogOptions_serializer.write(thisSerializer, options)
+        if (options instanceof TextPickerDialogOptions) {
+            thisSerializer.writeInt8((0).toByte())
+            const optionsForIdx0 = options as TextPickerDialogOptions
+            TextPickerDialogOptions_serializer.write(thisSerializer, optionsForIdx0)
+        } else if (options instanceof TextPickerDialogOptionsExt) {
+            thisSerializer.writeInt8((1).toByte())
+            const optionsForIdx1 = options as TextPickerDialogOptionsExt
+            TextPickerDialogOptionsExt_serializer.write(thisSerializer, optionsForIdx1)
+        }
         ArkUIGeneratedNativeModule._DialogExtender_showTextPickerDialog(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -158,8 +166,8 @@ export class DialogExtender {
         DialogExtender.showTimePickerDialog_serialize(options_casted)
         return
     }
-    public static showTextPickerDialog(options: TextPickerDialogOptions): void {
-        const options_casted = options as (TextPickerDialogOptions)
+    public static showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
+        const options_casted = options as (TextPickerDialogOptions | TextPickerDialogOptionsExt)
         DialogExtender.showTextPickerDialog_serialize(options_casted)
         return
     }

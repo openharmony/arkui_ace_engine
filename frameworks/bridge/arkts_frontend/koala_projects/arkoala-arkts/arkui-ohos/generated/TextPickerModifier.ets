@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, hookTextPickerDivider } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTextPickerPeer, TextPickerTextStyle, OnTextPickerChangeCallback, TextPickerScrollStopCallback, TextPickerEnterSelectedAreaCallback, DividerOptions, TextPickerAttribute } from "./component/textPicker"
+import { ArkTextPickerPeer, TextPickerTextStyle, OnTextPickerChangeCallback, TextPickerScrollStopCallback, TextPickerEnterSelectedAreaCallback, DividerOptions, PickerBackgroundStyle, TextPickerAttribute } from "./component/textPicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { Dimension } from "./component/units"
@@ -44,11 +44,11 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _canLoop_0_0value?: boolean | undefined
     _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _disappearTextStyle_0_0value?: PickerTextStyle | undefined
+    _disappearTextStyle_0_0value?: PickerTextStyle | TextPickerTextStyle | undefined
     _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textStyle_0_0value?: PickerTextStyle | undefined
+    _textStyle_0_0value?: PickerTextStyle | TextPickerTextStyle | undefined
     _selectedTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedTextStyle_0_0value?: PickerTextStyle | undefined
+    _selectedTextStyle_0_0value?: PickerTextStyle | TextPickerTextStyle | undefined
     _disableTextStyleAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _disableTextStyleAnimation_0_0value?: boolean | undefined
     _defaultTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -69,6 +69,8 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     _enableHapticFeedback_0_0value?: boolean | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    _selectedBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedBackgroundStyle_0_0value?: PickerBackgroundStyle | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -113,7 +115,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._disappearTextStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDisappearTextStyleAttribute((this._disappearTextStyle_0_0value as PickerTextStyle | undefined));
+                    peer.setDisappearTextStyleAttribute((this._disappearTextStyle_0_0value as PickerTextStyle | TextPickerTextStyle | undefined));
                     this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -123,7 +125,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._disappearTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDisappearTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                    peer.setDisappearTextStyleAttribute((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -131,7 +133,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._textStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTextStyleAttribute((this._textStyle_0_0value as PickerTextStyle | undefined));
+                    peer.setTextStyleAttribute((this._textStyle_0_0value as PickerTextStyle | TextPickerTextStyle | undefined));
                     this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -141,7 +143,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._textStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                    peer.setTextStyleAttribute((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -149,7 +151,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._selectedTextStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedTextStyleAttribute((this._selectedTextStyle_0_0value as PickerTextStyle | undefined));
+                    peer.setSelectedTextStyleAttribute((this._selectedTextStyle_0_0value as PickerTextStyle | TextPickerTextStyle | undefined));
                     this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -159,7 +161,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._selectedTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                    peer.setSelectedTextStyleAttribute((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -343,6 +345,24 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
             }
         }
+        if (this._selectedBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedBackgroundStyleAttribute((this._selectedBackgroundStyle_0_0value as PickerBackgroundStyle | undefined));
+                    this._selectedBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedBackgroundStyleAttribute((undefined as PickerBackgroundStyle | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextPickerModifier): void {
         super.mergeModifier(modifier)
@@ -382,7 +402,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                     break;
                 }
                 default: {
-                    this.disappearTextStyle((undefined as PickerTextStyle | undefined));
+                    this.disappearTextStyle((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -395,7 +415,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                     break;
                 }
                 default: {
-                    this.textStyle((undefined as PickerTextStyle | undefined));
+                    this.textStyle((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -408,7 +428,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                     break;
                 }
                 default: {
-                    this.selectedTextStyle((undefined as PickerTextStyle | undefined));
+                    this.selectedTextStyle((undefined as PickerTextStyle | TextPickerTextStyle | undefined));
                 }
             }
         }
@@ -542,6 +562,19 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
             }
         }
+        if (modifier._selectedBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedBackgroundStyle(modifier._selectedBackgroundStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedBackgroundStyle((undefined as PickerBackgroundStyle | undefined));
+                }
+            }
+        }
     }
     defaultPickerItemHeight(value: double | string | undefined): this {
         if (((this._defaultPickerItemHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._defaultPickerItemHeight_0_0value) !== (value)))
@@ -565,7 +598,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         }
         return this
     }
-    disappearTextStyle(value: PickerTextStyle | undefined): this {
+    disappearTextStyle(value: PickerTextStyle | TextPickerTextStyle | undefined): this {
         if (((this._disappearTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
@@ -576,7 +609,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         }
         return this
     }
-    textStyle(value: PickerTextStyle | undefined): this {
+    textStyle(value: PickerTextStyle | TextPickerTextStyle | undefined): this {
         if (((this._textStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
@@ -587,7 +620,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         }
         return this
     }
-    selectedTextStyle(value: PickerTextStyle | undefined): this {
+    selectedTextStyle(value: PickerTextStyle | TextPickerTextStyle | undefined): this {
         if (((this._selectedTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
@@ -705,6 +738,17 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedBackgroundStyle(value: PickerBackgroundStyle | undefined): this {
+        if (((this._selectedBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedBackgroundStyle_0_0value = value
+        } else
+        {
+            this._selectedBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

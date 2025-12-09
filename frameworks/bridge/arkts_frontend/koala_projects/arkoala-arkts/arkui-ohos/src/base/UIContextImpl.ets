@@ -41,7 +41,7 @@ import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
 import { ActionSheetOptions } from 'arkui/component/actionSheet';
 import { TimePickerDialogOptions } from "arkui/component/timePicker"
-import { TextPickerDialogOptions } from "arkui/component/textPicker"
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from "arkui/component/textPicker"
 import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -1782,7 +1782,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt ): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         DialogExtender.showTextPickerDialog(options);
         ArkUIAniModule._Common_Restore_InstanceId();

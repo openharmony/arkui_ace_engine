@@ -126,6 +126,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
         },
         ani_native_function {
+            "_Image_SetOnErrorCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Image_SetOnErrorCallback)
+        },
+        ani_native_function {
             "_Extractors_ToWebviewWebviewControllerPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToWebviewWebviewControllerPtr)

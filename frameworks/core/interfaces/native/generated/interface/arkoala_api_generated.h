@@ -3344,6 +3344,8 @@ typedef struct ParagraphStylePeer* Ark_ParagraphStyle;
 typedef struct Opt_ParagraphStyle Opt_ParagraphStyle;
 typedef struct Ark_ParagraphStyleInterface Ark_ParagraphStyleInterface;
 typedef struct Opt_ParagraphStyleInterface Opt_ParagraphStyleInterface;
+typedef struct Ark_PickerBackgroundStyle Ark_PickerBackgroundStyle;
+typedef struct Opt_PickerBackgroundStyle Opt_PickerBackgroundStyle;
 typedef struct Ark_PickerDialogButtonStyle Ark_PickerDialogButtonStyle;
 typedef struct Opt_PickerDialogButtonStyle Opt_PickerDialogButtonStyle;
 typedef struct Ark_PickerIndicatorStyle Ark_PickerIndicatorStyle;
@@ -3410,6 +3412,8 @@ typedef struct Ark_Union_Length_GutterOption Ark_Union_Length_GutterOption;
 typedef struct Opt_Union_Length_GutterOption Opt_Union_Length_GutterOption;
 typedef struct Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
 typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle Ark_Union_PickerTextStyle_TextPickerTextStyle;
+typedef struct Opt_Union_PickerTextStyle_TextPickerTextStyle Opt_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct AccessibilityHoverEventPeer AccessibilityHoverEventPeer;
 typedef struct AccessibilityHoverEventPeer* Ark_AccessibilityHoverEvent;
 typedef struct Opt_AccessibilityHoverEvent Opt_AccessibilityHoverEvent;
@@ -3477,6 +3481,8 @@ typedef struct Ark_SubTabBarStyle Ark_SubTabBarStyle;
 typedef struct Opt_SubTabBarStyle Opt_SubTabBarStyle;
 typedef struct Ark_TextPickerDialogOptions Ark_TextPickerDialogOptions;
 typedef struct Opt_TextPickerDialogOptions Opt_TextPickerDialogOptions;
+typedef struct Ark_TextPickerDialogOptionsExt Ark_TextPickerDialogOptionsExt;
+typedef struct Opt_TextPickerDialogOptionsExt Opt_TextPickerDialogOptionsExt;
 typedef struct Ark_TimePickerDialogOptions Ark_TimePickerDialogOptions;
 typedef struct Opt_TimePickerDialogOptions Opt_TimePickerDialogOptions;
 typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
@@ -3487,6 +3493,8 @@ typedef struct Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateIm
 typedef struct Opt_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions Opt_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions;
 typedef struct Ark_Union_String_ImageAttachment_CustomSpan Ark_Union_String_ImageAttachment_CustomSpan;
 typedef struct Opt_Union_String_ImageAttachment_CustomSpan Opt_Union_String_ImageAttachment_CustomSpan;
+typedef struct Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt;
+typedef struct Opt_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt Opt_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt;
 typedef struct Ark_AttachmentType Ark_AttachmentType;
 typedef struct Opt_AttachmentType Opt_AttachmentType;
 typedef struct Ark_RichEditorImageSpanOptions Ark_RichEditorImageSpanOptions;
@@ -21505,6 +21513,15 @@ typedef struct Opt_ParagraphStyleInterface {
     Ark_Tag tag;
     Ark_ParagraphStyleInterface value;
 } Opt_ParagraphStyleInterface;
+typedef struct Ark_PickerBackgroundStyle {
+    /* kind: Interface */
+    Opt_ResourceColor color;
+    Opt_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
+} Ark_PickerBackgroundStyle;
+typedef struct Opt_PickerBackgroundStyle {
+    Ark_Tag tag;
+    Ark_PickerBackgroundStyle value;
+} Opt_PickerBackgroundStyle;
 typedef struct Ark_PickerDialogButtonStyle {
     /* kind: Interface */
     Opt_ButtonType type;
@@ -21869,6 +21886,18 @@ typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions
     Ark_Tag tag;
     Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions value;
 } Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_PickerTextStyle value0;
+        Ark_TextPickerTextStyle value1;
+    };
+} Ark_Union_PickerTextStyle_TextPickerTextStyle;
+typedef struct Opt_Union_PickerTextStyle_TextPickerTextStyle {
+    Ark_Tag tag;
+    Ark_Union_PickerTextStyle_TextPickerTextStyle value;
+} Opt_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct Opt_AccessibilityHoverEvent {
     Ark_Tag tag;
     Ark_AccessibilityHoverEvent value;
@@ -21973,6 +22002,7 @@ typedef struct Ark_DatePickerDialogOptions {
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
+    Opt_Boolean canLoop;
 } Ark_DatePickerDialogOptions;
 typedef struct Opt_DatePickerDialogOptions {
     Ark_Tag tag;
@@ -22294,6 +22324,47 @@ typedef struct Opt_TextPickerDialogOptions {
     Ark_Tag tag;
     Ark_TextPickerDialogOptions value;
 } Opt_TextPickerDialogOptions;
+typedef struct Ark_TextPickerDialogOptionsExt {
+    /* kind: Interface */
+    Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent range;
+    Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable value;
+    Opt_Union_I32_Array_I32_Bindable_Bindable selected;
+    Opt_Array_LengthMetrics columnWidths;
+    Opt_Union_F64_String defaultPickerItemHeight;
+    Opt_Boolean canLoop;
+    Opt_TextPickerTextStyle disappearTextStyle;
+    Opt_TextPickerTextStyle textStyle;
+    Opt_PickerDialogButtonStyle acceptButtonStyle;
+    Opt_PickerDialogButtonStyle cancelButtonStyle;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_VoidCallback onWillDisappear;
+    Opt_Boolean disableTextStyleAnimation;
+    Opt_VoidCallback onCancel;
+    Opt_Offset offset;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onWillAppear;
+    Opt_Callback_TextPickerResult_Void onAccept;
+    Opt_Callback_TextPickerResult_Void onScrollStop;
+    Opt_Rectangle maskRect;
+    Opt_ResourceColor backgroundColor;
+    Opt_VoidCallback onDidDisappear;
+    Opt_PickerBackgroundStyle selectedBackgroundStyle;
+    Opt_TextPickerTextStyle selectedTextStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Boolean enableHoverMode;
+    Opt_Callback_TextPickerResult_Void onChange;
+    Opt_DialogAlignment alignment;
+    Opt_Boolean enableHapticFeedback;
+    Opt_TextPickerTextStyle defaultTextStyle;
+    Opt_Callback_TextPickerResult_Void onEnterSelectedArea;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+} Ark_TextPickerDialogOptionsExt;
+typedef struct Opt_TextPickerDialogOptionsExt {
+    Ark_Tag tag;
+    Ark_TextPickerDialogOptionsExt value;
+} Opt_TextPickerDialogOptionsExt;
 typedef struct Ark_TimePickerDialogOptions {
     /* kind: Interface */
     Opt_Union_Date_Bindable selected;
@@ -22387,6 +22458,18 @@ typedef struct Opt_Union_String_ImageAttachment_CustomSpan {
     Ark_Tag tag;
     Ark_Union_String_ImageAttachment_CustomSpan value;
 } Opt_Union_String_ImageAttachment_CustomSpan;
+typedef struct Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_TextPickerDialogOptions value0;
+        Ark_TextPickerDialogOptionsExt value1;
+    };
+} Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt;
+typedef struct Opt_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt {
+    Ark_Tag tag;
+    Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt value;
+} Opt_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt;
 typedef struct Ark_AttachmentType {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23336,6 +23419,8 @@ typedef struct GENERATED_ArkUIDatePickerModifier {
                                        const Opt_CrownSensitivity* value);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
                                     const Opt_Boolean* value);
+    void (*setCanLoop)(Ark_NativePointer node,
+                       const Opt_Boolean* value);
 } GENERATED_ArkUIDatePickerModifier;
 
 typedef struct GENERATED_ArkUIDividerModifier {
@@ -23621,6 +23706,8 @@ typedef struct GENERATED_ArkUIImageModifier {
                           const Opt_ImageRenderMode* value);
     void (*setDynamicRangeMode)(Ark_NativePointer node,
                                 const Opt_DynamicRangeMode* value);
+    void (*setHdrBrightness)(Ark_NativePointer node,
+                             const Opt_Float64* value);
     void (*setInterpolation)(Ark_NativePointer node,
                              const Opt_ImageInterpolation* value);
     void (*setSourceSize)(Ark_NativePointer node,
@@ -25653,11 +25740,11 @@ typedef struct GENERATED_ArkUITextPickerModifier {
     void (*setCanLoop)(Ark_NativePointer node,
                        const Opt_Boolean* value);
     void (*setDisappearTextStyle)(Ark_NativePointer node,
-                                  const Opt_PickerTextStyle* value);
+                                  const Opt_Union_PickerTextStyle_TextPickerTextStyle* value);
     void (*setTextStyle)(Ark_NativePointer node,
-                         const Opt_PickerTextStyle* value);
+                         const Opt_Union_PickerTextStyle_TextPickerTextStyle* value);
     void (*setSelectedTextStyle)(Ark_NativePointer node,
-                                 const Opt_PickerTextStyle* value);
+                                 const Opt_Union_PickerTextStyle_TextPickerTextStyle* value);
     void (*setDisableTextStyleAnimation)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
     void (*setDefaultTextStyle)(Ark_NativePointer node,
@@ -25678,6 +25765,8 @@ typedef struct GENERATED_ArkUITextPickerModifier {
                                     const Opt_Boolean* value);
     void (*setDigitalCrownSensitivity)(Ark_NativePointer node,
                                        const Opt_CrownSensitivity* value);
+    void (*setSelectedBackgroundStyle)(Ark_NativePointer node,
+                                       const Opt_PickerBackgroundStyle* value);
 } GENERATED_ArkUITextPickerModifier;
 
 typedef struct GENERATED_ArkUITextTimerModifier {
@@ -27019,7 +27108,7 @@ typedef struct GENERATED_ArkUIDecorationStyleAccessor {
 
 typedef struct GENERATED_ArkUIDialogExtenderAccessor {
     void (*showTimePickerDialog)(const Ark_TimePickerDialogOptions* options);
-    void (*showTextPickerDialog)(const Ark_TextPickerDialogOptions* options);
+    void (*showTextPickerDialog)(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* options);
     void (*showDatePickerDialog)(const Ark_DatePickerDialogOptions* options);
 } GENERATED_ArkUIDialogExtenderAccessor;
 

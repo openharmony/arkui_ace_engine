@@ -247,5 +247,15 @@ void ImageModelStatic::SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
 }
+
+void ImageModelStatic::SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (hdrBrightness) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, *hdrBrightness, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP
