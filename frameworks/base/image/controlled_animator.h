@@ -44,7 +44,7 @@ public:
     };
 
     void SetControlStatus(ControlStatus controlStatus);
-    ControlStatus GetControlStatus() const;
+    ACE_FORCE_EXPORT ControlStatus GetControlStatus() const;
     void SetFillMode(FillMode fillMode);
     FillMode GetFillMode() const;
     void SetRunningIdx(int32_t runningIdx);
@@ -67,11 +67,11 @@ public:
     void AddCancelListener(AnimatorEvent cancelEvent);
     void ClearAllListeners();
     // behavioral control
-    void Forward();
+    ACE_FORCE_EXPORT void Forward();
     void Backward();
     void Cancel();
-    void Pause();
-    void Finish();
+    ACE_FORCE_EXPORT void Pause();
+    ACE_FORCE_EXPORT void Finish();
     void MovePictureToRightPosition(bool checkWithFillMode = true);
     int32_t CalFinishIdx(bool checkWithFillMode = true);
 
