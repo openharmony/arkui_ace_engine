@@ -1841,6 +1841,27 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressModifierAnimator002
+ * @tc.desc: Test the animation of the progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    ProgressModifier progressModifier(frameNode_);;
+    progressModifier.SetSmoothEffect(false);
+    progressModifier.SetValue(PROGRESS_MODIFIER_VALUE2);
+    EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE2);
+
+    progressModifier.SetSmoothEffect(true);
+    progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE);
+}
+
+/**
  * @tc.name: GetContentDrawFunction
  * @tc.desc: Test the function GetContentDrawFunction in ProgressPaintMethod.
  * @tc.type: FUNC
