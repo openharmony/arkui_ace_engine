@@ -72,6 +72,7 @@ private:
 
 private:
     static std::set<RefPtr<FrameNode>> offscreenNodes;
+    static std::shared_mutex offscreenNodesMutex_;
 };
 } // namespace OHOS::Ace::NG
 
