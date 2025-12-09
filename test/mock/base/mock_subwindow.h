@@ -166,6 +166,8 @@ public:
     MOCK_METHOD2(ShowActionMenuStatic, void(DialogProperties& dialogProps,
         std::function<void(int32_t, int32_t)>&& callback));
     MOCK_METHOD2(OpenCustomDialogStatic, void(DialogProperties &dialogProps, std::function<void(int32_t)> &&callback));
+    bool SetReceiveDragEventEnabled(bool enabled) override;
+    bool GetIsReceiveDragEventEnabled() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

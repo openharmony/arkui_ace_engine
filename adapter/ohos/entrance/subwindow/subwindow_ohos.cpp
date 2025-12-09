@@ -2563,4 +2563,17 @@ void SubwindowOhos::RemoveFollowParentWindowLayoutNode(int32_t nodeId)
         SwitchFollowParentWindowLayout(freeMultiWindowEnable);
     }
 }
+
+bool SubwindowOhos::SetReceiveDragEventEnabled(bool enabled)
+{
+    if (GetIsReceiveDragEventEnabled() == enabled) {
+        return false;
+    }
+    OHOS::Rosen::WMError ret = window_->SetReceiveDragEventEnabled(enabled);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "set subwindow receive drag event enabled failed");
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace
