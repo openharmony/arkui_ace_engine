@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
+/**
+ * Use these variables when you tailor your ArkTS code. They must be of the const type.
+ */
+export const HAR_VERSION = '1.0.0';
+export const BUILD_MODE_NAME = 'release';
+export const DEBUG = false;
+export const TARGET_NAME = 'default';
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-
-namespace OHOS::Ace::Framework {
-panda::Local<panda::JSValueRef> JsLoadImageGeneratorDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-} // namespace OHOS::Ace::Framework
-
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
+/**
+ * BuildProfile Class is used only for compatibility purposes.
+ */
+export default class BuildProfile { 
+	static readonly HAR_VERSION = HAR_VERSION;
+	static readonly BUILD_MODE_NAME = BUILD_MODE_NAME;
+	static readonly DEBUG = DEBUG;
+	static readonly TARGET_NAME = TARGET_NAME;
+}

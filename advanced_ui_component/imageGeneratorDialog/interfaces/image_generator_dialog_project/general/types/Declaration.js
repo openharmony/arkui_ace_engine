@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
-
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-
-namespace OHOS::Ace::Framework {
-panda::Local<panda::JSValueRef> JsLoadImageGeneratorDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-} // namespace OHOS::Ace::Framework
-
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
+export var CanvasMode;
+(function (x4) {
+    x4[x4["COMMON_MODE"] = 0] = "COMMON_MODE";
+    x4[x4["DOODLE_MODE"] = 1] = "DOODLE_MODE";
+})(CanvasMode || (CanvasMode = {}));
