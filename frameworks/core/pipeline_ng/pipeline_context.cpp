@@ -4661,6 +4661,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.screenY = event.screenY;
     result.convertInfo.first = UIInputEventType::AXIS;
     result.convertInfo.second = UIInputEventType::MOUSE;
+    result.targetDisplayId = event.targetDisplayId;
     return result;
 }
 
