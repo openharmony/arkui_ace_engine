@@ -135,7 +135,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret == ERR_APPEXECFWK_FORM_NOT_SUPPORTED) {
         ProcessFormUninstall(info.id);
-        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, Unsupported card, ");
+        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, unsupported card");
         return;
     }
     if (ret != 0) {
