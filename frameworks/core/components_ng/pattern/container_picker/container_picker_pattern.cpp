@@ -1516,7 +1516,6 @@ bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
             int32_t upIndex = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
             SwipeTo(upIndex);
             selectedIndex_ = upIndex;
-            FireScrollStopEvent();
             break;
         }
 
@@ -1524,7 +1523,6 @@ bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
             int32_t downIndex = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
             SwipeTo(downIndex);
             selectedIndex_ = downIndex;
-            FireScrollStopEvent();
             break;
         }
 
