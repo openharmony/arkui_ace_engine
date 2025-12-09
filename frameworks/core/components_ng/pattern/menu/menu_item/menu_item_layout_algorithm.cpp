@@ -615,13 +615,14 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
         selectTheme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_);
 
     iconSize_ = selectTheme->GetIconSideLength().ConvertToPx();
-    if (selectTheme->IsTV() && !isOption_) {
+    if (!isOption_) {
         // The end side needs to be aligned on TV.
         auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
         auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
+        // If the size of the right row is not greater than 0, that is, there is no content displayed on the right row.
         middleSpace_ = GreatNotEqual(rightRowSize.Width(), 0.0f)
                            ? static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx())
-                           : 0;
+                           : static_cast<float>(selectTheme->GetMenuRowLastSpace().ConvertToPx());
     }
     MeasureItemViews(childConstraint, layoutConstraint, layoutWrapper);
     MeasureClickableArea(layoutWrapper);
