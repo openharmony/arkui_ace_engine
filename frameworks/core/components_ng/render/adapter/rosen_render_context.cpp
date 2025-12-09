@@ -1481,26 +1481,33 @@ void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 
 void RosenRenderContext::UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
-    CHECK_NULL_VOID(visualEffect);
+    CHECK_NULL_VOID(rsNode_ && visualEffect);
     rsNode_->SetVisualEffect(visualEffect);
 }
 
 void RosenRenderContext::UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
-    CHECK_NULL_VOID(backgroundFilter);
+    CHECK_NULL_VOID(rsNode_ && backgroundFilter);
     rsNode_->SetUIBackgroundFilter(backgroundFilter);
 }
 
 void RosenRenderContext::UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
 {
-    CHECK_NULL_VOID(foregroundFilter);
+    CHECK_NULL_VOID(rsNode_ && foregroundFilter);
     rsNode_->SetUIForegroundFilter(foregroundFilter);
 }
 
 void RosenRenderContext::UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    CHECK_NULL_VOID(compositingFilter);
+    CHECK_NULL_VOID(rsNode_ && compositingFilter);
     rsNode_->SetUICompositingFilter(compositingFilter);
+}
+
+void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIMaterialFilter(materialFilter);
+    RequestNextFrame();
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)

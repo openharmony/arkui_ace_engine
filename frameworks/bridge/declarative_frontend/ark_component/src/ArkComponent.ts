@@ -4018,6 +4018,20 @@ class CompositingFilterModifier extends ModifierWithKey<Filter> {
   }
 }
 
+class MaterialFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('materialFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaterialFilter(node);
+    } else {
+      getUINativeModule().common.setMaterialFilter(node, this.value);
+    }
+  }
+}
+
 class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -5998,6 +6012,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   compositingFilter(filter: Filter): this {
     modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  materialFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, MaterialFilterModifier.identity, MaterialFilterModifier, filter);
     return this;
   }
   foregroundEffect(options: ForegroundEffectOptions): this {

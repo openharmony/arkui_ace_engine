@@ -3686,6 +3686,20 @@ class CompositingFilterModifier extends ModifierWithKey {
   }
 }
 CompositingFilterModifier.identity = Symbol('compositingFilter');
+class MaterialFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetMaterialFilter(node);
+    }
+    else {
+      getUINativeModule().common.setMaterialFilter(node, this.value);
+    }
+  }
+}
+MaterialFilterModifier.identity = Symbol('materialFilter');
 class FreezeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5533,6 +5547,10 @@ class ArkComponent {
   }
   compositingFilter(filter) {
     modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  materialFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, MaterialFilterModifier.identity, MaterialFilterModifier, filter);
     return this;
   }
   freeze(value) {
@@ -13407,6 +13425,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   systemMaterial(material) {
+    throw new Error('Method not implemented.');
+  }
+  materialFilter(filter) {
     throw new Error('Method not implemented.');
   }
   attributeModifier(modifier) {

@@ -3134,6 +3134,8 @@ struct ArkUICommonModifier {
     void (*setBorderRadiusType)(ArkUINodeHandle node, ArkUI_Int32 type);
     void (*resetBorderRadiusType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBorderRadiusType)(ArkUINodeHandle node);
+    void (*setMaterialFilter)(ArkUINodeHandle node, void* filter);
+    void (*resetMaterialFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

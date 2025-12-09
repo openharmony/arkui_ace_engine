@@ -944,6 +944,14 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  systemMaterial(material: SystemUiMaterial | undefined) {
+    throw new Error('Method not implemented.');
+  }
+
+  materialFilter(filter: Filter) {
+    throw new Error('Method not implemented.');
+  }
+
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
