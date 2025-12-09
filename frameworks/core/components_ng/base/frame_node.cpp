@@ -7845,4 +7845,18 @@ void FrameNode::MountToParent(const RefPtr<UINode>& parent,
     }
     AfterMountToParent();
 }
+
+void FrameNode::OnContentChangeRegister(const ContentChangeConfig& config)
+{
+    if (pattern_) {
+        pattern_->OnContentChangeRegister(config);
+    }
+}
+
+void FrameNode::OnContentChangeUnregister()
+{
+    if (pattern_) {
+        pattern_->OnContentChangeUnregister();
+    }
+}
 } // namespace OHOS::Ace::NG
