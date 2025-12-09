@@ -2123,6 +2123,13 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     auto context = nodePtr->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto parent = NG::DialogManager::GetInstance().GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
     context->GetTaskExecutor()->PostTask(
         [dialogProperties, node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
             auto overlayManager = weak.Upgrade();
