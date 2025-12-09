@@ -6844,7 +6844,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 #endif
 #if defined(IOS_PLATFORM)
 #if defined(PLATFORM_VIEW_SUPPORTED)
-    if (patternType_ == PatternType::PLATFORM_VIEW) {
+    if (patternType_ == PatternType::PLATFORM_VIEW || patternType_ == PatternType::XCOM) {
         RSSurfaceExtConfig config = {
             .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
             .additionalData = nativeWindow,
