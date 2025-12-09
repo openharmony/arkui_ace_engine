@@ -105,6 +105,9 @@ using StringArray = std::vector<std::string>;
 using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
+struct BorderRadiusPropertyOpt {
+    BorderRadiusProperty value;
+};
 
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
@@ -553,6 +556,13 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_Float64& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Number& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Resource& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_String& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
     template<> BorderStyleProperty Convert(const Ark_EdgeStyles& src);
     template<> BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src);
