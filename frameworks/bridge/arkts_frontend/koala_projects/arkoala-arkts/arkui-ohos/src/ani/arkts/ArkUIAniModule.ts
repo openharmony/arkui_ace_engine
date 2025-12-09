@@ -134,6 +134,11 @@ export class ArkUIAniModule {
     native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
     native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
     native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
+    native static _BaseEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _DragEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _KeyEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _ClickEvent_preventDefault(ptr: KPointer): void
+    native static _TouchEvent_preventDefault(ptr: KPointer): void
 
     // for web
     native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
