@@ -224,6 +224,8 @@ namespace Converter {
             int64_t id_;
             std::vector<ParamType> params_;
     };
+    std::optional<Dimension> OptConvertFromArkNumResStr(
+        const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
     template<typename T, typename NumberType = Ark_Int32> std::optional<Dimension> OptConvertFromArkNumStrRes(
         const T& src, DimensionUnit defaultUnit = DimensionUnit::FP);
