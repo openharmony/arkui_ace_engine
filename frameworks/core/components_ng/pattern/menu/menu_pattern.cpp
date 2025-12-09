@@ -515,7 +515,7 @@ void MenuPattern::BuildDivider()
     buildDividerTaskAdded_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!IsSelectOverlayExtensionMenu()) {
+    if (!IsSelectOverlayExtensionMenuWithSubMenu()) {
         isNeedDivider_ = false;
     }
     auto uiNode = AceType::DynamicCast<UINode>(host);
@@ -2334,6 +2334,28 @@ RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
     auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
     CHECK_NULL_RETURN(mainMenuFrameNode, nullptr);
     return mainMenuFrameNode->GetPattern<MenuPattern>();
+}
+
+bool MenuPattern::IsSelectOverlayExtensionMenuWithSubMenu() const
+{
+    auto wrapperFrameNode = GetMenuWrapper();
+    CHECK_NULL_RETURN(wrapperFrameNode, false);
+    if (wrapperFrameNode->GetTag() != V2::SELECT_OVERLAY_ETS_TAG) {
+        return false;
+    }
+    RefPtr<UINode> mainMenuUINode = nullptr;
+    for (auto& child : wrapperFrameNode->GetChildren()) {
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            mainMenuUINode = child;
+            break;
+        }
+    }
+    CHECK_NULL_RETURN(mainMenuUINode, false);
+    auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    CHECK_NULL_RETURN(mainMenuFrameNode, false);
+    auto menuPattern = mainMenuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayExtensionMenu();
 }
 
 void InnerMenuPattern::RecordItemsAndGroups()
