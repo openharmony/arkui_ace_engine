@@ -577,6 +577,7 @@ struct ArkUIAniCommonModifier {
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
+    void(*resolveUIContext)(std::vector<int32_t>& instance);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

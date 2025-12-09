@@ -57,4 +57,7 @@ export class UIContextUtil {
         let instanceId = UIContextUtil.getCurrentInstanceId();
         return ArkUIAniModule._CheckIsUIThread(instanceId) !== 0;
     }
+    static resolveUIContext(): Array<int> {
+        return ArkUIAniModule._ResolveUIContext();
+    }
 }

@@ -370,7 +370,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetCustomCallbackWithCheck",
             "lC{arkui.FrameNode.FrameNode}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
-        }
+        },
+        ani_native_function {
+            "_ResolveUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)
+       }
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

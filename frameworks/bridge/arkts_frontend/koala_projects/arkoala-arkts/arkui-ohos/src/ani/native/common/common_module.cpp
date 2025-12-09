@@ -1776,4 +1776,16 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
             env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
     }
 }
+
+ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    ani_array_int resultArray = nullptr;
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, resultArray);
+    std::vector<int32_t> instance;
+    modifier->getCommonAniModifier()->resolveUIContext(instance);
+    env->Array_New_Int(instance.size(), &resultArray);
+    auto status = env->Array_SetRegion_Int(resultArray, 0, instance.size(), instance.data());
+    return resultArray;
+}
 } // namespace OHOS::Ace::Ani
