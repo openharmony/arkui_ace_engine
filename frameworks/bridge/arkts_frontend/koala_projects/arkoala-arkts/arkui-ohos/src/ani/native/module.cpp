@@ -1494,6 +1494,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetCustomCallbackWithCheck",
             "lC{arkui.FrameNode.FrameNode}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
+        },
+        ani_native_function {
+            "_BaseEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetBaseEventModifierKeyState)
+        },
+        ani_native_function {
+            "_DragEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetDragEventModifierKeyState)
+        },
+        ani_native_function {
+            "_KeyEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetKeyEventModifierKeyState)
+        },
+        ani_native_function {
+            "_ClickEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickEventPreventDefault)
+        },
+        ani_native_function {
+            "_TouchEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetTouchEventPreventDefault)
         }
     };
 

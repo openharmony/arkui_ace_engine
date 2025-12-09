@@ -117,6 +117,14 @@ void SetImageRawDataCacheSize(
 ani_status GetAniEnv(ani_vm* vm, ani_env** env);
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr);
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);
+ani_boolean GetBaseEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+ani_boolean GetDragEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+ani_boolean GetKeyEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+void SetClickEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
+void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

@@ -856,6 +856,55 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest002, TestSize.Leve
 }
 
 /**
+ * @tc.name: PanRecognizerSendCallbackMsgTest003
+ * @tc.desc: Test PanRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    std::unique_ptr<GestureEventFunc> onAction;
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty, type is AXIS
+     * @tc.expected: step2. result equals.
+     */
+    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y, type is not AXIS
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    panRecognizer->lastTouchEvent_ = touchEvent;
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.tiltX = 0.0f;
+    touchEvent.tiltY = 0.0f;
+    panRecognizer->lastTouchEvent_ = touchEvent;
+    panRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
+}
+
+/**
  * @tc.name: PanRecognizerTest010
  * @tc.desc: Test PanRecognizer function: ReconcileFrom
  * @tc.type: FUNC
@@ -1337,55 +1386,6 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest020, TestSize.Level1)
     panRecognizer->fingers_ = SINGLE_FINGER_NUMBER;
     panRecognizer->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(panRecognizer->lastAxisEvent_.id, axisEvent.id);
-}
-
-/**
- * @tc.name: PanRecognizerSendCallbackMsgTest003
- * @tc.desc: Test PanRecognizer function: SendCallbackMsg
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    std::unique_ptr<GestureEventFunc> onAction;
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty, type is AXIS
-     * @tc.expected: step2. result equals.
-     */
-    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    panRecognizer->inputEventType_ = InputEventType::AXIS;
-    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case4: touchEvent is not empty, have no X and Y, type is not AXIS
-     * @tc.expected: step2. result equals.
-     */
-    TouchEvent touchEvent;
-    panRecognizer->lastTouchEvent_ = touchEvent;
-    panRecognizer->inputEventType_ = InputEventType::AXIS;
-    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case4: touchEvent is not empty, have no X and Y
-     * @tc.expected: step2. result equals.
-     */
-    touchEvent.tiltX = 0.0f;
-    touchEvent.tiltY = 0.0f;
-    panRecognizer->lastTouchEvent_ = touchEvent;
-    panRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    panRecognizer->inputEventType_ = InputEventType::AXIS;
-    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
 }
 
 /*
