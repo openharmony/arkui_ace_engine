@@ -283,9 +283,6 @@ private:
     void RemoveIsFocusActiveUpdateEvent();
     void UpdateMenuChildColorConfiguration(
         const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange);
-    void SetOptionTextModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
-    void SetSelectedOptionTextModifierByUser(
-        const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetArrowModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props,
         const RefPtr<SelectLayoutProperty>& layoutProps);

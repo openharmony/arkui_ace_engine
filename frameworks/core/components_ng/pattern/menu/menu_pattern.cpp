@@ -2405,13 +2405,15 @@ void MenuPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
 
-    auto optionNode = menuPattern->GetOptions();
-    for (const auto& child : optionNode) {
-        auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        optionsPattern->SetFontColor(menuTheme->GetFontColor());
+    if (!isSelectMenu_) {
+        auto optionNode = menuPattern->GetOptions();
+        for (const auto& child : optionNode) {
+            auto optionsPattern = child->GetPattern<MenuItemPattern>();
+            optionsPattern->SetFontColor(menuTheme->GetFontColor());
 
-        child->MarkModifyDone();
-        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            child->MarkModifyDone();
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
     host->SetNeedCallChildrenUpdate(false);
 

@@ -73,6 +73,7 @@ public:
 
 protected:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuItemPaintProperty> paintProperty);
+    static RefPtr<FrameNode> CreateTargetNode();
 };
 
 void MenuItemPatternOptionTestNg::SetUp()
@@ -144,6 +145,15 @@ bool MenuItemPatternOptionTestNg::InitOptionTestNg()
     optionAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     CHECK_NULL_RETURN(optionAccessibilityProperty_, false);
     return true;
+}
+
+RefPtr<FrameNode> MenuItemPatternOptionTestNg::CreateTargetNode()
+{
+    std::vector<SelectParam> selectParam = { { "content1", "icon1" },
+        { "content2", "" }, { "", "icon3" }, { "", "" } };
+    auto wrapperNode = MenuView::Create(std::move(selectParam), TARGET_ID, EMPTY_TEXT);
+    CHECK_NULL_RETURN(wrapperNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
 }
 
 /**
@@ -862,6 +872,136 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg008, TestSize.Level
     UIState pressedState = UI_STATE_PRESSED;
     firstPattern->OnPress(pressedState);
     EXPECT_EQ(paintProp->GetNeedDividerValue(), false);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node.
+     * @tc.expected: option node is not null.
+     */
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    auto menuItem = menuPattern->GetOptions()[0];
+    ASSERT_NE(menuItem, nullptr);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    menuItemPattern->isSelectOption_ = true;
+    menuItemPattern->isSelected_ = true;
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::RED);
+        property->UpdateFontWeight(Ace::FontWeight::BOLD);
+        property->UpdateTextAlign(TextAlign::JUSTIFY);
+    };
+    /**
+     * @tc.steps: step2. call SetSelectedOptionTextModifier with applyFunc.
+     * @tc.expected: optionSelectedApply_ is not nullptr.
+     */
+    menuItemPattern->SetSelectedOptionTextModifier(applyFunc);
+    EXPECT_NE(menuItemPattern->optionSelectedApply_, nullptr);
+    menuItemPattern->OnColorConfigurationUpdate();
+
+    menuItemPattern->isSelected_ = false;
+
+    /**
+     * @tc.steps: step3. call SetOptionTextModifier with applyFunc.
+     * @tc.expected: optionApply_ is not nullptr.
+     */
+    menuItemPattern->SetOptionTextModifier(applyFunc);
+    EXPECT_NE(menuItemPattern->optionApply_, nullptr);
+    menuItemPattern->OnColorConfigurationUpdate();
+    auto renderContext = menuNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackgroundColor(), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: SetOptionTextModifierTest001
+ * @tc.desc: Test SetOptionTextModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, SetOptionTextModifierTest001, TestSize.Level1)
+{
+    CHECK_NULL_VOID(optionPattern_);
+    /**
+     * @tc.steps: step1. call SetOptionTextModifier with nullptr.
+     * @tc.expected: optionApply_ is nullptr.
+     */
+    optionPattern_->SetOptionTextModifier(nullptr);
+    EXPECT_EQ(optionPattern_->optionApply_, nullptr);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::RED);
+    };
+    /**
+     * @tc.steps: step2. call SetOptionTextModifier with applyFunc.
+     * @tc.expected: optionApply_ is not nullptr.
+     */
+    optionPattern_->SetOptionTextModifier(applyFunc);
+    EXPECT_NE(optionPattern_->optionApply_, nullptr);
+    auto text = optionPattern_->text_;
+    ASSERT_NE(text, nullptr);
+    auto property = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    EXPECT_EQ(property->GetTextColor(), Color::RED);
+}
+
+/**
+ * @tc.name: SetSelectedOptionTextModifierTest001
+ * @tc.desc: Test SetSelectedOptionTextModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, SetSelectedOptionTextModifierTest001, TestSize.Level1)
+{
+    CHECK_NULL_VOID(optionPattern_);
+    /**
+     * @tc.steps: step1. call SetSelectedOptionTextModifier with nullptr.
+     * @tc.expected: optionSelectedApply_ is nullptr.
+     */
+    optionPattern_->SetSelectedOptionTextModifier(nullptr);
+    EXPECT_EQ(optionPattern_->optionSelectedApply_, nullptr);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::RED);
+    };
+    /**
+     * @tc.steps: step2. call SetSelectedOptionTextModifier with applyFunc.
+     * @tc.expected: optionSelectedApply_ is not nullptr.
+     */
+    optionPattern_->SetSelectedOptionTextModifier(applyFunc);
+    EXPECT_NE(optionPattern_->optionSelectedApply_, nullptr);
+    auto text = optionPattern_->text_;
+    ASSERT_NE(text, nullptr);
+    auto property = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    EXPECT_EQ(property->GetTextColor(), Color::RED);
 }
 
 /**

@@ -557,6 +557,7 @@ friend class ServiceCollaborationMenuAceHelper;
 
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
+    void UpdateOptionStyle();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
     void OnAttachToMainTree() override;
 
