@@ -72,10 +72,10 @@ def main(argv):
         os.makedirs(js_output_path)
 
     try:
-        shutil.move(built_file, output_file)
-        print(f"ark_breakpoint: File successfully moved to {output_file}")
+        shutil.copy(built_file, output_file)
+        print(f"ark_breakpoint: File successfully copyed to {output_file}")
     except Exception as e:
-        print(f"Error: Failed to move file: {e}")
+        print(f"Error: Failed to copy file: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':
