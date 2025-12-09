@@ -662,5 +662,18 @@ std::shared_ptr<Rosen::RSSurfaceNode> FormRenderer::GetSurfaceNode()
     }
     return uiContent_->GetFormRootNode();
 }
+
+void FormRenderer::SetUiContentParams(const OHOS::AAFwk::Want& want)
+{
+    HILOG_INFO("call");
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
+        return;
+    }
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY)) {
+        std::string backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+        uiContent_->SetFormBackgroundColor(backgroundColor);
+    }
+}
 } // namespace Ace
 } // namespace OHOS

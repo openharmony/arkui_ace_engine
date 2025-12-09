@@ -68,6 +68,7 @@ public:
     void SetVisibleChange(bool isVisible);
     void UpdateFormSize(float width, float height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
+    void SetUiContentParams(const OHOS::AAFwk::Want& want);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);

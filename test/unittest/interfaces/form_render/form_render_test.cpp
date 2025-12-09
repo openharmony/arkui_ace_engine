@@ -848,4 +848,34 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     formRenderer->OnSurfaceCreate(formJsInfo, want);
     EXPECT_EQ(newFormJsInfo.formData, "");
 }
+
+/**
+ * @tc.name: FormRenderTest_SetUiContentParams_001
+ * @tc.desc: test SetUiContentParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest_SetUiContentParams_001, TestSize.Level0)
+{
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest_SetUiContentParams_001");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(formRendererGroup);
+    OHOS::AAFwk::Want want;
+    want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
+    want.SetParam(FORM_RENDERER_ALLOW_UPDATE, false);
+    want.SetParam(FORM_RENDER_STATE, true);
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formRendererGroup->AddForm(want, formJsInfo);
+    auto formRenderer = formRendererGroup->formRenderer_;
+    EXPECT_TRUE(formRenderer);
+    OHOS::AAFwk::Want renderWant;
+    formRenderer->SetUiContentParams(renderWant);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, "#FFFFFFFF");
+    formRenderer->SetUiContentParams(renderWant);
+}
 } // namespace OHOS::Ace
