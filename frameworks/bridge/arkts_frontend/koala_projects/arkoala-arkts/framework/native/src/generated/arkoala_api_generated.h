@@ -788,6 +788,9 @@ typedef struct UIExtensionProxyPeer* Ark_UIExtensionProxy;
 typedef struct Opt_UIExtensionProxy Opt_UIExtensionProxy;
 typedef struct Ark_UIGestureEvent Ark_UIGestureEvent;
 typedef struct Opt_UIGestureEvent Opt_UIGestureEvent;
+typedef struct uiMaterial_MaterialPeer uiMaterial_MaterialPeer;
+typedef struct uiMaterial_MaterialPeer* Ark_uiMaterial_Material;
+typedef struct Opt_uiMaterial_Material Opt_uiMaterial_Material;
 typedef struct Ark_uiObserver_NavigationInfo Ark_uiObserver_NavigationInfo;
 typedef struct Opt_uiObserver_NavigationInfo Opt_uiObserver_NavigationInfo;
 typedef struct unifiedDataChannel_UnifiedDataPeer unifiedDataChannel_UnifiedDataPeer;
@@ -8638,6 +8641,10 @@ typedef struct Opt_UIGestureEvent {
     Ark_Tag tag;
     Ark_UIGestureEvent value;
 } Opt_UIGestureEvent;
+typedef struct Opt_uiMaterial_Material {
+    Ark_Tag tag;
+    Ark_uiMaterial_Material value;
+} Opt_uiMaterial_Material;
 typedef struct Ark_uiObserver_NavigationInfo {
     /* kind: Interface */
     Ark_String navigationId;
@@ -22981,6 +22988,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                             const Opt_SizeChangeCallback* value);
     void (*setAccessibilityFocusDrawLevel)(Ark_NativePointer node,
                                            const Opt_FocusDrawLevel* value);
+    void (*setSystemMaterial)(Ark_NativePointer node,
+                              const Opt_uiMaterial_Material* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);

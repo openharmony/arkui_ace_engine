@@ -20,6 +20,7 @@
 #include "core/components_ng/render/adapter/flutter_render_context.h"
 #endif
 #include "core/components_ng/render/render_context.h"
+#include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RenderContext> RenderContext::Create()

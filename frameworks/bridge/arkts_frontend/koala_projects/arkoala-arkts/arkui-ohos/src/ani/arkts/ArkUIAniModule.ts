@@ -41,6 +41,7 @@ import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.sha
 import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 import { DrawModifier } from "#handwritten"
 import { JavaScriptProxy } from '#generated';
 import { ErrorCallback } from '@ohos.base';
@@ -68,6 +69,7 @@ export class ArkUIAniModule {
     native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
     native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
+    native static _Extractors_ToUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer;
     native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
     native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
     native static _Extractors_ToWebviewWebviewControllerPtr(value: webview.WebviewController): KPointer;
@@ -241,6 +243,9 @@ export class ArkUIAniModule {
     native static _Animation_PageTransitionSetTranslate(value: TranslateOptions): void
     native static _Animation_PageTransitionSetScale(value: ScaleOptions): void
     native static _Animation_PageTransitionSetOpacity(value: number): void
+
+    native static _UiMaterial_ConstructMaterial(value: uiMaterial.MaterialOptions | undefined): long
+    native static _UiMaterial_DestroyMaterial(value: long): void
 
     native static _CreateViewStackProcessor(): KPointer
 

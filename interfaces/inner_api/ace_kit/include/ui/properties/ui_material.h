@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace {
 
-class UiMaterial : public AceType {
+class ACE_FORCE_EXPORT UiMaterial : public AceType {
     DECLARE_ACE_TYPE(UiMaterial, AceType);
 
 public:
     UiMaterial() = default;
-    virtual ~UiMaterial() = default;
+    ~UiMaterial() override = default;
     bool operator==(const UiMaterial& other) const
     {
         return type_  == other.type_;
@@ -40,7 +40,12 @@ public:
     {
         return type_;
     }
+    // create a copy of UiMaterial.
+    virtual RefPtr<UiMaterial> Copy() const;
 protected:
+    // copy member of self.
+    virtual void CopyTo(RefPtr<UiMaterial>& other) const;
+
     int32_t type_{0};
 };
 

@@ -137,6 +137,9 @@ namespace OHOS::Ace::Ani {
 class DragAction;
 class AniGlobalReference;
 }
+namespace OHOS::Ace {
+class UiMaterial;
+}
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
 enum class ArkUIDragBehavior { UNKNOWN, COPY, MOVE };
@@ -791,6 +794,11 @@ struct ArkUIAniCommonNodeAniModifier {
     void (*setCommonOptions)(ani_long node);
 };
 
+struct ArkUIAniVisualEffectModifier {
+    OHOS::Ace::UiMaterial* (*constructMaterial)(int32_t type);
+    void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -806,6 +814,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();

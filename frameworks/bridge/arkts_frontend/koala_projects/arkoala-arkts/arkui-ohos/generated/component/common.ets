@@ -36,6 +36,7 @@ import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
+import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentContent_serializer } from "./../ComponentContent"
@@ -47,6 +48,7 @@ import { CustomBuilder } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -4783,6 +4785,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiMaterial_Material_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -7897,6 +7911,9 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         throw new Error("Unimplemented method accessibilityFocusDrawLevel")
     }
+    systemMaterial(value: uiMaterial.Material | undefined): this {
+        throw new Error("Unimplemented method systemMaterial")
+    }
     customProperty(name: string, value: CustomProperty): this {
         throw new Error("Unimplemented method customProperty")
     }
@@ -8212,6 +8229,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
+    systemMaterial_value?: uiMaterial.Material | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -8704,6 +8722,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
+    systemMaterial(value: uiMaterial.Material | undefined): this {
+        return this
+    }
     customProperty(name: string, value: CustomProperty): this {
         return this
     }
@@ -8985,6 +9006,7 @@ export { UIContext } from "@ohos.arkui.UIContext"
 export { DrawContext } from "arkui.Graphics"
 export type VisualEffect = uiEffect.VisualEffect;
 export type Filter = uiEffect.Filter;
+export type SystemUiMaterial = uiMaterial.Material;
 export type Blender = uiEffect.Blender;
 export type PromptActionDialogController = promptAction.DialogController;
 export interface RectResult {
@@ -10549,6 +10571,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("accessibilityFocusDrawLevel")) {
             const value_casted = value as (FocusDrawLevel | undefined)
             this.getPeer()?.setAccessibilityFocusDrawLevelAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public systemMaterial(value: uiMaterial.Material | undefined): this {
+        if (this.checkPriority("systemMaterial")) {
+            const value_casted = value as (uiMaterial.Material | undefined)
+            this.getPeer()?.setSystemMaterialAttribute(value_casted)
             return this
         }
         return this

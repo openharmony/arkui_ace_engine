@@ -666,6 +666,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOpacity)
         },
         ani_native_function {
+            "_UiMaterial_ConstructMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConstructMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_DestroyMaterial",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
+        },
+        ani_native_function {
             "_CreateViewStackProcessor",
             ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
@@ -1441,6 +1451,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_ToUiEffectVisualEffectPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToUiMaterialMaterialPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiMaterialMaterialPtr)
         },
         ani_native_function {
             "_Extractors_ToDrawContextPtr",
