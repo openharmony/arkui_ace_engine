@@ -32,7 +32,6 @@ ace_unittest("accessibility_test_ng") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
-    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/accessibility/utils/accessibility_property_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "accessibility_manager_ng_test_ng.cpp",
@@ -124,7 +123,6 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar_item.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_video.cpp",
-    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/accessibility/utils/accessibility_property_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",

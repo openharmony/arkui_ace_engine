@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/multi_thread.h"
+#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -544,6 +545,10 @@ bool AccessibilityProperty::CheckHoverConsumeByComponent(const RefPtr<FrameNode>
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, true);
     CHECK_EQUAL_RETURN(NotConsumeByModal(node), true, false);
+
+    auto nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(node, nodeAccessibilityVisible);
+    CHECK_EQUAL_RETURN(nodeAccessibilityVisible, false, false);
     return accessibilityProperty->IsAccessibilityHoverConsume(point);
 }
 
