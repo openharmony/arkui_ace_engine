@@ -313,12 +313,12 @@ export class ArkUIAniModule {
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
     native static _ConditionScope_Mark_Dirty(ptr: KPointer): void;
 
-    native static _Common_vp2px(value:number, instanceId: KInt): number
-    native static _Common_px2vp(value:number, instanceId: KInt): number
-    native static _Common_fp2px(value:number, instanceId: KInt): number
-    native static _Common_px2fp(value:number, instanceId: KInt): number
-    native static _Common_lpx2px(value:number, instanceId: KInt): number
-    native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_vp2px(value:double, instanceId: KInt): double
+    native static _Common_px2vp(value:double, instanceId: KInt): double
+    native static _Common_fp2px(value:double, instanceId: KInt): double
+    native static _Common_px2fp(value:double, instanceId: KInt): double
+    native static _Common_lpx2px(value:double, instanceId: KInt): double
+    native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
     native static _Common_getWindowId(instanceId: KInt): int32 | undefined
     native static _Common_getWindowWidthBreakpoint(): KInt
