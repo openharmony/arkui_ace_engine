@@ -1211,6 +1211,25 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, Tes
 }
 
 /**
+ * @tc.name: SwipeRecognizerTypeTest001
+ * @tc.desc: Test SwipeRecognizerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTypeTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    swipeRecognizerPtr->AttachFrameNode(frameNode);
+    swipeRecognizerPtr->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
+    
+    GestureEvent info;
+    swipeRecognizerPtr->HandleReports(info, GestureCallbackType::END);
+    EXPECT_EQ(swipeRecognizerPtr->GetRecognizerType(), GestureTypeName::SWIPE_GESTURE);
+}
+
+/**
  * @tc.name: SwipeGestureLimitFingerTest001
  * @tc.desc: Test SwipeGesture CreateRecognizer function
  */
@@ -1319,22 +1338,5 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
     EXPECT_EQ(swipeRecognizer->priorityMask_, swipeGesture.gestureMask_);
     EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
-/**
- * @tc.name: SwipeRecognizerTypeTest001
- * @tc.desc: Test SwipeRecognizerType
- * @tc.type: FUNC
- */
-HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTypeTest001, TestSize.Level1)
-{
-    SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
-        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
-    swipeRecognizerPtr->AttachFrameNode(frameNode);
-    swipeRecognizerPtr->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
-    
-    GestureEvent info;
-    swipeRecognizerPtr->HandleReports(info, GestureCallbackType::END);
-    EXPECT_EQ(swipeRecognizerPtr->GetRecognizerType(), GestureTypeName::SWIPE_GESTURE);
-}
+
 } // namespace OHOS::Ace::NG
