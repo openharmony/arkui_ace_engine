@@ -3726,8 +3726,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/s
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
-[Koala mirror]
-frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
+[UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
 
 [window scene]
