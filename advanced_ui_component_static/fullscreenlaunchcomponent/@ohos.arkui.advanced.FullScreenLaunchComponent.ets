@@ -148,7 +148,7 @@ export struct FullScreenLaunchComponent {
         this.popUp();
         hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!');
       }
-    }).catch((err: BusinessError<void>|null): void => {
+    }).catch((err: Error): void => {
       hilog.info(0x0000, 'FullScreenLaunchComponent',
         'isEmbeddedOpenAllowed failed, code is ${err?.code}, message is ${err?.message}');
     });
