@@ -2942,6 +2942,8 @@ void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetOnGridItemDrop));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnItemDrop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetOnGridItemDrop));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportLazyLoadingEmptyBranch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetSupportLazyLoadingEmptyBranch));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "grid"), grid);
 }
 
