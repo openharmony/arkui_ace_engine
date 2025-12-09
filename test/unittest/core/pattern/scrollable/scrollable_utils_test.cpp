@@ -22,8 +22,7 @@
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/repeat_model_ng.h"
-#include "core/components_ng/syntax/repeat_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,8 +58,8 @@ public:
     RefPtr<FrameNode> CreateScrollable();
     RefPtr<FrameNode> CreateScrollableChild();
     RefPtr<UINode> CreateScrollableChildUINode();
-    RefPtr<LazyForEachNode> CreateLazyForEachNode();
-    RefPtr<RepeatNode> CreateRepeatNode();
+    RefPtr<LazyForEachNode> CreateLazyForEachNode(int32_t childCount = 0);
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatNode(int32_t childCount = 0);
 
 private:
     RefPtr<FrameNode> scrollable_;
@@ -120,9 +119,13 @@ RefPtr<FrameNode> ScrollableUtilsTest::CreateScrollableChild()
     return FrameNode::CreateFrameNode("ScrollableChild", -1, AceType::MakeRefPtr<Pattern>());
 }
 
-RefPtr<LazyForEachNode> ScrollableUtilsTest::CreateLazyForEachNode()
+RefPtr<LazyForEachNode> ScrollableUtilsTest::CreateLazyForEachNode(int32_t childCount)
 {
     auto lazyBuilder = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    for (int32_t i = 0; i < childCount; i++) {
+        auto childNode = CreateScrollableChildUINode();
+        lazyBuilder->cachedItems_[i] = LazyForEachChild("mock_id", childNode);
+    }
     return AceType::MakeRefPtr<LazyForEachNode>(-1, lazyBuilder);
 }
 
@@ -131,12 +134,22 @@ RefPtr<UINode> ScrollableUtilsTest::CreateScrollableChildUINode()
     return DummyNode::CreateNode("ScrollableChildUINode", -1);
 }
 
-RefPtr<RepeatNode> ScrollableUtilsTest::CreateRepeatNode()
+RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t childCount)
 {
-    RepeatModelNG repeatModel;
-    repeatModel.StartRender();
-
-    return AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
+        return std::make_pair(2, 0);
+    };
+    std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
+    std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
+    std::function<void()> onPurge = []() {};
+    std::function<void()> onUpdateDirty = []() {};
+    RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
+        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    node->arrLen_ = childCount;
+    node->totalCount_ = childCount;
+    return node;
 }
 
 /**
@@ -405,12 +418,13 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy001, TestSize.Level1)
 {
     auto scrollable = CreateScrollable();
     auto child = CreateScrollableChild();
+    int32_t childIndex = 0;
     scrollable->AddChild(child);
     /**
      * @tc.steps: step1. when scrollable node doesn't have lazy child.
      * @tc.expected: return false.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, false);
 }
 
@@ -424,13 +438,14 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy002, TestSize.Level1)
     auto scrollable = CreateScrollable();
     auto frameChild = CreateScrollableChild();
     auto lazyChild = CreateLazyForEachNode();
+    int32_t childIndex = 0;
     frameChild->AddChild(lazyChild);
     scrollable->AddChild(frameChild);
     /**
      * @tc.steps: step1. when scrollable have lazy child. But lazy child is under FrameNode child.
      * @tc.expected: return false.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, false);
 }
 
@@ -443,14 +458,15 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy003, TestSize.Level1)
 {
     auto scrollable = CreateScrollable();
     auto dummyNode = CreateScrollableChildUINode();
-    auto lazyChild = CreateLazyForEachNode();
+    auto lazyChild = CreateLazyForEachNode(10);
+    int32_t childIndex = 0;
     dummyNode->AddChild(lazyChild);
     scrollable->AddChild(dummyNode);
     /**
      * @tc.steps: step1. when scrollable have lazy child. But lazy child is under FrameNode child.
      * @tc.expected: return true.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, true);
 }
 
@@ -462,13 +478,18 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy003, TestSize.Level1)
 HWTEST_F(ScrollableUtilsTest, IsChildLazy004, TestSize.Level1)
 {
     auto scrollable = CreateScrollable();
-    auto lazyChild = CreateLazyForEachNode();
+    auto lazyChild = CreateLazyForEachNode(10);
+    int32_t childIndex = 0;
     scrollable->AddChild(lazyChild);
     /**
      * @tc.steps: step1. when scrollable have lazy child.
      * @tc.expected: return true.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
+    EXPECT_EQ(isLazy, true);
+
+    childIndex = 5;
+    isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, true);
 }
 
@@ -480,15 +501,24 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy004, TestSize.Level1)
 HWTEST_F(ScrollableUtilsTest, IsChildLazy005, TestSize.Level1)
 {
     auto scrollable = CreateScrollable();
-    auto repeatChild = CreateRepeatNode();
-    auto lazyChild = CreateLazyForEachNode();
+    auto repeatChild = CreateRepeatNode(10);
+    auto lazyChild = CreateLazyForEachNode(10);
+    int32_t childIndex = 0;
     scrollable->AddChild(repeatChild);
     scrollable->AddChild(lazyChild);
     /**
      * @tc.steps: step1. when scrollable have both repeat and lazy child.
      * @tc.expected: return true.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
+    EXPECT_EQ(isLazy, true);
+
+    childIndex = 9;
+    isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
+    EXPECT_EQ(isLazy, true);
+
+    childIndex = 19;
+    isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, true);
 }
 
@@ -501,12 +531,13 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy006, TestSize.Level1)
 {
     auto scrollable = CreateScrollable();
     auto repeatChild = CreateRepeatNode();
+    int32_t childIndex = 0;
     scrollable->AddChild(repeatChild);
     /**
      * @tc.steps: step1. when scrollable have repeat child.
      * @tc.expected: return true.
      */
-    bool isLazy = ScrollableUtils::IsChildLazy(scrollable);
-    EXPECT_EQ(isLazy, true);
+    bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
+    EXPECT_EQ(isLazy, false);
 }
 } // namespace OHOS::Ace::NG

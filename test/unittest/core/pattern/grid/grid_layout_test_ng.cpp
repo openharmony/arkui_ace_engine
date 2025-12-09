@@ -23,15 +23,35 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
-#include "core/components_ng/syntax/repeat_model_ng.h"
-#include "core/components_ng/syntax/repeat_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
-class GridLayoutTestNg : public GridTestNg {};
+class GridLayoutTestNg : public GridTestNg {
+public:
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatNode(int32_t childCount = 0);
+};
+
+RefPtr<RepeatVirtualScroll2Node> GridLayoutTestNg::CreateRepeatNode(int32_t childCount)
+{
+    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
+        return std::make_pair(2, 0);
+    };
+    std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
+    std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
+    std::function<void()> onPurge = []() {};
+    std::function<void()> onUpdateDirty = []() {};
+    RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
+        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    node->arrLen_ = childCount;
+    node->totalCount_ = childCount;
+    return node;
+}
 
 /**
  * @tc.name: AdaptiveLayout001
@@ -916,9 +936,7 @@ HWTEST_F(GridLayoutTestNg, GridLazyEmptyBranchTest001, TestSize.Level1)
     auto wrapper1 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
     EXPECT_EQ(wrapper1, nullptr);
 
-    RepeatModelNG repeatModel;
-    repeatModel.StartRender();
-    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto repeatNode = CreateRepeatNode(1);
     frameNode_->AddChild(repeatNode);
     auto wrapper2 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
     EXPECT_NE(wrapper2, nullptr);

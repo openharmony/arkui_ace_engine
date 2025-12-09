@@ -82,7 +82,7 @@ struct ScrollableUtils {
      *
      * @param frameNode The scrollable frame node.
      */
-    static bool IsChildLazy(const RefPtr<FrameNode>& frameNode);
+    static bool IsChildLazy(const RefPtr<FrameNode>& frameNode, int32_t index);
 };
 } // namespace OHOS::Ace::NG
 

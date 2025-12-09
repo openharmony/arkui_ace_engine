@@ -16,6 +16,7 @@
 
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -105,6 +106,10 @@ void RecycleItemsByIndex(
         node->RecycleItems(start, end);
     }
 }
+struct NodeRange {
+    RefPtr<UINode> node;
+    int32_t start = 0;
+};
 } // namespace
 
 void ScrollableUtils::DisableLazyForEachBuildCache(const RefPtr<UINode>& node)
@@ -221,22 +226,36 @@ bool ScrollableUtils::IsMainThreadBusy(const RefPtr<FrameNode>& frameNode)
     return pipelineContext->GetIsRequestFrame();
 }
 
-bool ScrollableUtils::IsChildLazy(const RefPtr<FrameNode>& frameNode)
+bool ScrollableUtils::IsChildLazy(const RefPtr<FrameNode>& frameNode, int32_t index)
 {
     CHECK_NULL_RETURN(frameNode, false);
-    std::stack<RefPtr<UINode>> nodesStack;
-    nodesStack.push(frameNode);
+    std::stack<NodeRange> nodesStack;
+    nodesStack.push({frameNode, 0});
+
+    auto isChildLazyOrRepeat = [](const RefPtr<UINode>& child) -> bool {
+        return AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScroll2Node>(child);
+    };
+    auto inRange = [](int32_t start, int32_t end, int32_t val) -> bool { return val >= start && val < end; };
     while (!nodesStack.empty()) {
         auto node = nodesStack.top();
         nodesStack.pop();
-        for (const auto& child : node->GetChildren()) {
+        int32_t start = node.start;
+        int32_t end = start;
+        for (const auto& child : node.node->GetChildren()) {
+            start = end;
+            end = start + child->FrameCount();
+            if (start > index) {
+                break;
+            }
             if (AceType::InstanceOf<FrameNode>(child)) {
                 continue;
             }
-            if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
-                return true;
+            if (inRange(start, end, index)) {
+                if (isChildLazyOrRepeat(child)) {
+                    return true;
+                }
+                nodesStack.push({child, start});
             }
-            nodesStack.push(child);
         }
     }
     return false;
