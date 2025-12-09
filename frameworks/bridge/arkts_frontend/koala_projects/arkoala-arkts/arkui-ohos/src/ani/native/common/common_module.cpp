@@ -68,10 +68,11 @@ CommonModuleCallbackAni::~CommonModuleCallbackAni()
     CHECK_NULL_VOID(func_);
     ani_env* env = nullptr;
     auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-        env->GlobalReference_Delete(func_);
+    if (attachCurrentThreadStatus == ANI_OK) {
         vm_->DetachCurrentThread();
     }
+    CHECK_NULL_VOID(env);
+    env->GlobalReference_Delete(func_);
 }
 
 void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
