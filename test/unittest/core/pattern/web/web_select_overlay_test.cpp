@@ -7090,6 +7090,110 @@ HWTEST_F(WebSelectOverlayTest, IsMouseInHandleRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedMenuShareForWeb
+ * @tc.desc: Test IsNeedMenuShareForWeb.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsNeedMenuShareForWeb, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    OHOS::Ace::SetReturnStatus("");
+    EXPECT_FALSE(overlay.IsNeedMenuShareForWeb());
+    OHOS::Ace::SetReturnStatus("       ");
+    EXPECT_FALSE(overlay.IsNeedMenuShareForWeb());
+    OHOS::Ace::SetReturnStatus("");
+#endif
+}
+
+/**
+ * @tc.name: IsNeedMenuShareForWeb_TrimInvariant
+ * @tc.desc: Verify ASCII whitespace trimming does not change share eligibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsNeedMenuShareForWeb_TrimInvariant, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    OHOS::Ace::SetReturnStatus(" \t\nabc\r\f\v ");
+    bool resTrim = overlay.IsNeedMenuShareForWeb();
+    OHOS::Ace::SetReturnStatus("abc");
+    bool resPlain = overlay.IsNeedMenuShareForWeb();
+    EXPECT_EQ(resTrim, resPlain);
+    OHOS::Ace::SetReturnStatus("");
+#endif
+}
+
+/**
+ * @tc.name: IsNeedMenuShareForWeb_MonotonicByLength
+ * @tc.desc: If longer text is eligible for share, shorter text must also be eligible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsNeedMenuShareForWeb_MonotonicByLength, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    OHOS::Ace::SetReturnStatus("aa");
+    bool resLong = overlay.IsNeedMenuShareForWeb();
+    OHOS::Ace::SetReturnStatus("a");
+    bool resShort = overlay.IsNeedMenuShareForWeb();
+    EXPECT_TRUE(!resLong || resShort);
+    OHOS::Ace::SetReturnStatus("");
+#endif
+}
+
+/**
+ * @tc.name: IsNeedMenuShareForWeb_WhitespaceVariants
+ * @tc.desc: Only ASCII whitespace text should be ineligible for sharing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsNeedMenuShareForWeb_WhitespaceVariants, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    OHOS::Ace::SetReturnStatus("\t\n\r\f\v    ");
+    EXPECT_FALSE(overlay.IsNeedMenuShareForWeb());
+    OHOS::Ace::SetReturnStatus("");
+#endif
+}
+
+/**
  * @tc.name: OnOverlayMouseEvent
  * @tc.desc: Test OnOverlayMouseEvent.
  * @tc.type: FUNC

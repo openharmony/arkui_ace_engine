@@ -20,6 +20,7 @@
 
 #include "base/utils/utils.h"
 #include "arkweb_utils.h"
+#include "core/common/share/text_share_adapter.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -1283,6 +1284,22 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     }
 }
 
+bool WebSelectOverlay::IsNeedMenuShareForWeb()
+{
+    const auto& shareContent = GetSelectedText();
+    std::string_view sv(shareContent);
+    // whitespace characters to trim (same as \s in regex for ASCII whitespace)
+    constexpr auto ws = " \t\n\r\f\v";
+    const auto start = sv.find_first_not_of(ws);
+    if (start == std::string_view::npos) {
+        return false;
+    }
+    const auto end = sv.find_last_not_of(ws);
+    const auto trimmedLen = end - start + 1;
+    const auto maxShareLength = static_cast<size_t>(TextShareAdapter::GetMaxTextShareLength());
+    return trimmedLen <= maxShareLength;
+}
+
 void WebSelectOverlay::OnHandleMarkInfoChange(
     const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {
@@ -1300,7 +1317,7 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         auto copyOption = delegate->GetCopyOptionMode();
         bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                           (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
-        if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShare())) {
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShareForWeb())) {
             info->menuInfo.showShare = !info->menuInfo.showShare && canCopyOut;
             manager->NotifyUpdateToolBar(true);
         }

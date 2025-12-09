@@ -104,6 +104,7 @@ public:
     void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
+    bool IsNeedMenuShareForWeb();
     // Check whether the handle status is valid.
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
