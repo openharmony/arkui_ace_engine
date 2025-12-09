@@ -8264,6 +8264,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     if (filter.IsFastFilter()) {
         return;
     }
+    json->PutExtAttr("enableSelectedDataDetector", selectDetectEnabled_ ? "true" : "false", filter);
     json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(GetPlaceHolder()).c_str(), filter);
     json->PutExtAttr("text", contentController_->GetTextValue().c_str(), filter);
     json->PutExtAttr("fontSize", GetFontSize().c_str(), filter);

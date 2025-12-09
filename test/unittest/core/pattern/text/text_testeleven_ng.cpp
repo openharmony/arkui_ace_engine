@@ -568,9 +568,13 @@ HWTEST_F(TextTestNg, TLVUtilReadPaddingProperty001, TestSize.Level1)
     TLVUtil::WriteUint8(buffer, TLV_ELLIPSISMODE_TAG);
     TLVUtil::WriteUint8(buffer, TLV_PADDINGPROPERTY_END_TAG);
     auto result = TLVUtil::ReadPaddingProperty(buffer, cursor);
+
     EXPECT_FALSE(result.left.has_value());
+
     EXPECT_FALSE(result.top.has_value());
+
     EXPECT_FALSE(result.bottom.has_value());
+
     EXPECT_FALSE(result.right.has_value());
 }
 
@@ -632,6 +636,7 @@ HWTEST_F(TextTestNg, SpanStringGetDefaultSpan003, TestSize.Level1)
 {
     auto span = SpanString::GetDefaultSpan(SpanType::BackgroundColor);
     EXPECT_NE(span, nullptr);
+
     auto backgroundColorSpan = AceType::DynamicCast<BackgroundColorSpan>(span);
     EXPECT_NE(backgroundColorSpan, nullptr);
 }
@@ -645,6 +650,7 @@ HWTEST_F(TextTestNg, SpanStringGetDefaultSpan004, TestSize.Level1)
 {
     auto span = SpanString::GetDefaultSpan(SpanType::Url);
     EXPECT_NE(span, nullptr);
+
     auto urlSpan = AceType::DynamicCast<UrlSpan>(span);
     EXPECT_NE(urlSpan, nullptr);
 }

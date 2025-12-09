@@ -4101,6 +4101,7 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         return;
     }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSelectedDataDetector", selectDetectEnabled_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig",
         dataDetectorAdapter_ ? dataDetectorAdapter_->textDetectConfigStr_.c_str() : "", filter);
     const auto& selector = GetTextSelector();
