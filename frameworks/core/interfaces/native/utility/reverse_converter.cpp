@@ -246,8 +246,8 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
 
 void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
 {
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+    dst.x = Converter::ArkValue<Ark_Float64>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
 void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
@@ -555,10 +555,10 @@ void AssignArkValue(Ark_RectResult& dst, const RectF& src)
 
 void AssignArkValue(Ark_Frame& dst, const RectF& src)
 {
-    dst.x = ArkValue<Ark_Number>(src.GetX());
-    dst.y = ArkValue<Ark_Number>(src.GetY());
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.x = ArkValue<Ark_Float64>(src.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.GetY());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 template<typename PeerType, typename AceSpan>
@@ -623,8 +623,8 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
-    dst.width = ArkValue<Ark_Float32>(src.Width());
-    dst.height = ArkValue<Ark_Float32>(src.Height());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)

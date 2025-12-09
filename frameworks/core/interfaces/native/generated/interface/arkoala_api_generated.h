@@ -402,6 +402,8 @@ typedef struct Ark_FormSize Ark_FormSize;
 typedef struct Opt_FormSize Opt_FormSize;
 typedef struct Ark_FractionStop Ark_FractionStop;
 typedef struct Opt_FractionStop Opt_FractionStop;
+typedef struct Ark_Frame Ark_Frame;
+typedef struct Opt_Frame Opt_Frame;
 typedef struct FrictionMotionPeer FrictionMotionPeer;
 typedef struct FrictionMotionPeer* Ark_FrictionMotion;
 typedef struct Opt_FrictionMotion Opt_FrictionMotion;
@@ -484,6 +486,8 @@ typedef struct Opt_LoadingProgressConfiguration Opt_LoadingProgressConfiguration
 typedef struct LongPressRecognizerPeer LongPressRecognizerPeer;
 typedef struct LongPressRecognizerPeer* Ark_LongPressRecognizer;
 typedef struct Opt_LongPressRecognizer Opt_LongPressRecognizer;
+typedef struct Ark_Matrix4 Ark_Matrix4;
+typedef struct Opt_Matrix4 Opt_Matrix4;
 typedef struct matrix4_Matrix4TransitPeer matrix4_Matrix4TransitPeer;
 typedef struct matrix4_Matrix4TransitPeer* Ark_matrix4_Matrix4Transit;
 typedef struct Opt_matrix4_Matrix4Transit Opt_matrix4_Matrix4Transit;
@@ -506,6 +510,12 @@ typedef struct Opt_NestedScrollOptions Opt_NestedScrollOptions;
 typedef struct NodeControllerPeer NodeControllerPeer;
 typedef struct NodeControllerPeer* Ark_NodeController;
 typedef struct Opt_NodeController Opt_NodeController;
+typedef struct Ark_NodeEdges_Arkui_Component_Enums_BorderStyle Ark_NodeEdges_Arkui_Component_Enums_BorderStyle;
+typedef struct Opt_NodeEdges_Arkui_Component_Enums_BorderStyle Opt_NodeEdges_Arkui_Component_Enums_BorderStyle;
+typedef struct Ark_NodeEdges_F64 Ark_NodeEdges_F64;
+typedef struct Opt_NodeEdges_F64 Opt_NodeEdges_F64;
+typedef struct Ark_NodeEdges_I32 Ark_NodeEdges_I32;
+typedef struct Opt_NodeEdges_I32 Opt_NodeEdges_I32;
 typedef struct Ark_NodeEdgeStyles Ark_NodeEdgeStyles;
 typedef struct Opt_NodeEdgeStyles Opt_NodeEdgeStyles;
 typedef struct Opt_Number Opt_Number;
@@ -1262,6 +1272,8 @@ typedef struct Callback_KeyEvent_Boolean Callback_KeyEvent_Boolean;
 typedef struct Opt_Callback_KeyEvent_Boolean Opt_Callback_KeyEvent_Boolean;
 typedef struct Callback_KeyEvent_Void Callback_KeyEvent_Void;
 typedef struct Opt_Callback_KeyEvent_Void Opt_Callback_KeyEvent_Void;
+typedef struct Callback_Long_Void Callback_Long_Void;
+typedef struct Opt_Callback_Long_Void Opt_Callback_Long_Void;
 typedef struct Callback_Map_String_RecordData_Void Callback_Map_String_RecordData_Void;
 typedef struct Opt_Callback_Map_String_RecordData_Void Opt_Callback_Map_String_RecordData_Void;
 typedef struct Callback_MarqueeState_Void Callback_MarqueeState_Void;
@@ -1914,6 +1926,8 @@ typedef struct ConfigurationPeer* Ark_Configuration;
 typedef struct Opt_Configuration Opt_Configuration;
 typedef struct Ark_Corners_Arkui_Graphics_Vector2 Ark_Corners_Arkui_Graphics_Vector2;
 typedef struct Opt_Corners_Arkui_Graphics_Vector2 Opt_Corners_Arkui_Graphics_Vector2;
+typedef struct Ark_Corners_F64 Ark_Corners_F64;
+typedef struct Opt_Corners_F64 Opt_Corners_F64;
 typedef struct Ark_CrownEvent Ark_CrownEvent;
 typedef struct Opt_CrownEvent Opt_CrownEvent;
 typedef struct Ark_CustomDialogControllerExternalOptions Ark_CustomDialogControllerExternalOptions;
@@ -1986,8 +2000,10 @@ typedef struct Ark_DropOptions Ark_DropOptions;
 typedef struct Opt_DropOptions Opt_DropOptions;
 typedef struct Ark_EdgeEffectOptions Ark_EdgeEffectOptions;
 typedef struct Opt_EdgeEffectOptions Opt_EdgeEffectOptions;
-typedef struct Ark_EdgeNumber Ark_EdgeNumber;
-typedef struct Opt_EdgeNumber Opt_EdgeNumber;
+typedef struct Ark_EdgeF64 Ark_EdgeF64;
+typedef struct Opt_EdgeF64 Opt_EdgeF64;
+typedef struct Ark_EdgeI32 Ark_EdgeI32;
+typedef struct Opt_EdgeI32 Opt_EdgeI32;
 typedef struct Ark_EdgeOutlineStyles Ark_EdgeOutlineStyles;
 typedef struct Opt_EdgeOutlineStyles Opt_EdgeOutlineStyles;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
@@ -2039,8 +2055,6 @@ typedef struct Ark_FormCallbackInfo Ark_FormCallbackInfo;
 typedef struct Opt_FormCallbackInfo Opt_FormCallbackInfo;
 typedef struct Ark_FormLinkOptions Ark_FormLinkOptions;
 typedef struct Opt_FormLinkOptions Opt_FormLinkOptions;
-typedef struct Ark_Frame Ark_Frame;
-typedef struct Opt_Frame Opt_Frame;
 typedef struct FrameNodePeer FrameNodePeer;
 typedef struct FrameNodePeer* Ark_FrameNode;
 typedef struct Opt_FrameNode Opt_FrameNode;
@@ -2142,8 +2156,6 @@ typedef struct Opt_MarqueeOptions Opt_MarqueeOptions;
 typedef struct Matrix2DPeer Matrix2DPeer;
 typedef struct Matrix2DPeer* Ark_Matrix2D;
 typedef struct Opt_Matrix2D Opt_Matrix2D;
-typedef struct Ark_Matrix4 Ark_Matrix4;
-typedef struct Opt_Matrix4 Opt_Matrix4;
 typedef struct Ark_Matrix4Result Ark_Matrix4Result;
 typedef struct Opt_Matrix4Result Opt_Matrix4Result;
 typedef struct MeasurablePeer MeasurablePeer;
@@ -7676,6 +7688,17 @@ typedef struct Opt_FractionStop {
     Ark_Tag tag;
     Ark_FractionStop value;
 } Opt_FractionStop;
+typedef struct Ark_Frame {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 width;
+    Ark_Float64 height;
+} Ark_Frame;
+typedef struct Opt_Frame {
+    Ark_Tag tag;
+    Ark_Frame value;
+} Opt_Frame;
 typedef struct Opt_FrictionMotion {
     Ark_Tag tag;
     Ark_FrictionMotion value;
@@ -7838,6 +7861,29 @@ typedef struct Opt_LongPressRecognizer {
     Ark_Tag tag;
     Ark_LongPressRecognizer value;
 } Opt_LongPressRecognizer;
+typedef struct Ark_Matrix4 {
+    /* kind: Interface */
+    Ark_Float64 value0;
+    Ark_Float64 value1;
+    Ark_Float64 value2;
+    Ark_Float64 value3;
+    Ark_Float64 value4;
+    Ark_Float64 value5;
+    Ark_Float64 value6;
+    Ark_Float64 value7;
+    Ark_Float64 value8;
+    Ark_Float64 value9;
+    Ark_Float64 value10;
+    Ark_Float64 value11;
+    Ark_Float64 value12;
+    Ark_Float64 value13;
+    Ark_Float64 value14;
+    Ark_Float64 value15;
+} Ark_Matrix4;
+typedef struct Opt_Matrix4 {
+    Ark_Tag tag;
+    Ark_Matrix4 value;
+} Opt_Matrix4;
 typedef struct Opt_matrix4_Matrix4Transit {
     Ark_Tag tag;
     Ark_matrix4_Matrix4Transit value;
@@ -7898,6 +7944,39 @@ typedef struct Opt_NodeController {
     Ark_Tag tag;
     Ark_NodeController value;
 } Opt_NodeController;
+typedef struct Ark_NodeEdges_Arkui_Component_Enums_BorderStyle {
+    /* kind: Interface */
+    Ark_BorderStyle left;
+    Ark_BorderStyle right;
+    Ark_BorderStyle top;
+    Ark_BorderStyle bottom;
+} Ark_NodeEdges_Arkui_Component_Enums_BorderStyle;
+typedef struct Opt_NodeEdges_Arkui_Component_Enums_BorderStyle {
+    Ark_Tag tag;
+    Ark_NodeEdges_Arkui_Component_Enums_BorderStyle value;
+} Opt_NodeEdges_Arkui_Component_Enums_BorderStyle;
+typedef struct Ark_NodeEdges_F64 {
+    /* kind: Interface */
+    Ark_Float64 left;
+    Ark_Float64 right;
+    Ark_Float64 top;
+    Ark_Float64 bottom;
+} Ark_NodeEdges_F64;
+typedef struct Opt_NodeEdges_F64 {
+    Ark_Tag tag;
+    Ark_NodeEdges_F64 value;
+} Opt_NodeEdges_F64;
+typedef struct Ark_NodeEdges_I32 {
+    /* kind: Interface */
+    Ark_Int32 left;
+    Ark_Int32 right;
+    Ark_Int32 top;
+    Ark_Int32 bottom;
+} Ark_NodeEdges_I32;
+typedef struct Opt_NodeEdges_I32 {
+    Ark_Tag tag;
+    Ark_NodeEdges_I32 value;
+} Opt_NodeEdges_I32;
 typedef struct Ark_NodeEdgeStyles {
     /* kind: Interface */
     Ark_BorderStyle top;
@@ -8272,8 +8351,8 @@ typedef struct Opt_SearchController {
 } Opt_SearchController;
 typedef struct Ark_Size {
     /* kind: Interface */
-    Ark_Float32 width;
-    Ark_Float32 height;
+    Ark_Float64 width;
+    Ark_Float64 height;
 } Ark_Size;
 typedef struct Opt_Size {
     Ark_Tag tag;
@@ -9104,8 +9183,8 @@ typedef struct Opt_Vec4 {
 } Opt_Vec4;
 typedef struct Ark_Vector2 {
     /* kind: Interface */
-    Ark_Number x;
-    Ark_Number y;
+    Ark_Float64 x;
+    Ark_Float64 y;
 } Ark_Vector2;
 typedef struct Opt_Vector2 {
     Ark_Tag tag;
@@ -9113,9 +9192,9 @@ typedef struct Opt_Vector2 {
 } Opt_Vector2;
 typedef struct Ark_Vector3 {
     /* kind: Interface */
-    Ark_Number x;
-    Ark_Number y;
-    Ark_Number z;
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 z;
 } Ark_Vector3;
 typedef struct Opt_Vector3 {
     Ark_Tag tag;
@@ -10850,6 +10929,16 @@ typedef struct Opt_Callback_KeyEvent_Void {
     Ark_Tag tag;
     Callback_KeyEvent_Void value;
 } Opt_Callback_KeyEvent_Void;
+typedef struct Callback_Long_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int64 value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value);
+} Callback_Long_Void;
+typedef struct Opt_Callback_Long_Void {
+    Ark_Tag tag;
+    Callback_Long_Void value;
+} Opt_Callback_Long_Void;
 typedef struct Callback_Map_String_RecordData_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13848,9 +13937,9 @@ typedef struct Opt_ChildrenMainSize {
 } Opt_ChildrenMainSize;
 typedef struct Ark_Circle {
     /* kind: Interface */
-    Ark_Number centerX;
-    Ark_Number centerY;
-    Ark_Number radius;
+    Ark_Float64 centerX;
+    Ark_Float64 centerY;
+    Ark_Float64 radius;
 } Ark_Circle;
 typedef struct Opt_Circle {
     Ark_Tag tag;
@@ -13896,11 +13985,11 @@ typedef struct Opt_ColorFilterType {
 } Opt_ColorFilterType;
 typedef struct Ark_ColorMetrics {
     /* kind: Interface */
-    Ark_Number red_;
-    Ark_Number green_;
-    Ark_Number blue_;
-    Ark_Number alpha_;
-    Ark_Number resourceId_;
+    Ark_Int32 red_;
+    Ark_Int32 green_;
+    Ark_Int32 blue_;
+    Ark_Int32 alpha_;
+    Ark_Int32 resourceId_;
 } Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics {
     Ark_Tag tag;
@@ -13985,6 +14074,17 @@ typedef struct Opt_Corners_Arkui_Graphics_Vector2 {
     Ark_Tag tag;
     Ark_Corners_Arkui_Graphics_Vector2 value;
 } Opt_Corners_Arkui_Graphics_Vector2;
+typedef struct Ark_Corners_F64 {
+    /* kind: Interface */
+    Ark_Float64 topLeft;
+    Ark_Float64 topRight;
+    Ark_Float64 bottomLeft;
+    Ark_Float64 bottomRight;
+} Ark_Corners_F64;
+typedef struct Opt_Corners_F64 {
+    Ark_Tag tag;
+    Ark_Corners_F64 value;
+} Opt_Corners_F64;
 typedef struct Ark_CrownEvent {
     /* kind: Interface */
     Ark_Int64 timestamp;
@@ -14250,17 +14350,28 @@ typedef struct Opt_EdgeEffectOptions {
     Ark_Tag tag;
     Ark_EdgeEffectOptions value;
 } Opt_EdgeEffectOptions;
-typedef struct Ark_EdgeNumber {
+typedef struct Ark_EdgeF64 {
     /* kind: Interface */
-    Ark_Number top;
-    Ark_Number right;
-    Ark_Number bottom;
-    Ark_Number left;
-} Ark_EdgeNumber;
-typedef struct Opt_EdgeNumber {
+    Ark_Float64 top;
+    Ark_Float64 right;
+    Ark_Float64 bottom;
+    Ark_Float64 left;
+} Ark_EdgeF64;
+typedef struct Opt_EdgeF64 {
     Ark_Tag tag;
-    Ark_EdgeNumber value;
-} Opt_EdgeNumber;
+    Ark_EdgeF64 value;
+} Opt_EdgeF64;
+typedef struct Ark_EdgeI32 {
+    /* kind: Interface */
+    Ark_Int32 top;
+    Ark_Int32 right;
+    Ark_Int32 bottom;
+    Ark_Int32 left;
+} Ark_EdgeI32;
+typedef struct Opt_EdgeI32 {
+    Ark_Tag tag;
+    Ark_EdgeI32 value;
+} Opt_EdgeI32;
 typedef struct Ark_EdgeOutlineStyles {
     /* kind: Interface */
     Opt_OutlineStyle top;
@@ -14518,17 +14629,6 @@ typedef struct Opt_FormLinkOptions {
     Ark_Tag tag;
     Ark_FormLinkOptions value;
 } Opt_FormLinkOptions;
-typedef struct Ark_Frame {
-    /* kind: Interface */
-    Ark_Number x;
-    Ark_Number y;
-    Ark_Number width;
-    Ark_Number height;
-} Ark_Frame;
-typedef struct Opt_Frame {
-    Ark_Tag tag;
-    Ark_Frame value;
-} Opt_Frame;
 typedef struct Opt_FrameNode {
     Ark_Tag tag;
     Ark_FrameNode value;
@@ -14978,29 +15078,6 @@ typedef struct Opt_Matrix2D {
     Ark_Tag tag;
     Ark_Matrix2D value;
 } Opt_Matrix2D;
-typedef struct Ark_Matrix4 {
-    /* kind: Interface */
-    Ark_Number value0;
-    Ark_Number value1;
-    Ark_Number value2;
-    Ark_Number value3;
-    Ark_Number value4;
-    Ark_Number value5;
-    Ark_Number value6;
-    Ark_Number value7;
-    Ark_Number value8;
-    Ark_Number value9;
-    Ark_Number value10;
-    Ark_Number value11;
-    Ark_Number value12;
-    Ark_Number value13;
-    Ark_Number value14;
-    Ark_Number value15;
-} Ark_Matrix4;
-typedef struct Opt_Matrix4 {
-    Ark_Tag tag;
-    Ark_Matrix4 value;
-} Opt_Matrix4;
 typedef struct Ark_Matrix4Result {
     /* kind: Interface */
     Ark_Number value0;
@@ -27126,7 +27203,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                         Ark_FrameNode child);
     void (*clearChildren)(Ark_FrameNode peer);
     Ark_NativePointer (*getChild)(Ark_FrameNode peer,
-                                  const Ark_Number* index,
+                                  Ark_Int32 index,
                                   const Ark_Number* expandMode);
     Ark_NativePointer (*getFirstChild)(Ark_FrameNode peer);
     Ark_NativePointer (*getNextSibling)(Ark_FrameNode peer);
@@ -27141,7 +27218,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_String (*getId)(Ark_FrameNode peer);
     Ark_Int32 (*getUniqueId)(Ark_FrameNode peer);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
-    Ark_Number (*getOpacity)(Ark_FrameNode peer);
+    Ark_Float64 (*getOpacity)(Ark_FrameNode peer);
     Ark_Boolean (*isVisible)(Ark_FrameNode peer);
     Ark_Boolean (*isClipToFrame)(Ark_FrameNode peer);
     Ark_Boolean (*isAttached)(Ark_FrameNode peer);
@@ -27172,9 +27249,9 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Number (*getIdByFrameNode)(Ark_NativePointer node);
     Ark_Int32 (*moveTo)(Ark_FrameNode peer,
                         Ark_FrameNode targetParent,
-                        const Ark_Number* index);
-    Ark_Number (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
-    Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
+                        Ark_Int32 index);
+    Ark_Int32 (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
+    Ark_Int32 (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_NativePointer (*getFrameNodeById)(const Ark_Number* id);
     Ark_NativePointer (*getFrameNodeByUniqueId)(Ark_Int32 id);
@@ -27490,7 +27567,7 @@ typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
 typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
-    void (*freezeUINode1)(const Ark_Number* id,
+    void (*freezeUINode1)(Ark_Int32 id,
                           Ark_Boolean isFrozen);
     Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
                                     Ark_KeyEvent event);
@@ -28394,11 +28471,11 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     Ark_NativePointer (*getDestroy)();
     void (*destroyPeer)(Ark_RenderNode peer);
     void (*setBackgroundColor)(Ark_RenderNode peer,
-                               const Ark_Number* backgroundColor);
+                               Ark_Int32 backgroundColor);
     void (*setClipToFrame)(Ark_RenderNode peer,
                            Ark_Boolean clipToFrame);
     void (*setOpacity)(Ark_RenderNode peer,
-                       const Ark_Number* opacity);
+                       Ark_Float64 opacity);
     void (*setSize)(Ark_RenderNode peer,
                     const Ark_Size* size,
                     Ark_Int32 unitValue);
@@ -28417,25 +28494,25 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     void (*setTransform)(Ark_RenderNode peer,
                          const Ark_Matrix4* transform);
     void (*setShadowColor)(Ark_RenderNode peer,
-                           const Ark_Number* shadowColor);
+                           Ark_Int32 shadowColor);
     void (*setShadowOffset)(Ark_RenderNode peer,
                             const Ark_Vector2* shadowOffset,
                             Ark_Int32 unitValue);
     void (*setLabel)(Ark_RenderNode peer,
                      const Ark_String* label);
     void (*setShadowAlpha)(Ark_RenderNode peer,
-                           const Ark_Number* shadowAlpha);
+                           Ark_Float64 shadowAlpha);
     void (*setShadowElevation)(Ark_RenderNode peer,
-                               const Ark_Number* shadowElevation);
+                               Ark_Float64 shadowElevation);
     void (*setShadowRadius)(Ark_RenderNode peer,
-                            const Ark_Number* shadowRadius);
+                            Ark_Float64 shadowRadius);
     void (*setBorderStyle)(Ark_RenderNode peer,
                            const Ark_NodeEdgeStyles* borderStyle);
     void (*setBorderWidth)(Ark_RenderNode peer,
-                           const Ark_EdgeNumber* borderWidth,
+                           const Ark_EdgeF64* borderWidth,
                            Ark_Int32 unitValue);
     void (*setBorderColor)(Ark_RenderNode peer,
-                           const Ark_EdgeNumber* borderColor);
+                           const Ark_EdgeI32* borderColor);
     void (*setBorderRadius)(Ark_RenderNode peer,
                             const Ark_BorderRadiuses_graphics* borderRadius,
                             Ark_Int32 unitValue);
@@ -29000,9 +29077,9 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
                                const Ark_String* moduleName,
                                const Array_String* params);
     void (*resourceManagerReset)();
-    void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
-                             const Callback_Number_Void* onIdleCallback,
-                             const Ark_Number* delayTime);
+    void (*setFrameCallback)(const Callback_Long_Void* onFrameCallback,
+                             const Callback_Long_Void* onIdleCallback,
+                             Ark_Int64 delayTime);
     Array_Number (*colorMetricsResourceColor)(const Ark_Resource* color);
     Array_Number (*blendColorByColorMetrics)(const Ark_Number* color,
                                              const Ark_Number* overlayColor);

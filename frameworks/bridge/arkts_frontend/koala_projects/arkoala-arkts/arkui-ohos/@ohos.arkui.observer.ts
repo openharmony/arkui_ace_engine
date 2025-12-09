@@ -7,7 +7,7 @@ import { int32 } from "@koalaui/common"
 
 declare namespace uiObserver {
     export class DensityInfo {
-        density: number;
+        density: double;
     }
     type Callback<T,V = void> = (data: T) => V
       

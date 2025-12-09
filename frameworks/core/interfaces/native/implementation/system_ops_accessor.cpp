@@ -78,23 +78,22 @@ void ResourceManagerResetImpl()
 {
     ResourceManager::GetInstance().Reset();
 }
-void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
-                          const Callback_Number_Void* onIdleCallback,
-                          const Ark_Number* delayTime)
+void SetFrameCallbackImpl(const Callback_Long_Void* onFrameCallback,
+                          const Callback_Long_Void* onIdleCallback,
+                          Ark_Int64 delayTime)
 {
     CHECK_NULL_VOID(onFrameCallback);
     CHECK_NULL_VOID(onIdleCallback);
-    CHECK_NULL_VOID(delayTime);
-    auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
+    auto delayTimeInt = Converter::Convert<int64_t>(delayTime);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto onFrameCallbackFunc = [callback = CallbackHelper(*onFrameCallback)](double delayTimeInt) -> void {
-        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+        auto delayTime = Converter::ArkValue<Ark_Int64>(delayTimeInt);
         callback.Invoke(delayTime);
     };
     auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](uint64_t nanoTimestamp,
         uint32_t frameCount) -> void {
-        auto delayTime = Converter::ArkValue<Ark_Number>(nanoTimestamp);
+        auto delayTime = Converter::ArkValue<Ark_Int64>(nanoTimestamp);
         callback.Invoke(delayTime);
     };
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);

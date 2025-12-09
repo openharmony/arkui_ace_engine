@@ -1643,8 +1643,8 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return animatorRet;
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
@@ -1666,22 +1666,22 @@ export class UIContextImpl extends UIContext {
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
         return ret as HeightBreakpoint;
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
          return ArkUIAniModule._Common_px2vp(value, this.instanceId_);
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
          return ArkUIAniModule._Common_fp2px(value, this.instanceId_);
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
          return ArkUIAniModule._Common_px2fp(value, this.instanceId_);
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
           return ArkUIAniModule._Common_lpx2px(value, this.instanceId_);
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
@@ -1705,7 +1705,7 @@ export class UIContextImpl extends UIContext {
         this.setFrameCallback(onFrameFunc, onIdleFunc, 0)
         ArkUIAniModule._Common_Restore_InstanceId()
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         const onFrameFunc = frameCallback.onFrame
         const onIdleFunc = frameCallback.onIdle
@@ -1795,7 +1795,7 @@ export class UIContextImpl extends UIContext {
     }
 
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         IUIContext.freezeUINode(id, isFrozen);
         ArkUIAniModule._Common_Restore_InstanceId()

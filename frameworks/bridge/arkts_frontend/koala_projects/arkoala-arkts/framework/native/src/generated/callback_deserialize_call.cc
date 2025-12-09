@@ -1446,6 +1446,24 @@ void deserializeAndCallSyncCallback_KeyEvent_Void(Ark_VMContext vmContext, KSeri
     Ark_KeyEvent event = static_cast<Ark_KeyEvent>(KeyEvent_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, event);
 }
+void deserializeAndCallCallback_Long_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Long_Void))));
+    thisDeserializer.readPointer();
+    Ark_Int64 value = thisDeserializer.readInt64();
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_Long_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Long_Void))));
+    Ark_Int64 value = thisDeserializer.readInt64();
+    callSyncMethod(vmContext, resourceId, value);
+}
 void deserializeAndCallCallback_Map_String_RecordData_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7212,6 +7230,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisArray, thisLength);
         case Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisArray, thisLength);
         case Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Long_Void: return deserializeAndCallCallback_Long_Void(thisArray, thisLength);
         case Kind_Callback_Map_String_RecordData_Void: return deserializeAndCallCallback_Map_String_RecordData_Void(thisArray, thisLength);
         case Kind_Callback_MarqueeState_Void: return deserializeAndCallCallback_MarqueeState_Void(thisArray, thisLength);
         case Kind_Callback_MouseEvent_Void: return deserializeAndCallCallback_MouseEvent_Void(thisArray, thisLength);
@@ -7539,6 +7558,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_ItemDragInfo_Void: return deserializeAndCallSyncCallback_ItemDragInfo_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_KeyEvent_Boolean: return deserializeAndCallSyncCallback_KeyEvent_Boolean(vmContext, thisArray, thisLength);
         case Kind_Callback_KeyEvent_Void: return deserializeAndCallSyncCallback_KeyEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Long_Void: return deserializeAndCallSyncCallback_Long_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Map_String_RecordData_Void: return deserializeAndCallSyncCallback_Map_String_RecordData_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_MarqueeState_Void: return deserializeAndCallSyncCallback_MarqueeState_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_MouseEvent_Void: return deserializeAndCallSyncCallback_MouseEvent_Void(vmContext, thisArray, thisLength);

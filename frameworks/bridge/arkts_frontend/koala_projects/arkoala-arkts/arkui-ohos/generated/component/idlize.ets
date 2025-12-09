@@ -1430,7 +1430,7 @@ export class FrameNodeExtender {
     static clearChildren_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_clearChildren(extractors.toFrameNodePtr(peer))
     }
-    static getChild_serialize(peer: FrameNode, index: number, expandMode: number): KPointer {
+    static getChild_serialize(peer: FrameNode, index: int32, expandMode: number): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChild(extractors.toFrameNodePtr(peer), index, expandMode)
         return retval
     }
@@ -1493,7 +1493,7 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(extractors.toFrameNodePtr(peer))
         return retval
     }
-    static getOpacity_serialize(peer: FrameNode): number {
+    static getOpacity_serialize(peer: FrameNode): double {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getOpacity(extractors.toFrameNodePtr(peer))
         return retval
     }
@@ -1610,15 +1610,15 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNode(node)
         return retval
     }
-    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: number): int32 {
+    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: int32): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(targetParent), index)
         return retval
     }
-    static getFirstChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+    static getFirstChildIndexWithoutExpand_serialize(peer: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
         return retval
     }
-    static getLastChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+    static getLastChildIndexWithoutExpand_serialize(peer: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLastChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
         return retval
     }
@@ -1777,9 +1777,9 @@ export class FrameNodeExtender {
         FrameNodeExtender.clearChildren_serialize(peer_casted)
         return
     }
-    public static getChild(peer: FrameNode, index: number, expandMode: number): KPointer {
+    public static getChild(peer: FrameNode, index: int32, expandMode: number): KPointer {
         const peer_casted = peer as (FrameNode)
-        const index_casted = index as (number)
+        const index_casted = index as (int32)
         const expandMode_casted = expandMode as (number)
         return FrameNodeExtender.getChild_serialize(peer_casted, index_casted, expandMode_casted)
     }
@@ -1836,7 +1836,7 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getNodeType_serialize(peer_casted)
     }
-    public static getOpacity(peer: FrameNode): number {
+    public static getOpacity(peer: FrameNode): double {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getOpacity_serialize(peer_casted)
     }
@@ -1944,17 +1944,17 @@ export class FrameNodeExtender {
         const node_casted = node as (KPointer)
         return FrameNodeExtender.getIdByFrameNode_serialize(node_casted)
     }
-    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: number): int32 {
+    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: int32): int32 {
         const peer_casted = peer as (FrameNode)
         const targetParent_casted = targetParent as (FrameNode)
-        const index_casted = index as (number)
+        const index_casted = index as (int32)
         return FrameNodeExtender.moveTo_serialize(peer_casted, targetParent_casted, index_casted)
     }
-    public static getFirstChildIndexWithoutExpand(peer: FrameNode): number {
+    public static getFirstChildIndexWithoutExpand(peer: FrameNode): int32 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getFirstChildIndexWithoutExpand_serialize(peer_casted)
     }
-    public static getLastChildIndexWithoutExpand(peer: FrameNode): number {
+    public static getLastChildIndexWithoutExpand(peer: FrameNode): int32 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getLastChildIndexWithoutExpand_serialize(peer_casted)
     }
@@ -2446,7 +2446,7 @@ export class IUIContext {
     static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0)
     }
-    static freezeUINode1_serialize(id: number, isFrozen: boolean): void {
+    static freezeUINode1_serialize(id: int32, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode1(id, isFrozen ? 1 : 0)
     }
     static dispatchKeyEvent_serialize(node: number | string, event: KeyEvent): boolean {
@@ -2525,8 +2525,8 @@ export class IUIContext {
         IUIContext.freezeUINode0_serialize(id_casted, isFrozen_casted)
         return
     }
-    public static freezeUINode(id: number, isFrozen: boolean): void {
-        const id_casted = id as (number)
+    public static freezeUINode(id: int32, isFrozen: boolean): void {
+        const id_casted = id as (int32)
         const isFrozen_casted = isFrozen as (boolean)
         IUIContext.freezeUINode1_serialize(id_casted, isFrozen_casted)
         return
@@ -3217,13 +3217,13 @@ export class RenderNodeExtender {
     static destroyPeer_serialize(peer: RenderNode): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_destroyPeer(extractors.toRenderNodePtr(peer))
     }
-    static setBackgroundColor_serialize(peer: RenderNode, backgroundColor: number): void {
+    static setBackgroundColor_serialize(peer: RenderNode, backgroundColor: int32): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setBackgroundColor(extractors.toRenderNodePtr(peer), backgroundColor)
     }
     static setClipToFrame_serialize(peer: RenderNode, clipToFrame: boolean): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setClipToFrame(extractors.toRenderNodePtr(peer), clipToFrame ? 1 : 0)
     }
-    static setOpacity_serialize(peer: RenderNode, opacity: number): void {
+    static setOpacity_serialize(peer: RenderNode, opacity: double): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setOpacity(extractors.toRenderNodePtr(peer), opacity)
     }
     static setSize_serialize(peer: RenderNode, size: Size, unitValue: int32): void {
@@ -3265,41 +3265,41 @@ export class RenderNodeExtender {
     static setTransform_serialize(peer: RenderNode, transform: Matrix4): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         const transform_0  = transform[0]
-        thisSerializer.writeNumber(transform_0)
+        thisSerializer.writeFloat64(transform_0)
         const transform_1  = transform[1]
-        thisSerializer.writeNumber(transform_1)
+        thisSerializer.writeFloat64(transform_1)
         const transform_2  = transform[2]
-        thisSerializer.writeNumber(transform_2)
+        thisSerializer.writeFloat64(transform_2)
         const transform_3  = transform[3]
-        thisSerializer.writeNumber(transform_3)
+        thisSerializer.writeFloat64(transform_3)
         const transform_4  = transform[4]
-        thisSerializer.writeNumber(transform_4)
+        thisSerializer.writeFloat64(transform_4)
         const transform_5  = transform[5]
-        thisSerializer.writeNumber(transform_5)
+        thisSerializer.writeFloat64(transform_5)
         const transform_6  = transform[6]
-        thisSerializer.writeNumber(transform_6)
+        thisSerializer.writeFloat64(transform_6)
         const transform_7  = transform[7]
-        thisSerializer.writeNumber(transform_7)
+        thisSerializer.writeFloat64(transform_7)
         const transform_8  = transform[8]
-        thisSerializer.writeNumber(transform_8)
+        thisSerializer.writeFloat64(transform_8)
         const transform_9  = transform[9]
-        thisSerializer.writeNumber(transform_9)
+        thisSerializer.writeFloat64(transform_9)
         const transform_10  = transform[10]
-        thisSerializer.writeNumber(transform_10)
+        thisSerializer.writeFloat64(transform_10)
         const transform_11  = transform[11]
-        thisSerializer.writeNumber(transform_11)
+        thisSerializer.writeFloat64(transform_11)
         const transform_12  = transform[12]
-        thisSerializer.writeNumber(transform_12)
+        thisSerializer.writeFloat64(transform_12)
         const transform_13  = transform[13]
-        thisSerializer.writeNumber(transform_13)
+        thisSerializer.writeFloat64(transform_13)
         const transform_14  = transform[14]
-        thisSerializer.writeNumber(transform_14)
+        thisSerializer.writeFloat64(transform_14)
         const transform_15  = transform[15]
-        thisSerializer.writeNumber(transform_15)
+        thisSerializer.writeFloat64(transform_15)
         ArkUIGeneratedNativeModule._RenderNodeExtender_setTransform(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static setShadowColor_serialize(peer: RenderNode, shadowColor: number): void {
+    static setShadowColor_serialize(peer: RenderNode, shadowColor: int32): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowColor(extractors.toRenderNodePtr(peer), shadowColor)
     }
     static setShadowOffset_serialize(peer: RenderNode, shadowOffset: Vector2, unitValue: int32): void {
@@ -3311,13 +3311,13 @@ export class RenderNodeExtender {
     static setLabel_serialize(peer: RenderNode, label: string): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setLabel(extractors.toRenderNodePtr(peer), label)
     }
-    static setShadowAlpha_serialize(peer: RenderNode, shadowAlpha: number): void {
+    static setShadowAlpha_serialize(peer: RenderNode, shadowAlpha: double): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowAlpha(extractors.toRenderNodePtr(peer), shadowAlpha)
     }
-    static setShadowElevation_serialize(peer: RenderNode, shadowElevation: number): void {
+    static setShadowElevation_serialize(peer: RenderNode, shadowElevation: double): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowElevation(extractors.toRenderNodePtr(peer), shadowElevation)
     }
-    static setShadowRadius_serialize(peer: RenderNode, shadowRadius: number): void {
+    static setShadowRadius_serialize(peer: RenderNode, shadowRadius: double): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setShadowRadius(extractors.toRenderNodePtr(peer), shadowRadius)
     }
     static setBorderStyle_serialize(peer: RenderNode, borderStyle: NodeEdgeStyles): void {
@@ -3326,15 +3326,15 @@ export class RenderNodeExtender {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderStyle(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static setBorderWidth_serialize(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+    static setBorderWidth_serialize(peer: RenderNode, borderWidth: EdgeF64, unitValue: int32): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        EdgeNumber_serializer.write(thisSerializer, borderWidth)
+        EdgeF64_serializer.write(thisSerializer, borderWidth)
         ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderWidth(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length(), unitValue)
         thisSerializer.release()
     }
-    static setBorderColor_serialize(peer: RenderNode, borderColor: EdgeNumber): void {
+    static setBorderColor_serialize(peer: RenderNode, borderColor: EdgeI32): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        EdgeNumber_serializer.write(thisSerializer, borderColor)
+        EdgeI32_serializer.write(thisSerializer, borderColor)
         ArkUIGeneratedNativeModule._RenderNodeExtender_setBorderColor(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -3440,9 +3440,9 @@ export class RenderNodeExtender {
         RenderNodeExtender.destroyPeer_serialize(peer_casted)
         return
     }
-    public static setBackgroundColor(peer: RenderNode, backgroundColor: number): void {
+    public static setBackgroundColor(peer: RenderNode, backgroundColor: int32): void {
         const peer_casted = peer as (RenderNode)
-        const backgroundColor_casted = backgroundColor as (number)
+        const backgroundColor_casted = backgroundColor as (int32)
         RenderNodeExtender.setBackgroundColor_serialize(peer_casted, backgroundColor_casted)
         return
     }
@@ -3452,9 +3452,9 @@ export class RenderNodeExtender {
         RenderNodeExtender.setClipToFrame_serialize(peer_casted, clipToFrame_casted)
         return
     }
-    public static setOpacity(peer: RenderNode, opacity: number): void {
+    public static setOpacity(peer: RenderNode, opacity: double): void {
         const peer_casted = peer as (RenderNode)
-        const opacity_casted = opacity as (number)
+        const opacity_casted = opacity as (double)
         RenderNodeExtender.setOpacity_serialize(peer_casted, opacity_casted)
         return
     }
@@ -3503,9 +3503,9 @@ export class RenderNodeExtender {
         RenderNodeExtender.setTransform_serialize(peer_casted, transform_casted)
         return
     }
-    public static setShadowColor(peer: RenderNode, shadowColor: number): void {
+    public static setShadowColor(peer: RenderNode, shadowColor: int32): void {
         const peer_casted = peer as (RenderNode)
-        const shadowColor_casted = shadowColor as (number)
+        const shadowColor_casted = shadowColor as (int32)
         RenderNodeExtender.setShadowColor_serialize(peer_casted, shadowColor_casted)
         return
     }
@@ -3522,21 +3522,21 @@ export class RenderNodeExtender {
         RenderNodeExtender.setLabel_serialize(peer_casted, label_casted)
         return
     }
-    public static setShadowAlpha(peer: RenderNode, shadowAlpha: number): void {
+    public static setShadowAlpha(peer: RenderNode, shadowAlpha: double): void {
         const peer_casted = peer as (RenderNode)
-        const shadowAlpha_casted = shadowAlpha as (number)
+        const shadowAlpha_casted = shadowAlpha as (double)
         RenderNodeExtender.setShadowAlpha_serialize(peer_casted, shadowAlpha_casted)
         return
     }
-    public static setShadowElevation(peer: RenderNode, shadowElevation: number): void {
+    public static setShadowElevation(peer: RenderNode, shadowElevation: double): void {
         const peer_casted = peer as (RenderNode)
-        const shadowElevation_casted = shadowElevation as (number)
+        const shadowElevation_casted = shadowElevation as (double)
         RenderNodeExtender.setShadowElevation_serialize(peer_casted, shadowElevation_casted)
         return
     }
-    public static setShadowRadius(peer: RenderNode, shadowRadius: number): void {
+    public static setShadowRadius(peer: RenderNode, shadowRadius: double): void {
         const peer_casted = peer as (RenderNode)
-        const shadowRadius_casted = shadowRadius as (number)
+        const shadowRadius_casted = shadowRadius as (double)
         RenderNodeExtender.setShadowRadius_serialize(peer_casted, shadowRadius_casted)
         return
     }
@@ -3546,16 +3546,16 @@ export class RenderNodeExtender {
         RenderNodeExtender.setBorderStyle_serialize(peer_casted, borderStyle_casted)
         return
     }
-    public static setBorderWidth(peer: RenderNode, borderWidth: EdgeNumber, unitValue: int32): void {
+    public static setBorderWidth(peer: RenderNode, borderWidth: EdgeF64, unitValue: int32): void {
         const peer_casted = peer as (RenderNode)
-        const borderWidth_casted = borderWidth as (EdgeNumber)
+        const borderWidth_casted = borderWidth as (EdgeF64)
         const unitValue_casted = unitValue as (int32)
         RenderNodeExtender.setBorderWidth_serialize(peer_casted, borderWidth_casted, unitValue_casted)
         return
     }
-    public static setBorderColor(peer: RenderNode, borderColor: EdgeNumber): void {
+    public static setBorderColor(peer: RenderNode, borderColor: EdgeI32): void {
         const peer_casted = peer as (RenderNode)
-        const borderColor_casted = borderColor as (EdgeNumber)
+        const borderColor_casted = borderColor as (EdgeI32)
         RenderNodeExtender.setBorderColor_serialize(peer_casted, borderColor_casted)
         return
     }
@@ -4531,7 +4531,7 @@ export class SystemOps {
     static resourceManagerReset_serialize(): void {
         ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
     }
-    static setFrameCallback_serialize(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
+    static setFrameCallback_serialize(onFrameCallback: Callback_Long_Void, onIdleCallback: Callback_Long_Void, delayTime: int64): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(onFrameCallback)
         thisSerializer.holdAndWriteCallback(onIdleCallback)
@@ -4599,10 +4599,10 @@ export class SystemOps {
         SystemOps.resourceManagerReset_serialize()
         return
     }
-    public static setFrameCallback(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
-        const onFrameCallback_casted = onFrameCallback as (((value0: number) => void))
-        const onIdleCallback_casted = onIdleCallback as (((value0: number) => void))
-        const delayTime_casted = delayTime as (number)
+    public static setFrameCallback(onFrameCallback: Callback_Long_Void, onIdleCallback: Callback_Long_Void, delayTime: int64): void {
+        const onFrameCallback_casted = onFrameCallback as (Callback_Long_Void)
+        const onIdleCallback_casted = onIdleCallback as (Callback_Long_Void)
+        const delayTime_casted = delayTime as (int64)
         SystemOps.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
         return
     }
@@ -4976,6 +4976,7 @@ export interface LengthMetricsCustom {
     unit: number;
     value: number;
 }
+export type Callback_Long_Void = (value: int64) => void;
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;
@@ -5123,11 +5124,17 @@ export interface NodeEdgeStyles {
     bottom: BorderStyle;
     left: BorderStyle;
 }
-export interface EdgeNumber {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
+export interface EdgeF64 {
+    top: double;
+    right: double;
+    bottom: double;
+    left: double;
+}
+export interface EdgeI32 {
+    top: int32;
+    right: int32;
+    bottom: int32;
+    left: int32;
 }
 export interface SizeNumberInner {
     width: number;
@@ -5902,25 +5909,47 @@ export class DoubleAnimationParam_serializer {
         return value
     }
 }
-export class EdgeNumber_serializer {
-    public static write(buffer: SerializerBase, value: EdgeNumber): void {
+export class EdgeF64_serializer {
+    public static write(buffer: SerializerBase, value: EdgeF64): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTop  = value.top
-        valueSerializer.writeNumber(valueHolderForTop)
+        valueSerializer.writeFloat64(valueHolderForTop)
         const valueHolderForRight  = value.right
-        valueSerializer.writeNumber(valueHolderForRight)
+        valueSerializer.writeFloat64(valueHolderForRight)
         const valueHolderForBottom  = value.bottom
-        valueSerializer.writeNumber(valueHolderForBottom)
+        valueSerializer.writeFloat64(valueHolderForBottom)
         const valueHolderForLeft  = value.left
-        valueSerializer.writeNumber(valueHolderForLeft)
+        valueSerializer.writeFloat64(valueHolderForLeft)
     }
-    public static read(buffer: DeserializerBase): EdgeNumber {
+    public static read(buffer: DeserializerBase): EdgeF64 {
         let valueDeserializer : DeserializerBase = buffer
-        const topTmpResult : number = (valueDeserializer.readNumber() as number)
-        const rightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const bottomTmpResult : number = (valueDeserializer.readNumber() as number)
-        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : EdgeNumber = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeNumber)
+        const topTmpResult : double = valueDeserializer.readFloat64()
+        const rightTmpResult : double = valueDeserializer.readFloat64()
+        const bottomTmpResult : double = valueDeserializer.readFloat64()
+        const leftTmpResult : double = valueDeserializer.readFloat64()
+        let value : EdgeF64 = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeF64)
+        return value
+    }
+}
+export class EdgeI32_serializer {
+    public static write(buffer: SerializerBase, value: EdgeI32): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        valueSerializer.writeInt32(valueHolderForTop)
+        const valueHolderForRight  = value.right
+        valueSerializer.writeInt32(valueHolderForRight)
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeInt32(valueHolderForBottom)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeInt32(valueHolderForLeft)
+    }
+    public static read(buffer: DeserializerBase): EdgeI32 {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpResult : int32 = valueDeserializer.readInt32()
+        const rightTmpResult : int32 = valueDeserializer.readInt32()
+        const bottomTmpResult : int32 = valueDeserializer.readInt32()
+        const leftTmpResult : int32 = valueDeserializer.readInt32()
+        let value : EdgeI32 = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeI32)
         return value
     }
 }
