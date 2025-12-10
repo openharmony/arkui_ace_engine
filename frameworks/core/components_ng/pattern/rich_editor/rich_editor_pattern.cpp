@@ -1745,6 +1745,10 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
 void RichEditorPattern::DeleteBackwardFunction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "DeleteBackwardFunction called");
+    if (IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Skipping delete operation: preview text inputting");
+        return;
+    }
     HandleOnDelete(true);
 }
 
