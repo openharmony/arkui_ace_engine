@@ -60,7 +60,7 @@ private:
             forEachBuilder->ExpandChildrenOnInitial();
             return;
         }
-
+        nodeId = (nodeId != -1) ? nodeId : ElementRegister::GetInstance()->MakeUniqueId();
         auto lazyForEach = LazyForEachNode::GetOrCreateLazyForEachNode(nodeId, forEachBuilder);
         stack->Push(lazyForEach);
     }

@@ -1245,6 +1245,11 @@ void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& j
 
 void FrameNode::DumpInfo()
 {
+    auto parent = GetLastParent().Upgrade();
+    if (parent) {
+        DumpLog::GetInstance().AddDesc(std::string("LastParentTag: ").append(parent->GetTag()));
+        DumpLog::GetInstance().AddDesc(std::string("LastParentId: ").append(std::to_string(parent->GetId())));
+    }
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
     DumpKeyboardShortcutInfo();
@@ -7798,6 +7803,7 @@ void FrameNode::MountToParent(const RefPtr<UINode>& parent,
     int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(parent);
+    SetLastParent(parent);
     parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
     if (SubtreeWithIgnoreChild()) {
         auto parentFrame = GetAncestorNodeOfFrame(false);

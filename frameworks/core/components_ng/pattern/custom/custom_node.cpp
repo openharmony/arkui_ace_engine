@@ -288,6 +288,8 @@ void CustomNode::DumpInfo()
             DumpDecoratorInfo(decoratorInfo);
         }
     }
+    DumpLog::GetInstance().AddDesc(std::string("CreatorId: ").append(GetCreatorId()));
+    FireOnDumpInfoFunc({ "RecyclePool" });
 }
 
 void CustomNode::FireRecycleRenderFunc()

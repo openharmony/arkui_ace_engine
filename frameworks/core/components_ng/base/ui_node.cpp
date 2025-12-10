@@ -2371,6 +2371,7 @@ void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
     }
     parent_ = parent;
     ancestor_ = parent;
+    lastParent_ = parent;
 }
 
 int32_t UINode::GetThemeScopeId() const

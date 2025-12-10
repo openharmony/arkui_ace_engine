@@ -532,6 +532,7 @@ public:
     void StopTranslateAnimation();
     void StopSpringAnimationImmediately();
     void StopSpringAnimation();
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);

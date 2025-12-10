@@ -1222,6 +1222,23 @@ namespace OHOS::Ace::NG {
     {
         DumpLog::GetInstance().AddDesc(std::string("The totalCount of data:")
                                             .append(std::to_string(GetTotalCount()).c_str()));
+        if (expiringItem_.size() > 0) {
+            std::string cachedNodes;
+            for (auto& [index, item] : expiringItem_) {
+                if (item.second) {
+                    cachedNodes.append("[")
+                        .append(item.second->GetTag())
+                        .append(",")
+                        .append(std::to_string(item.second->GetId()))
+                        .append(",")
+                        .append(std::to_string(item.second->GetAccessibilityId()))
+                        .append("],");
+                }
+            }
+            cachedNodes.pop_back();
+            DumpLog::GetInstance().AddDesc(
+                std::string("CachedItems: ").append("[").append(cachedNodes).append("]"));
+        }
     }
 
     /*
