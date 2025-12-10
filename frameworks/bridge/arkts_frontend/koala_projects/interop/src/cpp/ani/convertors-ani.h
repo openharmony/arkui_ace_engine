@@ -38,11 +38,11 @@ while (0)
 
 #define CHECK_RETHROW_ERROR(env, result) \
 do {                                     \
-  ani_boolean isError = false;           \
-  env->ExistUnhandledError(&isError);    \
-  if (isError) {                         \
-      return result;                     \
-  }                                      \
+    ani_boolean isError = false;           \
+    env->ExistUnhandledError(&isError);    \
+    if (isError) {                         \
+        return result;                     \
+    }                                      \
 } while (0)
 
 template<class T>
@@ -191,17 +191,18 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
-      CHECK_RETHROW_ERROR(env, nullptr);
-      ani_fixedarray_byte result = nullptr;
-      ani_boolean errorExist;
-      env->ExistUnhandledError(&errorExist);
-      if (!errorExist) {
-          CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
-          CHECK_ANI_FATAL(
-              env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
-      }
-      value.dispose(value.data, value.length);
-      return result;
+        CHECK_RETHROW_ERROR(env, nullptr);
+        ani_fixedarray_byte result = nullptr;
+        ani_boolean errorExist;
+        env->ExistUnhandledError(&errorExist);
+        if (!errorExist) {
+            CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
+            CHECK_ANI_FATAL(
+                env->FixedArray_SetRegion_Byte(result, 0, value.length,
+                  reinterpret_cast<const ani_byte*>(value.data)));
+        }
+        value.dispose(value.data, value.length);
+        return result;
     };
     static inline void release(ani_env* env, InteropType value, KInteropReturnBuffer converted) {}
 };
