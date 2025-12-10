@@ -355,7 +355,7 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override pushArray(...items: T[]): number {
+    override pushArray(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -384,7 +384,7 @@ class ObservableArray<T> extends Array<T> {
         return this
     }
 
-    override splice(index: number, count: Number | undefined, ...items: T[]): Array<T> {
+    override splice(index: int, count: int | undefined, ...items: T[]): Array<T> {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -398,7 +398,7 @@ class ObservableArray<T> extends Array<T> {
         return super.splice(index, count, ...items)
     }
 
-    override unshift(...items: T[]): number {
+    override unshift(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -441,7 +441,7 @@ class ObservableArray<T> extends Array<T> {
         return super.find(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
+    override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findIndex(predicate)
     }
@@ -461,7 +461,7 @@ class ObservableArray<T> extends Array<T> {
         return super.some(predicate)
     }
 
-    override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
+    override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findLastIndex(predicate)
     }

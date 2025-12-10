@@ -1095,13 +1095,13 @@ export class MultiNavPathStack extends NavPathStack {
         if (index === removeIndex - 1) {
           this.subStackList[i]?.secondaryStack.clear();
           this.subStackList[i].secondaryStack.policyInfoList.splice(0);
-          this.totalStack.splice(index + 1);
+          this.totalStack.splice(index.toInt() + 1);
           this.clearTrashStack(i + 1, {}, animated);
           break;
         } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
           this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
-          this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
-          this.totalStack.splice(index + 1);
+          this.subStackList[i].secondaryStack.policyInfoList.splice(index.toInt() - removeIndex.toInt() + 1);
+          this.totalStack.splice(index.toInt() + 1);
           this.clearTrashStack(i + 1, {}, animated);
         }
         removeIndex += secondaryStackSize[i];
@@ -1134,13 +1134,13 @@ export class MultiNavPathStack extends NavPathStack {
         if (index === removeIndex - 1) {
           this.subStackList[i]?.secondaryStack.clear();
           this.subStackList[i].secondaryStack.policyInfoList.splice(0);
-          this.totalStack.splice(index + 1);
+          this.totalStack.splice(index.toInt() + 1);
           this.clearTrashStack(i + 1, result, animated);
           break;
         } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
           this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
-          this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
-          this.totalStack.splice(index + 1);
+          this.subStackList[i].secondaryStack.policyInfoList.splice(index.toInt() - removeIndex.toInt() + 1);
+          this.totalStack.splice(index.toInt() + 1);
           this.clearTrashStack(i + 1, result, animated);
         }
         removeIndex += secondaryStackSize[i];
@@ -1258,7 +1258,7 @@ export class MultiNavPathStack extends NavPathStack {
       this.subStackList[i].primaryStack.policyInfoList.splice(0);
       this.subStackList[i].secondaryStack.policyInfoList.splice(0);
     }
-    this.subStackList.splice(index);
+    this.subStackList.splice(index.toInt());
     console.log('MultiNavPathStack popToIndex subStackList.length=' + this.subStackList.length);
     this.outerStack.popToIndex(index - 1, result as Object, animated);
     console.log('MultiNavPathStack popToIndex outerStack.size=' + this.outerStack.size());
