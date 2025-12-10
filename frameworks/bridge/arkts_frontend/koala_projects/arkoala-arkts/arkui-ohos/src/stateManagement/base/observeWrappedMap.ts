@@ -182,6 +182,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
         if (typeof value === 'object') {
             const makeobserved = uiUtils.makeObservedEntrance(value, this.allowDeep_, this.isAPI_) as V;
             this.store_.set(key, makeobserved);
+            return makeobserved;
         }
         return value;
     }
