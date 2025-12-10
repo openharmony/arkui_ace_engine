@@ -75,7 +75,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             pool.pruneBy((index: int32) => index >= changeIndex)
         })
     }
-
+ 
     const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
     const currentExtendableComponent = ExtendableComponent.current
     /**
@@ -99,7 +99,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         }
     }
     LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
-
+ 
     /**
      * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
      */

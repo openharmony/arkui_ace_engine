@@ -38209,7 +38209,7 @@ void impl_TextTimerController_reset(Ark_NativePointer thisPtr) {
         GetAccessors()->getTextTimerControllerAccessor()->reset(self);
 }
 KOALA_INTEROP_DIRECT_V1(TextTimerController_reset, Ark_NativePointer)
-void impl_ThemeOps_sendThemeToNative(KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 elmtId) {
+void impl_ThemeOps_sendThemeToNative(KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 elmtId, Ark_Boolean darkSetStatus) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int32 colorArrayValueTempTmpBufLength = thisDeserializer.readInt32();
         Array_ResourceColor colorArrayValueTempTmpBuf = {};
@@ -38237,9 +38237,35 @@ void impl_ThemeOps_sendThemeToNative(KSerializerBuffer thisArray, int32_t thisLe
             colorArrayValueTempTmpBuf.array[colorArrayValueTempTmpBufBufCounterI] = static_cast<Ark_ResourceColor>(colorArrayValueTempTmpBufTempBuf);
         }
         Array_ResourceColor colorArrayValueTemp = colorArrayValueTempTmpBuf;;
-        GetAccessors()->getThemeOpsAccessor()->sendThemeToNative(static_cast<Array_ResourceColor*>(&colorArrayValueTemp), elmtId);
+        const Ark_Int32 darkColorArrayValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_ResourceColor darkColorArrayValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(darkColorArrayValueTempTmpBuf)>::type,
+        std::decay<decltype(*darkColorArrayValueTempTmpBuf.array)>::type>(&darkColorArrayValueTempTmpBuf, darkColorArrayValueTempTmpBufLength);
+        for (int darkColorArrayValueTempTmpBufBufCounterI = 0; darkColorArrayValueTempTmpBufBufCounterI < darkColorArrayValueTempTmpBufLength; darkColorArrayValueTempTmpBufBufCounterI++) {
+            const Ark_Int8 darkColorArrayValueTempTmpBufTempBufUnionSelector = thisDeserializer.readInt8();
+            Ark_ResourceColor darkColorArrayValueTempTmpBufTempBuf = {};
+            darkColorArrayValueTempTmpBufTempBuf.selector = darkColorArrayValueTempTmpBufTempBufUnionSelector;
+            if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 0) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 0;
+                darkColorArrayValueTempTmpBufTempBuf.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 1) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 1;
+                darkColorArrayValueTempTmpBufTempBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 2) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 2;
+                darkColorArrayValueTempTmpBufTempBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 3) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 3;
+                darkColorArrayValueTempTmpBufTempBuf.value3 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for darkColorArrayValueTempTmpBufTempBuf has to be chosen through deserialisation.");
+            }
+            darkColorArrayValueTempTmpBuf.array[darkColorArrayValueTempTmpBufBufCounterI] = static_cast<Ark_ResourceColor>(darkColorArrayValueTempTmpBufTempBuf);
+        }
+        Array_ResourceColor darkColorArrayValueTemp = darkColorArrayValueTempTmpBuf;;
+        GetAccessors()->getThemeOpsAccessor()->sendThemeToNative(static_cast<Array_ResourceColor*>(&colorArrayValueTemp), static_cast<Array_ResourceColor*>(&darkColorArrayValueTemp), elmtId, darkSetStatus);
 }
-KOALA_INTEROP_DIRECT_V3(ThemeOps_sendThemeToNative, KSerializerBuffer, int32_t, Ark_Int32)
+KOALA_INTEROP_DIRECT_V4(ThemeOps_sendThemeToNative, KSerializerBuffer, int32_t, Ark_Int32, Ark_Boolean)
 void impl_ThemeOps_setDefaultTheme(KSerializerBuffer thisArray, int32_t thisLength, Ark_Boolean isDark) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int32 colorArrayValueTempTmpBufLength = thisDeserializer.readInt32();
@@ -38271,7 +38297,7 @@ void impl_ThemeOps_setDefaultTheme(KSerializerBuffer thisArray, int32_t thisLeng
         GetAccessors()->getThemeOpsAccessor()->setDefaultTheme(static_cast<Array_ResourceColor*>(&colorArrayValueTemp), isDark);
 }
 KOALA_INTEROP_DIRECT_V3(ThemeOps_setDefaultTheme, KSerializerBuffer, int32_t, Ark_Boolean)
-void impl_ThemeOps_createAndBindTheme(Ark_Int32 themeScopeId, Ark_Int32 themeId, KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 colorMode) {
+void impl_ThemeOps_createAndBindTheme(Ark_Int32 themeScopeId, Ark_Int32 themeId, KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 colorMode, Ark_Boolean darkSetStatus) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int32 colorArrayValueTempTmpBufLength = thisDeserializer.readInt32();
         Array_ResourceColor colorArrayValueTempTmpBuf = {};
@@ -38299,10 +38325,36 @@ void impl_ThemeOps_createAndBindTheme(Ark_Int32 themeScopeId, Ark_Int32 themeId,
             colorArrayValueTempTmpBuf.array[colorArrayValueTempTmpBufBufCounterI] = static_cast<Ark_ResourceColor>(colorArrayValueTempTmpBufTempBuf);
         }
         Array_ResourceColor colorArrayValueTemp = colorArrayValueTempTmpBuf;;
+        const Ark_Int32 darkColorArrayValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_ResourceColor darkColorArrayValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(darkColorArrayValueTempTmpBuf)>::type,
+        std::decay<decltype(*darkColorArrayValueTempTmpBuf.array)>::type>(&darkColorArrayValueTempTmpBuf, darkColorArrayValueTempTmpBufLength);
+        for (int darkColorArrayValueTempTmpBufBufCounterI = 0; darkColorArrayValueTempTmpBufBufCounterI < darkColorArrayValueTempTmpBufLength; darkColorArrayValueTempTmpBufBufCounterI++) {
+            const Ark_Int8 darkColorArrayValueTempTmpBufTempBufUnionSelector = thisDeserializer.readInt8();
+            Ark_ResourceColor darkColorArrayValueTempTmpBufTempBuf = {};
+            darkColorArrayValueTempTmpBufTempBuf.selector = darkColorArrayValueTempTmpBufTempBufUnionSelector;
+            if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 0) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 0;
+                darkColorArrayValueTempTmpBufTempBuf.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 1) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 1;
+                darkColorArrayValueTempTmpBufTempBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 2) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 2;
+                darkColorArrayValueTempTmpBufTempBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 3) {
+                darkColorArrayValueTempTmpBufTempBuf.selector = 3;
+                darkColorArrayValueTempTmpBufTempBuf.value3 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for darkColorArrayValueTempTmpBufTempBuf has to be chosen through deserialisation.");
+            }
+            darkColorArrayValueTempTmpBuf.array[darkColorArrayValueTempTmpBufBufCounterI] = static_cast<Ark_ResourceColor>(darkColorArrayValueTempTmpBufTempBuf);
+        }
+        Array_ResourceColor darkColorArrayValueTemp = darkColorArrayValueTempTmpBuf;;
         Callback_Void onThemeScopeDestroyValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getThemeOpsAccessor()->createAndBindTheme(themeScopeId, themeId, static_cast<Array_ResourceColor*>(&colorArrayValueTemp), static_cast<Ark_ThemeColorMode>(colorMode), static_cast<Callback_Void*>(&onThemeScopeDestroyValueTemp));
+        GetAccessors()->getThemeOpsAccessor()->createAndBindTheme(themeScopeId, themeId, static_cast<Array_ResourceColor*>(&colorArrayValueTemp), static_cast<Array_ResourceColor*>(&darkColorArrayValueTemp), static_cast<Ark_ThemeColorMode>(colorMode), static_cast<Callback_Void*>(&onThemeScopeDestroyValueTemp), darkSetStatus);
 }
-KOALA_INTEROP_DIRECT_V5(ThemeOps_createAndBindTheme, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t, Ark_Int32)
+KOALA_INTEROP_DIRECT_V6(ThemeOps_createAndBindTheme, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t, Ark_Int32, Ark_Boolean)
 void impl_ThemeOps_applyThemeScopeIdToNode(Ark_NativePointer ptr, Ark_Int32 themeScopeId) {
         GetAccessors()->getThemeOpsAccessor()->applyThemeScopeIdToNode(ptr, themeScopeId);
 }

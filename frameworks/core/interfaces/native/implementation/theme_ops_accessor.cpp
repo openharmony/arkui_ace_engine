@@ -26,21 +26,30 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeOpsAccessor {
-void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmtId)
+void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, const Array_ResourceColor* darkColorArray, Ark_Int32 elmtId, Ark_Boolean darkSetStatus)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
+    CHECK_NULL_VOID(darkColorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
+    std::vector<Ark_ResourceColor> darkColorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
         colorArrayVec.push_back(colorArray->array[i]);
     }
+    for (int32_t i = 0; i < darkColorArray->length; i++) {
+        darkColorArrayVec.push_back(darkColorArray->array[i]);
+    }
+
     auto colors = AceType::MakeRefPtr<AniThemeColors>();
     colors->SetColors(colorArrayVec);
+    auto darkColors = AceType::MakeRefPtr<AniThemeColors>();
+    darkColors->SetColors(darkColorArrayVec);
 
     auto themeScopeId = static_cast<int32_t>(elmtId);
 
     AniTheme aniTheme;
     aniTheme.SetColors(colors);
+    aniTheme.SetDarkColors(darkColors);
     AniThemeScope::AddAniTheme(themeScopeId, aniTheme);
 
     // save the current theme when Theme was created by WithTheme container
@@ -66,24 +75,34 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
 #endif
 }
 void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
-    Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy)
+    const Array_ResourceColor* darkColorArray,
+    Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy, Ark_Boolean darkSetStatus)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
+    CHECK_NULL_VOID(darkColorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
+    std::vector<Ark_ResourceColor> darkColorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
         colorArrayVec.push_back(colorArray->array[i]);
+    }
+    for (int32_t i = 0; i < darkColorArray->length; i++) {
+        darkColorArrayVec.push_back(darkColorArray->array[i]);
     }
 
     int32_t colorModeValue = static_cast<int32_t>(colorMode);
 
     std::vector<uint32_t> colors;
+    std::vector<uint32_t> darkColors;
     std::vector<RefPtr<ResourceObject>> resObjs;
+    std::vector<RefPtr<ResourceObject>> darkResObjs;
     AniThemeModule::ConvertToColorArray(colorArrayVec, colors, resObjs);
+    AniThemeModule::ConvertToColorArray(darkColorArrayVec, darkColors, darkResObjs);
 
     auto themeModifier = NodeModifier::GetThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, colors.data(), colors.data(), colorModeValue,
-        static_cast<void*>(&resObjs), static_cast<void*>(&resObjs));
+    auto theme = themeModifier->createTheme(themeId, colors.data(), darkColors.data(), colorModeValue,
+        static_cast<void*>(&resObjs), static_cast<void*>(&darkResObjs));
+
     CHECK_NULL_VOID(theme);
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {

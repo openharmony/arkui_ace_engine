@@ -44109,7 +44109,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // TextTimerControllerAccessor
     namespace ThemeOpsAccessor {
     void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
-                               Ark_Int32 elmtId)
+                               const Array_ResourceColor* darkColorArray,
+                               Ark_Int32 elmtId,
+                               Ark_Boolean darkSetStatus)
     {
         if (!needGroupedLog(1))
         {
@@ -44118,7 +44120,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         string out("sendThemeToNative(");
         WriteToString(&out, colorArray);
         out.append(", ");
+        WriteToString(&out, darkColorArray);
+        out.append(", ");
         WriteToString(&out, elmtId);
+        out.append(", ");
+        WriteToString(&out, darkSetStatus);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -44139,8 +44145,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
                                 Ark_Int32 themeId,
                                 const Array_ResourceColor* colorArray,
+                                const Array_ResourceColor* darkColorArray,
                                 Ark_ThemeColorMode colorMode,
-                                const Callback_Void* onThemeScopeDestroy)
+                                const Callback_Void* onThemeScopeDestroy,
+                                Ark_Boolean darkSetStatus)
     {
         if (!needGroupedLog(1))
         {
@@ -44153,9 +44161,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, colorArray);
         out.append(", ");
+        WriteToString(&out, darkColorArray);
+        out.append(", ");
         WriteToString(&out, colorMode);
         out.append(", ");
         WriteToString(&out, onThemeScopeDestroy);
+        out.append(", ");
+        WriteToString(&out, darkSetStatus);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

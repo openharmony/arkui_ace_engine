@@ -27,17 +27,19 @@ import { ThemeOps } from 'arkui/component/idlize';
 import { GlobalStateManager } from '@koalaui/runtime';
 
 export class ArkThemeNativeHelper {
-    static sendThemeToNative(theme: Theme, elmtId: int32): void {
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
-        ThemeOps.sendThemeToNative(colorArray, elmtId);
+    static sendThemeToNative(theme: Theme, elmtId: int32, darkSetStatus: boolean): void {
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
+        ThemeOps.sendThemeToNative(colorArray, darkColorArray, elmtId, darkSetStatus);
     }
     static setDefaultTheme(theme: CustomTheme | undefined): void {
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         ThemeOps.setDefaultTheme(colorArray, false);
 
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
-        ThemeOps.setDefaultTheme(colorArray, true);
+        ThemeOps.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
     static createInternal(
@@ -45,7 +47,8 @@ export class ArkThemeNativeHelper {
         themeId: int32,
         theme: CustomTheme | undefined,
         colorMode: ThemeColorMode,
-        onThemeScopeDestroy: () => void
+        onThemeScopeDestroy: () => void,
+        darkSetStatus: boolean
     ) {
         // set local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
@@ -119,7 +122,7 @@ export class ArkThemeNativeHelper {
             srcTheme.colors.interactiveActive,
             srcTheme.colors.interactiveSelect,
             srcTheme.colors.interactiveClick,
-        ];
+        ];  
     }
 
     public static convertColorsToArray(colors: Colors | CustomColors | undefined): ResourceColor[] {
@@ -129,6 +132,9 @@ export class ArkThemeNativeHelper {
         }
         const colorArray: ResourceColor[] = [];
         for (let attr of Object.values(colors)) {
+            if (!attr) {
+                continue;
+            }
             const value: ResourceColor = attr as ResourceColor;
             if (ArkColorsImpl.checkIsColor(value)) {
                 colorArray.push(value as Color);

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { CustomTheme, Colors } from '@ohos/arkui/theme';
+import { CustomTheme, Colors, CustomColors } from '@ohos/arkui/theme';
 import { ArkThemeCache } from './ArkThemeCache';
+import { ArkColorsImpl } from './ArkColorsImpl';
 import { Shapes, Typography } from './index';
 import { ThemeColorMode } from 'arkui/component/common';
 import { int32 } from "@koalaui/common";
@@ -31,6 +32,7 @@ let themeCounter: int32 = 10000;
 export class ArkThemeBase implements ThemeInternal {
     // Theme tokens
     colors: Colors;
+    darkColors: Colors;
     shapes: Shapes;
     typography: Typography;
 
@@ -76,6 +78,7 @@ export class ArkThemeBase implements ThemeInternal {
      * @param customTheme instance of CustomTheme used to create current theme
      * @param colorMode local colorm mode used for current theme
      * @param colors colors tokens
+     *  
      * @param shapes shapes tokens
      * @param typography typography tokens
      */
@@ -84,6 +87,7 @@ export class ArkThemeBase implements ThemeInternal {
         customTheme: CustomTheme | undefined,
         colorMode: ThemeColorMode,
         colors: Colors,
+        darkColors: Colors,
         shapes: Shapes,
         typography: Typography
     ) {
@@ -95,6 +99,7 @@ export class ArkThemeBase implements ThemeInternal {
         this.colorMode = colorMode;
 
         this.colors = colors;
+        this.darkColors = darkColors;
         this.shapes = shapes;
         this.typography = typography;
     }
@@ -194,6 +199,16 @@ export class ArkThemeBase implements ThemeInternal {
         if (customTheme.colors) {
             copyTheme.colors = customTheme.colors!;
         }
+
+        if (customTheme.darkColors) {
+            copyTheme.darkColors = {} as CustomColors;
+            if (customTheme.colors) {
+                ArkColorsImpl.assignCustom(copyTheme?.darkColors!, customTheme?.colors!);
+            }
+            ArkColorsImpl.assignCustom(copyTheme?.darkColors!, customTheme?.darkColors!);
+        }
+
+
         if (customTheme instanceof CustomThemeInternal) {
             const srcTheme = customTheme as CustomThemeInternal;
             if (srcTheme.shapes) {
