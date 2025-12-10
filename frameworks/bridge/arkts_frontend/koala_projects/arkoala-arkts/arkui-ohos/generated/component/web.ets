@@ -2094,6 +2094,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnWindowExit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWindowNewExtAttribute(value: ((value0: OnWindowNewExtEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnWindowNewExt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMultiWindowAccessAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3609,6 +3621,26 @@ export interface OnWindowNewEvent {
     targetUrl: string;
     handler: ControllerHandler;
 }
+export enum NavigationPolicy {
+    NEW_POPUP = 0,
+    NEW_WINDOW = 1,
+    NEW_BACKGROUND_TAB = 2,
+    NEW_FOREGROUND_TAB = 3
+}
+export interface WindowFeatures {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+}
+export interface OnWindowNewExtEvent {
+    isAlert: boolean;
+    isUserTrigger: boolean;
+    targetUrl: string;
+    handler: ControllerHandler;
+    windowFeatures: WindowFeatures;
+    navigationPolicy: NavigationPolicy;
+}
 export interface OnTouchIconUrlReceivedEvent {
     url: string;
     precomposed: boolean;
@@ -3892,6 +3924,9 @@ export interface WebAttribute extends CommonMethod {
     }
     onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onWindowNew")
+    }
+    onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onWindowNewExt")
     }
     onWindowExit(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onWindowExit")
@@ -4209,6 +4244,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onSslErrorEvent_value?: OnSslErrorEventCallback | undefined
     onClientAuthenticationRequest_value?: ((value0: OnClientAuthenticationEvent) => void) | undefined
     onWindowNew_value?: ((value0: OnWindowNewEvent) => void) | undefined
+    onWindowNewExt_value?: ((value0: OnWindowNewExtEvent) => void) | undefined
     onWindowExit_value?: (() => void) | undefined
     multiWindowAccess_value?: boolean | undefined
     onInterceptKeyEvent_value?: ((event: KeyEvent) => boolean) | undefined
@@ -4470,6 +4506,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
+        return this
+    }
+    onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
         return this
     }
     onWindowExit(value: (() => void) | undefined): this {
@@ -5257,6 +5296,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onWindowNew")) {
             const value_casted = value as (((value0: OnWindowNewEvent) => void) | undefined)
             this.getPeer()?.setOnWindowNewAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
+        if (this.checkPriority("onWindowNewExt")) {
+            const value_casted = value as (((value0: OnWindowNewExtEvent) => void) | undefined)
+            this.getPeer()?.setOnWindowNewExtAttribute(value_casted)
             return this
         }
         return this
@@ -6416,6 +6463,28 @@ export class WebResourceResponse_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return WebResourceResponseInternal.fromPtr(ptr)
+    }
+}
+export class WindowFeatures_serializer {
+    public static write(buffer: SerializerBase, value: WindowFeatures): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeFloat64(valueHolderForHeight)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeFloat64(valueHolderForWidth)
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): WindowFeatures {
+        let valueDeserializer : DeserializerBase = buffer
+        const heightTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : WindowFeatures = ({height: heightTmpResult, width: widthTmpResult, x: xTmpResult, y: yTmpResult} as WindowFeatures)
+        return value
     }
 }
 export class AcceptableFileType_serializer {
@@ -7624,6 +7693,34 @@ export class OnWindowNewEvent_serializer {
         const targetUrlTmpResult : string = (valueDeserializer.readString() as string)
         const handlerTmpResult : ControllerHandler = (ControllerHandler_serializer.read(valueDeserializer) as ControllerHandler)
         let value : OnWindowNewEvent = ({isAlert: isAlertTmpResult, isUserTrigger: isUserTriggerTmpResult, targetUrl: targetUrlTmpResult, handler: handlerTmpResult} as OnWindowNewEvent)
+        return value
+    }
+}
+export class OnWindowNewExtEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnWindowNewExtEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIsAlert  = value.isAlert
+        valueSerializer.writeBoolean(valueHolderForIsAlert)
+        const valueHolderForIsUserTrigger  = value.isUserTrigger
+        valueSerializer.writeBoolean(valueHolderForIsUserTrigger)
+        const valueHolderForTargetUrl  = value.targetUrl
+        valueSerializer.writeString(valueHolderForTargetUrl)
+        const valueHolderForHandler  = value.handler
+        ControllerHandler_serializer.write(valueSerializer, valueHolderForHandler)
+        const valueHolderForWindowFeatures  = value.windowFeatures
+        WindowFeatures_serializer.write(valueSerializer, valueHolderForWindowFeatures)
+        const valueHolderForNavigationPolicy  = value.navigationPolicy
+        valueSerializer.writeInt32(valueHolderForNavigationPolicy.valueOf())
+    }
+    public static read(buffer: DeserializerBase): OnWindowNewExtEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const isAlertTmpResult : boolean = valueDeserializer.readBoolean()
+        const isUserTriggerTmpResult : boolean = valueDeserializer.readBoolean()
+        const targetUrlTmpResult : string = (valueDeserializer.readString() as string)
+        const handlerTmpResult : ControllerHandler = (ControllerHandler_serializer.read(valueDeserializer) as ControllerHandler)
+        const windowFeaturesTmpResult : WindowFeatures = WindowFeatures_serializer.read(valueDeserializer)
+        const navigationPolicyTmpResult : NavigationPolicy = NavigationPolicy.fromValue(valueDeserializer.readInt32())
+        let value : OnWindowNewExtEvent = ({isAlert: isAlertTmpResult, isUserTrigger: isUserTriggerTmpResult, targetUrl: targetUrlTmpResult, handler: handlerTmpResult, windowFeatures: windowFeaturesTmpResult, navigationPolicy: navigationPolicyTmpResult} as OnWindowNewExtEvent)
         return value
     }
 }

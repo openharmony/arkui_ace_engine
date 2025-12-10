@@ -926,6 +926,8 @@ typedef struct window_WindowStagePeer* Ark_window_WindowStage;
 typedef struct Opt_window_WindowStage Opt_window_WindowStage;
 typedef struct Ark_WindowAnimationTarget Ark_WindowAnimationTarget;
 typedef struct Opt_WindowAnimationTarget Opt_WindowAnimationTarget;
+typedef struct Ark_WindowFeatures Ark_WindowFeatures;
+typedef struct Opt_WindowFeatures Opt_WindowFeatures;
 typedef struct WindowSizePeer WindowSizePeer;
 typedef struct WindowSizePeer* Ark_WindowSize;
 typedef struct Opt_WindowSize Opt_WindowSize;
@@ -1400,6 +1402,8 @@ typedef struct Callback_OnTouchIconUrlReceivedEvent_Void Callback_OnTouchIconUrl
 typedef struct Opt_Callback_OnTouchIconUrlReceivedEvent_Void Opt_Callback_OnTouchIconUrlReceivedEvent_Void;
 typedef struct Callback_OnWindowNewEvent_Void Callback_OnWindowNewEvent_Void;
 typedef struct Opt_Callback_OnWindowNewEvent_Void Opt_Callback_OnWindowNewEvent_Void;
+typedef struct Callback_OnWindowNewExtEvent_Void Callback_OnWindowNewExtEvent_Void;
+typedef struct Opt_Callback_OnWindowNewExtEvent_Void Opt_Callback_OnWindowNewExtEvent_Void;
 typedef struct Callback_Opt_Array_NavDestinationTransition_Void Callback_Opt_Array_NavDestinationTransition_Void;
 typedef struct Opt_Callback_Opt_Array_NavDestinationTransition_Void Opt_Callback_Opt_Array_NavDestinationTransition_Void;
 typedef struct Callback_Opt_Array_String_Void Callback_Opt_Array_String_Void;
@@ -2288,6 +2292,8 @@ typedef struct Ark_OnTouchIconUrlReceivedEvent Ark_OnTouchIconUrlReceivedEvent;
 typedef struct Opt_OnTouchIconUrlReceivedEvent Opt_OnTouchIconUrlReceivedEvent;
 typedef struct Ark_OnWindowNewEvent Ark_OnWindowNewEvent;
 typedef struct Opt_OnWindowNewEvent Opt_OnWindowNewEvent;
+typedef struct Ark_OnWindowNewExtEvent Ark_OnWindowNewExtEvent;
+typedef struct Opt_OnWindowNewExtEvent Opt_OnWindowNewExtEvent;
 typedef struct Ark_OverlayOffset Ark_OverlayOffset;
 typedef struct Opt_OverlayOffset Opt_OverlayOffset;
 typedef struct Ark_PanGestureHandlerOptions Ark_PanGestureHandlerOptions;
@@ -5756,6 +5762,16 @@ typedef struct Opt_NavigationOperation {
     Ark_Tag tag;
     Ark_NavigationOperation value;
 } Opt_NavigationOperation;
+typedef enum Ark_NavigationPolicy {
+    ARK_NAVIGATION_POLICY_NEW_POPUP = 0,
+    ARK_NAVIGATION_POLICY_NEW_WINDOW = 1,
+    ARK_NAVIGATION_POLICY_NEW_BACKGROUND_TAB = 2,
+    ARK_NAVIGATION_POLICY_NEW_FOREGROUND_TAB = 3,
+} Ark_NavigationPolicy;
+typedef struct Opt_NavigationPolicy {
+    Ark_Tag tag;
+    Ark_NavigationPolicy value;
+} Opt_NavigationPolicy;
 typedef enum Ark_NavigationSystemTransitionType {
     ARK_NAVIGATION_SYSTEM_TRANSITION_TYPE_DEFAULT = 0,
     ARK_NAVIGATION_SYSTEM_TRANSITION_TYPE_NONE = 1,
@@ -9394,6 +9410,17 @@ typedef struct Opt_WindowAnimationTarget {
     Ark_Tag tag;
     Ark_WindowAnimationTarget value;
 } Opt_WindowAnimationTarget;
+typedef struct Ark_WindowFeatures {
+    /* kind: Interface */
+    Ark_Float64 height;
+    Ark_Float64 width;
+    Ark_Float64 x;
+    Ark_Float64 y;
+} Ark_WindowFeatures;
+typedef struct Opt_WindowFeatures {
+    Ark_Tag tag;
+    Ark_WindowFeatures value;
+} Opt_WindowFeatures;
 typedef struct Opt_WindowSize {
     Ark_Tag tag;
     Ark_WindowSize value;
@@ -11659,6 +11686,16 @@ typedef struct Opt_Callback_OnWindowNewEvent_Void {
     Ark_Tag tag;
     Callback_OnWindowNewEvent_Void value;
 } Opt_Callback_OnWindowNewEvent_Void;
+typedef struct Callback_OnWindowNewExtEvent_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnWindowNewExtEvent value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnWindowNewExtEvent value0);
+} Callback_OnWindowNewExtEvent_Void;
+typedef struct Opt_Callback_OnWindowNewExtEvent_Void {
+    Ark_Tag tag;
+    Callback_OnWindowNewExtEvent_Void value;
+} Opt_Callback_OnWindowNewExtEvent_Void;
 typedef struct Callback_Opt_Array_NavDestinationTransition_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15760,6 +15797,19 @@ typedef struct Opt_OnWindowNewEvent {
     Ark_Tag tag;
     Ark_OnWindowNewEvent value;
 } Opt_OnWindowNewEvent;
+typedef struct Ark_OnWindowNewExtEvent {
+    /* kind: Interface */
+    Ark_Boolean isAlert;
+    Ark_Boolean isUserTrigger;
+    Ark_String targetUrl;
+    Ark_ControllerHandler handler;
+    Ark_WindowFeatures windowFeatures;
+    Ark_NavigationPolicy navigationPolicy;
+} Ark_OnWindowNewExtEvent;
+typedef struct Opt_OnWindowNewExtEvent {
+    Ark_Tag tag;
+    Ark_OnWindowNewExtEvent value;
+} Opt_OnWindowNewExtEvent;
 typedef struct Ark_OverlayOffset {
     /* kind: Interface */
     Opt_Float64 x;
@@ -26377,6 +26427,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                              const Opt_Callback_OnClientAuthenticationEvent_Void* value);
     void (*setOnWindowNew)(Ark_NativePointer node,
                            const Opt_Callback_OnWindowNewEvent_Void* value);
+    void (*setOnWindowNewExt)(Ark_NativePointer node,
+                              const Opt_Callback_OnWindowNewExtEvent_Void* value);
     void (*setOnWindowExit)(Ark_NativePointer node,
                             const Opt_Callback_Void* value);
     void (*setMultiWindowAccess)(Ark_NativePointer node,
