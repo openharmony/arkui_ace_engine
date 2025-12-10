@@ -52,6 +52,7 @@ const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D", "ArkUI.queryA
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
+thread_local std::set<RefPtr<FrameNode>> offscreenNodes;
 
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
@@ -544,8 +545,6 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 }
 } // namespace
 
-std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
-
 RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach, bool skipoffscreenNodes)
 {
     // 如果查找的目标节点确定是已经挂树的节点，可以跳过offscreenNodes的遍历，避免offscreenNodes过多的情况消耗性能。
@@ -866,6 +865,16 @@ void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
     offscreenNodes.erase(node);
+}
+
+int32_t Inspector::GetOffscreenNodesSize()
+{
+    return offscreenNodes.size();
+}
+
+void Inspector::ClearAllOffscreenNodes()
+{
+    offscreenNodes.clear();
 }
 
 void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)

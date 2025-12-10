@@ -80,6 +80,7 @@ public:
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);
+    static const std::set<int32_t> GetAllLocalContainer();
 private:
     int32_t restoreId_ = CurrentId();
 

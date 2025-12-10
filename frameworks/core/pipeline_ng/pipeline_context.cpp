@@ -56,6 +56,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -5124,6 +5125,14 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     renderContext->UpdateWindowBlur();
 }
 
+void PipelineContext::ClearInspectorOffScreenNodes()
+{
+    auto containerLocalSet = ContainerScope::GetAllLocalContainer();
+    if (static_cast<uint32_t>(containerLocalSet.size()) == 1 && *containerLocalSet.cbegin() == instanceId_) {
+        Inspector::ClearAllOffscreenNodes();
+    }
+}
+
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -5177,6 +5186,7 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     uiContextImpl_.Reset();
+    ClearInspectorOffScreenNodes();
     PipelineBase::Destroy();
 }
 
