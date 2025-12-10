@@ -18368,22 +18368,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              Ark_Boolean isDark)
     {
     }
-    // testAdd
-    // void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
-    //                             Ark_Int32 themeId,
-    //                             const Array_ResourceColor* colorArray,
-    //                             const Array_ResourceColor* darkColorArray,
-    //                             Ark_ThemeColorMode colorMode,
-    //                             const Callback_Void* onThemeScopeDestroy,
-    //                             Ark_Boolean darkSetStatus)
-    // {
-    // }
-    // void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,
-    //                                  Ark_Int32 themeScopeId)
-    // {
-    //     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    //     CHECK_NULL_VOID(frameNode);
-    // }
     } // ThemeOpsAccessor
     namespace TimePickerDialogAccessor {
     void DestroyPeerImpl(Ark_TimePickerDialog peer)

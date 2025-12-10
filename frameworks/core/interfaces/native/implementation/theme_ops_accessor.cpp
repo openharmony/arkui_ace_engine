@@ -26,7 +26,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeOpsAccessor {
-void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, const Array_ResourceColor* darkColorArray, Ark_Int32 elmtId, Ark_Boolean darkSetStatus)
+void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, const Array_ResourceColor* darkColorArray,
+    Ark_Int32 elmtId, Ark_Boolean darkSetStatus)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
@@ -102,7 +103,6 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Arr
     auto themeModifier = NodeModifier::GetThemeModifier();
     auto theme = themeModifier->createTheme(themeId, colors.data(), darkColors.data(), colorModeValue,
         static_cast<void*>(&resObjs), static_cast<void*>(&darkResObjs));
-
     CHECK_NULL_VOID(theme);
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {

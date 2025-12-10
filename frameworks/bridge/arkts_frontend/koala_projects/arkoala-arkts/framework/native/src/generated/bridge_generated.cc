@@ -38250,7 +38250,7 @@ void impl_ThemeOps_sendThemeToNative(KSerializerBuffer thisArray, int32_t thisLe
                 darkColorArrayValueTempTmpBufTempBuf.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
             } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 1) {
                 darkColorArrayValueTempTmpBufTempBuf.selector = 1;
-                darkColorArrayValueTempTmpBufTempBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                darkColorArrayValueTempTmpBufTempBuf.value1 = thisDeserializer.readInt32();
             } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 2) {
                 darkColorArrayValueTempTmpBufTempBuf.selector = 2;
                 darkColorArrayValueTempTmpBufTempBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
@@ -38338,7 +38338,7 @@ void impl_ThemeOps_createAndBindTheme(Ark_Int32 themeScopeId, Ark_Int32 themeId,
                 darkColorArrayValueTempTmpBufTempBuf.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
             } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 1) {
                 darkColorArrayValueTempTmpBufTempBuf.selector = 1;
-                darkColorArrayValueTempTmpBufTempBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                darkColorArrayValueTempTmpBufTempBuf.value1 = thisDeserializer.readInt32();
             } else if (darkColorArrayValueTempTmpBufTempBufUnionSelector == 2) {
                 darkColorArrayValueTempTmpBufTempBuf.selector = 2;
                 darkColorArrayValueTempTmpBufTempBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
