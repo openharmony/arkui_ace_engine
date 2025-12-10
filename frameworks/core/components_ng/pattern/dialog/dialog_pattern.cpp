@@ -2475,6 +2475,20 @@ void DialogPattern::OnDetachFromMainTreeImpl()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->RemoveDialogFromMapForcefully(host);
+
+    if (dialogProperties_.isShowInSubWindow) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        auto maskNodeId = parentOverlayManager->GetMaskNodeIdWithDialogId(host->GetId());
+        if (maskNodeId == -1) {
+            maskNodeId = maskNodeId_;
+        }
+        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(maskNodeId);
+        CHECK_NULL_VOID(maskNode);
+        parentOverlayManager->CloseDialog(maskNode);
+    }
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)

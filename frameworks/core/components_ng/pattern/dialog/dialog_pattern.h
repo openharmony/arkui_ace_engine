@@ -356,6 +356,16 @@ public:
         transitionNodeCount_++;
     }
 
+    int32_t getMaskNodeId()
+    {
+        return maskNodeId_;
+    }
+
+    void setMaskNodeId(int32_t maskNodeId)
+    {
+        maskNodeId_ = maskNodeId;
+    }
+
     void SetNeedRefreshOnWindowShow(bool refreshOnWindowShow)
     {
         refreshOnWindowShow_ = refreshOnWindowShow;
@@ -503,6 +513,7 @@ private:
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
     int32_t transitionNodeCount_ = 0;
+    int32_t maskNodeId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 
