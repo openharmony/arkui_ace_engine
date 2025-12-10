@@ -56,19 +56,24 @@ export class ArkThemeNativeHelper {
         }
         // const thisSerializer : Serializer = Serializer.hold();
         const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
-        ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, colorMode, onThemeScopeDestroy);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
+        ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus);
 
         // reset local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
     }
-    public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined): ResourceColor[] {
+    public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined, isDark: boolean): ResourceColor[] {
         const srcTheme: Theme = { colors: new ArkColorsImpl() };
         if (theme instanceof Theme) {
-            srcTheme.colors = theme.colors;
+            srcTheme.colors = isDark? theme.darkColors : theme.colors;
         } else if (theme instanceof CustomTheme) {
-            ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
+            if (isDark) {
+                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).darkColors!);
+            } else {
+                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
+            }
         }
         return [
             srcTheme.colors.brand,
@@ -122,7 +127,7 @@ export class ArkThemeNativeHelper {
             srcTheme.colors.interactiveActive,
             srcTheme.colors.interactiveSelect,
             srcTheme.colors.interactiveClick,
-        ];  
+        ];
     }
 
     public static convertColorsToArray(colors: Colors | CustomColors | undefined): ResourceColor[] {
@@ -132,9 +137,6 @@ export class ArkThemeNativeHelper {
         }
         const colorArray: ResourceColor[] = [];
         for (let attr of Object.values(colors)) {
-            if (!attr) {
-                continue;
-            }
             const value: ResourceColor = attr as ResourceColor;
             if (ArkColorsImpl.checkIsColor(value)) {
                 colorArray.push(value as Color);

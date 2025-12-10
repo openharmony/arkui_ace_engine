@@ -50,60 +50,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     itemDragEvent?: ItemDragEventHandler,
     isRepeat: boolean = false
 ) {
-    const node = createLazyNode(isRepeat)
 
-    let pool = rememberDisposable(
-        () => new LazyItemPool(node, CustomComponent.current),
-        (pool?: LazyItemPool) => {
-            pool?.dispose()
-        }
-    )
-    if (pool.total !== dataSource.totalCount()) {
-        console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
-        pool.total = dataSource.totalCount()
-    }
-    let listener = remember(() => {
-        let changeCounter = STATE_MGMT_FACTORY.makeStaticLocal<int32>('__backing_value_change_counter', 0)
-        let res = new InternalListener(changeCounter)
-        dataSource.registerDataChangeListener(res)
-        return res
-    })
-    listener.version.get() // subscribe
-    const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
-    if (changeIndex < Number.POSITIVE_INFINITY) {
-        scheduleCallback(() => {
-            pool.pruneBy((index: int32) => index >= changeIndex)
-        })
-    }
- 
-    const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
-    const currentExtendableComponent = ExtendableComponent.current
-    /**
-     * provide totalCount and callbacks to the backend
-     */
-    let createCallback = (index: int32) => {
-        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
-        const lastExtendableComponent = ExtendableComponent.current
-        ObserveSingleton.instance.renderingComponent = currentRenderingComponent
-        ExtendableComponent.current = currentExtendableComponent
-        try {
-            return pool.getOrCreate(index, dataSource.getData(index), itemGenerator,
-                currentRenderingComponent, currentExtendableComponent)
-        } catch (error) {
-            InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
-            InteropNativeModule._NativeLog(`${(error as Error).stack}`)
-            return nullptr
-        } finally {
-            ObserveSingleton.instance.renderingComponent = lastRenderingComponent
-            ExtendableComponent.current = lastExtendableComponent
-        }
-    }
-    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
- 
-    /**
-     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
-     */
-    LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
 /** @memo:intrinsic */
