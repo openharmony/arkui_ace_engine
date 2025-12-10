@@ -6008,7 +6008,7 @@ void NavigationPattern::FireNavigateChangeCallback()
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
-    auto fromNavPath = navigationStack_->GetTopNavPath();
+    auto fromNavPath = navigationStack_->GetPreTopNavPath();
     auto names = navigationStack_->GetAllPathName();
     if (names.size() == 0 && !fromNavPath.has_value()) {
         return;
