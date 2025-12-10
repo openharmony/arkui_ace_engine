@@ -216,7 +216,11 @@ std::unordered_map<ThemeType, Ace::Kit::BuildThemeWrapperFunc> TOKEN_THEME_WRAPP
 
 ThemeManagerImpl::ThemeManagerImpl()
 {
+#ifdef CROSS_PLATFORM
+    auto resAdapter = ResourceAdapter::CreateV2();
+#else
     auto resAdapter = ResourceAdapter::Create();
+#endif
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
