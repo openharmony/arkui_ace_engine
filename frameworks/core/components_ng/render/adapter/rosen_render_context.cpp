@@ -4557,7 +4557,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
     parentNode->MarkNeedSyncRenderTree();
-    parentNode->RebuildRenderContextTree();
+    parentNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return true;
 }
 
