@@ -731,16 +731,23 @@ std::shared_ptr<Media::PixelMap> CopyMediaPixelMap(const RefPtr<PixelMap>& pixel
 }
 
 bool GetShadowInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::DeviceStatus::ShadowInfo& shadowInfo,
-    RefPtr<PixelMap> refPixelMap, float scale)
+    std::shared_ptr<Media::PixelMap> pixelMap, float scale)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
-    auto pixelMapDuplicated = CopyMediaPixelMap(refPixelMap);
+    std::shared_ptr<Media::PixelMap> pixelMapDuplicated = pixelMap;
+    if (!NearEqual(scale, 1.0f)) {
+        RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        CHECK_NULL_RETURN(refPixelMap, false);
+        pixelMapDuplicated = CopyMediaPixelMap(refPixelMap);
+    }
     if (!pixelMapDuplicated) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
         pixelMapDuplicated = asyncCtx->pixelMap;
     }
     CHECK_NULL_RETURN(pixelMapDuplicated, false);
-    pixelMapDuplicated->scale(scale, scale, Media::AntiAliasingOption::HIGH);
+    if (!NearEqual(scale, 1.0f)) {
+        pixelMapDuplicated->scale(scale, scale, Media::AntiAliasingOption::HIGH);
+    }
     int32_t width = pixelMapDuplicated->GetWidth();
     int32_t height = pixelMapDuplicated->GetHeight();
     CHECK_NULL_RETURN(pixelMapDuplicated, false);
@@ -969,7 +976,8 @@ void LogDragInfoInner(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Ms
 }
 
 bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, NG::PreparedInfoForDrag& data,
-    NG::PreparedAsyncCtxForAnimate& asyncCtxData, std::shared_ptr<Media::PixelMap> pixelMap)
+    NG::PreparedAsyncCtxForAnimate& asyncCtxData, std::shared_ptr<Media::PixelMap> pixelMap,
+    RefPtr<Subwindow>& subWindow)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(pixelMap, false);
@@ -1001,6 +1009,9 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
         data.imageNode = imageNode;
+        if (!subWindow) {
+            subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
+        }
         data.dragPreviewOffsetToScreen = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
     }
     return true;
@@ -1015,8 +1026,6 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
     CHECK_NULL_RETURN(scaleData, false);
     auto scale = asyncCtx->windowScale;
-    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-    CHECK_NULL_RETURN(refPixelMap, false);
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         asyncCtx->badgeNumber = badgeNumber.value();
@@ -1024,7 +1033,7 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         scale = scaleData->scale * asyncCtx->windowScale;
     }
-    auto result = GetShadowInfo(asyncCtx, shadowInfo, refPixelMap, scale);
+    auto result = GetShadowInfo(asyncCtx, shadowInfo, pixelMap, scale);
     if (!result) {
         return false;
     }
@@ -1054,7 +1063,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
+    RefPtr<Subwindow> subWindow = nullptr;
     for (auto& pixelMap: asyncCtx->pixelMapList) {
         if (!pixelMap) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
@@ -1070,7 +1079,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
             continue;
         }
-        if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, pixelMap)) {
+        if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, pixelMap, subWindow)) {
             return false;
         }
         break;
@@ -1244,11 +1253,11 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
+    RefPtr<Subwindow> subWindow = nullptr;
     if (!CreatePreviewNodeAndScale(asyncCtx, shadowInfo, asyncCtx->pixelMap)) {
         return false;
     }
-    if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, asyncCtx->pixelMap)) {
+    if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, asyncCtx->pixelMap, subWindow)) {
         return false;
     }
     asyncCtx->scale = data.previewScale;
