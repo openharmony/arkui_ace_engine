@@ -2720,6 +2720,12 @@ export class NavExtender {
     static setNavigationOptions_serialize(ptr: KPointer, pathStack: NavPathStack): void {
         ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(ptr, toPeerPtr(pathStack))
     }
+    static setNavDestinationBuilderCallback_serialize(ptr: KPointer, callback: NavExtender_PageMapNodeBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._NavExtender_setNavDestinationBuilderCallback(ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback)
@@ -2801,6 +2807,12 @@ export class NavExtender {
         const ptr_casted = ptr as (KPointer)
         const pathStack_casted = pathStack as (NavPathStack)
         NavExtender.setNavigationOptions_serialize(ptr_casted, pathStack_casted)
+        return
+    }
+    public static setNavDestinationBuilderCallback(ptr: KPointer, callback: NavExtender_PageMapNodeBuilder): void {
+        const ptr_casted = ptr as (KPointer)
+        const callback_casted = callback as (NavExtender_PageMapNodeBuilder)
+        NavExtender.setNavDestinationBuilderCallback_serialize(ptr_casted, callback_casted)
         return
     }
     public static setUpdateStackCallback(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
@@ -5119,6 +5131,7 @@ export interface SizeTLengthMetrics {
     height: LengthMetrics;
 }
 export type NavExtender_OnUpdateStack = () => void;
+export type NavExtender_PageMapNodeBuilder = (url: string, params?: Object) => KPointer;
 export type NavExtender_CreateNavDestination = (index: int32) => KPointer;
 export interface BorderRadiuses_graphics {
     topLeft: number;

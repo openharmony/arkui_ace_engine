@@ -1606,6 +1606,8 @@ typedef struct NavExtender_CreateNavDestination NavExtender_CreateNavDestination
 typedef struct Opt_NavExtender_CreateNavDestination Opt_NavExtender_CreateNavDestination;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
+typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback OnAlphabetIndexerPopupSelectCallback;
@@ -12565,6 +12567,16 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct NavExtender_PageMapNodeBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation);
+} NavExtender_PageMapNodeBuilder;
+typedef struct Opt_NavExtender_PageMapNodeBuilder {
+    Ark_Tag tag;
+    NavExtender_PageMapNodeBuilder value;
+} Opt_NavExtender_PageMapNodeBuilder;
 typedef struct OnAdsBlockedCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -28083,12 +28095,9 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                                  Ark_NavPathStack pathStack);
     void (*setUpdateStackCallback)(Ark_NavPathStack peer,
                                    const NavExtender_OnUpdateStack* callback);
+    void (*setNavDestinationBuilderCallback)(Ark_NativePointer ptr,
+                                             const NavExtender_PageMapNodeBuilder* callback);
     void (*syncStack)(Ark_NavPathStack peer);
-    Ark_Boolean (*checkNeedCreate)(Ark_NativePointer navigation,
-                                   Ark_Int32 index);
-    void (*setNavDestinationNode)(Ark_NavPathStack peer,
-                                  Ark_Int32 index,
-                                  Ark_NativePointer node);
     void (*pushPath)(Ark_NavPathStack pathStack,
                      Ark_NavPathInfo info,
                      const Ark_NavigationOptions* options);

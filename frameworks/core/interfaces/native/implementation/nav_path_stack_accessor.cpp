@@ -601,7 +601,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
     NavigationContext::InterceptionType result = new NavigationContext::Interception();
     if (interception->modeChange.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         result->modeChange = [callback = CallbackHelper(interception->modeChange.value)](NG::NavigationMode mode) {
-            callback.Invoke(Converter::ArkValue<Ark_NavigationMode>(mode));
+            callback.InvokeSync(Converter::ArkValue<Ark_NavigationMode>(mode));
         };
     }
     if (interception->willShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -623,7 +623,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             } else {
                 tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
             }
-            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+            callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
         };
     }
@@ -646,7 +646,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             } else {
                 tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
             }
-            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+            callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
         };
     }

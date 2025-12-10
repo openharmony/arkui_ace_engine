@@ -11475,6 +11475,12 @@ void impl_NavigationAttribute_setOnNavigationModeChange(Ark_NativePointer thisPt
         GetNodeModifiers()->getNavigationModifier()->setOnNavigationModeChange(self, static_cast<Opt_Callback_NavigationMode_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setOnNavigationModeChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavExtender_setNavDestinationBuilderCallback(Ark_NativePointer ptr, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        NavExtender_PageMapNodeBuilder callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_PageMapNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_PageMapNodeBuilder))))};;
+        GetAccessors()->getNavExtenderAccessor()->setNavDestinationBuilderCallback(ptr, static_cast<NavExtender_PageMapNodeBuilder*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(NavExtender_setNavDestinationBuilderCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setCustomNavContentTransition(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -33292,15 +33298,7 @@ KOALA_INTEROP_DIRECT_V3(NavExtender_setUpdateStackCallback, Ark_NativePointer, K
 void impl_NavExtender_syncStack(Ark_NativePointer peer) {
         GetAccessors()->getNavExtenderAccessor()->syncStack(static_cast<Ark_NavPathStack>(peer));
 }
-KOALA_INTEROP_DIRECT_V1(NavExtender_syncStack, Ark_NativePointer)
-Ark_Boolean impl_NavExtender_checkNeedCreate(Ark_NativePointer navigation, Ark_Int32 index) {
-        return GetAccessors()->getNavExtenderAccessor()->checkNeedCreate(navigation, index);
-}
-KOALA_INTEROP_DIRECT_2(NavExtender_checkNeedCreate, Ark_Boolean, Ark_NativePointer, Ark_Int32)
-void impl_NavExtender_setNavDestinationNode(Ark_NativePointer peer, Ark_Int32 index, Ark_NativePointer node) {
-        GetAccessors()->getNavExtenderAccessor()->setNavDestinationNode(static_cast<Ark_NavPathStack>(peer), index, node);
-}
-KOALA_INTEROP_DIRECT_V3(NavExtender_setNavDestinationNode, Ark_NativePointer, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_V1(NavExtender_syncStack, Ark_NativePointer)
 void impl_NavExtender_pushPath(Ark_NativePointer pathStack, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_NavigationOptions optionsValueTemp = NavigationOptions_serializer::read(thisDeserializer);;

@@ -36529,6 +36529,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetNavDestinationBuilderCallbackImpl(Ark_NativePointer ptr,
+                                              const NavExtender_PageMapNodeBuilder* callback)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setNavDestinationBuilderCallback(");
+        WriteToString(&out, ptr);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SyncStackImpl(Ark_NavPathStack peer)
     {
         if (!needGroupedLog(1))
@@ -36537,39 +36551,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("syncStack(");
         WriteToString(&out, peer);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
-                                    Ark_Int32 index)
-    {
-        if (!needGroupedLog(1))
-        {
-            return 0;
-        }
-        string out("checkNeedCreate(");
-        WriteToString(&out, navigation);
-        out.append(", ");
-        WriteToString(&out, index);
-        out.append(") \n");
-        out.append("[return 0] \n");
-        appendGroupedLog(1, out);
-        return 0;
-    }
-    void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
-                                   Ark_Int32 index,
-                                   Ark_NativePointer node)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNavDestinationNode(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, index);
-        out.append(", ");
-        WriteToString(&out, node);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -48982,9 +48963,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
             NavExtenderAccessor::SetNavigationOptionsImpl,
             NavExtenderAccessor::SetUpdateStackCallbackImpl,
+            NavExtenderAccessor::SetNavDestinationBuilderCallbackImpl,
             NavExtenderAccessor::SyncStackImpl,
-            NavExtenderAccessor::CheckNeedCreateImpl,
-            NavExtenderAccessor::SetNavDestinationNodeImpl,
             NavExtenderAccessor::PushPathImpl,
             NavExtenderAccessor::ReplacePathImpl,
             NavExtenderAccessor::PopImpl,
