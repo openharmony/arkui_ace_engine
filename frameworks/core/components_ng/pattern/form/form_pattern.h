@@ -45,6 +45,9 @@ struct SerializedGesture;
 struct AccessibilityParentRectInfo;
 
 namespace NG {
+namespace {
+    constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
+}
 enum class FormChildNodeType : int32_t {
     /**
      * Arkts card node type
@@ -249,7 +252,8 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
-    void DelayRemoveFormChildNode(FormChildNodeType formChildNodeType);
+    void DelayRemoveFormChildNode(FormChildNodeType formChildNodeType,
+        uint32_t delay = STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE);
     void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
