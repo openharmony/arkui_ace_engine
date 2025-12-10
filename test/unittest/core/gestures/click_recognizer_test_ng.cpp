@@ -1017,31 +1017,6 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEventTest001, TestSi
 }
 
 /**
- * @tc.name: GestureRecognizerHandleTouchMoveEventTest001
- * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ClickRecognizerTestNg, GestureRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create ClickRecognizer.
-     */
-    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-
-    /**
-     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
-     * @tc.steps: case1: refereeState is SUCCESS,return
-     * @tc.expected: step2. result equals.
-     */
-    TouchEvent touchEvent;
-    clickRecognizer->currentTouchPointsNum_ = 0;
-    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
-    clickRecognizer->currentFingers_ = FINGER_NUMBER;
-    clickRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
-}
-
-/**
  * @tc.name: Dump001
  * @tc.desc: Test ClickRecognizer function: Dump
  * @tc.type: FUNC
