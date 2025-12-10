@@ -77,6 +77,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+        SetupTheme<TextTheme>();
         for (auto& [id, strid, res] : resourceInitTable) {
             AddResource(id, res);
             AddResource(strid, res);
