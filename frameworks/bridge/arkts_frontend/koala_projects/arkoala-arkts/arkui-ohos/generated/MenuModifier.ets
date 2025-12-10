@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkMenuPeer, SubMenuExpandingMode, MenuAttribute } from "./component/menu"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./component/units"
-import { Color } from "./component/enums"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkMenuPeer, SubMenuExpandingMode, MenuAttribute } from './component/menu'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { Font as arkui_component_units_Font, ResourceColor, Resource as arkui_component_units_Resource, Dimension, BorderRadiuses, DividerStyleOptions } from './component/units'
+import { Color as arkui_component_enums_Color } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class MenuModifier extends CommonMethodModifier implements MenuAttribute,AttributeModifier<MenuAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,152 +45,146 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     applyFocusedAttribute(instance: MenuAttribute): void { }
     applyDisabledAttribute(instance: MenuAttribute): void { }
     applySelectedAttribute(instance: MenuAttribute): void { }
-    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _font_0_0value?: Font | undefined
-    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontColor_0_0value?: ResourceColor | undefined
-    _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radius_0_0value?: Dimension | BorderRadiuses | undefined
-    _menuItemDivider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuItemDivider_0_0value?: DividerStyleOptions | undefined
-    _menuItemGroupDivider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuItemGroupDivider_0_0value?: DividerStyleOptions | undefined
-    _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _font_0_0value?: arkui_component_units_Font | undefined
+    public _fontColor_0_0value?: ResourceColor | undefined
+    public _radius_0_0value?: Dimension | BorderRadiuses | undefined
+    public _menuItemDivider_0_0value?: DividerStyleOptions | undefined
+    public _menuItemGroupDivider_0_0value?: DividerStyleOptions | undefined
+    public _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkMenuPeer;
-        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontAttribute((this._font_0_0value as Font | undefined));
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkMenuPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontAttribute((undefined as Font | undefined));
+                    flagArray[0] = 0;
+                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setFontColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._radius_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._radius_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setRadiusAttribute((this._radius_0_0value as Dimension | BorderRadiuses | undefined));
-                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._radius_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setRadiusAttribute((undefined as Dimension | BorderRadiuses | undefined));
                 }
             }
         }
-        if (this._menuItemDivider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuItemDivider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setMenuItemDividerAttribute((this._menuItemDivider_0_0value as DividerStyleOptions | undefined));
-                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setMenuItemDividerAttribute((undefined as DividerStyleOptions | undefined));
                 }
             }
         }
-        if (this._menuItemGroupDivider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuItemGroupDivider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setMenuItemGroupDividerAttribute((this._menuItemGroupDivider_0_0value as DividerStyleOptions | undefined));
-                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setMenuItemGroupDividerAttribute((undefined as DividerStyleOptions | undefined));
                 }
             }
         }
-        if (this._subMenuExpandingMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._subMenuExpandingMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setSubMenuExpandingModeAttribute((this._subMenuExpandingMode_0_0value as SubMenuExpandingMode | undefined));
-                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setSubMenuExpandingModeAttribute((undefined as SubMenuExpandingMode | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: MenuModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: MenuModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.font(modifier._font_0_0value);
                     break;
                 }
                 default: {
-                    this.font((undefined as Font | undefined));
+                    this.font((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.fontColor(modifier._fontColor_0_0value);
                     break;
                 }
@@ -193,11 +193,10 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
-        if (modifier._radius_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._radius_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.radius(modifier._radius_0_0value);
                     break;
                 }
@@ -206,11 +205,10 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
-        if (modifier._menuItemDivider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuItemDivider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.menuItemDivider(modifier._menuItemDivider_0_0value);
                     break;
                 }
@@ -219,11 +217,10 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
-        if (modifier._menuItemGroupDivider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuItemGroupDivider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.menuItemGroupDivider(modifier._menuItemGroupDivider_0_0value);
                     break;
                 }
@@ -232,11 +229,10 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
-        if (modifier._subMenuExpandingMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._subMenuExpandingMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.subMenuExpandingMode(modifier._subMenuExpandingMode_0_0value);
                     break;
                 }
@@ -246,79 +242,67 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
             }
         }
     }
-    font(value: Font | undefined): this {
-        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+    font(value: arkui_component_units_Font | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._font_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._font_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     fontColor(value: ResourceColor | undefined): this {
-        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._fontColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     radius(value: Dimension | BorderRadiuses | undefined): this {
-        if (((this._radius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._radius_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._radius_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._radius_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     menuItemDivider(value: DividerStyleOptions | undefined): this {
-        if (((this._menuItemDivider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menuItemDivider_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._menuItemDivider_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._menuItemDivider_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
-        if (((this._menuItemGroupDivider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._menuItemGroupDivider_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
-        if (((this._subMenuExpandingMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._subMenuExpandingMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

@@ -16,34 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors } from "#handwritten"
-import { default as uiEffect } from "@ohos.graphics.uiEffect"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
-export class uiEffect_Filter_serializer {
-    public static write(buffer: SerializerBase, value: uiEffect.Filter): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toUiEffectFilterPtr(value))
-    }
-    public static read(buffer: DeserializerBase): uiEffect.Filter {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromUiEffectFilterPtr(ptr)
-    }
-}
-export class uiEffect_VisualEffect_serializer {
-    public static write(buffer: SerializerBase, value: uiEffect.VisualEffect): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toUiEffectVisualEffectPtr(value))
-    }
-    public static read(buffer: DeserializerBase): uiEffect.VisualEffect {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromUiEffectVisualEffectPtr(ptr)
-    }
-}
+import { default as uiEffect } from '@ohos.graphics.uiEffect'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { extractors } from '#handwritten'
 export class uiEffect_BrightnessBlender_serializer {
     public static write(buffer: SerializerBase, value: uiEffect.BrightnessBlender): void {
         let valueSerializer : SerializerBase = buffer
@@ -92,5 +69,27 @@ export class uiEffect_BrightnessBlender_serializer {
         const fractionTmpResult : double = valueDeserializer.readFloat64()
         let value : uiEffect.BrightnessBlender = ({cubicRate: cubicRateTmpResult, quadraticRate: quadraticRateTmpResult, linearRate: linearRateTmpResult, degree: degreeTmpResult, saturation: saturationTmpResult, positiveCoefficient: positiveCoefficientTmpResult, negativeCoefficient: negativeCoefficientTmpResult, fraction: fractionTmpResult} as uiEffect.BrightnessBlender)
         return value
+    }
+}
+export class uiEffect_Filter_serializer {
+    public static write(buffer: SerializerBase, value: uiEffect.Filter): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toUiEffectFilterPtr(value))
+    }
+    public static read(buffer: DeserializerBase): uiEffect.Filter {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromUiEffectFilterPtr(ptr)
+    }
+}
+export class uiEffect_VisualEffect_serializer {
+    public static write(buffer: SerializerBase, value: uiEffect.VisualEffect): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toUiEffectVisualEffectPtr(value))
+    }
+    public static read(buffer: DeserializerBase): uiEffect.VisualEffect {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromUiEffectVisualEffectPtr(ptr)
     }
 }

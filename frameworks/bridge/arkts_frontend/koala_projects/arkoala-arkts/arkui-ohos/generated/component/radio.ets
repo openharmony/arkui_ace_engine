@@ -16,28 +16,29 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ContentModifier, AttributeModifier, hookRadioContentModifier, hookRadioAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { CustomBuilder } from "./builder"
-import { ResourceColor } from "./units"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { RadioModifier } from "./../RadioModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ContentModifier, AttributeModifier, hookRadioContentModifier, hookRadioAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { CustomBuilder } from './builder'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
+import { Color as arkui_component_enums_Color } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { RadioModifier } from './../RadioModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkRadioPeer extends ArkCommonMethodPeer {
     attributeSet?: RadioModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRadioPeer {
@@ -48,6 +49,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRadioOptionsAttribute(options: RadioOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         RadioOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._RadioInterface_setRadioOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -62,7 +64,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -117,64 +119,36 @@ export interface RadioStyle {
 export type OnRadioChangeCallback = (isChecked: boolean) => void;
 export interface RadioAttribute extends CommonMethod {
     setRadioOptions(options: RadioOptions): this {
-        throw new Error("Unimplemented method setRadioOptions")
+        throw new Error('Unimplemented method setRadioOptions')
     }
     checked(value: boolean | Bindable<boolean> | undefined): this {
-        throw new Error("Unimplemented method checked")
+        throw new Error('Unimplemented method checked')
     }
     onChange(value: OnRadioChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onChange")
+        throw new Error('Unimplemented method onChange')
     }
     radioStyle(value: RadioStyle | undefined): this {
-        throw new Error("Unimplemented method radioStyle")
+        throw new Error('Unimplemented method radioStyle')
     }
     contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
-        throw new Error("Unimplemented method contentModifier")
+        throw new Error('Unimplemented method contentModifier')
     }
     attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
-    checked_value?: boolean | Bindable<boolean> | undefined
-    onChange_value?: OnRadioChangeCallback | undefined
-    radioStyle_value?: RadioStyle | undefined
-    contentModifier_value?: ContentModifier<RadioConfiguration> | undefined
-    attributeModifier_value?: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined
-    setRadioOptions(options: RadioOptions): this {
-        return this
-    }
-    checked(value: boolean | Bindable<boolean> | undefined): this {
-        return this
-    }
-    onChange(value: OnRadioChangeCallback | undefined): this {
-        return this
-    }
-    radioStyle(value: RadioStyle | undefined): this {
-        return this
-    }
-    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface RadioConfiguration extends CommonConfiguration<RadioConfiguration> {
     value: string;
     checked: boolean;
-    triggerChange: ((value0: boolean) => void);
+    triggerChange: arkui_component_common_Callback<boolean, void>;
 }
 
 export class ArkRadioComponent extends ArkCommonMethodComponent implements RadioAttribute {
     getPeer(): ArkRadioPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkRadioPeer)
     }
     public setRadioOptions(options: RadioOptions): this {
-        if (this.checkPriority("setRadioOptions")) {
+        if (this.checkPriority('setRadioOptions')) {
             const options_casted = options as (RadioOptions)
             this.getPeer()?.setRadioOptionsAttribute(options_casted)
             this.applyOptionsFinish('RadioAttribute');
@@ -183,7 +157,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public checked(value: boolean | Bindable<boolean> | undefined): this {
-        if (this.checkPriority("checked")) {
+        if (this.checkPriority('checked')) {
             const value_casted = value as (boolean | Bindable<boolean> | undefined)
             this.getPeer()?.setCheckedAttribute(value_casted)
             return this
@@ -191,7 +165,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public onChange(value: OnRadioChangeCallback | undefined): this {
-        if (this.checkPriority("onChange")) {
+        if (this.checkPriority('onChange')) {
             const value_casted = value as (OnRadioChangeCallback | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
@@ -199,7 +173,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public radioStyle(value: RadioStyle | undefined): this {
-        if (this.checkPriority("radioStyle")) {
+        if (this.checkPriority('radioStyle')) {
             const value_casted = value as (RadioStyle | undefined)
             this.getPeer()?.setRadioStyleAttribute(value_casted)
             return this
@@ -207,7 +181,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
-        if (this.checkPriority("contentModifier")) {
+        if (this.checkPriority('contentModifier')) {
             hookRadioContentModifier(this, value)
         }
         return this
@@ -229,18 +203,16 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
 
 @memo
 export function RadioImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: RadioAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkRadioComponent>((): ArkRadioComponent => {
         return new ArkRadioComponent()
     })
-    NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (peer: ArkRadioPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (_: ArkRadioPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -268,16 +240,18 @@ export class RadioConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const triggerChangeTmpBufClosure  = (data: boolean):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
-            triggerChangeTmpBufBufArgsSerializer.writeBoolean(value0);
-            InteropNativeModule._CallCallbackSync(10, 313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            triggerChangeTmpBufBufArgsSerializer.writeBoolean(data);
+            InteropNativeModule._CallCallbackSync(10, -1691789173, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : arkui_component_common_Callback<boolean, void> = triggerChangeTmpBufClosure
         let value : RadioConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, checked: checkedTmpResult, triggerChange: triggerChangeTmpResult} as RadioConfiguration)
         return value
     }
@@ -310,27 +284,29 @@ export class RadioOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const groupTmpResult : string = (valueDeserializer.readString() as string)
         const valueTmpResult : string = (valueDeserializer.readString() as string)
-        const indicatorTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const indicatorTypeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let indicatorTypeTmpBuf : RadioIndicatorType | undefined = undefined
         if ((indicatorTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             indicatorTypeTmpBuf = RadioIndicatorType.fromValue(valueDeserializer.readInt32())
         }
         const indicatorTypeTmpResult : RadioIndicatorType | undefined = indicatorTypeTmpBuf
-        const indicatorBuilderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const indicatorBuilderTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let indicatorBuilderTmpBuf : CustomBuilder | undefined = undefined
         if ((indicatorBuilderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const indicatorBuilderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const indicatorBuilderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const indicatorBuilderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            indicatorBuilderTmpBuf = ():void => {
-                const indicatorBuilderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                indicatorBuilderTmpBuf_BufArgsSerializer.writeInt32(indicatorBuilderTmpBuf_BufResource.resourceId);
-                indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCall);
-                indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, 737226752, indicatorBuilderTmpBuf_BufArgsSerializer.asBuffer(), indicatorBuilderTmpBuf_BufArgsSerializer.length());
-                indicatorBuilderTmpBuf_BufArgsSerializer.release();
+            const indicatorBuilderTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const indicatorBuilderTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const indicatorBuilderTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const indicatorBuilderTmpBufOptClosure  = ():void => {
+                const indicatorBuilderTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                indicatorBuilderTmpBufOptBufArgsSerializer.writeInt32(indicatorBuilderTmpBufOptBufResource.resourceId);
+                indicatorBuilderTmpBufOptBufArgsSerializer.writePointer(indicatorBuilderTmpBufOptBufCall);
+                indicatorBuilderTmpBufOptBufArgsSerializer.writePointer(indicatorBuilderTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1834072896, indicatorBuilderTmpBufOptBufArgsSerializer.asBuffer(), indicatorBuilderTmpBufOptBufArgsSerializer.length());
+                indicatorBuilderTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(indicatorBuilderTmpBufOptClosure, indicatorBuilderTmpBufOptBufResource)
+            indicatorBuilderTmpBuf = indicatorBuilderTmpBufOptClosure
         }
         const indicatorBuilderTmpResult : CustomBuilder | undefined = indicatorBuilderTmpBuf
         let value : RadioOptions = ({group: groupTmpResult, value: valueTmpResult, indicatorType: indicatorTypeTmpResult, indicatorBuilder: indicatorBuilderTmpResult} as RadioOptions)
@@ -344,10 +320,10 @@ export class RadioStyle_serializer {
         if (valueHolderForCheckedBackgroundColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCheckedBackgroundColorTmpValue  = valueHolderForCheckedBackgroundColor!
-            if (valueHolderForCheckedBackgroundColorTmpValue instanceof Color) {
+            if (valueHolderForCheckedBackgroundColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as int32
@@ -356,10 +332,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx2  = valueHolderForCheckedBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForCheckedBackgroundColorTmpValueForIdx2)
-            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof Resource) {
+            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForCheckedBackgroundColorTmpValueForIdx3  = valueHolderForCheckedBackgroundColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForCheckedBackgroundColorTmpValueForIdx3)
+                const valueHolderForCheckedBackgroundColorTmpValueForIdx3  = valueHolderForCheckedBackgroundColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForCheckedBackgroundColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -368,10 +344,10 @@ export class RadioStyle_serializer {
         if (valueHolderForUncheckedBorderColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUncheckedBorderColorTmpValue  = valueHolderForUncheckedBorderColor!
-            if (valueHolderForUncheckedBorderColorTmpValue instanceof Color) {
+            if (valueHolderForUncheckedBorderColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as int32
@@ -380,10 +356,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx2  = valueHolderForUncheckedBorderColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUncheckedBorderColorTmpValueForIdx2)
-            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof Resource) {
+            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForUncheckedBorderColorTmpValueForIdx3  = valueHolderForUncheckedBorderColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForUncheckedBorderColorTmpValueForIdx3)
+                const valueHolderForUncheckedBorderColorTmpValueForIdx3  = valueHolderForUncheckedBorderColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForUncheckedBorderColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -392,10 +368,10 @@ export class RadioStyle_serializer {
         if (valueHolderForIndicatorColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndicatorColorTmpValue  = valueHolderForIndicatorColor!
-            if (valueHolderForIndicatorColorTmpValue instanceof Color) {
+            if (valueHolderForIndicatorColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForIndicatorColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as int32
@@ -404,10 +380,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx2  = valueHolderForIndicatorColorTmpValue as string
                 valueSerializer.writeString(valueHolderForIndicatorColorTmpValueForIdx2)
-            } else if (valueHolderForIndicatorColorTmpValue instanceof Resource) {
+            } else if (valueHolderForIndicatorColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForIndicatorColorTmpValueForIdx3  = valueHolderForIndicatorColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForIndicatorColorTmpValueForIdx3)
+                const valueHolderForIndicatorColorTmpValueForIdx3  = valueHolderForIndicatorColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForIndicatorColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -415,61 +391,61 @@ export class RadioStyle_serializer {
     }
     public static read(buffer: DeserializerBase): RadioStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const checkedBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const checkedBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let checkedBackgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((checkedBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const checkedBackgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let checkedBackgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (checkedBackgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                checkedBackgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (checkedBackgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                checkedBackgroundColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (checkedBackgroundColorTmpBuf_UnionSelector == (2).toChar()) {
-                checkedBackgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (checkedBackgroundColorTmpBuf_UnionSelector == (3).toChar()) {
-                checkedBackgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const checkedBackgroundColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let checkedBackgroundColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (checkedBackgroundColorTmpBufOptUnionSelector == (0).toByte()) {
+                checkedBackgroundColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (checkedBackgroundColorTmpBufOptUnionSelector == (1).toByte()) {
+                checkedBackgroundColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (checkedBackgroundColorTmpBufOptUnionSelector == (2).toByte()) {
+                checkedBackgroundColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (checkedBackgroundColorTmpBufOptUnionSelector == (3).toByte()) {
+                checkedBackgroundColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for checkedBackgroundColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for checkedBackgroundColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            checkedBackgroundColorTmpBuf = (checkedBackgroundColorTmpBuf_ as Color | int32 | string | Resource)
+            checkedBackgroundColorTmpBuf = (checkedBackgroundColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const checkedBackgroundColorTmpResult : ResourceColor | undefined = checkedBackgroundColorTmpBuf
-        const uncheckedBorderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const uncheckedBorderColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let uncheckedBorderColorTmpBuf : ResourceColor | undefined = undefined
         if ((uncheckedBorderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const uncheckedBorderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let uncheckedBorderColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (uncheckedBorderColorTmpBuf_UnionSelector == (0).toChar()) {
-                uncheckedBorderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (uncheckedBorderColorTmpBuf_UnionSelector == (1).toChar()) {
-                uncheckedBorderColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (uncheckedBorderColorTmpBuf_UnionSelector == (2).toChar()) {
-                uncheckedBorderColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (uncheckedBorderColorTmpBuf_UnionSelector == (3).toChar()) {
-                uncheckedBorderColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const uncheckedBorderColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let uncheckedBorderColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (uncheckedBorderColorTmpBufOptUnionSelector == (0).toByte()) {
+                uncheckedBorderColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (uncheckedBorderColorTmpBufOptUnionSelector == (1).toByte()) {
+                uncheckedBorderColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (uncheckedBorderColorTmpBufOptUnionSelector == (2).toByte()) {
+                uncheckedBorderColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (uncheckedBorderColorTmpBufOptUnionSelector == (3).toByte()) {
+                uncheckedBorderColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for uncheckedBorderColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for uncheckedBorderColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            uncheckedBorderColorTmpBuf = (uncheckedBorderColorTmpBuf_ as Color | int32 | string | Resource)
+            uncheckedBorderColorTmpBuf = (uncheckedBorderColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const uncheckedBorderColorTmpResult : ResourceColor | undefined = uncheckedBorderColorTmpBuf
-        const indicatorColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const indicatorColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let indicatorColorTmpBuf : ResourceColor | undefined = undefined
         if ((indicatorColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const indicatorColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let indicatorColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (indicatorColorTmpBuf_UnionSelector == (0).toChar()) {
-                indicatorColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (indicatorColorTmpBuf_UnionSelector == (1).toChar()) {
-                indicatorColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (indicatorColorTmpBuf_UnionSelector == (2).toChar()) {
-                indicatorColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (indicatorColorTmpBuf_UnionSelector == (3).toChar()) {
-                indicatorColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const indicatorColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let indicatorColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (indicatorColorTmpBufOptUnionSelector == (0).toByte()) {
+                indicatorColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (indicatorColorTmpBufOptUnionSelector == (1).toByte()) {
+                indicatorColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (indicatorColorTmpBufOptUnionSelector == (2).toByte()) {
+                indicatorColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (indicatorColorTmpBufOptUnionSelector == (3).toByte()) {
+                indicatorColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for indicatorColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for indicatorColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            indicatorColorTmpBuf = (indicatorColorTmpBuf_ as Color | int32 | string | Resource)
+            indicatorColorTmpBuf = (indicatorColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const indicatorColorTmpResult : ResourceColor | undefined = indicatorColorTmpBuf
         let value : RadioStyle = ({checkedBackgroundColor: checkedBackgroundColorTmpResult, uncheckedBorderColor: uncheckedBorderColorTmpResult, indicatorColor: indicatorColorTmpResult} as RadioStyle)

@@ -16,39 +16,40 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { Resource_serializer } from "./../framework/resource"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Resource } from "global.resource"
-import { ResourceColor } from "./units"
-import { Color, FontWeight } from "./enums"
-import { AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { SymbolGlyphModifier } from "./../SymbolGlyphModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
+import { Color as arkui_component_enums_Color, FontWeight } from './enums'
+import { AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SymbolGlyphModifier } from './../SymbolGlyphModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class SymbolEffectInternal {
     public static fromPtr(ptr: KPointer): SymbolEffect {
-        return new SymbolEffect(ptr)
+        return new SymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class SymbolEffect implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SymbolEffect.getFinalizer())
     }
     constructor() {
-        this(SymbolEffect.construct())
+        this(MaterializedBaseTag.NOP, SymbolEffect.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SymbolEffect_construct()
@@ -60,7 +61,7 @@ export class SymbolEffect implements MaterializedBase {
 }
 export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
     attributeSet?: SymbolGlyphModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSymbolGlyphPeer {
@@ -70,19 +71,20 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setSymbolGlyphOptionsAttribute(value?: Resource): void {
+    setSymbolGlyphOptionsAttribute(value?: global_resource_Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            Resource_serializer.write(thisSerializer, valueTmpValue)
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphInterface_setSymbolGlyphOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: double | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -95,10 +97,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -114,10 +116,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32((valueTmpValue.length).toInt())
             for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
                 const valueTmpValueTmpElement : ResourceColor = valueTmpValue[valueTmpValueCounterI]
-                if (valueTmpValueTmpElement instanceof Color) {
+                if (valueTmpValueTmpElement instanceof arkui_component_enums_Color) {
                     thisSerializer.writeInt8((0).toByte())
-                    const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
-                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
+                    const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as arkui_component_enums_Color
+                    thisSerializer.writeInt32((valueTmpValueTmpElementForIdx0.getOrdinal()) % (12))
                 } else if (valueTmpValueTmpElement instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as int32
@@ -126,10 +128,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx2)
-                } else if (valueTmpValueTmpElement instanceof Resource) {
+                } else if (valueTmpValueTmpElement instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((3).toByte())
-                    const valueTmpValueTmpElementForIdx3  = valueTmpValueTmpElement as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx3)
+                    const valueTmpValueTmpElementForIdx3  = valueTmpValueTmpElement as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx3)
                 }
             }
         } else {
@@ -198,7 +200,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: double | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -207,10 +209,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -218,7 +220,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -227,10 +229,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -300,117 +302,67 @@ export enum EffectFillStyle {
     ITERATIVE = 1
 }
 export interface SymbolGlyphAttribute extends CommonMethod {
-    setSymbolGlyphOptions(value?: Resource): this {
-        throw new Error("Unimplemented method setSymbolGlyphOptions")
+    setSymbolGlyphOptions(value?: global_resource_Resource): this {
+        throw new Error('Unimplemented method setSymbolGlyphOptions')
     }
-    fontSize(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method fontSize")
+    fontSize(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method fontSize')
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
-        throw new Error("Unimplemented method fontColor")
+        throw new Error('Unimplemented method fontColor')
     }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
-        throw new Error("Unimplemented method fontWeight")
+        throw new Error('Unimplemented method fontWeight')
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
-        throw new Error("Unimplemented method effectStrategy")
+        throw new Error('Unimplemented method effectStrategy')
     }
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
-        throw new Error("Unimplemented method renderingStrategy")
+        throw new Error('Unimplemented method renderingStrategy')
     }
     symbolEffect(value: SymbolEffect | undefined): this {
-        throw new Error("Unimplemented method symbolEffect")
+        throw new Error('Unimplemented method symbolEffect')
     }
-    minFontScale(value: double | Resource | undefined): this {
-        throw new Error("Unimplemented method minFontScale")
+    minFontScale(value: double | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method minFontScale')
     }
-    maxFontScale(value: double | Resource | undefined): this {
-        throw new Error("Unimplemented method maxFontScale")
+    maxFontScale(value: double | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method maxFontScale')
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
-        throw new Error("Unimplemented method symbolEffect")
+        throw new Error('Unimplemented method symbolEffect')
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
-        throw new Error("Unimplemented method symbolEffect")
+        throw new Error('Unimplemented method symbolEffect')
     }
     attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
-    fontSize_value?: double | string | Resource | undefined
-    fontColor_value?: Array<ResourceColor> | undefined
-    fontWeight_value?: int32 | FontWeight | string | undefined
-    effectStrategy_value?: SymbolEffectStrategy | undefined
-    renderingStrategy_value?: SymbolRenderingStrategy | undefined
-    symbolEffect_value?: SymbolEffect | undefined
-    minFontScale_value?: double | Resource | undefined
-    maxFontScale_value?: double | Resource | undefined
-    attributeModifier_value?: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined
-    setSymbolGlyphOptions(value?: Resource): this {
-        return this
-    }
-    fontSize(value: double | string | Resource | undefined): this {
-        return this
-    }
-    fontColor(value: Array<ResourceColor> | undefined): this {
-        return this
-    }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
-        return this
-    }
-    effectStrategy(value: SymbolEffectStrategy | undefined): this {
-        return this
-    }
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
-        return this
-    }
-    symbolEffect(value: SymbolEffect | undefined): this {
-        return this
-    }
-    minFontScale(value: double | Resource | undefined): this {
-        return this
-    }
-    maxFontScale(value: double | Resource | undefined): this {
-        return this
-    }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
-        return this
-    }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements SymbolGlyphAttribute {
     getPeer(): ArkSymbolGlyphPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkSymbolGlyphPeer)
     }
-    public setSymbolGlyphOptions(value?: Resource): this {
-        if (this.checkPriority("setSymbolGlyphOptions")) {
-            const value_casted = value as (Resource | undefined)
+    public setSymbolGlyphOptions(value?: global_resource_Resource): this {
+        if (this.checkPriority('setSymbolGlyphOptions')) {
+            const value_casted = value as (global_resource_Resource | undefined)
             this.getPeer()?.setSymbolGlyphOptionsAttribute(value_casted)
             this.applyOptionsFinish('SymbolGlyphAttribute');
             return this
         }
         return this
     }
-    public fontSize(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("fontSize")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public fontSize(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('fontSize')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
     public fontColor(value: Array<ResourceColor> | undefined): this {
-        if (this.checkPriority("fontColor")) {
+        if (this.checkPriority('fontColor')) {
             const value_casted = value as (Array<ResourceColor> | undefined)
             this.getPeer()?.setFontColorAttribute(value_casted)
             return this
@@ -418,7 +370,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public fontWeight(value: int32 | FontWeight | string | undefined): this {
-        if (this.checkPriority("fontWeight")) {
+        if (this.checkPriority('fontWeight')) {
             const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
@@ -426,7 +378,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
-        if (this.checkPriority("effectStrategy")) {
+        if (this.checkPriority('effectStrategy')) {
             const value_casted = value as (SymbolEffectStrategy | undefined)
             this.getPeer()?.setEffectStrategyAttribute(value_casted)
             return this
@@ -434,7 +386,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
-        if (this.checkPriority("renderingStrategy")) {
+        if (this.checkPriority('renderingStrategy')) {
             const value_casted = value as (SymbolRenderingStrategy | undefined)
             this.getPeer()?.setRenderingStrategyAttribute(value_casted)
             return this
@@ -442,31 +394,31 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public symbolEffect(value: SymbolEffect | undefined): this {
-        if (this.checkPriority("symbolEffect")) {
+        if (this.checkPriority('symbolEffect')) {
             const value_casted = value as (SymbolEffect | undefined)
             this.getPeer()?.setSymbolEffect0Attribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: double | Resource | undefined): this {
-        if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (double | Resource | undefined)
+    public minFontScale(value: double | global_resource_Resource | undefined): this {
+        if (this.checkPriority('minFontScale')) {
+            const value_casted = value as (double | global_resource_Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: double | Resource | undefined): this {
-        if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (double | Resource | undefined)
+    public maxFontScale(value: double | global_resource_Resource | undefined): this {
+        if (this.checkPriority('maxFontScale')) {
+            const value_casted = value as (double | global_resource_Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
     public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
-        if (this.checkPriority("symbolEffect")) {
+        if (this.checkPriority('symbolEffect')) {
             const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
             const isActive_casted = isActive as (boolean | undefined)
             this.getPeer()?.setSymbolEffect1Attribute(symbolEffect_casted, isActive_casted)
@@ -475,7 +427,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
-        if (this.checkPriority("symbolEffect")) {
+        if (this.checkPriority('symbolEffect')) {
             const symbolEffect_casted = symbolEffect as (SymbolEffect | undefined)
             const triggerValue_casted = triggerValue as (int32 | undefined)
             this.getPeer()?.setSymbolEffect2Attribute(symbolEffect_casted, triggerValue_casted)
@@ -500,44 +452,20 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
 
 @memo
 export function SymbolGlyphImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
         return new ArkSymbolGlyphComponent()
     })
-    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (peer: ArkSymbolGlyphPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
-export class PulseSymbolEffect_serializer {
-    public static write(buffer: SerializerBase, value: PulseSymbolEffect): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): PulseSymbolEffect {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PulseSymbolEffectInternal.fromPtr(ptr)
-    }
-}
-export class SymbolEffect_serializer {
-    public static write(buffer: SerializerBase, value: SymbolEffect): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): SymbolEffect {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return SymbolEffectInternal.fromPtr(ptr)
-    }
-}
 export class AppearSymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: AppearSymbolEffect): void {
         let valueSerializer : SerializerBase = buffer
@@ -582,6 +510,17 @@ export class HierarchicalSymbolEffect_serializer {
         return HierarchicalSymbolEffectInternal.fromPtr(ptr)
     }
 }
+export class PulseSymbolEffect_serializer {
+    public static write(buffer: SerializerBase, value: PulseSymbolEffect): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): PulseSymbolEffect {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PulseSymbolEffectInternal.fromPtr(ptr)
+    }
+}
 export class ReplaceSymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: ReplaceSymbolEffect): void {
         let valueSerializer : SerializerBase = buffer
@@ -604,24 +543,31 @@ export class ScaleSymbolEffect_serializer {
         return ScaleSymbolEffectInternal.fromPtr(ptr)
     }
 }
+export class SymbolEffect_serializer {
+    public static write(buffer: SerializerBase, value: SymbolEffect): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): SymbolEffect {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SymbolEffectInternal.fromPtr(ptr)
+    }
+}
 export class AppearSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): AppearSymbolEffect {
-        return new AppearSymbolEffect(false, ptr)
+        return new AppearSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get scope(): EffectScope | undefined {
-        return this.getScope()
-    }
-    set scope(scope: EffectScope | undefined) {
-        const scope_NonNull  = (scope as EffectScope | undefined)
-        this.setScope(scope_NonNull)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public scope?: EffectScope | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.scope = this.getScope()
     }
     constructor(scope?: EffectScope) {
-        this(false, AppearSymbolEffect.construct(scope))
+        this(MaterializedBaseTag.NOP, AppearSymbolEffect.construct(scope))
+        this.scope = this.getScope()
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -650,7 +596,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
     private getScope_serialize(): EffectScope | undefined {
         const retval  = ArkUIGeneratedNativeModule._AppearSymbolEffect_getScope(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectScope | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
@@ -673,29 +619,21 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
 }
 export class BounceSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): BounceSymbolEffect {
-        return new BounceSymbolEffect(false, false, ptr)
+        return new BounceSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get scope(): EffectScope | undefined {
-        return this.getScope()
-    }
-    set scope(scope: EffectScope | undefined) {
-        const scope_NonNull  = (scope as EffectScope | undefined)
-        this.setScope(scope_NonNull)
-    }
-    get direction(): EffectDirection | undefined {
-        return this.getDirection()
-    }
-    set direction(direction: EffectDirection | undefined) {
-        const direction_NonNull  = (direction as EffectDirection | undefined)
-        this.setDirection(direction_NonNull)
-    }
-    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public scope?: EffectScope | undefined
+    public direction?: EffectDirection | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.scope = this.getScope()
+        this.direction = this.getDirection()
     }
     constructor(scope?: EffectScope, direction?: EffectDirection) {
-        this(false, false, BounceSymbolEffect.construct(scope, direction))
+        this(MaterializedBaseTag.NOP, BounceSymbolEffect.construct(scope, direction))
+        this.scope = this.getScope()
+        this.direction = this.getDirection()
     }
     static construct(scope?: EffectScope, direction?: EffectDirection): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -739,7 +677,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
     private getScope_serialize(): EffectScope | undefined {
         const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_getScope(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectScope | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
@@ -762,7 +700,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
     private getDirection_serialize(): EffectDirection | undefined {
         const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_getDirection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectDirection | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectDirection.fromValue(retvalDeserializer.readInt32())
@@ -785,22 +723,18 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
 }
 export class DisappearSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): DisappearSymbolEffect {
-        return new DisappearSymbolEffect(false, ptr)
+        return new DisappearSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class DisappearSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get scope(): EffectScope | undefined {
-        return this.getScope()
-    }
-    set scope(scope: EffectScope | undefined) {
-        const scope_NonNull  = (scope as EffectScope | undefined)
-        this.setScope(scope_NonNull)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public scope?: EffectScope | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.scope = this.getScope()
     }
     constructor(scope?: EffectScope) {
-        this(false, DisappearSymbolEffect.construct(scope))
+        this(MaterializedBaseTag.NOP, DisappearSymbolEffect.construct(scope))
+        this.scope = this.getScope()
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -829,7 +763,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
     private getScope_serialize(): EffectScope | undefined {
         const retval  = ArkUIGeneratedNativeModule._DisappearSymbolEffect_getScope(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectScope | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
@@ -852,22 +786,18 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
 }
 export class HierarchicalSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): HierarchicalSymbolEffect {
-        return new HierarchicalSymbolEffect(false, ptr)
+        return new HierarchicalSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class HierarchicalSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get fillStyle(): EffectFillStyle | undefined {
-        return this.getFillStyle()
-    }
-    set fillStyle(fillStyle: EffectFillStyle | undefined) {
-        const fillStyle_NonNull  = (fillStyle as EffectFillStyle | undefined)
-        this.setFillStyle(fillStyle_NonNull)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public fillStyle?: EffectFillStyle | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.fillStyle = this.getFillStyle()
     }
     constructor(fillStyle?: EffectFillStyle) {
-        this(false, HierarchicalSymbolEffect.construct(fillStyle))
+        this(MaterializedBaseTag.NOP, HierarchicalSymbolEffect.construct(fillStyle))
+        this.fillStyle = this.getFillStyle()
     }
     static construct(fillStyle?: EffectFillStyle): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -896,7 +826,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
     private getFillStyle_serialize(): EffectFillStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_getFillStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectFillStyle | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectFillStyle.fromValue(retvalDeserializer.readInt32())
@@ -919,15 +849,15 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
 }
 export class PulseSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): PulseSymbolEffect {
-        return new PulseSymbolEffect(ptr)
+        return new PulseSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class PulseSymbolEffect extends SymbolEffect implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor() {
-        this(PulseSymbolEffect.construct())
+        this(MaterializedBaseTag.NOP, PulseSymbolEffect.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._PulseSymbolEffect_construct()
@@ -939,22 +869,18 @@ export class PulseSymbolEffect extends SymbolEffect implements MaterializedBase 
 }
 export class ReplaceSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): ReplaceSymbolEffect {
-        return new ReplaceSymbolEffect(false, ptr)
+        return new ReplaceSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get scope(): EffectScope | undefined {
-        return this.getScope()
-    }
-    set scope(scope: EffectScope | undefined) {
-        const scope_NonNull  = (scope as EffectScope | undefined)
-        this.setScope(scope_NonNull)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public scope?: EffectScope | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.scope = this.getScope()
     }
     constructor(scope?: EffectScope) {
-        this(false, ReplaceSymbolEffect.construct(scope))
+        this(MaterializedBaseTag.NOP, ReplaceSymbolEffect.construct(scope))
+        this.scope = this.getScope()
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -983,7 +909,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
     private getScope_serialize(): EffectScope | undefined {
         const retval  = ArkUIGeneratedNativeModule._ReplaceSymbolEffect_getScope(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectScope | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
@@ -1006,29 +932,21 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
 }
 export class ScaleSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): ScaleSymbolEffect {
-        return new ScaleSymbolEffect(false, false, ptr)
+        return new ScaleSymbolEffect(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase {
-    get scope(): EffectScope | undefined {
-        return this.getScope()
-    }
-    set scope(scope: EffectScope | undefined) {
-        const scope_NonNull  = (scope as EffectScope | undefined)
-        this.setScope(scope_NonNull)
-    }
-    get direction(): EffectDirection | undefined {
-        return this.getDirection()
-    }
-    set direction(direction: EffectDirection | undefined) {
-        const direction_NonNull  = (direction as EffectDirection | undefined)
-        this.setDirection(direction_NonNull)
-    }
-    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public scope?: EffectScope | undefined
+    public direction?: EffectDirection | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.scope = this.getScope()
+        this.direction = this.getDirection()
     }
     constructor(scope?: EffectScope, direction?: EffectDirection) {
-        this(false, false, ScaleSymbolEffect.construct(scope, direction))
+        this(MaterializedBaseTag.NOP, ScaleSymbolEffect.construct(scope, direction))
+        this.scope = this.getScope()
+        this.direction = this.getDirection()
     }
     static construct(scope?: EffectScope, direction?: EffectDirection): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1072,7 +990,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
     private getScope_serialize(): EffectScope | undefined {
         const retval  = ArkUIGeneratedNativeModule._ScaleSymbolEffect_getScope(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectScope | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectScope.fromValue(retvalDeserializer.readInt32())
@@ -1095,7 +1013,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
     private getDirection_serialize(): EffectDirection | undefined {
         const retval  = ArkUIGeneratedNativeModule._ScaleSymbolEffect_getDirection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : EffectDirection | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = EffectDirection.fromValue(retvalDeserializer.readInt32())

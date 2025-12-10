@@ -16,17 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkRowSplitPeer, RowSplitAttribute } from "./component/rowSplit"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkRowSplitPeer, RowSplitAttribute } from './component/rowSplit'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class RowSplitModifier extends CommonMethodModifier implements RowSplitAttribute,AttributeModifier<RowSplitAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,26 +42,28 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     applyFocusedAttribute(instance: RowSplitAttribute): void { }
     applyDisabledAttribute(instance: RowSplitAttribute): void { }
     applySelectedAttribute(instance: RowSplitAttribute): void { }
-    _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _resizeable_0_0value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _resizeable_0_0value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkRowSplitPeer;
-        if (this._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._resizeable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkRowSplitPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setResizeableAttribute((this._resizeable_0_0value as boolean | undefined));
-                    this._resizeable_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._resizeable_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._resizeable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setResizeableAttribute((undefined as boolean | undefined));
                 }
             }
@@ -64,11 +72,14 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     mergeModifier(modifier: RowSplitModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._resizeable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: RowSplitModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.resizeable(modifier._resizeable_0_0value);
                     break;
                 }
@@ -79,18 +90,16 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
         }
     }
     resizeable(value: boolean | undefined): this {
-        if (((this._resizeable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._resizeable_0_0value) !== (value)))
-        {
-            this._resizeable_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._resizeable_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._resizeable_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._resizeable_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

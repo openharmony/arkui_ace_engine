@@ -16,32 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolEffect, SymbolGlyphAttribute } from "./component/symbolglyph"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CommonMethod } from "./component/common"
-import { Resource } from "global.resource"
-import { ResourceColor } from "./component/units"
-import { Color, FontWeight } from "./component/enums"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./CallbackTransformer"
-import { ModifierState } from "./CommonModifier"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolEffect, SymbolGlyphAttribute } from './component/symbolglyph'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './component/units'
+import { Color as arkui_component_enums_Color, FontWeight } from './component/enums'
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {
-    constructor(src?: Resource) {
-        super()
-        let src_type: int32 = RuntimeType.UNDEFINED
-        src_type = runtimeType(src)
-        if (RuntimeType.UNDEFINED != src_type) {
-            this.setSymbolGlyphOptions(src)
-        }
-    }
     _instanceId: number = -1;
-     _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -51,266 +45,220 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
-
-    _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _setSymbolGlyphOptions0_value?: Resource | undefined
-    _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: double | string | Resource | undefined
-    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontColor_0_0value?: Array<ResourceColor> | undefined
-    _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
-    _effectStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
-    _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
-    _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _symbolEffect_0_0value?: SymbolEffect | undefined
-    _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: double | Resource | undefined
-    _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: double | Resource | undefined
-    _symbolEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _symbolEffect_1_0value?: SymbolEffect | undefined
-    _symbolEffect_1_1value?: boolean | undefined
-    _symbolEffect_2_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _symbolEffect_2_0value?: SymbolEffect | undefined
-    _symbolEffect_2_1value?: int32 | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _fontSize_0_0value?: double | string | global_resource_Resource | undefined
+    public _fontColor_0_0value?: Array<ResourceColor> | undefined
+    public _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    public _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
+    public _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
+    public _symbolEffect_0_0value?: SymbolEffect | undefined
+    public _minFontScale_0_0value?: double | global_resource_Resource | undefined
+    public _maxFontScale_0_0value?: double | global_resource_Resource | undefined
+    public _symbolEffect_1_0value?: SymbolEffect | undefined
+    public _symbolEffect_1_1value?: boolean | undefined
+    public _symbolEffect_2_0value?: SymbolEffect | undefined
+    public _symbolEffect_2_1value?: int32 | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkSymbolGlyphPeer;
-        if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
-            switch (this._setSymbolGlyphOptions_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSymbolGlyphOptionsAttribute((this._setSymbolGlyphOptions0_value as Resource | undefined))
-                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
-                    break
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
-                    break
-                }
-                default: {
-                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.INITIAL
-                    peer.setSymbolGlyphOptionsAttribute(undefined)
-                }
-            }
-        }
-        if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
-                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkSymbolGlyphPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | global_resource_Resource | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
+                    flagArray[0] = 0;
+                    peer.setFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setFontColorAttribute((this._fontColor_0_0value as Array<ResourceColor> | undefined));
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setFontColorAttribute((undefined as Array<ResourceColor> | undefined));
                 }
             }
         }
-        if (this._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
-        if (this._effectStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._effectStrategy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setEffectStrategyAttribute((this._effectStrategy_0_0value as SymbolEffectStrategy | undefined));
-                    this._effectStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._effectStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._effectStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setEffectStrategyAttribute((undefined as SymbolEffectStrategy | undefined));
                 }
             }
         }
-        if (this._renderingStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._renderingStrategy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setRenderingStrategyAttribute((this._renderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
-                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
                 }
             }
         }
-        if (this._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._symbolEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setSymbolEffect0Attribute((this._symbolEffect_0_0value as SymbolEffect | undefined));
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._symbolEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setSymbolEffect0Attribute((undefined as SymbolEffect | undefined));
                 }
             }
         }
-        if (this._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minFontScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
-                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | global_resource_Resource | undefined));
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
-                }
-            }
-        }
-        if (this._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._maxFontScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
-                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
+                    flagArray[6] = 0;
+                    peer.setMinFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._symbolEffect_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._symbolEffect_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | global_resource_Resource | undefined));
+                    flagArray[7] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[7] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[7] = 0;
+                    peer.setMaxFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setSymbolEffect1Attribute((this._symbolEffect_1_0value as SymbolEffect | undefined), (this._symbolEffect_1_1value as boolean | undefined));
-                    this._symbolEffect_1_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._symbolEffect_1_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._symbolEffect_1_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setSymbolEffect1Attribute((undefined as SymbolEffect | undefined), (undefined as boolean | undefined));
                 }
             }
         }
-        if (this._symbolEffect_2_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._symbolEffect_2_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setSymbolEffect2Attribute((this._symbolEffect_2_0value as SymbolEffect | undefined), (this._symbolEffect_2_1value as int32 | undefined));
-                    this._symbolEffect_2_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._symbolEffect_2_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._symbolEffect_2_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setSymbolEffect2Attribute((undefined as SymbolEffect | undefined), (undefined as int32 | undefined));
                 }
             }
         }
     }
-    mergeModifier(value: CommonMethodModifier): void {
-        super.mergeModifier(value)
-        const modifier = value as SymbolGlyphModifier;
-        if (modifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
-            switch (modifier._setSymbolGlyphOptions_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.setSymbolGlyphOptions(modifier._setSymbolGlyphOptions0_value)
-                    break
-                }
-                default: {
-                    this.setSymbolGlyphOptions(undefined)
-                }
-            }
-        }
-        if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    mergeModifier(modifier: SymbolGlyphModifier): void {
+        super.mergeModifier(modifier)
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: SymbolGlyphModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.fontSize(modifier._fontSize_0_0value);
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as double | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.fontColor(modifier._fontColor_0_0value);
                     break;
                 }
@@ -319,11 +267,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.fontWeight(modifier._fontWeight_0_0value);
                     break;
                 }
@@ -332,11 +279,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._effectStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._effectStrategy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.effectStrategy(modifier._effectStrategy_0_0value);
                     break;
                 }
@@ -345,11 +291,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._renderingStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._renderingStrategy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.renderingStrategy(modifier._renderingStrategy_0_0value);
                     break;
                 }
@@ -358,11 +303,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._symbolEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.symbolEffect(modifier._symbolEffect_0_0value);
                     break;
                 }
@@ -371,37 +315,34 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minFontScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.minFontScale(modifier._minFontScale_0_0value);
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as double | Resource | undefined));
+                    this.minFontScale((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._maxFontScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.maxFontScale(modifier._maxFontScale_0_0value);
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as double | Resource | undefined));
+                    this.maxFontScale((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._symbolEffect_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._symbolEffect_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.symbolEffect(modifier._symbolEffect_1_0value, modifier._symbolEffect_1_1value);
                     break;
                 }
@@ -410,11 +351,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._symbolEffect_2_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._symbolEffect_2_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.symbolEffect(modifier._symbolEffect_2_0value, modifier._symbolEffect_2_1value);
                     break;
                 }
@@ -424,140 +364,109 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
             }
         }
     }
-    setSymbolGlyphOptions(value: Resource | undefined): this {
-        if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
-            this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {
-            this._setSymbolGlyphOptions0_value = value
-            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
-        } else {
-            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    fontSize(value: double | string | Resource | undefined): this {
-        if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
+    fontSize(value: double | string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._fontSize_0_0value = value
-        } else
-        {
-            this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     fontColor(value: Array<ResourceColor> | undefined): this {
-        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._fontColor_0_0value = value
-        } else
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
-        if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._fontWeight_0_0value = value
-        } else
-        {
-            this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
-        if (((this._effectStrategy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._effectStrategy_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._effectStrategy_0_0value = value
-        } else
-        {
-            this._effectStrategy_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
-        if (((this._renderingStrategy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._renderingStrategy_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._renderingStrategy_0_0value = value
-        } else
-        {
-            this._renderingStrategy_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     symbolEffect(value: SymbolEffect | undefined): this {
-        if (((this._symbolEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._symbolEffect_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._symbolEffect_0_0value = value
-        } else
-        {
-            this._symbolEffect_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
-    minFontScale(value: double | Resource | undefined): this {
-        if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+    minFontScale(value: double | global_resource_Resource | undefined): this {
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._minFontScale_0_0value = value
-        } else
-        {
-            this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
-    maxFontScale(value: double | Resource | undefined): this {
-        if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+    maxFontScale(value: double | global_resource_Resource | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._maxFontScale_0_0value = value
-        } else
-        {
-            this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
-        if (((this._symbolEffect_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_1_1value) !== (isActive)))
-        {
-            this._symbolEffect_1_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || (true) || ((this._symbolEffect_1_1value) !== (isActive))) {
+            this._flagArray[8] = 1
             this._symbolEffect_1_0value = symbolEffect
             this._symbolEffect_1_1value = isActive
-        } else
-        {
-            this._symbolEffect_1_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
-        if (((this._symbolEffect_2_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_2_1value) !== (triggerValue)))
-        {
-            this._symbolEffect_2_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true) || ((this._symbolEffect_2_1value) !== (triggerValue))) {
+            this._flagArray[9] = 1
             this._symbolEffect_2_0value = symbolEffect
             this._symbolEffect_2_1value = triggerValue
-        } else
-        {
-            this._symbolEffect_2_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
-}
-export class SymbolGlyphModifier_serializer {
-    public static write(buffer: SerializerBase, value: SymbolGlyphModifier): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toSymbolGlyphModifierPtr(value))
-    }
-    public static read(buffer: DeserializerBase): SymbolGlyphModifier {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromSymbolGlyphModifierPtr(ptr)
+        throw new Error('Not implemented')
     }
 }

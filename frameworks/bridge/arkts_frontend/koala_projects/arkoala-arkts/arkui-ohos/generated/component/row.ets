@@ -16,24 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { VerticalAlign, FlexAlign } from "./enums"
-import { AttributeModifier, hookRowAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { RowModifier } from "./../RowModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier'
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent } from './common'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { VerticalAlign, FlexAlign } from './enums'
+import { AttributeModifier, hookRowAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SpaceType } from './column'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { RowModifier } from './../RowModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkRowPeer extends ArkCommonMethodPeer {
     attributeSet?: RowModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRowPeer {
@@ -44,6 +48,7 @@ export class ArkRowPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRowOptionsAttribute(options?: RowOptions | RowOptionsV2): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -87,6 +92,18 @@ export class ArkRowPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RowAttribute_setJustifyContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setPointLightAttribute(value: PointLightStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RowAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setReverseAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -101,59 +118,38 @@ export class ArkRowPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RowOptions {
-    space?: string | number;
+    space?: string | double;
 }
 export interface RowOptionsV2 {
-    _stub: int32;
+    space?: SpaceType;
 }
 export interface RowAttribute extends CommonMethod {
     setRowOptions(options?: RowOptions | RowOptionsV2): this {
-        throw new Error("Unimplemented method setRowOptions")
+        throw new Error('Unimplemented method setRowOptions')
     }
     alignItems(value: VerticalAlign | undefined): this {
-        throw new Error("Unimplemented method alignItems")
+        throw new Error('Unimplemented method alignItems')
     }
     justifyContent(value: FlexAlign | undefined): this {
-        throw new Error("Unimplemented method justifyContent")
+        throw new Error('Unimplemented method justifyContent')
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error('Unimplemented method pointLight')
     }
     reverse(value: boolean | undefined): this {
-        throw new Error("Unimplemented method reverse")
+        throw new Error('Unimplemented method reverse')
     }
     attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
-    alignItems_value?: VerticalAlign | undefined
-    justifyContent_value?: FlexAlign | undefined
-    reverse_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined
-    setRowOptions(options?: RowOptions | RowOptionsV2): this {
-        return this
-    }
-    alignItems(value: VerticalAlign | undefined): this {
-        return this
-    }
-    justifyContent(value: FlexAlign | undefined): this {
-        return this
-    }
-    reverse(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttribute {
     getPeer(): ArkRowPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkRowPeer)
     }
     public setRowOptions(options?: RowOptions | RowOptionsV2): this {
-        if (this.checkPriority("setRowOptions")) {
+        if (this.checkPriority('setRowOptions')) {
             const options_casted = options as (RowOptions | RowOptionsV2 | undefined)
             this.getPeer()?.setRowOptionsAttribute(options_casted)
             this.applyOptionsFinish('RowAttribute');
@@ -162,7 +158,7 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
         return this
     }
     public alignItems(value: VerticalAlign | undefined): this {
-        if (this.checkPriority("alignItems")) {
+        if (this.checkPriority('alignItems')) {
             const value_casted = value as (VerticalAlign | undefined)
             this.getPeer()?.setAlignItemsAttribute(value_casted)
             return this
@@ -170,15 +166,23 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
         return this
     }
     public justifyContent(value: FlexAlign | undefined): this {
-        if (this.checkPriority("justifyContent")) {
+        if (this.checkPriority('justifyContent')) {
             const value_casted = value as (FlexAlign | undefined)
             this.getPeer()?.setJustifyContentAttribute(value_casted)
             return this
         }
         return this
     }
+    public pointLight(value: PointLightStyle | undefined): this {
+        if (this.checkPriority('pointLight')) {
+            const value_casted = value as (PointLightStyle | undefined)
+            this.getPeer()?.setPointLightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public reverse(value: boolean | undefined): this {
-        if (this.checkPriority("reverse")) {
+        if (this.checkPriority('reverse')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setReverseAttribute(value_casted)
             return this
@@ -202,35 +206,20 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
 
 @memo
 export function RowImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: RowAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkRowComponent>((): ArkRowComponent => {
         return new ArkRowComponent()
     })
-    NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (peer: ArkRowPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (_: ArkRowPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
-export class RowOptionsV2_serializer {
-    public static write(buffer: SerializerBase, value: RowOptionsV2): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_stub  = value._stub
-        valueSerializer.writeInt32(valueHolderFor_stub)
-    }
-    public static read(buffer: DeserializerBase): RowOptionsV2 {
-        let valueDeserializer : DeserializerBase = buffer
-        const _stubTmpResult : int32 = valueDeserializer.readInt32()
-        let value : RowOptionsV2 = ({_stub: _stubTmpResult} as RowOptionsV2)
-        return value
-    }
-}
 export class RowOptions_serializer {
     public static write(buffer: SerializerBase, value: RowOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -242,10 +231,10 @@ export class RowOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
-            } else if (valueHolderForSpaceTmpValue instanceof number) {
+            } else if (valueHolderForSpaceTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx1)
+                const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -253,22 +242,69 @@ export class RowOptions_serializer {
     }
     public static read(buffer: DeserializerBase): RowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let spaceTmpBuf : string | number | undefined = undefined
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let spaceTmpBuf : string | double | undefined = undefined
         if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const spaceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let spaceTmpBuf_ : string | number | undefined
-            if (spaceTmpBuf_UnionSelector == (0).toChar()) {
-                spaceTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (spaceTmpBuf_UnionSelector == (1).toChar()) {
-                spaceTmpBuf_ = (valueDeserializer.readNumber() as number)
+            const spaceTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let spaceTmpBufOpt : string | double | undefined
+            if (spaceTmpBufOptUnionSelector == (0).toByte()) {
+                spaceTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (spaceTmpBufOptUnionSelector == (1).toByte()) {
+                spaceTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for spaceTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for spaceTmpBufOpt has to be chosen through deserialisation.')
             }
-            spaceTmpBuf = (spaceTmpBuf_ as string | number)
+            spaceTmpBuf = (spaceTmpBufOpt as string | double)
         }
-        const spaceTmpResult : string | number | undefined = spaceTmpBuf
+        const spaceTmpResult : string | double | undefined = spaceTmpBuf
         let value : RowOptions = ({space: spaceTmpResult} as RowOptions)
+        return value
+    }
+}
+export class RowOptionsV2_serializer {
+    public static write(buffer: SerializerBase, value: RowOptionsV2): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSpace  = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue  = valueHolderForSpace!
+            if (valueHolderForSpaceTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
+            } else if (valueHolderForSpaceTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx1)
+            } else if (valueHolderForSpaceTmpValue instanceof global_resource_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForSpaceTmpValueForIdx2  = valueHolderForSpaceTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSpaceTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RowOptionsV2 {
+        let valueDeserializer : DeserializerBase = buffer
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let spaceTmpBuf : SpaceType | undefined = undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let spaceTmpBufOpt : string | double | global_resource_Resource | undefined
+            if (spaceTmpBufOptUnionSelector == (0).toByte()) {
+                spaceTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (spaceTmpBufOptUnionSelector == (1).toByte()) {
+                spaceTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (spaceTmpBufOptUnionSelector == (2).toByte()) {
+                spaceTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for spaceTmpBufOpt has to be chosen through deserialisation.')
+            }
+            spaceTmpBuf = (spaceTmpBufOpt as string | double | global_resource_Resource)
+        }
+        const spaceTmpResult : SpaceType | undefined = spaceTmpBuf
+        let value : RowOptionsV2 = ({space: spaceTmpResult} as RowOptionsV2)
         return value
     }
 }

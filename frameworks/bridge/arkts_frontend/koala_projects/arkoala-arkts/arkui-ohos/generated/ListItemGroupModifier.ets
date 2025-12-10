@@ -16,18 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkListItemGroupPeer, ListItemGroupAttribute } from "./component/listItemGroup"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, ChildrenMainSize } from "./component/common"
-import { ListDividerOptions } from "./component/list"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, ChildrenMainSize, hookListItemGroupChildrenMainSizeImpl } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkListItemGroupPeer, ListItemGroupAttribute } from './component/listItemGroup'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ListDividerOptions } from './component/list'
 export class ListItemGroupModifier extends CommonMethodModifier implements ListItemGroupAttribute,AttributeModifier<ListItemGroupAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,59 +43,62 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
     applyFocusedAttribute(instance: ListItemGroupAttribute): void { }
     applyDisabledAttribute(instance: ListItemGroupAttribute): void { }
     applySelectedAttribute(instance: ListItemGroupAttribute): void { }
-    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _divider_0_0value?: ListDividerOptions | null | undefined
-    _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _childrenMainSize_0_0value?: ChildrenMainSize | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _divider_0_0value?: ListDividerOptions | null | undefined
+    public _childrenMainSize_0_0value?: ChildrenMainSize | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkListItemGroupPeer;
-        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkListItemGroupPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setDividerAttribute((this._divider_0_0value as ListDividerOptions | null | undefined));
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setDividerAttribute((undefined as ListDividerOptions | null | undefined));
                 }
             }
         }
-        if (this._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._childrenMainSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setChildrenMainSizeAttribute((this._childrenMainSize_0_0value as ChildrenMainSize | undefined));
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    hookListItemGroupChildrenMainSizeImpl(peer, (this._childrenMainSize_0_0value as ChildrenMainSize | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setChildrenMainSizeAttribute((undefined as ChildrenMainSize | undefined));
+                    flagArray[1] = 0;
+                    hookListItemGroupChildrenMainSizeImpl(peer, (undefined as ChildrenMainSize | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: ListItemGroupModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ListItemGroupModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.divider(modifier._divider_0_0value);
                     break;
                 }
@@ -98,11 +107,10 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
                 }
             }
         }
-        if (modifier._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._childrenMainSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.childrenMainSize(modifier._childrenMainSize_0_0value);
                     break;
                 }
@@ -113,30 +121,26 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
         }
     }
     divider(value: ListDividerOptions | null | undefined): this {
-        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._divider_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
-        if (((this._childrenMainSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._childrenMainSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

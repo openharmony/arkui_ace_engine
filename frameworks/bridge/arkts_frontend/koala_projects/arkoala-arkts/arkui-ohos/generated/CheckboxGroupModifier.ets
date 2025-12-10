@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkCheckboxGroupPeer, OnCheckboxGroupChangeCallback, CheckboxGroupResult, CheckboxGroupAttribute } from "./component/checkboxgroup"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, Bindable } from "./component/common"
-import { ResourceColor, MarkStyle } from "./component/units"
-import { Color, CheckBoxShape } from "./component/enums"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkCheckboxGroupPeer, OnCheckboxGroupChangeCallback, CheckboxGroupResult, CheckboxGroupAttribute } from './component/checkboxgroup'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, Bindable } from './component/common'
+import { ResourceColor, Resource as arkui_component_units_Resource, MarkStyle } from './component/units'
+import { Color as arkui_component_enums_Color, CheckBoxShape } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class CheckboxGroupModifier extends CommonMethodModifier implements CheckboxGroupAttribute,AttributeModifier<CheckboxGroupAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,139 +45,134 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
     applyFocusedAttribute(instance: CheckboxGroupAttribute): void { }
     applyDisabledAttribute(instance: CheckboxGroupAttribute): void { }
     applySelectedAttribute(instance: CheckboxGroupAttribute): void { }
-    _selectAll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectAll_0_0value?: boolean | Bindable<boolean> | undefined
-    _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedColor_0_0value?: ResourceColor | undefined
-    _unselectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _unselectedColor_0_0value?: ResourceColor | undefined
-    _mark_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mark_0_0value?: MarkStyle | undefined
-    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: OnCheckboxGroupChangeCallback | undefined
-    _checkboxShape_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _checkboxShape_0_0value?: CheckBoxShape | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _selectAll_0_0value?: boolean | Bindable<boolean> | undefined
+    public _selectedColor_0_0value?: ResourceColor | undefined
+    public _unselectedColor_0_0value?: ResourceColor | undefined
+    public _mark_0_0value?: MarkStyle | undefined
+    public _onChange_0_0value?: OnCheckboxGroupChangeCallback | undefined
+    public _checkboxShape_0_0value?: CheckBoxShape | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkCheckboxGroupPeer;
-        if (this._selectAll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectAll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkCheckboxGroupPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setSelectAllAttribute((this._selectAll_0_0value as boolean | Bindable<boolean> | undefined));
-                    this._selectAll_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectAll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._selectAll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setSelectAllAttribute((undefined as boolean | Bindable<boolean> | undefined));
                 }
             }
         }
-        if (this._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setSelectedColorAttribute((this._selectedColor_0_0value as ResourceColor | undefined));
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setSelectedColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._unselectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._unselectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setUnselectedColorAttribute((this._unselectedColor_0_0value as ResourceColor | undefined));
-                    this._unselectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._unselectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._unselectedColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setUnselectedColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._mark_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._mark_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setMarkAttribute((this._mark_0_0value as MarkStyle | undefined));
-                    this._mark_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._mark_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._mark_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setMarkAttribute((undefined as MarkStyle | undefined));
                 }
             }
         }
-        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setOnChangeAttribute((this._onChange_0_0value as OnCheckboxGroupChangeCallback | undefined));
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setOnChangeAttribute((undefined as OnCheckboxGroupChangeCallback | undefined));
                 }
             }
         }
-        if (this._checkboxShape_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._checkboxShape_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setCheckboxShapeAttribute((this._checkboxShape_0_0value as CheckBoxShape | undefined));
-                    this._checkboxShape_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._checkboxShape_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._checkboxShape_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setCheckboxShapeAttribute((undefined as CheckBoxShape | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: CheckboxGroupModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._selectAll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectAll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: CheckboxGroupModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.selectAll(modifier._selectAll_0_0value);
                     break;
                 }
@@ -180,11 +181,10 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
                 }
             }
         }
-        if (modifier._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.selectedColor(modifier._selectedColor_0_0value);
                     break;
                 }
@@ -193,11 +193,10 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
                 }
             }
         }
-        if (modifier._unselectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._unselectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.unselectedColor(modifier._unselectedColor_0_0value);
                     break;
                 }
@@ -206,11 +205,10 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
                 }
             }
         }
-        if (modifier._mark_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._mark_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.mark(modifier._mark_0_0value);
                     break;
                 }
@@ -219,11 +217,10 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
                 }
             }
         }
-        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.onChange(modifier._onChange_0_0value);
                     break;
                 }
@@ -232,11 +229,10 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
                 }
             }
         }
-        if (modifier._checkboxShape_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._checkboxShape_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.checkboxShape(modifier._checkboxShape_0_0value);
                     break;
                 }
@@ -247,78 +243,66 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         }
     }
     selectAll(value: boolean | Bindable<boolean> | undefined): this {
-        if (((this._selectAll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectAll_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._selectAll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectAll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     selectedColor(value: ResourceColor | undefined): this {
-        if (((this._selectedColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._selectedColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     unselectedColor(value: ResourceColor | undefined): this {
-        if (((this._unselectedColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._unselectedColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._unselectedColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._unselectedColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     mark(value: MarkStyle | undefined): this {
-        if (((this._mark_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._mark_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._mark_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._mark_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
-        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._onChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     checkboxShape(value: CheckBoxShape | undefined): this {
-        if (((this._checkboxShape_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._checkboxShape_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._checkboxShape_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._checkboxShape_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

@@ -16,18 +16,17 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors } from "#handwritten"
-import { UIContext, TargetInfo } from "@ohos.arkui.UIContext"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
-export class UIContext_serializer {
-    public static write(buffer: SerializerBase, value: UIContext): void {
+import { extractors } from '#handwritten'
+import { UIContext as ohos_arkui_UIContext_UIContext, TargetInfo } from '@ohos.arkui.UIContext'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
+export class ohos_arkui_UIContext_UIContext_serializer {
+    public static write(buffer: SerializerBase, value: ohos_arkui_UIContext_UIContext): void {
         let valueSerializer : SerializerBase = buffer
         valueSerializer.writePointer(extractors.toUIContextPtr(value))
     }
-    public static read(buffer: DeserializerBase): UIContext {
+    public static read(buffer: DeserializerBase): ohos_arkui_UIContext_UIContext {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return extractors.fromUIContextPtr(ptr)
@@ -59,15 +58,15 @@ export class TargetInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const idTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let idTmpBuf : string | int32 | undefined
-        if (idTmpBufUnionSelector == (0).toChar()) {
+        if (idTmpBufUnionSelector == (0).toByte()) {
             idTmpBuf = (valueDeserializer.readString() as string)
-        } else if (idTmpBufUnionSelector == (1).toChar()) {
+        } else if (idTmpBufUnionSelector == (1).toByte()) {
             idTmpBuf = valueDeserializer.readInt32()
         } else {
-            throw new Error("One of the branches for idTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for idTmpBuf has to be chosen through deserialisation.')
         }
         const idTmpResult : string | int32 = (idTmpBuf as string | int32)
-        const componentIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const componentIdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let componentIdTmpBuf : int32 | undefined = undefined
         if ((componentIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             componentIdTmpBuf = valueDeserializer.readInt32()

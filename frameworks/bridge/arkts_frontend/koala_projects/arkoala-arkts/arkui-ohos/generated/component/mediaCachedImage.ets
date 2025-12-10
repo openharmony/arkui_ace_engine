@@ -16,31 +16,32 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { Resource_serializer } from "./../framework/resource"
-import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
-import { AttributeModifier, extractors, hookMediaCachedImageAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { default as image } from "@ohos.multimedia.image"
-import { ResourceStr } from "./units"
-import { Resource } from "global.resource"
-import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { MediaCachedImageModifier } from "./../MediaCachedImageModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { DrawableDescriptor_serializer } from './../framework/ohos.arkui.drawableDescriptor'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkImagePeer, ImageAttribute, ArkImageComponent } from './image'
+import { PixelMap, CommonMethod, ArkCommonMethodComponent } from './common'
+import { extractors, hookMediaCachedImageAttributeModifier, AttributeModifier, AttributeUpdater } from '#handwritten'
+import { default as image } from '@ohos.multimedia.image'
+import { ResourceStr as arkui_component_units_ResourceStr, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { MediaCachedImageModifier } from './../MediaCachedImageModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkMediaCachedImagePeer extends ArkImagePeer {
     attributeSet?: MediaCachedImageModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkMediaCachedImagePeer {
@@ -50,23 +51,24 @@ export class ArkMediaCachedImagePeer extends ArkImagePeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setMediaCachedImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): void {
+    setMediaCachedImageOptionsAttribute(src: PixelMap | arkui_component_units_ResourceStr | DrawableDescriptor | ASTCResource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (src instanceof image.PixelMap) {
+        if (src instanceof PixelMap) {
             thisSerializer.writeInt8((0).toByte())
-            const srcForIdx0  = src as image.PixelMap
+            const srcForIdx0  = src as PixelMap
             image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
-        } else if (src instanceof ResourceStr) {
+        } else if (src instanceof arkui_component_units_ResourceStr) {
             thisSerializer.writeInt8((1).toByte())
-            const srcForIdx1  = src as ResourceStr
+            const srcForIdx1  = src as arkui_component_units_ResourceStr
             if (srcForIdx1 instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
                 const srcForIdx1ForIdx0  = srcForIdx1 as string
                 thisSerializer.writeString(srcForIdx1ForIdx0)
-            } else if (srcForIdx1 instanceof Resource) {
+            } else if (srcForIdx1 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const srcForIdx1ForIdx1  = srcForIdx1 as Resource
-                Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
+                const srcForIdx1ForIdx1  = srcForIdx1 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
         } else if (src instanceof DrawableDescriptor) {
             thisSerializer.writeInt8((2).toByte())
@@ -83,34 +85,22 @@ export class ArkMediaCachedImagePeer extends ArkImagePeer {
 }
 export interface ASTCResource {
     sources: Array<string>;
-    column: number;
+    column: int32;
 }
 export interface MediaCachedImageAttribute extends ImageAttribute {
-    setMediaCachedImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
-        throw new Error("Unimplemented method setMediaCachedImageOptions")
+    setMediaCachedImageOptions(src: PixelMap | arkui_component_units_ResourceStr | DrawableDescriptor | ASTCResource): this {
+        throw new Error('Unimplemented method setMediaCachedImageOptions')
     }
     attributeModifier(value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this
-}
-export class ArkMediaCachedImageStyle extends ArkImageStyle implements MediaCachedImageAttribute {
-    attributeModifier_value?: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<CommonMethod> | undefined
-    setMediaCachedImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 
 export class ArkMediaCachedImageComponent extends ArkImageComponent implements MediaCachedImageAttribute {
     getPeer(): ArkMediaCachedImagePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkMediaCachedImagePeer)
     }
-    public setMediaCachedImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
-        if (this.checkPriority("setMediaCachedImageOptions")) {
-            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource)
+    public setMediaCachedImageOptions(src: PixelMap | arkui_component_units_ResourceStr | DrawableDescriptor | ASTCResource): this {
+        if (this.checkPriority('setMediaCachedImageOptions')) {
+            const src_casted = src as (PixelMap | arkui_component_units_ResourceStr | DrawableDescriptor | ASTCResource)
             this.getPeer()?.setMediaCachedImageOptionsAttribute(src_casted)
             this.applyOptionsFinish('MediaCachedImageAttribute');
             return this
@@ -134,18 +124,16 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
 
 @memo
 export function MediaCachedImageImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkMediaCachedImageComponent>((): ArkMediaCachedImageComponent => {
         return new ArkMediaCachedImageComponent()
     })
-    NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (peer: ArkMediaCachedImagePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (_: ArkMediaCachedImagePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -160,7 +148,7 @@ export class ASTCResource_serializer {
             valueSerializer.writeString(valueHolderForSourcesTmpElement)
         }
         const valueHolderForColumn  = value.column
-        valueSerializer.writeNumber(valueHolderForColumn)
+        valueSerializer.writeInt32(valueHolderForColumn)
     }
     public static read(buffer: DeserializerBase): ASTCResource {
         let valueDeserializer : DeserializerBase = buffer
@@ -170,7 +158,7 @@ export class ASTCResource_serializer {
             sourcesTmpBuf[sourcesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
         const sourcesTmpResult : Array<string> = sourcesTmpBuf
-        const columnTmpResult : number = (valueDeserializer.readNumber() as number)
+        const columnTmpResult : int32 = valueDeserializer.readInt32()
         let value : ASTCResource = ({sources: sourcesTmpResult, column: columnTmpResult} as ASTCResource)
         return value
     }

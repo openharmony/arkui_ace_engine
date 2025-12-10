@@ -16,22 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookEffectComponentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { EffectComponentModifier } from "./../EffectComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkThemeScopeManager } from '#arktheme'
+import { int32, int64, float32 } from '@koalaui/common'
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookEffectComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { EffectComponentModifier } from './../EffectComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: EffectComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkEffectComponentPeer {
@@ -42,92 +44,72 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setEffectComponentOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._EffectComponentInterface_setEffectComponentOptions(this.peer.ptr)
     }
-    setAlwaysSnapshotAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.writeBoolean(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._EffectComponentAttribute_setAlwaysSnapshot(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    setAlwaysSnapshotAttribute(value: boolean): void {
+        ArkUIGeneratedNativeModule._EffectComponentAttribute_setAlwaysSnapshot(this.peer.ptr, value ? true : false)
     }
 }
 export interface EffectComponentAttribute extends CommonMethod {
     setEffectComponentOptions(): this {
-        throw new Error("Unimplemented method setEffectComponentOptions")
+        throw new Error('Unimplemented method setEffectComponentOptions')
     }
-    alwaysSnapshot(value: boolean | undefined): this {
-        throw new Error("Unimplemented method alwaysSnapshot")
+    alwaysSnapshot(value: boolean): this {
+        throw new Error('Unimplemented method alwaysSnapshot')
     }
     attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
-    alwaysSnapshot_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setEffectComponentOptions(): this {
-        return this
-    }
-    alwaysSnapshot(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
     getPeer(): ArkEffectComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkEffectComponentPeer)
     }
     public setEffectComponentOptions(): this {
-        if (this.checkPriority("setEffectComponentOptions")) {
+        if (this.checkPriority('setEffectComponentOptions')) {
             this.getPeer()?.setEffectComponentOptionsAttribute()
+            this.applyOptionsFinish('EffectComponentAttribute');
             return this
         }
         return this
     }
-    public alwaysSnapshot(value: boolean | undefined): this {
-        if (this.checkPriority("alwaysSnapshot")) {
-            const value_casted = value as (boolean | undefined)
+    public alwaysSnapshot(value: boolean): this {
+        if (this.checkPriority('alwaysSnapshot')) {
+            const value_casted = value as (boolean)
             this.getPeer()?.setAlwaysSnapshotAttribute(value_casted)
             return this
         }
         return this
-     }
+    }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookEffectComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookEffectComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
 export function EffectComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: EffectComponentAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkEffectComponentComponent>((): ArkEffectComponentComponent => {
         return new ArkEffectComponentComponent()
     })
-    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (peer: ArkEffectComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

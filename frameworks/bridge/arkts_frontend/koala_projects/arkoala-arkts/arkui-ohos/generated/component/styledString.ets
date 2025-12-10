@@ -16,44 +16,46 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { TextBackgroundStyle_serializer, TextBackgroundStyle } from "./span"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors } from "#handwritten"
-import { LengthMetrics, DrawContext } from "arkui.Graphics"
-import { Resource_serializer } from "./../framework/resource"
-import { TextDecorationType, Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from "./enums"
-import { ResourceColor, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from "./units"
-import { Resource } from "global.resource"
-import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.drawing"
-import { default as image } from "@ohos.multimedia.image"
-import { default as drawing } from "@ohos.graphics.drawing"
-import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
-import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { GestureEvent, GestureEvent_serializer } from "./gesture"
-import { LengthMetrics_serializer } from "./../Graphics"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, resourceFinalizerRegister, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { TextBackgroundStyle_serializer, TextBackgroundStyle } from './span'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { arkui_Graphics_LengthMetrics_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
+import { LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr as arkui_component_units_ResourceStr, Margin, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from './units'
+import { LengthMetrics as arkui_Graphics_LengthMetrics, DrawContext as arkui_Graphics_DrawContext } from '@arkui.Graphics'
+import { extractors } from '#handwritten'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
+import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, ClickEvent_serializer } from './common'
+import { default as image } from '@ohos.multimedia.image'
+import { DrawingColorFilter } from './image'
+import { default as drawing } from '@ohos.graphics.drawing'
+import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { GestureEvent, GestureEvent_serializer } from './gesture'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class BackgroundColorStyleInternal {
     public static fromPtr(ptr: KPointer): BackgroundColorStyle {
-        return new BackgroundColorStyle(false, ptr)
+        return new BackgroundColorStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class BackgroundColorStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly textBackgroundStyle: TextBackgroundStyle
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly textBackgroundStyle: TextBackgroundStyle
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, BackgroundColorStyle.getFinalizer())
         this.textBackgroundStyle = this.getTextBackgroundStyle()
     }
     constructor(textBackgroundStyle: TextBackgroundStyle) {
-        this(false, BackgroundColorStyle.construct(textBackgroundStyle))
+        this(MaterializedBaseTag.NOP, BackgroundColorStyle.construct(textBackgroundStyle))
+        this.textBackgroundStyle = this.getTextBackgroundStyle()
     }
     static construct(textBackgroundStyle: TextBackgroundStyle): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -77,25 +79,26 @@ export class BackgroundColorStyle implements MaterializedBase {
 }
 export class BaselineOffsetStyleInternal {
     public static fromPtr(ptr: KPointer): BaselineOffsetStyle {
-        return new BaselineOffsetStyle(false, ptr)
+        return new BaselineOffsetStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class BaselineOffsetStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly baselineOffset: double
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly baselineOffset: double
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, BaselineOffsetStyle.getFinalizer())
         this.baselineOffset = this.getBaselineOffset()
     }
-    constructor(value: LengthMetrics) {
-        this(false, BaselineOffsetStyle.construct(value))
+    constructor(value: arkui_component_units_LengthMetrics) {
+        this(MaterializedBaseTag.NOP, BaselineOffsetStyle.construct(value))
+        this.baselineOffset = this.getBaselineOffset()
     }
-    static construct(value: LengthMetrics): KPointer {
+    static construct(value: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        LengthMetrics_serializer.write(thisSerializer, value)
+        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, value)
         const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -113,16 +116,16 @@ export class BaselineOffsetStyle implements MaterializedBase {
 }
 export class CustomSpanInternal {
     public static fromPtr(ptr: KPointer): CustomSpan {
-        return new CustomSpan(ptr)
+        return new CustomSpan(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class CustomSpan implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
-        throw new Error("Not implemented!")
+        throw new Error('Not implemented!')
     }
     get onMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
         return this.getOnMeasure_callback()
@@ -130,20 +133,20 @@ export class CustomSpan implements MaterializedBase {
     set onMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
         this.setOnMeasure_callback(onMeasure_callback)
     }
-    onDraw(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
-        throw new Error("Not implemented!")
+    onDraw(context: arkui_Graphics_DrawContext, drawInfo: CustomSpanDrawInfo): void {
+        throw new Error('Not implemented!')
     }
-    get onDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+    get onDraw_callback(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
         return this.getOnDraw_callback()
     }
-    set onDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
+    set onDraw_callback(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
         this.setOnDraw_callback(onDraw_callback)
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, CustomSpan.getFinalizer())
     }
     constructor() {
-        this(CustomSpan.construct())
+        this(MaterializedBaseTag.NOP, CustomSpan.construct())
         this.onMeasure_callback = this.onMeasure
         this.onDraw_callback = this.onDraw
     }
@@ -166,20 +169,41 @@ export class CustomSpan implements MaterializedBase {
         this.setOnMeasure_callback_serialize(onMeasure_callback_casted)
         return
     }
-    private getOnDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+    private getOnDraw_callback(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
         return this.getOnDraw_callback_serialize()
     }
-    private setOnDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
-        const onDraw_callback_casted = onDraw_callback as (((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void))
+    private setOnDraw_callback(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+        const onDraw_callback_casted = onDraw_callback as (((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void))
         this.setOnDraw_callback_serialize(onDraw_callback_casted)
         return
     }
-    invalidate_serialize(): void {
+    private invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
     }
     private getOnMeasure_callback_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferBufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+        const bufferBufCall : KPointer = retvalDeserializer.readPointer()
+        const bufferBufCallSync : KPointer = retvalDeserializer.readPointer()
+        const bufferClosure  = (measureInfo: CustomSpanMeasureInfo):CustomSpanMetrics => {
+            const bufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
+            bufferBufArgsSerializer.writePointer(bufferBufCall);
+            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
+            CustomSpanMeasureInfo_serializer.write(bufferBufArgsSerializer, measureInfo);
+            let bufferBufContinuationValue : CustomSpanMetrics | undefined;
+            const bufferBufContinuationCallback : ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
+            bufferBufContinuationValue = value;
+        }
+            bufferBufArgsSerializer.holdAndWriteCallback(bufferBufContinuationCallback);
+            InteropNativeModule._CallCallbackSync(10, -1570631366, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
+            bufferBufArgsSerializer.release();
+            return (bufferBufContinuationValue as CustomSpanMetrics);
+        }
+        resourceFinalizerRegister(bufferClosure, bufferBufResource)
+        const returnResult : ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) = bufferClosure
+        return returnResult
     }
     private setOnMeasure_callback_serialize(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -187,11 +211,28 @@ export class CustomSpan implements MaterializedBase {
         ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getOnDraw_callback_serialize(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+    private getOnDraw_callback_serialize(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferBufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+        const bufferBufCall : KPointer = retvalDeserializer.readPointer()
+        const bufferBufCallSync : KPointer = retvalDeserializer.readPointer()
+        const bufferClosure  = (context: arkui_Graphics_DrawContext, drawInfo: CustomSpanDrawInfo):void => {
+            const bufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
+            bufferBufArgsSerializer.writePointer(bufferBufCall);
+            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
+            arkui_Graphics_DrawContext_serializer.write(bufferBufArgsSerializer, context);
+            CustomSpanDrawInfo_serializer.write(bufferBufArgsSerializer, drawInfo);
+            InteropNativeModule._CallCallbackSync(10, 799028158, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
+            bufferBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(bufferClosure, bufferBufResource)
+        const returnResult : ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) = bufferClosure
+        return returnResult
     }
-    private setOnDraw_callback_serialize(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+    private setOnDraw_callback_serialize(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(onDraw_callback)
         ArkUIGeneratedNativeModule._CustomSpan_setOnDraw_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -200,25 +241,28 @@ export class CustomSpan implements MaterializedBase {
 }
 export class DecorationStyleInternal {
     public static fromPtr(ptr: KPointer): DecorationStyle {
-        return new DecorationStyle(false, ptr)
+        return new DecorationStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class DecorationStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly type: TextDecorationType
-    readonly color?: ResourceColor | undefined
-    readonly style?: TextDecorationStyle | undefined
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly type: TextDecorationType
+    public readonly color?: ResourceColor | undefined
+    public readonly style?: TextDecorationStyle | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DecorationStyle.getFinalizer())
         this.type = this.getType()
         this.color = this.getColor()
         this.style = this.getStyle()
     }
     constructor(value: DecorationStyleInterface) {
-        this(false, DecorationStyle.construct(value))
+        this(MaterializedBaseTag.NOP, DecorationStyle.construct(value))
+        this.type = this.getType()
+        this.color = this.getColor()
+        this.style = this.getStyle()
     }
     static construct(value: DecorationStyleInterface): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -246,23 +290,23 @@ export class DecorationStyle implements MaterializedBase {
     private getColor_serialize(): ResourceColor | undefined {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getColor(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | int32 | string | Resource | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.values()[retvalDeserializer.readInt32()]
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readInt32())
-            } else if (buffer_UnionSelector == (2).toChar()) {
-                buffer_ = (retvalDeserializer.readString() as string)
-            } else if (buffer_UnionSelector == (3).toChar()) {
-                buffer_ = Resource_serializer.read(retvalDeserializer)
+            const bufferOptUnionSelector : int32 = retvalDeserializer.readInt8()
+            let bufferOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = arkui_component_enums_Color.values()[retvalDeserializer.readInt32()]
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = retvalDeserializer.readInt32()
+            } else if (bufferOptUnionSelector == (2).toByte()) {
+                bufferOpt = (retvalDeserializer.readString() as string)
+            } else if (bufferOptUnionSelector == (3).toByte()) {
+                bufferOpt = global_resource_Resource_serializer.read(retvalDeserializer)
             } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
             }
-            buffer = (buffer_ as Color | int32 | string | Resource)
+            buffer = (bufferOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -270,7 +314,7 @@ export class DecorationStyle implements MaterializedBase {
     private getStyle_serialize(): TextDecorationStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : TextDecorationStyle | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TextDecorationStyle.fromValue(retvalDeserializer.readInt32())
@@ -281,19 +325,19 @@ export class DecorationStyle implements MaterializedBase {
 }
 export class GestureStyleInternal {
     public static fromPtr(ptr: KPointer): GestureStyle {
-        return new GestureStyle(false, ptr)
+        return new GestureStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class GestureStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(_0: boolean, peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, GestureStyle.getFinalizer())
     }
     constructor(value?: GestureStyleInterface) {
-        this(false, GestureStyle.construct(value))
+        this(MaterializedBaseTag.NOP, GestureStyle.construct(value))
     }
     static construct(value?: GestureStyleInterface): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -314,21 +358,21 @@ export class GestureStyle implements MaterializedBase {
 }
 export class ImageAttachmentInternal {
     public static fromPtr(ptr: KPointer): ImageAttachment {
-        return new ImageAttachment(false, ptr)
+        return new ImageAttachment(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ImageAttachment implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly value: image.PixelMap
-    readonly size?: SizeOptions | undefined
-    readonly verticalAlign?: ImageSpanAlignment | undefined
-    readonly objectFit?: ImageFit | undefined
-    readonly layoutStyle?: ImageAttachmentLayoutStyle | undefined
-    readonly colorFilter?: ColorFilterType | undefined
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly value: PixelMap
+    public readonly size?: SizeOptions | undefined
+    public readonly verticalAlign?: ImageSpanAlignment | undefined
+    public readonly objectFit?: ImageFit | undefined
+    public readonly layoutStyle?: ImageAttachmentLayoutStyle | undefined
+    public readonly colorFilter?: ColorFilterType | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ImageAttachment.getFinalizer())
         this.value = this.getValue()
         this.size = this.getSize()
@@ -338,7 +382,13 @@ export class ImageAttachment implements MaterializedBase {
         this.colorFilter = this.getColorFilter()
     }
     constructor(value: AttachmentType | undefined) {
-        this(false, ImageAttachment.construct(value))
+        this(MaterializedBaseTag.NOP, ImageAttachment.construct(value))
+        this.value = this.getValue()
+        this.size = this.getSize()
+        this.verticalAlign = this.getVerticalAlign()
+        this.objectFit = this.getObjectFit()
+        this.layoutStyle = this.getLayoutStyle()
+        this.colorFilter = this.getColorFilter()
     }
     static construct(value: AttachmentType | undefined): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -364,7 +414,7 @@ export class ImageAttachment implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ImageAttachment_getFinalizer()
     }
-    private getValue(): image.PixelMap {
+    private getValue(): PixelMap {
         return this.getValue_serialize()
     }
     private getSize(): SizeOptions | undefined {
@@ -382,15 +432,14 @@ export class ImageAttachment implements MaterializedBase {
     private getColorFilter(): ColorFilterType | undefined {
         return this.getColorFilter_serialize()
     }
-    private getValue_serialize(): image.PixelMap {
+    private getValue_serialize(): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
-        const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
-        return obj
+        throw new Error('Object deserialization is not implemented.')
     }
     private getSize_serialize(): SizeOptions | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : SizeOptions | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = SizeOptions_serializer.read(retvalDeserializer)
@@ -401,7 +450,7 @@ export class ImageAttachment implements MaterializedBase {
     private getVerticalAlign_serialize(): ImageSpanAlignment | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ImageSpanAlignment | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = ImageSpanAlignment.fromValue(retvalDeserializer.readInt32())
@@ -412,7 +461,7 @@ export class ImageAttachment implements MaterializedBase {
     private getObjectFit_serialize(): ImageFit | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ImageFit | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = ImageFit.fromValue(retvalDeserializer.readInt32())
@@ -423,7 +472,7 @@ export class ImageAttachment implements MaterializedBase {
     private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ImageAttachmentLayoutStyle | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = ImageAttachmentLayoutStyle_serializer.read(retvalDeserializer)
@@ -434,19 +483,19 @@ export class ImageAttachment implements MaterializedBase {
     private getColorFilter_serialize(): ColorFilterType | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getColorFilter(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ColorFilterType | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : ColorFilter | drawing.ColorFilter | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = (ColorFilter_serializer.read(retvalDeserializer) as ColorFilter)
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (drawing_ColorFilter_serializer.read(retvalDeserializer) as drawing.ColorFilter)
+            const bufferOptUnionSelector : int32 = retvalDeserializer.readInt8()
+            let bufferOpt : ColorFilter | DrawingColorFilter | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = (ColorFilter_serializer.read(retvalDeserializer) as ColorFilter)
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = (drawing_ColorFilter_serializer.read(retvalDeserializer) as drawing.ColorFilter)
             } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
             }
-            buffer = (buffer_ as ColorFilter | drawing.ColorFilter)
+            buffer = (bufferOpt as ColorFilter | DrawingColorFilter)
         }
         const returnResult : ColorFilterType | undefined = buffer
         return returnResult
@@ -454,25 +503,26 @@ export class ImageAttachment implements MaterializedBase {
 }
 export class LetterSpacingStyleInternal {
     public static fromPtr(ptr: KPointer): LetterSpacingStyle {
-        return new LetterSpacingStyle(false, ptr)
+        return new LetterSpacingStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class LetterSpacingStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly letterSpacing: double
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly letterSpacing: double
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LetterSpacingStyle.getFinalizer())
         this.letterSpacing = this.getLetterSpacing()
     }
-    constructor(value: LengthMetrics) {
-        this(false, LetterSpacingStyle.construct(value))
+    constructor(value: arkui_component_units_LengthMetrics) {
+        this(MaterializedBaseTag.NOP, LetterSpacingStyle.construct(value))
+        this.letterSpacing = this.getLetterSpacing()
     }
-    static construct(value: LengthMetrics): KPointer {
+    static construct(value: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        LengthMetrics_serializer.write(thisSerializer, value)
+        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, value)
         const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -490,25 +540,26 @@ export class LetterSpacingStyle implements MaterializedBase {
 }
 export class LineHeightStyleInternal {
     public static fromPtr(ptr: KPointer): LineHeightStyle {
-        return new LineHeightStyle(false, ptr)
+        return new LineHeightStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class LineHeightStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly lineHeight: double
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly lineHeight: double
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LineHeightStyle.getFinalizer())
         this.lineHeight = this.getLineHeight()
     }
-    constructor(lineHeight: LengthMetrics) {
-        this(false, LineHeightStyle.construct(lineHeight))
+    constructor(lineHeight: arkui_component_units_LengthMetrics) {
+        this(MaterializedBaseTag.NOP, LineHeightStyle.construct(lineHeight))
+        this.lineHeight = this.getLineHeight()
     }
-    static construct(lineHeight: LengthMetrics): KPointer {
+    static construct(lineHeight: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineHeight)
         const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -526,22 +577,22 @@ export class LineHeightStyle implements MaterializedBase {
 }
 export class ParagraphStyleInternal {
     public static fromPtr(ptr: KPointer): ParagraphStyle {
-        return new ParagraphStyle(false, ptr)
+        return new ParagraphStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ParagraphStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly textAlign?: TextAlign | undefined
-    readonly textIndent?: double | undefined
-    readonly maxLines?: int32 | undefined
-    readonly overflow?: TextOverflow | undefined
-    readonly wordBreak?: WordBreak | undefined
-    readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
-    readonly paragraphSpacing?: double | undefined
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly textAlign?: TextAlign | undefined
+    public readonly textIndent?: double | undefined
+    public readonly maxLines?: int32 | undefined
+    public readonly overflow?: TextOverflow | undefined
+    public readonly wordBreak?: WordBreak | undefined
+    public readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
+    public readonly paragraphSpacing?: double | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
         this.textIndent = this.getTextIndent()
@@ -552,7 +603,14 @@ export class ParagraphStyle implements MaterializedBase {
         this.paragraphSpacing = this.getParagraphSpacing()
     }
     constructor(value?: ParagraphStyleInterface) {
-        this(false, ParagraphStyle.construct(value))
+        this(MaterializedBaseTag.NOP, ParagraphStyle.construct(value))
+        this.textAlign = this.getTextAlign()
+        this.textIndent = this.getTextIndent()
+        this.maxLines = this.getMaxLines()
+        this.overflow = this.getOverflow()
+        this.wordBreak = this.getWordBreak()
+        this.leadingMargin = this.getLeadingMargin()
+        this.paragraphSpacing = this.getParagraphSpacing()
     }
     static construct(value?: ParagraphStyleInterface): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -594,7 +652,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : TextAlign | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TextAlign.fromValue(retvalDeserializer.readInt32())
@@ -605,7 +663,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getTextIndent_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextIndent(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readFloat64()
@@ -616,7 +674,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getMaxLines_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getMaxLines(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readInt32()
@@ -627,7 +685,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getOverflow_serialize(): TextOverflow | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getOverflow(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : TextOverflow | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TextOverflow.fromValue(retvalDeserializer.readInt32())
@@ -638,7 +696,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getWordBreak_serialize(): WordBreak | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getWordBreak(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : WordBreak | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = WordBreak.fromValue(retvalDeserializer.readInt32())
@@ -649,19 +707,19 @@ export class ParagraphStyle implements MaterializedBase {
     private getLeadingMargin_serialize(): double | LeadingMarginPlaceholder | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getLeadingMargin(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : double | LeadingMarginPlaceholder | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : double | LeadingMarginPlaceholder | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = retvalDeserializer.readFloat64()
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = LeadingMarginPlaceholder_serializer.read(retvalDeserializer)
+            const bufferOptUnionSelector : int32 = retvalDeserializer.readInt8()
+            let bufferOpt : double | LeadingMarginPlaceholder | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = retvalDeserializer.readFloat64()
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = LeadingMarginPlaceholder_serializer.read(retvalDeserializer)
             } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
             }
-            buffer = (buffer_ as double | LeadingMarginPlaceholder)
+            buffer = (bufferOpt as double | LeadingMarginPlaceholder)
         }
         const returnResult : double | LeadingMarginPlaceholder | undefined = buffer
         return returnResult
@@ -669,7 +727,7 @@ export class ParagraphStyle implements MaterializedBase {
     private getParagraphSpacing_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getParagraphSpacing(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readFloat64()
@@ -680,25 +738,22 @@ export class ParagraphStyle implements MaterializedBase {
 }
 export class StyledStringInternal {
     public static fromPtr(ptr: KPointer): StyledString {
-        return new StyledString(false, false, ptr)
+        return new StyledString(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class StyledString implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     get length(): int32 {
         return this.getLength()
     }
-    set length(length: int32) {
-        this.setLength(length)
-    }
-    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, StyledString.getFinalizer())
     }
     constructor(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
-        this(false, false, StyledString.construct(value, styles))
+        this(MaterializedBaseTag.NOP, StyledString.construct(value, styles))
     }
     static construct(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -733,77 +788,6 @@ export class StyledString implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._StyledString_getFinalizer()
     }
-    static fromHtml_serialize(html: string): Promise<StyledString | undefined> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
-        ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    static toHtml_serialize(styledString: StyledString): string {
-        const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
-        return retval
-    }
-    static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : ArrayBuffer | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
-        }
-        const returnResult : ArrayBuffer | undefined = buffer
-        return returnResult
-    }
-    static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeBuffer(buffer)
-        thisSerializer.holdAndWriteCallback(callback_)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
-        ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    static marshalling1_serialize(styledString: StyledString): ArrayBuffer | undefined {
-        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString))
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : ArrayBuffer | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
-        }
-        const returnResult : ArrayBuffer | undefined = buffer
-        return returnResult
-    }
-    static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString | undefined> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeBuffer(buffer)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
-        ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    public getString(): string {
-        return this.getString_serialize()
-    }
-    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
-        const start_casted = start as (int32)
-        const length_casted = length as (int32)
-        const styledKey_casted = styledKey as (StyledStringKey | undefined)
-        return this.getStyles_serialize(start_casted, length_casted, styledKey_casted)
-    }
-    public equals(other: StyledString): boolean {
-        const other_casted = other as (StyledString)
-        return this.equals_serialize(other_casted)
-    }
-    public subStyledString(start: int32, length?: int32): StyledString | undefined {
-        const start_casted = start as (int32)
-        const length_casted = length as (int32 | undefined)
-        return this.subStyledString_serialize(start_casted, length_casted)
-    }
     public static fromHtml(html: string): Promise<StyledString | undefined> {
         const html_casted = html as (string)
         return StyledString.fromHtml_serialize(html_casted)
@@ -830,19 +814,89 @@ export class StyledString implements MaterializedBase {
         const buffer_casted = buffer as (ArrayBuffer)
         return StyledString.unmarshalling1_serialize(buffer_casted)
     }
+    private static fromHtml_serialize(html: string): Promise<StyledString | undefined> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
+        ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private static toHtml_serialize(styledString: StyledString): string {
+        const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
+    }
+    private static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
+    }
+    private static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeBuffer(buffer)
+        thisSerializer.holdAndWriteCallback(callback_)
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private static marshalling1_serialize(styledString: StyledString): ArrayBuffer | undefined {
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
+    }
+    private static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString | undefined> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeBuffer(buffer)
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public getString(): string {
+        return this.getString_serialize()
+    }
+    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32)
+        const styledKey_casted = styledKey as (StyledStringKey | undefined)
+        return this.getStyles_serialize(start_casted, length_casted, styledKey_casted)
+    }
+    public equals(other: StyledString): boolean {
+        const other_casted = other as (StyledString)
+        return this.equals_serialize(other_casted)
+    }
+    public subStyledString(start: int32, length?: int32): StyledString | undefined {
+        const start_casted = start as (int32)
+        const length_casted = length as (int32 | undefined)
+        return this.subStyledString_serialize(start_casted, length_casted)
+    }
     private getLength(): int32 {
         return this.getLength_serialize()
     }
-    private setLength(length: int32): void {
-        const length_casted = length as (int32)
-        this.setLength_serialize(length_casted)
-        return
-    }
-    getString_serialize(): string {
+    private getString_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
+    private getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (styledKey !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -854,24 +908,24 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : Array<SpanStyle> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_Length : int32 = retvalDeserializer.readInt32()
-            let buffer_ : Array<SpanStyle> = new Array<SpanStyle>(buffer_Length)
-            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
-                buffer_[buffer_BufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
+            const bufferOptLength : int32 = retvalDeserializer.readInt32()
+            let bufferOpt : Array<SpanStyle> = new Array<SpanStyle>(bufferOptLength)
+            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
+                bufferOpt[bufferOptBufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
             }
-            buffer = buffer_
+            buffer = bufferOpt
         }
         const returnResult : Array<SpanStyle> | undefined = buffer
         return returnResult
     }
-    equals_serialize(other: StyledString): boolean {
+    private equals_serialize(other: StyledString): boolean {
         const retval  = ArkUIGeneratedNativeModule._StyledString_equals(this.peer!.ptr, toPeerPtr(other))
         return retval
     }
-    subStyledString_serialize(start: int32, length?: int32): StyledString | undefined {
+    private subStyledString_serialize(start: int32, length?: int32): StyledString | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (length !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -883,7 +937,7 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_subStyledString(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : StyledString | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
@@ -895,27 +949,25 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getLength(this.peer!.ptr)
         return retval
     }
-    private setLength_serialize(length: int32): void {
-        ArkUIGeneratedNativeModule._StyledString_setLength(this.peer!.ptr, length)
-    }
 }
 export class TextShadowStyleInternal {
     public static fromPtr(ptr: KPointer): TextShadowStyle {
-        return new TextShadowStyle(false, ptr)
+        return new TextShadowStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class TextShadowStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly textShadow: Array<ShadowOptions>
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly textShadow: Array<ShadowOptions>
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextShadowStyle.getFinalizer())
         this.textShadow = this.getTextShadow()
     }
     constructor(value: ShadowOptions | Array<ShadowOptions>) {
-        this(false, TextShadowStyle.construct(value))
+        this(MaterializedBaseTag.NOP, TextShadowStyle.construct(value))
+        this.textShadow = this.getTextShadow()
     }
     static construct(value: ShadowOptions | Array<ShadowOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -923,13 +975,21 @@ export class TextShadowStyle implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as ShadowOptions
             ShadowOptions_serializer.write(thisSerializer, valueForIdx0)
-        } else if (TypeChecker.isArray_ShadowOptions(value)) {
-            thisSerializer.writeInt8((1).toByte())
-            const valueForIdx1  = value as Array<ShadowOptions>
-            thisSerializer.writeInt32((valueForIdx1.length).toInt())
-            for (let valueForIdx1CounterI = 0; valueForIdx1CounterI < valueForIdx1.length; valueForIdx1CounterI++) {
-                const valueForIdx1TmpElement : ShadowOptions = valueForIdx1[valueForIdx1CounterI]
-                ShadowOptions_serializer.write(thisSerializer, valueForIdx1TmpElement)
+        } else if (value instanceof Array) {
+            if (value.length == 0) {
+                thisSerializer.writeInt8((1).toByte())
+                thisSerializer.writeInt32(0)
+            } else {
+                const valueElem  = value[0]
+                if (valueElem instanceof ShadowOptions) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueForIdx1  = value as Array<ShadowOptions>
+                    thisSerializer.writeInt32((valueForIdx1.length).toInt())
+                    for (let valueForIdx1CounterI = 0; valueForIdx1CounterI < valueForIdx1.length; valueForIdx1CounterI++) {
+                        const valueForIdx1TmpElement : ShadowOptions = valueForIdx1[valueForIdx1CounterI]
+                        ShadowOptions_serializer.write(thisSerializer, valueForIdx1TmpElement)
+                    }
+                }
             }
         }
         const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
@@ -956,20 +1016,20 @@ export class TextShadowStyle implements MaterializedBase {
 }
 export class TextStyleInternal {
     public static fromPtr(ptr: KPointer): TextStyle {
-        return new TextStyle(false, ptr)
+        return new TextStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class TextStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly fontColor?: ResourceColor | undefined
-    readonly fontFamily?: string | undefined
-    readonly fontSize?: double | undefined
-    readonly fontWeight?: int32 | undefined
-    readonly fontStyle?: FontStyle | undefined
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly fontColor?: ResourceColor | undefined
+    public readonly fontFamily?: string | undefined
+    public readonly fontSize?: double | undefined
+    public readonly fontWeight?: int32 | undefined
+    public readonly fontStyle?: FontStyle | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextStyle.getFinalizer())
         this.fontColor = this.getFontColor()
         this.fontFamily = this.getFontFamily()
@@ -978,7 +1038,12 @@ export class TextStyle implements MaterializedBase {
         this.fontStyle = this.getFontStyle()
     }
     constructor(value?: TextStyleInterface) {
-        this(false, TextStyle.construct(value))
+        this(MaterializedBaseTag.NOP, TextStyle.construct(value))
+        this.fontColor = this.getFontColor()
+        this.fontFamily = this.getFontFamily()
+        this.fontSize = this.getFontSize()
+        this.fontWeight = this.getFontWeight()
+        this.fontStyle = this.getFontStyle()
     }
     static construct(value?: TextStyleInterface): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1014,23 +1079,23 @@ export class TextStyle implements MaterializedBase {
     private getFontColor_serialize(): ResourceColor | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontColor(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | int32 | string | Resource | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = Color.values()[retvalDeserializer.readInt32()]
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readInt32())
-            } else if (buffer_UnionSelector == (2).toChar()) {
-                buffer_ = (retvalDeserializer.readString() as string)
-            } else if (buffer_UnionSelector == (3).toChar()) {
-                buffer_ = Resource_serializer.read(retvalDeserializer)
+            const bufferOptUnionSelector : int32 = retvalDeserializer.readInt8()
+            let bufferOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = arkui_component_enums_Color.values()[retvalDeserializer.readInt32()]
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = retvalDeserializer.readInt32()
+            } else if (bufferOptUnionSelector == (2).toByte()) {
+                bufferOpt = (retvalDeserializer.readString() as string)
+            } else if (bufferOptUnionSelector == (3).toByte()) {
+                bufferOpt = global_resource_Resource_serializer.read(retvalDeserializer)
             } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
             }
-            buffer = (buffer_ as Color | int32 | string | Resource)
+            buffer = (bufferOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -1038,7 +1103,7 @@ export class TextStyle implements MaterializedBase {
     private getFontFamily_serialize(): string | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontFamily(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : string | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readString() as string)
@@ -1049,7 +1114,7 @@ export class TextStyle implements MaterializedBase {
     private getFontSize_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontSize(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readFloat64()
@@ -1060,7 +1125,7 @@ export class TextStyle implements MaterializedBase {
     private getFontWeight_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontWeight(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readInt32()
@@ -1071,7 +1136,7 @@ export class TextStyle implements MaterializedBase {
     private getFontStyle_serialize(): FontStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : FontStyle | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = FontStyle.fromValue(retvalDeserializer.readInt32())
@@ -1082,21 +1147,22 @@ export class TextStyle implements MaterializedBase {
 }
 export class UrlStyleInternal {
     public static fromPtr(ptr: KPointer): UrlStyle {
-        return new UrlStyle(false, ptr)
+        return new UrlStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class UrlStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly url: string
-    constructor(_0: boolean, peerPtr: KPointer) {
+    public readonly url: string
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, UrlStyle.getFinalizer())
         this.url = this.getUrl()
     }
     constructor(url: string) {
-        this(false, UrlStyle.construct(url))
+        this(MaterializedBaseTag.NOP, UrlStyle.construct(url))
+        this.url = this.getUrl()
     }
     static construct(url: string): KPointer {
         const retval  = ArkUIGeneratedNativeModule._UrlStyle_construct(url)
@@ -1110,12 +1176,14 @@ export class UrlStyle implements MaterializedBase {
     }
     private getUrl_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._UrlStyle_getUrl(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
 }
 export type StyledStringMarshallingValue = UserDataSpan;
-export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => ArrayBuffer;
-export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => UserDataSpan;
+export type StyledStringMarshallCallback = (marshallableVal: StyledStringMarshallingValue) => ArrayBuffer;
+export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => StyledStringMarshallingValue;
 export interface StyleOptions {
     start?: int32;
     length?: int32;
@@ -1130,8 +1198,8 @@ export interface SpanStyle {
 }
 export interface TextStyleInterface {
     fontColor?: ResourceColor;
-    fontFamily?: ResourceStr;
-    fontSize?: LengthMetrics;
+    fontFamily?: arkui_component_units_ResourceStr;
+    fontSize?: arkui_component_units_LengthMetrics;
     fontWeight?: int32 | FontWeight | string;
     fontStyle?: FontStyle;
 }
@@ -1141,17 +1209,17 @@ export interface DecorationStyleInterface {
     style?: TextDecorationStyle;
 }
 export interface GestureStyleInterface {
-    onClick?: ((value0: ClickEvent) => void);
-    onLongPress?: ((value0: GestureEvent) => void);
+    onClick?: ((event: ClickEvent) => void);
+    onLongPress?: arkui_component_common_Callback<GestureEvent, void>;
 }
 export interface ParagraphStyleInterface {
     textAlign?: TextAlign;
-    textIndent?: LengthMetrics;
+    textIndent?: arkui_component_units_LengthMetrics;
     maxLines?: int32;
     overflow?: TextOverflow;
     wordBreak?: WordBreak;
-    leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
-    paragraphSpacing?: LengthMetrics;
+    leadingMargin?: arkui_component_units_LengthMetrics | LeadingMarginPlaceholder;
+    paragraphSpacing?: arkui_component_units_LengthMetrics;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
@@ -1170,7 +1238,7 @@ export enum StyledStringKey {
     USER_DATA = 500
 }
 export interface ResourceImageAttachmentOptions {
-    resourceValue: ResourceStr | undefined;
+    resourceValue: arkui_component_units_ResourceStr | undefined;
     size?: SizeOptions;
     verticalAlign?: ImageSpanAlignment;
     objectFit?: ImageFit;
@@ -1179,7 +1247,7 @@ export interface ResourceImageAttachmentOptions {
     syncLoad?: boolean;
 }
 export interface ImageAttachmentInterface {
-    value: image.PixelMap;
+    value: PixelMap;
     size?: SizeOptions;
     verticalAlign?: ImageSpanAlignment;
     objectFit?: ImageFit;
@@ -1187,11 +1255,11 @@ export interface ImageAttachmentInterface {
     colorFilter?: ColorFilterType;
 }
 export type AttachmentType = ImageAttachmentInterface | ResourceImageAttachmentOptions;
-export type ColorFilterType = ColorFilter | drawing.ColorFilter;
+export type ColorFilterType = ColorFilter | DrawingColorFilter;
 export interface ImageAttachmentLayoutStyle {
-    margin?: LengthMetrics | Padding;
-    padding?: LengthMetrics | Padding;
-    borderRadius?: LengthMetrics | BorderRadiuses;
+    margin?: arkui_component_units_LengthMetrics | Margin;
+    padding?: arkui_component_units_LengthMetrics | Padding;
+    borderRadius?: arkui_component_units_LengthMetrics | BorderRadiuses;
 }
 export interface CustomSpanMetrics {
     width: double;
@@ -1206,7 +1274,51 @@ export interface CustomSpanDrawInfo {
 export interface CustomSpanMeasureInfo {
     fontSize: double;
 }
-export abstract class UserDataSpan {
+export class UserDataSpan {
+}
+export class BackgroundColorStyle_serializer {
+    public static write(buffer: SerializerBase, value: BackgroundColorStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): BackgroundColorStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BackgroundColorStyleInternal.fromPtr(ptr)
+    }
+}
+export class BaselineOffsetStyle_serializer {
+    public static write(buffer: SerializerBase, value: BaselineOffsetStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): BaselineOffsetStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BaselineOffsetStyleInternal.fromPtr(ptr)
+    }
+}
+export class CustomSpan_serializer {
+    public static write(buffer: SerializerBase, value: CustomSpan): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): CustomSpan {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CustomSpanInternal.fromPtr(ptr)
+    }
+}
+export class DecorationStyle_serializer {
+    public static write(buffer: SerializerBase, value: DecorationStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): DecorationStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DecorationStyleInternal.fromPtr(ptr)
+    }
 }
 export class GestureStyle_serializer {
     public static write(buffer: SerializerBase, value: GestureStyle): void {
@@ -1217,6 +1329,17 @@ export class GestureStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return GestureStyleInternal.fromPtr(ptr)
+    }
+}
+export class ImageAttachment_serializer {
+    public static write(buffer: SerializerBase, value: ImageAttachment): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ImageAttachment {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ImageAttachmentInternal.fromPtr(ptr)
     }
 }
 export class LetterSpacingStyle_serializer {
@@ -1252,6 +1375,17 @@ export class MutableStyledString_serializer {
         return MutableStyledStringInternal.fromPtr(ptr)
     }
 }
+export class ParagraphStyle_serializer {
+    public static write(buffer: SerializerBase, value: ParagraphStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ParagraphStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ParagraphStyleInternal.fromPtr(ptr)
+    }
+}
 export class StyledString_serializer {
     public static write(buffer: SerializerBase, value: StyledString): void {
         let valueSerializer : SerializerBase = buffer
@@ -1263,6 +1397,28 @@ export class StyledString_serializer {
         return StyledStringInternal.fromPtr(ptr)
     }
 }
+export class TextShadowStyle_serializer {
+    public static write(buffer: SerializerBase, value: TextShadowStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TextShadowStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TextShadowStyleInternal.fromPtr(ptr)
+    }
+}
+export class TextStyle_serializer {
+    public static write(buffer: SerializerBase, value: TextStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TextStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TextStyleInternal.fromPtr(ptr)
+    }
+}
 export class UrlStyle_serializer {
     public static write(buffer: SerializerBase, value: UrlStyle): void {
         let valueSerializer : SerializerBase = buffer
@@ -1272,28 +1428,6 @@ export class UrlStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return UrlStyleInternal.fromPtr(ptr)
-    }
-}
-export class BaselineOffsetStyle_serializer {
-    public static write(buffer: SerializerBase, value: BaselineOffsetStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): BaselineOffsetStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return BaselineOffsetStyleInternal.fromPtr(ptr)
-    }
-}
-export class CustomSpan_serializer {
-    public static write(buffer: SerializerBase, value: CustomSpan): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): CustomSpan {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CustomSpanInternal.fromPtr(ptr)
     }
 }
 export class CustomSpanDrawInfo_serializer {
@@ -1348,7 +1482,7 @@ export class CustomSpanMetrics_serializer {
     public static read(buffer: DeserializerBase): CustomSpanMetrics {
         let valueDeserializer : DeserializerBase = buffer
         const widthTmpResult : double = valueDeserializer.readFloat64()
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             heightTmpBuf = valueDeserializer.readFloat64()
@@ -1380,809 +1514,47 @@ export class GestureStyleInterface_serializer {
     }
     public static read(buffer: DeserializerBase): GestureStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
-        const onClickTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onClickTmpBuf : ((value0: ClickEvent) => void) | undefined = undefined
+        const onClickTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onClickTmpBuf : ((event: ClickEvent) => void) | undefined = undefined
         if ((onClickTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onClickTmpBuf = (value0: ClickEvent):void => {
-                const onClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onClickTmpBuf_BufArgsSerializer.writeInt32(onClickTmpBuf_BufResource.resourceId);
-                onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCall);
-                onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCallSync);
-                ClickEvent_serializer.write(onClickTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallbackSync(10, 1097178637, onClickTmpBuf_BufArgsSerializer.asBuffer(), onClickTmpBuf_BufArgsSerializer.length());
-                onClickTmpBuf_BufArgsSerializer.release();
+            const onClickTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onClickTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onClickTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onClickTmpBufOptClosure  = (event: ClickEvent):void => {
+                const onClickTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onClickTmpBufOptBufArgsSerializer.writeInt32(onClickTmpBufOptBufResource.resourceId);
+                onClickTmpBufOptBufArgsSerializer.writePointer(onClickTmpBufOptBufCall);
+                onClickTmpBufOptBufArgsSerializer.writePointer(onClickTmpBufOptBufCallSync);
+                ClickEvent_serializer.write(onClickTmpBufOptBufArgsSerializer, event);
+                InteropNativeModule._CallCallbackSync(10, -972351187, onClickTmpBufOptBufArgsSerializer.asBuffer(), onClickTmpBufOptBufArgsSerializer.length());
+                onClickTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onClickTmpBufOptClosure, onClickTmpBufOptBufResource)
+            onClickTmpBuf = onClickTmpBufOptClosure
         }
-        const onClickTmpResult : ((value0: ClickEvent) => void) | undefined = onClickTmpBuf
-        const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onLongPressTmpBuf : ((value0: GestureEvent) => void) | undefined = undefined
+        const onClickTmpResult : ((event: ClickEvent) => void) | undefined = onClickTmpBuf
+        const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onLongPressTmpBuf : arkui_component_common_Callback<GestureEvent, void> | undefined = undefined
         if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: GestureEvent):void => {
-                const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
-                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
-                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
-                GestureEvent_serializer.write(onLongPressTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallbackSync(10, -1143194492, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
-                onLongPressTmpBuf_BufArgsSerializer.release();
+            const onLongPressTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onLongPressTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBufOptClosure  = (data: GestureEvent):void => {
+                const onLongPressTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onLongPressTmpBufOptBufArgsSerializer.writeInt32(onLongPressTmpBufOptBufResource.resourceId);
+                onLongPressTmpBufOptBufArgsSerializer.writePointer(onLongPressTmpBufOptBufCall);
+                onLongPressTmpBufOptBufArgsSerializer.writePointer(onLongPressTmpBufOptBufCallSync);
+                GestureEvent_serializer.write(onLongPressTmpBufOptBufArgsSerializer, data);
+                InteropNativeModule._CallCallbackSync(10, 1662060708, onLongPressTmpBufOptBufArgsSerializer.asBuffer(), onLongPressTmpBufOptBufArgsSerializer.length());
+                onLongPressTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onLongPressTmpBufOptClosure, onLongPressTmpBufOptBufResource)
+            onLongPressTmpBuf = onLongPressTmpBufOptClosure
         }
-        const onLongPressTmpResult : ((value0: GestureEvent) => void) | undefined = onLongPressTmpBuf
+        const onLongPressTmpResult : arkui_component_common_Callback<GestureEvent, void> | undefined = onLongPressTmpBuf
         let value : GestureStyleInterface = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult} as GestureStyleInterface)
-        return value
-    }
-}
-export class TextShadowStyle_serializer {
-    public static write(buffer: SerializerBase, value: TextShadowStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): TextShadowStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TextShadowStyleInternal.fromPtr(ptr)
-    }
-}
-export class DecorationStyle_serializer {
-    public static write(buffer: SerializerBase, value: DecorationStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): DecorationStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DecorationStyleInternal.fromPtr(ptr)
-    }
-}
-export class DecorationStyleInterface_serializer {
-    public static write(buffer: SerializerBase, value: DecorationStyleInterface): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForType  = value.type
-        if (valueHolderForType !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTypeTmpValue  = (valueHolderForType as TextDecorationType)
-            valueSerializer.writeInt32(valueHolderForTypeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForColor  = value.color
-        if (valueHolderForColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
-            } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
-                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForStyle  = value.style
-        if (valueHolderForStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStyleTmpValue  = (valueHolderForStyle as TextDecorationStyle)
-            valueSerializer.writeInt32(valueHolderForStyleTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): DecorationStyleInterface {
-        let valueDeserializer : DeserializerBase = buffer
-        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let typeTmpBuf : TextDecorationType | undefined = undefined
-        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            typeTmpBuf = TextDecorationType.fromValue(valueDeserializer.readInt32())
-        }
-        const typeTmpResult : TextDecorationType | undefined = typeTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorTmpBuf : ResourceColor | undefined = undefined
-        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
-            }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
-        }
-        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let styleTmpBuf : TextDecorationStyle | undefined = undefined
-        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
-        }
-        const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
-        let value : DecorationStyleInterface = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleInterface)
-        return value
-    }
-}
-export class TextStyle_serializer {
-    public static write(buffer: SerializerBase, value: TextStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): TextStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TextStyleInternal.fromPtr(ptr)
-    }
-}
-export class TextStyleInterface_serializer {
-    public static write(buffer: SerializerBase, value: TextStyleInterface): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForFontColor  = value.fontColor
-        if (valueHolderForFontColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
-            if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
-            } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
-                valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
-            } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFontFamily  = value.fontFamily
-        if (valueHolderForFontFamily !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
-            if (valueHolderForFontFamilyTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as string
-                valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx0)
-            } else if (valueHolderForFontFamilyTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFontSize  = value.fontSize
-        if (valueHolderForFontSize !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForFontSizeTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFontWeight  = value.fontWeight
-        if (valueHolderForFontWeight !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
-            if (valueHolderForFontWeightTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
-            } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
-                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
-            } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
-                valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFontStyle  = value.fontStyle
-        if (valueHolderForFontStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFontStyleTmpValue  = (valueHolderForFontStyle as FontStyle)
-            valueSerializer.writeInt32(valueHolderForFontStyleTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): TextStyleInterface {
-        let valueDeserializer : DeserializerBase = buffer
-        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontColorTmpBuf : ResourceColor | undefined = undefined
-        if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
-                fontColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
-            }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
-        }
-        const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
-        const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFamilyTmpBuf : ResourceStr | undefined = undefined
-        if ((fontFamilyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontFamilyTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontFamilyTmpBuf_ : string | Resource | undefined
-            if (fontFamilyTmpBuf_UnionSelector == (0).toChar()) {
-                fontFamilyTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (fontFamilyTmpBuf_UnionSelector == (1).toChar()) {
-                fontFamilyTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for fontFamilyTmpBuf_ has to be chosen through deserialisation.")
-            }
-            fontFamilyTmpBuf = (fontFamilyTmpBuf_ as string | Resource)
-        }
-        const fontFamilyTmpResult : ResourceStr | undefined = fontFamilyTmpBuf
-        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSizeTmpBuf : LengthMetrics | undefined = undefined
-        if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontSizeTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-        }
-        const fontSizeTmpResult : LengthMetrics | undefined = fontSizeTmpBuf
-        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeightTmpBuf : int32 | FontWeight | string | undefined = undefined
-        if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontWeightTmpBuf_ : int32 | FontWeight | string | undefined
-            if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
-                fontWeightTmpBuf_ = valueDeserializer.readInt32()
-            } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
-                fontWeightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
-            } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
-                fontWeightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else {
-                throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
-            }
-            fontWeightTmpBuf = (fontWeightTmpBuf_ as int32 | FontWeight | string)
-        }
-        const fontWeightTmpResult : int32 | FontWeight | string | undefined = fontWeightTmpBuf
-        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontStyleTmpBuf : FontStyle | undefined = undefined
-        if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontStyleTmpBuf = FontStyle.fromValue(valueDeserializer.readInt32())
-        }
-        const fontStyleTmpResult : FontStyle | undefined = fontStyleTmpBuf
-        let value : TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult} as TextStyleInterface)
-        return value
-    }
-}
-export class ImageAttachmentLayoutStyle_serializer {
-    public static write(buffer: SerializerBase, value: ImageAttachmentLayoutStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForMargin  = value.margin
-        if (valueHolderForMargin !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMarginTmpValue  = valueHolderForMargin!
-            if (valueHolderForMarginTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as LengthMetrics
-                LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0)
-            } else if (valueHolderForMarginTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as Padding
-                Padding_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPadding  = value.padding
-        if (valueHolderForPadding !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPaddingTmpValue  = valueHolderForPadding!
-            if (valueHolderForPaddingTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForPaddingTmpValueForIdx0  = valueHolderForPaddingTmpValue as LengthMetrics
-                LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx0)
-            } else if (valueHolderForPaddingTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForPaddingTmpValueForIdx1  = valueHolderForPaddingTmpValue as Padding
-                Padding_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForBorderRadius  = value.borderRadius
-        if (valueHolderForBorderRadius !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
-            if (valueHolderForBorderRadiusTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as LengthMetrics
-                LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
-            } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
-                BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): ImageAttachmentLayoutStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let marginTmpBuf : LengthMetrics | Padding | undefined = undefined
-        if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const marginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let marginTmpBuf_ : LengthMetrics | Padding | undefined
-            if (marginTmpBuf_UnionSelector == (0).toChar()) {
-                marginTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-            } else if (marginTmpBuf_UnionSelector == (1).toChar()) {
-                marginTmpBuf_ = Padding_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for marginTmpBuf_ has to be chosen through deserialisation.")
-            }
-            marginTmpBuf = (marginTmpBuf_ as LengthMetrics | Padding)
-        }
-        const marginTmpResult : LengthMetrics | Padding | undefined = marginTmpBuf
-        const paddingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paddingTmpBuf : LengthMetrics | Padding | undefined = undefined
-        if ((paddingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const paddingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let paddingTmpBuf_ : LengthMetrics | Padding | undefined
-            if (paddingTmpBuf_UnionSelector == (0).toChar()) {
-                paddingTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-            } else if (paddingTmpBuf_UnionSelector == (1).toChar()) {
-                paddingTmpBuf_ = Padding_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for paddingTmpBuf_ has to be chosen through deserialisation.")
-            }
-            paddingTmpBuf = (paddingTmpBuf_ as LengthMetrics | Padding)
-        }
-        const paddingTmpResult : LengthMetrics | Padding | undefined = paddingTmpBuf
-        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadiusTmpBuf : LengthMetrics | BorderRadiuses | undefined = undefined
-        if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderRadiusTmpBuf_ : LengthMetrics | BorderRadiuses | undefined
-            if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                borderRadiusTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-            } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                borderRadiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
-            }
-            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as LengthMetrics | BorderRadiuses)
-        }
-        const borderRadiusTmpResult : LengthMetrics | BorderRadiuses | undefined = borderRadiusTmpBuf
-        let value : ImageAttachmentLayoutStyle = ({margin: marginTmpResult, padding: paddingTmpResult, borderRadius: borderRadiusTmpResult} as ImageAttachmentLayoutStyle)
-        return value
-    }
-}
-export class ParagraphStyle_serializer {
-    public static write(buffer: SerializerBase, value: ParagraphStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ParagraphStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ParagraphStyleInternal.fromPtr(ptr)
-    }
-}
-export class ParagraphStyleInterface_serializer {
-    public static write(buffer: SerializerBase, value: ParagraphStyleInterface): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForTextAlign  = value.textAlign
-        if (valueHolderForTextAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTextAlignTmpValue  = (valueHolderForTextAlign as TextAlign)
-            valueSerializer.writeInt32(valueHolderForTextAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForTextIndent  = value.textIndent
-        if (valueHolderForTextIndent !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTextIndentTmpValue  = valueHolderForTextIndent!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForTextIndentTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForMaxLines  = value.maxLines
-        if (valueHolderForMaxLines !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForOverflow  = value.overflow
-        if (valueHolderForOverflow !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOverflowTmpValue  = (valueHolderForOverflow as TextOverflow)
-            valueSerializer.writeInt32(valueHolderForOverflowTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForWordBreak  = value.wordBreak
-        if (valueHolderForWordBreak !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWordBreakTmpValue  = (valueHolderForWordBreak as WordBreak)
-            valueSerializer.writeInt32(valueHolderForWordBreakTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLeadingMargin  = value.leadingMargin
-        if (valueHolderForLeadingMargin !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLeadingMarginTmpValue  = valueHolderForLeadingMargin!
-            if (valueHolderForLeadingMarginTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForLeadingMarginTmpValueForIdx0  = valueHolderForLeadingMarginTmpValue as LengthMetrics
-                LengthMetrics_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0)
-            } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForLeadingMarginTmpValueForIdx1  = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
-                LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForParagraphSpacing  = value.paragraphSpacing
-        if (valueHolderForParagraphSpacing !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForParagraphSpacingTmpValue  = valueHolderForParagraphSpacing!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForParagraphSpacingTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): ParagraphStyleInterface {
-        let valueDeserializer : DeserializerBase = buffer
-        const textAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textAlignTmpBuf : TextAlign | undefined = undefined
-        if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
-        }
-        const textAlignTmpResult : TextAlign | undefined = textAlignTmpBuf
-        const textIndentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textIndentTmpBuf : LengthMetrics | undefined = undefined
-        if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textIndentTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-        }
-        const textIndentTmpResult : LengthMetrics | undefined = textIndentTmpBuf
-        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : int32 | undefined = undefined
-        if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = valueDeserializer.readInt32()
-        }
-        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
-        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let overflowTmpBuf : TextOverflow | undefined = undefined
-        if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            overflowTmpBuf = TextOverflow.fromValue(valueDeserializer.readInt32())
-        }
-        const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
-        const wordBreakTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wordBreakTmpBuf : WordBreak | undefined = undefined
-        if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            wordBreakTmpBuf = WordBreak.fromValue(valueDeserializer.readInt32())
-        }
-        const wordBreakTmpResult : WordBreak | undefined = wordBreakTmpBuf
-        const leadingMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let leadingMarginTmpBuf : LengthMetrics | LeadingMarginPlaceholder | undefined = undefined
-        if ((leadingMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const leadingMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let leadingMarginTmpBuf_ : LengthMetrics | LeadingMarginPlaceholder | undefined
-            if (leadingMarginTmpBuf_UnionSelector == (0).toChar()) {
-                leadingMarginTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-            } else if (leadingMarginTmpBuf_UnionSelector == (1).toChar()) {
-                leadingMarginTmpBuf_ = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for leadingMarginTmpBuf_ has to be chosen through deserialisation.")
-            }
-            leadingMarginTmpBuf = (leadingMarginTmpBuf_ as LengthMetrics | LeadingMarginPlaceholder)
-        }
-        const leadingMarginTmpResult : LengthMetrics | LeadingMarginPlaceholder | undefined = leadingMarginTmpBuf
-        const paragraphSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paragraphSpacingTmpBuf : LengthMetrics | undefined = undefined
-        if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paragraphSpacingTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
-        }
-        const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
-        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)
-        return value
-    }
-}
-export class BackgroundColorStyle_serializer {
-    public static write(buffer: SerializerBase, value: BackgroundColorStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): BackgroundColorStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return BackgroundColorStyleInternal.fromPtr(ptr)
-    }
-}
-export class ImageAttachment_serializer {
-    public static write(buffer: SerializerBase, value: ImageAttachment): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ImageAttachment {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageAttachmentInternal.fromPtr(ptr)
-    }
-}
-export class ImageAttachmentInterface_serializer {
-    public static write(buffer: SerializerBase, value: ImageAttachmentInterface): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForValue  = value.value
-        image_PixelMap_serializer.write(valueSerializer, valueHolderForValue)
-        const valueHolderForSize  = value.size
-        if (valueHolderForSize !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSizeTmpValue  = valueHolderForSize!
-            SizeOptions_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForVerticalAlign  = value.verticalAlign
-        if (valueHolderForVerticalAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForVerticalAlignTmpValue  = (valueHolderForVerticalAlign as ImageSpanAlignment)
-            valueSerializer.writeInt32(valueHolderForVerticalAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForObjectFit  = value.objectFit
-        if (valueHolderForObjectFit !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForObjectFitTmpValue  = (valueHolderForObjectFit as ImageFit)
-            valueSerializer.writeInt32(valueHolderForObjectFitTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLayoutStyle  = value.layoutStyle
-        if (valueHolderForLayoutStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLayoutStyleTmpValue  = valueHolderForLayoutStyle!
-            ImageAttachmentLayoutStyle_serializer.write(valueSerializer, valueHolderForLayoutStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForColorFilter  = value.colorFilter
-        if (valueHolderForColorFilter !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
-            if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
-                ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
-            } else if (valueHolderForColorFilterTmpValue instanceof drawing.ColorFilter) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as drawing.ColorFilter
-                drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): ImageAttachmentInterface {
-        let valueDeserializer : DeserializerBase = buffer
-        const valueTmpResult : image.PixelMap = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let sizeTmpBuf : SizeOptions | undefined = undefined
-        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            sizeTmpBuf = SizeOptions_serializer.read(valueDeserializer)
-        }
-        const sizeTmpResult : SizeOptions | undefined = sizeTmpBuf
-        const verticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let verticalAlignTmpBuf : ImageSpanAlignment | undefined = undefined
-        if ((verticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            verticalAlignTmpBuf = ImageSpanAlignment.fromValue(valueDeserializer.readInt32())
-        }
-        const verticalAlignTmpResult : ImageSpanAlignment | undefined = verticalAlignTmpBuf
-        const objectFitTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let objectFitTmpBuf : ImageFit | undefined = undefined
-        if ((objectFitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            objectFitTmpBuf = ImageFit.fromValue(valueDeserializer.readInt32())
-        }
-        const objectFitTmpResult : ImageFit | undefined = objectFitTmpBuf
-        const layoutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let layoutStyleTmpBuf : ImageAttachmentLayoutStyle | undefined = undefined
-        if ((layoutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            layoutStyleTmpBuf = ImageAttachmentLayoutStyle_serializer.read(valueDeserializer)
-        }
-        const layoutStyleTmpResult : ImageAttachmentLayoutStyle | undefined = layoutStyleTmpBuf
-        const colorFilterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorFilterTmpBuf : ColorFilterType | undefined = undefined
-        if ((colorFilterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorFilterTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorFilterTmpBuf_ : ColorFilter | drawing.ColorFilter | undefined
-            if (colorFilterTmpBuf_UnionSelector == (0).toChar()) {
-                colorFilterTmpBuf_ = (ColorFilter_serializer.read(valueDeserializer) as ColorFilter)
-            } else if (colorFilterTmpBuf_UnionSelector == (1).toChar()) {
-                colorFilterTmpBuf_ = (drawing_ColorFilter_serializer.read(valueDeserializer) as drawing.ColorFilter)
-            } else {
-                throw new Error("One of the branches for colorFilterTmpBuf_ has to be chosen through deserialisation.")
-            }
-            colorFilterTmpBuf = (colorFilterTmpBuf_ as ColorFilter | drawing.ColorFilter)
-        }
-        const colorFilterTmpResult : ColorFilterType | undefined = colorFilterTmpBuf
-        let value : ImageAttachmentInterface = ({value: valueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult} as ImageAttachmentInterface)
-        return value
-    }
-}
-export class ResourceImageAttachmentOptions_serializer {
-    public static write(buffer: SerializerBase, value: ResourceImageAttachmentOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForResourceValue  = value.resourceValue
-        if (valueHolderForResourceValue !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForResourceValueTmpValue  = valueHolderForResourceValue!
-            if (valueHolderForResourceValueTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForResourceValueTmpValueForIdx0  = valueHolderForResourceValueTmpValue as string
-                valueSerializer.writeString(valueHolderForResourceValueTmpValueForIdx0)
-            } else if (valueHolderForResourceValueTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForResourceValueTmpValueForIdx1  = valueHolderForResourceValueTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForResourceValueTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSize  = value.size
-        if (valueHolderForSize !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSizeTmpValue  = valueHolderForSize!
-            SizeOptions_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForVerticalAlign  = value.verticalAlign
-        if (valueHolderForVerticalAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForVerticalAlignTmpValue  = (valueHolderForVerticalAlign as ImageSpanAlignment)
-            valueSerializer.writeInt32(valueHolderForVerticalAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForObjectFit  = value.objectFit
-        if (valueHolderForObjectFit !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForObjectFitTmpValue  = (valueHolderForObjectFit as ImageFit)
-            valueSerializer.writeInt32(valueHolderForObjectFitTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLayoutStyle  = value.layoutStyle
-        if (valueHolderForLayoutStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLayoutStyleTmpValue  = valueHolderForLayoutStyle!
-            ImageAttachmentLayoutStyle_serializer.write(valueSerializer, valueHolderForLayoutStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForColorFilter  = value.colorFilter
-        if (valueHolderForColorFilter !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
-            if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
-                ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
-            } else if (valueHolderForColorFilterTmpValue instanceof drawing.ColorFilter) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as drawing.ColorFilter
-                drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSyncLoad  = value.syncLoad
-        if (valueHolderForSyncLoad !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSyncLoadTmpValue  = valueHolderForSyncLoad!
-            valueSerializer.writeBoolean(valueHolderForSyncLoadTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): ResourceImageAttachmentOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const resourceValueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let resourceValueTmpBuf : ResourceStr | undefined = undefined
-        if ((resourceValueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const resourceValueTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let resourceValueTmpBuf_ : string | Resource | undefined
-            if (resourceValueTmpBuf_UnionSelector == (0).toChar()) {
-                resourceValueTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (resourceValueTmpBuf_UnionSelector == (1).toChar()) {
-                resourceValueTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for resourceValueTmpBuf_ has to be chosen through deserialisation.")
-            }
-            resourceValueTmpBuf = (resourceValueTmpBuf_ as string | Resource)
-        }
-        const resourceValueTmpResult : ResourceStr | undefined = resourceValueTmpBuf
-        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let sizeTmpBuf : SizeOptions | undefined = undefined
-        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            sizeTmpBuf = SizeOptions_serializer.read(valueDeserializer)
-        }
-        const sizeTmpResult : SizeOptions | undefined = sizeTmpBuf
-        const verticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let verticalAlignTmpBuf : ImageSpanAlignment | undefined = undefined
-        if ((verticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            verticalAlignTmpBuf = ImageSpanAlignment.fromValue(valueDeserializer.readInt32())
-        }
-        const verticalAlignTmpResult : ImageSpanAlignment | undefined = verticalAlignTmpBuf
-        const objectFitTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let objectFitTmpBuf : ImageFit | undefined = undefined
-        if ((objectFitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            objectFitTmpBuf = ImageFit.fromValue(valueDeserializer.readInt32())
-        }
-        const objectFitTmpResult : ImageFit | undefined = objectFitTmpBuf
-        const layoutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let layoutStyleTmpBuf : ImageAttachmentLayoutStyle | undefined = undefined
-        if ((layoutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            layoutStyleTmpBuf = ImageAttachmentLayoutStyle_serializer.read(valueDeserializer)
-        }
-        const layoutStyleTmpResult : ImageAttachmentLayoutStyle | undefined = layoutStyleTmpBuf
-        const colorFilterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorFilterTmpBuf : ColorFilterType | undefined = undefined
-        if ((colorFilterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorFilterTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorFilterTmpBuf_ : ColorFilter | drawing.ColorFilter | undefined
-            if (colorFilterTmpBuf_UnionSelector == (0).toChar()) {
-                colorFilterTmpBuf_ = (ColorFilter_serializer.read(valueDeserializer) as ColorFilter)
-            } else if (colorFilterTmpBuf_UnionSelector == (1).toChar()) {
-                colorFilterTmpBuf_ = (drawing_ColorFilter_serializer.read(valueDeserializer) as drawing.ColorFilter)
-            } else {
-                throw new Error("One of the branches for colorFilterTmpBuf_ has to be chosen through deserialisation.")
-            }
-            colorFilterTmpBuf = (colorFilterTmpBuf_ as ColorFilter | drawing.ColorFilter)
-        }
-        const colorFilterTmpResult : ColorFilterType | undefined = colorFilterTmpBuf
-        const syncLoadTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let syncLoadTmpBuf : boolean | undefined = undefined
-        if ((syncLoadTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            syncLoadTmpBuf = valueDeserializer.readBoolean()
-        }
-        const syncLoadTmpResult : boolean | undefined = syncLoadTmpBuf
-        let value : ResourceImageAttachmentOptions = ({resourceValue: resourceValueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult, syncLoad: syncLoadTmpResult} as ResourceImageAttachmentOptions)
         return value
     }
 }
@@ -2264,13 +1636,13 @@ export class StyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): StyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let startTmpBuf : int32 | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             startTmpBuf = valueDeserializer.readInt32()
         }
         const startTmpResult : int32 | undefined = startTmpBuf
-        const lengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lengthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lengthTmpBuf : int32 | undefined = undefined
         if ((lengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lengthTmpBuf = valueDeserializer.readInt32()
@@ -2279,37 +1651,118 @@ export class StyleOptions_serializer {
         const styledKeyTmpResult : StyledStringKey = StyledStringKey.fromValue(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let styledValueTmpBuf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
-        if (styledValueTmpBufUnionSelector == (0).toChar()) {
+        if (styledValueTmpBufUnionSelector == (0).toByte()) {
             styledValueTmpBuf = (TextStyle_serializer.read(valueDeserializer) as TextStyle)
-        } else if (styledValueTmpBufUnionSelector == (1).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (1).toByte()) {
             styledValueTmpBuf = (DecorationStyle_serializer.read(valueDeserializer) as DecorationStyle)
-        } else if (styledValueTmpBufUnionSelector == (2).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (2).toByte()) {
             styledValueTmpBuf = (BaselineOffsetStyle_serializer.read(valueDeserializer) as BaselineOffsetStyle)
-        } else if (styledValueTmpBufUnionSelector == (3).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (3).toByte()) {
             styledValueTmpBuf = (LetterSpacingStyle_serializer.read(valueDeserializer) as LetterSpacingStyle)
-        } else if (styledValueTmpBufUnionSelector == (4).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (4).toByte()) {
             styledValueTmpBuf = (TextShadowStyle_serializer.read(valueDeserializer) as TextShadowStyle)
-        } else if (styledValueTmpBufUnionSelector == (5).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (5).toByte()) {
             styledValueTmpBuf = (GestureStyle_serializer.read(valueDeserializer) as GestureStyle)
-        } else if (styledValueTmpBufUnionSelector == (6).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (6).toByte()) {
             styledValueTmpBuf = (ImageAttachment_serializer.read(valueDeserializer) as ImageAttachment)
-        } else if (styledValueTmpBufUnionSelector == (7).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (7).toByte()) {
             styledValueTmpBuf = (ParagraphStyle_serializer.read(valueDeserializer) as ParagraphStyle)
-        } else if (styledValueTmpBufUnionSelector == (8).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (8).toByte()) {
             styledValueTmpBuf = (LineHeightStyle_serializer.read(valueDeserializer) as LineHeightStyle)
-        } else if (styledValueTmpBufUnionSelector == (9).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (9).toByte()) {
             styledValueTmpBuf = (UrlStyle_serializer.read(valueDeserializer) as UrlStyle)
-        } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (10).toByte()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
-        } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (11).toByte()) {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
-        } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {
-            throw new Error("One of the branches for styledValueTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for styledValueTmpBuf has to be chosen through deserialisation.')
         }
         const styledValueTmpResult : StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : StyleOptions = ({start: startTmpResult, length: lengthTmpResult, styledKey: styledKeyTmpResult, styledValue: styledValueTmpResult} as StyleOptions)
+        return value
+    }
+}
+export class DecorationStyleInterface_serializer {
+    public static write(buffer: SerializerBase, value: DecorationStyleInterface): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = (valueHolderForType as TextDecorationType)
+            valueSerializer.writeInt32(valueHolderForTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStyle  = value.style
+        if (valueHolderForStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStyleTmpValue  = (valueHolderForStyle as TextDecorationStyle)
+            valueSerializer.writeInt32(valueHolderForStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): DecorationStyleInterface {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let typeTmpBuf : TextDecorationType | undefined = undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        }
+        const typeTmpResult : TextDecorationType | undefined = typeTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf : ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let styleTmpBuf : TextDecorationStyle | undefined = undefined
+        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
+        let value : DecorationStyleInterface = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleInterface)
         return value
     }
 }
@@ -2384,51 +1837,670 @@ export class SpanStyle_serializer {
         const styledKeyTmpResult : StyledStringKey = StyledStringKey.fromValue(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let styledValueTmpBuf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
-        if (styledValueTmpBufUnionSelector == (0).toChar()) {
+        if (styledValueTmpBufUnionSelector == (0).toByte()) {
             styledValueTmpBuf = (TextStyle_serializer.read(valueDeserializer) as TextStyle)
-        } else if (styledValueTmpBufUnionSelector == (1).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (1).toByte()) {
             styledValueTmpBuf = (DecorationStyle_serializer.read(valueDeserializer) as DecorationStyle)
-        } else if (styledValueTmpBufUnionSelector == (2).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (2).toByte()) {
             styledValueTmpBuf = (BaselineOffsetStyle_serializer.read(valueDeserializer) as BaselineOffsetStyle)
-        } else if (styledValueTmpBufUnionSelector == (3).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (3).toByte()) {
             styledValueTmpBuf = (LetterSpacingStyle_serializer.read(valueDeserializer) as LetterSpacingStyle)
-        } else if (styledValueTmpBufUnionSelector == (4).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (4).toByte()) {
             styledValueTmpBuf = (TextShadowStyle_serializer.read(valueDeserializer) as TextShadowStyle)
-        } else if (styledValueTmpBufUnionSelector == (5).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (5).toByte()) {
             styledValueTmpBuf = (GestureStyle_serializer.read(valueDeserializer) as GestureStyle)
-        } else if (styledValueTmpBufUnionSelector == (6).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (6).toByte()) {
             styledValueTmpBuf = (ImageAttachment_serializer.read(valueDeserializer) as ImageAttachment)
-        } else if (styledValueTmpBufUnionSelector == (7).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (7).toByte()) {
             styledValueTmpBuf = (ParagraphStyle_serializer.read(valueDeserializer) as ParagraphStyle)
-        } else if (styledValueTmpBufUnionSelector == (8).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (8).toByte()) {
             styledValueTmpBuf = (LineHeightStyle_serializer.read(valueDeserializer) as LineHeightStyle)
-        } else if (styledValueTmpBufUnionSelector == (9).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (9).toByte()) {
             styledValueTmpBuf = (UrlStyle_serializer.read(valueDeserializer) as UrlStyle)
-        } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (10).toByte()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
-        } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (11).toByte()) {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
-        } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
+        } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {
-            throw new Error("One of the branches for styledValueTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for styledValueTmpBuf has to be chosen through deserialisation.')
         }
         const styledValueTmpResult : StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : SpanStyle = ({start: startTmpResult, length: lengthTmpResult, styledKey: styledKeyTmpResult, styledValue: styledValueTmpResult} as SpanStyle)
         return value
     }
 }
+export class TextStyleInterface_serializer {
+    public static write(buffer: SerializerBase, value: TextStyleInterface): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFontColor  = value.fontColor
+        if (valueHolderForFontColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
+            if (valueHolderForFontColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForFontColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
+            } else if (valueHolderForFontColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
+                valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
+            } else if (valueHolderForFontColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFontFamily  = value.fontFamily
+        if (valueHolderForFontFamily !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
+            if (valueHolderForFontFamilyTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as string
+                valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx0)
+            } else if (valueHolderForFontFamilyTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFontSize  = value.fontSize
+        if (valueHolderForFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForFontSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFontWeight  = value.fontWeight
+        if (valueHolderForFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
+            if (valueHolderForFontWeightTmpValue instanceof int32) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
+            } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
+            } else if (valueHolderForFontWeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
+                valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFontStyle  = value.fontStyle
+        if (valueHolderForFontStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontStyleTmpValue  = (valueHolderForFontStyle as FontStyle)
+            valueSerializer.writeInt32(valueHolderForFontStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): TextStyleInterface {
+        let valueDeserializer : DeserializerBase = buffer
+        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontColorTmpBuf : ResourceColor | undefined = undefined
+        if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (fontColorTmpBufOptUnionSelector == (0).toByte()) {
+                fontColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (fontColorTmpBufOptUnionSelector == (1).toByte()) {
+                fontColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (fontColorTmpBufOptUnionSelector == (2).toByte()) {
+                fontColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (fontColorTmpBufOptUnionSelector == (3).toByte()) {
+                fontColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for fontColorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            fontColorTmpBuf = (fontColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
+        const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontFamilyTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
+        if ((fontFamilyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontFamilyTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontFamilyTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (fontFamilyTmpBufOptUnionSelector == (0).toByte()) {
+                fontFamilyTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (fontFamilyTmpBufOptUnionSelector == (1).toByte()) {
+                fontFamilyTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for fontFamilyTmpBufOpt has to be chosen through deserialisation.')
+            }
+            fontFamilyTmpBuf = (fontFamilyTmpBufOpt as string | arkui_component_units_Resource)
+        }
+        const fontFamilyTmpResult : arkui_component_units_ResourceStr | undefined = fontFamilyTmpBuf
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontSizeTmpBuf : arkui_component_units_LengthMetrics | undefined = undefined
+        if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontSizeTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const fontSizeTmpResult : arkui_component_units_LengthMetrics | undefined = fontSizeTmpBuf
+        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontWeightTmpBuf : int32 | FontWeight | string | undefined = undefined
+        if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontWeightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontWeightTmpBufOpt : int32 | FontWeight | string | undefined
+            if (fontWeightTmpBufOptUnionSelector == (0).toByte()) {
+                fontWeightTmpBufOpt = valueDeserializer.readInt32()
+            } else if (fontWeightTmpBufOptUnionSelector == (1).toByte()) {
+                fontWeightTmpBufOpt = FontWeight.fromValue(valueDeserializer.readInt32())
+            } else if (fontWeightTmpBufOptUnionSelector == (2).toByte()) {
+                fontWeightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error('One of the branches for fontWeightTmpBufOpt has to be chosen through deserialisation.')
+            }
+            fontWeightTmpBuf = (fontWeightTmpBufOpt as int32 | FontWeight | string)
+        }
+        const fontWeightTmpResult : int32 | FontWeight | string | undefined = fontWeightTmpBuf
+        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontStyleTmpBuf : FontStyle | undefined = undefined
+        if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontStyleTmpBuf = FontStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const fontStyleTmpResult : FontStyle | undefined = fontStyleTmpBuf
+        let value : TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult} as TextStyleInterface)
+        return value
+    }
+}
+export class ImageAttachmentLayoutStyle_serializer {
+    public static write(buffer: SerializerBase, value: ImageAttachmentLayoutStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForMargin  = value.margin
+        if (valueHolderForMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarginTmpValue  = valueHolderForMargin!
+            if (valueHolderForMarginTmpValue instanceof arkui_component_units_LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0)
+            } else if (valueHolderForMarginTmpValue instanceof Margin) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as Margin
+                Padding_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPadding  = value.padding
+        if (valueHolderForPadding !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPaddingTmpValue  = valueHolderForPadding!
+            if (valueHolderForPaddingTmpValue instanceof arkui_component_units_LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForPaddingTmpValueForIdx0  = valueHolderForPaddingTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx0)
+            } else if (valueHolderForPaddingTmpValue instanceof Padding) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForPaddingTmpValueForIdx1  = valueHolderForPaddingTmpValue as Padding
+                Padding_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBorderRadius  = value.borderRadius
+        if (valueHolderForBorderRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
+            if (valueHolderForBorderRadiusTmpValue instanceof arkui_component_units_LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImageAttachmentLayoutStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let marginTmpBuf : arkui_component_units_LengthMetrics | Margin | undefined = undefined
+        if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const marginTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTmpBufOpt : arkui_component_units_LengthMetrics | Margin | undefined
+            if (marginTmpBufOptUnionSelector == (0).toByte()) {
+                marginTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            } else if (marginTmpBufOptUnionSelector == (1).toByte()) {
+                marginTmpBufOpt = Padding_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for marginTmpBufOpt has to be chosen through deserialisation.')
+            }
+            marginTmpBuf = (marginTmpBufOpt as arkui_component_units_LengthMetrics | Margin)
+        }
+        const marginTmpResult : arkui_component_units_LengthMetrics | Margin | undefined = marginTmpBuf
+        const paddingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let paddingTmpBuf : arkui_component_units_LengthMetrics | Padding | undefined = undefined
+        if ((paddingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const paddingTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let paddingTmpBufOpt : arkui_component_units_LengthMetrics | Padding | undefined
+            if (paddingTmpBufOptUnionSelector == (0).toByte()) {
+                paddingTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            } else if (paddingTmpBufOptUnionSelector == (1).toByte()) {
+                paddingTmpBufOpt = Padding_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for paddingTmpBufOpt has to be chosen through deserialisation.')
+            }
+            paddingTmpBuf = (paddingTmpBufOpt as arkui_component_units_LengthMetrics | Padding)
+        }
+        const paddingTmpResult : arkui_component_units_LengthMetrics | Padding | undefined = paddingTmpBuf
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let borderRadiusTmpBuf : arkui_component_units_LengthMetrics | BorderRadiuses | undefined = undefined
+        if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderRadiusTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBufOpt : arkui_component_units_LengthMetrics | BorderRadiuses | undefined
+            if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
+                borderRadiusTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
+                borderRadiusTmpBufOpt = BorderRadiuses_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for borderRadiusTmpBufOpt has to be chosen through deserialisation.')
+            }
+            borderRadiusTmpBuf = (borderRadiusTmpBufOpt as arkui_component_units_LengthMetrics | BorderRadiuses)
+        }
+        const borderRadiusTmpResult : arkui_component_units_LengthMetrics | BorderRadiuses | undefined = borderRadiusTmpBuf
+        let value : ImageAttachmentLayoutStyle = ({margin: marginTmpResult, padding: paddingTmpResult, borderRadius: borderRadiusTmpResult} as ImageAttachmentLayoutStyle)
+        return value
+    }
+}
+export class ParagraphStyleInterface_serializer {
+    public static write(buffer: SerializerBase, value: ParagraphStyleInterface): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTextAlign  = value.textAlign
+        if (valueHolderForTextAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextAlignTmpValue  = (valueHolderForTextAlign as TextAlign)
+            valueSerializer.writeInt32(valueHolderForTextAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTextIndent  = value.textIndent
+        if (valueHolderForTextIndent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextIndentTmpValue  = valueHolderForTextIndent!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTextIndentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMaxLines  = value.maxLines
+        if (valueHolderForMaxLines !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOverflow  = value.overflow
+        if (valueHolderForOverflow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOverflowTmpValue  = (valueHolderForOverflow as TextOverflow)
+            valueSerializer.writeInt32(valueHolderForOverflowTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWordBreak  = value.wordBreak
+        if (valueHolderForWordBreak !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWordBreakTmpValue  = (valueHolderForWordBreak as WordBreak)
+            valueSerializer.writeInt32(valueHolderForWordBreakTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLeadingMargin  = value.leadingMargin
+        if (valueHolderForLeadingMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeadingMarginTmpValue  = valueHolderForLeadingMargin!
+            if (valueHolderForLeadingMarginTmpValue instanceof arkui_component_units_LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForLeadingMarginTmpValueForIdx0  = valueHolderForLeadingMarginTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0)
+            } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForLeadingMarginTmpValueForIdx1  = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
+                LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForParagraphSpacing  = value.paragraphSpacing
+        if (valueHolderForParagraphSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParagraphSpacingTmpValue  = valueHolderForParagraphSpacing!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForParagraphSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParagraphStyleInterface {
+        let valueDeserializer : DeserializerBase = buffer
+        const textAlignTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let textAlignTmpBuf : TextAlign | undefined = undefined
+        if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textAlignTmpResult : TextAlign | undefined = textAlignTmpBuf
+        const textIndentTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let textIndentTmpBuf : arkui_component_units_LengthMetrics | undefined = undefined
+        if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textIndentTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const textIndentTmpResult : arkui_component_units_LengthMetrics | undefined = textIndentTmpBuf
+        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let maxLinesTmpBuf : int32 | undefined = undefined
+        if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxLinesTmpBuf = valueDeserializer.readInt32()
+        }
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
+        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let overflowTmpBuf : TextOverflow | undefined = undefined
+        if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            overflowTmpBuf = TextOverflow.fromValue(valueDeserializer.readInt32())
+        }
+        const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
+        const wordBreakTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let wordBreakTmpBuf : WordBreak | undefined = undefined
+        if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wordBreakTmpBuf = WordBreak.fromValue(valueDeserializer.readInt32())
+        }
+        const wordBreakTmpResult : WordBreak | undefined = wordBreakTmpBuf
+        const leadingMarginTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let leadingMarginTmpBuf : arkui_component_units_LengthMetrics | LeadingMarginPlaceholder | undefined = undefined
+        if ((leadingMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const leadingMarginTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let leadingMarginTmpBufOpt : arkui_component_units_LengthMetrics | LeadingMarginPlaceholder | undefined
+            if (leadingMarginTmpBufOptUnionSelector == (0).toByte()) {
+                leadingMarginTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            } else if (leadingMarginTmpBufOptUnionSelector == (1).toByte()) {
+                leadingMarginTmpBufOpt = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for leadingMarginTmpBufOpt has to be chosen through deserialisation.')
+            }
+            leadingMarginTmpBuf = (leadingMarginTmpBufOpt as arkui_component_units_LengthMetrics | LeadingMarginPlaceholder)
+        }
+        const leadingMarginTmpResult : arkui_component_units_LengthMetrics | LeadingMarginPlaceholder | undefined = leadingMarginTmpBuf
+        const paragraphSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let paragraphSpacingTmpBuf : arkui_component_units_LengthMetrics | undefined = undefined
+        if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paragraphSpacingTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const paragraphSpacingTmpResult : arkui_component_units_LengthMetrics | undefined = paragraphSpacingTmpBuf
+        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)
+        return value
+    }
+}
+export class ImageAttachmentInterface_serializer {
+    public static write(buffer: SerializerBase, value: ImageAttachmentInterface): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        image_PixelMap_serializer.write(valueSerializer, valueHolderForValue)
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            SizeOptions_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForVerticalAlign  = value.verticalAlign
+        if (valueHolderForVerticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForVerticalAlignTmpValue  = (valueHolderForVerticalAlign as ImageSpanAlignment)
+            valueSerializer.writeInt32(valueHolderForVerticalAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForObjectFit  = value.objectFit
+        if (valueHolderForObjectFit !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForObjectFitTmpValue  = (valueHolderForObjectFit as ImageFit)
+            valueSerializer.writeInt32(valueHolderForObjectFitTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLayoutStyle  = value.layoutStyle
+        if (valueHolderForLayoutStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLayoutStyleTmpValue  = valueHolderForLayoutStyle!
+            ImageAttachmentLayoutStyle_serializer.write(valueSerializer, valueHolderForLayoutStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColorFilter  = value.colorFilter
+        if (valueHolderForColorFilter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
+            if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
+                ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
+            } else if (valueHolderForColorFilterTmpValue instanceof DrawingColorFilter) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as DrawingColorFilter
+                drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImageAttachmentInterface {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : PixelMap = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let sizeTmpBuf : SizeOptions | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sizeTmpBuf = SizeOptions_serializer.read(valueDeserializer)
+        }
+        const sizeTmpResult : SizeOptions | undefined = sizeTmpBuf
+        const verticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let verticalAlignTmpBuf : ImageSpanAlignment | undefined = undefined
+        if ((verticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            verticalAlignTmpBuf = ImageSpanAlignment.fromValue(valueDeserializer.readInt32())
+        }
+        const verticalAlignTmpResult : ImageSpanAlignment | undefined = verticalAlignTmpBuf
+        const objectFitTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let objectFitTmpBuf : ImageFit | undefined = undefined
+        if ((objectFitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            objectFitTmpBuf = ImageFit.fromValue(valueDeserializer.readInt32())
+        }
+        const objectFitTmpResult : ImageFit | undefined = objectFitTmpBuf
+        const layoutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let layoutStyleTmpBuf : ImageAttachmentLayoutStyle | undefined = undefined
+        if ((layoutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            layoutStyleTmpBuf = ImageAttachmentLayoutStyle_serializer.read(valueDeserializer)
+        }
+        const layoutStyleTmpResult : ImageAttachmentLayoutStyle | undefined = layoutStyleTmpBuf
+        const colorFilterTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let colorFilterTmpBuf : ColorFilterType | undefined = undefined
+        if ((colorFilterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorFilterTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let colorFilterTmpBufOpt : ColorFilter | DrawingColorFilter | undefined
+            if (colorFilterTmpBufOptUnionSelector == (0).toByte()) {
+                colorFilterTmpBufOpt = (ColorFilter_serializer.read(valueDeserializer) as ColorFilter)
+            } else if (colorFilterTmpBufOptUnionSelector == (1).toByte()) {
+                colorFilterTmpBufOpt = (drawing_ColorFilter_serializer.read(valueDeserializer) as drawing.ColorFilter)
+            } else {
+                throw new Error('One of the branches for colorFilterTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorFilterTmpBuf = (colorFilterTmpBufOpt as ColorFilter | DrawingColorFilter)
+        }
+        const colorFilterTmpResult : ColorFilterType | undefined = colorFilterTmpBuf
+        let value : ImageAttachmentInterface = ({value: valueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult} as ImageAttachmentInterface)
+        return value
+    }
+}
+export class ResourceImageAttachmentOptions_serializer {
+    public static write(buffer: SerializerBase, value: ResourceImageAttachmentOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForResourceValue  = value.resourceValue
+        if (valueHolderForResourceValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForResourceValueTmpValue  = valueHolderForResourceValue!
+            if (valueHolderForResourceValueTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForResourceValueTmpValueForIdx0  = valueHolderForResourceValueTmpValue as string
+                valueSerializer.writeString(valueHolderForResourceValueTmpValueForIdx0)
+            } else if (valueHolderForResourceValueTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForResourceValueTmpValueForIdx1  = valueHolderForResourceValueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForResourceValueTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            SizeOptions_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForVerticalAlign  = value.verticalAlign
+        if (valueHolderForVerticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForVerticalAlignTmpValue  = (valueHolderForVerticalAlign as ImageSpanAlignment)
+            valueSerializer.writeInt32(valueHolderForVerticalAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForObjectFit  = value.objectFit
+        if (valueHolderForObjectFit !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForObjectFitTmpValue  = (valueHolderForObjectFit as ImageFit)
+            valueSerializer.writeInt32(valueHolderForObjectFitTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLayoutStyle  = value.layoutStyle
+        if (valueHolderForLayoutStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLayoutStyleTmpValue  = valueHolderForLayoutStyle!
+            ImageAttachmentLayoutStyle_serializer.write(valueSerializer, valueHolderForLayoutStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColorFilter  = value.colorFilter
+        if (valueHolderForColorFilter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
+            if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
+                ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
+            } else if (valueHolderForColorFilterTmpValue instanceof DrawingColorFilter) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as DrawingColorFilter
+                drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSyncLoad  = value.syncLoad
+        if (valueHolderForSyncLoad !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSyncLoadTmpValue  = valueHolderForSyncLoad!
+            valueSerializer.writeBoolean(valueHolderForSyncLoadTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ResourceImageAttachmentOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const resourceValueTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let resourceValueTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
+        if ((resourceValueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const resourceValueTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let resourceValueTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (resourceValueTmpBufOptUnionSelector == (0).toByte()) {
+                resourceValueTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (resourceValueTmpBufOptUnionSelector == (1).toByte()) {
+                resourceValueTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for resourceValueTmpBufOpt has to be chosen through deserialisation.')
+            }
+            resourceValueTmpBuf = (resourceValueTmpBufOpt as string | arkui_component_units_Resource)
+        }
+        const resourceValueTmpResult : arkui_component_units_ResourceStr | undefined = resourceValueTmpBuf
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let sizeTmpBuf : SizeOptions | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sizeTmpBuf = SizeOptions_serializer.read(valueDeserializer)
+        }
+        const sizeTmpResult : SizeOptions | undefined = sizeTmpBuf
+        const verticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let verticalAlignTmpBuf : ImageSpanAlignment | undefined = undefined
+        if ((verticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            verticalAlignTmpBuf = ImageSpanAlignment.fromValue(valueDeserializer.readInt32())
+        }
+        const verticalAlignTmpResult : ImageSpanAlignment | undefined = verticalAlignTmpBuf
+        const objectFitTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let objectFitTmpBuf : ImageFit | undefined = undefined
+        if ((objectFitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            objectFitTmpBuf = ImageFit.fromValue(valueDeserializer.readInt32())
+        }
+        const objectFitTmpResult : ImageFit | undefined = objectFitTmpBuf
+        const layoutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let layoutStyleTmpBuf : ImageAttachmentLayoutStyle | undefined = undefined
+        if ((layoutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            layoutStyleTmpBuf = ImageAttachmentLayoutStyle_serializer.read(valueDeserializer)
+        }
+        const layoutStyleTmpResult : ImageAttachmentLayoutStyle | undefined = layoutStyleTmpBuf
+        const colorFilterTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let colorFilterTmpBuf : ColorFilterType | undefined = undefined
+        if ((colorFilterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorFilterTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let colorFilterTmpBufOpt : ColorFilter | DrawingColorFilter | undefined
+            if (colorFilterTmpBufOptUnionSelector == (0).toByte()) {
+                colorFilterTmpBufOpt = (ColorFilter_serializer.read(valueDeserializer) as ColorFilter)
+            } else if (colorFilterTmpBufOptUnionSelector == (1).toByte()) {
+                colorFilterTmpBufOpt = (drawing_ColorFilter_serializer.read(valueDeserializer) as drawing.ColorFilter)
+            } else {
+                throw new Error('One of the branches for colorFilterTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorFilterTmpBuf = (colorFilterTmpBufOpt as ColorFilter | DrawingColorFilter)
+        }
+        const colorFilterTmpResult : ColorFilterType | undefined = colorFilterTmpBuf
+        const syncLoadTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let syncLoadTmpBuf : boolean | undefined = undefined
+        if ((syncLoadTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            syncLoadTmpBuf = valueDeserializer.readBoolean()
+        }
+        const syncLoadTmpResult : boolean | undefined = syncLoadTmpBuf
+        let value : ResourceImageAttachmentOptions = ({resourceValue: resourceValueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult, syncLoad: syncLoadTmpResult} as ResourceImageAttachmentOptions)
+        return value
+    }
+}
 export class MutableStyledStringInternal {
     public static fromPtr(ptr: KPointer): MutableStyledString {
-        return new MutableStyledString(false, false, ptr)
+        return new MutableStyledString(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class MutableStyledString extends StyledString implements MaterializedBase {
-    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
-        super(false, false, peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
-        this(false, false, MutableStyledString.construct(value, styles))
+        this(MaterializedBaseTag.NOP, MutableStyledString.construct(value, styles))
     }
     static construct(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -2527,43 +2599,43 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         this.appendStyledString_serialize(other_casted)
         return
     }
-    replaceString_serialize(start: int32, length: int32, other: string): void {
+    private replaceString_serialize(start: int32, length: int32, other: string): void {
         ArkUIGeneratedNativeModule._MutableStyledString_replaceString(this.peer!.ptr, start, length, other)
     }
-    insertString_serialize(start: int32, other: string): void {
+    private insertString_serialize(start: int32, other: string): void {
         ArkUIGeneratedNativeModule._MutableStyledString_insertString(this.peer!.ptr, start, other)
     }
-    removeString_serialize(start: int32, length: int32): void {
+    private removeString_serialize(start: int32, length: int32): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeString(this.peer!.ptr, start, length)
     }
-    replaceStyle_serialize(spanStyle: SpanStyle): void {
+    private replaceStyle_serialize(spanStyle: SpanStyle): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         SpanStyle_serializer.write(thisSerializer, spanStyle)
         ArkUIGeneratedNativeModule._MutableStyledString_replaceStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStyle_serialize(spanStyle: SpanStyle): void {
+    private setStyle_serialize(spanStyle: SpanStyle): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         SpanStyle_serializer.write(thisSerializer, spanStyle)
         ArkUIGeneratedNativeModule._MutableStyledString_setStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    removeStyle_serialize(start: int32, length: int32, styledKey: StyledStringKey): void {
+    private removeStyle_serialize(start: int32, length: int32, styledKey: StyledStringKey): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, styledKey.valueOf())
     }
-    removeStyles_serialize(start: int32, length: int32): void {
+    private removeStyles_serialize(start: int32, length: int32): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyles(this.peer!.ptr, start, length)
     }
-    clearStyles_serialize(): void {
+    private clearStyles_serialize(): void {
         ArkUIGeneratedNativeModule._MutableStyledString_clearStyles(this.peer!.ptr)
     }
-    replaceStyledString_serialize(start: int32, length: int32, other: StyledString): void {
+    private replaceStyledString_serialize(start: int32, length: int32, other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, toPeerPtr(other))
     }
-    insertStyledString_serialize(start: int32, other: StyledString): void {
+    private insertStyledString_serialize(start: int32, other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, toPeerPtr(other))
     }
-    appendStyledString_serialize(other: StyledString): void {
+    private appendStyledString_serialize(other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, toPeerPtr(other))
     }
 }

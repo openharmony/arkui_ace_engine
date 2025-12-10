@@ -16,18 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkDatePickerPeer, DatePickerAttribute } from "./component/datePicker"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, PickerTextStyle } from "./component/common"
-import { CrownSensitivity } from "./component/enums"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkDatePickerPeer, DatePickerAttribute } from './component/datePicker'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback } from './component/common'
+import { CrownSensitivity } from './component/enums'
 export class DatePickerModifier extends CommonMethodModifier implements DatePickerAttribute,AttributeModifier<DatePickerAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,159 +43,152 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
     applyFocusedAttribute(instance: DatePickerAttribute): void { }
     applyDisabledAttribute(instance: DatePickerAttribute): void { }
     applySelectedAttribute(instance: DatePickerAttribute): void { }
-    _lunar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lunar_0_0value?: boolean | undefined
-    _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _disappearTextStyle_0_0value?: PickerTextStyle | undefined
-    _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textStyle_0_0value?: PickerTextStyle | undefined
-    _selectedTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedTextStyle_0_0value?: PickerTextStyle | undefined
-    _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDateChange_0_0value?: ((value0: Date) => void) | undefined
-    _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
-    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableHapticFeedback_0_0value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _lunar_0_0value?: boolean | undefined
+    public _disappearTextStyle_0_0value?: PickerTextStyle | undefined
+    public _textStyle_0_0value?: PickerTextStyle | undefined
+    public _selectedTextStyle_0_0value?: PickerTextStyle | undefined
+    public _onDateChange_0_0value?: arkui_component_common_Callback<Date, void> | undefined
+    public _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    public _enableHapticFeedback_0_0value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkDatePickerPeer;
-        if (this._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._lunar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkDatePickerPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setLunarAttribute((this._lunar_0_0value as boolean | undefined));
-                    this._lunar_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._lunar_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._lunar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setLunarAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._disappearTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setDisappearTextStyleAttribute((this._disappearTextStyle_0_0value as PickerTextStyle | undefined));
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setDisappearTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setTextStyleAttribute((this._textStyle_0_0value as PickerTextStyle | undefined));
-                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._textStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setSelectedTextStyleAttribute((this._selectedTextStyle_0_0value as PickerTextStyle | undefined));
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setSelectedTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDateChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as ((value0: Date) => void) | undefined));
-                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
+                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as arkui_component_common_Callback<Date, void> | undefined));
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._onDateChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDateChangeAttribute((undefined as ((value0: Date) => void) | undefined));
+                    flagArray[4] = 0;
+                    peer.setOnDateChangeAttribute((undefined as arkui_component_common_Callback<Date, void> | undefined));
                 }
             }
         }
-        if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
-        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: DatePickerModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._lunar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: DatePickerModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.lunar(modifier._lunar_0_0value);
                     break;
                 }
@@ -198,11 +197,10 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
-        if (modifier._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._disappearTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.disappearTextStyle(modifier._disappearTextStyle_0_0value);
                     break;
                 }
@@ -211,11 +209,10 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
-        if (modifier._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.textStyle(modifier._textStyle_0_0value);
                     break;
                 }
@@ -224,11 +221,10 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
-        if (modifier._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.selectedTextStyle(modifier._selectedTextStyle_0_0value);
                     break;
                 }
@@ -237,24 +233,22 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
-        if (modifier._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDateChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.onDateChange(modifier._onDateChange_0_0value);
                     break;
                 }
                 default: {
-                    this.onDateChange((undefined as ((value0: Date) => void) | undefined));
+                    this.onDateChange((undefined as arkui_component_common_Callback<Date, void> | undefined));
                 }
             }
         }
-        if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.digitalCrownSensitivity(modifier._digitalCrownSensitivity_0_0value);
                     break;
                 }
@@ -263,11 +257,10 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
-        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
                     break;
                 }
@@ -278,90 +271,76 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         }
     }
     lunar(value: boolean | undefined): this {
-        if (((this._lunar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lunar_0_0value) !== (value)))
-        {
-            this._lunar_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._lunar_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._lunar_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._lunar_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     disappearTextStyle(value: PickerTextStyle | undefined): this {
-        if (((this._disappearTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._disappearTextStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     textStyle(value: PickerTextStyle | undefined): this {
-        if (((this._textStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._textStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     selectedTextStyle(value: PickerTextStyle | undefined): this {
-        if (((this._selectedTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._selectedTextStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
-    onDateChange(value: ((value0: Date) => void) | undefined): this {
-        if (((this._onDateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onDateChange(value: arkui_component_common_Callback<Date, void> | undefined): this {
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._onDateChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDateChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        if (((this._digitalCrownSensitivity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
+            this._flagArray[6] = 1
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

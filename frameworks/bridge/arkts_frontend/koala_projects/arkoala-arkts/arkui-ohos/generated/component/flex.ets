@@ -16,26 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, extractors, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
-import { LengthMetrics } from "arkui.Graphics"
-import { FlexModifier } from "./../FlexModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier'
-import { LengthMetrics_serializer } from "./../Graphics"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent } from './common'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { AttributeModifier, hookFlexAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from './enums'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
+import { FlexModifier } from './../FlexModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     attributeSet?: FlexModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFlexPeer {
@@ -46,6 +47,7 @@ export class ArkFlexPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFlexOptionsAttribute(value?: FlexOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -55,6 +57,18 @@ export class ArkFlexPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._FlexInterface_setFlexOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setPointLightAttribute(value: PointLightStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._FlexAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -67,39 +81,38 @@ export interface FlexOptions {
     space?: FlexSpaceOptions;
 }
 export interface FlexSpaceOptions {
-    main?: LengthMetrics;
-    cross?: LengthMetrics;
+    main?: arkui_Graphics_LengthMetrics;
+    cross?: arkui_Graphics_LengthMetrics;
 }
 export interface FlexAttribute extends CommonMethod {
     setFlexOptions(value?: FlexOptions): this {
-        throw new Error("Unimplemented method setFlexOptions")
+        throw new Error('Unimplemented method setFlexOptions')
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error('Unimplemented method pointLight')
     }
     attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
-    attributeModifier_value?: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined
-    setFlexOptions(value?: FlexOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAttribute {
     getPeer(): ArkFlexPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkFlexPeer)
     }
     public setFlexOptions(value?: FlexOptions): this {
-        if (this.checkPriority("setFlexOptions")) {
+        if (this.checkPriority('setFlexOptions')) {
             const value_casted = value as (FlexOptions | undefined)
             this.getPeer()?.setFlexOptionsAttribute(value_casted)
             this.applyOptionsFinish('FlexAttribute');
+            return this
+        }
+        return this
+    }
+    public pointLight(value: PointLightStyle | undefined): this {
+        if (this.checkPriority('pointLight')) {
+            const value_casted = value as (PointLightStyle | undefined)
+            this.getPeer()?.setPointLightAttribute(value_casted)
             return this
         }
         return this
@@ -121,18 +134,16 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
 
 @memo
 export function FlexImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: FlexAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkFlexComponent>((): ArkFlexComponent => {
         return new ArkFlexComponent()
     })
-    NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (peer: ArkFlexPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (_: ArkFlexPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -144,7 +155,7 @@ export class FlexSpaceOptions_serializer {
         if (valueHolderForMain !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMainTmpValue  = valueHolderForMain!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForMainTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMainTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -152,25 +163,25 @@ export class FlexSpaceOptions_serializer {
         if (valueHolderForCross !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCrossTmpValue  = valueHolderForCross!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForCrossTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForCrossTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FlexSpaceOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const mainTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mainTmpBuf : LengthMetrics | undefined = undefined
+        const mainTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let mainTmpBuf : arkui_Graphics_LengthMetrics | undefined = undefined
         if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mainTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            mainTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const mainTmpResult : LengthMetrics | undefined = mainTmpBuf
-        const crossTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let crossTmpBuf : LengthMetrics | undefined = undefined
+        const mainTmpResult : arkui_Graphics_LengthMetrics | undefined = mainTmpBuf
+        const crossTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let crossTmpBuf : arkui_Graphics_LengthMetrics | undefined = undefined
         if ((crossTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            crossTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            crossTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const crossTmpResult : LengthMetrics | undefined = crossTmpBuf
+        const crossTmpResult : arkui_Graphics_LengthMetrics | undefined = crossTmpBuf
         let value : FlexSpaceOptions = ({main: mainTmpResult, cross: crossTmpResult} as FlexSpaceOptions)
         return value
     }
@@ -229,37 +240,37 @@ export class FlexOptions_serializer {
     }
     public static read(buffer: DeserializerBase): FlexOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let directionTmpBuf : FlexDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             directionTmpBuf = FlexDirection.fromValue(valueDeserializer.readInt32())
         }
         const directionTmpResult : FlexDirection | undefined = directionTmpBuf
-        const wrapTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const wrapTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let wrapTmpBuf : FlexWrap | undefined = undefined
         if ((wrapTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             wrapTmpBuf = FlexWrap.fromValue(valueDeserializer.readInt32())
         }
         const wrapTmpResult : FlexWrap | undefined = wrapTmpBuf
-        const justifyContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const justifyContentTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let justifyContentTmpBuf : FlexAlign | undefined = undefined
         if ((justifyContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             justifyContentTmpBuf = FlexAlign.fromValue(valueDeserializer.readInt32())
         }
         const justifyContentTmpResult : FlexAlign | undefined = justifyContentTmpBuf
-        const alignItemsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const alignItemsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let alignItemsTmpBuf : ItemAlign | undefined = undefined
         if ((alignItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             alignItemsTmpBuf = ItemAlign.fromValue(valueDeserializer.readInt32())
         }
         const alignItemsTmpResult : ItemAlign | undefined = alignItemsTmpBuf
-        const alignContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const alignContentTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let alignContentTmpBuf : FlexAlign | undefined = undefined
         if ((alignContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             alignContentTmpBuf = FlexAlign.fromValue(valueDeserializer.readInt32())
         }
         const alignContentTmpResult : FlexAlign | undefined = alignContentTmpBuf
-        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let spaceTmpBuf : FlexSpaceOptions | undefined = undefined
         if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             spaceTmpBuf = FlexSpaceOptions_serializer.read(valueDeserializer)

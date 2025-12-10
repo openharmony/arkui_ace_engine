@@ -16,11 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { default as intl } from "@ohos.intl"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { default as intl } from '@ohos.intl'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class intl_DateTimeOptions_serializer {
     public static write(buffer: SerializerBase, value: intl.DateTimeOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -179,115 +178,115 @@ export class intl_DateTimeOptions_serializer {
     }
     public static read(buffer: DeserializerBase): intl.DateTimeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const localeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const localeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let localeTmpBuf : string | undefined = undefined
         if ((localeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             localeTmpBuf = (valueDeserializer.readString() as string)
         }
         const localeTmpResult : string | undefined = localeTmpBuf
-        const dateStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const dateStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let dateStyleTmpBuf : string | undefined = undefined
         if ((dateStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dateStyleTmpBuf = (valueDeserializer.readString() as string)
         }
         const dateStyleTmpResult : string | undefined = dateStyleTmpBuf
-        const timeStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const timeStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let timeStyleTmpBuf : string | undefined = undefined
         if ((timeStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             timeStyleTmpBuf = (valueDeserializer.readString() as string)
         }
         const timeStyleTmpResult : string | undefined = timeStyleTmpBuf
-        const hourCycleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const hourCycleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let hourCycleTmpBuf : string | undefined = undefined
         if ((hourCycleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             hourCycleTmpBuf = (valueDeserializer.readString() as string)
         }
         const hourCycleTmpResult : string | undefined = hourCycleTmpBuf
-        const timeZoneTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const timeZoneTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let timeZoneTmpBuf : string | undefined = undefined
         if ((timeZoneTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             timeZoneTmpBuf = (valueDeserializer.readString() as string)
         }
         const timeZoneTmpResult : string | undefined = timeZoneTmpBuf
-        const numberingSystemTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const numberingSystemTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let numberingSystemTmpBuf : string | undefined = undefined
         if ((numberingSystemTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             numberingSystemTmpBuf = (valueDeserializer.readString() as string)
         }
         const numberingSystemTmpResult : string | undefined = numberingSystemTmpBuf
-        const hour12TmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const hour12TmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let hour12TmpBuf : boolean | undefined = undefined
         if ((hour12TmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             hour12TmpBuf = valueDeserializer.readBoolean()
         }
         const hour12TmpResult : boolean | undefined = hour12TmpBuf
-        const weekdayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const weekdayTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let weekdayTmpBuf : string | undefined = undefined
         if ((weekdayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             weekdayTmpBuf = (valueDeserializer.readString() as string)
         }
         const weekdayTmpResult : string | undefined = weekdayTmpBuf
-        const eraTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const eraTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let eraTmpBuf : string | undefined = undefined
         if ((eraTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             eraTmpBuf = (valueDeserializer.readString() as string)
         }
         const eraTmpResult : string | undefined = eraTmpBuf
-        const yearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const yearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let yearTmpBuf : string | undefined = undefined
         if ((yearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             yearTmpBuf = (valueDeserializer.readString() as string)
         }
         const yearTmpResult : string | undefined = yearTmpBuf
-        const monthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const monthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let monthTmpBuf : string | undefined = undefined
         if ((monthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             monthTmpBuf = (valueDeserializer.readString() as string)
         }
         const monthTmpResult : string | undefined = monthTmpBuf
-        const dayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const dayTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let dayTmpBuf : string | undefined = undefined
         if ((dayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dayTmpBuf = (valueDeserializer.readString() as string)
         }
         const dayTmpResult : string | undefined = dayTmpBuf
-        const hourTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const hourTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let hourTmpBuf : string | undefined = undefined
         if ((hourTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             hourTmpBuf = (valueDeserializer.readString() as string)
         }
         const hourTmpResult : string | undefined = hourTmpBuf
-        const minuteTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const minuteTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let minuteTmpBuf : string | undefined = undefined
         if ((minuteTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             minuteTmpBuf = (valueDeserializer.readString() as string)
         }
         const minuteTmpResult : string | undefined = minuteTmpBuf
-        const secondTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const secondTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let secondTmpBuf : string | undefined = undefined
         if ((secondTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             secondTmpBuf = (valueDeserializer.readString() as string)
         }
         const secondTmpResult : string | undefined = secondTmpBuf
-        const timeZoneNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const timeZoneNameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let timeZoneNameTmpBuf : string | undefined = undefined
         if ((timeZoneNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             timeZoneNameTmpBuf = (valueDeserializer.readString() as string)
         }
         const timeZoneNameTmpResult : string | undefined = timeZoneNameTmpBuf
-        const dayPeriodTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const dayPeriodTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let dayPeriodTmpBuf : string | undefined = undefined
         if ((dayPeriodTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dayPeriodTmpBuf = (valueDeserializer.readString() as string)
         }
         const dayPeriodTmpResult : string | undefined = dayPeriodTmpBuf
-        const localeMatcherTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const localeMatcherTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let localeMatcherTmpBuf : string | undefined = undefined
         if ((localeMatcherTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             localeMatcherTmpBuf = (valueDeserializer.readString() as string)
         }
         const localeMatcherTmpResult : string | undefined = localeMatcherTmpBuf
-        const formatMatcherTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const formatMatcherTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let formatMatcherTmpBuf : string | undefined = undefined
         if ((formatMatcherTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             formatMatcherTmpBuf = (valueDeserializer.readString() as string)

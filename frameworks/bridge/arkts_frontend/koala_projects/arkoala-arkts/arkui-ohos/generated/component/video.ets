@@ -16,45 +16,46 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { ColorMetrics_serializer } from "./../Graphics"
-import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ImageFit } from "./enums"
-import { VoidCallback } from "./units"
-import { ErrorCallback } from "@ohos.base"
-import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { ColorMetrics } from "arkui.Graphics"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Resource } from "global.resource"
-import { default as image } from "@ohos.multimedia.image"
-import { VideoModifier } from "./../VideoModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { ModifierStateManager } from '../CommonModifier';
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from './imageCommon'
+import { arkui_Graphics_ColorMetrics_serializer } from './../framework/Graphics'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, PixelMap, ArkCommonMethodComponent } from './common'
+import { ImageFit } from './enums'
+import { VoidCallback, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
+import { ErrorCallback, BusinessError } from '@ohos.base'
+import { extractors, AttributeModifier, hookVideoAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from '@arkui.Graphics'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { default as image } from '@ohos.multimedia.image'
+import { VideoModifier } from './../VideoModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {
-        return new VideoController(ptr)
+        return new VideoController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class VideoController implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, VideoController.getFinalizer())
     }
     constructor() {
-        this(VideoController.construct())
+        this(MaterializedBaseTag.NOP, VideoController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._VideoController_construct()
@@ -94,22 +95,22 @@ export class VideoController implements MaterializedBase {
         this.reset_serialize()
         return
     }
-    start_serialize(): void {
+    private start_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_start(this.peer!.ptr)
     }
-    pause_serialize(): void {
+    private pause_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_pause(this.peer!.ptr)
     }
-    stop_serialize(): void {
+    private stop_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_stop(this.peer!.ptr)
     }
-    requestFullscreen_serialize(value: boolean): void {
-        ArkUIGeneratedNativeModule._VideoController_requestFullscreen(this.peer!.ptr, value ? 1 : 0)
+    private requestFullscreen_serialize(value: boolean): void {
+        ArkUIGeneratedNativeModule._VideoController_requestFullscreen(this.peer!.ptr, value ? true : false)
     }
-    exitFullscreen_serialize(): void {
+    private exitFullscreen_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_exitFullscreen(this.peer!.ptr)
     }
-    setCurrentTime_serialize(value: double, seekMode?: SeekMode): void {
+    private setCurrentTime_serialize(value: double, seekMode?: SeekMode): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (seekMode !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -121,13 +122,13 @@ export class VideoController implements MaterializedBase {
         ArkUIGeneratedNativeModule._VideoController_setCurrentTime(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    reset_serialize(): void {
+    private reset_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_reset(this.peer!.ptr)
     }
 }
 export class ArkVideoPeer extends ArkCommonMethodPeer {
     attributeSet?: VideoModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkVideoPeer {
@@ -138,6 +139,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setVideoOptionsAttribute(value: VideoOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         VideoOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._VideoInterface_setVideoOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -239,7 +241,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnFullscreenChangeAttribute(value: ((value0: FullscreenInfo) => void) | undefined): void {
+    setOnFullscreenChangeAttribute(value: arkui_component_common_Callback<FullscreenInfo, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -251,7 +253,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnFullscreenChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPreparedAttribute(value: ((value0: PreparedInfo) => void) | undefined): void {
+    setOnPreparedAttribute(value: arkui_component_common_Callback<PreparedInfo, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -263,7 +265,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnPrepared(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSeekingAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
+    setOnSeekingAttribute(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -275,7 +277,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnSeeking(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSeekedAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
+    setOnSeekedAttribute(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -287,7 +289,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnSeeked(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnUpdateAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
+    setOnUpdateAttribute(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -299,7 +301,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnErrorAttribute(value: VoidCallback | ErrorCallback | undefined): void {
+    setOnErrorAttribute(value: VoidCallback | ErrorCallback<BusinessError<void>> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -308,9 +310,9 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as VoidCallback
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof ErrorCallback) {
+            } else if (valueTmpValue instanceof ErrorCallback<BusinessError>) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as ErrorCallback
+                const valueTmpValueForIdx1  = valueTmpValue as ErrorCallback<BusinessError<void>>
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
             }
         } else {
@@ -367,12 +369,12 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setEnableShortcutKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSurfaceBackgroundColorAttribute(value: ColorMetrics | undefined): void {
+    setSurfaceBackgroundColorAttribute(value: arkui_component_units_ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+            arkui_Graphics_ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -381,26 +383,26 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
     }
 }
 export enum SeekMode {
-    PREVIOUS_KEYFRAME = 0,
     PreviousKeyframe = 0,
-    NEXT_KEYFRAME = 1,
     NextKeyframe = 1,
-    CLOSEST_KEYFRAME = 2,
     ClosestKeyframe = 2,
-    ACCURATE = 3,
-    Accurate = 3
+    Accurate = 3,
+    PREVIOUS_KEYFRAME = 0,
+    NEXT_KEYFRAME = 1,
+    CLOSEST_KEYFRAME = 2,
+    ACCURATE = 3
 }
 export enum PlaybackSpeed {
-    SPEED_FORWARD_0_75_X = 0,
     Speed_Forward_0_75_X = 0,
-    SPEED_FORWARD_1_00_X = 1,
     Speed_Forward_1_00_X = 1,
-    SPEED_FORWARD_1_25_X = 2,
     Speed_Forward_1_25_X = 2,
-    SPEED_FORWARD_1_75_X = 3,
     Speed_Forward_1_75_X = 3,
-    SPEED_FORWARD_2_00_X = 4,
-    Speed_Forward_2_00_X = 4
+    Speed_Forward_2_00_X = 4,
+    SPEED_FORWARD_0_75_X = 0,
+    SPEED_FORWARD_1_00_X = 1,
+    SPEED_FORWARD_1_25_X = 2,
+    SPEED_FORWARD_1_75_X = 3,
+    SPEED_FORWARD_2_00_X = 4
 }
 export interface FullscreenInfo {
     fullscreen: boolean;
@@ -415,173 +417,85 @@ export interface PosterOptions {
     showFirstFrame?: boolean;
 }
 export interface VideoOptions {
-    src?: string | Resource;
+    src?: string | global_resource_Resource;
     currentProgressRate?: double | string | PlaybackSpeed;
-    previewUri?: string | image.PixelMap | Resource;
+    previewUri?: string | PixelMap | global_resource_Resource;
     controller?: VideoController;
     imageAIOptions?: ImageAIOptions;
     posterOptions?: PosterOptions;
 }
 export interface VideoAttribute extends CommonMethod {
     setVideoOptions(value: VideoOptions): this {
-        throw new Error("Unimplemented method setVideoOptions")
+        throw new Error('Unimplemented method setVideoOptions')
     }
     muted(value: boolean | undefined): this {
-        throw new Error("Unimplemented method muted")
+        throw new Error('Unimplemented method muted')
     }
     autoPlay(value: boolean | undefined): this {
-        throw new Error("Unimplemented method autoPlay")
+        throw new Error('Unimplemented method autoPlay')
     }
     controls(value: boolean | undefined): this {
-        throw new Error("Unimplemented method controls")
+        throw new Error('Unimplemented method controls')
     }
     loop(value: boolean | undefined): this {
-        throw new Error("Unimplemented method loop")
+        throw new Error('Unimplemented method loop')
     }
     objectFit(value: ImageFit | undefined): this {
-        throw new Error("Unimplemented method objectFit")
+        throw new Error('Unimplemented method objectFit')
     }
     onStart(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onStart")
+        throw new Error('Unimplemented method onStart')
     }
     onPause(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onPause")
+        throw new Error('Unimplemented method onPause')
     }
     onFinish(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onFinish")
+        throw new Error('Unimplemented method onFinish')
     }
-    onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onFullscreenChange")
+    onFullscreenChange(value: arkui_component_common_Callback<FullscreenInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onFullscreenChange')
     }
-    onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onPrepared")
+    onPrepared(value: arkui_component_common_Callback<PreparedInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onPrepared')
     }
-    onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onSeeking")
+    onSeeking(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onSeeking')
     }
-    onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onSeeked")
+    onSeeked(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onSeeked')
     }
-    onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onUpdate")
+    onUpdate(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onUpdate')
     }
-    onError(value: VoidCallback | ErrorCallback | undefined): this {
-        throw new Error("Unimplemented method onError")
+    onError(value: VoidCallback | ErrorCallback<BusinessError<void>> | undefined): this {
+        throw new Error('Unimplemented method onError')
     }
     onStop(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onStop")
+        throw new Error('Unimplemented method onStop')
     }
     enableAnalyzer(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableAnalyzer")
+        throw new Error('Unimplemented method enableAnalyzer')
     }
     analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
-        throw new Error("Unimplemented method analyzerConfig")
+        throw new Error('Unimplemented method analyzerConfig')
     }
     enableShortcutKey(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableShortcutKey")
+        throw new Error('Unimplemented method enableShortcutKey')
     }
-    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
-        throw new Error("Unimplemented method surfaceBackgroundColor")
+    surfaceBackgroundColor(value: arkui_component_units_ColorMetrics | undefined): this {
+        throw new Error('Unimplemented method surfaceBackgroundColor')
     }
     attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribute {
-    muted_value?: boolean | undefined
-    autoPlay_value?: boolean | undefined
-    controls_value?: boolean | undefined
-    loop_value?: boolean | undefined
-    objectFit_value?: ImageFit | undefined
-    onStart_value?: VoidCallback | undefined
-    onPause_value?: VoidCallback | undefined
-    onFinish_value?: VoidCallback | undefined
-    onFullscreenChange_value?: ((value0: FullscreenInfo) => void) | undefined
-    onPrepared_value?: ((value0: PreparedInfo) => void) | undefined
-    onSeeking_value?: ((value0: PlaybackInfo) => void) | undefined
-    onSeeked_value?: ((value0: PlaybackInfo) => void) | undefined
-    onUpdate_value?: ((value0: PlaybackInfo) => void) | undefined
-    onError_value?: VoidCallback | ErrorCallback | undefined
-    onStop_value?: VoidCallback | undefined
-    enableAnalyzer_value?: boolean | undefined
-    analyzerConfig_value?: ImageAnalyzerConfig | undefined
-    enableShortcutKey_value?: boolean | undefined
-    surfaceBackgroundColor_value?: ColorMetrics | undefined
-    attributeModifier_value?: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined
-    setVideoOptions(value: VideoOptions): this {
-        return this
-    }
-    muted(value: boolean | undefined): this {
-        return this
-    }
-    autoPlay(value: boolean | undefined): this {
-        return this
-    }
-    controls(value: boolean | undefined): this {
-        return this
-    }
-    loop(value: boolean | undefined): this {
-        return this
-    }
-    objectFit(value: ImageFit | undefined): this {
-        return this
-    }
-    onStart(value: VoidCallback | undefined): this {
-        return this
-    }
-    onPause(value: VoidCallback | undefined): this {
-        return this
-    }
-    onFinish(value: VoidCallback | undefined): this {
-        return this
-    }
-    onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
-        return this
-    }
-    onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
-        return this
-    }
-    onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        return this
-    }
-    onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        return this
-    }
-    onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        return this
-    }
-    onError(value: VoidCallback | ErrorCallback | undefined): this {
-        return this
-    }
-    onStop(value: VoidCallback | undefined): this {
-        return this
-    }
-    enableAnalyzer(value: boolean | undefined): this {
-        return this
-    }
-    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
-        return this
-    }
-    enableShortcutKey(value: boolean | undefined): this {
-        return this
-    }
-    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkVideoComponent extends ArkCommonMethodComponent implements VideoAttribute {
     getPeer(): ArkVideoPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkVideoPeer)
     }
     public setVideoOptions(value: VideoOptions): this {
-        if (this.checkPriority("setVideoOptions")) {
+        if (this.checkPriority('setVideoOptions')) {
             const value_casted = value as (VideoOptions)
             this.getPeer()?.setVideoOptionsAttribute(value_casted)
             this.applyOptionsFinish('VideoAttribute');
@@ -590,7 +504,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public muted(value: boolean | undefined): this {
-        if (this.checkPriority("muted")) {
+        if (this.checkPriority('muted')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMutedAttribute(value_casted)
             return this
@@ -598,7 +512,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public autoPlay(value: boolean | undefined): this {
-        if (this.checkPriority("autoPlay")) {
+        if (this.checkPriority('autoPlay')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setAutoPlayAttribute(value_casted)
             return this
@@ -606,7 +520,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public controls(value: boolean | undefined): this {
-        if (this.checkPriority("controls")) {
+        if (this.checkPriority('controls')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setControlsAttribute(value_casted)
             return this
@@ -614,7 +528,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public loop(value: boolean | undefined): this {
-        if (this.checkPriority("loop")) {
+        if (this.checkPriority('loop')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setLoopAttribute(value_casted)
             return this
@@ -622,7 +536,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
-        if (this.checkPriority("objectFit")) {
+        if (this.checkPriority('objectFit')) {
             const value_casted = value as (ImageFit | undefined)
             this.getPeer()?.setObjectFitAttribute(value_casted)
             return this
@@ -630,7 +544,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public onStart(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onStart")) {
+        if (this.checkPriority('onStart')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnStartAttribute(value_casted)
             return this
@@ -638,7 +552,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public onPause(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onPause")) {
+        if (this.checkPriority('onPause')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnPauseAttribute(value_casted)
             return this
@@ -646,63 +560,63 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public onFinish(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onFinish")) {
+        if (this.checkPriority('onFinish')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnFinishAttribute(value_casted)
             return this
         }
         return this
     }
-    public onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
-        if (this.checkPriority("onFullscreenChange")) {
-            const value_casted = value as (((value0: FullscreenInfo) => void) | undefined)
+    public onFullscreenChange(value: arkui_component_common_Callback<FullscreenInfo, void> | undefined): this {
+        if (this.checkPriority('onFullscreenChange')) {
+            const value_casted = value as (arkui_component_common_Callback<FullscreenInfo, void> | undefined)
             this.getPeer()?.setOnFullscreenChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
-        if (this.checkPriority("onPrepared")) {
-            const value_casted = value as (((value0: PreparedInfo) => void) | undefined)
+    public onPrepared(value: arkui_component_common_Callback<PreparedInfo, void> | undefined): this {
+        if (this.checkPriority('onPrepared')) {
+            const value_casted = value as (arkui_component_common_Callback<PreparedInfo, void> | undefined)
             this.getPeer()?.setOnPreparedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        if (this.checkPriority("onSeeking")) {
-            const value_casted = value as (((value0: PlaybackInfo) => void) | undefined)
+    public onSeeking(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        if (this.checkPriority('onSeeking')) {
+            const value_casted = value as (arkui_component_common_Callback<PlaybackInfo, void> | undefined)
             this.getPeer()?.setOnSeekingAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        if (this.checkPriority("onSeeked")) {
-            const value_casted = value as (((value0: PlaybackInfo) => void) | undefined)
+    public onSeeked(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        if (this.checkPriority('onSeeked')) {
+            const value_casted = value as (arkui_component_common_Callback<PlaybackInfo, void> | undefined)
             this.getPeer()?.setOnSeekedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        if (this.checkPriority("onUpdate")) {
-            const value_casted = value as (((value0: PlaybackInfo) => void) | undefined)
+    public onUpdate(value: arkui_component_common_Callback<PlaybackInfo, void> | undefined): this {
+        if (this.checkPriority('onUpdate')) {
+            const value_casted = value as (arkui_component_common_Callback<PlaybackInfo, void> | undefined)
             this.getPeer()?.setOnUpdateAttribute(value_casted)
             return this
         }
         return this
     }
-    public onError(value: VoidCallback | ErrorCallback | undefined): this {
-        if (this.checkPriority("onError")) {
-            const value_casted = value as (VoidCallback | ErrorCallback | undefined)
+    public onError(value: VoidCallback | ErrorCallback<BusinessError<void>> | undefined): this {
+        if (this.checkPriority('onError')) {
+            const value_casted = value as (VoidCallback | ErrorCallback<BusinessError<void>> | undefined)
             this.getPeer()?.setOnErrorAttribute(value_casted)
             return this
         }
         return this
     }
     public onStop(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onStop")) {
+        if (this.checkPriority('onStop')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnStopAttribute(value_casted)
             return this
@@ -710,7 +624,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public enableAnalyzer(value: boolean | undefined): this {
-        if (this.checkPriority("enableAnalyzer")) {
+        if (this.checkPriority('enableAnalyzer')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableAnalyzerAttribute(value_casted)
             return this
@@ -718,7 +632,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
-        if (this.checkPriority("analyzerConfig")) {
+        if (this.checkPriority('analyzerConfig')) {
             const value_casted = value as (ImageAnalyzerConfig | undefined)
             this.getPeer()?.setAnalyzerConfigAttribute(value_casted)
             return this
@@ -726,16 +640,16 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public enableShortcutKey(value: boolean | undefined): this {
-        if (this.checkPriority("enableShortcutKey")) {
+        if (this.checkPriority('enableShortcutKey')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableShortcutKeyAttribute(value_casted)
             return this
         }
         return this
     }
-    public surfaceBackgroundColor(value: ColorMetrics | undefined): this {
-        if (this.checkPriority("surfaceBackgroundColor")) {
-            const value_casted = value as (ColorMetrics | undefined)
+    public surfaceBackgroundColor(value: arkui_component_units_ColorMetrics | undefined): this {
+        if (this.checkPriority('surfaceBackgroundColor')) {
+            const value_casted = value as (arkui_component_units_ColorMetrics | undefined)
             this.getPeer()?.setSurfaceBackgroundColorAttribute(value_casted)
             return this
         }
@@ -758,18 +672,16 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
 
 @memo
 export function VideoImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: VideoAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkVideoComponent>((): ArkVideoComponent => {
         return new ArkVideoComponent()
     })
-    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (peer: ArkVideoPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -838,7 +750,7 @@ export class PosterOptions_serializer {
     }
     public static read(buffer: DeserializerBase): PosterOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const showFirstFrameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const showFirstFrameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let showFirstFrameTmpBuf : boolean | undefined = undefined
         if ((showFirstFrameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             showFirstFrameTmpBuf = valueDeserializer.readBoolean()
@@ -859,10 +771,10 @@ export class VideoOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSrcTmpValueForIdx0  = valueHolderForSrcTmpValue as string
                 valueSerializer.writeString(valueHolderForSrcTmpValueForIdx0)
-            } else if (valueHolderForSrcTmpValue instanceof Resource) {
+            } else if (valueHolderForSrcTmpValue instanceof global_resource_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
+                const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -895,14 +807,14 @@ export class VideoOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewUriTmpValueForIdx0  = valueHolderForPreviewUriTmpValue as string
                 valueSerializer.writeString(valueHolderForPreviewUriTmpValueForIdx0)
-            } else if (valueHolderForPreviewUriTmpValue instanceof image.PixelMap) {
+            } else if (valueHolderForPreviewUriTmpValue instanceof PixelMap) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForPreviewUriTmpValueForIdx1  = valueHolderForPreviewUriTmpValue as image.PixelMap
+                const valueHolderForPreviewUriTmpValueForIdx1  = valueHolderForPreviewUriTmpValue as PixelMap
                 image_PixelMap_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx1)
-            } else if (valueHolderForPreviewUriTmpValue instanceof Resource) {
+            } else if (valueHolderForPreviewUriTmpValue instanceof global_resource_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForPreviewUriTmpValueForIdx2  = valueHolderForPreviewUriTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx2)
+                const valueHolderForPreviewUriTmpValueForIdx2  = valueHolderForPreviewUriTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -934,68 +846,68 @@ export class VideoOptions_serializer {
     }
     public static read(buffer: DeserializerBase): VideoOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let srcTmpBuf : string | Resource | undefined = undefined
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let srcTmpBuf : string | global_resource_Resource | undefined = undefined
         if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const srcTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let srcTmpBuf_ : string | Resource | undefined
-            if (srcTmpBuf_UnionSelector == (0).toChar()) {
-                srcTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (srcTmpBuf_UnionSelector == (1).toChar()) {
-                srcTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const srcTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let srcTmpBufOpt : string | global_resource_Resource | undefined
+            if (srcTmpBufOptUnionSelector == (0).toByte()) {
+                srcTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (srcTmpBufOptUnionSelector == (1).toByte()) {
+                srcTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for srcTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for srcTmpBufOpt has to be chosen through deserialisation.')
             }
-            srcTmpBuf = (srcTmpBuf_ as string | Resource)
+            srcTmpBuf = (srcTmpBufOpt as string | global_resource_Resource)
         }
-        const srcTmpResult : string | Resource | undefined = srcTmpBuf
-        const currentProgressRateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const srcTmpResult : string | global_resource_Resource | undefined = srcTmpBuf
+        const currentProgressRateTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let currentProgressRateTmpBuf : double | string | PlaybackSpeed | undefined = undefined
         if ((currentProgressRateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const currentProgressRateTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let currentProgressRateTmpBuf_ : double | string | PlaybackSpeed | undefined
-            if (currentProgressRateTmpBuf_UnionSelector == (0).toChar()) {
-                currentProgressRateTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (currentProgressRateTmpBuf_UnionSelector == (1).toChar()) {
-                currentProgressRateTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (currentProgressRateTmpBuf_UnionSelector == (2).toChar()) {
-                currentProgressRateTmpBuf_ = PlaybackSpeed.fromValue(valueDeserializer.readInt32())
+            const currentProgressRateTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let currentProgressRateTmpBufOpt : double | string | PlaybackSpeed | undefined
+            if (currentProgressRateTmpBufOptUnionSelector == (0).toByte()) {
+                currentProgressRateTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (currentProgressRateTmpBufOptUnionSelector == (1).toByte()) {
+                currentProgressRateTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (currentProgressRateTmpBufOptUnionSelector == (2).toByte()) {
+                currentProgressRateTmpBufOpt = PlaybackSpeed.fromValue(valueDeserializer.readInt32())
             } else {
-                throw new Error("One of the branches for currentProgressRateTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for currentProgressRateTmpBufOpt has to be chosen through deserialisation.')
             }
-            currentProgressRateTmpBuf = (currentProgressRateTmpBuf_ as double | string | PlaybackSpeed)
+            currentProgressRateTmpBuf = (currentProgressRateTmpBufOpt as double | string | PlaybackSpeed)
         }
         const currentProgressRateTmpResult : double | string | PlaybackSpeed | undefined = currentProgressRateTmpBuf
-        const previewUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewUriTmpBuf : string | image.PixelMap | Resource | undefined = undefined
+        const previewUriTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let previewUriTmpBuf : string | PixelMap | global_resource_Resource | undefined = undefined
         if ((previewUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const previewUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let previewUriTmpBuf_ : string | image.PixelMap | Resource | undefined
-            if (previewUriTmpBuf_UnionSelector == (0).toChar()) {
-                previewUriTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (previewUriTmpBuf_UnionSelector == (1).toChar()) {
-                previewUriTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-            } else if (previewUriTmpBuf_UnionSelector == (2).toChar()) {
-                previewUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const previewUriTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let previewUriTmpBufOpt : string | PixelMap | global_resource_Resource | undefined
+            if (previewUriTmpBufOptUnionSelector == (0).toByte()) {
+                previewUriTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (previewUriTmpBufOptUnionSelector == (1).toByte()) {
+                previewUriTmpBufOpt = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else if (previewUriTmpBufOptUnionSelector == (2).toByte()) {
+                previewUriTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for previewUriTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for previewUriTmpBufOpt has to be chosen through deserialisation.')
             }
-            previewUriTmpBuf = (previewUriTmpBuf_ as string | image.PixelMap | Resource)
+            previewUriTmpBuf = (previewUriTmpBufOpt as string | PixelMap | global_resource_Resource)
         }
-        const previewUriTmpResult : string | image.PixelMap | Resource | undefined = previewUriTmpBuf
-        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const previewUriTmpResult : string | PixelMap | global_resource_Resource | undefined = previewUriTmpBuf
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let controllerTmpBuf : VideoController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             controllerTmpBuf = (VideoController_serializer.read(valueDeserializer) as VideoController)
         }
         const controllerTmpResult : VideoController | undefined = controllerTmpBuf
-        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let imageAIOptionsTmpBuf : ImageAIOptions | undefined = undefined
         if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
         }
         const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
-        const posterOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const posterOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let posterOptionsTmpBuf : PosterOptions | undefined = undefined
         if ((posterOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             posterOptionsTmpBuf = PosterOptions_serializer.read(valueDeserializer)

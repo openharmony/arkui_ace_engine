@@ -16,18 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkWindowScenePeer, WindowSceneAttribute } from "./component/windowScene"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { Position } from "./component/units"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkWindowScenePeer, WindowSceneAttribute } from './component/windowScene'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { Position } from './component/units'
 export class WindowSceneModifier extends CommonMethodModifier implements WindowSceneAttribute,AttributeModifier<WindowSceneAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,63 +43,66 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
     applyFocusedAttribute(instance: WindowSceneAttribute): void { }
     applyDisabledAttribute(instance: WindowSceneAttribute): void { }
     applySelectedAttribute(instance: WindowSceneAttribute): void { }
-    _attractionEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _attractionEffect_0_0value?: Position | undefined
-    _attractionEffect_0_1value?: number | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _attractionEffect_0_0value?: Position | undefined
+    public _attractionEffect_0_1value?: double | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkWindowScenePeer;
-        if (this._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._attractionEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAttractionEffectAttribute((this._attractionEffect_0_0value as Position | undefined), (this._attractionEffect_0_1value as number | undefined));
-                    this._attractionEffect_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkWindowScenePeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setAttractionEffectAttribute((this._attractionEffect_0_0value as Position | undefined), (this._attractionEffect_0_1value as double | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._attractionEffect_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._attractionEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAttractionEffectAttribute((undefined as Position | undefined), (undefined as number | undefined));
+                    flagArray[0] = 0;
+                    peer.setAttractionEffectAttribute((undefined as Position | undefined), (undefined as double | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: WindowSceneModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._attractionEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: WindowSceneModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.attractionEffect(modifier._attractionEffect_0_0value, modifier._attractionEffect_0_1value);
                     break;
                 }
                 default: {
-                    this.attractionEffect((undefined as Position | undefined), (undefined as number | undefined));
+                    this.attractionEffect((undefined as Position | undefined), (undefined as double | undefined));
                 }
             }
         }
     }
-    attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
-        if (((this._attractionEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._attractionEffect_0_1value) !== (fraction)))
-        {
-            this._attractionEffect_0_flag = AttributeUpdaterFlag.UPDATE
+    attractionEffect(destination: Position | undefined, fraction: double | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true) || ((this._attractionEffect_0_1value) !== (fraction))) {
+            this._flagArray[0] = 1
             this._attractionEffect_0_0value = destination
             this._attractionEffect_0_1value = fraction
             this._state.fireChange()
-        } else
-        {
-            this._attractionEffect_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

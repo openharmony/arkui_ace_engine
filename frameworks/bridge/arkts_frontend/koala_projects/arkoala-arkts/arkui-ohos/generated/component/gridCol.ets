@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookGridColAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { GridColModifier } from "./../GridColModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookGridColAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { GridColModifier } from './../GridColModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkGridColPeer extends ArkCommonMethodPeer {
     attributeSet?: GridColModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkGridColPeer {
@@ -43,6 +44,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGridColOptionsAttribute(option?: GridColOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (option !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -130,52 +132,28 @@ export interface GridColOptions {
 }
 export interface GridColAttribute extends CommonMethod {
     setGridColOptions(option?: GridColOptions): this {
-        throw new Error("Unimplemented method setGridColOptions")
+        throw new Error('Unimplemented method setGridColOptions')
     }
     span(value: int32 | GridColColumnOption | undefined): this {
-        throw new Error("Unimplemented method span")
+        throw new Error('Unimplemented method span')
     }
     gridColOffset(value: int32 | GridColColumnOption | undefined): this {
-        throw new Error("Unimplemented method gridColOffset")
+        throw new Error('Unimplemented method gridColOffset')
     }
     order(value: int32 | GridColColumnOption | undefined): this {
-        throw new Error("Unimplemented method order")
+        throw new Error('Unimplemented method order')
     }
     attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttribute {
-    span_value?: int32 | GridColColumnOption | undefined
-    gridColOffset_value?: int32 | GridColColumnOption | undefined
-    order_value?: int32 | GridColColumnOption | undefined
-    attributeModifier_value?: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined
-    setGridColOptions(option?: GridColOptions): this {
-        return this
-    }
-    span(value: int32 | GridColColumnOption | undefined): this {
-        return this
-    }
-    gridColOffset(value: int32 | GridColColumnOption | undefined): this {
-        return this
-    }
-    order(value: int32 | GridColColumnOption | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
     getPeer(): ArkGridColPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkGridColPeer)
     }
     public setGridColOptions(option?: GridColOptions): this {
-        if (this.checkPriority("setGridColOptions")) {
+        if (this.checkPriority('setGridColOptions')) {
             const option_casted = option as (GridColOptions | undefined)
             this.getPeer()?.setGridColOptionsAttribute(option_casted)
             this.applyOptionsFinish('GridColAttribute');
@@ -184,7 +162,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public span(value: int32 | GridColColumnOption | undefined): this {
-        if (this.checkPriority("span")) {
+        if (this.checkPriority('span')) {
             const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setSpanAttribute(value_casted)
             return this
@@ -192,7 +170,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public gridColOffset(value: int32 | GridColColumnOption | undefined): this {
-        if (this.checkPriority("gridColOffset")) {
+        if (this.checkPriority('gridColOffset')) {
             const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setGridColOffsetAttribute(value_casted)
             return this
@@ -200,7 +178,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public order(value: int32 | GridColColumnOption | undefined): this {
-        if (this.checkPriority("order")) {
+        if (this.checkPriority('order')) {
             const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setOrderAttribute(value_casted)
             return this
@@ -224,18 +202,16 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
 
 @memo
 export function GridColImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: GridColAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkGridColComponent>((): ArkGridColComponent => {
         return new ArkGridColComponent()
     })
-    NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (peer: ArkGridColPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (_: ArkGridColPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -294,37 +270,37 @@ export class GridColColumnOption_serializer {
     }
     public static read(buffer: DeserializerBase): GridColColumnOption {
         let valueDeserializer : DeserializerBase = buffer
-        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xsTmpBuf : int32 | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xsTmpBuf = valueDeserializer.readInt32()
         }
         const xsTmpResult : int32 | undefined = xsTmpBuf
-        const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const smTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let smTmpBuf : int32 | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             smTmpBuf = valueDeserializer.readInt32()
         }
         const smTmpResult : int32 | undefined = smTmpBuf
-        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let mdTmpBuf : int32 | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             mdTmpBuf = valueDeserializer.readInt32()
         }
         const mdTmpResult : int32 | undefined = mdTmpBuf
-        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lgTmpBuf : int32 | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lgTmpBuf = valueDeserializer.readInt32()
         }
         const lgTmpResult : int32 | undefined = lgTmpBuf
-        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xlTmpBuf : int32 | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xlTmpBuf = valueDeserializer.readInt32()
         }
         const xlTmpResult : int32 | undefined = xlTmpBuf
-        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xxlTmpBuf : int32 | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xxlTmpBuf = valueDeserializer.readInt32()
@@ -388,49 +364,49 @@ export class GridColOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GridColOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const spanTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const spanTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let spanTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((spanTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const spanTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let spanTmpBuf_ : int32 | GridColColumnOption | undefined
-            if (spanTmpBuf_UnionSelector == (0).toChar()) {
-                spanTmpBuf_ = valueDeserializer.readInt32()
-            } else if (spanTmpBuf_UnionSelector == (1).toChar()) {
-                spanTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
+            const spanTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let spanTmpBufOpt : int32 | GridColColumnOption | undefined
+            if (spanTmpBufOptUnionSelector == (0).toByte()) {
+                spanTmpBufOpt = valueDeserializer.readInt32()
+            } else if (spanTmpBufOptUnionSelector == (1).toByte()) {
+                spanTmpBufOpt = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for spanTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for spanTmpBufOpt has to be chosen through deserialisation.')
             }
-            spanTmpBuf = (spanTmpBuf_ as int32 | GridColColumnOption)
+            spanTmpBuf = (spanTmpBufOpt as int32 | GridColColumnOption)
         }
         const spanTmpResult : int32 | GridColColumnOption | undefined = spanTmpBuf
-        const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let offsetTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const offsetTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetTmpBuf_ : int32 | GridColColumnOption | undefined
-            if (offsetTmpBuf_UnionSelector == (0).toChar()) {
-                offsetTmpBuf_ = valueDeserializer.readInt32()
-            } else if (offsetTmpBuf_UnionSelector == (1).toChar()) {
-                offsetTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
+            const offsetTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let offsetTmpBufOpt : int32 | GridColColumnOption | undefined
+            if (offsetTmpBufOptUnionSelector == (0).toByte()) {
+                offsetTmpBufOpt = valueDeserializer.readInt32()
+            } else if (offsetTmpBufOptUnionSelector == (1).toByte()) {
+                offsetTmpBufOpt = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for offsetTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for offsetTmpBufOpt has to be chosen through deserialisation.')
             }
-            offsetTmpBuf = (offsetTmpBuf_ as int32 | GridColColumnOption)
+            offsetTmpBuf = (offsetTmpBufOpt as int32 | GridColColumnOption)
         }
         const offsetTmpResult : int32 | GridColColumnOption | undefined = offsetTmpBuf
-        const orderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const orderTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let orderTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((orderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const orderTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let orderTmpBuf_ : int32 | GridColColumnOption | undefined
-            if (orderTmpBuf_UnionSelector == (0).toChar()) {
-                orderTmpBuf_ = valueDeserializer.readInt32()
-            } else if (orderTmpBuf_UnionSelector == (1).toChar()) {
-                orderTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
+            const orderTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let orderTmpBufOpt : int32 | GridColColumnOption | undefined
+            if (orderTmpBufOptUnionSelector == (0).toByte()) {
+                orderTmpBufOpt = valueDeserializer.readInt32()
+            } else if (orderTmpBufOptUnionSelector == (1).toByte()) {
+                orderTmpBufOpt = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for orderTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for orderTmpBufOpt has to be chosen through deserialisation.')
             }
-            orderTmpBuf = (orderTmpBuf_ as int32 | GridColColumnOption)
+            orderTmpBuf = (orderTmpBufOpt as int32 | GridColColumnOption)
         }
         const orderTmpResult : int32 | GridColColumnOption | undefined = orderTmpBuf
         let value : GridColOptions = ({span: spanTmpResult, offset: offsetTmpResult, order: orderTmpResult} as GridColOptions)

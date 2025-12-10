@@ -16,25 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 export class SearchOps {
-    static registerSearchValueCallback_serialize(node: KPointer, value: string, callback: SearchValueCallback): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback)
-        const retval  = ArkUIGeneratedNativeModule._SearchOps_registerSearchValueCallback(node, value, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
     public static registerSearchValueCallback(node: KPointer, value: string, callback: SearchValueCallback): KPointer {
         const node_casted = node as (KPointer)
         const value_casted = value as (string)
         const callback_casted = callback as (SearchValueCallback)
         return SearchOps.registerSearchValueCallback_serialize(node_casted, value_casted, callback_casted)
+    }
+    private static registerSearchValueCallback_serialize(node: KPointer, value: string, callback: SearchValueCallback): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._SearchOps_registerSearchValueCallback(node, value, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
     }
 }
 export type SearchValueCallback = (value: string) => void;

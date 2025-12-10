@@ -16,35 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class EnvironmentBackend {
-    static isAccessibilityEnabled_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_isAccessibilityEnabled()
-        return retval
-    }
-    static getColorMode_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getColorMode()
-        return retval
-    }
-    static getFontScale_serialize(): float {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getFontScale()
-        return retval
-    }
-    static getFontWeightScale_serialize(): float {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getFontWeightScale()
-        return retval
-    }
-    static getLayoutDirection_serialize(): string {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getLayoutDirection()
-        return retval
-    }
-    static getLanguageCode_serialize(): string {
-        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getLanguageCode()
-        return retval
-    }
     public static isAccessibilityEnabled(): boolean {
         return EnvironmentBackend.isAccessibilityEnabled_serialize()
     }
@@ -63,32 +39,36 @@ export class EnvironmentBackend {
     public static getLanguageCode(): string {
         return EnvironmentBackend.getLanguageCode_serialize()
     }
-}
-export class PersistentStorageBackend {
-    static get_serialize(key: string): string | undefined {
-        const retval  = ArkUIGeneratedNativeModule._PersistentStorageBackend_get(key)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : string | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readString() as string)
-        }
-        const returnResult : string | undefined = buffer
-        return returnResult
-    }
-    static has_serialize(key: string): boolean {
-        const retval  = ArkUIGeneratedNativeModule._PersistentStorageBackend_has(key)
+    private static isAccessibilityEnabled_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_isAccessibilityEnabled()
         return retval
     }
-    static remove_serialize(key: string): void {
-        ArkUIGeneratedNativeModule._PersistentStorageBackend_remove(key)
+    private static getColorMode_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getColorMode()
+        return retval
     }
-    static set_serialize(key: string, value: string): void {
-        ArkUIGeneratedNativeModule._PersistentStorageBackend_set(key, value)
+    private static getFontScale_serialize(): float {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getFontScale()
+        return retval
     }
-    static clear_serialize(): void {
-        ArkUIGeneratedNativeModule._PersistentStorageBackend_clear()
+    private static getFontWeightScale_serialize(): float {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getFontWeightScale()
+        return retval
     }
+    private static getLayoutDirection_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getLayoutDirection()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
+    }
+    private static getLanguageCode_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._EnvironmentBackend_getLanguageCode()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
+    }
+}
+export class PersistentStorageBackend {
     public static get(key: string): string | undefined {
         const key_casted = key as (string)
         return PersistentStorageBackend.get_serialize(key_casted)
@@ -111,5 +91,29 @@ export class PersistentStorageBackend {
     public static clear(): void {
         PersistentStorageBackend.clear_serialize()
         return
+    }
+    private static get_serialize(key: string): string | undefined {
+        const retval  = ArkUIGeneratedNativeModule._PersistentStorageBackend_get(key)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : string | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : string | undefined = buffer
+        return returnResult
+    }
+    private static has_serialize(key: string): boolean {
+        const retval  = ArkUIGeneratedNativeModule._PersistentStorageBackend_has(key)
+        return retval
+    }
+    private static remove_serialize(key: string): void {
+        ArkUIGeneratedNativeModule._PersistentStorageBackend_remove(key)
+    }
+    private static set_serialize(key: string, value: string): void {
+        ArkUIGeneratedNativeModule._PersistentStorageBackend_set(key, value)
+    }
+    private static clear_serialize(): void {
+        ArkUIGeneratedNativeModule._PersistentStorageBackend_clear()
     }
 }

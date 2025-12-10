@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookEllipseAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { EllipseModifier } from "./../EllipseModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookEllipseAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { EllipseModifier } from './../EllipseModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkEllipsePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: EllipseModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkEllipsePeer {
@@ -43,6 +44,7 @@ export class ArkEllipsePeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setEllipseOptionsAttribute(options?: EllipseOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -59,33 +61,21 @@ export interface EllipseOptions {
     width?: string | double;
     height?: string | double;
 }
-export interface EllipseAttribute extends CommonShapeMethod {
+export interface EllipseAttribute extends arkui_component_common_CommonShapeMethod {
     setEllipseOptions(options?: EllipseOptions): this {
-        throw new Error("Unimplemented method setEllipseOptions")
+        throw new Error('Unimplemented method setEllipseOptions')
     }
-    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
-    attributeModifier_value?: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonMethod> | undefined
-    setEllipseOptions(options?: EllipseOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements EllipseAttribute {
     getPeer(): ArkEllipsePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkEllipsePeer)
     }
     public setEllipseOptions(options?: EllipseOptions): this {
-        if (this.checkPriority("setEllipseOptions")) {
+        if (this.checkPriority('setEllipseOptions')) {
             const options_casted = options as (EllipseOptions | undefined)
             this.getPeer()?.setEllipseOptionsAttribute(options_casted)
             this.applyOptionsFinish('EllipseAttribute');
@@ -93,7 +83,7 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookEllipseAttributeModifier(this, value);
         })
@@ -110,18 +100,16 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
 
 @memo
 export function EllipseImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: EllipseAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkEllipseComponent>((): ArkEllipseComponent => {
         return new ArkEllipseComponent()
     })
-    NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (peer: ArkEllipsePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (_: ArkEllipsePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -164,34 +152,34 @@ export class EllipseOptions_serializer {
     }
     public static read(buffer: DeserializerBase): EllipseOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : string | double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : string | double | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double)
+            widthTmpBuf = (widthTmpBufOpt as string | double)
         }
         const widthTmpResult : string | double | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : string | double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : string | double | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double)
+            heightTmpBuf = (heightTmpBufOpt as string | double)
         }
         const heightTmpResult : string | double | undefined = heightTmpBuf
         let value : EllipseOptions = ({width: widthTmpResult, height: heightTmpResult} as EllipseOptions)

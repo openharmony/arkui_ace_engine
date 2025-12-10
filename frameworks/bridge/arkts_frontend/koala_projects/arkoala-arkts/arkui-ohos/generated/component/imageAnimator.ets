@@ -16,28 +16,29 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AnimationStatus, FillMode } from "./enums"
-import { AttributeModifier, extractors, hookImageAnimatorAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Resource } from "global.resource"
-import { default as image } from "@ohos.multimedia.image"
-import { ImageAnimatorModifier } from "./../ImageAnimatorModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, PixelMap, ArkCommonMethodComponent } from './common'
+import { AnimationStatus, FillMode } from './enums'
+import { AttributeModifier, extractors, hookImageAnimatorAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { default as image } from '@ohos.multimedia.image'
+import { ImageAnimatorModifier } from './../ImageAnimatorModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
     attributeSet?: ImageAnimatorModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkImageAnimatorPeer {
@@ -48,6 +49,7 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setImageAnimatorOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._ImageAnimatorInterface_setImageAnimatorOptions(this.peer.ptr)
     }
     setImagesAttribute(value: Array<ImageFrameInfo> | undefined): void {
@@ -212,7 +214,7 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
     }
 }
 export interface ImageFrameInfo {
-    src: string | Resource | image.PixelMap;
+    src: string | global_resource_Resource | PixelMap;
     width?: double | string;
     height?: double | string;
     top?: double | string;
@@ -221,122 +223,58 @@ export interface ImageFrameInfo {
 }
 export interface ImageAnimatorAttribute extends CommonMethod {
     setImageAnimatorOptions(): this {
-        throw new Error("Unimplemented method setImageAnimatorOptions")
+        throw new Error('Unimplemented method setImageAnimatorOptions')
     }
     images(value: Array<ImageFrameInfo> | undefined): this {
-        throw new Error("Unimplemented method images")
+        throw new Error('Unimplemented method images')
     }
     state(value: AnimationStatus | undefined): this {
-        throw new Error("Unimplemented method state")
+        throw new Error('Unimplemented method state')
     }
     duration(value: int32 | undefined): this {
-        throw new Error("Unimplemented method duration")
+        throw new Error('Unimplemented method duration')
     }
     reverse(value: boolean | undefined): this {
-        throw new Error("Unimplemented method reverse")
+        throw new Error('Unimplemented method reverse')
     }
     fixedSize(value: boolean | undefined): this {
-        throw new Error("Unimplemented method fixedSize")
+        throw new Error('Unimplemented method fixedSize')
     }
     fillMode(value: FillMode | undefined): this {
-        throw new Error("Unimplemented method fillMode")
+        throw new Error('Unimplemented method fillMode')
     }
     iterations(value: int32 | undefined): this {
-        throw new Error("Unimplemented method iterations")
+        throw new Error('Unimplemented method iterations')
     }
     monitorInvisibleArea(value: boolean | undefined): this {
-        throw new Error("Unimplemented method monitorInvisibleArea")
+        throw new Error('Unimplemented method monitorInvisibleArea')
     }
     onStart(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onStart")
+        throw new Error('Unimplemented method onStart')
     }
     onPause(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onPause")
+        throw new Error('Unimplemented method onPause')
     }
     onRepeat(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onRepeat")
+        throw new Error('Unimplemented method onRepeat')
     }
     onCancel(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onCancel")
+        throw new Error('Unimplemented method onCancel')
     }
     onFinish(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onFinish")
+        throw new Error('Unimplemented method onFinish')
     }
     attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements ImageAnimatorAttribute {
-    images_value?: Array<ImageFrameInfo> | undefined
-    state_value?: AnimationStatus | undefined
-    duration_value?: int32 | undefined
-    reverse_value?: boolean | undefined
-    fixedSize_value?: boolean | undefined
-    fillMode_value?: FillMode | undefined
-    iterations_value?: int32 | undefined
-    monitorInvisibleArea_value?: boolean | undefined
-    onStart_value?: (() => void) | undefined
-    onPause_value?: (() => void) | undefined
-    onRepeat_value?: (() => void) | undefined
-    onCancel_value?: (() => void) | undefined
-    onFinish_value?: (() => void) | undefined
-    attributeModifier_value?: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined
-    setImageAnimatorOptions(): this {
-        return this
-    }
-    images(value: Array<ImageFrameInfo> | undefined): this {
-        return this
-    }
-    state(value: AnimationStatus | undefined): this {
-        return this
-    }
-    duration(value: int32 | undefined): this {
-        return this
-    }
-    reverse(value: boolean | undefined): this {
-        return this
-    }
-    fixedSize(value: boolean | undefined): this {
-        return this
-    }
-    fillMode(value: FillMode | undefined): this {
-        return this
-    }
-    iterations(value: int32 | undefined): this {
-        return this
-    }
-    monitorInvisibleArea(value: boolean | undefined): this {
-        return this
-    }
-    onStart(value: (() => void) | undefined): this {
-        return this
-    }
-    onPause(value: (() => void) | undefined): this {
-        return this
-    }
-    onRepeat(value: (() => void) | undefined): this {
-        return this
-    }
-    onCancel(value: (() => void) | undefined): this {
-        return this
-    }
-    onFinish(value: (() => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements ImageAnimatorAttribute {
     getPeer(): ArkImageAnimatorPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkImageAnimatorPeer)
     }
     public setImageAnimatorOptions(): this {
-        if (this.checkPriority("setImageAnimatorOptions")) {
+        if (this.checkPriority('setImageAnimatorOptions')) {
             this.getPeer()?.setImageAnimatorOptionsAttribute()
             this.applyOptionsFinish('ImageAnimatorAttribute');
             return this
@@ -344,7 +282,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public images(value: Array<ImageFrameInfo> | undefined): this {
-        if (this.checkPriority("images")) {
+        if (this.checkPriority('images')) {
             const value_casted = value as (Array<ImageFrameInfo> | undefined)
             this.getPeer()?.setImagesAttribute(value_casted)
             return this
@@ -352,7 +290,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public state(value: AnimationStatus | undefined): this {
-        if (this.checkPriority("state")) {
+        if (this.checkPriority('state')) {
             const value_casted = value as (AnimationStatus | undefined)
             this.getPeer()?.setStateAttribute(value_casted)
             return this
@@ -360,7 +298,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public duration(value: int32 | undefined): this {
-        if (this.checkPriority("duration")) {
+        if (this.checkPriority('duration')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDurationAttribute(value_casted)
             return this
@@ -368,7 +306,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public reverse(value: boolean | undefined): this {
-        if (this.checkPriority("reverse")) {
+        if (this.checkPriority('reverse')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setReverseAttribute(value_casted)
             return this
@@ -376,7 +314,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public fixedSize(value: boolean | undefined): this {
-        if (this.checkPriority("fixedSize")) {
+        if (this.checkPriority('fixedSize')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setFixedSizeAttribute(value_casted)
             return this
@@ -384,7 +322,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public fillMode(value: FillMode | undefined): this {
-        if (this.checkPriority("fillMode")) {
+        if (this.checkPriority('fillMode')) {
             const value_casted = value as (FillMode | undefined)
             this.getPeer()?.setFillModeAttribute(value_casted)
             return this
@@ -392,7 +330,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public iterations(value: int32 | undefined): this {
-        if (this.checkPriority("iterations")) {
+        if (this.checkPriority('iterations')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setIterationsAttribute(value_casted)
             return this
@@ -400,7 +338,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public monitorInvisibleArea(value: boolean | undefined): this {
-        if (this.checkPriority("monitorInvisibleArea")) {
+        if (this.checkPriority('monitorInvisibleArea')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMonitorInvisibleAreaAttribute(value_casted)
             return this
@@ -408,7 +346,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onStart(value: (() => void) | undefined): this {
-        if (this.checkPriority("onStart")) {
+        if (this.checkPriority('onStart')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnStartAttribute(value_casted)
             return this
@@ -416,7 +354,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onPause(value: (() => void) | undefined): this {
-        if (this.checkPriority("onPause")) {
+        if (this.checkPriority('onPause')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnPauseAttribute(value_casted)
             return this
@@ -424,7 +362,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onRepeat(value: (() => void) | undefined): this {
-        if (this.checkPriority("onRepeat")) {
+        if (this.checkPriority('onRepeat')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnRepeatAttribute(value_casted)
             return this
@@ -432,7 +370,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onCancel(value: (() => void) | undefined): this {
-        if (this.checkPriority("onCancel")) {
+        if (this.checkPriority('onCancel')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnCancelAttribute(value_casted)
             return this
@@ -440,7 +378,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onFinish(value: (() => void) | undefined): this {
-        if (this.checkPriority("onFinish")) {
+        if (this.checkPriority('onFinish')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnFinishAttribute(value_casted)
             return this
@@ -448,8 +386,8 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
-            hookImageAnimatorAttributeModifier(this, value); 
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookImageAnimatorAttributeModifier(this, value);
         })
         return this
     }
@@ -464,18 +402,16 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
 
 @memo
 export function ImageAnimatorImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ImageAnimatorAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkImageAnimatorComponent>((): ArkImageAnimatorComponent => {
         return new ArkImageAnimatorComponent()
     })
-    NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (peer: ArkImageAnimatorPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (_: ArkImageAnimatorPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -488,13 +424,13 @@ export class ImageFrameInfo_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
-        } else if (valueHolderForSrc instanceof Resource) {
+        } else if (valueHolderForSrc instanceof global_resource_Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
-        } else if (valueHolderForSrc instanceof image.PixelMap) {
+            const valueHolderForSrcForIdx1  = valueHolderForSrc as global_resource_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
+        } else if (valueHolderForSrc instanceof PixelMap) {
             valueSerializer.writeInt8((2).toByte())
-            const valueHolderForSrcForIdx2  = valueHolderForSrc as image.PixelMap
+            const valueHolderForSrcForIdx2  = valueHolderForSrc as PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForSrcForIdx2)
         }
         const valueHolderForWidth  = value.width
@@ -573,78 +509,78 @@ export class ImageFrameInfo_serializer {
     public static read(buffer: DeserializerBase): ImageFrameInfo {
         let valueDeserializer : DeserializerBase = buffer
         const srcTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let srcTmpBuf : string | Resource | image.PixelMap | undefined
-        if (srcTmpBufUnionSelector == (0).toChar()) {
+        let srcTmpBuf : string | global_resource_Resource | PixelMap | undefined
+        if (srcTmpBufUnionSelector == (0).toByte()) {
             srcTmpBuf = (valueDeserializer.readString() as string)
-        } else if (srcTmpBufUnionSelector == (1).toChar()) {
-            srcTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else if (srcTmpBufUnionSelector == (2).toChar()) {
+        } else if (srcTmpBufUnionSelector == (1).toByte()) {
+            srcTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
+        } else if (srcTmpBufUnionSelector == (2).toByte()) {
             srcTmpBuf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
         } else {
-            throw new Error("One of the branches for srcTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for srcTmpBuf has to be chosen through deserialisation.')
         }
-        const srcTmpResult : string | Resource | image.PixelMap = (srcTmpBuf as string | Resource | image.PixelMap)
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const srcTmpResult : string | global_resource_Resource | PixelMap = (srcTmpBuf as string | global_resource_Resource | PixelMap)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : double | string | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : double | string | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : double | string | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as double | string)
+            widthTmpBuf = (widthTmpBufOpt as double | string)
         }
         const widthTmpResult : double | string | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : double | string | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : double | string | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : double | string | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as double | string)
+            heightTmpBuf = (heightTmpBufOpt as double | string)
         }
         const heightTmpResult : double | string | undefined = heightTmpBuf
-        const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const topTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let topTmpBuf : double | string | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const topTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let topTmpBuf_ : double | string | undefined
-            if (topTmpBuf_UnionSelector == (0).toChar()) {
-                topTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (topTmpBuf_UnionSelector == (1).toChar()) {
-                topTmpBuf_ = (valueDeserializer.readString() as string)
+            const topTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let topTmpBufOpt : double | string | undefined
+            if (topTmpBufOptUnionSelector == (0).toByte()) {
+                topTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (topTmpBufOptUnionSelector == (1).toByte()) {
+                topTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for topTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for topTmpBufOpt has to be chosen through deserialisation.')
             }
-            topTmpBuf = (topTmpBuf_ as double | string)
+            topTmpBuf = (topTmpBufOpt as double | string)
         }
         const topTmpResult : double | string | undefined = topTmpBuf
-        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let leftTmpBuf : double | string | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const leftTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let leftTmpBuf_ : double | string | undefined
-            if (leftTmpBuf_UnionSelector == (0).toChar()) {
-                leftTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (leftTmpBuf_UnionSelector == (1).toChar()) {
-                leftTmpBuf_ = (valueDeserializer.readString() as string)
+            const leftTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let leftTmpBufOpt : double | string | undefined
+            if (leftTmpBufOptUnionSelector == (0).toByte()) {
+                leftTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (leftTmpBufOptUnionSelector == (1).toByte()) {
+                leftTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for leftTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for leftTmpBufOpt has to be chosen through deserialisation.')
             }
-            leftTmpBuf = (leftTmpBuf_ as double | string)
+            leftTmpBuf = (leftTmpBufOpt as double | string)
         }
         const leftTmpResult : double | string | undefined = leftTmpBuf
-        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             durationTmpBuf = valueDeserializer.readInt32()

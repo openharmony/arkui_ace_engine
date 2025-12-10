@@ -16,23 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { FormLinkModifier } from "./../FormLinkModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { RecordData } from '@ohos.base'
+import { FormLinkModifier } from './../FormLinkModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkFormLinkPeer extends ArkCommonMethodPeer {
     attributeSet?: FormLinkModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFormLinkPeer {
@@ -43,6 +45,7 @@ export class ArkFormLinkPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFormLinkOptionsAttribute(options: FormLinkOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         FormLinkOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._FormLinkInterface_setFormLinkOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -55,35 +58,23 @@ export interface FormLinkOptions {
     bundleName?: string;
     abilityName?: string;
     uri?: string;
-    params?: Object;
+    params?: RecordData;
 }
 export interface FormLinkAttribute extends CommonMethod {
     setFormLinkOptions(options: FormLinkOptions): this {
-        throw new Error("Unimplemented method setFormLinkOptions")
+        throw new Error('Unimplemented method setFormLinkOptions')
     }
     attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAttribute {
-    attributeModifier_value?: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined
-    setFormLinkOptions(options: FormLinkOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkFormLinkComponent extends ArkCommonMethodComponent implements FormLinkAttribute {
     getPeer(): ArkFormLinkPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkFormLinkPeer)
     }
     public setFormLinkOptions(options: FormLinkOptions): this {
-        if (this.checkPriority("setFormLinkOptions")) {
+        if (this.checkPriority('setFormLinkOptions')) {
             const options_casted = options as (FormLinkOptions)
             this.getPeer()?.setFormLinkOptionsAttribute(options_casted)
             this.applyOptionsFinish('FormLinkAttribute');
@@ -92,7 +83,7 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         return this
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
+        ModifierStateManager.INSTANCE.scope(() => {
             hookFormLinkAttributeModifier(this, value);
         })
         return this
@@ -108,18 +99,16 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
 
 @memo
 export function FormLinkImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: FormLinkAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkFormLinkComponent>((): ArkFormLinkComponent => {
         return new ArkFormLinkComponent()
     })
-    NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (peer: ArkFormLinkPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (_: ArkFormLinkPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -173,36 +162,36 @@ export class FormLinkOptions_serializer {
     public static read(buffer: DeserializerBase): FormLinkOptions {
         let valueDeserializer : DeserializerBase = buffer
         const actionTmpResult : string = (valueDeserializer.readString() as string)
-        const moduleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const moduleNameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let moduleNameTmpBuf : string | undefined = undefined
         if ((moduleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             moduleNameTmpBuf = (valueDeserializer.readString() as string)
         }
         const moduleNameTmpResult : string | undefined = moduleNameTmpBuf
-        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let bundleNameTmpBuf : string | undefined = undefined
         if ((bundleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             bundleNameTmpBuf = (valueDeserializer.readString() as string)
         }
         const bundleNameTmpResult : string | undefined = bundleNameTmpBuf
-        const abilityNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const abilityNameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let abilityNameTmpBuf : string | undefined = undefined
         if ((abilityNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             abilityNameTmpBuf = (valueDeserializer.readString() as string)
         }
         const abilityNameTmpResult : string | undefined = abilityNameTmpBuf
-        const uriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const uriTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let uriTmpBuf : string | undefined = undefined
         if ((uriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             uriTmpBuf = (valueDeserializer.readString() as string)
         }
         const uriTmpResult : string | undefined = uriTmpBuf
-        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paramsTmpBuf : Object | undefined = undefined
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let paramsTmpBuf : RecordData | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             paramsTmpBuf = (valueDeserializer.readObject() as object)
         }
-        const paramsTmpResult : Object | undefined = paramsTmpBuf
+        const paramsTmpResult : RecordData | undefined = paramsTmpBuf
         let value : FormLinkOptions = ({action: actionTmpResult, moduleName: moduleNameTmpResult, bundleName: bundleNameTmpResult, abilityName: abilityNameTmpResult, uri: uriTmpResult, params: paramsTmpResult} as FormLinkOptions)
         return value
     }

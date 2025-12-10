@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier, hookDataPanelContentModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from "./component/dataPanel"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { ResourceColor, Length } from "./component/units"
-import { Color } from "./component/enums"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, ContentModifier, hookDataPanelContentModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from './component/dataPanel'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length } from './component/units'
+import { Color as arkui_component_enums_Color } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class DataPanelModifier extends CommonMethodModifier implements DataPanelAttribute,AttributeModifier<DataPanelAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,139 +45,134 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     applyFocusedAttribute(instance: DataPanelAttribute): void { }
     applyDisabledAttribute(instance: DataPanelAttribute): void { }
     applySelectedAttribute(instance: DataPanelAttribute): void { }
-    _closeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _closeEffect_0_0value?: boolean | undefined
-    _valueColors_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _valueColors_0_0value?: Array<ResourceColor | LinearGradient> | undefined
-    _trackBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _trackBackgroundColor_0_0value?: ResourceColor | undefined
-    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeWidth_0_0value?: Length | undefined
-    _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _trackShadow_0_0value?: DataPanelShadowOptions | null | undefined
-    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _closeEffect_0_0value?: boolean | undefined
+    public _valueColors_0_0value?: Array<ResourceColor | LinearGradient> | undefined
+    public _trackBackgroundColor_0_0value?: ResourceColor | undefined
+    public _strokeWidth_0_0value?: Length | undefined
+    public _trackShadow_0_0value?: DataPanelShadowOptions | null | undefined
+    public _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkDataPanelPeer;
-        if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._closeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkDataPanelPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setCloseEffectAttribute((this._closeEffect_0_0value as boolean | undefined));
-                    this._closeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._closeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._closeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setCloseEffectAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._valueColors_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._valueColors_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setValueColorsAttribute((this._valueColors_0_0value as Array<ResourceColor | LinearGradient> | undefined));
-                    this._valueColors_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._valueColors_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._valueColors_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setValueColorsAttribute((undefined as Array<ResourceColor | LinearGradient> | undefined));
                 }
             }
         }
-        if (this._trackBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._trackBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setTrackBackgroundColorAttribute((this._trackBackgroundColor_0_0value as ResourceColor | undefined));
-                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setTrackBackgroundColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as Length | undefined));
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setStrokeWidthAttribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._trackShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._trackShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | null | undefined));
-                    this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }
-        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._contentModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     hookDataPanelContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<DataPanelConfiguration> | undefined));
-                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     hookDataPanelContentModifier(peer, (undefined as ContentModifier<DataPanelConfiguration> | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: DataPanelModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._closeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: DataPanelModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.closeEffect(modifier._closeEffect_0_0value);
                     break;
                 }
@@ -180,11 +181,10 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
-        if (modifier._valueColors_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._valueColors_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.valueColors(modifier._valueColors_0_0value);
                     break;
                 }
@@ -193,11 +193,10 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
-        if (modifier._trackBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._trackBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.trackBackgroundColor(modifier._trackBackgroundColor_0_0value);
                     break;
                 }
@@ -206,11 +205,10 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
-        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.strokeWidth(modifier._strokeWidth_0_0value);
                     break;
                 }
@@ -219,11 +217,10 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
-        if (modifier._trackShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._trackShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.trackShadow(modifier._trackShadow_0_0value);
                     break;
                 }
@@ -232,11 +229,10 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
             }
         }
-        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._contentModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.contentModifier(modifier._contentModifier_0_0value);
                     break;
                 }
@@ -247,78 +243,66 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         }
     }
     closeEffect(value: boolean | undefined): this {
-        if (((this._closeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._closeEffect_0_0value) !== (value)))
-        {
-            this._closeEffect_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._closeEffect_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._closeEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._closeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
-        if (((this._valueColors_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._valueColors_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._valueColors_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._valueColors_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     trackBackgroundColor(value: ResourceColor | undefined): this {
-        if (((this._trackBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._trackBackgroundColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     strokeWidth(value: Length | undefined): this {
-        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._strokeWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     trackShadow(value: DataPanelShadowOptions | null | undefined): this {
-        if (((this._trackShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._trackShadow_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._contentModifier_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

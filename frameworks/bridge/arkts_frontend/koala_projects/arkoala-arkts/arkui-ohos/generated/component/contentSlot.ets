@@ -16,13 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
-import { Content } from "arkui.Content"
+import { int32, int64, float32 } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { extractors } from '#handwritten'
+import { Content } from 'arkui.Content'
 export interface ContentSlotAttribute {
-     setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;

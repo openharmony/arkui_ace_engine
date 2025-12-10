@@ -16,25 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookRichTextAttributeModifier, AttributeUpdater } from "#handwritten"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { RichTextModifier } from "./../RichTextModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32 } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookRichTextAttributeModifier, AttributeUpdater } from '#handwritten'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { RichTextModifier } from './../RichTextModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkRichTextPeer extends ArkCommonMethodPeer {
     attributeSet?: RichTextModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRichTextPeer {
@@ -44,16 +45,17 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setRichTextOptionsAttribute(content: string | Resource): void {
+    setRichTextOptionsAttribute(content: string | global_resource_Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
             thisSerializer.writeInt8((0).toByte())
             const contentForIdx0  = content as string
             thisSerializer.writeString(contentForIdx0)
-        } else if (content instanceof Resource) {
+        } else if (content instanceof global_resource_Resource) {
             thisSerializer.writeInt8((1).toByte())
-            const contentForIdx1  = content as Resource
-            Resource_serializer.write(thisSerializer, contentForIdx1)
+            const contentForIdx1  = content as global_resource_Resource
+            global_resource_Resource_serializer.write(thisSerializer, contentForIdx1)
         }
         ArkUIGeneratedNativeModule._RichTextInterface_setRichTextOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -84,47 +86,27 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RichTextAttribute extends CommonMethod {
-    setRichTextOptions(content: string | Resource): this {
-        throw new Error("Unimplemented method setRichTextOptions")
+    setRichTextOptions(content: string | global_resource_Resource): this {
+        throw new Error('Unimplemented method setRichTextOptions')
     }
     onStart(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onStart")
+        throw new Error('Unimplemented method onStart')
     }
     onComplete(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onComplete")
+        throw new Error('Unimplemented method onComplete')
     }
     attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
-    onStart_value?: (() => void) | undefined
-    onComplete_value?: (() => void) | undefined
-    attributeModifier_value?: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined
-    setRichTextOptions(content: string | Resource): this {
-        return this
-    }
-    onStart(value: (() => void) | undefined): this {
-        return this
-    }
-    onComplete(value: (() => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkRichTextComponent extends ArkCommonMethodComponent implements RichTextAttribute {
     getPeer(): ArkRichTextPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkRichTextPeer)
     }
-    public setRichTextOptions(content: string | Resource): this {
-        if (this.checkPriority("setRichTextOptions")) {
-            const content_casted = content as (string | Resource)
+    public setRichTextOptions(content: string | global_resource_Resource): this {
+        if (this.checkPriority('setRichTextOptions')) {
+            const content_casted = content as (string | global_resource_Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
             this.applyOptionsFinish('RichTextAttribute');
             return this
@@ -132,7 +114,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         return this
     }
     public onStart(value: (() => void) | undefined): this {
-        if (this.checkPriority("onStart")) {
+        if (this.checkPriority('onStart')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnStartAttribute(value_casted)
             return this
@@ -140,7 +122,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         return this
     }
     public onComplete(value: (() => void) | undefined): this {
-        if (this.checkPriority("onComplete")) {
+        if (this.checkPriority('onComplete')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnCompleteAttribute(value_casted)
             return this
@@ -164,18 +146,16 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
 
 @memo
 export function RichTextImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: RichTextAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkRichTextComponent>((): ArkRichTextComponent => {
         return new ArkRichTextComponent()
     })
-    NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (peer: ArkRichTextPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (_: ArkRichTextPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

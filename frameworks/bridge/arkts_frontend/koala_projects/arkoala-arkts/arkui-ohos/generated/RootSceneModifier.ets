@@ -16,17 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkRootScenePeer, RootSceneAttribute } from "./component/rootScene"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkRootScenePeer, RootSceneAttribute } from './component/rootScene'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class RootSceneModifier extends CommonMethodModifier implements RootSceneAttribute,AttributeModifier<RootSceneAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,15 +42,18 @@ export class RootSceneModifier extends CommonMethodModifier implements RootScene
     applyFocusedAttribute(instance: RootSceneAttribute): void { }
     applyDisabledAttribute(instance: RootSceneAttribute): void { }
     applySelectedAttribute(instance: RootSceneAttribute): void { }
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkRootScenePeer;
+        const flagArray = this._flagArray;
     }
     mergeModifier(modifier: RootSceneModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
     }
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

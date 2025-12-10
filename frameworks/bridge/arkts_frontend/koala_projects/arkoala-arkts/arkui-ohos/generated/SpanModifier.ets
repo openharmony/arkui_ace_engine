@@ -16,21 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkSpanPeer, TextBackgroundStyle, SpanAttribute } from "./component/span"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { Font, ResourceColor, Length } from "./component/units"
-import { Color, FontStyle, FontWeight, TextCase } from "./component/enums"
-import { Resource } from "global.resource"
-import { DecorationStyleInterface } from "./component/styledString"
-import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from "./component/common"
-import { LengthMetrics } from "arkui.Graphics"
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkSpanPeer, TextBackgroundStyle, SpanAttribute } from './component/span'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { Font as arkui_component_units_Font, ResourceColor, Resource as arkui_component_units_Resource, Length } from './component/units'
+import { Color as arkui_component_enums_Color, FontStyle, FontWeight, TextCase } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { DecorationStyleInterface } from './component/styledString'
+import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from './component/common'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
 export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,390 +45,361 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     applyFocusedAttribute(instance: SpanAttribute): void { }
     applyDisabledAttribute(instance: SpanAttribute): void { }
     applySelectedAttribute(instance: SpanAttribute): void { }
-    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _font_0_0value?: Font | undefined
-    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontColor_0_0value?: ResourceColor | undefined
-    _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: double | string | Resource | undefined
-    _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontStyle_0_0value?: FontStyle | undefined
-    _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
-    _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontFamily_0_0value?: string | Resource | undefined
-    _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _decoration_0_0value?: DecorationStyleInterface | undefined
-    _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: double | string | undefined
-    _textCase_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textCase_0_0value?: TextCase | undefined
-    _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeight_0_0value?: Length | undefined
-    _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
-    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _baselineOffset_0_0value?: LengthMetrics | undefined
-    _key_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _key_0_0value?: string | undefined
-    _id_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _id_0_0value?: string | undefined
-    _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onClick_0_0value?: ((value0: ClickEvent) => void) | undefined
-    _onHover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onHover_0_0value?: HoverCallback | undefined
-    _onClick_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onClick_1_0value?: ((value0: ClickEvent) => void) | undefined
-    _onClick_1_1value?: double | undefined
-    applyModifierPatch(node: PeerNode): void {
+    public _font_0_0value?: arkui_component_units_Font | undefined
+    public _fontColor_0_0value?: ResourceColor | undefined
+    public _fontSize_0_0value?: double | string | global_resource_Resource | undefined
+    public _fontStyle_0_0value?: FontStyle | undefined
+    public _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    public _fontFamily_0_0value?: string | global_resource_Resource | undefined
+    public _decoration_0_0value?: DecorationStyleInterface | undefined
+    public _letterSpacing_0_0value?: double | string | undefined
+    public _textCase_0_0value?: TextCase | undefined
+    public _lineHeight_0_0value?: Length | undefined
+    public _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    public _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    public _baselineOffset_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    public _key_0_0value?: string | undefined
+    public _id_0_0value?: string | undefined
+    public _onClick_0_0value?: ((event: ClickEvent) => void) | undefined
+    public _onHover_0_0value?: HoverCallback | undefined
+    public _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
+    public _onClick_1_1value?: double | undefined
+    applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkSpanPeer;
-        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontAttribute((this._font_0_0value as Font | undefined));
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkSpanPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontAttribute((undefined as Font | undefined));
+                    flagArray[0] = 0;
+                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setFontColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
-                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | global_resource_Resource | undefined));
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
+                    flagArray[2] = 0;
+                    peer.setFontSizeAttribute((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setFontStyleAttribute((this._fontStyle_0_0value as FontStyle | undefined));
-                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._fontStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setFontStyleAttribute((undefined as FontStyle | undefined));
                 }
             }
         }
-        if (this._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
-        if (this._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontFamily_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as string | Resource | undefined));
-                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as string | global_resource_Resource | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._fontFamily_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontFamilyAttribute((undefined as string | Resource | undefined));
+                    flagArray[5] = 0;
+                    peer.setFontFamilyAttribute((undefined as string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._decoration_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._decoration_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setDecorationAttribute((this._decoration_0_0value as DecorationStyleInterface | undefined));
-                    this._decoration_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._decoration_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._decoration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setDecorationAttribute((undefined as DecorationStyleInterface | undefined));
                 }
             }
         }
-        if (this._letterSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._letterSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | undefined));
-                    this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setLetterSpacingAttribute((undefined as double | string | undefined));
                 }
             }
         }
-        if (this._textCase_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textCase_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setTextCaseAttribute((this._textCase_0_0value as TextCase | undefined));
-                    this._textCase_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textCase_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._textCase_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setTextCaseAttribute((undefined as TextCase | undefined));
                 }
             }
         }
-        if (this._lineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._lineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setLineHeightAttribute((this._lineHeight_0_0value as Length | undefined));
-                    this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setLineHeightAttribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setTextShadowAttribute((this._textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
-                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._textShadow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setTextShadowAttribute((undefined as ShadowOptions | Array<ShadowOptions> | undefined));
                 }
             }
         }
-        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
                     peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[11] = 0;
                     peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
                 }
             }
         }
-        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as LengthMetrics | undefined));
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as arkui_Graphics_LengthMetrics | undefined));
+                    flagArray[12] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[12] = 2;
                     break;
                 }
                 default: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBaselineOffsetAttribute((undefined as LengthMetrics | undefined));
+                    flagArray[12] = 0;
+                    peer.setBaselineOffsetAttribute((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
-        if (this._key_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._key_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
                     peer.setKeyAttribute((this._key_0_0value as string | undefined));
-                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[13] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._key_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[13] = 2;
                     break;
                 }
                 default: {
-                    this._key_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[13] = 0;
                     peer.setKeyAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._id_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._id_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
                     peer.setIdAttribute((this._id_0_0value as string | undefined));
-                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[14] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._id_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[14] = 2;
                     break;
                 }
                 default: {
-                    this._id_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[14] = 0;
                     peer.setIdAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onClick_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClick0Attribute((this._onClick_0_0value as ((value0: ClickEvent) => void) | undefined));
-                    this._onClick_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
+                    peer.setOnClick0Attribute((this._onClick_0_0value as ((event: ClickEvent) => void) | undefined));
+                    flagArray[15] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onClick_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[15] = 2;
                     break;
                 }
                 default: {
-                    this._onClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClick0Attribute((undefined as ((value0: ClickEvent) => void) | undefined));
+                    flagArray[15] = 0;
+                    peer.setOnClick0Attribute((undefined as ((event: ClickEvent) => void) | undefined));
                 }
             }
         }
-        if (this._onHover_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onHover_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
                     peer.setOnHoverAttribute((this._onHover_0_0value as HoverCallback | undefined));
-                    this._onHover_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[16] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onHover_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[16] = 2;
                     break;
                 }
                 default: {
-                    this._onHover_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[16] = 0;
                     peer.setOnHoverAttribute((undefined as HoverCallback | undefined));
                 }
             }
         }
-        if (this._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onClick_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClick1Attribute((this._onClick_1_0value as ((value0: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
-                    this._onClick_1_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
+                    flagArray[17] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onClick_1_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[17] = 2;
                     break;
                 }
                 default: {
-                    this._onClick_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClick1Attribute((undefined as ((value0: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                    flagArray[17] = 0;
+                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: SpanModifier): void {
-        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: SpanModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.font(modifier._font_0_0value);
                     break;
                 }
                 default: {
-                    this.font((undefined as Font | undefined));
+                    this.font((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.fontColor(modifier._fontColor_0_0value);
                     break;
                 }
@@ -432,24 +408,22 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.fontSize(modifier._fontSize_0_0value);
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as double | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.fontStyle(modifier._fontStyle_0_0value);
                     break;
                 }
@@ -458,11 +432,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.fontWeight(modifier._fontWeight_0_0value);
                     break;
                 }
@@ -471,24 +444,22 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontFamily_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.fontFamily(modifier._fontFamily_0_0value);
                     break;
                 }
                 default: {
-                    this.fontFamily((undefined as string | Resource | undefined));
+                    this.fontFamily((undefined as string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._decoration_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._decoration_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.decoration(modifier._decoration_0_0value);
                     break;
                 }
@@ -497,11 +468,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._letterSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._letterSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.letterSpacing(modifier._letterSpacing_0_0value);
                     break;
                 }
@@ -510,11 +480,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._textCase_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textCase_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.textCase(modifier._textCase_0_0value);
                     break;
                 }
@@ -523,11 +492,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._lineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._lineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.lineHeight(modifier._lineHeight_0_0value);
                     break;
                 }
@@ -536,11 +504,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.textShadow(modifier._textShadow_0_0value);
                     break;
                 }
@@ -549,11 +516,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
                     this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
                     break;
                 }
@@ -562,24 +528,22 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
                     this.baselineOffset(modifier._baselineOffset_0_0value);
                     break;
                 }
                 default: {
-                    this.baselineOffset((undefined as LengthMetrics | undefined));
+                    this.baselineOffset((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
-        if (modifier._key_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._key_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
                     this.key(modifier._key_0_0value);
                     break;
                 }
@@ -588,11 +552,10 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._id_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._id_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
                     this.id(modifier._id_0_0value);
                     break;
                 }
@@ -601,24 +564,22 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onClick_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
                     this.onClick(modifier._onClick_0_0value);
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((value0: ClickEvent) => void) | undefined));
+                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined));
                 }
             }
         }
-        if (modifier._onHover_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onHover_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
                     this.onHover(modifier._onHover_0_0value);
                     break;
                 }
@@ -627,238 +588,201 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
             }
         }
-        if (modifier._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onClick_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
                     this.onClick(modifier._onClick_1_0value, modifier._onClick_1_1value);
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((value0: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
     }
-    font(value: Font | undefined): this {
-        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+    font(value: arkui_component_units_Font | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._font_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._font_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     fontColor(value: ResourceColor | undefined): this {
-        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._fontColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    fontSize(value: double | string | Resource | undefined): this {
-        if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
+    fontSize(value: double | string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._fontSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
-        if (((this._fontStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._fontStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
-        if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._fontWeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    fontFamily(value: string | Resource | undefined): this {
-        if (((this._fontFamily_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
+    fontFamily(value: string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._fontFamily_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     decoration(value: DecorationStyleInterface | undefined): this {
-        if (((this._decoration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._decoration_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._decoration_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     letterSpacing(value: double | string | undefined): this {
-        if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._letterSpacing_0_0value) !== (value)))
-        {
-            this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[7]) == (0)) || ((this._letterSpacing_0_0value) !== (value))) {
+            this._flagArray[7] = 1
             this._letterSpacing_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     textCase(value: TextCase | undefined): this {
-        if (((this._textCase_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textCase_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._textCase_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textCase_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     lineHeight(value: Length | undefined): this {
-        if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._lineHeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
-        if (((this._textShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
             this._textShadow_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
-        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[11]) == (0)) || (true)) {
+            this._flagArray[11] = 1
             this._textBackgroundStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[11] = 3
         }
         return this
     }
-    baselineOffset(value: LengthMetrics | undefined): this {
-        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+    baselineOffset(value: arkui_Graphics_LengthMetrics | undefined): this {
+        if (((this._flagArray[12]) == (0)) || (true)) {
+            this._flagArray[12] = 1
             this._baselineOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[12] = 3
         }
         return this
     }
     key(value: string | undefined): this {
-        if (((this._key_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._key_0_0value) !== (value)))
-        {
-            this._key_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[13]) == (0)) || ((this._key_0_0value) !== (value))) {
+            this._flagArray[13] = 1
             this._key_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._key_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[13] = 3
         }
         return this
     }
     id(value: string | undefined): this {
-        if (((this._id_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._id_0_0value) !== (value)))
-        {
-            this._id_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[14]) == (0)) || ((this._id_0_0value) !== (value))) {
+            this._flagArray[14] = 1
             this._id_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._id_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[14] = 3
         }
         return this
     }
-    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
-        if (((this._onClick_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
+    onClick(value: ((event: ClickEvent) => void) | undefined): this {
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
             this._onClick_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onClick_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[15] = 3
         }
         return this
     }
     onHover(value: HoverCallback | undefined): this {
-        if (((this._onHover_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onHover_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[16]) == (0)) || (true)) {
+            this._flagArray[16] = 1
             this._onHover_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onHover_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[16] = 3
         }
         return this
     }
-    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
-        if (((this._onClick_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold)))
-        {
-            this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (((this._flagArray[17]) == (0)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold))) {
+            this._flagArray[17] = 1
             this._onClick_1_0value = event
             this._onClick_1_1value = distanceThreshold
             this._state.fireChange()
-        } else
-        {
-            this._onClick_1_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[17] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

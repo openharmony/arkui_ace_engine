@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookCircleAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { CircleModifier } from "./../CircleModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookCircleAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { CircleModifier } from './../CircleModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: CircleModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCirclePeer {
@@ -43,6 +44,7 @@ export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setCircleOptionsAttribute(options?: CircleOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -59,33 +61,21 @@ export interface CircleOptions {
     width?: string | double;
     height?: string | double;
 }
-export interface CircleAttribute extends CommonShapeMethod {
+export interface CircleAttribute extends arkui_component_common_CommonShapeMethod {
     setCircleOptions(options?: CircleOptions): this {
-        throw new Error("Unimplemented method setCircleOptions")
+        throw new Error('Unimplemented method setCircleOptions')
     }
-    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
-    attributeModifier_value?: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined
-    setCircleOptions(options?: CircleOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements CircleAttribute {
     getPeer(): ArkCirclePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkCirclePeer)
     }
     public setCircleOptions(options?: CircleOptions): this {
-        if (this.checkPriority("setCircleOptions")) {
+        if (this.checkPriority('setCircleOptions')) {
             const options_casted = options as (CircleOptions | undefined)
             this.getPeer()?.setCircleOptionsAttribute(options_casted)
             this.applyOptionsFinish('CircleAttribute');
@@ -93,7 +83,7 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookCircleAttributeModifier(this, value);
         })
@@ -110,18 +100,16 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
 
 @memo
 export function CircleImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: CircleAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkCircleComponent>((): ArkCircleComponent => {
         return new ArkCircleComponent()
     })
-    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (peer: ArkCirclePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (_: ArkCirclePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -164,34 +152,34 @@ export class CircleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): CircleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : string | double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : string | double | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double)
+            widthTmpBuf = (widthTmpBufOpt as string | double)
         }
         const widthTmpResult : string | double | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : string | double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : string | double | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double)
+            heightTmpBuf = (heightTmpBufOpt as string | double)
         }
         const heightTmpResult : string | double | undefined = heightTmpBuf
         let value : CircleOptions = ({width: widthTmpResult, height: heightTmpResult} as CircleOptions)

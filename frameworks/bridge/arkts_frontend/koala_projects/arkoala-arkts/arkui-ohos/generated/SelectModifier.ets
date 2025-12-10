@@ -16,24 +16,30 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
-import { int32 } from "@koalaui/common"
-import { CommonMethod, Bindable, BlurStyle } from "./component/common"
-import { Resource } from "global.resource"
-import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset } from "./component/units"
-import { Color, OptionWidthMode } from "./component/enums"
-import { ControlSize } from "./component/button"
-import { DividerOptions } from "./component/textPicker"
-import { TextModifier } from "arkui.TextModifier"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { ModifierState } from "./CommonModifier"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, ContentModifier, extractors, hookSelectContentModifier, hookSelectSetDividerMethod } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from './component/select'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, Bindable, BlurStyle } from './component/common'
+import { Resource as arkui_component_units_Resource, ResourceStr as arkui_component_units_ResourceStr, Font as arkui_component_units_Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset } from './component/units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { Color as arkui_component_enums_Color, OptionWidthMode } from './component/enums'
+import { ControlSize } from './component/button'
+import { DividerOptions } from './component/textPicker'
+import { TextModifier } from 'arkui.TextModifier'
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier'
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute,AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
-     _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,619 +49,571 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     applyFocusedAttribute(instance: SelectAttribute): void { }
     applyDisabledAttribute(instance: SelectAttribute): void { }
     applySelectedAttribute(instance: SelectAttribute): void { }
-    _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selected_0_0value?: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined
-    _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _value_0_0value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
-    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _font_0_0value?: Font | undefined
-    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontColor_0_0value?: ResourceColor | undefined
-    _selectedOptionBgColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedOptionBgColor_0_0value?: ResourceColor | undefined
-    _selectedOptionFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedOptionFont_0_0value?: Font | undefined
-    _selectedOptionFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedOptionFontColor_0_0value?: ResourceColor | undefined
-    _optionBgColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionBgColor_0_0value?: ResourceColor | undefined
-    _optionFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionFont_0_0value?: Font | undefined
-    _optionFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionFontColor_0_0value?: ResourceColor | undefined
-    _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelect_0_0value?: OnSelectCallback | undefined
-    _space_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _space_0_0value?: Length | undefined
-    _arrowPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _arrowPosition_0_0value?: ArrowPosition | undefined
-    _optionWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionWidth_0_0value?: Dimension | OptionWidthMode | undefined
-    _optionHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionHeight_0_0value?: Dimension | undefined
-    _menuBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuBackgroundColor_0_0value?: ResourceColor | undefined
-    _menuBackgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuBackgroundBlurStyle_0_0value?: BlurStyle | undefined
-    _controlSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _controlSize_0_0value?: ControlSize | undefined
-    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _divider_0_0value?: DividerOptions | null | undefined
-    _textModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textModifier_0_0value?: TextModifier | undefined
-    _arrowModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _arrowModifier_0_0value?: SymbolGlyphModifier | undefined
-    _optionTextModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optionTextModifier_0_0value?: TextModifier | undefined
-    _selectedOptionTextModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedOptionTextModifier_0_0value?: TextModifier | undefined
-    _dividerStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _dividerStyle_0_0value?: DividerStyleOptions | undefined
-    _avoidance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _avoidance_0_0value?: AvoidanceMode | undefined
-    _menuOutline_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuOutline_0_0value?: MenuOutlineOptions | undefined
-    _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backgroundColor_0_0value?: ResourceColor | undefined
-    _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _menuAlign_0_0value?: MenuAlignType | undefined
-    _menuAlign_0_1value?: Offset | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _selected_0_0value?: int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined
+    public _value_0_0value?: arkui_component_units_ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined
+    public _font_0_0value?: arkui_component_units_Font | undefined
+    public _fontColor_0_0value?: ResourceColor | undefined
+    public _selectedOptionBgColor_0_0value?: ResourceColor | undefined
+    public _selectedOptionFont_0_0value?: arkui_component_units_Font | undefined
+    public _selectedOptionFontColor_0_0value?: ResourceColor | undefined
+    public _optionBgColor_0_0value?: ResourceColor | undefined
+    public _optionFont_0_0value?: arkui_component_units_Font | undefined
+    public _optionFontColor_0_0value?: ResourceColor | undefined
+    public _onSelect_0_0value?: OnSelectCallback | undefined
+    public _space_0_0value?: Length | undefined
+    public _arrowPosition_0_0value?: ArrowPosition | undefined
+    public _optionWidth_0_0value?: Dimension | OptionWidthMode | undefined
+    public _optionHeight_0_0value?: Dimension | undefined
+    public _menuBackgroundColor_0_0value?: ResourceColor | undefined
+    public _menuBackgroundBlurStyle_0_0value?: BlurStyle | undefined
+    public _controlSize_0_0value?: ControlSize | undefined
+    public _menuItemContentModifier_0_0value?: ContentModifier<MenuItemConfiguration> | undefined
+    public _divider_0_0value?: DividerOptions | null | undefined
+    public _textModifier_0_0value?: TextModifier | undefined
+    public _arrowModifier_0_0value?: SymbolGlyphModifier | undefined
+    public _optionTextModifier_0_0value?: TextModifier | undefined
+    public _selectedOptionTextModifier_0_0value?: TextModifier | undefined
+    public _dividerStyle_0_0value?: DividerStyleOptions | undefined
+    public _avoidance_0_0value?: AvoidanceMode | undefined
+    public _menuOutline_0_0value?: MenuOutlineOptions | undefined
+    public _menuAlign_0_0value?: MenuAlignType | undefined
+    public _menuAlign_0_1value?: Offset | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkSelectPeer;
-        if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedAttribute((this._selected_0_0value as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
-                    this._selected_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+        this.applyModifierPatch1(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkSelectPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setSelectedAttribute((this._selected_0_0value as int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selected_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._selected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedAttribute((undefined as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
-                }
-            }
-        }
-        if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._value_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setValueAttribute((this._value_0_0value as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
-                    this._value_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._value_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._value_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setValueAttribute((undefined as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
+                    flagArray[0] = 0;
+                    peer.setSelectedAttribute((undefined as int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined));
                 }
             }
         }
-        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontAttribute((this._font_0_0value as Font | undefined));
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setValueAttribute((this._value_0_0value as arkui_component_units_ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontAttribute((undefined as Font | undefined));
+                    flagArray[1] = 0;
+                    peer.setValueAttribute((undefined as arkui_component_units_ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined));
                 }
             }
         }
-        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined));
+                    flagArray[2] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[2] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[2] = 0;
+                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined));
+                }
+            }
+        }
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setFontColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._selectedOptionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedOptionBgColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setSelectedOptionBgColorAttribute((this._selectedOptionBgColor_0_0value as ResourceColor | undefined));
-                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setSelectedOptionBgColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._selectedOptionFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedOptionFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedOptionFontAttribute((this._selectedOptionFont_0_0value as Font | undefined));
-                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setSelectedOptionFontAttribute((this._selectedOptionFont_0_0value as arkui_component_units_Font | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedOptionFontAttribute((undefined as Font | undefined));
+                    flagArray[5] = 0;
+                    peer.setSelectedOptionFontAttribute((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (this._selectedOptionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedOptionFontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setSelectedOptionFontColorAttribute((this._selectedOptionFontColor_0_0value as ResourceColor | undefined));
-                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setSelectedOptionFontColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._optionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionBgColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setOptionBgColorAttribute((this._optionBgColor_0_0value as ResourceColor | undefined));
-                    this._optionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._optionBgColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setOptionBgColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._optionFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOptionFontAttribute((this._optionFont_0_0value as Font | undefined));
-                    this._optionFont_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
+                    peer.setOptionFontAttribute((this._optionFont_0_0value as arkui_component_units_Font | undefined));
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._optionFont_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOptionFontAttribute((undefined as Font | undefined));
+                    flagArray[8] = 0;
+                    peer.setOptionFontAttribute((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (this._optionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionFontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setOptionFontColorAttribute((this._optionFontColor_0_0value as ResourceColor | undefined));
-                    this._optionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._optionFontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setOptionFontColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSelect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setOnSelectAttribute((this._onSelect_0_0value as OnSelectCallback | undefined));
-                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._onSelect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setOnSelectAttribute((undefined as OnSelectCallback | undefined));
                 }
             }
         }
-        if (this._space_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._space_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
                     peer.setSpaceAttribute((this._space_0_0value as Length | undefined));
-                    this._space_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._space_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._space_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[11] = 0;
                     peer.setSpaceAttribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._arrowPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._arrowPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
                     peer.setArrowPositionAttribute((this._arrowPosition_0_0value as ArrowPosition | undefined));
-                    this._arrowPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[12] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._arrowPosition_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[12] = 2;
                     break;
                 }
                 default: {
-                    this._arrowPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[12] = 0;
                     peer.setArrowPositionAttribute((undefined as ArrowPosition | undefined));
                 }
             }
         }
-        if (this._optionWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
                     peer.setOptionWidthAttribute((this._optionWidth_0_0value as Dimension | OptionWidthMode | undefined));
-                    this._optionWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[13] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[13] = 2;
                     break;
                 }
                 default: {
-                    this._optionWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[13] = 0;
                     peer.setOptionWidthAttribute((undefined as Dimension | OptionWidthMode | undefined));
                 }
             }
         }
-        if (this._optionHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
                     peer.setOptionHeightAttribute((this._optionHeight_0_0value as Dimension | undefined));
-                    this._optionHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[14] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionHeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[14] = 2;
                     break;
                 }
                 default: {
-                    this._optionHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[14] = 0;
                     peer.setOptionHeightAttribute((undefined as Dimension | undefined));
                 }
             }
         }
-        if (this._menuBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
                     peer.setMenuBackgroundColorAttribute((this._menuBackgroundColor_0_0value as ResourceColor | undefined));
-                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[15] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[15] = 2;
                     break;
                 }
                 default: {
-                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[15] = 0;
                     peer.setMenuBackgroundColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._menuBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuBackgroundBlurStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
                     peer.setMenuBackgroundBlurStyleAttribute((this._menuBackgroundBlurStyle_0_0value as BlurStyle | undefined));
-                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[16] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[16] = 2;
                     break;
                 }
                 default: {
-                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[16] = 0;
                     peer.setMenuBackgroundBlurStyleAttribute((undefined as BlurStyle | undefined));
                 }
             }
         }
-        if (this._controlSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._controlSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
                     peer.setControlSizeAttribute((this._controlSize_0_0value as ControlSize | undefined));
-                    this._controlSize_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[17] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._controlSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[17] = 2;
                     break;
                 }
                 default: {
-                    this._controlSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[17] = 0;
                     peer.setControlSizeAttribute((undefined as ControlSize | undefined));
                 }
             }
         }
-        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDividerAttribute((this._divider_0_0value as DividerOptions | null | undefined));
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
+                    hookSelectContentModifier(peer, (this._menuItemContentModifier_0_0value as ContentModifier<MenuItemConfiguration> | undefined));
+                    flagArray[18] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[18] = 2;
                     break;
                 }
                 default: {
-                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDividerAttribute((undefined as DividerOptions | null | undefined));
+                    flagArray[18] = 0;
+                    hookSelectContentModifier(peer, (undefined as ContentModifier<MenuItemConfiguration> | undefined));
                 }
             }
         }
-        if (this._textModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTextModifierAttribute((this._textModifier_0_0value as TextModifier | undefined));
-                    this._textModifier_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
+                    hookSelectSetDividerMethod(peer, (this._divider_0_0value as DividerOptions | null | undefined));
+                    flagArray[19] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textModifier_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[19] = 2;
                     break;
                 }
                 default: {
-                    this._textModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[19] = 0;
+                    hookSelectSetDividerMethod(peer, (undefined as DividerOptions | null | undefined));
+                }
+            }
+        }
+    }
+    applyModifierPatch1(peer: ArkSelectPeer, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1: {
+                    peer.setTextModifierAttribute((this._textModifier_0_0value as TextModifier | undefined));
+                    flagArray[20] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[20] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[20] = 0;
                     peer.setTextModifierAttribute((undefined as TextModifier | undefined));
                 }
             }
         }
-        if (this._arrowModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._arrowModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1: {
                     peer.setArrowModifierAttribute((this._arrowModifier_0_0value as SymbolGlyphModifier | undefined));
-                    this._arrowModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[21] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._arrowModifier_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[21] = 2;
                     break;
                 }
                 default: {
-                    this._arrowModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[21] = 0;
                     peer.setArrowModifierAttribute((undefined as SymbolGlyphModifier | undefined));
                 }
             }
         }
-        if (this._optionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optionTextModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1: {
                     peer.setOptionTextModifierAttribute((this._optionTextModifier_0_0value as TextModifier | undefined));
-                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[22] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[22] = 2;
                     break;
                 }
                 default: {
-                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[22] = 0;
                     peer.setOptionTextModifierAttribute((undefined as TextModifier | undefined));
                 }
             }
         }
-        if (this._selectedOptionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedOptionTextModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1: {
                     peer.setSelectedOptionTextModifierAttribute((this._selectedOptionTextModifier_0_0value as TextModifier | undefined));
-                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[23] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[23] = 2;
                     break;
                 }
                 default: {
-                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[23] = 0;
                     peer.setSelectedOptionTextModifierAttribute((undefined as TextModifier | undefined));
                 }
             }
         }
-        if (this._dividerStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._dividerStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1: {
                     peer.setDividerStyleAttribute((this._dividerStyle_0_0value as DividerStyleOptions | undefined));
-                    this._dividerStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[24] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._dividerStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[24] = 2;
                     break;
                 }
                 default: {
-                    this._dividerStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[24] = 0;
                     peer.setDividerStyleAttribute((undefined as DividerStyleOptions | undefined));
                 }
             }
         }
-        if (this._avoidance_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._avoidance_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1: {
                     peer.setAvoidanceAttribute((this._avoidance_0_0value as AvoidanceMode | undefined));
-                    this._avoidance_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[25] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._avoidance_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[25] = 2;
                     break;
                 }
                 default: {
-                    this._avoidance_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[25] = 0;
                     peer.setAvoidanceAttribute((undefined as AvoidanceMode | undefined));
                 }
             }
         }
-        if (this._menuOutline_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuOutline_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1: {
                     peer.setMenuOutlineAttribute((this._menuOutline_0_0value as MenuOutlineOptions | undefined));
-                    this._menuOutline_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[26] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuOutline_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[26] = 2;
                     break;
                 }
                 default: {
-                    this._menuOutline_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[26] = 0;
                     peer.setMenuOutlineAttribute((undefined as MenuOutlineOptions | undefined));
                 }
             }
         }
-        if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._backgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | undefined));
-                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._backgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackgroundColorAttribute((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (this._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._menuAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1: {
                     peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined | undefined));
-                    this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[27] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[27] = 2;
                     break;
                 }
                 default: {
-                    this._menuAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[27] = 0;
                     peer.setMenuAlignAttribute((undefined as MenuAlignType | undefined), (undefined as Offset | undefined | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: SelectModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+        this.mergeModifier1(modifier, flagArray);
+    }
+    mergeModifier0(modifier: SelectModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.selected(modifier._selected_0_0value);
                     break;
                 }
                 default: {
-                    this.selected((undefined as int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined));
+                    this.selected((undefined as int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined));
                 }
             }
         }
-        if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._value_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.value(modifier._value_0_0value);
                     break;
                 }
                 default: {
-                    this.value((undefined as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
+                    this.value((undefined as arkui_component_units_ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined));
                 }
             }
         }
-        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._font_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.font(modifier._font_0_0value);
                     break;
                 }
                 default: {
-                    this.font((undefined as Font | undefined));
+                    this.font((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.fontColor(modifier._fontColor_0_0value);
                     break;
                 }
@@ -664,11 +622,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._selectedOptionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedOptionBgColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.selectedOptionBgColor(modifier._selectedOptionBgColor_0_0value);
                     break;
                 }
@@ -677,24 +634,22 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._selectedOptionFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedOptionFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.selectedOptionFont(modifier._selectedOptionFont_0_0value);
                     break;
                 }
                 default: {
-                    this.selectedOptionFont((undefined as Font | undefined));
+                    this.selectedOptionFont((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (modifier._selectedOptionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedOptionFontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.selectedOptionFontColor(modifier._selectedOptionFontColor_0_0value);
                     break;
                 }
@@ -703,11 +658,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._optionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionBgColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.optionBgColor(modifier._optionBgColor_0_0value);
                     break;
                 }
@@ -716,24 +670,22 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._optionFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.optionFont(modifier._optionFont_0_0value);
                     break;
                 }
                 default: {
-                    this.optionFont((undefined as Font | undefined));
+                    this.optionFont((undefined as arkui_component_units_Font | undefined));
                 }
             }
         }
-        if (modifier._optionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionFontColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.optionFontColor(modifier._optionFontColor_0_0value);
                     break;
                 }
@@ -742,11 +694,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSelect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.onSelect(modifier._onSelect_0_0value);
                     break;
                 }
@@ -755,11 +706,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._space_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._space_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
                     this.space(modifier._space_0_0value);
                     break;
                 }
@@ -768,11 +718,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._arrowPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._arrowPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
                     this.arrowPosition(modifier._arrowPosition_0_0value);
                     break;
                 }
@@ -781,11 +730,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._optionWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
                     this.optionWidth(modifier._optionWidth_0_0value);
                     break;
                 }
@@ -794,11 +742,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._optionHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
                     this.optionHeight(modifier._optionHeight_0_0value);
                     break;
                 }
@@ -807,11 +754,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._menuBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
                     this.menuBackgroundColor(modifier._menuBackgroundColor_0_0value);
                     break;
                 }
@@ -820,11 +766,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._menuBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuBackgroundBlurStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
                     this.menuBackgroundBlurStyle(modifier._menuBackgroundBlurStyle_0_0value);
                     break;
                 }
@@ -833,11 +778,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._controlSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._controlSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
                     this.controlSize(modifier._controlSize_0_0value);
                     break;
                 }
@@ -846,11 +790,22 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.menuItemContentModifier(modifier._menuItemContentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuItemContentModifier((undefined as ContentModifier<MenuItemConfiguration> | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
                     this.divider(modifier._divider_0_0value);
                     break;
                 }
@@ -859,11 +814,12 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._textModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier1(modifier: SelectModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1:
+                case 3: {
                     this.textModifier(modifier._textModifier_0_0value);
                     break;
                 }
@@ -872,11 +828,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._arrowModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._arrowModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1:
+                case 3: {
                     this.arrowModifier(modifier._arrowModifier_0_0value);
                     break;
                 }
@@ -885,11 +840,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._optionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optionTextModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1:
+                case 3: {
                     this.optionTextModifier(modifier._optionTextModifier_0_0value);
                     break;
                 }
@@ -898,11 +852,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._selectedOptionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedOptionTextModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1:
+                case 3: {
                     this.selectedOptionTextModifier(modifier._selectedOptionTextModifier_0_0value);
                     break;
                 }
@@ -911,11 +864,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._dividerStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._dividerStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1:
+                case 3: {
                     this.dividerStyle(modifier._dividerStyle_0_0value);
                     break;
                 }
@@ -924,11 +876,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._avoidance_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._avoidance_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1:
+                case 3: {
                     this.avoidance(modifier._avoidance_0_0value);
                     break;
                 }
@@ -937,11 +888,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._menuOutline_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuOutline_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
                     this.menuOutline(modifier._menuOutline_0_0value);
                     break;
                 }
@@ -950,24 +900,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
-        if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._backgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.backgroundColor(modifier._backgroundColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.backgroundColor((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (modifier._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._menuAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1:
+                case 3: {
                     this.menuAlign(modifier._menuAlign_0_0value, modifier._menuAlign_0_1value);
                     break;
                 }
@@ -977,316 +913,288 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
             }
         }
     }
-    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
-        if (((this._selected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selected_0_flag = AttributeUpdaterFlag.UPDATE
+    selected(value: int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._selected_0_0value = value
-        } else
-        {
-            this._selected_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        if (((this._value_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._value_0_flag = AttributeUpdaterFlag.UPDATE
+    value(value: arkui_component_units_ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._value_0_0value = value
-        } else
-        {
-            this._value_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    font(value: Font | undefined): this {
-        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+    font(value: arkui_component_units_Font | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._font_0_0value = value
-        } else
-        {
-            this._font_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     fontColor(value: ResourceColor | undefined): this {
-        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._fontColor_0_0value = value
-        } else
-        {
-            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     selectedOptionBgColor(value: ResourceColor | undefined): this {
-        if (((this._selectedOptionBgColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._selectedOptionBgColor_0_0value = value
-        } else
-        {
-            this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    selectedOptionFont(value: Font | undefined): this {
-        if (((this._selectedOptionFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedOptionFont_0_flag = AttributeUpdaterFlag.UPDATE
+    selectedOptionFont(value: arkui_component_units_Font | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._selectedOptionFont_0_0value = value
-        } else
-        {
-            this._selectedOptionFont_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     selectedOptionFontColor(value: ResourceColor | undefined): this {
-        if (((this._selectedOptionFontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._selectedOptionFontColor_0_0value = value
-        } else
-        {
-            this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     optionBgColor(value: ResourceColor | undefined): this {
-        if (((this._optionBgColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionBgColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._optionBgColor_0_0value = value
-        } else
-        {
-            this._optionBgColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
-    optionFont(value: Font | undefined): this {
-        if (((this._optionFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionFont_0_flag = AttributeUpdaterFlag.UPDATE
+    optionFont(value: arkui_component_units_Font | undefined): this {
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._optionFont_0_0value = value
-        } else
-        {
-            this._optionFont_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     optionFontColor(value: ResourceColor | undefined): this {
-        if (((this._optionFontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionFontColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._optionFontColor_0_0value = value
-        } else
-        {
-            this._optionFontColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     onSelect(value: OnSelectCallback | undefined): this {
-        if (((this._onSelect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
             this._onSelect_0_0value = value
-        } else
-        {
-            this._onSelect_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     space(value: Length | undefined): this {
-        if (((this._space_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._space_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[11]) == (0)) || (true)) {
+            this._flagArray[11] = 1
             this._space_0_0value = value
-        } else
-        {
-            this._space_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[11] = 3
         }
         return this
     }
     arrowPosition(value: ArrowPosition | undefined): this {
-        if (((this._arrowPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._arrowPosition_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[12]) == (0)) || (true)) {
+            this._flagArray[12] = 1
             this._arrowPosition_0_0value = value
-        } else
-        {
-            this._arrowPosition_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[12] = 3
         }
         return this
     }
     optionWidth(value: Dimension | OptionWidthMode | undefined): this {
-        if (((this._optionWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionWidth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[13]) == (0)) || (true)) {
+            this._flagArray[13] = 1
             this._optionWidth_0_0value = value
-        } else
-        {
-            this._optionWidth_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[13] = 3
         }
         return this
     }
     optionHeight(value: Dimension | undefined): this {
-        if (((this._optionHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionHeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[14]) == (0)) || (true)) {
+            this._flagArray[14] = 1
             this._optionHeight_0_0value = value
-        } else
-        {
-            this._optionHeight_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[14] = 3
         }
         return this
     }
     menuBackgroundColor(value: ResourceColor | undefined): this {
-        if (((this._menuBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
             this._menuBackgroundColor_0_0value = value
-        } else
-        {
-            this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[15] = 3
         }
         return this
     }
     menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        if (((this._menuBackgroundBlurStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[16]) == (0)) || (true)) {
+            this._flagArray[16] = 1
             this._menuBackgroundBlurStyle_0_0value = value
-        } else
-        {
-            this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[16] = 3
         }
         return this
     }
     controlSize(value: ControlSize | undefined): this {
-        if (((this._controlSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._controlSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[17]) == (0)) || (true)) {
+            this._flagArray[17] = 1
             this._controlSize_0_0value = value
-        } else
-        {
-            this._controlSize_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[17] = 3
+        }
+        return this
+    }
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        if (((this._flagArray[18]) == (0)) || (true)) {
+            this._flagArray[18] = 1
+            this._menuItemContentModifier_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[18] = 3
         }
         return this
     }
     divider(value: DividerOptions | null | undefined): this {
-        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[19]) == (0)) || (true)) {
+            this._flagArray[19] = 1
             this._divider_0_0value = value
-        } else
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[19] = 3
         }
         return this
     }
     textModifier(value: TextModifier | undefined): this {
-        if (((this._textModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textModifier_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[20]) == (0)) || (true)) {
+            this._flagArray[20] = 1
             this._textModifier_0_0value = value
-        } else
-        {
-            this._textModifier_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[20] = 3
         }
         return this
     }
     arrowModifier(value: SymbolGlyphModifier | undefined): this {
-        if (((this._arrowModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._arrowModifier_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[21]) == (0)) || (true)) {
+            this._flagArray[21] = 1
             this._arrowModifier_0_0value = value
-        } else
-        {
-            this._arrowModifier_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[21] = 3
         }
         return this
     }
     optionTextModifier(value: TextModifier | undefined): this {
-        if (((this._optionTextModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._optionTextModifier_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[22]) == (0)) || (true)) {
+            this._flagArray[22] = 1
             this._optionTextModifier_0_0value = value
-        } else
-        {
-            this._optionTextModifier_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[22] = 3
         }
         return this
     }
     selectedOptionTextModifier(value: TextModifier | undefined): this {
-        if (((this._selectedOptionTextModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[23]) == (0)) || (true)) {
+            this._flagArray[23] = 1
             this._selectedOptionTextModifier_0_0value = value
-        } else
-        {
-            this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[23] = 3
         }
         return this
     }
     dividerStyle(value: DividerStyleOptions | undefined): this {
-        if (((this._dividerStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._dividerStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[24]) == (0)) || (true)) {
+            this._flagArray[24] = 1
             this._dividerStyle_0_0value = value
-        } else
-        {
-            this._dividerStyle_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[24] = 3
         }
         return this
     }
     avoidance(value: AvoidanceMode | undefined): this {
-        if (((this._avoidance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._avoidance_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[25]) == (0)) || (true)) {
+            this._flagArray[25] = 1
             this._avoidance_0_0value = value
-        } else
-        {
-            this._avoidance_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[25] = 3
         }
         return this
     }
     menuOutline(value: MenuOutlineOptions | undefined): this {
-        if (((this._menuOutline_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._menuOutline_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[26]) == (0)) || (true)) {
+            this._flagArray[26] = 1
             this._menuOutline_0_0value = value
-        } else
-        {
-            this._menuOutline_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    backgroundColor(value: ResourceColor | undefined): this {
-        if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._backgroundColor_0_0value = value
-        } else
-        {
-            this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[26] = 3
         }
         return this
     }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
-        if (((this._menuAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._menuAlign_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[27]) == (0)) || (true) || (true)) {
+            this._flagArray[27] = 1
             this._menuAlign_0_0value = alignType
             this._menuAlign_0_1value = offset
-        } else
-        {
-            this._menuAlign_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[27] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

@@ -16,27 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Resource_serializer } from "./../framework/resource"
-import { MarkStyle_serializer, ResourceColor, MarkStyle } from "./units"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Color, CheckBoxShape } from "./enums"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookCheckboxGroupAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { CheckboxGroupModifier } from "./../CheckboxGroupModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent } from './common'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { MarkStyle_serializer, ResourceColor, Resource as arkui_component_units_Resource, MarkStyle } from './units'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { Color as arkui_component_enums_Color, CheckBoxShape } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookCheckboxGroupAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { CheckboxGroupModifier } from './../CheckboxGroupModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: CheckboxGroupModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCheckboxGroupPeer {
@@ -47,6 +48,7 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCheckboxGroupOptionsAttribute(options?: CheckboxGroupOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -67,7 +69,7 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -83,10 +85,10 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -95,10 +97,10 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -111,10 +113,10 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -123,10 +125,10 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -172,12 +174,12 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     }
 }
 export enum SelectStatus {
-    ALL = 0,
     All = 0,
-    PART = 1,
     Part = 1,
-    NONE = 2,
-    None = 2
+    None = 2,
+    ALL = 0,
+    PART = 1,
+    NONE = 2
 }
 export interface CheckboxGroupOptions {
     group?: string;
@@ -189,73 +191,37 @@ export interface CheckboxGroupResult {
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
     setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        throw new Error("Unimplemented method setCheckboxGroupOptions")
+        throw new Error('Unimplemented method setCheckboxGroupOptions')
     }
     selectAll(value: boolean | Bindable<boolean> | undefined): this {
-        throw new Error("Unimplemented method selectAll")
+        throw new Error('Unimplemented method selectAll')
     }
     selectedColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method selectedColor")
+        throw new Error('Unimplemented method selectedColor')
     }
     unselectedColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method unselectedColor")
+        throw new Error('Unimplemented method unselectedColor')
     }
     mark(value: MarkStyle | undefined): this {
-        throw new Error("Unimplemented method mark")
+        throw new Error('Unimplemented method mark')
     }
     onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onChange")
+        throw new Error('Unimplemented method onChange')
     }
     checkboxShape(value: CheckBoxShape | undefined): this {
-        throw new Error("Unimplemented method checkboxShape")
+        throw new Error('Unimplemented method checkboxShape')
     }
     attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
-    selectAll_value?: boolean | Bindable<boolean> | undefined
-    selectedColor_value?: ResourceColor | undefined
-    unselectedColor_value?: ResourceColor | undefined
-    mark_value?: MarkStyle | undefined
-    onChange_value?: OnCheckboxGroupChangeCallback | undefined
-    checkboxShape_value?: CheckBoxShape | undefined
-    attributeModifier_value?: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined
-    setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        return this
-    }
-    selectAll(value: boolean | Bindable<boolean> | undefined): this {
-        return this
-    }
-    selectedColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    unselectedColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    mark(value: MarkStyle | undefined): this {
-        return this
-    }
-    onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
-        return this
-    }
-    checkboxShape(value: CheckBoxShape | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implements CheckboxGroupAttribute {
     getPeer(): ArkCheckboxGroupPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkCheckboxGroupPeer)
     }
     public setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        if (this.checkPriority("setCheckboxGroupOptions")) {
+        if (this.checkPriority('setCheckboxGroupOptions')) {
             const options_casted = options as (CheckboxGroupOptions | undefined)
             this.getPeer()?.setCheckboxGroupOptionsAttribute(options_casted)
             this.applyOptionsFinish('CheckboxGroupAttribute');
@@ -264,7 +230,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public selectAll(value: boolean | Bindable<boolean> | undefined): this {
-        if (this.checkPriority("selectAll")) {
+        if (this.checkPriority('selectAll')) {
             const value_casted = value as (boolean | Bindable<boolean> | undefined)
             this.getPeer()?.setSelectAllAttribute(value_casted)
             return this
@@ -272,7 +238,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("selectedColor")) {
+        if (this.checkPriority('selectedColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setSelectedColorAttribute(value_casted)
             return this
@@ -280,7 +246,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public unselectedColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("unselectedColor")) {
+        if (this.checkPriority('unselectedColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setUnselectedColorAttribute(value_casted)
             return this
@@ -288,7 +254,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public mark(value: MarkStyle | undefined): this {
-        if (this.checkPriority("mark")) {
+        if (this.checkPriority('mark')) {
             const value_casted = value as (MarkStyle | undefined)
             this.getPeer()?.setMarkAttribute(value_casted)
             return this
@@ -296,7 +262,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
-        if (this.checkPriority("onChange")) {
+        if (this.checkPriority('onChange')) {
             const value_casted = value as (OnCheckboxGroupChangeCallback | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
@@ -304,7 +270,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public checkboxShape(value: CheckBoxShape | undefined): this {
-        if (this.checkPriority("checkboxShape")) {
+        if (this.checkPriority('checkboxShape')) {
             const value_casted = value as (CheckBoxShape | undefined)
             this.getPeer()?.setCheckboxShapeAttribute(value_casted)
             return this
@@ -328,18 +294,16 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
 
 @memo
 export function CheckboxGroupImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: CheckboxGroupAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkCheckboxGroupComponent>((): ArkCheckboxGroupComponent => {
         return new ArkCheckboxGroupComponent()
     })
-    NodeAttach<ArkCheckboxGroupPeer>((): ArkCheckboxGroupPeer => ArkCheckboxGroupPeer.create(receiver), (peer: ArkCheckboxGroupPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkCheckboxGroupPeer>((): ArkCheckboxGroupPeer => ArkCheckboxGroupPeer.create(receiver), (_: ArkCheckboxGroupPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -358,7 +322,7 @@ export class CheckboxGroupOptions_serializer {
     }
     public static read(buffer: DeserializerBase): CheckboxGroupOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const groupTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const groupTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let groupTmpBuf : string | undefined = undefined
         if ((groupTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             groupTmpBuf = (valueDeserializer.readString() as string)

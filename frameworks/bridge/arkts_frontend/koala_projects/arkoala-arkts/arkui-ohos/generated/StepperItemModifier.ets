@@ -16,17 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkStepperItemPeer, ItemState, StepperItemAttribute } from "./component/stepperItem"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkStepperItemPeer, ItemState, StepperItemAttribute } from './component/stepperItem'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class StepperItemModifier extends CommonMethodModifier implements StepperItemAttribute,AttributeModifier<StepperItemAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,79 +42,80 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
     applyFocusedAttribute(instance: StepperItemAttribute): void { }
     applyDisabledAttribute(instance: StepperItemAttribute): void { }
     applySelectedAttribute(instance: StepperItemAttribute): void { }
-    _prevLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _prevLabel_0_0value?: string | undefined
-    _nextLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _nextLabel_0_0value?: string | undefined
-    _status_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _status_0_0value?: ItemState | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _prevLabel_0_0value?: string | undefined
+    public _nextLabel_0_0value?: string | undefined
+    public _status_0_0value?: ItemState | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkStepperItemPeer;
-        if (this._prevLabel_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._prevLabel_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkStepperItemPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setPrevLabelAttribute((this._prevLabel_0_0value as string | undefined));
-                    this._prevLabel_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._prevLabel_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._prevLabel_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setPrevLabelAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._nextLabel_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._nextLabel_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setNextLabelAttribute((this._nextLabel_0_0value as string | undefined));
-                    this._nextLabel_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._nextLabel_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._nextLabel_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setNextLabelAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._status_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._status_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setStatusAttribute((this._status_0_0value as ItemState | undefined));
-                    this._status_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._status_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._status_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setStatusAttribute((undefined as ItemState | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: StepperItemModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._prevLabel_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._prevLabel_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: StepperItemModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.prevLabel(modifier._prevLabel_0_0value);
                     break;
                 }
@@ -117,11 +124,10 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
                 }
             }
         }
-        if (modifier._nextLabel_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._nextLabel_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.nextLabel(modifier._nextLabel_0_0value);
                     break;
                 }
@@ -130,11 +136,10 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
                 }
             }
         }
-        if (modifier._status_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._status_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.status(modifier._status_0_0value);
                     break;
                 }
@@ -145,42 +150,36 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         }
     }
     prevLabel(value: string | undefined): this {
-        if (((this._prevLabel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._prevLabel_0_0value) !== (value)))
-        {
-            this._prevLabel_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._prevLabel_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._prevLabel_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._prevLabel_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     nextLabel(value: string | undefined): this {
-        if (((this._nextLabel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._nextLabel_0_0value) !== (value)))
-        {
-            this._nextLabel_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || ((this._nextLabel_0_0value) !== (value))) {
+            this._flagArray[1] = 1
             this._nextLabel_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._nextLabel_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     status(value: ItemState | undefined): this {
-        if (((this._status_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._status_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._status_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._status_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

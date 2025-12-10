@@ -16,16 +16,15 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { NativeBuffer, KInt, KPointer, KBoolean, KStringPtr } from "@koalaui/interop"
-import { GlobalScope } from "./../framework/GlobalScope"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { int32, int64, float32 } from '@koalaui/common'
+import { NativeBuffer } from '@koalaui/interop'
+import { GlobalScope } from './../framework/GlobalScope'
+import { Callback as ohos_base_Callback } from '@ohos.base'
 export function setAppBgColor(value: string): void {
     GlobalScope.setAppBgColor(value)
 }
 export namespace Profiler {
-    export function registerVsyncCallback(callback_: ((value0: string) => void)): void {
+    export function registerVsyncCallback(callback_: ohos_base_Callback<string>): void {
         GlobalScope.Profiler_registerVsyncCallback(callback_)
     }
     export function unregisterVsyncCallback(): void {

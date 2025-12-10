@@ -16,15 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { default as text } from "@ohos.graphics.text"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { common2D_Color_serializer, common2D_Rect_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
-import { default as common2D } from "@ohos.graphics.common2D"
-import { drawing_FontMetrics_serializer } from "./ohos.graphics.drawing"
-import { default as drawing } from "@ohos.graphics.drawing"
+import { default as text } from '@ohos.graphics.text'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { common2D_Color_serializer, common2D_Rect_serializer, common2D_Point_serializer } from './ohos.graphics.common2D'
+import { default as common2D } from '@ohos.graphics.common2D'
+import { drawing_FontMetrics_serializer } from './ohos.graphics.drawing'
+import { default as drawing } from '@ohos.graphics.drawing'
 export class text_FontFeature_serializer {
     public static write(buffer: SerializerBase, value: text.FontFeature): void {
         let valueSerializer : SerializerBase = buffer
@@ -193,25 +192,25 @@ export class text_Decoration_serializer {
     }
     public static read(buffer: DeserializerBase): text.Decoration {
         let valueDeserializer : DeserializerBase = buffer
-        const textDecorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const textDecorationTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let textDecorationTmpBuf : text.TextDecorationType | undefined = undefined
         if ((textDecorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             textDecorationTmpBuf = text.TextDecorationType.fromValue(valueDeserializer.readInt32())
         }
         const textDecorationTmpResult : text.TextDecorationType | undefined = textDecorationTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let colorTmpBuf : common2D.Color | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
         const colorTmpResult : common2D.Color | undefined = colorTmpBuf
-        const decorationStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const decorationStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let decorationStyleTmpBuf : text.TextDecorationStyle | undefined = undefined
         if ((decorationStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             decorationStyleTmpBuf = text.TextDecorationStyle.fromValue(valueDeserializer.readInt32())
         }
         const decorationStyleTmpResult : text.TextDecorationStyle | undefined = decorationStyleTmpBuf
-        const decorationThicknessScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const decorationThicknessScaleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let decorationThicknessScaleTmpBuf : double | undefined = undefined
         if ((decorationThicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             decorationThicknessScaleTmpBuf = valueDeserializer.readFloat64()
@@ -251,19 +250,19 @@ export class text_TextShadow_serializer {
     }
     public static read(buffer: DeserializerBase): text.TextShadow {
         let valueDeserializer : DeserializerBase = buffer
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let colorTmpBuf : common2D.Color | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
         const colorTmpResult : common2D.Color | undefined = colorTmpBuf
-        const pointTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const pointTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let pointTmpBuf : common2D.Point | undefined = undefined
         if ((pointTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             pointTmpBuf = common2D_Point_serializer.read(valueDeserializer)
         }
         const pointTmpResult : common2D.Point | undefined = pointTmpBuf
-        const blurRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const blurRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let blurRadiusTmpBuf : double | undefined = undefined
         if ((blurRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             blurRadiusTmpBuf = valueDeserializer.readFloat64()
@@ -455,144 +454,144 @@ export class text_TextStyle_serializer {
     }
     public static read(buffer: DeserializerBase): text.TextStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let decorationTmpBuf : text.Decoration | undefined = undefined
         if ((decorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             decorationTmpBuf = text_Decoration_serializer.read(valueDeserializer)
         }
         const decorationTmpResult : text.Decoration | undefined = decorationTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let colorTmpBuf : common2D.Color | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
         const colorTmpResult : common2D.Color | undefined = colorTmpBuf
-        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontWeightTmpBuf : text.FontWeight | undefined = undefined
         if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             fontWeightTmpBuf = text.FontWeight.fromValue(valueDeserializer.readInt32())
         }
         const fontWeightTmpResult : text.FontWeight | undefined = fontWeightTmpBuf
-        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontStyleTmpBuf : text.FontStyle | undefined = undefined
         if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             fontStyleTmpBuf = text.FontStyle.fromValue(valueDeserializer.readInt32())
         }
         const fontStyleTmpResult : text.FontStyle | undefined = fontStyleTmpBuf
-        const baselineTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const baselineTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let baselineTmpBuf : text.TextBaseline | undefined = undefined
         if ((baselineTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             baselineTmpBuf = text.TextBaseline.fromValue(valueDeserializer.readInt32())
         }
         const baselineTmpResult : text.TextBaseline | undefined = baselineTmpBuf
-        const fontFamiliesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontFamiliesTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontFamiliesTmpBuf : Array<string> | undefined = undefined
         if ((fontFamiliesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontFamiliesTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let fontFamiliesTmpBuf_ : Array<string> = new Array<string>(fontFamiliesTmpBuf_Length)
-            for (let fontFamiliesTmpBuf_BufCounterI = 0; fontFamiliesTmpBuf_BufCounterI < fontFamiliesTmpBuf_Length; fontFamiliesTmpBuf_BufCounterI++) {
-                fontFamiliesTmpBuf_[fontFamiliesTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
+            const fontFamiliesTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let fontFamiliesTmpBufOpt : Array<string> = new Array<string>(fontFamiliesTmpBufOptLength)
+            for (let fontFamiliesTmpBufOptBufCounterI = 0; fontFamiliesTmpBufOptBufCounterI < fontFamiliesTmpBufOptLength; fontFamiliesTmpBufOptBufCounterI++) {
+                fontFamiliesTmpBufOpt[fontFamiliesTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
             }
-            fontFamiliesTmpBuf = fontFamiliesTmpBuf_
+            fontFamiliesTmpBuf = fontFamiliesTmpBufOpt
         }
         const fontFamiliesTmpResult : Array<string> | undefined = fontFamiliesTmpBuf
-        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontSizeTmpBuf : double | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             fontSizeTmpBuf = valueDeserializer.readFloat64()
         }
         const fontSizeTmpResult : double | undefined = fontSizeTmpBuf
-        const letterSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const letterSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let letterSpacingTmpBuf : double | undefined = undefined
         if ((letterSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             letterSpacingTmpBuf = valueDeserializer.readFloat64()
         }
         const letterSpacingTmpResult : double | undefined = letterSpacingTmpBuf
-        const wordSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const wordSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let wordSpacingTmpBuf : double | undefined = undefined
         if ((wordSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             wordSpacingTmpBuf = valueDeserializer.readFloat64()
         }
         const wordSpacingTmpResult : double | undefined = wordSpacingTmpBuf
-        const heightScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightScaleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightScaleTmpBuf : double | undefined = undefined
         if ((heightScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             heightScaleTmpBuf = valueDeserializer.readFloat64()
         }
         const heightScaleTmpResult : double | undefined = heightScaleTmpBuf
-        const halfLeadingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const halfLeadingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let halfLeadingTmpBuf : boolean | undefined = undefined
         if ((halfLeadingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             halfLeadingTmpBuf = valueDeserializer.readBoolean()
         }
         const halfLeadingTmpResult : boolean | undefined = halfLeadingTmpBuf
-        const heightOnlyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightOnlyTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightOnlyTmpBuf : boolean | undefined = undefined
         if ((heightOnlyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             heightOnlyTmpBuf = valueDeserializer.readBoolean()
         }
         const heightOnlyTmpResult : boolean | undefined = heightOnlyTmpBuf
-        const ellipsisTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const ellipsisTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let ellipsisTmpBuf : string | undefined = undefined
         if ((ellipsisTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             ellipsisTmpBuf = (valueDeserializer.readString() as string)
         }
         const ellipsisTmpResult : string | undefined = ellipsisTmpBuf
-        const ellipsisModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const ellipsisModeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let ellipsisModeTmpBuf : text.EllipsisMode | undefined = undefined
         if ((ellipsisModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             ellipsisModeTmpBuf = text.EllipsisMode.fromValue(valueDeserializer.readInt32())
         }
         const ellipsisModeTmpResult : text.EllipsisMode | undefined = ellipsisModeTmpBuf
-        const localeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const localeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let localeTmpBuf : string | undefined = undefined
         if ((localeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             localeTmpBuf = (valueDeserializer.readString() as string)
         }
         const localeTmpResult : string | undefined = localeTmpBuf
-        const baselineShiftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const baselineShiftTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let baselineShiftTmpBuf : double | undefined = undefined
         if ((baselineShiftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             baselineShiftTmpBuf = valueDeserializer.readFloat64()
         }
         const baselineShiftTmpResult : double | undefined = baselineShiftTmpBuf
-        const fontFeaturesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontFeaturesTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontFeaturesTmpBuf : Array<text.FontFeature> | undefined = undefined
         if ((fontFeaturesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontFeaturesTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let fontFeaturesTmpBuf_ : Array<text.FontFeature> = new Array<text.FontFeature>(fontFeaturesTmpBuf_Length)
-            for (let fontFeaturesTmpBuf_BufCounterI = 0; fontFeaturesTmpBuf_BufCounterI < fontFeaturesTmpBuf_Length; fontFeaturesTmpBuf_BufCounterI++) {
-                fontFeaturesTmpBuf_[fontFeaturesTmpBuf_BufCounterI] = text_FontFeature_serializer.read(valueDeserializer)
+            const fontFeaturesTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let fontFeaturesTmpBufOpt : Array<text.FontFeature> = new Array<text.FontFeature>(fontFeaturesTmpBufOptLength)
+            for (let fontFeaturesTmpBufOptBufCounterI = 0; fontFeaturesTmpBufOptBufCounterI < fontFeaturesTmpBufOptLength; fontFeaturesTmpBufOptBufCounterI++) {
+                fontFeaturesTmpBufOpt[fontFeaturesTmpBufOptBufCounterI] = text_FontFeature_serializer.read(valueDeserializer)
             }
-            fontFeaturesTmpBuf = fontFeaturesTmpBuf_
+            fontFeaturesTmpBuf = fontFeaturesTmpBufOpt
         }
         const fontFeaturesTmpResult : Array<text.FontFeature> | undefined = fontFeaturesTmpBuf
-        const textShadowsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const textShadowsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let textShadowsTmpBuf : Array<text.TextShadow> | undefined = undefined
         if ((textShadowsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const textShadowsTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let textShadowsTmpBuf_ : Array<text.TextShadow> = new Array<text.TextShadow>(textShadowsTmpBuf_Length)
-            for (let textShadowsTmpBuf_BufCounterI = 0; textShadowsTmpBuf_BufCounterI < textShadowsTmpBuf_Length; textShadowsTmpBuf_BufCounterI++) {
-                textShadowsTmpBuf_[textShadowsTmpBuf_BufCounterI] = text_TextShadow_serializer.read(valueDeserializer)
+            const textShadowsTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let textShadowsTmpBufOpt : Array<text.TextShadow> = new Array<text.TextShadow>(textShadowsTmpBufOptLength)
+            for (let textShadowsTmpBufOptBufCounterI = 0; textShadowsTmpBufOptBufCounterI < textShadowsTmpBufOptLength; textShadowsTmpBufOptBufCounterI++) {
+                textShadowsTmpBufOpt[textShadowsTmpBufOptBufCounterI] = text_TextShadow_serializer.read(valueDeserializer)
             }
-            textShadowsTmpBuf = textShadowsTmpBuf_
+            textShadowsTmpBuf = textShadowsTmpBufOpt
         }
         const textShadowsTmpResult : Array<text.TextShadow> | undefined = textShadowsTmpBuf
-        const backgroundRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundRectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundRectTmpBuf : text.RectStyle | undefined = undefined
         if ((backgroundRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             backgroundRectTmpBuf = text_RectStyle_serializer.read(valueDeserializer)
         }
         const backgroundRectTmpResult : text.RectStyle | undefined = backgroundRectTmpBuf
-        const fontVariationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontVariationsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontVariationsTmpBuf : Array<text.FontVariation> | undefined = undefined
         if ((fontVariationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontVariationsTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let fontVariationsTmpBuf_ : Array<text.FontVariation> = new Array<text.FontVariation>(fontVariationsTmpBuf_Length)
-            for (let fontVariationsTmpBuf_BufCounterI = 0; fontVariationsTmpBuf_BufCounterI < fontVariationsTmpBuf_Length; fontVariationsTmpBuf_BufCounterI++) {
-                fontVariationsTmpBuf_[fontVariationsTmpBuf_BufCounterI] = text_FontVariation_serializer.read(valueDeserializer)
+            const fontVariationsTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let fontVariationsTmpBufOpt : Array<text.FontVariation> = new Array<text.FontVariation>(fontVariationsTmpBufOptLength)
+            for (let fontVariationsTmpBufOptBufCounterI = 0; fontVariationsTmpBufOptBufCounterI < fontVariationsTmpBufOptLength; fontVariationsTmpBufOptBufCounterI++) {
+                fontVariationsTmpBufOpt[fontVariationsTmpBufOptBufCounterI] = text_FontVariation_serializer.read(valueDeserializer)
             }
-            fontVariationsTmpBuf = fontVariationsTmpBuf_
+            fontVariationsTmpBuf = fontVariationsTmpBufOpt
         }
         const fontVariationsTmpResult : Array<text.FontVariation> | undefined = fontVariationsTmpBuf
         let value : text.TextStyle = ({decoration: decorationTmpResult, color: colorTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, baseline: baselineTmpResult, fontFamilies: fontFamiliesTmpResult, fontSize: fontSizeTmpResult, letterSpacing: letterSpacingTmpResult, wordSpacing: wordSpacingTmpResult, heightScale: heightScaleTmpResult, halfLeading: halfLeadingTmpResult, heightOnly: heightOnlyTmpResult, ellipsis: ellipsisTmpResult, ellipsisMode: ellipsisModeTmpResult, locale: localeTmpResult, baselineShift: baselineShiftTmpResult, fontFeatures: fontFeaturesTmpResult, textShadows: textShadowsTmpResult, backgroundRect: backgroundRectTmpResult, fontVariations: fontVariationsTmpResult} as text.TextStyle)
