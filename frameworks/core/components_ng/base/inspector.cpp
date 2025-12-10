@@ -545,11 +545,9 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 } // namespace
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
-std::shared_mutex Inspector::offscreenNodesMutex_;
 
 RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach, bool skipoffscreenNodes)
 {
-    std::shared_lock<std::shared_mutex> lock(offscreenNodesMutex_);
     // 如果查找的目标节点确定是已经挂树的节点，可以跳过offscreenNodes的遍历，避免offscreenNodes过多的情况消耗性能。
     if (!offscreenNodes.empty() && !skipoffscreenNodes) {
         for (auto node : offscreenNodes) {
@@ -861,14 +859,12 @@ void Inspector::HideAllMenus()
 void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    std::unique_lock<std::shared_mutex> lock(offscreenNodesMutex_);
     offscreenNodes.insert(node);
 }
 
 void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    std::unique_lock<std::shared_mutex> lock(offscreenNodesMutex_);
     offscreenNodes.erase(node);
 }
 
@@ -1018,7 +1014,6 @@ void Inspector::GetInspectorChildrenInfo(
 
 void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
 {
-    std::shared_lock<std::shared_mutex> lock(offscreenNodesMutex_);
     for (const auto& item : offscreenNodes) {
         AddInspectorTreeNode(item, nodes);
     }
