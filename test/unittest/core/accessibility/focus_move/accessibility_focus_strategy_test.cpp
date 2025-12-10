@@ -329,7 +329,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor002, TestSize.
 }
 
 /**
- * @tc.name: FindForwardScrollAncestor001
+ * @tc.name: FindForwardScrollAncestor003
  * @tc.desc: UpdateAccessibilityElementInfo
  * @tc.type: FUNC
  */
@@ -350,6 +350,54 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor003, TestSize.
     auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);
+}
+
+
+/**
+ * @tc.name: FindForwardScrollAncestor004
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor004, TestSize.Level1)
+{
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+    AccessibilityFocusStrategy focusStrategy;
+    std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = false, .bypassDescendants = false};
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
+    // 1. no fowardScrollAncestor
+    auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    EXPECT_EQ(targetNodes.size(), 0);
+    // 2. self and parent is fowardScrollAncestor
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [accessibilityPtr = AceType::WeakClaim(AceType::RawPtr(accessibilityProperty))]() {
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    });
+    auto accessibilityProperty1 = frameNode1->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty1, nullptr);
+    accessibilityProperty1->SetSpecificSupportActionCallback(
+        [accessibilityPtr = AceType::WeakClaim(AceType::RawPtr(accessibilityProperty1))]() {
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    });
+
+    result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    ASSERT_EQ(targetNodes.size(), 2);
+    auto targetNode = targetNodes.front();
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(frameNode1->GetAccessibilityId(), targetNode->GetAccessibilityId());
 }
 
 /**

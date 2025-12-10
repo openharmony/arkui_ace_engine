@@ -165,7 +165,8 @@ FocusMoveResult FocusStrategyOsal::ProcessGetScrollAncestor(
     CHECK_NULL_RETURN(checkNode, errorResult);
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
     AccessibilityFocusStrategy strategy;
-    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    auto bypassSelf = param.condition == DetailCondition::CHECK_SELF ? false : true;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = bypassSelf, .bypassDescendants = false};
     if (param.direction == FocusMoveDirection::GET_BACKWARD_SCROLL_ANCESTOR) {
         strategy.FindBackwardScrollAncestor(condition, checkNode, targetNodes);
     } else if (param.direction == FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR) {
