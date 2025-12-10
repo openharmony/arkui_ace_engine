@@ -208,6 +208,8 @@ void JSButton::SetButtonStyle(const JSCallbackInfo& info)
     auto buttonStyleMode = static_cast<ButtonStyleMode>(value);
     if (!JSButtonTheme::ApplyTheme(buttonStyleMode, isLabelButton_)) {
         ButtonModel::GetInstance()->SetButtonStyle(buttonStyleMode);
+    } else {
+        ButtonModel::GetInstance()->SetButtonStyleOnly(buttonStyleMode);
     }
 }
 
@@ -235,6 +237,8 @@ void JSButton::SetRole(const JSCallbackInfo& info)
     auto buttonRole = static_cast<ButtonRole>(value);
     if (!JSButtonTheme::ApplyTheme(buttonRole, isLabelButton_)) {
         ButtonModel::GetInstance()->SetRole(buttonRole);
+    } else {
+        ButtonModel::GetInstance()->SetRoleOnly(buttonRole);
     }
 }
 

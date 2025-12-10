@@ -57,8 +57,10 @@ public:
         const std::optional<Dimension>& radiusBottomEnd) override;
     void ResetBorderRadius() override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
+    void SetButtonStyleOnly(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     void SetRole(const std::optional<ButtonRole>& buttonRole) override;
+    void SetRoleOnly(const std::optional<ButtonRole>& buttonRole) override;
     void SetCreateWithLabel(bool createWithLabel) override;
     void SetMinFontScale(float minFontScale) override;
     void SetMaxFontScale(float maxFontScale) override;
