@@ -4718,5 +4718,21 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_SetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
     }
 ]

@@ -12310,6 +12310,25 @@ class SearchTextDirectionModifier extends ModifierWithKey {
 }
 SearchTextDirectionModifier.identity = Symbol('searchTextDirection');
 
+class SearchSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().search.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+SearchSelectedDragPreviewStyleModifier.identity = Symbol('searchSelectedDragPreviewStyle');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -12624,6 +12643,13 @@ class ArkSearchComponent extends ArkComponent {
   }
   textDirection(value) {
     modifierWithKey(this._modifiersWithKeys, SearchTextDirectionModifier.identity, SearchTextDirectionModifier, value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedDragPreviewStyleModifier.identity,
+      SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }
@@ -15164,6 +15190,25 @@ class TextDirectionModifier extends ModifierWithKey {
 }
 TextDirectionModifier.identity = Symbol('textDirection');
 
+class TextSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().text.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+TextSelectedDragPreviewStyleModifier.identity = Symbol('textSelectedDragPreviewStyle');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15456,6 +15501,13 @@ class ArkTextComponent extends ArkComponent {
   }
   textDirection(value) {
     modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
+        TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }
@@ -16940,6 +16992,25 @@ class TextAreaTextDirectionModifier extends ModifierWithKey {
 }
 TextAreaTextDirectionModifier.identity = Symbol('textAreaTextDirection');
 
+class TextAreaSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().textArea.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+TextAreaSelectedDragPreviewStyleModifier.identity = Symbol('textAreaSelectedDragPreviewStyle');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17352,6 +17423,13 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   textDirection(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaTextDirectionModifier.identity, TextAreaTextDirectionModifier, value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectedDragPreviewStyleModifier.identity,
+      TextAreaSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }
@@ -19048,6 +19126,25 @@ class TextInputTextDirectionModifier extends ModifierWithKey {
 }
 TextInputTextDirectionModifier.identity = Symbol('textInputTextDirection');
 
+class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().textInput.setSelectedDragPreviewStyle(node, this.value.color);
+      }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+TextInputSelectedDragPreviewStyleModifier.identity = Symbol('textInputSelectedDragPreviewStyle');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -19510,6 +19607,13 @@ class ArkTextInputComponent extends ArkComponent {
   }
   textDirection(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputTextDirectionModifier.identity, TextInputTextDirectionModifier, value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectedDragPreviewStyleModifier.identity,
+      TextInputSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }
@@ -21429,6 +21533,15 @@ class ArkNavBackButton {
 
   isEqual(another) {
     return this.icon === another.icon && this.text === another.text;
+  }
+}
+
+class ArkSelectedDragPreviewStyle {
+  constructor() {
+    this.color = undefined;
+  }
+  isEqual(another) {
+    return this.color === another.color;
   }
 }
 

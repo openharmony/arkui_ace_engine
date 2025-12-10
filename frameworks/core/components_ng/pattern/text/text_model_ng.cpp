@@ -1922,4 +1922,32 @@ void TextModelNG::ReSetTextContentAlign(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT, frameNode);
 }
+
+void TextModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color TextModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
 } // namespace OHOS::Ace::NG
