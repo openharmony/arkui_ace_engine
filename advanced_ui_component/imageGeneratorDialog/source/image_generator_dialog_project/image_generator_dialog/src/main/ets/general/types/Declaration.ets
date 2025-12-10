@@ -14,6 +14,6 @@
  */
 
 export enum CanvasMode {
-  COMMON_MODE = 0,
+  GENERAL_MODE = 0,
   DOODLE_MODE = 1
 }

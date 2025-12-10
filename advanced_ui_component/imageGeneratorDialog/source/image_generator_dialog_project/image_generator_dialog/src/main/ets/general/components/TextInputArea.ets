@@ -13,8 +13,25 @@
  * limitations under the License.
  */
 
-export var CanvasMode;
-(function (w8) {
-    w8[w8["GENERAL_MODE"] = 0] = "GENERAL_MODE";
-    w8[w8["DOODLE_MODE"] = 1] = "DOODLE_MODE";
-})(CanvasMode || (CanvasMode = {}));
+@ComponentV2
+export struct TextInputArea {
+  build() {
+    Row() {
+      Column()
+        .height(40)
+        .width(510)
+        .margin({ top: 3, bottom: 2, left: 16, right: 12 })
+        .borderRadius(31.11)
+        .borderWidth(0.5)
+
+      Column()
+        .borderRadius(31.11)
+        .borderWidth(0.5)
+        .height(40)
+        .width(96)
+        .margin({ top: 3, bottom: 2, right: 16 })
+    }
+    .width('100%')
+    .height(45)
+  }
+}

@@ -22,10 +22,9 @@ extern const char _binary_imageGeneratorDialog_abc_start[];
 extern const char _binary_imageGeneratorDialog_abc_end[];
 
 namespace OHOS::Ace::Framework {
-thread_local bool abcInitialized_ = false;
-
 bool ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(int32_t instanceId)
 {
+    thread_local bool abcInitialized_ = false;
     if (abcInitialized_) {
         return true;
     }
@@ -50,6 +49,9 @@ bool ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(int32_t instanceId
 
 bool ImageGeneratorDialogView::Create(int32_t instanceId)
 {
+    if (instanceId == -1) {
+        return false;
+    }
     auto viewStackProcessor = NG::ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(viewStackProcessor, false);
     auto uiNode = viewStackProcessor->GetImageGeneratorDialogNode();
@@ -59,12 +61,7 @@ bool ImageGeneratorDialogView::Create(int32_t instanceId)
     } else {
         return false;
     }
-    RefPtr<NG::PipelineContext> pipeline = nullptr;
-    if (instanceId != -1) {
-        pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
-    } else {
-        pipeline = NG::PipelineContext::GetCurrentContext();
-    }
+    RefPtr<NG::PipelineContext> pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);

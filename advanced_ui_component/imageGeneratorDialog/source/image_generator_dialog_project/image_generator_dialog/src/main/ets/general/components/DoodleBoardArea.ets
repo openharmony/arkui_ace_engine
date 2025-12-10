@@ -13,8 +13,19 @@
  * limitations under the License.
  */
 
-export var CanvasMode;
-(function (w8) {
-    w8[w8["GENERAL_MODE"] = 0] = "GENERAL_MODE";
-    w8[w8["DOODLE_MODE"] = 1] = "DOODLE_MODE";
-})(CanvasMode || (CanvasMode = {}));
+@ComponentV2
+export struct DoodleBoardArea {
+  build() {
+    Column() {
+
+    }
+    .width(386)
+    .height(386)
+    .borderRadius(24)
+    .borderWidth(2)
+    .borderColor('#ffffff')
+    .shadow({
+      radius: 10,
+    })
+  }
+}
