@@ -29,6 +29,23 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int DEFAULT_SELECTED_INDEX = 2;
+const int DEFAULT_INDEX = 3;
+const float DEFAULT_POSITION = 50.0f;
+const float DEFAULT_MAIN_AXIS_LENGTH = 100.0f;
+const int INIT_IS_CALLED = 0;
+const int IS_CALLED_0 = 0;
+const int IS_CALLED_1 = 1;
+const int IS_CALLED_2 = 2;
+const int IS_CALLED_3 = 3;
+const int IS_CALLED_4 = 4;
+const int VALID_INDEX = 1;
+const float VALID_START_POS = -50.0f;
+const float VALID_END_POS = 50.0f;
+const float INVALID_START_POS = 0.0f;
+const float INVALID_END_POS = 0.0f;
+} // namespace
 class TabPatternTestNg : public TabsTestNg {
 public:
     static void SetUpTestSuite();
@@ -679,6 +696,195 @@ HWTEST_F(TabPatternTestNg, ProvideRestoreInfoTest001, TestSize.Level1)
     tabBarPattern->SetIndicator(index);
     auto indexStr = tabsPattern->ProvideRestoreInfo();
     EXPECT_NE(indexStr.c_str(), "{index: 1}");
+}
+
+/**
+ * @tc.name: SetOnContentDidScrollTest001
+ * @tc.desc: test SetOnContentDidScroll with valid and nullptr callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, SetOnContentDidScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init Tabs.
+     */
+    CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set OnContentDidScroll callback and trigger it.
+     * @tc.expected: step2. callback is called successfully.
+     */
+    int isCalled = INIT_IS_CALLED;
+    auto didScrollCallback = [&isCalled](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        isCalled++;
+    };
+    tabsPattern->SetOnContentDidScroll(didScrollCallback);
+    auto event = *swiperPattern->onContentDidScroll_;
+    ASSERT_NE(event, nullptr);
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(isCalled, IS_CALLED_1);
+
+    /**
+     * @tc.steps: step3. set OnContentDidScroll callback to nullptr and trigger it.
+     * @tc.expected: step3. callback is not called.
+     */
+    tabsPattern->SetOnContentDidScroll(nullptr);
+    event = *swiperPattern->onContentDidScroll_;
+    ASSERT_NE(event, nullptr);
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(isCalled, IS_CALLED_1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnContentDidScrollTest002
+ * @tc.desc: test turnPageRateCallback in SetOnContentDidScroll with IsTranslateAnimationRunning and
+ * turnPageRateCallback conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, SetOnContentDidScrollTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init Tabs.
+     */
+    CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set OnContentDidScroll callback and turnPageRateCallback.
+     */
+    int callbackCalled = INIT_IS_CALLED;
+    int turnPageRateCalled = INIT_IS_CALLED;
+    auto didScrollCallback = [&callbackCalled](int32_t selectedIndex, int32_t index, float position,
+                                 float mainAxisLength) { callbackCalled++; };
+    auto turnPageRateCallback = [&turnPageRateCalled](int32_t idx, float rate) { turnPageRateCalled++; };
+    tabsPattern->SetOnContentDidScroll(didScrollCallback);
+    auto swiperController = swiperPattern->swiperController_;
+    ASSERT_NE(swiperController, nullptr);
+    swiperController->SetTurnPageRateCallback(nullptr);
+
+    /**
+     * @tc.steps: step3. IsTranslateAnimationRunning() == false, turnPageRateCallback == nullptr, turnPageRateCallback
+     * should not be called.
+     * @tc.expected: step3. didScrollCallback is called, turnPageRateCallback is not called.
+     */
+    swiperPattern->translateAnimationIsRunning_ = false;
+    swiperPattern->itemPosition_.clear();
+    swiperPattern->itemPosition_[VALID_INDEX] = { VALID_START_POS, VALID_END_POS }; // turnPageRate = 0.5
+    auto event = *swiperPattern->onContentDidScroll_;
+    ASSERT_NE(event, nullptr);
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_1);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_0);
+
+    /**
+     * @tc.steps: step4. IsTranslateAnimationRunning() == true, turnPageRateCallback == nullptr, turnPageRateCallback
+     * should not be called.
+     * @tc.expected: step4. didScrollCallback is called, turnPageRateCallback is not called.
+     */
+    swiperPattern->translateAnimationIsRunning_ = true;
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_2);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_0);
+
+    /**
+     * @tc.steps: step5. IsTranslateAnimationRunning() == true, turnPageRateCallback != nullptr, turnPageRateCallback
+     * should be called.
+     * @tc.expected: step5. didScrollCallback and turnPageRateCallback are both called.
+     */
+    swiperController->SetTurnPageRateCallback(turnPageRateCallback);
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_3);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_1);
+
+    /**
+     * @tc.steps: step6. IsTranslateAnimationRunning() == false, turnPageRateCallback != nullptr,  turnPageRateCallback
+     * should not be called.
+     * @tc.expected: step6. didScrollCallback is called, turnPageRateCallback is not called.
+     */
+    swiperPattern->translateAnimationIsRunning_ = false;
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_4);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnContentDidScrollTest003
+ * @tc.desc: test turnPageRateCallback in SetOnContentDidScroll with turnPageRate conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, SetOnContentDidScrollTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init Tabs.
+     */
+    CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set OnContentDidScroll callback and turnPageRateCallback.
+     */
+    int callbackCalled = INIT_IS_CALLED;
+    int turnPageRateCalled = INIT_IS_CALLED;
+
+    auto didScrollCallback = [&callbackCalled](int32_t selectedIndex, int32_t index, float position,
+                                 float mainAxisLength) { callbackCalled++; };
+    auto turnPageRateCallback = [&turnPageRateCalled](int32_t idx, float rate) { turnPageRateCalled++; };
+    tabsPattern->SetOnContentDidScroll(didScrollCallback);
+    auto swiperController = swiperPattern->swiperController_;
+    ASSERT_NE(swiperController, nullptr);
+    swiperController->SetTurnPageRateCallback(turnPageRateCallback);
+    /**
+     * @tc.steps: step3. turnPageRate = 0.5, turnPageRateCallback should be called.
+     * @tc.expected: step3. didScrollCallback and turnPageRateCallback are both called.
+     */
+    swiperPattern->translateAnimationIsRunning_ = true;
+    swiperPattern->itemPosition_.clear();
+    swiperPattern->itemPosition_[VALID_INDEX] = { VALID_START_POS, VALID_END_POS };
+    auto event = *swiperPattern->onContentDidScroll_;
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_1);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_1);
+
+    /**
+     * @tc.steps: step4. turnPageRate = 0.0, turnPageRateCallback should not be called.
+     * @tc.expected: step4. didScrollCallback is called, turnPageRateCallback is not called.
+     */
+    swiperPattern->itemPosition_.clear();
+    swiperPattern->itemPosition_[VALID_INDEX] = { INVALID_START_POS, INVALID_END_POS };
+    event(DEFAULT_SELECTED_INDEX, DEFAULT_INDEX, DEFAULT_POSITION, DEFAULT_MAIN_AXIS_LENGTH);
+    EXPECT_EQ(callbackCalled, IS_CALLED_2);
+    EXPECT_EQ(turnPageRateCalled, IS_CALLED_1);
+    CreateDone();
 }
 
 /**
