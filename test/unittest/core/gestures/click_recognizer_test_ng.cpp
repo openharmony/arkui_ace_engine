@@ -1016,4 +1016,17 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEventTest001, TestSi
     EXPECT_EQ(clickRecognizer->equalsToFingers_, true);
 }
 
+/**
+ * @tc.name: Dump001
+ * @tc.desc: Test ClickRecognizer function: Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, Dump001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->SetDistanceThreshold(20.0);
+    auto snapshot = clickRecognizer->Dump();
+    EXPECT_NE(snapshot, nullptr);
+    EXPECT_EQ(snapshot->customInfo, "count: 2, fingers: 5, distanceThreshold: 20, userDT: inf, allowedTypes: [all]");
+}
 } // namespace OHOS::Ace::NG
