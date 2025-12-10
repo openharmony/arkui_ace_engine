@@ -191,9 +191,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
-        CHECK_RETHROW_ERROR(env, nullptr);
-        ani_fixedarray_byte result = nullptr;
-        ani_boolean errorExist;
+        CHECK_RETHROW_ERROR(env, nullptr); ani_fixedarray_byte result = nullptr; ani_boolean errorExist;
         env->ExistUnhandledError(&errorExist);
         if (!errorExist) {
             CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
