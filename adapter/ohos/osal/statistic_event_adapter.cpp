@@ -33,7 +33,7 @@ void StatisticEventAdapter::ReportStatisticEvents(
     }
     Ace::UIServiceMgrClientIdl::GetInstance()->ReportStatisticEvents(appInfoParcel, eventParcelList);
 #else
-    TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "ui serivce not implement");
+    TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "ui service not implement");
 #endif
 }
 } // namespace OHOS::Ace
