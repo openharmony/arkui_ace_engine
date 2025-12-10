@@ -29369,6 +29369,7 @@ typedef struct GENERATED_ArkUITextMenuItemIdAccessor {
     Ark_TextMenuItemId (*getSEARCH)();
     Ark_TextMenuItemId (*getSHARE)();
     Ark_TextMenuItemId (*getAutoFill)();
+    Ark_TextMenuItemId (*getPasswordVault)();
 } GENERATED_ArkUITextMenuItemIdAccessor;
 
 typedef struct GENERATED_ArkUITextPickerDialogAccessor {

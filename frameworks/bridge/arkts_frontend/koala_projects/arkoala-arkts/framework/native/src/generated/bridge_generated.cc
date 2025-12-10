@@ -38134,6 +38134,10 @@ Ark_NativePointer impl_TextMenuItemId_getAutoFill() {
         return GetAccessors()->getTextMenuItemIdAccessor()->getAutoFill();
 }
 KOALA_INTEROP_DIRECT_0(TextMenuItemId_getAutoFill, Ark_NativePointer)
+Ark_NativePointer impl_TextMenuItemId_getPasswordVault() {
+        return GetAccessors()->getTextMenuItemIdAccessor()->getPasswordVault();
+}
+KOALA_INTEROP_DIRECT_0(TextMenuItemId_getPasswordVault, Ark_NativePointer)
 Ark_NativePointer impl_TextPickerDialog_construct() {
         return GetAccessors()->getTextPickerDialogAccessor()->construct();
 }

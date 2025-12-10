@@ -65,6 +65,7 @@ public:
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
+            theme->textRightClickMenuEndIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -421,6 +422,11 @@ public:
         return stackExpandIconId_;
     }
 
+    uint32_t GetTextRightClickMenuEndIconId() const
+    {
+        return textRightClickMenuEndIconId_;
+    }
+
     Color GetMenuOutlineColor() const
     {
         return menuOutlineColor_;
@@ -485,6 +491,7 @@ private:
     std::string menuHapticFeedback_;
     uint32_t embeddedExpandIconId_ = 0;
     uint32_t stackExpandIconId_ = 0;
+    uint32_t textRightClickMenuEndIconId_ = 0;
     Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
 };
 

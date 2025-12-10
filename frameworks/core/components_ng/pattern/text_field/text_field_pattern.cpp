@@ -2064,6 +2064,11 @@ bool TextFieldPattern::IsShowSearch()
 
 bool TextFieldPattern::IsShowAutoFill()
 {
+    auto container = Container::Current();
+    if (container && container->IsSceneBoardWindow()) {
+        return false;
+    }
+
     return SystemProperties::IsAutoFillSupport();
 }
 
@@ -3255,7 +3260,7 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool ignoreFillType, bool 
     };
     if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
         auto autoFillController = GetOrCreateAutoFillController();
-        if (autoFillController) {
+        if (autoFillController && IsSelected()) {
             autoFillController->UpdateAutoFillInsertInfo(selectController_->GetStartIndex(),
                 selectController_->GetEndIndex(), AutoFillInsertStatus::PENDING);
         }

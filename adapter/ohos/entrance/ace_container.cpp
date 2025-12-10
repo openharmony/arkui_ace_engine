@@ -1755,7 +1755,10 @@ public:
             return;
         }
         auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
+        if (!node) {
+            TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "requesting node is nullptr.");
+            return;
+        }
         taskExecutor->PostTask(
             [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {

@@ -2453,6 +2453,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_AUTO_FILL');
   }
 
+  static get passwordVault() {
+    return new TextMenuItemId('OH_DEFAULT_PASSWORD_VAULT');
+  }
+
   static get TRANSLATE() {
     return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }

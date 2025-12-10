@@ -1322,6 +1322,10 @@ bool MenuItemPattern::OnClick()
     }
     auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
+    auto jsAction = hub->GetSelectOverlayMenuOnClick();
+    if (jsAction) {
+        jsAction();
+    }
     auto onChange = hub->GetOnChange();
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
     SetChange();
