@@ -67,11 +67,6 @@ public:
     CustomPaintPaintMethod();
     ~CustomPaintPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
-    {
-        return contentModifier_;
-    }
-
     void SetFillRuleForPath(const CanvasFillRule& rule);
     void SetFillRuleForPath2D(const CanvasFillRule& rule);
 
@@ -102,7 +97,6 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     void SetTransform(const TransformParam& param);
-    virtual TransformParam GetTransform() const;
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
@@ -197,16 +191,6 @@ public:
         state_.strokeState.SetMiterLimit(limit);
     }
 
-    virtual LineDashParam GetLineDash() const
-    {
-        return lineDash_;
-    }
-
-    void SetLineDashParam(const std::vector<double>& segments)
-    {
-        lineDash_.lineDash = segments;
-    }
-
     void SetLineDash(const std::vector<double>& segments)
     {
         state_.strokeState.SetLineDash(segments);
@@ -290,15 +274,6 @@ public:
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void SaveProperties();
-    void RestoreProperties();
-    void ResetTransformMatrix();
-    void ResetLineDash();
-    void RotateMatrix(double angle);
-    void ScaleMatrix(double x, double y);
-    void SetTransformMatrix(const TransformParam& param);
-    void TransformMatrix(const TransformParam& param);
-    void TranslateMatrix(double tx, double ty);
     void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit);
     void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
@@ -394,14 +369,10 @@ protected:
     PaintHolder state_;
     RSBrush imageBrush_;
     RSColorMatrix colorMatrix_;
-    LineDashParam lineDash_;
 
-    RSMatrix matrix_;
     RSPath rsPath_;
     RSPath rsPath2d_;
     std::vector<PaintHolder> saveStates_;
-    std::vector<RSMatrix> matrixStates_;
-    std::vector<LineDashParam> lineDashStates_;
     std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
     std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
 
@@ -414,7 +385,6 @@ protected:
 
     std::unique_ptr<RSParagraph> paragraph_;
     std::unique_ptr<RSParagraph> shadowParagraph_;
-    RefPtr<CanvasModifier> contentModifier_;
     RefPtr<ImageCache> imageCache_;
     SizeF lastLayoutSize_;
     double density_ = 1.0;
