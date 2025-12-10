@@ -2254,7 +2254,10 @@ std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, Dime
     } else if (type == ResourceType::STRING) {
         std::optional<std::string> optStr = converter.ToString();
         if (optStr.has_value()) {
-            dimension = ConvertFromString(optStr.value(), defaultUnit);
+            Dimension value;
+            if (ConvertFromString(optStr.value(), defaultUnit, value)) {
+                dimension = value;
+            }
         }
     } else if (type == ResourceType::INTEGER) {
         std::optional<int32_t> intValue = converter.ToInt();
