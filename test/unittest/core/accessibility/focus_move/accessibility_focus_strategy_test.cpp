@@ -72,6 +72,11 @@ public:
         }
         return mockCanFocus_;
     }
+    bool IsRootType(const std::shared_ptr<FocusRulesCheckNode>& currentNode) override
+    {
+        return false;
+    }
+
     bool mockCanFocusId_ = -1;
     bool mockCanFocus_ = false;
 };
@@ -143,6 +148,9 @@ public:
 
     std::shared_ptr<FocusRulesCheckNode> GetAceParent() override
     {
+        if (mockParentNode_) {
+            return mockParentNode_;
+        }
         return nullptr;
     }
 
@@ -180,11 +188,13 @@ public:
 
     bool IsEmbededTarget() override
     {
-        return false;
+        return mockIsEmbededTarget_;
     }
     std::set<std::string> mockValueArray_;
     std::shared_ptr<FocusRulesCheckNode> mockNextNode_;
+    std::shared_ptr<FocusRulesCheckNode> mockParentNode_;
     bool mockChildTreeContainer = false;
+    bool mockIsEmbededTarget_ = false;
 private:
 };
 } // namespace
@@ -797,6 +807,31 @@ HWTEST_F(AccessibilityFocusStrategyTest, CheckParentEarlyStopTest001, TestSize.L
     parentNode2->mockValueArray_.insert("scrollBackward");
     result = focusStrategy.CheckParentEarlyStop(parentNode2, targetNode);
     ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL_IN_SCROLL);
+}
+
+/**
+ * @tc.name: FindPrevReadableNodeToHigherLevel001
+ * @tc.desc: Test the method CheckParentEarlyStop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindPrevReadableNodeToHigherLevel001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::shared_ptr<MockFocusRulesCheckNode> parentNode = std::make_shared<MockFocusRulesCheckNode>(0);
+    std::shared_ptr<MockFocusRulesCheckNode> currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition;
+    ASSERT_NE(currentNode, nullptr);
+    currentNode->mockParentNode_ = parentNode;
+    // no focusable, need return FIND_FAIL
+    auto result = focusStrategy.FindPrevReadableNodeToHigherLevel(currentNode, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    // parent is embeded, need return FIND_EMBED_TARGET
+    std::shared_ptr<MockFocusRulesCheckNode> parentNode1 = std::make_shared<MockFocusRulesCheckNode>(2);
+    parentNode1->mockIsEmbededTarget_ = true;
+    currentNode->mockParentNode_ = parentNode1;
+    result = focusStrategy.FindPrevReadableNodeToHigherLevel(currentNode, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_EMBED_TARGET);
 }
 
 /**
