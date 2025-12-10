@@ -55,7 +55,7 @@ export class ArkThemeNativeHelper {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
         // const thisSerializer : Serializer = Serializer.hold();
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
         const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
         ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus);
 
