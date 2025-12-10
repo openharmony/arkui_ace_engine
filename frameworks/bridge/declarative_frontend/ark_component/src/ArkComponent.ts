@@ -455,7 +455,7 @@ class BorderRadiusModifier extends ModifierWithKey<ArkBorderRadiusOpts | undefin
       if (isNumber(this.value.value) || isString(this.value.value) || isResource(this.value.value)) {
         getUINativeModule().common.setBorderRadius(node, this.value.value, this.value.value, this.value.value, this.value.value, this.value.type);
       } else {
-        if (isUndefined(this.value.value)) {
+        if (isUndefined(this.value.value) || isNull(this.value.value)) {
           getUINativeModule().common.setBorderRadius(node, undefined, undefined, undefined, undefined, this.value.type);
           return;
         }
@@ -482,8 +482,17 @@ class BorderRadiusModifier extends ModifierWithKey<ArkBorderRadiusOpts | undefin
   }
 
   checkObjectDiff(): boolean {
+    if (isNull(this.value.value)) {
+      return !isNull(this.stageValue.value);
+    }
+    if (isNull(this.stageValue.value)) {
+      return !isNull(this.value.value);
+    }
     if (isUndefined(this.value.value)) {
-      return this.stageValue.value !== undefined;
+      return !isUndefined(this.stageValue.value);
+    }
+    if (isUndefined(this.stageValue.value)) {
+      return !isUndefined(this.value.value);
     }
     if (!isResource(this.stageValue.value) && !isResource(this.value.value)) {
       if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
