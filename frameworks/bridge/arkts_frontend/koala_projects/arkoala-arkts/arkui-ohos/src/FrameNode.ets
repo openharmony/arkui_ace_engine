@@ -474,28 +474,30 @@ export class FrameNode implements MaterializedBase {
     public getLayoutPosition(): NodePosition {
         return FrameNodeExtender.getLayoutPosition(this);
     }
-   public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigBorderWidth()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics };
+    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
+        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth_serialize(this);
+        return {
+            top: borderWidth.top, left: borderWidth.left,
+            bottom: borderWidth.bottom, right: borderWidth.right
+        };
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigPadding()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let padding = FrameNodeExtender.getUserConfigPadding_serialize(this)
+        return {
+            top: padding.top, left: padding.left,
+            bottom: padding.bottom, right: padding.right
+        }
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigMargin()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let margin = FrameNodeExtender.getUserConfigMargin_serialize(this)
+        return {
+            top: margin.top, left: margin.left,
+            bottom: margin.bottom, right: margin.right
+        }
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigSize()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { width: lengthMetrics, height: lengthMetrics }
+        let size = FrameNodeExtender.getUserConfigSize_serialize(this)
+        return { width: size.width, height: size.height }
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
@@ -563,12 +565,12 @@ export class FrameNode implements MaterializedBase {
         let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
         const error = Error(errorMessage);
         if (!this.isModifiable()) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
         let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
         let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting);
         if (!isSupport) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
     }
     public getCrossLanguageOptions(): CrossLanguageOptions {
