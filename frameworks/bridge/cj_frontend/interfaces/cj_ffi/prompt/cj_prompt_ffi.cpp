@@ -181,10 +181,7 @@ int32_t CalculateToastAlignment(int32_t alignment, const std::string& bottom)
     if (bottom.empty()) {
         return alignment;
     }
-    double value = 0.0;
-    if (!StringUtils::StringToDouble(bottom, value)) {
-        return alignment;
-    }
+    double value = StringUtils::StringToDouble(bottom);
     constexpr double EPSILON = 1e-9;
     if (std::abs(value) < EPSILON) {
         return alignment;
