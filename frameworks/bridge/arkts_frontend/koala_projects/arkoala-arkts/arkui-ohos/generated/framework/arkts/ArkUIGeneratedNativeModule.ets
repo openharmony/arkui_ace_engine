@@ -759,6 +759,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DatePickerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DatePickerAttribute_setCanLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Divider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _DividerInterface_setDividerOptions(ptr: KPointer): void
@@ -992,6 +994,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ImageAttribute_setRenderMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setDynamicRangeMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ImageAttribute_setHdrBrightness(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setInterpolation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2771,6 +2775,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextPickerAttribute_setDigitalCrownSensitivity(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _TextPickerAttribute_setSelectedBackgroundStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _TextTimer_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _TextTimerInterface_setTextTimerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4195,7 +4201,7 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_removeChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNodeExtender_clearChildren(peer: KPointer): void
-    native static _FrameNodeExtender_getChild(peer: KPointer, index: number, expandMode: number): KPointer
+    native static _FrameNodeExtender_getChild(peer: KPointer, index: KInt, expandMode: number): KPointer
     native static _FrameNodeExtender_getFirstChild(peer: KPointer): KPointer
     native static _FrameNodeExtender_getNextSibling(peer: KPointer): KPointer
     native static _FrameNodeExtender_getPreviousSibling(peer: KPointer): KPointer
@@ -4219,8 +4225,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_getUniqueId(peer: KPointer): int32
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getNodeType(peer: KPointer): string
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getOpacity(peer: KPointer): number
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getOpacity(peer: KPointer): double
     @ani.unsafe.Direct
     native static _FrameNodeExtender_isVisible(peer: KPointer): boolean
     @ani.unsafe.Direct
@@ -4268,11 +4274,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getIdByFrameNode(node: KPointer): number
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_moveTo(peer: KPointer, targetParent: KPointer, index: number): int32
+    native static _FrameNodeExtender_moveTo(peer: KPointer, targetParent: KPointer, index: KInt): int32
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getFirstChildIndexWithoutExpand(peer: KPointer): number
+    native static _FrameNodeExtender_getFirstChildIndexWithoutExpand(peer: KPointer): int32
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getLastChildIndexWithoutExpand(peer: KPointer): number
+    native static _FrameNodeExtender_getLastChildIndexWithoutExpand(peer: KPointer): int32
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getAttachedFrameNodeById(id: KStringPtr): KPointer
     @ani.unsafe.Direct
@@ -4588,7 +4594,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
-    native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
+    native static _IUIContext_freezeUINode1(id: KInt, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _IUIContext_dispatchKeyEvent(thisArray: KSerializerBuffer, thisLength: int32, event: KPointer): boolean
     native static _IUIContext_openBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -5366,11 +5372,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_destroyPeer(peer: KPointer): void
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_setBackgroundColor(peer: KPointer, backgroundColor: number): void
+    native static _RenderNodeExtender_setBackgroundColor(peer: KPointer, backgroundColor: KInt): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setClipToFrame(peer: KPointer, clipToFrame: KInt): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setOpacity(peer: KPointer, opacity: number): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setOpacity(peer: KPointer, opacity: KDouble): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setSize(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
     @ani.unsafe.Direct
@@ -5386,17 +5392,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setTransform(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowColor(peer: KPointer, shadowColor: number): void
+    native static _RenderNodeExtender_setShadowColor(peer: KPointer, shadowColor: KInt): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setShadowOffset(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
     @ani.unsafe.Quick
     native static _RenderNodeExtender_setLabel(peer: KPointer, label: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowAlpha(peer: KPointer, shadowAlpha: number): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowElevation(peer: KPointer, shadowElevation: number): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowRadius(peer: KPointer, shadowRadius: number): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowAlpha(peer: KPointer, shadowAlpha: KDouble): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowElevation(peer: KPointer, shadowElevation: KDouble): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowRadius(peer: KPointer, shadowRadius: KDouble): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setBorderStyle(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5810,7 +5816,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SystemOps_resourceManagerReset(): void
     @ani.unsafe.Direct
-    native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: number): void
+    native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: KLong): void
     @ani.unsafe.Quick
     native static _SystemOps_colorMetricsResourceColor(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Quick

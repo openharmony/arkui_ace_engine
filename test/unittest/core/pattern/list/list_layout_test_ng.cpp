@@ -2047,6 +2047,205 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyListItemFocused001
+ * @tc.desc: Test list layout with NotifyListItemFocused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NotifyListItemFocused001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
+    UpdateContentModifier();
+    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    auto dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 4);
+
+    auto listItemNode = GetChildFrameNode(frameNode_, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto focusHub = listItemNode->GetFocusHub();
+
+    focusHub->OnPaintFocusState(true);
+    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
+    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    for (auto child : listPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+    UpdateContentModifier();
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 3);
+
+    focusHub->OnPaintFocusState(false);
+    paint = pattern_->CreateNodePaintMethod();
+    listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    for (auto child : listPaint->itemPosition_) {
+        EXPECT_FALSE(child.second.isPressed);
+    }
+    UpdateContentModifier();
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 4);
+}
+
+/**
+ * @tc.name: NotifyListItemFocused002
+ * @tc.desc: Test listItemGroup layout with PostListItemPressStyleTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NotifyListItemFocused002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
+    auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto focusHub = listItemNode->GetFocusHub();
+    focusHub->OnPaintFocusState(true);
+    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
+    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto child : groupPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+
+    focusHub->OnPaintFocusState(false);
+    paint = groupPattern->CreateNodePaintMethod();
+    groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto child : groupPaint->itemPosition_) {
+        EXPECT_FALSE(child.second.isPressed);
+    }
+}
+
+/**
+ * @tc.name: NotifyListItemHovered
+ * @tc.desc: Test list layout with NotifyListItemHovered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NotifyListItemHovered001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
+    UpdateContentModifier();
+    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    auto dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 4);
+
+    auto listItemNode = GetChildFrameNode(frameNode_, 0);
+    auto listItemNodeId = listItemNode->GetId();
+
+    listItemNode->OnHoverWithHightLight(true);
+    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
+    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    for (auto child : listPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+    UpdateContentModifier();
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 3);
+
+    listItemNode->OnHoverWithHightLight(false);
+    paint = pattern_->CreateNodePaintMethod();
+    listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    for (auto child : listPaint->itemPosition_) {
+        EXPECT_FALSE(child.second.isPressed);
+    }
+    UpdateContentModifier();
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 4);
+}
+
+/**
+ * @tc.name: NotifyListItemHovered002
+ * @tc.desc: Test listItemGroup layout with NotifyListItemHovered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NotifyListItemHovered002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
+    auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
+    auto listItemNodeId = listItemNode->GetId();
+
+    listItemNode->OnHoverWithHightLight(true);
+    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
+    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto child : groupPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+
+    listItemNode->OnHoverWithHightLight(false);
+    paint = groupPattern->CreateNodePaintMethod();
+    groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto child : groupPaint->itemPosition_) {
+        EXPECT_FALSE(child.second.isPressed);
+    }
+}
+
+/**
  * @tc.name: ChildrenMainSize005
  * @tc.desc: Test childrenMainSize layout
  * @tc.type: FUNC

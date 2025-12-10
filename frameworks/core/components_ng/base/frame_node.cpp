@@ -3928,7 +3928,15 @@ void FrameNode::AnimateHoverEffect(bool isHovered) const
         renderContext->AnimateHoverEffectScale(isHovered);
     } else if (animationType == HoverEffectType::BOARD) {
         renderContext->AnimateHoverEffectBoard(isHovered);
+        OnHoverWithHightLight(isHovered);
     }
+}
+
+void FrameNode::OnHoverWithHightLight(bool isHover) const
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnHoverWithHightLight(isHover);
 }
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()

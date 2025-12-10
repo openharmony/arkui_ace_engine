@@ -1716,34 +1716,43 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
 
 /**
  * @tc.name: ClickJudge007
- * @tc.desc: Test ClickJudge with selfAdjust
+ * @tc.desc: Test ClickJudge with UpdatePaintRect
  * @tc.type: FUNC
  */
 HWTEST_F(ListSwipeTestNg, ClickJudge007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create list and set swipeItems
+     * @tc.steps: step1. Create list and swipeItem
      */
-    ListModelNG model = CreateList();
+    auto listModelNG = CreateList();
     auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
-    CreateSwipeItems(nullptr, endFunc, V2::SwipeEdgeEffect::None, 20);
+    CreateSwipeItem(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     CreateSwipeDone();
 
     /**
-     * @tc.steps: step2. Set selfAdjust
+     * @tc.steps: step2. Expand endNode
+     * @tc.expected: return true
      */
-    item_->GetGeometryNode()->SetSelfAdjust(RectF(0, 100.f, 0, 0));
+    EXPECT_TRUE(DragSwiperItem(item_, -END_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_END));
 
     /**
-     * @tc.steps: step3. Expand endNode
+     * @tc.steps: step3. Update PaintRect
+     */
+    auto renderContext = item_->GetRenderContext();
+    ASSERT_NE(renderContext, false);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    renderContext->UpdatePaintRect(RectF(rect.GetX(), rect.GetY() + 100.f, rect.Width(), rect.Height()));
+
+    /**
+     * @tc.steps: step4. Click listItem
      * @tc.expected: Click not at endNode would return true
      */
-    auto selfAdjust = item_->GetGeometryNode()->GetSelfAdjust();
-    EXPECT_EQ(selfAdjust.GetY(), 100.f);
-    EXPECT_TRUE(DragSwiperItem(item_, -END_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_END));
-    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f + selfAdjust.GetY())));
-    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(WIDTH - 10.f, 10.f + selfAdjust.GetY())));
-    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(WIDTH + 10.f, 10.f + selfAdjust.GetY())));
+    rect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = rect.GetOffset();
+    EXPECT_EQ(offset.GetY(), 100.f);
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f + offset.GetY())));
+    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(WIDTH - 10.f, 10.f + offset.GetY())));
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(WIDTH + 10.f, 10.f + offset.GetY())));
 }
 
 /**

@@ -264,17 +264,45 @@ void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src)
     }
 }
 
-void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src)
+void AssignArkValue(Ark_GestureControl_GestureType& dst, const GestureTypeName& src)
 {
     switch (src) {
-        case GestureTypeName::TAP_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE; break;
-        case GestureTypeName::LONG_PRESS_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE; break;
-        case GestureTypeName::PAN_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE; break;
-        case GestureTypeName::PINCH_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE; break;
-        case GestureTypeName::SWIPE_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE; break;
-        case GestureTypeName::ROTATION_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE; break;
-        case GestureTypeName::DRAG: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG; break;
-        case GestureTypeName::CLICK: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK; break;
+        case GestureTypeName::TAP_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE;
+            break;
+        case GestureTypeName::LONG_PRESS_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE;
+            break;
+        case GestureTypeName::PAN_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE;
+            break;
+        case GestureTypeName::PINCH_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE;
+            break;
+        case GestureTypeName::SWIPE_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE;
+            break;
+        case GestureTypeName::ROTATION_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE;
+            break;
+        case GestureTypeName::DRAG:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG;
+            break;
+        case GestureTypeName::CLICK:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK;
+            break;
+        case GestureTypeName::BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_BOX_SELECT_GESTURE;
+            break;
+        case GestureTypeName::WEBSCROLL:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_WEB_SCROLL_GESTURE;
+            break;
+        case GestureTypeName::TEXTFIELD_BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TEXT_FIELD_SELECT_GESTURE;
+            break;
+        case GestureTypeName::CONTEXT_MENU_HOVER:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CONTEXT_MENU_HOVER_GESTURE;
+            break;
         default:
             LOGE("Unexpected enum value in GestureTypeName: %{public}d", src);
             dst = static_cast<Ark_GestureControl_GestureType>(-1);

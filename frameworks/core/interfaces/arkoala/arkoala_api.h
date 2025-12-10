@@ -2505,6 +2505,10 @@ struct ArkUITextLineMetrics {
     ArkUIFontMetrics firstCharMetrics;
 };
 
+struct ArkUISelectedDragPreviewStyle {
+    ArkUI_Uint32 color;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -3134,6 +3138,8 @@ struct ArkUICommonModifier {
     void (*setBorderRadiusType)(ArkUINodeHandle node, ArkUI_Int32 type);
     void (*resetBorderRadiusType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBorderRadiusType)(ArkUINodeHandle node);
+    void (*setMaterialFilter)(ArkUINodeHandle node, void* filter);
+    void (*resetMaterialFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -3472,6 +3478,9 @@ struct ArkUITextModifier {
     void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
     void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
+    void (*setTextSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -4311,6 +4320,8 @@ struct ArkUIGridModifier {
     void (*resetItemFillPolicy)(ArkUINodeHandle node);
     void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     ArkUI_Int32 (*getItemFillPolicy)(ArkUINodeHandle node);
+    void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool support);
+    ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -5249,6 +5260,9 @@ struct ArkUITextAreaModifier {
     void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
     void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5509,6 +5523,9 @@ struct ArkUITextInputModifier {
     void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
     void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getFallbackLineSpacing)(ArkUINodeHandle node);
+    void (*setTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -6610,6 +6627,9 @@ struct ArkUISearchModifier {
     void (*resetIncludeFontPadding)(ArkUINodeHandle node);
     void (*setFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing);
     void (*resetFallbackLineSpacing)(ArkUINodeHandle node);
+    void (*setSearchSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetSearchSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getSearchSelectedDragPreviewStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

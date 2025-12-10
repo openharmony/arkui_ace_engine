@@ -97,7 +97,7 @@ public:
     }
 
     void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
-        const std::set<int32_t>& pressedItem, bool showCached, bool clip)
+        const std::map<int32_t, uint32_t>& pressedItem, bool showCached, bool clip)
     {
         itemPosition_ = positionMap;
         if (showCached || clip) {

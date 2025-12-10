@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
@@ -610,7 +609,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(2, params);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();

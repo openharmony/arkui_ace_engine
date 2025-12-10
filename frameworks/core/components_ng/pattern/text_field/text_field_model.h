@@ -446,6 +446,8 @@ public:
     virtual void ResetTextDirection() {}
     virtual void SetIncludeFontPadding(bool enabled) {};
     virtual void SetFallbackLineSpacing(bool enabled) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

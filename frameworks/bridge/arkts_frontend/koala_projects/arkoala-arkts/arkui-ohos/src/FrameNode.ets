@@ -343,13 +343,12 @@ export class FrameNode implements MaterializedBase {
         }
         return node;
     }
-    public getChild(index: number, expandMode?: ExpandMode | undefined): FrameNode | null {
-        const index_casted = index as (number);
+    public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
         }
-        const retval = FrameNodeExtender.getChild(this, index_casted, expand_casted);
+        const retval = FrameNodeExtender.getChild(this, index, expand_casted);
         if (retval !== nullptr) {
             let child = extractors.fromFrameNodePtr(retval);
             const nodeId = FrameNodeExtender.getIdByFrameNode(toPeerPtr(child));
@@ -428,7 +427,7 @@ export class FrameNode implements MaterializedBase {
         }
         return null;
     }
-    public getChildrenCount(): number {
+    public getChildrenCount(): int {
         return FrameNodeExtender.getChildrenCount(this);
     }
     public dispose(): void {
@@ -443,7 +442,7 @@ export class FrameNode implements MaterializedBase {
             this.peer?.close();
         }
     }
-    public getOpacity(): number {
+    public getOpacity(): double {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
@@ -641,11 +640,11 @@ export class FrameNode implements MaterializedBase {
         const node_casted = node as (FrameNode);
         return FrameNodeExtender.getIdByFrameNode(toPeerPtr(node_casted));
     }
-    public moveTo(targetParent: FrameNode, index?: number): void {
+    public moveTo(targetParent: FrameNode, index?: int): void {
         if (targetParent === undefined || targetParent === null) {
             return;
         }
-        let index_casted: number = -1;
+        let index_casted: int = -1;
         if (index !== undefined && index !== null) {
             index_casted = index;
         }
@@ -663,10 +662,10 @@ export class FrameNode implements MaterializedBase {
         return;
     }
 
-    public getFirstChildIndexWithoutExpand(): number {
+    public getFirstChildIndexWithoutExpand(): int {
         return FrameNodeExtender.getFirstChildIndexWithoutExpand(this);
     }
-    public getLastChildIndexWithoutExpand(): number {
+    public getLastChildIndexWithoutExpand(): int {
         return FrameNodeExtender.getLastChildIndexWithoutExpand(this);
     }
     public reuse(): void {
@@ -795,7 +794,7 @@ export class ProxyFrameNode extends ImmutableFrameNode {
     getType(): string {
         return 'ProxyFrameNode';
     }
-    moveTo(targetParent: FrameNode, index?: number): void {
+    moveTo(targetParent: FrameNode, index?: int): void {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
@@ -1884,18 +1883,18 @@ class NodeAdapterFinalizable extends Finalizable {
 export class NodeAdapter implements MaterializedBase {
     private peer?: Finalizable | undefined = undefined;
     private attachedNodeRef_?: WeakRef<FrameNode>;
-    private count_: number = 0;
+    private count_: int = 0;
     private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
 
-    onDisposeChild(index: number, node: FrameNode) {
+    onDisposeChild(index: int32, node: FrameNode) {
 
     }
 
-    onUpdateChild(index: number, node: FrameNode) {
+    onUpdateChild(index: int32, node: FrameNode) {
 
     }
 
-    onCreateChild(index: number): FrameNode {
+    onCreateChild(index: int): FrameNode {
         return new FrameNode(undefined);
     }
 
@@ -1917,7 +1916,7 @@ export class NodeAdapter implements MaterializedBase {
         }
     }
 
-    set totalNodeCount(count: number) {
+    set totalNodeCount(count: int) {
         if (count < 0) {
             return;
         }
@@ -1932,25 +1931,25 @@ export class NodeAdapter implements MaterializedBase {
     reloadAllItems() {
         ArkUIAniModule._NodeAdapter_NotifyItemReloaded(this.peer!.ptr!);
     }
-    reloadItem(start: number, count: number) {
+    reloadItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemChanged(this.peer!.ptr!, start, count);
     }
-    removeItem(start: number, count: number) {
+    removeItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemRemoved(this.peer!.ptr!, start, count);
     }
-    insertItem(start: number, count: number) {
+    insertItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemInserted(this.peer!.ptr!, start, count);
     }
-    moveItem(from: number, to: number) {
+    moveItem(from: int32, to: int32) {
         if (from < 0 || to < 0) {
             return;
         }
@@ -2003,7 +2002,7 @@ export class NodeAdapter implements MaterializedBase {
     }
     onCreateNewNodePtr(index: number): pointer {
         if (this.onCreateChild !== undefined) {
-            let frameNode = this.onCreateChild(index);
+            let frameNode = this.onCreateChild(index as int32);
             if (!this.nodeRefs_.find((node) => {
                 return node === frameNode;
             })) {
@@ -2020,7 +2019,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
-                this.onDisposeChild(index, frameNode);
+                this.onDisposeChild((index as int32), frameNode);
                 let index2 = this.nodeRefs_.indexOf(frameNode);
                 if (index2 > -1) {
                     this.nodeRefs_.splice(index2, 1);
@@ -2033,7 +2032,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
-                this.onUpdateChild(index, frameNode!);
+                this.onUpdateChild((index as int32), frameNode!);
             }
         }
     }

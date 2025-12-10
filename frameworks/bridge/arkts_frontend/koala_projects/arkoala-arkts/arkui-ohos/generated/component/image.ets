@@ -33,7 +33,7 @@ import { PointLightStyle_serializer, ContentTransitionEffect_serializer, ArkComm
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater, hookImageOnError } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
@@ -297,6 +297,18 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setDynamicRangeMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setHdrBrightnessAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setHdrBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setInterpolationAttribute(value: ImageInterpolation | undefined): void {
@@ -628,6 +640,9 @@ export interface ImageAttribute extends CommonMethod {
     dynamicRangeMode(value: DynamicRangeMode | undefined): this {
         throw new Error("Unimplemented method dynamicRangeMode")
     }
+    hdrBrightness(value: double | undefined): this {
+        throw new Error("Unimplemented method hdrBrightness")
+    }
     interpolation(value: ImageInterpolation | undefined): this {
         throw new Error("Unimplemented method interpolation")
     }
@@ -698,6 +713,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     autoResize_value?: boolean | undefined
     renderMode_value?: ImageRenderMode | undefined
     dynamicRangeMode_value?: DynamicRangeMode | undefined
+    hdrBrightness_value?: double | undefined
     interpolation_value?: ImageInterpolation | undefined
     sourceSize_value?: ImageSourceSize | undefined
     syncLoad_value?: boolean | undefined
@@ -749,6 +765,9 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
         return this
     }
     dynamicRangeMode(value: DynamicRangeMode | undefined): this {
+        return this
+    }
+    hdrBrightness(value: double | undefined): this {
         return this
     }
     interpolation(value: ImageInterpolation | undefined): this {
@@ -922,6 +941,14 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
+    public hdrBrightness(value: double | undefined): this {
+        if (this.checkPriority("hdrBrightness")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setHdrBrightnessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public interpolation(value: ImageInterpolation | undefined): this {
         if (this.checkPriority("interpolation")) {
             const value_casted = value as (ImageInterpolation | undefined)
@@ -996,8 +1023,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public onError(value: ImageErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
-            const value_casted = value as (ImageErrorCallback | undefined)
-            this.getPeer()?.setOnErrorAttribute(value_casted)
+            hookImageOnError(this, value)
             return this
         }
         return this

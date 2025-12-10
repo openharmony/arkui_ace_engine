@@ -4845,10 +4845,6 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -5608,6 +5604,20 @@ void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen:
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_VOID(target);
     target->UpdateCompositingFilter(compositingFilter);
+}
+
+void ViewAbstract::SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilter);
+}
+
+void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
 }
 
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
@@ -6642,10 +6652,6 @@ void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gr
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }

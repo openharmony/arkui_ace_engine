@@ -60,5 +60,6 @@ void TextDragPaintMethod::UpdateHandleInfo(const TextDragInfo& info)
     CHECK_NULL_VOID(textTheme);
     auto selectorColor = info.selectedBackgroundColor.value_or(textTheme->GetSelectedColor());
     modifier->SetSelectedColor(selectorColor.GetValue());
+    modifier->SetSelectedDragPreviewColor(info.dragBackgroundColor);
 }
 } // namespace OHOS::Ace::NG

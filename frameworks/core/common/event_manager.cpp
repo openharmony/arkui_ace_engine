@@ -856,7 +856,9 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
 
 void EventManager::UpdateDragInfo(TouchEvent& point)
 {
-    if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
+    if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE ||
+            point.type == TouchType::PULL_IN_WINDOW || point.pullType == TouchType::PULL_IN_WINDOW ||
+            point.type == TouchType::PULL_OUT_WINDOW || point.pullType == TouchType::PULL_OUT_WINDOW) {
         isDragging_ = false;
         point.type = TouchType::CANCEL;
         point.pullType = TouchType::PULL_MOVE;

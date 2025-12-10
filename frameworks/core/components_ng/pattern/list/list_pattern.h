@@ -361,12 +361,25 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
-    void SetItemPressed(bool isPressed, int32_t id)
+    void SetItemState(ItemState itemState, int32_t id)
     {
-        if (isPressed) {
-            pressedItem_.emplace(id);
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            noDividerItems_[id] = itemState;
         } else {
-            pressedItem_.erase(id);
+            item->second |= itemState;
+        }
+    }
+
+    void ResetItemState(ItemState itemState, int32_t id)
+    {
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            return;
+        }
+        item->second &= ~itemState;
+        if (item->second == ITEM_STATE_NORMAL) {
+            noDividerItems_.erase(id);
         }
     }
 
@@ -665,7 +678,7 @@ private:
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
-    std::set<int32_t> pressedItem_;
+    std::map<int32_t, uint32_t> noDividerItems_;
     int32_t lanes_ = 1;
     int32_t laneIdx4Divider_ = 0;
     float laneGutter_ = 0.0f;

@@ -860,11 +860,17 @@ HWTEST_F(MenuItemModelStaticTestNg, SetOnChange001, TestSize.Level1)
  */
 HWTEST_F(MenuItemModelStaticTestNg, SetSymbolStartIcon001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
     auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
 
+    /**
+     * @tc.steps: step2. call MenuItemModelStatic::SetSymbolStartIcon.
+     */
     std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)> symbolApply =
         [](OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>) {};
     MenuItemModelStatic::SetSymbolStartIcon(node, symbolApply);
@@ -881,17 +887,27 @@ HWTEST_F(MenuItemModelStaticTestNg, SetSymbolStartIcon001, TestSize.Level1)
  */
 HWTEST_F(MenuItemModelStaticTestNg, SetSymbolEndIcon001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
     auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
 
+    /**
+     * @tc.steps: step2. call MenuItemModelStatic::SetSymbolEndIcon.
+     */
     std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)> symbolApply =
         [](OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>) {};
     MenuItemModelStatic::SetSymbolEndIcon(node, symbolApply);
 
+    /**
+     * @tc.steps: step3. do assert.
+     */
     auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(menuProperty, nullptr);
+    
     ASSERT_NE(menuProperty->GetEndSymbol(), nullptr);
 }
 } // namespace OHOS::Ace::NG

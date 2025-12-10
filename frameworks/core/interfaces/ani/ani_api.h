@@ -92,7 +92,7 @@ typedef struct webview_WebviewControllerPeer {
 typedef struct NodeAdapterInfo {
     std::function<void(ani_double)> onAttachToNode = nullptr;
     std::function<void(void)> onDetachFromNode = nullptr;
-    std::function<int32_t(ani_double)> onGetId = nullptr;
+    std::function<int32_t(ani_int)> onGetId = nullptr;
     std::function<ani_long(ani_double)> onCreateChild = nullptr;
     std::function<void(ani_double, ani_double)> onDisposeChild = nullptr;
     std::function<void(ani_double, ani_double)> onUpdateChild = nullptr;
@@ -394,6 +394,7 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
+    void (*setImageOnErrorCallback)(ani_env* env, ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIWaterFlowSectionGap {

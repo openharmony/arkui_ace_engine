@@ -847,12 +847,32 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     overlayManager->RemoveDragPixelMap();
     overlayManager->RemoveGatherNode();
     SubwindowManager::GetInstance()->HidePreviewNG();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(windowContainerId, SubwindowType::TYPE_MENU);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->SetReceiveDragEventEnabled(true);
     info_.scale = -1.0;
     dampingOverflowCount_ = 0;
 }
 
+bool DragDropManager::ShouldSkipDragMoveOutForSubwindow() const
+{
+    if (Container::CurrentId() < MIN_SUBCONTAINER_ID) {
+        return false;
+    }
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if (subwindow && !subwindow->GetIsReceiveDragEventEnabled()) {
+        return true;
+    }
+    return false;
+}
+
 void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
+    if (ShouldSkipDragMoveOutForSubwindow()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "accept pull out event in subWindow");
+        return;
+    }
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -962,6 +982,9 @@ void DragDropManager::OnDragStartForDragEvent(const DragPointerEvent& pointerEve
 void DragDropManager::HandleDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<FrameNode>& node)
 {
+    if (SystemProperties::GetDebugEnabled() && Container::CurrentId() >= MIN_SUBCONTAINER_ID) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "accept drag event in subwindow, action = %{public}d", static_cast<int>(action));
+    }
     switch (action) {
         case DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER: {
             RequireSummary();
@@ -970,6 +993,9 @@ void DragDropManager::HandleDragEvent(const DragPointerEvent& pointerEvent, Drag
         }
         // PULL_OUT
         case DragEventAction::DRAG_EVENT_OUT: {
+            if (SystemProperties::GetDebugEnabled() && Container::CurrentId() >= MIN_SUBCONTAINER_ID) {
+                TAG_LOGD(AceLogTag::ACE_DRAG, "Accept PULL_OUT In SubWindow");
+            }
             OnDragMoveOut(pointerEvent);
             break;
         }

@@ -56,6 +56,12 @@ HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 }
 
+HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}
+
 HWTEST_F(PatternLockModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

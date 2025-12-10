@@ -1508,6 +1508,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
         return false;
     }
+    OnPaintFocusState(true);
 
     if (HasFocusStateStyle()) {
         if (isNeedStateStyles) {
@@ -1743,6 +1744,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
             isRaisedZIndex_ = false;
         }
         renderContext->ClearFocusState();
+        OnPaintFocusState(false);
     }
 }
 
@@ -2943,6 +2945,15 @@ bool FocusHub::IsLastWeakNodeFocused() const
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     CHECK_NULL_RETURN(lastFocusNode, false);
     return lastFocusNode->IsCurrentFocus();
+}
+
+void FocusHub::OnPaintFocusState(bool isFocus)
+{
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnPaintFocusState(isFocus);
 }
 
 RefPtr<FocusHub> FocusHub::FindHeadOrTailDescendantFocus(bool isHead, bool isHomeOrEnd)

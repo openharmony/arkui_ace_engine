@@ -46,7 +46,10 @@ export function ArkComponentRoot(
             const func = CallbackTransformer.transformFromCustomBuilder(@memo (): void => {
                 rememberDisposable(() => {
                     ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                        ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
                         component.aboutToAppear();
+                        ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                     });
                     return true;
                 }, (_: boolean | undefined) => {

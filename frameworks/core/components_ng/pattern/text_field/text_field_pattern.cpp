@@ -2501,6 +2501,8 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     CHECK_NULL_RETURN(textFieldTheme, info);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, info);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, info);
     auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
     auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
     auto firstIndex = selectController_->GetFirstHandleIndex();
@@ -2517,6 +2519,11 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
         info.isSecondHandleAnimation = secondIsShow;
     }
     info.selectedBackgroundColor = selectedBackgroundColor;
+    if (layoutProperty->HasSelectedDragPreviewStyle()) {
+        info.dragBackgroundColor = layoutProperty->GetSelectedDragPreviewStyleValue();
+    } else {
+        info.dragBackgroundColor = std::nullopt;
+    }
     info.handleColor = handleColor;
     return info;
 }
@@ -12099,6 +12106,7 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
         DEFINE_PROP_HANDLER(counterTextColor, Color, UpdateCounterTextColor),
         DEFINE_PROP_HANDLER(counterTextOverflowColor, Color, UpdateCounterTextOverflowColor),
+        DEFINE_PROP_HANDLER(selectedDragPreviewStyleColor, Color, UpdateSelectedDragPreviewStyle),
         
         {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {

@@ -275,7 +275,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     info_.startIndex_ = 0;
     info_.hasBigItem_ = false;
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
         if (!childLayoutWrapper) {
             break;
         }
@@ -350,7 +350,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            auto childWrapper = GetGridItem(layoutWrapper, index);
             if (!childWrapper) {
                 break;
             }
@@ -368,7 +368,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIndex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
+            auto wrapper = GetGridItem(layoutWrapper, itemIndex);
             if (!wrapper) {
                 break;
             }

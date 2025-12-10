@@ -711,6 +711,20 @@ ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
     return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
 }
 
+void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, support);
+}
+
+ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
@@ -811,6 +825,8 @@ const ArkUIGridModifier* GetGridModifier()
         .resetItemFillPolicy = ResetItemFillPolicy,
         .setItemFillPolicy = SetItemFillPolicy,
         .getItemFillPolicy = GetItemFillPolicy,
+        .setSupportLazyLoadingEmptyBranch = SetSupportLazyLoadingEmptyBranch,
+        .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

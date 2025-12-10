@@ -695,4 +695,13 @@ void SearchModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, std::option
 {
     SearchModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
 }
+
+void SearchModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        SearchModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
 } // namespace OHOS::Ace::NG

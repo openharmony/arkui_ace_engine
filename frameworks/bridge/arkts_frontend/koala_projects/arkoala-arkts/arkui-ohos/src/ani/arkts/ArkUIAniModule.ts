@@ -24,7 +24,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
 import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
-import { SectionChangeInfo, WaterFlowSections, OverlayOptions } from '#generated';
+import { SectionChangeInfo, WaterFlowSections, OverlayOptions, ImageErrorCallback } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
 import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
@@ -81,6 +81,7 @@ export class ArkUIAniModule {
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
+    native static _Image_SetOnErrorCallback(ptr: KPointer, value: ImageErrorCallback | undefined): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
@@ -323,12 +324,12 @@ export class ArkUIAniModule {
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
     native static _ConditionScope_Mark_Dirty(ptr: KPointer): void;
 
-    native static _Common_vp2px(value:number, instanceId: KInt): number
-    native static _Common_px2vp(value:number, instanceId: KInt): number
-    native static _Common_fp2px(value:number, instanceId: KInt): number
-    native static _Common_px2fp(value:number, instanceId: KInt): number
-    native static _Common_lpx2px(value:number, instanceId: KInt): number
-    native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_vp2px(value:double, instanceId: KInt): double
+    native static _Common_px2vp(value:double, instanceId: KInt): double
+    native static _Common_fp2px(value:double, instanceId: KInt): double
+    native static _Common_px2fp(value:double, instanceId: KInt): double
+    native static _Common_lpx2px(value:double, instanceId: KInt): double
+    native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
     native static _Common_getWindowId(instanceId: KInt): int32 | undefined
     native static _Common_getWindowWidthBreakpoint(): KInt
