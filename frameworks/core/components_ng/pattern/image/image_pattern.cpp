@@ -28,6 +28,7 @@
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
@@ -2094,6 +2095,12 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
     }
+    OnConfigurationUpdate();
+}
+
+void ImagePattern::OnDpiConfigurationUpdate()
+{
+    ImageDecoder::ClearPixelMapCache();
     OnConfigurationUpdate();
 }
 
