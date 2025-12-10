@@ -220,7 +220,7 @@ ArkUI_Int32 ConvertPositionToWindow(ArkUINodeHandle node, ArkUI_Int32 position[2
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow({ PipelineBase::Vp2PxWithCurrentDensity(position[0]),
-                                                PipelineBase::Vp2PxWithCurrentDensity(position[1]) }, false);
+        PipelineBase::Vp2PxWithCurrentDensity(position[1]) }, false);
     (*windowPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     (*windowPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return ERROR_CODE_NO_ERROR;
@@ -232,7 +232,7 @@ ArkUI_Int32 ConvertPositionFromWindow(ArkUINodeHandle node, ArkUI_Int32 windowPo
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow({ PipelineBase::Vp2PxWithCurrentDensity(windowPosition[0]),
-                                               PipelineBase::Vp2PxWithCurrentDensity(windowPosition[1]) }, true);
+        PipelineBase::Vp2PxWithCurrentDensity(windowPosition[1]) }, true);
     (*position)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     (*position)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return ERROR_CODE_NO_ERROR;
