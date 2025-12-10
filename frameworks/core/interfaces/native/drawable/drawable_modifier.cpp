@@ -196,6 +196,171 @@ void DecreaseRef(void* object)
     }
 }
 
+void* CreateDrawableDescriptorByType(uint32_t type)
+{
+    if (type > static_cast<uint32_t>(DrawableType::PIXELMAP)) {
+        return nullptr;
+    }
+    auto enumType = static_cast<DrawableType>(type);
+    if (enumType == DrawableType::BASE) {
+        return new DrawableDescriptor();
+    } else if (enumType == DrawableType::LAYERED) {
+        return new LayeredDrawableDescriptor();
+    } else if (enumType == DrawableType::ANIMATED) {
+        return new AnimatedDrawableDescriptor();
+    } else if (enumType == DrawableType::PIXELMAP) {
+        return new PixelMapDrawableDescriptor();
+    }
+    return nullptr;
+}
+
+void SetPixelMapList(void* object, void* pixelMapVec)
+{
+    if (object == nullptr || pixelMapVec == nullptr) {
+        return;
+    }
+
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* pixelMaps = static_cast<std::vector<std::shared_ptr<OHOS::Media::PixelMap>>*>(pixelMapVec);
+
+    std::vector<RefPtr<PixelMap>> pixelMapList;
+    for (size_t i = 0; i < pixelMaps->size(); i++) {
+        auto pixelMap = PixelMap::Create((*pixelMaps)[i]);
+        pixelMapList.push_back(pixelMap);
+    }
+    drawable->SetPixelMapList(pixelMapList);
+}
+
+void SetAnimatedTotalDuration(void* object, int32_t duration)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    drawable->SetTotalDuration(duration);
+}
+
+void SetAnimatedIterations(void* object, int32_t iterations)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    drawable->SetIterations(iterations);
+}
+
+void SetAnimatedPath(void* object, const char* path)
+{
+    if (object == nullptr || path == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto info = AceType::MakeRefPtr<DrawableDescriptorInfo>(std::string(path));
+    drawable->SetDrawableDescriptorInfo(info);
+}
+
+void SetAnimatedResource(void* object, void* resourceObject)
+{
+    if (object == nullptr || resourceObject == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* resourcePtr = static_cast<OHOS::Ace::ResourceObject*>(resourceObject);
+    auto resourceRef = Referenced::Claim(resourcePtr);
+    resourceRef->DecRefCount();
+    auto info = AceType::MakeRefPtr<DrawableDescriptorInfo>(resourceRef);
+    drawable->SetDrawableDescriptorInfo(info);
+}
+
+void SetAnimatedAutoPlay(void* object, bool autoPlay)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    drawable->SetAutoPlay(autoPlay);
+}
+
+void SetAnimatedDurations(void* object, const void* durationsVec)
+{
+    if (object == nullptr || durationsVec == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* durations = static_cast<const std::vector<int32_t>*>(durationsVec);
+    drawable->SetDurations(*durations);
+}
+
+void LoadSyncAnimated(void* object, int32_t* width, int32_t* height, int32_t* errorCode)
+{
+    if (object == nullptr || width == nullptr || height == nullptr || errorCode == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto result = drawable->LoadSync();
+    *width = result.imageWidth_;
+    *height = result.imageHeight_;
+    *errorCode = result.errorCode;
+}
+
+void* GetAnimatedController(void* object, const char* id)
+{
+    if (object == nullptr || id == nullptr) {
+        return nullptr;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto controller = drawable->GetControlledAnimator(std::string(id));
+    return AceType::RawPtr(controller);
+}
+
+void StartAnimated(void* object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* controller = static_cast<OHOS::Ace::ControlledAnimator*>(object);
+    controller->Finish();
+    controller->Forward();
+}
+
+void StopAnimated(void* object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* controller = static_cast<OHOS::Ace::ControlledAnimator*>(object);
+    controller->Finish();
+}
+
+void PauseAnimated(void* object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* controller = static_cast<OHOS::Ace::ControlledAnimator*>(object);
+    controller->Pause();
+}
+
+void ResumeAnimated(void* object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* controller = static_cast<OHOS::Ace::ControlledAnimator*>(object);
+    controller->Forward();
+}
+
+int32_t GetAnimatedStatus(void* object)
+{
+    int32_t status = -1;
+    if (object == nullptr) {
+        return status;
+    }
+    auto* controller = static_cast<OHOS::Ace::ControlledAnimator*>(object);
+    status = static_cast<int32_t>(controller->GetControlStatus());
+    return status;
+}
+
 } // namespace OHOS::Ace
 
 extern "C" {
@@ -217,6 +382,21 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .getAnimatedIterations = OHOS::Ace::GetAnimatedIterations,
         .increaseRef = OHOS::Ace::IncreaseRef,
         .decreaseRef = OHOS::Ace::DecreaseRef,
+        .createDrawableDescriptorByType = OHOS::Ace::CreateDrawableDescriptorByType,
+        .setPixelMapList = OHOS::Ace::SetPixelMapList,
+        .setAnimatedTotalDuration = OHOS::Ace::SetAnimatedTotalDuration,
+        .setAnimatedIterations = OHOS::Ace::SetAnimatedIterations,
+        .setAnimatedPath = OHOS::Ace::SetAnimatedPath,
+        .setAnimatedResource = OHOS::Ace::SetAnimatedResource,
+        .setAnimatedAutoPlay = OHOS::Ace::SetAnimatedAutoPlay,
+        .setAnimatedDurations = OHOS::Ace::SetAnimatedDurations,
+        .loadSyncAnimated = OHOS::Ace::LoadSyncAnimated,
+        .getAnimatedController = OHOS::Ace::GetAnimatedController,
+        .startAnimated = OHOS::Ace::StartAnimated,
+        .stopAnimated = OHOS::Ace::StopAnimated,
+        .pauseAnimated = OHOS::Ace::PauseAnimated,
+        .resumeAnimated = OHOS::Ace::ResumeAnimated,
+        .getAnimatedStatus = OHOS::Ace::GetAnimatedStatus
     };
     return &impl;
 }

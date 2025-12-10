@@ -227,6 +227,7 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/web_modifier.cpp" ]
     }
     if (is_arkui_x) {
+      sources += [ "drawable/drawable_modifier.cpp" ]
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
         "//third_party/bounds_checking_function:libsec_static",
