@@ -2831,6 +2831,8 @@ void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderR
                 radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
         }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, Dimension(0));
     }
     auto renderStrategy = type->value;
     ViewAbstractModelStatic::SetRenderStrategy(
@@ -5146,6 +5148,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaType |= vec[i].value_or(0);
         }
         opts.type = safeAreaType;
+    } else {
+        opts.type = SAFE_AREA_TYPE_ALL;
     }
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (convEdges.has_value()) {
@@ -5154,6 +5158,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaEdge |= vec[i].value_or(0);
         }
         opts.edges = safeAreaEdge;
+    } else {
+        opts.edges = NG::SAFE_AREA_EDGE_ALL;
     }
     ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
