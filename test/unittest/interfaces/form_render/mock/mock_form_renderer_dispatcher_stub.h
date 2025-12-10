@@ -29,6 +29,7 @@ public:
     MOCK_METHOD3(DispatchSurfaceChangeEvent, void(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo,
         uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(SetObscured, void(bool isObscured));
+    MOCK_METHOD1(SetColorMode, void(int32_t colorMode));
     MOCK_METHOD3(OnAccessibilityChildTreeRegister, void(uint32_t windowId, int32_t treeId, int64_t accessibilityId));
     MOCK_METHOD0(OnAccessibilityChildTreeDeregister, void());
     MOCK_METHOD2(
