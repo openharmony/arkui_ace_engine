@@ -34,6 +34,14 @@ ohos_shared_library("ace_container_scope") {
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
+  
+  if (is_ohos && is_clang && target_cpu == "arm64" && defined(build_ext_path)) {
+    ldflags = [ 
+      "-Wl,--emit-relocs",
+      "-Wl,--no-relax", 
+      "-mno-fix-cortex-a53-843419" 
+    ]
+  }
 }
 
 ohos_static_library("ace_container_scope_static") {
