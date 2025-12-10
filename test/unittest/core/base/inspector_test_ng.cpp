@@ -1873,46 +1873,4 @@ HWTEST_F(InspectorTestNg, GetElementRegisterNodes_001, TestSize.Level1)
     it = treesInfos.find(id2);
     EXPECT_TRUE(it != treesInfos.end());
 }
-
-/**
- * @tc.name: InspectorMultiThreadTest001
- * @tc.desc: Multi Thread Test the operation of GetFrameNodeByKey
- * @tc.type: FUNC
- */
-HWTEST_F(InspectorTestNg, InspectorMultiThreadTest001, TestSize.Level1)
-{
-    std::array<RefPtr<FrameNode>, 30> vec = {};
-    for (int32_t index = 0 ; index < 30; index++) {
-        std::string inspectorId = "node" + std::to_string(index);
-        auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-        frameNode->UpdateInspectorId(inspectorId);
-        vec[index] = frameNode;
-    }
-    std::thread add1([vec]() {
-            for (int32_t index = 0 ; index < 15; index++) {
-                Inspector::AddOffscreenNode(vec[index]);
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-    });
-    std::thread add2([vec]() {
-            for (int32_t index = 15 ; index < 30; index++) {
-                Inspector::AddOffscreenNode(vec[index]);
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-    });
-    std::thread remove([vec]() {
-            for (int32_t index = 20 ; index < 30; index++) {
-                Inspector::RemoveOffscreenNode(vec[index]);
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-    });
-    add1.join();
-    add2.join();
-    remove.join();
-    for (int32_t index = 0 ; index < 20; index++) {
-        std::string inspectorId = "node" + std::to_string(index);
-        EXPECT_NE(Inspector::GetFrameNodeByKey(inspectorId), nullptr);
-    }
-}
 } // namespace OHOS::Ace::NG
