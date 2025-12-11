@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
@@ -29,23 +30,28 @@ using TaskFunc = std::function<void(CanvasPaintMethod&)>;
 using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod);
+
 public:
     CanvasPaintMethod() = default;
     CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode);
-    ~CanvasPaintMethod() override = default;
+    ~CanvasPaintMethod() override;
 
     void GetFastTaskPool();
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* /*paintWrapper*/) override
+    {
+        return contentModifier_;
+    }
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateRecordingCanvas(float width, float height);
 
     void SetCustomTextType();
-    void PushTask(const TaskFunc& task);
-    bool HasTask() const;
+    void PushTask(TaskFunc&& task);
+    bool NeedRender() const;
     void FlushTask();
 
     void FlushUITasks()
     {
-        CHECK_EQUAL_VOID(HasTask(), false);
+        CHECK_EQUAL_VOID(NeedRender(), false);
         auto context = context_.Upgrade();
         if (context) {
             context->FlushUITasks();
@@ -77,6 +83,7 @@ public:
     {
         canvasCallback_ = callback;
     }
+
     void FireRSCanvasCallback(double width, double height)
     {
         CHECK_NULL_VOID(canvasCallback_);
@@ -94,7 +101,7 @@ public:
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
 #endif
-    std::string ToDataURL(const std::string& type, const double quality);
+    std::string ToDataURL(const std::string& type, double quality);
     bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
@@ -103,12 +110,32 @@ public:
     std::string GetDumpInfo();
     void SetHostCustomNodeName();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
+
+    void ResetRecordingCanvas();
+
+    void SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext);
+
+    TransformParam GetTransform();
+    LineDashParam GetLineDash() const;
+    void SetLineDashParam(const std::vector<double>& segments);
+    void SaveProperties();
+    void RestoreProperties();
+    void ResetTransformMatrix();
+    void ResetLineDash();
+    void RotateMatrix(double angle);
+    void ScaleMatrix(double x, double y);
+    void SetTransformMatrix(const TransformParam& param);
+    void TransformMatrix(const TransformParam& param);
+    void TranslateMatrix(double tx, double ty);
+
+    TransformParam GetTransformInner();
+    LineDashParam GetLineDashInner() const;
+
 private:
     int32_t GetId() const;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif
-    std::list<TaskFunc> tasks_;
 
     OnModifierUpdateFunc onModifierUpdate_;
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
@@ -116,6 +143,9 @@ private:
     bool needMarkDirty_ = true;
     // To record the host custom component name of the current canvas.
     std::string customNodeName_;
+
+    RefPtr<CanvasModifier> contentModifier_ = nullptr;
+    RefPtr<CanvasRenderContext> canvasRenderContext_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

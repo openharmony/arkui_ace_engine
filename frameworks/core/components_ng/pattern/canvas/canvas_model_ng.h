@@ -22,11 +22,13 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT CanvasModelNG : public OHOS::Ace::CanvasModel {
 public:
     RefPtr<AceType> Create() override;
-    RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) override;
     void SetOnReady(std::function<void()>&& onReady) override;
+    void SetOnReady(std::function<void(bool, CanvasUnit)>&& onReady) override;
     void EnableAnalyzer(bool enable) override;
     void SetImageAIOptions(void* options) override;
     void DetachRenderContext() override;
+    void SetImmediateRender(bool immediateRender) override;
+    void UpdateUnit(CanvasUnit unit) override;
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static RefPtr<AceType> GetCanvasPattern(FrameNode* frameNode);

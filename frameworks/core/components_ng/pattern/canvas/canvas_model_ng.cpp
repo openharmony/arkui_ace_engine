@@ -36,11 +36,6 @@ RefPtr<AceType> CanvasModelNG::Create()
     return frameNode->GetPattern<CanvasPattern>();
 }
 
-RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
-{
-    return pattern;
-}
-
 void CanvasModelNG::DetachRenderContext(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -112,5 +107,32 @@ RefPtr<FrameNode> CanvasModelNG::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+}
+
+void CanvasModelNG::SetOnReady(std::function<void(bool, CanvasUnit)>&& onReady)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReady(std::move(onReady));
+}
+
+void CanvasModelNG::SetImmediateRender(bool immediateRender)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImmediateRender(immediateRender);
+}
+
+void CanvasModelNG::UpdateUnit(CanvasUnit unit)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateUnit(unit);
 }
 } // namespace OHOS::Ace::NG

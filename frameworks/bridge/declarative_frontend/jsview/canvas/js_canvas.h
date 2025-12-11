@@ -28,6 +28,9 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnReady(const JSCallbackInfo& info);
     static void EnableAnalyzer(bool enable);
+
+private:
+    static void ParseCanvasParams(const JSRef<JSObject>& params);
 };
 
 } // namespace OHOS::Ace::Framework

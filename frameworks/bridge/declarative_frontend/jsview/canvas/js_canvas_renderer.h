@@ -155,7 +155,7 @@ public:
         anti_ = anti;
     }
 
-    bool GetAnti()
+    bool GetAnti() const
     {
         return anti_;
     }
