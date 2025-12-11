@@ -15,6 +15,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
@@ -244,6 +245,95 @@ void ResetContainerPickerSelectionIndicator(ArkUINodeHandle node)
         pattern->UnRegisterResource("containerPicker.borderRadius");
     }
 }
+
+void SetContainerPickerSelectedIndex(ArkUINodeHandle node, int index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetSelectedIndex(frameNode, index);
+}
+
+void ResetContainerPickerSelectedIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetSelectedIndex(frameNode, 0);
+}
+
+void SetContainerPickerIndicator(ArkUINodeHandle node, const struct ArkUI_PickerIndicatorStyle* pickerIndicatorStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerIndicatorStyle indicatorStyle;
+    indicatorStyle.type = pickerIndicatorStyle->type;
+    if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        indicatorStyle.strokeWidth = Dimension(pickerIndicatorStyle->strokeWidth, DimensionUnit::VP);
+        indicatorStyle.dividerColor = Color(pickerIndicatorStyle->dividerColor);
+        indicatorStyle.startMargin = Dimension(pickerIndicatorStyle->startMargin, DimensionUnit::VP);
+        indicatorStyle.endMargin = Dimension(pickerIndicatorStyle->endMargin, DimensionUnit::VP);
+    } else if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
+        indicatorStyle.backgroundColor = Color(pickerIndicatorStyle->backgroundColor);
+        BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = Dimension(pickerIndicatorStyle->topLeftRadius, DimensionUnit::VP);
+        borderRadius.radiusTopRight = Dimension(pickerIndicatorStyle->topRightRadius, DimensionUnit::VP);
+        borderRadius.radiusBottomLeft = Dimension(pickerIndicatorStyle->bottomLeftRadius, DimensionUnit::VP);
+        borderRadius.radiusBottomRight = Dimension(pickerIndicatorStyle->bottomRightRadius, DimensionUnit::VP);
+        indicatorStyle.borderRadius = borderRadius;
+    }
+    ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
+}
+
+void ResetContainerPickerIndicator(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerIndicatorStyle indicatorStyle;
+    indicatorStyle.type = 0;
+    ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
+}
+
+int32_t GetContainerPickerSelectedIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ContainerPickerModel::GetSelectedIndex(frameNode);
+}
+
+ArkUI_Bool GetContainerPickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ContainerPickerModel::GetEnableHapticFeedback(frameNode);
+}
+
+ArkUI_Bool GetContainerPickerCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ContainerPickerModel::GetCanLoop(frameNode);
+}
+
+ArkUI_PickerIndicatorStyle GetContainerPickerIndicator(ArkUINodeHandle node)
+{
+    ArkUI_PickerIndicatorStyle indicatorStyle;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, indicatorStyle);
+    auto style = ContainerPickerModel::GetIndicatorStyle(frameNode);
+    indicatorStyle.type = style.type;
+    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        indicatorStyle.strokeWidth = style.strokeWidth->Value();
+        indicatorStyle.dividerColor = style.dividerColor->GetValue();
+        indicatorStyle.startMargin = style.startMargin->Value();
+        indicatorStyle.endMargin = style.endMargin->Value();
+    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
+        indicatorStyle.backgroundColor = style.backgroundColor->GetValue();
+        indicatorStyle.topLeftRadius = style.borderRadius->radiusTopLeft->Value();
+        indicatorStyle.topRightRadius = style.borderRadius->radiusTopRight->Value();
+        indicatorStyle.bottomLeftRadius = style.borderRadius->radiusBottomLeft->Value();
+        indicatorStyle.bottomRightRadius = style.borderRadius->radiusBottomRight->Value();
+    }
+    return indicatorStyle;
+}
 }  // namespace
 
 namespace NodeModifier {
@@ -261,10 +351,62 @@ const ArkUIContainerPickerModifier* GetContainerPickerModifier()
         .resetContainerPickerCanLoop = ResetContainerPickerCanLoop,
         .setContainerPickerSelectionIndicator = SetContainerPickerSelectionIndicator,
         .resetContainerPickerSelectionIndicator = ResetContainerPickerSelectionIndicator,
+        .setContainerPickerSelectedIndex = SetContainerPickerSelectedIndex,
+        .resetContainerPickerSelectedIndex = ResetContainerPickerSelectedIndex,
+        .setContainerPickerIndicator = SetContainerPickerIndicator,
+        .resetContainerPickerIndicator = ResetContainerPickerIndicator,
+        .getContainerPickerSelectedIndex = GetContainerPickerSelectedIndex,
+        .getContainerPickerEnableHapticFeedback = GetContainerPickerEnableHapticFeedback,
+        .getContainerPickerCanLoop = GetContainerPickerCanLoop,
+        .getContainerPickerIndicator = GetContainerPickerIndicator,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0);  // don't move this line
 
     return &modifier;
+}
+
+void SetPickerOnChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [extraParam](const double selectedIndex) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_CONTAINER_PICKER_CHANGE;
+        event.mixedEvent.numberData[0].i32 = selectedIndex;
+        SendArkUISyncEvent(&event);
+    };
+    ContainerPickerModel::SetOnChange(frameNode, std::move(callback));
+}
+
+void SetPickerOnScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [extraParam](const double selectedIndex) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_CONTAINER_PICKER_SCROLL_STOP;
+        event.mixedEvent.numberData[0].i32 = selectedIndex;
+        SendArkUISyncEvent(&event);
+    };
+    ContainerPickerModel::SetOnScrollStop(frameNode, std::move(callback));
+}
+
+void ResetPickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetOnChange(frameNode, nullptr);
+}
+
+void ResetPickerOnScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetOnScrollStop(frameNode, nullptr);
 }
 }  // namespace NodeModifier
 }  // namespace OHOS::Ace::NG

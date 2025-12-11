@@ -1092,6 +1092,19 @@ struct ArkUIPickerIndicatorStyle {
     bool isDefaultBorderRadius = true;
 };
 
+struct ArkUI_PickerIndicatorStyle {
+    ArkUI_Uint32 type;
+    ArkUI_Uint32 backgroundColor;
+    ArkUI_Float32 topLeftRadius;
+    ArkUI_Float32 topRightRadius;
+    ArkUI_Float32 bottomLeftRadius;
+    ArkUI_Float32 bottomRightRadius;
+    ArkUI_Float32 strokeWidth;
+    ArkUI_Uint32 dividerColor;
+    ArkUI_Float32 startMargin;
+    ArkUI_Float32 endMargin;
+};
+
 struct ArkUIPickerDividerResObjStruct {
     void* strokeWidthRawPtr;
     void* colorRawPtr;
@@ -1192,6 +1205,8 @@ enum ArkUINodeType {
     ARKUI_XCOMPONENT_TEXTURE,
     ARKUI_ARC_ALPHABET_INDEXER,
     ARKUI_EMBEDDED_COMPONENT,
+    ARKUI_UNDEFINED,
+    ARKUI_PICKER,
 };
 
 enum ArkUIEventCategory {
@@ -1411,6 +1426,9 @@ enum ArkUIEventSubKind {
     ON_IMAGE_SPAN_ERROR,
 
     ON_CHECKBOX_GROUP_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CHECK_BOX_GROUP,
+
+    ON_CONTAINER_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_PICKER,
+    ON_CONTAINER_PICKER_SCROLL_STOP,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -4676,6 +4694,15 @@ struct ArkUIContainerPickerModifier {
     void (*setContainerPickerSelectionIndicator)(
         ArkUINodeHandle node, ArkUI_Bool* isHasValue, const struct ArkUIPickerIndicatorStyle* pickerIndicatorStyle);
     void (*resetContainerPickerSelectionIndicator)(ArkUINodeHandle node);
+    void (*setContainerPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*resetContainerPickerSelectedIndex)(ArkUINodeHandle node);
+    void (*setContainerPickerIndicator)(
+        ArkUINodeHandle node, const struct ArkUI_PickerIndicatorStyle* pickerIndicatorStyle);
+    void (*resetContainerPickerIndicator)(ArkUINodeHandle node);
+    int32_t (*getContainerPickerSelectedIndex)(ArkUINodeHandle node);
+    ArkUI_Bool (*getContainerPickerEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Bool (*getContainerPickerCanLoop)(ArkUINodeHandle node);
+    ArkUI_PickerIndicatorStyle (*getContainerPickerIndicator)(ArkUINodeHandle node);
 };
 
 struct ArkUIGesture;

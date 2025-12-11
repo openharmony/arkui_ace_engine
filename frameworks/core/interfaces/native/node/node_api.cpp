@@ -36,6 +36,7 @@
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -689,6 +690,11 @@ const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnFinish,
 };
 
+const ComponentAsyncEventHandler PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetPickerOnChange,
+    NodeModifier::SetPickerOnScrollStop,
+};
+
 const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnAppear,
     NodeModifier::ResetOnDisappear,
@@ -927,6 +933,11 @@ const ResetComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HAND
     NodeModifier::ResetImageAnimatorOnRepeat,
     NodeModifier::ResetImageAnimatorOnCancel,
     NodeModifier::ResetImageAnimatorOnFinish,
+};
+
+const ResetComponentAsyncEventHandler PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetPickerOnChange,
+    NodeModifier::ResetPickerOnScrollStop,
 };
 
 /* clang-format on */
@@ -1183,6 +1194,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_PICKER: {
+            if (subKind >= sizeof(PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1479,6 +1498,15 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_PICKER: {
+            if (subKind >= sizeof(PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

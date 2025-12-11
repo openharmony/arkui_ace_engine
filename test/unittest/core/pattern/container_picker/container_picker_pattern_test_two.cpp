@@ -616,4 +616,52 @@ HWTEST_F(ContainerPickerPatternTestTwo, ProcessScrollMotionZeroDeltaTest, TestSi
     EXPECT_NEAR(pattern->currentPos_, 200.0f, 0.001f);
 }
 
+/**
+ * @tc.name: CreateFrameNodeTest
+ * @tc.steps: step1. Create container picker node and set selected index.
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, CreateFrameNodeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto node = picker.CreateFrameNode(1);
+    EXPECT_NE(node, nullptr);
+    picker.SetSelectedIndex(AceType::RawPtr(node), 1);
+    EXPECT_EQ(picker.GetSelectedIndex(AceType::RawPtr(node)), 1);
+}
+
+/**
+ * @tc.name: GetEnableHapticFeedbackTest
+ * @tc.steps: step1. Create container picker node and get enable haptic feedback.
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, GetEnableHapticFeedbackTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto node = picker.CreateFrameNode(1);
+    EXPECT_NE(node, nullptr);
+    picker.SetEnableHapticFeedback(AceType::RawPtr(node), 1);
+    EXPECT_EQ(picker.GetEnableHapticFeedback(AceType::RawPtr(node)), 1);
+}
+
+/**
+ * @tc.name: GetCanLoopTest
+ * @tc.steps: step1. Create container picker node and get canLoop.
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, GetCanLoopTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get frameNode.
+     */
+    ContainerPickerModel picker;
+    auto node = picker.CreateFrameNode(1);
+    EXPECT_NE(node, nullptr);
+    picker.SetCanLoop(AceType::RawPtr(node), 1);
+    EXPECT_EQ(picker.GetCanLoop(AceType::RawPtr(node)), 1);
+}
+
 } // namespace OHOS::Ace::NG
