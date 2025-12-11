@@ -60,24 +60,20 @@ export function RepeatImplForOptions<T>(
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
-    item_: T;
+    arr_: RepeatArray<T>;
     index_: int32;
 
-    constructor(initialItem: T, initialIndex: int32) {
-        this.item_ = initialItem;
+    constructor(arr: RepeatArray<T>, initialIndex: int32) {
+        this.arr_ = arr;
         this.index_ = initialIndex;
     }
 
     get item(): T {
-        return this.item_;
+        return this.arr_[this.index_];
     }
 
     get index(): int32 {
         return this.index_;
-    }
-
-    public updateItem(newItem: T): void {
-        this.item_ = newItem;
     }
 
     public updateIndex(newIndex: int32): void {
@@ -100,25 +96,19 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     updateData(newArr: RepeatArray<T>, totalCount: int32) {
-        if (this.total_ != totalCount) {
-            this.listener_?.update(
-                Math.min(this.total_, totalCount).toInt(), Number.POSITIVE_INFINITY.toInt(), totalCount - this.total_);
-        }
-        this.total_ = totalCount;
-        // Compare array references first
-        if (this.arr_ === newArr) {
-            return;
-        }
         // Shallow compare: check length and each element by reference
-        if (this.arr_.length !== newArr.length) {
-            this.listener_?.update(0, Number.POSITIVE_INFINITY.toInt(), this.arr_.length - newArr.length);
+        if (totalCount !== this.total_) {
+            this.listener_?.update(0, Number.POSITIVE_INFINITY.toInt(), totalCount - this.total_);
             this.arr_ = newArr;
+            this.total_ = totalCount;
             return;
         }
+        // check each element
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
                 this.listener_?.update(i, Number.POSITIVE_INFINITY.toInt(), 0);
                 this.arr_ = newArr;
+                this.total_ = totalCount;
                 return;
             }
         }
@@ -259,7 +249,7 @@ function virtualRender<T>(
 
     /** @memo */
     const itemGen = (item: T, index: int32): void => {
-        const ri = new RepeatItemImpl<T>(item, index);
+        const ri = new RepeatItemImpl<T>(arr, index);
         let _type: string = attributes.ttypeGenFunc_(item, index);
         if (!attributes.itemGenFuncs_.has(_type)) {
             _type = REPEAT_EACH_FUNC_TYPE;
@@ -315,7 +305,7 @@ function nonVirtualRender<T>(
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
         const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
-        const ri = new RepeatItemImpl<T>(ele, i);
+        const ri = new RepeatItemImpl<T>(arr, i);
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);
         });
