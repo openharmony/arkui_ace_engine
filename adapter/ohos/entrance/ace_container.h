@@ -1011,6 +1011,8 @@ private:
     void LoadCompleteManagerStartCollect(const std::string& url) override;
     void LoadCompleteManagerStopCollect() override;
 
+    void InitForceSplitManager();
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;

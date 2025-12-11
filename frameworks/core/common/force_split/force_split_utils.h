@@ -25,6 +25,8 @@ class NavDestinationGroupNode;
 class NavBarNode;
 
 struct ForceSplitConfig {
+    std::string homePage;
+    std::string relatedPage;
     bool isArkUIHookEnabled = false;
     bool navigationDisablePlaceholder = false;
     bool navigationDisableDivider = false;
@@ -40,8 +42,10 @@ public:
     static bool IsHomePageNavDestination(const RefPtr<NavDestinationGroupNode>& node);
     static bool IsHomePageNavBar(const RefPtr<NavBarNode>& navBar);
     static RefPtr<FrameNode> CreatePlaceHolderNode();
-    static bool ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
-
+    static bool ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
+    static bool ParseAppForceSplitConfig(bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config);
+    static void LogSystemForceSplitConfig(bool isRouter, const std::string& homePage, const ForceSplitConfig& config);
+    static void LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
 private:
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);

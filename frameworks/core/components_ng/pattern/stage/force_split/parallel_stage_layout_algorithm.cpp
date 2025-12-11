@@ -161,7 +161,7 @@ void ParallelStageLayoutAlgorithm::MeasureDetailPage(const RefPtr<LayoutWrapper>
     auto pageHeight = pipelineContext->GetRootHeight();
     auto forceSplitMgr = pipelineContext->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    if (forceSplitMgr->IsForceSplitSupported()) {
+    if (forceSplitMgr->IsForceSplitSupported(true)) {
         constraint.scaleProperty = ScaleProperty::CreateScaleProperty(pipelineContext);
     }
     constraint.selfIdealSize.UpdateSizeWithCheck(SizeF(pageWidth, pageHeight));
@@ -182,7 +182,7 @@ void ParallelStageLayoutAlgorithm::MeasureSplitPage(const RefPtr<LayoutWrapper>&
     CHECK_NULL_VOID(pipelineContext);
     auto forceSplitMgr = pipelineContext->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    if (forceSplitMgr->IsForceSplitSupported()) {
+    if (forceSplitMgr->IsForceSplitSupported(true)) {
         constraint.scaleProperty = ScaleProperty::CreateScaleProperty(pipelineContext);
     }
     const int32_t halfContent = 2;

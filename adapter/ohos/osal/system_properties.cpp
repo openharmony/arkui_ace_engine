@@ -315,11 +315,6 @@ bool IsNavigationBlurEnabled()
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
-bool IsForceSplitIgnoreOrientationEnabled()
-{
-    return (system::GetParameter("persist.ace.navigation.ignoreorientation.enabled", "0") == "1");
-}
-
 std::optional<bool> IsArkUIHookEnabled()
 {
     auto enabledValue = system::GetParameter("persist.ace.arkuihook.enabled", "NA");
@@ -749,7 +744,6 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
-bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
@@ -947,7 +941,6 @@ void SystemProperties::InitDeviceInfo(
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = configChangePerform_ || IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
-    forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
     arkUIHookEnabled_ = IsArkUIHookEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
@@ -1150,11 +1143,6 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
-}
-
-bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
-{
-    return forceSplitIgnoreOrientationEnabled_;
 }
 
 std::optional<bool> SystemProperties::GetArkUIHookEnabled()

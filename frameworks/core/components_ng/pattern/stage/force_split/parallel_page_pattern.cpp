@@ -62,9 +62,11 @@ bool ParallelPagePattern::IsShowOrHideAllowed()
     CHECK_NULL_RETURN(pipeline, false);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipeline->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
     if (SystemProperties::GetDeviceType() != DeviceType::TABLET &&
         SystemProperties::GetDeviceType() != DeviceType::TWO_IN_ONE &&
-        !stageManager->GetForceSplitEnable()) {
+        !forceSplitMgr->IsForceSplitEnable(true)) {
         return true;
     }
     return stageManager->IsInStageOperation();

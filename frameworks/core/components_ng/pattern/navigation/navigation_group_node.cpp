@@ -2599,14 +2599,14 @@ bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGro
     CHECK_NULL_RETURN(navDestination, false);
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-    if (navDestination != navigationPattern->GetHomeNode()) {
+    if (navDestination != navigationPattern->GetForceSplitHomeDestination()) {
         return false;
     }
     auto context = GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
-    auto navigationManager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(navigationManager, false);
-    return navigationManager->IsForceSplitEnable() && navigationPattern->CanForceSplitLayout() &&
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    return forceSplitMgr->IsForceSplitEnable(false) && navigationPattern->CanForceSplitLayout() &&
         !navigationPattern->IsTopFullScreenPage();
 }
 

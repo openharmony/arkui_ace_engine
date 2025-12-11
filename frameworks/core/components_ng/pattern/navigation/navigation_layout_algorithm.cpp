@@ -546,8 +546,8 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
         enableModeChangeAnimation && modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto navigationManager = pipeline->GetNavigationManager();
-    if (navigationManager && navigationManager->IsForceSplitEnable() && navigationPattern->IsTopFullScreenPage()) {
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    if (forceSplitMgr && forceSplitMgr->IsForceSplitEnable(false) && navigationPattern->IsTopFullScreenPage()) {
         // disable animation of mode switch when force-split changed with full screen page
         doModeSwitchAnimationInAnotherTask = false;
     }
@@ -848,7 +848,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
-    pattern->TryForceSplitIfNeeded(size);
+    pattern->TryForceSplitIfNeeded();
     if (ifNeedInit_) {
         RangeCalculation(hostNode, navigationLayoutProperty);
     }
