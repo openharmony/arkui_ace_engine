@@ -13,7 +13,20 @@
  * limitations under the License.
  */
 
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration'
+
 export enum CanvasMode {
   GENERAL_MODE = 0,
   DOODLE_MODE = 1
+}
+
+export interface AIGenerateCallBack {
+  onReady: () => void,
+  onError: () => void,
+
+  // use for text
+  onResult: ((result: imageGeneration.GenerateTextTaskPartialResult) => void) | undefined,
+
+  // use for image
+  onComplete: ((result: string[]) => void) | undefined,
 }
