@@ -317,7 +317,8 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
-std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveObj)
+std::function<float(float)> ParseCallBackFunction(
+    const JSExecutionContext& executionContext, const JSRef<JSObject>& curveObj)
 {
     std::function<float(float)> customCallBack = nullptr;
     JSRef<JSVal> onCallBack = curveObj->GetProperty("__curveCustomFunc");
@@ -325,9 +326,12 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFuncCallBack =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentIdSafely(), node = frameNode](
-                             float time) -> float {
+        customCallBack = [execCtx = executionContext,
+                            func = std::move(jsFuncCallBack),
+                            id = Container::CurrentIdSafely(),
+                            node = frameNode](float time) -> float {
             ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, 1.0f);
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_RETURN(pipelineContext, 1.0f);
             pipelineContext->UpdateCurrentActiveNode(node);
@@ -407,7 +411,7 @@ std::vector<KeyframeParam> ParseKeyframes(const JSExecutionContext& executionCon
             func->Execute();
         };
         auto curveArgs = info->GetProperty("curve");
-        param.curve = JSViewContext::ParseCurve(curveArgs, true);
+        param.curve = JSViewContext::ParseCurve(executionContext, curveArgs, true);
         params.emplace_back(param);
     }
     return params;
@@ -502,7 +506,8 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
 }
 } // namespace
 
-RefPtr<Curve> JSViewContext::ParseCurve(const JSRef<JSVal>& curveArgs, bool exceptSpring)
+RefPtr<Curve> JSViewContext::ParseCurve(
+    const JSExecutionContext& executionContext, const JSRef<JSVal>& curveArgs, bool exceptSpring)
 {
     RefPtr<Curve> curve;
     if (curveArgs->IsString()) {
@@ -521,7 +526,7 @@ RefPtr<Curve> JSViewContext::ParseCurve(const JSRef<JSVal>& curveArgs, bool exce
         auto aniTimFunc = curveString->ToString();
         std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
         if (aniTimFunc == customFuncName) {
-            auto customCurveFunc = ParseCallBackFunction(curveObject);
+            auto customCurveFunc = ParseCallBackFunction(executionContext, curveObject);
             curve = CreateCurve(customCurveFunc);
         } else if (exceptSpring) {
             curve = CreateCurveExceptSpring(aniTimFunc);
@@ -534,7 +539,8 @@ RefPtr<Curve> JSViewContext::ParseCurve(const JSRef<JSVal>& curveArgs, bool exce
     return curve;
 }
 
-const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& animationArgs, bool isForm)
+const AnimationOption JSViewContext::CreateAnimation(
+    const JSExecutionContext& executionContext, const JSRef<JSObject>& animationArgs, bool isForm)
 {
     AnimationOption option;
     // If the attribute does not exist, the default value is used.
@@ -549,7 +555,7 @@ const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& anim
     auto direction = StringToAnimationDirection(animationArgs->GetPropertyValue<std::string>("playMode", "normal"));
     auto finishCallbackType = static_cast<FinishCallbackType>(
         animationArgs->GetPropertyValue<int32_t>("finishCallbackType", 0));
-    auto curve = ParseCurve(animationArgs->GetProperty("curve"));
+    auto curve = ParseCurve(executionContext, animationArgs->GetProperty("curve"));
 
     // limit animation for ArkTS Form
     if (isForm) {
@@ -639,7 +645,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         };
     }
 
-    option = CreateAnimation(obj, pipelineContextBase->IsFormRenderExceptDynamicComponent());
+    option =
+        CreateAnimation(info.GetExecutionContext(), obj, pipelineContextBase->IsFormRenderExceptDynamicComponent());
     if (pipelineContextBase->IsFormAnimationFinishCallback() &&
         pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
@@ -740,7 +747,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRenderExceptDynamicComponent());
+    AnimationOption option =
+        CreateAnimation(info.GetExecutionContext(), obj, pipelineContext->IsFormRenderExceptDynamicComponent());
     auto iterations = option.GetIteration();
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;

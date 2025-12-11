@@ -27,8 +27,10 @@ public:
     static void JSAnimateTo(const JSCallbackInfo& info);
     static void JSAnimateToImmediately(const JSCallbackInfo& info);
     static void JSKeyframeAnimateTo(const JSCallbackInfo& info);
-    static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs, bool isForm = false);
-    static RefPtr<Curve> ParseCurve(const JSRef<JSVal>& curveArgs, bool exceptSpring = false);
+    static const AnimationOption CreateAnimation(
+        const JSExecutionContext& executionContext, const JSRef<JSObject>& animationArgs, bool isForm = false);
+    static RefPtr<Curve> ParseCurve(
+        const JSExecutionContext& executionContext, const JSRef<JSVal>& curveArgs, bool exceptSpring = false);
     static void SetDynamicDimming(const JSCallbackInfo& info);
     static void JSOpenBindSheet(const JSCallbackInfo& info);
     static void JSUpdateBindSheet(const JSCallbackInfo& info);
