@@ -39,10 +39,6 @@ export function ArkComponentRoot(
     NodeAttach<ArkCustomComponentRootPeer>(
         () => {
             const node = ArkCustomComponentRootPeer.create(component)
-            if (component.isCustomLayout) {
-                return node;
-            }
-
             const func = CallbackTransformer.transformFromCustomBuilder(@memo (): void => {
                 rememberDisposable(() => {
                     ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
@@ -63,22 +59,6 @@ export function ArkComponentRoot(
             });
             return node;
         },
-        (node: ArkCustomComponentRootPeer) => {
-            if (!component.isCustomLayout) {
-                return;
-            }
-            rememberDisposable(() => {
-                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
-                    component.aboutToAppear();
-                });
-                return true;
-            }, (_: boolean | undefined) => {
-                scheduleCallback(() => {
-                    component.aboutToDisappear()
-                });
-            });
-            content(node);
-            return;
-        }
+        (node: ArkCustomComponentRootPeer) => { }
     );
 }
