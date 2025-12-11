@@ -68,9 +68,8 @@ void SetDividerColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
         auto colorResObj = AceType::Claim(color);
         DividerModelNG::SetDividerColor(frameNode, colorResObj, true);
-    } else {
-        DividerModelNG::SetDividerColor(frameNode, Color(color), true);
     }
+    DividerModelNG::SetDividerColor(frameNode, Color(color), true);
 }
 
 void ResetDividerColor(ArkUINodeHandle node)
