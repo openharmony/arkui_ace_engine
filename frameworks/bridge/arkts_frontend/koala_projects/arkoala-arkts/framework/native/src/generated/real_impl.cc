@@ -5641,6 +5641,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_ResourceColor* value)
     {
     }
+    void SetKeyboardAvoidModeImpl(Ark_NativePointer node,
+                                  const Opt_MenuKeyboardAvoidMode* value)
+    {
+    }
+    void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node,
+                                         const Opt_LengthMetrics* value)
+    {
+    }
     void SetMenuAlignImpl(Ark_NativePointer node,
                           const Opt_MenuAlignType* alignType,
                           const Opt_Offset* offset)
@@ -9981,6 +9989,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetShowInSubWindowImpl,
             SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
             SelectAttributeModifier::SetBackgroundColorImpl,
+            SelectAttributeModifier::SetKeyboardAvoidModeImpl,
+            SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;

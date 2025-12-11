@@ -25,6 +25,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/text_modifier_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 
@@ -611,6 +612,21 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
+void SetKeyboardAvoidModeImpl(Ark_NativePointer node, const Opt_MenuKeyboardAvoidMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<MenuKeyboardAvoidMode>(value);
+    SelectModelNG::SetKeyboardAvoidMode(frameNode, convValue);
+}
+void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonPercent(convValue);
+    SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, convValue);
+}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
@@ -662,6 +678,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetShowInSubWindowImpl,
         SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
         SelectAttributeModifier::SetBackgroundColorImpl,
+        SelectAttributeModifier::SetKeyboardAvoidModeImpl,
+        SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;
