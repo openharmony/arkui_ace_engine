@@ -24,7 +24,7 @@ import {
   ConstraintSizeOptions, focusControl, BorderOptions ,HitTestMode, SymbolEffect, ImageCompleteEvent, Resource,
   Image, Callback ,ImageFit, VerticalAlign, TextOverflow, TextAlign, ShadowStyle, BlurStyle,Margin, Padding,
   CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback, SymbolGlyphModifier,
-  ClassCastError, ClickEvent
+  ClassCastError, ClickEvent, LocalizedPadding, LengthMetrics
 } from "@ohos.arkui.component";
 import { State, Observed, PropRef, StorageLink, StorageProp, Watch } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
@@ -231,7 +231,9 @@ export struct TabTitleBar {
         }
       }
       .backgroundColor($r('sys.color.ohos_id_color_background'))
-      .margin({ right: $r('sys.float.ohos_id_max_padding_end') } as Margin)
+      .margin({
+        end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end'))
+      } as LocalizedPadding)
       .onAreaChange((_oldValue: Area, newValue: Area) => {
         this.tabWidth = Number(newValue.width as number) - this.menuSectionWidth;
       })
@@ -383,7 +385,7 @@ export struct CollapsibleMenuSection {
               .fontColor([$r('sys.color.icon_primary')])
               .focusable(true)
           }
-          .accessibilityText($r('sys.string.ohos_toolbar_more'))
+          .accessibilityText(this.toStringFormat($r('sys.string.ohos_toolbar_more')))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -464,6 +466,24 @@ export struct CollapsibleMenuSection {
       child.layout({ x: 0, y: 0 });
     })
     this.fontSize = this.decideFontScale();
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource as string;
+    } else if (typeof resource === 'undefined') {
+      return ' ';
+    } else {
+      let resourceString: undefined | string = ' ';
+      try {
+        resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
+      } catch (exception) {
+        let code: int | undefined = (exception as ClassCastError)?.code;
+        let message: string | undefined = (exception as ClassCastError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
   }
 
   @Builder
@@ -559,9 +579,9 @@ struct TabContentItem {
     if (typeof resource === 'string') {
       return resource as string;
     } else if (typeof resource === 'undefined') {
-      return '';
+      return ' ';
     } else {
-      let resourceString: undefined | string = '';
+      let resourceString: undefined | string = ' ';
       try {
         resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
       } catch (exception) {
@@ -757,9 +777,9 @@ struct TabContentItem {
       }
     }
     .margin({
-      left: this.index === 0 ? TabContentItem.marginFirst : 0,
-      right: this.index === this.maxIndex ? 12 : 0
-    } as Margin)
+      start: LengthMetrics.vp(this.index === 0 ? TabContentItem.marginFirst : 0),
+      end: LengthMetrics.vp(this.index === this.maxIndex ? 12 : 0)
+    } as LocalizedPadding)
   }
 }
 
@@ -853,6 +873,25 @@ struct ImageMenuItem {
     return ' ';
   }
 
+  private getAccessibilityReadDescription(): string | undefined {
+    if (this.item.accessibilityDescription) {
+      if (typeof this.item.accessibilityDescription === 'string') {
+        return this.item.accessibilityDescription as string;
+      } else if (typeof this.item.accessibilityDescription === 'undefined') {
+        return ' ' as string;
+      } else {
+        let accessibilityDescription: string = ' ';
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        if (uiContent) {
+          accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
+            .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
+        }
+        return accessibilityDescription as string;
+      }
+    }
+    return ' ';
+  }
+
   build() {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled } as ButtonOptions) {
       if (this.item.symbolStyle) {
@@ -884,7 +923,7 @@ struct ImageMenuItem {
     }
     .accessibilityText(this.getAccessibilityReadText())
     .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+    .accessibilityDescription(this.getAccessibilityReadDescription())
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
