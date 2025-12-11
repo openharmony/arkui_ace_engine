@@ -2796,6 +2796,14 @@
         "name": "OH_ArkUI_GetNodeSnapshot"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SnapshotOptions_SetColorMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SnapshotOptions_SetDynamicRangeMode"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_StartImageAnalyzer"
     },
@@ -4436,51 +4444,51 @@
         "first_introduced": "23"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_NodeEvent_GetTouchTestInfo"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfo_GetTouchTestInfoList"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetX"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetY"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetWindowX"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetWindowY"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetXRelativeToParent"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetYRelativeToParent"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetChildRect"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfoItem_GetChildId"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TouchTestInfo_SetTouchResultId"
     },
     {
@@ -4710,5 +4718,21 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_SetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
     }
 ]

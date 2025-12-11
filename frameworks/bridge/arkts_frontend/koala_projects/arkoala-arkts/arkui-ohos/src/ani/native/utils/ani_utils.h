@@ -47,7 +47,7 @@
             HILOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                   \
                 static_cast<size_t>(ret) < std::extent_v<decltype(aniErr)> ? aniErr[ret] : "ANI_???"); \
             if (ret == ANI_PENDING_ERROR) {                                                            \
-                Ani::AniUtils::ClearAniPendingError(env);                                              \
+                OHOS::Ace::Ani::AniUtils::ClearAniPendingError(env);                                   \
             }                                                                                          \
             onFail;                                                                                    \
         }                                                                                              \
@@ -69,6 +69,7 @@ public:
     static bool IsNumber(ani_env* env, ani_object obj);
     static bool IsFunction(ani_env* env, ani_object obj);
     static bool IsUndefined(ani_env* env, ani_object obj);
+    static bool IsUndefined(ani_env* env, ani_ref ref);
     static ani_object GetUndefined(ani_env* env);
     static std::optional<ani_string> StdStringToANIString(ani_env *env, std::string str);
     static bool GetStringByName(
@@ -99,7 +100,7 @@ public:
     static int32_t CreateAniBoolean(ani_env* env, bool value, ani_object& result);
 
     /**
-     * Get AbcRuntimeLinkder to load application class.
+     * Get AbcRuntimeLinker to load application class.
      */
     static int32_t GetNearestNonBootRuntimeLinker(ani_env*, ani_ref& result);
 

@@ -237,6 +237,7 @@ public:
     }
     void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
     void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
+    bool SetReceiveDragEventEnabled(bool enabled) override;
     void SetNodeId(int32_t nodeId) override
     {
         nodeId_ = nodeId;
@@ -257,6 +258,10 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void OpenCustomDialogStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback) override;
+    bool GetIsReceiveDragEventEnabled() override
+    {
+        return window_->IsReceiveDragEventEnabled();
+    }
 
 private:
     RefPtr<StackElement> GetStack();

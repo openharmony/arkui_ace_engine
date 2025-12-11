@@ -38,6 +38,21 @@ struct ArkUIDrawableDescriptor {
     int32_t (*getAnimatedIterations)(void* object);
     void (*increaseRef)(void* object);
     void (*decreaseRef)(void* object);
+    void* (*createDrawableDescriptorByType)(uint32_t type);
+    void (*setPixelMapList)(void* object, void* pixelMapVec);
+    void (*setAnimatedTotalDuration)(void* object, int32_t duration);
+    void (*setAnimatedIterations)(void* object, int32_t iterations);
+    void (*setAnimatedPath)(void* object, const char* path);
+    void (*setAnimatedResource)(void* object, void* resourceObject);
+    void (*setAnimatedAutoPlay)(void* object, bool autoPlay);
+    void (*setAnimatedDurations)(void* object, const void* durationsVec);
+    void (*loadSyncAnimated)(void* object, int32_t* width, int32_t* height, int32_t* errorCode);
+    void* (*getAnimatedController)(void* object, const char* id);
+    void (*startAnimated)(void* object);
+    void (*stopAnimated)(void* object);
+    void (*pauseAnimated)(void* object);
+    void (*resumeAnimated)(void* object);
+    int32_t (*getAnimatedStatus)(void* object);
 };
 
 __attribute__((visibility("default"))) const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor(void);

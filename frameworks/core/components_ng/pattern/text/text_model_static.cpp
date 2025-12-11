@@ -396,4 +396,15 @@ void TextModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::op
 {
     TextModelNG::SetFallbackLineSpacing(frameNode, valueOpt.value_or(false));
 }
+
+void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+    
+    if (color.has_value()) {
+        TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
 } // namespace OHOS::Ace::NG

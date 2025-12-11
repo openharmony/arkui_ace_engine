@@ -316,6 +316,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showAutoFill = pattern->IsShowAutoFill();
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
@@ -420,6 +421,12 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU, false, true);
+            return;
+        case OptionMenuActionId::PASSWORD_VAULT:
+            pattern->HandleOnPasswordVault();
+            return;
+        case OptionMenuActionId::AUTO_FILL:
+            HandleOnAutoFill(type);
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();

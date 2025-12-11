@@ -21,7 +21,7 @@ import { ButtonAttribute, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, 
     FontWeight } from "../framework";
 import { Resource } from "global.resource";
 import { ContentModifier } from "#handwritten";
-import { hookButtonContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookButtonContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
     constructParam(...params: Object[]): this {
         if (params.length > 2) {

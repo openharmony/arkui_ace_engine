@@ -220,6 +220,7 @@ export class ParallelNode<T> {
     }
 
     dispose(): void {
+        this.__needAttach?.dispose();
         this.manager?.terminate<PeerNode>(this.rootState!)
     }
 }

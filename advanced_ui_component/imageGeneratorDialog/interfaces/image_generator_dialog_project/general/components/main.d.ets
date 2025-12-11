@@ -13,4 +13,16 @@
  * limitations under the License.
  */
 
-// file demo here finally
+import arkuiNamespaces from "@kit.ArkUI";
+import { CanvasMode } from "../types/Declaration";
+@Component
+export declare struct ImageGeneratorDialog {
+    options?: arkuiNamespaces.imageGeneration.GeneratorDialogOptions;
+    @State
+    width_: Dimension;
+    @State
+    height_: Dimension;
+    @State
+    currentCanvasMode: CanvasMode;
+    build(): void;
+}

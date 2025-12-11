@@ -21,6 +21,7 @@
 #include "log/log.h"
 #include "pixel_map_taihe_ani.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -223,5 +224,18 @@ ani_long Image_ColorFilter_TransferDynamic(ani_env* env, [[maybe_unused]] ani_ob
     }
     auto pointer = modifier->getImageAniModifier()->getColorFilter(colorFilterPeer);
     return pointer;
+}
+
+void Image_SetOnErrorCallback(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object onErrorCallback)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    if (AniUtils::IsUndefined(env, onErrorCallback)) {
+        return;
+    }
+    modifier->getImageAniModifier()->setImageOnErrorCallback(env, arkNode, onErrorCallback);
 }
 } // namespace OHOS::Ace::Ani

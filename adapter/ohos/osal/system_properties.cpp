@@ -479,6 +479,11 @@ float ReadDragStartPanDistanceThreshold()
         DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
 }
 
+bool ReadIsOpenYuvDecode()
+{
+    return system::GetBoolParameter("persist.ace.yuv.decode.enabled", false);
+}
+
 uint32_t ReadCanvasDebugMode()
 {
     return system::GetUintParameter("persist.ace.canvas.debug.mode", 0u);
@@ -781,8 +786,9 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPoint
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
+bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
-
+bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -964,6 +970,8 @@ void SystemProperties::InitDeviceInfo(
     InitDeviceTypeBySystemProperty();
     GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
     isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
+    isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+    isOpenYuvDecode_ = ReadIsOpenYuvDecode();
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1407,6 +1415,11 @@ ACE_WEAK_SYM bool SystemProperties::GetCompatibleInputTransEnabled()
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
 {
     return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

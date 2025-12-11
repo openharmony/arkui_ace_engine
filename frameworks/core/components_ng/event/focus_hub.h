@@ -993,6 +993,8 @@ private:
 
     bool IsLastWeakNodeFocused() const;
 
+    void OnPaintFocusState(bool isFocus);
+
     std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

@@ -26,6 +26,7 @@ public:
     void SetDimension(int32_t value) override;
     void AllowUpdate(bool value) override;
     void SetModuleName(const std::string& value) override;
+    void SetColorMode(int32_t colorMode) override;
     void SetOnAcquired(std::function<void(const std::string&)>&& onAcquired) override;
     void SetOnError(std::function<void(const std::string&)>&& onError) override;
     void SetOnUninstall(std::function<void(const std::string&)>&& onUninstall) override;

@@ -219,40 +219,6 @@ bool GetTransformRectRelativeToParent(
     }
     return find;
 }
-
-void IsCoveredByBrother(const RefPtr<NG::FrameNode>& frameNode, bool& nodeAccessibilityVisible)
-{
-    CHECK_EQUAL_VOID(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled(), false);
-    CHECK_EQUAL_VOID(nodeAccessibilityVisible, false);
-    auto parentFrameNode = frameNode;
-    do {
-        parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
-        CHECK_NULL_BREAK(parentFrameNode);
-
-        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_CONTINUE(accessibilityProperty);
-
-        NG::RectF parentRect;
-        auto find = accessibilityProperty->GetAccessibilityInnerVisibleRect(parentRect);
-        if (!find) {
-            continue;
-        }
-
-        NG::RectF currentRect;
-        auto transResult = GetTransformRectRelativeToParent(frameNode, parentFrameNode, currentRect);
-        if (!transResult) {
-            break;
-        }
-
-        if (GreatNotEqual(currentRect.Top(),  parentRect.Bottom()) ||
-            LessNotEqual(currentRect.Bottom(),  parentRect.Top()) ||
-            NearEqual(parentRect.Top(), parentRect.Bottom())) {
-            nodeAccessibilityVisible = false;
-            break;
-        }
-    } while (parentFrameNode);
-}
-
 } // namespace
 
 void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
@@ -452,5 +418,39 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByCondition(
         }
     }
     return nullptr;
+}
+
+void AccessibilityFrameNodeUtils::IsCoveredByBrother(
+    const RefPtr<NG::FrameNode>& frameNode, bool& nodeAccessibilityVisible)
+{
+    CHECK_EQUAL_VOID(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled(), false);
+    CHECK_EQUAL_VOID(nodeAccessibilityVisible, false);
+    auto parentFrameNode = frameNode;
+    do {
+        parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
+        CHECK_NULL_BREAK(parentFrameNode);
+
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_CONTINUE(accessibilityProperty);
+
+        NG::RectF parentRect;
+        auto find = accessibilityProperty->GetAccessibilityInnerVisibleRect(parentRect);
+        if (!find) {
+            continue;
+        }
+
+        NG::RectF currentRect;
+        auto transResult = GetTransformRectRelativeToParent(frameNode, parentFrameNode, currentRect);
+        if (!transResult) {
+            break;
+        }
+
+        if (GreatNotEqual(currentRect.Top(),  parentRect.Bottom()) ||
+            LessNotEqual(currentRect.Bottom(),  parentRect.Top()) ||
+            NearEqual(parentRect.Top(), parentRect.Bottom())) {
+            nodeAccessibilityVisible = false;
+            break;
+        }
+    } while (parentFrameNode);
 }
 } // namespace OHOS::Ace::NG

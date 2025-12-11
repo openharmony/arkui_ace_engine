@@ -9574,6 +9574,21 @@ void ResetCompositingFilter(ArkUINodeHandle node)
     ViewAbstractModelNG::SetCompositingFilter(frameNode, nullptr);
 }
 
+void SetMaterialFilter(ArkUINodeHandle node, void* materialFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto materialFilterPtr = reinterpret_cast<Rosen::Filter*>(materialFilter);
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilterPtr);
+}
+
+void ResetMaterialFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMaterialFilter(frameNode, nullptr);
+}
+
 void SetSystemMaterial(ArkUINodeHandle node, void* material)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10932,6 +10947,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setBorderRadiusType = SetBorderRadiusType,
         .resetBorderRadiusType = ResetBorderRadiusType,
         .getBorderRadiusType = GetBorderRadiusType,
+        .setMaterialFilter = SetMaterialFilter,
+        .resetMaterialFilter = ResetMaterialFilter,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

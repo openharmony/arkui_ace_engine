@@ -3184,7 +3184,7 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
     }
 }
 
-void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack)
+void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback)
 {
     if (navigationStack_) {
         navigationStack_->SetOnStateChangedCallback(nullptr);
@@ -3192,6 +3192,9 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
     navigationStack_ = navigationStack;
     if (navigationStack_) {
         navigationStack_->SetNavigationNode(GetHost());
+        if (!needUpdateCallback) {
+            return;
+        }
         WeakPtr<NavigationPattern> weakPattern = WeakClaim(this);
         auto id = Container::CurrentId();
         auto callback = [weakPattern, id]() {

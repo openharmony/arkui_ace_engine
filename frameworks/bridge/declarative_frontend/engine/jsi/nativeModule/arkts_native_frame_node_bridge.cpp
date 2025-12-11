@@ -403,33 +403,6 @@ void FrameNodeBridge::FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGloba
 }
 
 static ArkUINodeType ParseNodeType(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node)
-{
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
-    std::string type = firstArg->IsString(vm) ? firstArg->ToString(vm)->ToString(vm) : "";
-    static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
-        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
-        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
-        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
-        { "ListItem", ARKUI_LIST_ITEM }, { "Scroll", ARKUI_SCROLL }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
-        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
-        { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
-        { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
-        { "FlowItem", ARKUI_FLOW_ITEM }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID },
-        { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
-        { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
-        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
-        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
-    ArkUINodeType nodeType = ARKUI_CUSTOM;
-    auto iter = typeMap.find(type);
-    if (iter != typeMap.end()) {
-        nodeType = iter->second;
-    }
-    return nodeType;
-}
-
-static ArkUINodeType ParseNodeTypeWithCheck(
     ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node,
     const std::unordered_map<std::string, ArkUINodeType>& typeMap)
 {
@@ -477,12 +450,13 @@ static void HandleNodeParams(
     }
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+static ArkUINativeModuleValue CreateTypedFrameNodeImpl(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    const std::unordered_map<std::string, ArkUINodeType>& typeMap)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> node;
-    ArkUINodeType nodeType = ParseNodeType(runtimeCallInfo, vm, nodeId, node);
+    ArkUINodeType nodeType = ParseNodeType(runtimeCallInfo, vm, nodeId, node, typeMap);
     if (nodeType != ARKUI_CUSTOM) {
         HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
@@ -491,6 +465,26 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
+        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
+        { "ListItem", ARKUI_LIST_ITEM }, { "Scroll", ARKUI_SCROLL }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
+        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
+        { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
+        { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
+        { "FlowItem", ARKUI_FLOW_ITEM }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID },
+        { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
+        { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
+        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
+        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
+    auto result = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMap);
+    return result;
 } // namespace OHOS::Ace::NG
 
 ArkUINativeModuleValue FrameNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -3121,39 +3115,28 @@ ArkUINativeModuleValue FrameNodeBridge::FireArkUIObjectLifecycleCallback(ArkUIRu
     return defaultReturnValue;
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> node;
     static const std::unordered_map<std::string, ArkUINodeType> typeMapLite = { { "Text", ARKUI_TEXT },
-        { "Stack", ARKUI_STACK } };
-    ArkUINodeType nodeType = ParseNodeTypeWithCheck(runtimeCallInfo, vm, nodeId, node, typeMapLite);
-    if (nodeType != ARKUI_CUSTOM) {
-        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
-    }
-
-    const char* keys[] = { "nodeId", "nativeStrongRef" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
-    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
+        { "Image", ARKUI_IMAGE }, { "Button", ARKUI_BUTTON }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}};
+    auto reslut = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMapLite);
     return reslut;
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> node;
     static const std::unordered_map<std::string, ArkUINodeType> typeMapFull = { { "Text", ARKUI_TEXT },
-        { "Column", ARKUI_COLUMN }, { "Stack", ARKUI_STACK } };
-    ArkUINodeType nodeType = ParseNodeTypeWithCheck(runtimeCallInfo, vm, nodeId, node, typeMapFull);
-    if (nodeType != ARKUI_CUSTOM) {
-        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
-    }
-
-    const char* keys[] = { "nodeId", "nativeStrongRef" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
-    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
+        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
+        { "ListItem", ARKUI_LIST_ITEM }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
+        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS },
+        { "Button", ARKUI_BUTTON }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE },
+        { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK }, { "TextTimer", ARKUI_TEXT_TIMER },
+        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER } };
+    auto reslut = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMapFull);
     return reslut;
 }
 } // namespace OHOS::Ace::NG

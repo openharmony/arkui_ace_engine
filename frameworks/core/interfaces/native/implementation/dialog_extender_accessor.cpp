@@ -25,7 +25,7 @@ void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
 {
     TimePickerDialogExtender::Show(options);
 }
-void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+void ShowTextPickerDialogImpl(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* options)
 {
     TextPickerDialogExtender::Show(options);
 }

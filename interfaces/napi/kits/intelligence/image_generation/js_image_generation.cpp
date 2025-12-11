@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
+#include "base/utils/utils.h"
 #include "base/error/error_code.h"
 
-#include "core/components_ng/pattern/image_generator_dialog/image_generator_dialog_view.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -29,13 +30,17 @@ namespace {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
-constexpr uint32_t IMAGES_INPUT_MAX_COUNT = 4;
-constexpr size_t CONTENT_INPUT_MAX_SIZE = 600;
+
+// error code
+constexpr int32_t CREATOR_IMAGES_OVERSIZE = 1;
+constexpr int32_t CREATOR_CONTENT_OVERSIZE = 2;
+constexpr int32_t CREATOR_INTERNAL_ERROR = 99;
+// error message
 constexpr char FIRST_ARG_TYPE_INCORRECT[] = "type of first param is incorrect!";
-constexpr char SECOND_ARG_TYPE_INCORRECT[] = "type of second param is incorrect!";
 constexpr char IMAGES_INPUT_OVER_SIZE[] = "images input are oversize(larger than 4)!";
 constexpr char CONTENT_INPUT_OVER_SIZE[] = "content input is oversize(larger than 600 character)!";
 constexpr char INTERNAL_ERROR_MSG[] = "internal error, create canvas failed!";
+constexpr char IMAGE_GENERATOR_DIALOG_CREATOR_FUNC[] = "__imageGeneratorDialogCreator";
 
 napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
 {
@@ -68,14 +73,32 @@ napi_value CreatePromise(napi_env env, int32_t errCode, const std::string& errMs
 }
 }
 
+static int32_t CallImageGeneratorCreator(napi_env env, napi_value options)
+{
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return CREATOR_INTERNAL_ERROR;
+    }
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value imageGeneratorCreator;
+    napi_get_named_property(env, globalValue, IMAGE_GENERATOR_DIALOG_CREATOR_FUNC, &imageGeneratorCreator);
+    napi_value funcArgv[1] = { options };
+    napi_value returnValue;
+    if (napi_call_function(env, globalValue, imageGeneratorCreator, 1, funcArgv, &returnValue) != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_SIDEBAR, "CallLoadImageGeneratorDialog failed");
+        return CREATOR_INTERNAL_ERROR;
+    }
+    int32_t errorCode = CREATOR_INTERNAL_ERROR;
+    napi_get_value_int32(env, returnValue, &errorCode);
+    return errorCode;
+}
+
 static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
 {
-    std::string optionStr = "__NA__";
-
     GET_PARAMS(env, info, 2);
-
     NAPI_ASSERT(env, (argc >= 1), "Invalid argc");
-
     // parse uiContext start
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[0], &valueType);
@@ -84,34 +107,21 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
         return CreatePromise(env, ERROR_CODE_PARAM_INVALID, FIRST_ARG_TYPE_INCORRECT);
     }
     // parse uiContext finish
-    // parse options start
-    if (argc == 2) {
-        napi_typeof(env, argv[1], &valueType);
-        if (valueType == napi_undefined || valueType != napi_object) {
-            return CreatePromise(env, ERROR_CODE_PARAM_INVALID, SECOND_ARG_TYPE_INCORRECT);
-        }
-        napi_value generatorDialogOptions = argv[1];
-        napi_value imagesNapi = nullptr;
-        if (napi_get_named_property(env, generatorDialogOptions, "images", &imagesNapi) == napi_ok) {
-            uint32_t length = 0;
-            napi_get_array_length(env, imagesNapi, &length);
-            if (length > IMAGES_INPUT_MAX_COUNT) {
-                return CreatePromise(env, ERROR_CODE_PARAM_INVALID, IMAGES_INPUT_OVER_SIZE);
-            }
-        }
-        napi_value contentNapi = nullptr;
-        if (napi_get_named_property(env, generatorDialogOptions, "content", &contentNapi) == napi_ok) {
-            size_t size = 0;
-            napi_get_value_string_utf8(env, contentNapi, nullptr, 0, &size);
-            if (size > CONTENT_INPUT_MAX_SIZE) {
-                return CreatePromise(env, ERROR_CODE_PARAM_INVALID, CONTENT_INPUT_OVER_SIZE);
-            }
-        }
+    napi_value options = argc == 2 ? argv[1] : nullptr;
+    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(-1)) {
+        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
-    // parse options finish
-    auto isSuccess = NG::ImageGeneratorDialogView::Create(optionStr, -1);
-    TAG_LOGE(AceLogTag::ACE_SIDEBAR, "create canvas %{public}s", isSuccess ? "success" : "failed");
-    if (isSuccess) {
+    int32_t errorCode = CallImageGeneratorCreator(env, options);
+    if (errorCode == CREATOR_IMAGES_OVERSIZE) {
+        return CreatePromise(env, ERROR_CODE_PARAM_INVALID, IMAGES_INPUT_OVER_SIZE);
+    }
+    if (errorCode == CREATOR_CONTENT_OVERSIZE) {
+        return CreatePromise(env, ERROR_CODE_PARAM_INVALID, CONTENT_INPUT_OVER_SIZE);
+    }
+    if (errorCode == CREATOR_INTERNAL_ERROR) {
+        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
+    }
+    if (Framework::ImageGeneratorDialogView::Create(-1)) {
         return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
     } else {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);

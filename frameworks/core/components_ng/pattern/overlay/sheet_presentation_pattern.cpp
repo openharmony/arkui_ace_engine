@@ -4038,6 +4038,8 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     }
     if (!sheetObject->CheckIfUpdateObject(newType)) {
         sheetObject->UpdateSheetType(newType);
+        // need delete after popup object
+        ResetPopupScrollUserDefinedIdealSize(newType);
         return;
     }
     if (newType == SheetType::SHEET_SIDE) {
@@ -4061,6 +4063,17 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     InitSheetMode();
     isFirstInit_ = false;
     AvoidAiBar();
+}
+
+void SheetPresentationPattern::ResetPopupScrollUserDefinedIdealSize(SheetType newType)
+{
+    if (newType == SheetType::SHEET_POPUP) {
+        auto scrollNode = GetSheetScrollNode();
+        CHECK_NULL_VOID(scrollNode);
+        auto props = scrollNode->GetLayoutProperty();
+        CHECK_NULL_VOID(props);
+        props->ClearUserDefinedIdealSize(true, true);
+    }
 }
 
 void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resObj,

@@ -388,6 +388,7 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
                 pattern->clickBreak_ = true;
                 auto TossEndPosition = toss->GetTossEndPosition();
                 pattern->SetYLast(TossEndPosition);
+                toss->SetTossPlaying(false);
                 toss->StopTossAnimation();
                 pattern->StopHapticController();
             } else {

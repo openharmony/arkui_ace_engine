@@ -5,6 +5,7 @@ import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial';
 import { default as drawing } from "@ohos.graphics.drawing";
 import { default as uiEffect } from "@ohos.graphics.uiEffect";
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel";
@@ -233,6 +234,13 @@ export namespace extractors {
   }
   export function fromUiEffectFilterPtr(ptr: KPointer): uiEffect.Filter {
     throw new Error("fromUiEffectFilterPtr is not implemented.")
+  }
+
+  export function toUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer {
+    return ArkUIAniModule._Extractors_ToUiMaterialMaterialPtr(value);
+  }
+  export function fromUiMaterialMaterialPtr(ptr: KPointer): uiMaterial.Material {
+    throw new Error("fromUiMaterialMaterialPtr is not implemented.")
   }
 
   export function toUiEffectVisualEffectPtr(

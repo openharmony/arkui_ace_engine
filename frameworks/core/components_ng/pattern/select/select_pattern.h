@@ -157,7 +157,12 @@ public:
     // set props of menu background
     void SetMenuBackgroundColor(const Color& color);
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
-
+    bool IsValidIndex(int32_t index);
+    void GetSelectedValue(int32_t index, std::string& value);
+    void ShowOptions(int32_t index);
+    bool ParseCommand(const std::string& command, int32_t& targetIndex);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    bool ReportOnSelectEvent(int32_t index, const std::string& value);
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
@@ -435,6 +440,39 @@ private:
     std::optional<Color> menuBackgroundColor_;
 };
 
+class SelectJsonUtil {
+public:
+    std::optional<int32_t> index;
+    std::optional<std::string> value;
+
+    SelectJsonUtil() : index(std::nullopt), value(std::nullopt) {}
+
+    static std::shared_ptr<InspectorJsonValue> ToJson(const SelectJsonUtil& util)
+    {
+        auto params = InspectorJsonUtil::CreateObject();
+        CHECK_NULL_RETURN(params, nullptr);
+        params->Put("index", util.index.has_value() ? util.index.value() : -1);
+        params->Put("value", util.value.has_value() ? util.value.value().c_str() : "");
+        auto result = InspectorJsonUtil::Create();
+        CHECK_NULL_RETURN(result, nullptr);
+        result->Put("cmd", "onSelect");
+        result->Put("params", params);
+        return result;
+    };
+
+    static SelectJsonUtil FromJson(const std::unique_ptr<JsonValue>& json)
+    {
+        SelectJsonUtil util;
+        if (json && json->IsValid() && json->GetString("cmd") == "onSelect") {
+            auto child = json->GetValue("params");
+            if (child && child->IsObject()) {
+                util.index = child->GetInt("index", -1);
+            }
+        }
+
+        return util;
+    }
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_SELECT_PATTERN_H

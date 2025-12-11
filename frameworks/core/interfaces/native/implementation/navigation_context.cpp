@@ -775,11 +775,8 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     RefPtr<NG::UINode> targetNode;
     RefPtr<NG::NavDestinationGroupNode> desNode;
     int32_t errorCode = ERROR_CODE_DESTINATION_NOT_FOUND;
-    for (auto iter = nodes_.begin(); iter != nodes_.end(); iter++) {
-        if (iter->first == index) {
-            targetNode = iter->second;
-            break;
-        }
+    if (navDestBuilder_) {
+        targetNode = navDestBuilder_(index);
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;

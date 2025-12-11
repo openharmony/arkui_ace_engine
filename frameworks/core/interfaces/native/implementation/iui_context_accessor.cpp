@@ -341,10 +341,9 @@ void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeById(Converter::Convert<std::string>(*id), Converter::Convert<bool>(isFrozen));
 }
-void FreezeUINode1Impl(const Ark_Number* id, Ark_Boolean isFrozen)
+void FreezeUINode1Impl(Ark_Int32 id, Ark_Boolean isFrozen)
 {
-    CHECK_NULL_VOID(id);
-    ViewAbstract::FreezeUINodeByUniqueId(Converter::Convert<int32_t>(*id), Converter::Convert<bool>(isFrozen));
+    ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
 }
 Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEvent event)
 {

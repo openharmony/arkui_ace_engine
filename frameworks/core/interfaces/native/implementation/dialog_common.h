@@ -15,13 +15,7 @@
 #pragma once
 #include "core/components/dialog/dialog_properties.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss);
-}
-
-namespace OHOS::Ace::NG::Converter {
-template<> MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options);
-template<> NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options);
 }

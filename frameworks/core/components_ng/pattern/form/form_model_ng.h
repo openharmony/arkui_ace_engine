@@ -44,6 +44,7 @@ public:
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
+    void SetColorMode(int32_t colorMode) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,

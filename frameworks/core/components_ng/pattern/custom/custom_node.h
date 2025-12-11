@@ -61,15 +61,7 @@ public:
         renderFunction_ = renderFunction;
     }
 
-    bool HasRenderFunction()
-    {
-        return renderFunction_ != nullptr;
-    }
-
     void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override;
-    void NodeDidBuild();
-    void OnAttachToMainTree(bool recursive = false) override;
-    void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr) override;
 
     int32_t FrameCount() const override
     {
@@ -120,11 +112,6 @@ public:
     void SetJsActive(bool active)
     {
         prevJsActive_ = active;
-    }
-
-    bool isDidBuild()
-    {
-        return isDidBuild_;
     }
 
     void SetExtraInfos(const std::list<ExtraInfo> extraInfos)
@@ -231,8 +218,6 @@ private:
     RenderFunction completeReloadFunc_;
     bool needMarkParent_ = true;
     bool prevJsActive_ = true;
-    bool needMountToMainTree_ = false;
-    bool isDidBuild_ = false;
     std::list<ExtraInfo> extraInfos_;
     WeakPtr<UINode> navigationNode_;
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;

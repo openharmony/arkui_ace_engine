@@ -35,6 +35,8 @@ extern "C" {
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 const float DEFAULT_SNAPSHOT_SCALE = 1.f;
 const int32_t DEFAULT_DELAY_TIME = 300;
+const uint32_t DEFAULT_COLORSPACE_VALUE_SRGB = 4;
+const uint32_t DEFAULT_DYNAMICRANGE_VALUE_STANDARD = 2;
 
 struct _ArkUIStyledString;
 struct _ArkUINode;
@@ -90,7 +92,7 @@ typedef struct webview_WebviewControllerPeer {
 typedef struct NodeAdapterInfo {
     std::function<void(ani_double)> onAttachToNode = nullptr;
     std::function<void(void)> onDetachFromNode = nullptr;
-    std::function<int32_t(ani_double)> onGetId = nullptr;
+    std::function<int32_t(ani_int)> onGetId = nullptr;
     std::function<ani_long(ani_double)> onCreateChild = nullptr;
     std::function<void(ani_double, ani_double)> onDisposeChild = nullptr;
     std::function<void(ani_double, ani_double)> onUpdateChild = nullptr;
@@ -134,6 +136,9 @@ class Context;
 namespace OHOS::Ace::Ani {
 class DragAction;
 class AniGlobalReference;
+}
+namespace OHOS::Ace {
+class UiMaterial;
 }
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
@@ -291,11 +296,26 @@ struct ArkUILocalizedSnapshotRegion {
     double bottom = -1.f;
 };
 
+typedef uint32_t ArkUIColorSpaceMode;
+typedef uint32_t ArkUIDynamicRange;
+
+struct ArkUIColorSpaceModeOptions {
+    ArkUIColorSpaceMode colorSpaceMode = DEFAULT_COLORSPACE_VALUE_SRGB;
+    bool isAuto = false;
+};
+
+struct ArkUIDynamicRangeModeOptions {
+    ArkUIDynamicRange dynamicRangeMode = DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+    bool isAuto = false;
+};
+
 struct ArkUIComponentSnapshotOptions {
     float scale = DEFAULT_SNAPSHOT_SCALE;
     bool waitUntilRenderFinished = false;
     ArkUILocalizedSnapshotRegion snapshotRegion;
     ArkUISnapshotRegionMode regionMode = ArkUISnapshotRegionMode::NO_REGION;
+    ArkUIColorSpaceModeOptions colorSpaceModeOptions;
+    ArkUIDynamicRangeModeOptions dynamicRangeModeOptions;
 };
 
 struct ArkUISnapshotParam {
@@ -374,6 +394,7 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
+    void (*setImageOnErrorCallback)(ani_env* env, ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIWaterFlowSectionGap {
@@ -449,6 +470,7 @@ struct ArkUIAniDragModifier {
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
     ani_long (*getUnifiedData)(ani_long peer);
+    void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
     void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
@@ -542,6 +564,10 @@ struct ArkUIAniCommonModifier {
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
+    void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
+    ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -570,7 +596,7 @@ struct ArkUIAniKeyboardAvoidModeModifier {
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun,
-        void* fnDrawFrontFun, void* fnDrawForegroundFun);
+        void* fnDrawFrontFun, void* fnDrawForegroundFun, void* fnDrawOverlayFun);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {
@@ -769,6 +795,11 @@ struct ArkUIAniCommonNodeAniModifier {
     void (*setCommonOptions)(ani_long node);
 };
 
+struct ArkUIAniVisualEffectModifier {
+    OHOS::Ace::UiMaterial* (*constructMaterial)(int32_t type);
+    void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -784,6 +815,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();

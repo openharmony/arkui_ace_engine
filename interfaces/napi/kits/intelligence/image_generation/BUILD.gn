@@ -22,7 +22,10 @@ template("napi_imagegeneration_static") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    sources = [ "js_image_generation.cpp" ]
+    sources = [
+      "js_image_generation.cpp",
+      "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.cpp",
+      ]
 
     deps = []
     external_deps = []

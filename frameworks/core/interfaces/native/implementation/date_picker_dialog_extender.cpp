@@ -197,6 +197,10 @@ DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions& option
     if (enableHapticFeedback) {
         settingData.isEnableHapticFeedback = enableHapticFeedback.value();
     }
+    auto canLoop = Converter::OptConvert<bool>(options.canLoop);
+    if (canLoop) {
+        settingData.canLoop = canLoop.value();
+    }
     return settingData;
 }
 

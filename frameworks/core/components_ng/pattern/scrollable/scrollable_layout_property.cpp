@@ -25,6 +25,7 @@ void ScrollableLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
     json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("supportLazyLoadingEmptyBranch", propSupportLazyLoadingEmptyBranch_.value_or(false), filter);
 }
 
 } // namespace OHOS::Ace::NG

@@ -97,7 +97,9 @@ export class PeerNode extends IncrementalNode {
         } else if (needRecurs) {
             this._onReuse?.(param);
             for (let child = this.firstChild; child; child = child!.nextSibling) {
-                if (child?.isKind(PeerNodeType)) {
+                if (child?.isKind(RootPeerType)) {
+                    (child as PeerNode)!.onReuse(false, param);
+                } else if (child?.isKind(PeerNodeType)) {
                     (child as PeerNode)!.onReuse(needRecurs, param);
                 }
             }
@@ -108,7 +110,9 @@ export class PeerNode extends IncrementalNode {
         this._onRecycle?.()
         if (needRecurs) {
             for (let child = this.firstChild; child; child = child!.nextSibling) {
-                if (child?.isKind(PeerNodeType)) {
+                if (child?.isKind(RootPeerType)) {
+                    (child as PeerNode)!.onRecycle(false);
+                } else if (child?.isKind(PeerNodeType)) {
                     (child as PeerNode)!.onRecycle(needRecurs);
                 }
             }

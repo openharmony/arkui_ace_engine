@@ -669,7 +669,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
             CHECK_NULL_CONTINUE(menuPattern);
             isClearLastMenuItem_ = true;
-            if (menuPattern->IsSubMenu() && HasSideSubMenu() &&
+            if ((menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) && HasSideSubMenu() &&
                 IsTouchWithinParentMenuItemZone(child, children, position)) {
                 continue;
             }

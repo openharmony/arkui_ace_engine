@@ -1668,6 +1668,56 @@ HWTEST_F(ViewAbstractTestFourNg, ViewAbstractResourceObjectTest022, TestSize.Lev
 }
 
 /**
+ * @tc.name: SetSweepGradient1
+ * @tc.desc: Test SetSweepGradient1 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractResourceObjectTest023, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    gradient.GetSweepGradient()->endAngle = CalcDimension(50.0f, DimensionUnit::PX);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+      CalcDimension(50.0f, DimensionUnit::PX));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetSweepGradient2
+ * @tc.desc: Test SetSweepGradient2 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractResourceObjectTest024, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    gradient.GetSweepGradient()->endAngle = CalcDimension(50.0f, DimensionUnit::PX);
+    ViewAbstract::SetSweepGradient(gradient);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+      CalcDimension(50.0f, DimensionUnit::PX));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
  * @tc.name: SetClipEdge
  * @tc.desc: Test SetClipEdge of View_Abstract
  * @tc.type: FUNC

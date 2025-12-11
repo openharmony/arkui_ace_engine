@@ -312,7 +312,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     if (filter.IsFastFilter()) {
         return;
     }
-    if (propClipShape.has_value()) {
+    if (propClipShape.has_value() && propClipShape.value()) {
         auto jsonClip = JsonUtil::Create(true);
         auto shape = propClipShape.value();
         auto shapeType = BasicShapeTypeToString(shape->GetBasicShapeType());
@@ -325,7 +325,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     }
 
     auto jsonMask = JsonUtil::Create(true);
-    if (propClipMask.has_value()) {
+    if (propClipMask.has_value() && propClipMask.value()) {
         auto shape = propClipMask.value();
         auto shapeType = BasicShapeTypeToString(shape->GetBasicShapeType());
         if (!shapeType.empty()) {

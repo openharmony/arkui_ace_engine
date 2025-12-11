@@ -92,6 +92,7 @@ struct OptionParam {
 
     bool isAIMenuOption = false;
     bool isAskCeliaOption = false;
+    std::vector<OptionParam> subMenuItems = {};
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -124,6 +125,11 @@ struct OptionParam {
         bool enabledParam, uint32_t symbolId)
         : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
           symbolId(symbolId)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam, uint32_t symbolId, const std::vector<OptionParam>& subMenuItems)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
+          symbolId(symbolId), subMenuItems(subMenuItems)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
@@ -266,6 +272,7 @@ public:
     static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(const UiMaterial* material);
 
     // outer border
@@ -1096,6 +1103,7 @@ public:
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();

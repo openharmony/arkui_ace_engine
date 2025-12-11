@@ -1458,6 +1458,9 @@ public:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     bool ProcessAutoFill(AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void ProcessAutoFillOnPaste();
+    void HandleOnPasswordVault();
+    bool IsShowAutoFill();
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1903,7 +1906,6 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

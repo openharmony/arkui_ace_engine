@@ -57,7 +57,7 @@ import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, Pop
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
@@ -424,6 +424,8 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
       flag |= (1 << 2);
     } else if (classType.getMethod(i)?.getName() === "drawForeground") {
       flag |= (1 << 3);
+    } else if (classType.getMethod(i)?.getName() === 'drawOverlay') {
+      flag |= (1 << 4);
     }
   }
   if (flag) {
@@ -439,6 +441,10 @@ export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandW
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
+
+export function hookImageOnError(receiver: ArkImageComponent | ArkImagePeer, value: ImageErrorCallback | undefined): void {
+    ImageOpsHandWritten.hookImageOnErrorImpl(receiver, value);
 }
 
 export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
@@ -476,7 +482,6 @@ export function convertDimensionStrToNumber(value: string, density: number): num
     let unitPart : string = ''
     if (match.length > 1 && match[1] !== undefined) {
         numericValue = Number.parseFloat(match[1] as string);
-        return numericValue
     }
     if (match.length > 2 && match[2] !== undefined) {
         unitPart = match[2] as string;

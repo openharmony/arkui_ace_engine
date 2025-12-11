@@ -664,6 +664,8 @@ public:
 
     static bool IsPCMode();
 
+    static bool IsAutoFillSupport();
+
     static bool ConfigChangePerform();
 
     static void SetConfigChangePerform();
@@ -846,6 +848,11 @@ public:
         return prebuildInMultiFrameEnabled_;
     }
 
+    static bool IsOpenYuvDecode()
+    {
+        return isOpenYuvDecode_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -959,6 +966,8 @@ private:
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;
+    static bool isAutoFillSupport_;
+    static bool isOpenYuvDecode_;
 };
 
 } // namespace OHOS::Ace

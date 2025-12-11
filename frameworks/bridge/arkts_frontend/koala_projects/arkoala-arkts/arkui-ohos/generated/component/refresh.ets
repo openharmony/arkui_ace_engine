@@ -32,11 +32,11 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ResourceStr } from "./units"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { RefreshModifier } from "./../RefreshModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     attributeSet?: RefreshModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -157,7 +157,7 @@ export interface RefreshOptions {
     refreshing: boolean | Bindable<boolean>;
     promptText?: ResourceStr;
     builder?: CustomBuilder;
-    refreshingContent?: ComponentContent;
+    refreshingContent?: ComponentContentBase;
 }
 export interface RefreshAttribute extends CommonMethod {
     setRefreshOptions(value: RefreshOptions): this {
@@ -372,7 +372,7 @@ export class RefreshOptions_serializer {
         if (valueHolderForRefreshingContent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRefreshingContentTmpValue  = valueHolderForRefreshingContent!
-            ComponentContent_serializer.write(valueSerializer, valueHolderForRefreshingContentTmpValue)
+            ComponentContentBase_serializer.write(valueSerializer, valueHolderForRefreshingContentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -422,11 +422,11 @@ export class RefreshOptions_serializer {
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const refreshingContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let refreshingContentTmpBuf : ComponentContent | undefined = undefined
+        let refreshingContentTmpBuf : ComponentContentBase | undefined = undefined
         if ((refreshingContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            refreshingContentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+            refreshingContentTmpBuf = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
         }
-        const refreshingContentTmpResult : ComponentContent | undefined = refreshingContentTmpBuf
+        const refreshingContentTmpResult : ComponentContentBase | undefined = refreshingContentTmpBuf
         let value : RefreshOptions = ({refreshing: refreshingTmpResult, promptText: promptTextTmpResult, builder: builderTmpResult, refreshingContent: refreshingContentTmpResult} as RefreshOptions)
         return value
     }

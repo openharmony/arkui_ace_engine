@@ -1194,4 +1194,20 @@ ArkUINativeModuleValue GridBridge::ResetOnGridItemDrop(ArkUIRuntimeCallInfo* run
     GetArkUINodeModifiers()->getGridModifier()->resetOnGridItemDrop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue GridBridge::SetSupportLazyLoadingEmptyBranch(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_support = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
+        nativeNode, arg_support->IsBoolean() ? arg_support->ToBoolean(vm)->Value() : true);
+
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

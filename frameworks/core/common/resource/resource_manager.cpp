@@ -38,6 +38,12 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
     std::string moduleName = resourceObject->GetModuleName();
 
     auto resourceAdapter = GetResourceAdapter(bundleName, moduleName, instanceId);
+#ifdef CROSS_PLATFORM
+    if (resourceAdapter == nullptr) {
+        std::string fullModuleName = bundleName + "." + moduleName;
+        resourceAdapter = GetResourceAdapter(bundleName, fullModuleName, instanceId);
+    }
+#endif
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
         if (!resourceAdapter) {

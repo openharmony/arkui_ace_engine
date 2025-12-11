@@ -21,6 +21,23 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+bool IsSelectOverlayExtensionMenu(const RefPtr<FrameNode>& itemNode)
+{
+    bool isSelectOverlayExtensionMenu = false;
+    CHECK_NULL_RETURN(itemNode, isSelectOverlayExtensionMenu);
+    auto menuItemPattern = itemNode->GetPattern<MenuItemPattern>();
+    if (menuItemPattern) {
+        auto topLevelMenuPattern = menuItemPattern->GetMenuPattern(true);
+        if (topLevelMenuPattern) {
+            isSelectOverlayExtensionMenu = topLevelMenuPattern->IsSelectOverlayExtensionMenu();
+        }
+    }
+    return isSelectOverlayExtensionMenu;
+}
+} // namespace
+
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -315,8 +332,9 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 
     auto width = std::max(minRowWidth_, contentWidth);
     auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : width;
-    childConstraint.minSize.SetWidth(actualWidth - padding_.Width());
-    childConstraint.maxSize.SetWidth(actualWidth - padding_.Width());
+    auto subMenuIndentation = IsSelectOverlayExtensionMenu(layoutWrapper->GetHostNode()) ? 0.0f : padding_.Width();
+    childConstraint.minSize.SetWidth(actualWidth - subMenuIndentation);
+    childConstraint.maxSize.SetWidth(actualWidth - subMenuIndentation);
     auto expandableHeight = MeasureExpandableHeight(childConstraint, layoutWrapper);
 
     float itemHeight = CalcItemHeight(leftRowHeight, rightRowHeight);
@@ -343,7 +361,6 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_VOID(itemNode);
     auto pipeline = itemNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-
     auto children = row->GetAllChildrenWithBuild();
     CHECK_EQUAL_VOID(isOption_ && !showDefaultSelectedIcon_ && children.empty(), true);
     
@@ -357,7 +374,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
             theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_
     );
     float iconContentPadding = 0.0f;
-    if (!isOption_) {
+    if (!isOption_ && !IsSelectOverlayExtensionMenu(itemNode)) {
         iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     }
 
@@ -735,9 +752,9 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     auto expandableArea = layoutWrapper->GetOrCreateChildByIndex(EXPANDABLE_AREA_VIEW_INDEX);
     CHECK_NULL_VOID(expandableArea);
     expandableArea->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-    expandableArea->GetGeometryNode()->SetMarginFrameOffset(
-        OffsetF(padding_.left.value_or(horInterval_),
-        itemHeight));
+    auto subMenuStartOffset = IsSelectOverlayExtensionMenu(layoutWrapper->GetHostNode()) ? 0.0f :
+        padding_.left.value_or(horInterval_);
+    expandableArea->GetGeometryNode()->SetMarginFrameOffset(OffsetF(subMenuStartOffset, itemHeight));
     expandableArea->Layout();
 }
 

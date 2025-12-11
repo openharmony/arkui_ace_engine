@@ -32,6 +32,8 @@
 #undef protected
 #include "nweb.h"
 #include "nweb_handler.h"
+#include "ui/properties/ui_material.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"

@@ -126,6 +126,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
         },
         ani_native_function {
+            "_Image_SetOnErrorCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Image_SetOnErrorCallback)
+        },
+        ani_native_function {
             "_Extractors_ToWebviewWebviewControllerPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToWebviewWebviewControllerPtr)
@@ -664,6 +669,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Animation_PageTransitionSetOpacity",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOpacity)
+        },
+        ani_native_function {
+            "_UiMaterial_ConstructMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConstructMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_DestroyMaterial",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
         },
         ani_native_function {
             "_CreateViewStackProcessor",
@@ -1443,6 +1458,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
         },
         ani_native_function {
+            "_Extractors_ToUiMaterialMaterialPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiMaterialMaterialPtr)
+        },
+        ani_native_function {
             "_Extractors_ToDrawContextPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawContextPtr)
@@ -1502,6 +1522,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::PasteButton_SetOnClickCallback)
         },
+        ani_native_function {
+            "_BaseEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetBaseEventModifierKeyState)
+        },
+        ani_native_function {
+            "_DragEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetDragEventModifierKeyState)
+        },
+        ani_native_function {
+            "_KeyEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetKeyEventModifierKeyState)
+        },
+        ani_native_function {
+            "_ClickEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickEventPreventDefault)
+        },
+        ani_native_function {
+            "_TouchEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetTouchEventPreventDefault)
+        }
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

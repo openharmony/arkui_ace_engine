@@ -68,6 +68,8 @@ enum class SelectOverlayMenuId {
     CUT,
     PASTE,
     SELECT_ALL,
+    AUTO_FILL,
+    PASSWORD_VAULT,
     TRANSLATE,
     SEARCH,
     SHARE,

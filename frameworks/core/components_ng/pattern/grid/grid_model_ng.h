@@ -81,6 +81,7 @@ public:
     void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetSupportLazyLoadingEmptyBranch(bool supportLazyLoadingEmptyBranch) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -168,6 +169,8 @@ public:
     static void ResetItemFillPolicy(FrameNode* frameNode);
     static int32_t GetItemFillPolicy(FrameNode* frameNode);
     static void SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc&& value);
+    static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool supportLazyLoadingEmptyBranch);
+    static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

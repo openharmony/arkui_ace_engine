@@ -109,7 +109,7 @@ public:
 
     bool JudgeFoldStateChangeAndUpdateState();
 
-    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
+    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback = true);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
     {

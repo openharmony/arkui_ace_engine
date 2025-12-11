@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_mask_accessibility_property.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1672,6 +1673,41 @@ HWTEST_F(SheetOthersTestNg, SetMaskInteractiveTest002, TestSize.Level1)
     sheetManager.SetMaskInteractive(maskNode, false);
     auto ret = maskPattern->GetIsMaskInteractive();
     EXPECT_FALSE(ret);
+
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsAccessibilityModal001
+ * @tc.desc: Test IsAccessibilityModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, IsAccessibilityModal001, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+
+    auto uniqueId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto targetId = NUM_0;
+    auto targetTag = "";
+
+    auto maskNode = FrameNode::CreateFrameNode("SheetMask", uniqueId,
+        AceType::MakeRefPtr<SheetMaskPattern>(targetId, targetTag));
+    ASSERT_NE(maskNode, nullptr);
+
+    auto accessibilityProperty = maskNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto isModal = accessibilityProperty->IsAccessibilityModal();
+    EXPECT_TRUE(isModal);
+
+    auto maskPattern = maskNode->GetPattern<SheetMaskPattern>();
+    ASSERT_NE(maskPattern, nullptr);
+    maskPattern->SetIsMaskInteractive(false);
+    isModal = accessibilityProperty->IsAccessibilityModal();
+    EXPECT_FALSE(isModal);
+
+    maskPattern->SetIsMaskInteractive(true);
+    isModal = accessibilityProperty->IsAccessibilityModal();
+    EXPECT_TRUE(isModal);
 
     SheetOthersTestNg::TearDownTestCase();
 }

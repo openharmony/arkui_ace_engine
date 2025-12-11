@@ -150,6 +150,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "text_overlay_menu_copy_label",
     "text_overlay_menu_paste_label",
     "text_overlay_menu_select_all_label",
+    "text_overlay_menu_auto_fill_label",
+    "text_overlay_menu_password_vault_label",
     "text_overlay_menu_translate_label",
     "text_overlay_menu_share_label",
     "text_overlay_menu_search_label",

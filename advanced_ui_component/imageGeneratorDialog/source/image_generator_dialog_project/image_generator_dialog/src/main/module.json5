@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "image_generator_dialog",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

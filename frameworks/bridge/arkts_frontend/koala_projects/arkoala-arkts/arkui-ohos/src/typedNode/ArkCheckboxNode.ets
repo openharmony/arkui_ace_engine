@@ -18,7 +18,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { ArkCheckboxPeer, CheckboxOptions, CheckboxAttribute, CheckBoxShape, MarkStyle, OnCheckboxChangeCallback,
     CheckBoxConfiguration, ResourceColor, Bindable } from "../framework";
 import { ContentModifier } from "#handwritten";
-import { hookCheckBoxContentModifier } from "../hooks/content_modifiers/ContentModifierHooks";
+import { hookCheckBoxContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkCheckboxNode extends ArkBaseNode implements CheckboxAttribute {
     constructParam(...param: Object[]): this {

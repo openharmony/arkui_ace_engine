@@ -180,6 +180,7 @@ template("ace_core_interfaces_native_node") {
         "ani/trace_ani_modifier.cpp",
         "ani/uinode_ani_modifier.cpp",
         "ani/video_ani_modifier.cpp",
+        "ani/visual_effect_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
@@ -205,6 +206,7 @@ template("ace_core_interfaces_native_node") {
           "ani/security_component_ani_method.cpp",
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
+          "ani/image_ani_modifier.cpp",
         ]
       }
 
@@ -233,6 +235,7 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/web_modifier.cpp" ]
     }
     if (is_arkui_x) {
+      sources += [ "drawable/drawable_modifier.cpp" ]
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
         "//third_party/bounds_checking_function:libsec_static",

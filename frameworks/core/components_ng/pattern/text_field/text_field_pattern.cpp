@@ -1907,6 +1907,12 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
 }
 
+void TextFieldPattern::HandleOnPasswordVault()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPasswordVault");
+    ProcessAutoFillAndKeyboard(SourceType::NONE, true, false, AceAutoFillTriggerType::MANUAL_REQUEST);
+}
+
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     CHECK_NULL_VOID(GetClipboard());
@@ -2054,6 +2060,11 @@ bool TextFieldPattern::IsShowSearch()
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, false);
     return textFieldTheme->GetIsSupportSearch();
+}
+
+bool TextFieldPattern::IsShowAutoFill()
+{
+    return SystemProperties::IsAutoFillSupport();
 }
 
 void TextFieldPattern::HandleOnCameraInput()
@@ -2490,6 +2501,8 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     CHECK_NULL_RETURN(textFieldTheme, info);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, info);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, info);
     auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
     auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
     auto firstIndex = selectController_->GetFirstHandleIndex();
@@ -2506,6 +2519,11 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
         info.isSecondHandleAnimation = secondIsShow;
     }
     info.selectedBackgroundColor = selectedBackgroundColor;
+    if (layoutProperty->HasSelectedDragPreviewStyle()) {
+        info.dragBackgroundColor = layoutProperty->GetSelectedDragPreviewStyleValue();
+    } else {
+        info.dragBackgroundColor = std::nullopt;
+    }
     info.handleColor = handleColor;
     return info;
 }
@@ -3043,6 +3061,18 @@ void TextFieldPattern::ProcessAutoFillOnPaste()
     ProcessAutoFill(isPopup, true, false, AceAutoFillTriggerType::PASTE_REQUEST);
 }
 
+void TextFieldPattern::ProcessAutoFillAndKeyboard(SourceType sourceType, bool ignoreFillType, bool isNewPassWord,
+    AceAutoFillTriggerType triggerType)
+{
+    bool isPopup = false;
+    auto isSuccess = ProcessAutoFill(isPopup, ignoreFillType, isNewPassWord, triggerType);
+    if (!isPopup && isSuccess) {
+        SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::AUTOFILL_PROCESS);
+    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
+        NotifyOnEditChanged(true);
+    }
+}
+
 void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
@@ -3052,13 +3082,7 @@ void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
         }
         return;
     }
-    bool isPopup = false;
-    auto isSuccess = ProcessAutoFill(isPopup);
-    if (!isPopup && isSuccess) {
-        SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::AUTOFILL_PROCESS);
-    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
-        NotifyOnEditChanged(true);
-    }
+    ProcessAutoFillAndKeyboard(sourceType);
 }
 
 bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillType)
@@ -3229,7 +3253,13 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool ignoreFillType, bool 
         CHECK_NULL_VOID(pagePattern);
         pagePattern->SetIsModalCovered(true);
     };
-
+    if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
+        auto autoFillController = GetOrCreateAutoFillController();
+        if (autoFillController) {
+            autoFillController->UpdateAutoFillInsertInfo(selectController_->GetStartIndex(),
+                selectController_->GetEndIndex(), AutoFillInsertStatus::PENDING);
+        }
+    }
     auto resultCode = container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_, true,
         onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
     if (resultCode != AceAutoFillError::ACE_AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED) {
@@ -5542,7 +5572,15 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     TwinklingByFocus();
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
-    auto caretStart = IsSelected() ? start : selectController_->GetCaretIndex();
+    auto autoFillController = GetOrCreateAutoFillController();
+    bool needAutoFillOnSelected = autoFillController &&
+        autoFillController->GetAutoFillInsertStatus() == AutoFillInsertStatus::INSERTING;
+    if (needAutoFillOnSelected) {
+        autoFillController->GetAutoFillInsertStartEnd(start, end);
+        autoFillController->UpdateAutoFillInsertInfo(-1, -1, AutoFillInsertStatus::INIT);
+    }
+    bool isSelected = IsSelected() || needAutoFillOnSelected;
+    auto caretStart = isSelected ? start : selectController_->GetCaretIndex();
     if (isIME) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
         CHECK_NULL_VOID(isInsert);
@@ -5553,7 +5591,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto oldContent = contentController_->GetTextUtf16Value();
     auto originCaretIndex =
             TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
-    if (IsSelected()) {
+    if (isSelected) {
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = true;
         if (isIME) {
@@ -8852,6 +8890,18 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         HandleOnPasteCommon(nodeWrap->GetValue());
         return;
     }
+    if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
+        if (nodeWrap->GetIsFocus() && !HasFocus()) {
+            TextFieldRequestFocus(RequestFocusReason::AUTO_FILL);
+        }
+        auto autoFillController = GetOrCreateAutoFillController();
+        if (autoFillController && autoFillController->GetAutoFillInsertStatus() == AutoFillInsertStatus::PENDING) {
+            autoFillController->UpdateAutoFillInsertStatus(AutoFillInsertStatus::INSERTING);
+        }
+        auto fillData = UtfUtils::Str8DebugToStr16(nodeWrap->GetValue());
+        AddInsertCommand(fillData, InputReason::AUTO_FILL);
+        return;
+    }
     auto isFocus = nodeWrap->GetIsFocus();
     if (isFocus && !HasFocus()) {
         TextFieldRequestFocus(RequestFocusReason::AUTO_FILL);
@@ -8894,6 +8944,10 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::AUTO_FILL_REQUEST_FAIL)) {
             NotifyOnEditChanged(true);
         }
+    }
+    auto autoFillController = GetOrCreateAutoFillController();
+    if (autoFillController && autoFillController->GetAutoFillInsertStatus() == AutoFillInsertStatus::PENDING) {
+        autoFillController->UpdateAutoFillInsertInfo(-1, -1, AutoFillInsertStatus::INIT);
     }
 #endif
 }
@@ -11406,7 +11460,7 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
         host->IsFreeze(), GetIsPreviewText());
     TAG_LOGI(ACE_TEXT_FIELD, "AddInsertCommand len: %{public}d reason: %{public}d",
         static_cast<int32_t>(insertValue.length()), static_cast<int32_t>(reason));
-    if (reason != InputReason::PASTE) {
+    if (reason != InputReason::PASTE && reason != InputReason::AUTO_FILL) {
         if (!HasFocus()) {
             int32_t frameId = host->GetId();
             TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
@@ -12052,6 +12106,7 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
         DEFINE_PROP_HANDLER(counterTextColor, Color, UpdateCounterTextColor),
         DEFINE_PROP_HANDLER(counterTextOverflowColor, Color, UpdateCounterTextOverflowColor),
+        DEFINE_PROP_HANDLER(selectedDragPreviewStyleColor, Color, UpdateSelectedDragPreviewStyle),
         
         {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {

@@ -312,6 +312,11 @@ public:
         ViewAbstract::SetCompositingFilter(compositingFilter);
     }
 
+    void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override
+    {
+        ViewAbstract::SetMaterialFilter(materialFilter);
+    }
+
     void SetSystemMaterial(const UiMaterial* material) override
     {
         ViewAbstract::SetSystemMaterial(material);

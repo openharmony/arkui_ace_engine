@@ -865,7 +865,8 @@ public:
     static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
-
+    static std::function<void(NG::DrawingContext& context)> GetDrawOverlayCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
     static void JsFocusScopeId(const JSCallbackInfo& info);
@@ -875,6 +876,7 @@ public:
     static void JsBackgroundFilter(const JSCallbackInfo& info);
     static void JsForegroundFilter(const JSCallbackInfo& info);
     static void JsCompositingFilter(const JSCallbackInfo& info);
+    static void JsMaterialFilter(const JSCallbackInfo& info);
     static NG::PaddingProperty GetLocalizedPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
         const std::optional<CalcDimension>& end);

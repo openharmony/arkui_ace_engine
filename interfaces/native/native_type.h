@@ -2514,6 +2514,16 @@ typedef enum {
      * @since 15
      */
     ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
+    /**
+     * @error The provided color space or dynamic range mode is not supported.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED = 160003,
+    /**
+     * @error The isAuto parameter of the color space or dynamic range mode is set to true for offscreen node snapshot.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED = 160004,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
@@ -5487,6 +5497,44 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 
 /**
+ * @brief Defines the color mode used for current snapshot taking.
+ * By default, the system draws snapshot in sRGB mode. Therefore, snapshot for components with wide color display
+ * mode enabled will lose some effect. If you know the color space used in the component to be taken snapshot,
+ * you can specify the colorSpace parameter and set isAuto to false, for achieving the expected screenshot effect.
+ * But it is difficult to know which color space is used by the component to be taken. Therefore, in general,
+ * you can just set isAuto to true for letting the system to determine the color space to use based on the actual
+ * situation automaticly. When isAuto is set to true, value set by the colorSpace parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param colorSpace One specific color space which want to be used, you can refer the {@link ColorSpaceName} enum
+ *    in native_color_space_manager.h.
+ * @param isAuto Indicate that if the system should decide the color space automaticlly.
+ *    If set this to true, the one specificed by colorSpace parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetColorMode(ArkUI_SnapshotOptions* snapshotOptions, int32_t colorSpace, bool isAuto);
+
+/**
+ * @brief Defines the dynamic range mode used for current snapshot taking.
+ * By default, the system draws snapshot in STANDARD mode. You can set the dynamicRangeMode parameter
+ * and set isAuto to false, for using one specific dynamic range mode.
+ * Also you can just set isAuto to true for letting the system to determine the dynamic range mode automaticly.
+ * When isAuto is set to true, value set by the dynamicRangeMode parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param dynamicRangeMode One specific dynamic range mode defined in {@link ArkUI_DynamicRangeMode}.
+ * @param isAuto Indicate that if the system should decide the dynamic range mode automaticlly.
+ *    If set this to true, the one specificed by dynamicRangeMode parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
+    ArkUI_SnapshotOptions* snapshotOptions, int32_t dynamicRangeMode, bool isAuto);
+
+/**
  * @brief Create a cross-language option instance.
  *
  * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
@@ -6977,6 +7025,44 @@ void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* optio
  * @since 23
  */
 ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
 
 #ifdef __cplusplus
 };
