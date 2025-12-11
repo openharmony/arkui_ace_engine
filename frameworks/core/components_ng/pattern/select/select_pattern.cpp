@@ -2073,10 +2073,6 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     CHECK_NULL_VOID(props);
     auto themeBgcolor = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
     SetMenuBackgroundColorByUser(themeBgcolor, props);
-    SetOptionBgColorByUser(Color::TRANSPARENT, props);
-    auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    SetSelectedOptionBgColorByUser(theme, props, layoutProps);
     SetModifierByUser(theme, props);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2714,34 +2710,6 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
 }
 
-void SelectPattern::SetOptionTextModifierByUser(
-    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
-{
-    CHECK_NULL_VOID(theme);
-    CHECK_NULL_VOID(props);
-    if (!props->GetOptionFontColorSetByUserValue(false)) {
-        SetOptionFontColor(theme->GetFontColor());
-    }
-
-    if (props->GetOptionTextModifierSetByUserValue(false)) {
-        SetOptionTextModifier(textOptionApply_);
-    }
-}
-
-void SelectPattern::SetSelectedOptionTextModifierByUser(
-    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
-{
-    CHECK_NULL_VOID(theme);
-    CHECK_NULL_VOID(props);
-    if (!props->GetSelectedOptionFontColorSetByUserValue(false)) {
-        SetSelectedOptionFontColor(theme->GetSelectedColorText());
-    }
-
-    if (props->GetSelectedOptionTextModifierSetByUserValue(false)) {
-        SetSelectedOptionTextModifier(textSelectOptionApply_);
-    }
-}
-
 void SelectPattern::SetArrowModifierByUser(
     const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
 {
@@ -2792,9 +2760,6 @@ void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const Re
     if (props->GetTextModifierSetByUserValue(false)) {
         SetTextModifierApply(textApply_);
     }
-
-    SetOptionTextModifierByUser(theme, props);
-    SetSelectedOptionTextModifierByUser(theme, props);
     SetArrowModifierByUser(theme, props);
 }
 
