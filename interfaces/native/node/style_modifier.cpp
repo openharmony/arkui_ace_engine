@@ -18077,14 +18077,14 @@ const ArkUI_AttributeItem* GetGridSupportAnimation(ArkUI_NodeHandle node)
 
 int32_t SetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    bool supportLazyLoadingEmptyBranch = false;
+    bool enable = false;
     if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     } else {
-        supportLazyLoadingEmptyBranch = item->value[0].i32;
+        enable = item->value[0].i32;
     }
     GetFullImpl()->getNodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
-        node->uiNodeHandle, supportLazyLoadingEmptyBranch);
+        node->uiNodeHandle, enable);
     return ERROR_CODE_NO_ERROR;
 }
 

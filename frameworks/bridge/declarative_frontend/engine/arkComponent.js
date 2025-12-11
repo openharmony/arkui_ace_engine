@@ -7645,7 +7645,7 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
     return this;
   }
-  supportLazyLoadingEmptyBranch(value) {
+  supportEmptyBranchInLazyLoading(value) {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }
@@ -7960,7 +7960,7 @@ class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey {
     }
   }
 }
-GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('supportLazyLoadingEmptyBranch');
+GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('supportEmptyBranchInLazyLoading');
 class GridOnReachStartModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
