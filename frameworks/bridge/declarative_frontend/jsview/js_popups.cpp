@@ -603,6 +603,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
                 popupParam->SetShadow(shadow);
+                popupParam->SetIsShadowStyle(true);
             }
         } else {
             popupParam->SetShadow(shadow);
@@ -611,7 +612,11 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
             popupParam->SetShadow(shadow);
+            popupParam->SetIsShadowStyle(true);
         }
+    }
+    if (shadowVal->IsNumber()) {
+        popupParam->SetIsShadowStyle(true);
     }
 
     auto blurStyleValue = popupObj->GetProperty("backgroundBlurStyle");
