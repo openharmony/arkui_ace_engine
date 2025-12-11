@@ -111,8 +111,9 @@ public:
             if (pattern) {
                 theme->titleStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_title_font_size", 0.0_fp));
                 theme->titleStyle_.SetTextColor(pattern->GetAttr<Color>("picker_title_text_color", Color()));
+                theme->titleStyle_.SetFontWeight(
+                    FontWeight(pattern->GetAttr<int>("picker_title_font_weight", static_cast<int>(FontWeight::W500))));
             }
-            theme->titleStyle_.SetFontWeight(FontWeight::W500);
             theme->titleStyle_.SetMaxLines(1);
             theme->titleStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
@@ -190,6 +191,22 @@ public:
                 pattern->GetAttr<Color>("picker_selector_item_focus_bg_color", Color::TRANSPARENT);
             theme->selectorItemNormalBgColor_ =
                 pattern->GetAttr<Color>("picker_selector_item_normal_bg_color", Color::TRANSPARENT);
+            theme->checkboxSize_ = pattern->GetAttr<Dimension>("picker_checkbox_size", 24.0_vp);
+            theme->lunarSwitchHeight_ = pattern->GetAttr<Dimension>("picker_lunar_switch_height", 48.0_vp);
+            theme->checkboxPaddingLeft_ = pattern->GetAttr<Dimension>("picker_checkbox_padding_left", 24.0_vp);
+            theme->checkboxPaddingRight_ = pattern->GetAttr<Dimension>("picker_checkbox_padding_right", 8.0_vp);
+            theme->pickerPadding_ = pattern->GetAttr<Dimension>("picker_padding", 6.0_vp);
+            theme->titlePaddingHorizontal_ = pattern->GetAttr<Dimension>("picker_title_padding_horizontal", 16.0_vp);
+            theme->titleMarginTop_ = pattern->GetAttr<Dimension>("picker_title_margin_top", 8.0_vp);
+            theme->titleMarginBottom_ = pattern->GetAttr<Dimension>("picker_title_margin_bottom", 8.0_vp);
+            theme->timePickerTitleMarginTop_ = pattern->GetAttr<Dimension>("time_picker_title_margin_top", 24.0_vp);
+            theme->timePickerTitleMarginBottom_ =
+                pattern->GetAttr<Dimension>("time_picker_title_margin_bottom", 24.0_vp);
+            theme->buttonColor_ = pattern->GetAttr<Color>("picker_button_color", Color::TRANSPARENT);
+            theme->pickerDialogMargin_ = pattern->GetAttr<Dimension>("picker_dialog_margin", 24.0_vp);
+            theme->pickerDialogDividerMargin_ = pattern->GetAttr<Dimension>("picker_dialog_divider_margin", 24.0_vp);
+            theme->pickerTitleHeight_ = pattern->GetAttr<Dimension>("picker_title_height", 32.0_vp);
+            theme->pickerTextPadding_ = pattern->GetAttr<Dimension>("picker_text_padding", 16.0_vp);
 
             if (FOCUS_AREA_TYPE_IMPL == theme->focusImplType_) {
                 theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>(
@@ -298,6 +315,21 @@ public:
         theme->selectorItemFocusBgColor_ = selectorItemFocusBgColor_;
         theme->selectorItemNormalBgColor_ = selectorItemNormalBgColor_;
         theme->focusPadding_ = focusPadding_;
+        theme->checkboxSize_ = checkboxSize_;
+        theme->lunarSwitchHeight_ = lunarSwitchHeight_;
+        theme->checkboxPaddingLeft_ = checkboxPaddingLeft_;
+        theme->checkboxPaddingRight_ = checkboxPaddingRight_;
+        theme->pickerPadding_ = pickerPadding_;
+        theme->titlePaddingHorizontal_ = titlePaddingHorizontal_;
+        theme->titleMarginTop_ = titleMarginTop_;
+        theme->titleMarginBottom_ = titleMarginBottom_;
+        theme->timePickerTitleMarginTop_ = timePickerTitleMarginTop_;
+        theme->timePickerTitleMarginBottom_ = timePickerTitleMarginBottom_;
+        theme->buttonColor_ = buttonColor_;
+        theme->pickerDialogMargin_ = pickerDialogMargin_;
+        theme->pickerDialogDividerMargin_ = pickerDialogDividerMargin_;
+        theme->pickerTitleHeight_ = pickerTitleHeight_;
+        theme->pickerTextPadding_ = pickerTextPadding_;
     }
 
     void cloneSelectedBackgroundStyle(RefPtr<PickerTheme> theme) const
@@ -655,6 +687,81 @@ public:
         return focusPadding_;
     }
 
+    const Dimension& GetCheckboxSize() const
+    {
+        return checkboxSize_;
+    }
+
+    const Dimension& GetLunarSwitchHeight() const
+    {
+        return lunarSwitchHeight_;
+    }
+
+    const Dimension& GetCheckboxPaddingLeft() const
+    {
+        return checkboxPaddingLeft_;
+    }
+
+    const Dimension& GetCheckboxPaddingRight() const
+    {
+        return checkboxPaddingRight_;
+    }
+
+    const Dimension& GetPickerPadding() const
+    {
+        return pickerPadding_;
+    }
+
+    const Dimension& GetTitlePaddingHorizontal() const
+    {
+        return titlePaddingHorizontal_;
+    }
+
+    const Dimension& GetTitleMarginTop() const
+    {
+        return titleMarginTop_;
+    }
+
+    const Dimension& GetTitleMarginBottom() const
+    {
+        return titleMarginBottom_;
+    }
+
+    const Dimension& GetTimePickerTitleMarginTop() const
+    {
+        return timePickerTitleMarginTop_;
+    }
+
+    const Dimension& GetTimePickerTitleMarginBottom() const
+    {
+        return timePickerTitleMarginBottom_;
+    }
+
+    const Color& GetButtonColor() const
+    {
+        return buttonColor_;
+    }
+
+    const Dimension& GetPickerDialogMargin() const
+    {
+        return pickerDialogMargin_;
+    }
+
+    const Dimension& GetPickerDialogDividerMargin() const
+    {
+        return pickerDialogDividerMargin_;
+    }
+
+    const Dimension& GetPickerTitleHeight() const
+    {
+        return pickerTitleHeight_;
+    }
+
+    const Dimension& GetPickerTextPadding() const
+    {
+        return pickerTextPadding_;
+    }
+
     const Color& GetSelectorItemBorderColor() const
     {
         return selectorItemBorderColor_;
@@ -815,6 +922,21 @@ private:
     Dimension selectorItemBorderWidth_;
     Dimension selectorItemFocusBorderWidth_;
     Dimension focusPadding_;
+    Dimension checkboxSize_;
+    Dimension lunarSwitchHeight_;
+    Dimension checkboxPaddingLeft_;
+    Dimension checkboxPaddingRight_;
+    Dimension pickerPadding_;
+    Dimension titlePaddingHorizontal_;
+    Dimension titleMarginTop_;
+    Dimension titleMarginBottom_;
+    Dimension timePickerTitleMarginTop_;
+    Dimension timePickerTitleMarginBottom_;
+    Dimension pickerDialogMargin_;
+    Dimension pickerDialogDividerMargin_;
+    Dimension pickerTitleHeight_;
+    Dimension pickerTextPadding_;
+    Color buttonColor_;
     Color selectorItemBorderColor_;
     Color selectorItemFocusBorderColor_;
     Color selectorItemFocusBgColor_;

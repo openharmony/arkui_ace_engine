@@ -47,6 +47,7 @@ const int32_t CHILD_INDEX_SECOND = 1;
 const int32_t CHILD_INDEX_THIRD = 2;
 const int32_t CHILD_INDEX_FOURTH = 3;
 constexpr float DISABLE_ALPHA = 0.6f;
+const Dimension FOCUS_RADIUS = 3.0_vp;
 const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
@@ -97,6 +98,10 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
+    auto currentFocusStackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(currentFocusStackChild);
+    auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackChild->GetFirstChild());
+    CHECK_NULL_VOID(currentFocusButtonNode);
     for (const auto& child : children) {
         auto childNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(childNode);
@@ -110,16 +115,19 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto columnNodeHeight = timePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        UpdateButtonConfirmLayoutProperty(buttonLayoutProperty);
         auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
         auto maxButtonHeight = static_cast<float>(columnNodeHeight);
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (!useButtonFocusArea_) {
+            buttonLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
+            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        } else {
+            auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
+            UpdateFocusStyles(buttonLayoutProperty, timePickerColumnNode, height, isFocusButton);
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
         if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
@@ -129,6 +137,115 @@ void TimePickerRowPattern::SetButtonIdeaSize()
             parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     }
+}
+
+void TimePickerRowPattern::UpdateFocusStyles(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty,
+    const RefPtr<FrameNode>& timePickerColumnNode, const Dimension& height, bool isFocusButton)
+{
+    auto columnNode = DynamicCast<FrameNode>(timePickerColumnNode->GetLastChild());
+    CHECK_NULL_VOID(columnNode);
+    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
+    auto maxButtonHeight = static_cast<float>(timePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
+    auto standardButtonHeight = static_cast<float>((height - pickerPadding_ * RATE).ConvertToPx());
+    auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(width - (pickerPadding_ * RATE).ConvertToPx()), CalcLength(buttonHeight)));
+    UpdateColumnButtonStyles(columnNode, isFocusButton, false);
+}
+
+void TimePickerRowPattern::UpdateButtonConfirmLayoutProperty(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
+{
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(pickerSelectorItemRadius_));
+}
+
+void TimePickerRowPattern::InitSelectorProps()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
+}
+
+void TimePickerRowPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusActive) {
+            auto pickerPattern = weak.Upgrade();
+            CHECK_NULL_VOID(pickerPattern);
+            pickerPattern->SetHaveFocus(isFocusActive);
+            pickerPattern->UpdateFocusButtonState();
+        };
+    }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void TimePickerRowPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(host);
+}
+
+void TimePickerRowPattern::SetHaveFocus(bool haveFocus)
+{
+    haveFocus_ = haveFocus;
+}
+
+void TimePickerRowPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+
+    AddIsFocusActiveUpdateEvent();
+    if (context->GetIsFocusActive()) {
+        SetHaveFocus(true);
+        UpdateFocusButtonState();
+    }
+}
+
+void TimePickerRowPattern::HandleBlurEvent()
+{
+    SetHaveFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
+    UpdateFocusButtonState();
+}
+
+void TimePickerRowPattern::UpdateFocusButtonState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (useButtonFocusArea_) {
+        auto currentFocusStackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+        CHECK_NULL_VOID(currentFocusStackNode);
+        auto blendColumnNode = currentFocusStackNode->GetLastChild();
+        CHECK_NULL_VOID(blendColumnNode);
+        auto currentFocusColumnNode = DynamicCast<FrameNode>(blendColumnNode->GetLastChild());
+        CHECK_NULL_VOID(currentFocusColumnNode);
+
+        UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
+    }
+}
+
+void TimePickerRowPattern::UpdateColumnButtonStyles(
+    const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty)
+{
+    CHECK_NULL_VOID(columnNode);
+    auto datePickerColumnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(datePickerColumnPattern);
+    datePickerColumnPattern->UpdateColumnButtonFocusState(haveFocus, needMarkDirty);
 }
 
 void TimePickerRowPattern::ColumnPatternInitHapticController()
@@ -297,12 +414,33 @@ void TimePickerRowPattern::InitFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
     if (focusHub) {
         InitOnKeyEvent(focusHub);
 #ifdef SUPPORT_DIGITAL_CROWN
         InitOnCrownEvent(focusHub);
 #endif
     }
+    CHECK_NULL_VOID(!focusEventInitialized_);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    focusEventInitialized_ = true;
 }
 
 void TimePickerRowPattern::UpdateTitleNodeContent()
@@ -368,6 +506,7 @@ void TimePickerRowPattern::OnModifyDone()
     FlushColumn();
     InitDisabled();
     SetCallBack();
+    InitSelect();
     InitFocusEvent();
     UpdateTitleNodeContent();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -375,6 +514,20 @@ void TimePickerRowPattern::OnModifyDone()
         UpdateUserSetSelectColor();
     }
     SetDefaultFocus();
+    InitSelectorProps();
+}
+
+void TimePickerRowPattern::InitSelect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
+    pickerSelectorItemRadius_ = pickerTheme->GetSelectorItemRadius();
+    pickerPadding_ = pickerTheme->GetPickerPadding();
 }
 
 void TimePickerRowPattern::LimitSelectedTimeInRange()
@@ -1843,6 +1996,7 @@ void TimePickerRowPattern::PaintFocusState()
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
 
+    UpdateFocusButtonState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1889,14 +2043,39 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
+    if (!useButtonFocusArea_) {
+        float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+        float paintRectHeight = dividerSpacing - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+        auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+        auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
+                       FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+        AdjustFocusBoxOffset(centerX);
+        paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
+        PaintRectWithoutButtonFocusArea(paintRect);
+    } else {
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto buttonNode = DynamicCast<FrameNode>(stackChild->GetFirstChild());
+        CHECK_NULL_VOID(buttonNode);
+        auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
+        auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
+        auto stackRenderContext = stackChild->GetRenderContext();
+        CHECK_NULL_VOID(stackRenderContext);
+        auto leftPadding = 0.0f;
+        if (geometryNode->GetPadding()) {
+            leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
+        }
+        focusButtonRect -=
+            OffsetF(focusSpace - leftPadding, focusSpace - stackRenderContext->GetPaintRectWithoutTransform().GetY());
+        focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
+        focusButtonRect += OffsetF(leftTotalColumnWidth, 0);
+        paintRect.SetRect(focusButtonRect);
+        PaintRectWithButtonFocusArea(paintRect);
+    }
+}
 
-    float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
-    float paintRectHeight = dividerSpacing - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
-    auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-    auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
-        FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-    AdjustFocusBoxOffset(centerX);
-    paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
+void TimePickerRowPattern::PaintRectWithoutButtonFocusArea(RoundRect& paintRect)
+{
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -1905,6 +2084,22 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+}
+
+void TimePickerRowPattern::PaintRectWithButtonFocusArea(RoundRect& paintRect)
+{
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((pickerSelectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
 }
 
 void TimePickerRowPattern::AdjustFocusBoxOffset(double& centerX)

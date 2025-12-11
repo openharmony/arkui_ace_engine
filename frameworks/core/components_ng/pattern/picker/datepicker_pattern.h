@@ -41,6 +41,7 @@ namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
+constexpr Dimension PICKER_MARGIN_FROM_CHECK_BOX = 10.0_vp;
 }
 
 class DatePickerPattern : public LinearLayoutPattern {
@@ -831,6 +832,8 @@ private:
     void UpdateFocusButtonState();
     void SetHaveFocus(bool haveFocus);
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
+    bool UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme, RefPtr<UINode> child,
+        const RefPtr<FrameNode> currentFocusButtonNode, const RefPtr<FrameNode> host);
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
     void OrderCurrentDateByYearMonthDayColumn(
