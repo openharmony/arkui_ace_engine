@@ -496,10 +496,7 @@ void SecurityComponentModelNG::SetIcon(const ImageSourceInfo& value)
     if (hasPermission.value_or(false)) {
         auto secCompTheme = GetTheme();
         CHECK_NULL_VOID(secCompTheme);
-        bool isButtonVisible = false;
-        if (prop) {
-            isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-        }
+        bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
         RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
         if (iconNode == nullptr) {
             iconNode = FrameNode::CreateFrameNode(
@@ -535,10 +532,7 @@ void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, const std::optional
     if (hasPermission.value_or(false) && value.has_value()) {
         auto secCompTheme = GetTheme();
         CHECK_NULL_VOID(secCompTheme);
-        bool isButtonVisible = false;
-        if (prop) {
-            isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-        }
+        bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
         RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
         if (iconNode == nullptr) {
             iconNode = FrameNode::CreateFrameNode(
@@ -582,10 +576,7 @@ void SecurityComponentModelNG::SetText(const std::string& value)
             CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
             std::string textStr = value;
-            bool isButtonVisible = false;
-            if (prop) {
-                isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-            }
+            bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
             SetDefaultTextStyle(textNode, textStr, isButtonVisible);
             CHECK_NULL_VOID(textNode);
             frameNode->AddChild(textNode);
@@ -610,10 +601,7 @@ void SecurityComponentModelNG::SetText(FrameNode* frameNode, const std::optional
             CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
             std::string textStr = value.value();
-            bool isButtonVisible = false;
-            if (prop) {
-                isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-            }
+            bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
             SetDefaultTextStyle(textNode, textStr, isButtonVisible);
             CHECK_NULL_VOID(textNode);
             frameNode->AddChild(textNode);
