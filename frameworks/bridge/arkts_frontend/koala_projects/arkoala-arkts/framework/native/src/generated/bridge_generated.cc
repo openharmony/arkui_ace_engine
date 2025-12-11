@@ -30356,7 +30356,7 @@ KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_clearChildren, Ark_NativePointer)
 Ark_NativePointer impl_FrameNodeExtender_getChild(Ark_NativePointer peer, Ark_Int32 index, KInteropNumber expandMode) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getChild(static_cast<Ark_FrameNode>(peer), index, (const Ark_Number*) (&expandMode));
 }
-KOALA_INTEROP_DIRECT_3(FrameNodeExtender_getChild, Ark_NativePointer, Ark_NativePointer, Ark_Int32, KInteropNumber)
+KOALA_INTEROP_3(FrameNodeExtender_getChild, Ark_NativePointer, Ark_NativePointer, Ark_Int32, KInteropNumber)
 Ark_NativePointer impl_FrameNodeExtender_getFirstChild(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChild(static_cast<Ark_FrameNode>(peer));
 }
