@@ -269,6 +269,21 @@ Opt_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset(Ark_VMContext vmContext)
     return Converter::ArkValue<Opt_OffsetResult>(offset);
 }
 
+Opt_OffsetResult ScrollerPeerImpl::TriggerOffset()
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        LOGE("ARKOALA ScrollerPeerImpl::TriggerOffset Controller not bound to component.");
+        return (Opt_OffsetResult) {
+            .tag = static_cast<InteropTag>(INTEROP_TAG_UNDEFINED),
+            .value = { 0, 0 }
+            };
+    }
+    ContainerScope scope(instanceId_);
+    auto offset = scrollController->GetCurrentOffset(); // the result of GetCurrentOffset need to be returned
+    return Converter::ArkValue<Opt_OffsetResult>(offset);
+}
+
 void ScrollerPeerImpl::TriggerScrollToIndex(Ark_VMContext vmContext, const Ark_Int32 value,
     const Opt_Boolean* smoothValue, const Opt_ScrollAlign* alignValue, const Opt_ScrollToIndexOptions* options)
 {

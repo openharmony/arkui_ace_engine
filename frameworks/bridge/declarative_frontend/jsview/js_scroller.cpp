@@ -332,8 +332,6 @@ void JSScroller::Offset(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
-        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
-            "The controller does not bind a component when calling Offset function");
         return;
     }
     auto retObj = JSRef<JSObject>::New();

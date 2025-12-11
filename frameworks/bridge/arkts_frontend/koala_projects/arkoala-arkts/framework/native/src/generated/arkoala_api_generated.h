@@ -28679,6 +28679,7 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
                        const Ark_ScrollPageOptions* value);
     Opt_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
                                       Ark_Scroller peer);
+    Opt_OffsetResult (*offset)(Ark_Scroller peer);
     void (*scrollToIndex)(Ark_VMContext vmContext,
                           Ark_Scroller peer,
                           Ark_Int32 value,
