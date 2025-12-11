@@ -23625,6 +23625,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                                const Opt_GridDirection* value);
     void (*setSupportAnimation)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
+    void (*setSupportEmptyBranchInLazyLoading)(Ark_NativePointer node,
+                                               const Opt_Boolean* value);
     void (*setOnItemDragStart)(Ark_NativePointer node,
                                const Opt_OnItemDragStartCallback* value);
     void (*setOnItemDragEnter)(Ark_NativePointer node,
