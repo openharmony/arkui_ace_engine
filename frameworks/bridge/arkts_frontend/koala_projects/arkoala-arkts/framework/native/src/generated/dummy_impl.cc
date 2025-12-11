@@ -31966,6 +31966,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                              const Ark_Vector2* positionByLocal)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("convertPositionToWindow(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, positionByLocal);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer,
+                                                const Ark_Vector2* positionByWindow)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("convertPositionFromWindow(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, positionByWindow);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
     void DestroyPeerImpl(Ark_FrictionMotion peer)
@@ -48192,6 +48224,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
             FrameNodeExtenderAccessor::IsOnRendertreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+            FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+            FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }

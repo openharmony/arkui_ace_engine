@@ -30689,6 +30689,32 @@ KOALA_INTEROP_DIRECT_2(FrameNodeExtender_removeAdoptedChild, Ark_Int32, Ark_Nati
 Ark_NativePointer impl_FrictionMotion_construct(KInteropNumber friction, KInteropNumber position, KInteropNumber velocity) {
         return GetAccessors()->getFrictionMotionAccessor()->construct((const Ark_Number*) (&friction), (const Ark_Number*) (&position), (const Ark_Number*) (&velocity));
 }
+KInteropReturnBuffer impl_FrameNodeExtender_convertPositionToWindow(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Vector2 positionByLocalValueTemp = Vector2_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->convertPositionToWindow(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Vector2*>(&positionByLocalValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Float64 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeFloat64(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(FrameNodeExtender_convertPositionToWindow, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_FrameNodeExtender_convertPositionFromWindow(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Vector2 positionByWindowValueTemp = Vector2_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->convertPositionFromWindow(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Vector2*>(&positionByWindowValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_Float64 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeFloat64(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(FrameNodeExtender_convertPositionFromWindow, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
 KOALA_INTEROP_DIRECT_3(FrictionMotion_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber)
 Ark_NativePointer impl_FrictionMotion_getFinalizer() {
         return GetAccessors()->getFrictionMotionAccessor()->getFinalizer();

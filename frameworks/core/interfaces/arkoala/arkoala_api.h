@@ -7661,9 +7661,9 @@ struct ArkUIFrameNodeModifier {
     void (*applyAttributesFinish)(ArkUINodeHandle node);
     ArkUI_Bool (*isOnRenderTree)(ArkUINodeHandle node);
     ArkUI_Int32 (*convertPositionToWindow)(
-        ArkUINodeHandle node, ArkUI_Int32 position[2], ArkUI_Int32 (*windowPosition)[2]);
+        ArkUINodeHandle node, ArkUI_Float32 position[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
     ArkUI_Int32 (*convertPositionFromWindow)(
-        ArkUINodeHandle node, ArkUI_Int32 windowPosition[2], ArkUI_Int32 (*position)[2]);
+        ArkUINodeHandle node, ArkUI_Float32 windowPosition[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
 };
 
 struct ArkUINodeContentEvent {

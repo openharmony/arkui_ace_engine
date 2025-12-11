@@ -582,6 +582,80 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runti
     return valueArray;
 }
 
+ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // 0: the first parameter
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 3); // 3: size of return value
+    Local<JSValueRef> x = runtimeCallInfo->GetCallArgRef(1);                 // 1: the second parameter
+    Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);                 // 2: the third parameter
+    if (!x->IsNumber() || !y->IsNumber()) {
+        Framework::ArrayRef::SetValueAt(
+            vm, valueArray, 0, panda::NumberRef::New(vm, 2)); // 2: means the param position has error
+        return valueArray;
+    }
+    ArkUI_Float32 position[2];
+    position[0] = x->ToNumber(vm)->Value();
+    position[1] = y->ToNumber(vm)->Value();
+
+    ArkUI_Float32 targetNodePositionOffset[2];
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
+        nativeNode, position, &targetNodePositionOffset, true);
+    if (result != ERROR_CODE_NO_ERROR) {
+        Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
+        return valueArray;
+    }
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1)); // 0: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0])); // 1: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
+    return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // 0: the first parameter
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 3); // 3: size of return value
+    Local<JSValueRef> x = runtimeCallInfo->GetCallArgRef(1);                 // 1: the second parameter
+    Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);                 // 2: the third parameter
+    if (!x->IsNumber() || !y->IsNumber()) {
+        Framework::ArrayRef::SetValueAt(
+            vm, valueArray, 0, panda::NumberRef::New(vm, 2)); // 2: means the param position has error
+        return valueArray;
+    }
+    ArkUI_Float32 position[2];
+    position[0] = x->ToNumber(vm)->Value();
+    position[1] = y->ToNumber(vm)->Value();
+
+    ArkUI_Float32 targetNodePositionOffset[2];
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
+        nativeNode, position, &targetNodePositionOffset, true);
+    if (result != ERROR_CODE_NO_ERROR) {
+        Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
+        return valueArray;
+    }
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1)); // 0: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0])); // 1: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
+    return valueArray;
+}
+
 void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     CHECK_NULL_VOID(frameNode);

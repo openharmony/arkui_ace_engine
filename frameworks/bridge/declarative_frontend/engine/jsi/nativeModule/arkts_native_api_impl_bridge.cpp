@@ -3495,14 +3495,18 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ApplyAttributesFinish));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPoint));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
-
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPositionToWindow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPositionToWindow));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPositionFromWindow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPositionFromWindow));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "adoptChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AdoptChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeAdoptedChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveAdoptedChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isOnRenderTree"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsOnRenderTree));
+
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

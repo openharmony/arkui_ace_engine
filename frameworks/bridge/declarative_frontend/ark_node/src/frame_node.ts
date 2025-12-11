@@ -23,7 +23,7 @@ interface CrossLanguageOptions {
   attributeSetting?: boolean;
 }
 
-interface InteractionEventBindingInfo  {
+interface InteractionEventBindingInfo {
   baseEventRegistered?: boolean;
   nodeEventRegistered?: boolean;
   nativeEventRegistered?: boolean;
@@ -37,11 +37,11 @@ enum ExpandMode {
 }
 
 enum UIState {
-  NORMAL = 0 ,
-  PRESSED = 1 << 0 ,
-  FOCUSED = 1 << 1 ,
-  DISABLED = 1 << 2 ,
-  SELECTED = 1 << 3 ,
+  NORMAL = 0,
+  PRESSED = 1 << 0,
+  FOCUSED = 1 << 1,
+  DISABLED = 1 << 2,
+  SELECTED = 1 << 3,
 }
 
 declare enum EventQueryType {
@@ -66,7 +66,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
 declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
 function getFrameNodeRawPtr(frameNode: FrameNode): number {
-    return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+  return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
 
 class FrameNode extends Disposable {
@@ -204,7 +204,7 @@ class FrameNode extends Disposable {
     super.dispose();
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-          'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+        'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -701,13 +701,13 @@ class FrameNode extends Disposable {
 
   get gestureEvent(): UIGestureEvent {
     if (this._gestureEvent === undefined) {
-        this._gestureEvent = new UIGestureEvent();
-        this._gestureEvent.setNodePtr(this.nodePtr_);
-        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
-        this._gestureEvent.setWeakNodePtr(weakPtr);
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
-        __JSScopeUtil__.restoreInstanceId();
+      this._gestureEvent = new UIGestureEvent();
+      this._gestureEvent.setNodePtr(this.nodePtr_);
+      let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+      this._gestureEvent.setWeakNodePtr(weakPtr);
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
+      this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
+      __JSScopeUtil__.restoreInstanceId();
     }
     return this._gestureEvent;
   }
@@ -744,7 +744,7 @@ class FrameNode extends Disposable {
   }
   addSupportedUIStates(uiStates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    this.statesChangeHandler_ = (currentUIStates: number)=>{
+    this.statesChangeHandler_ = (currentUIStates: number) => {
       if (statesChangeHandler !== undefined && statesChangeHandler !== null) {
         statesChangeHandler(this, currentUIStates);
       }
@@ -781,30 +781,74 @@ class FrameNode extends Disposable {
   }
   convertPosition(position, targetNode): Position {
     if (targetNode === null) {
-        throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
+      throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
     }
     if (targetNode === undefined) {
-        throw { message: "The parameter 'targetNode' is invalid: it cannot be undefined.", code: 100025 };
+      throw { message: "The parameter 'targetNode' is invalid: it cannot be undefined.", code: 100025 };
     }
     if (targetNode.isDisposed()) {
-        throw { message: "The parameter 'targetNode' is invalid: the node has already been disposed. Check the node's status with 'isDisposed()' before passing it.", code: 100025 };
+      throw { message: "The parameter 'targetNode' is invalid: the node has already been disposed. Check the node's status with 'isDisposed()' before passing it.", code: 100025 };
     }
     if (position === undefined) {
-        throw { message: "The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 100025 };
+      throw { message: "The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 100025 };
     }
     if (position === null) {
-        throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
+      throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPoint(
-        this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+      this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     if (offsetPosition[0] === 0) {
-        throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
+      throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
-  adoptChild(child: FrameNode): void{
+  convertPositionToWindow(positionByLocal: Position): Position {
+    if (positionByLocal === undefined) {
+      throw { message: "The parameter 'positionByLocal' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 401 };
+    }
+    if (positionByLocal === null) {
+      throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
+    }
+    if (this.isDisposed()) {
+      throw { message: "The current FrameNode has been disposed.", code: 10026 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
+      this.getNodePtr(), positionByLocal.x, positionByLocal.y);
+    __JSScopeUtil__.restoreInstanceId();
+    if (offsetPosition[0] === 2) {
+      throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
+    }
+    if (offsetPosition[0] === 0) {
+      throw { message: "The current FrameNode is not on the main tree.", code: 10028 };
+    }
+    return { x: offsetPosition[1], y: offsetPosition[2] };
+  }
+  convertPositionFromWindow(positionByWindow: Position): Position {
+    if (positionByWindow === undefined) {
+      throw { message: "The parameter 'positionByWindow' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 401 };
+    }
+    if (positionByWindow === null) {
+      throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
+    }
+    if (this.isDisposed()) {
+      throw { message: "The current FrameNode has been disposed.", code: 10026 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
+      this.getNodePtr(), positionByWindow.x, positionByWindow.y);
+    __JSScopeUtil__.restoreInstanceId();
+    if (offsetPosition[0] === 2) {
+      throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
+    }
+    if (offsetPosition[0] === 0) {
+      throw { message: "The current FrameNode is not on the main tree.", code: 10028 };
+    }
+    return { x: offsetPosition[1], y: offsetPosition[2] };
+  }
+  adoptChild(child: FrameNode): void {
     if (child === undefined || child === null) {
       return;
     }
@@ -828,7 +872,7 @@ class FrameNode extends Disposable {
       throw { message: errorInfo, code: 100025 };
     }
   }
-    removeAdoptedChild(child: FrameNode): void {
+  removeAdoptedChild(child: FrameNode): void {
     if (child === undefined || child === null) {
       return;
     }
@@ -852,12 +896,12 @@ class FrameNode extends Disposable {
       throw { message: errorInfo, code: 100025 };
     }
   }
-   isInRenderState() :boolean {
-        if (this.getNodePtr()) {
-            return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
-        }
-        return false;
+  isInRenderState(): boolean {
+    if (this.getNodePtr()) {
+      return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
     }
+    return false;
+  }
 }
 
 class ImmutableFrameNode extends FrameNode {
@@ -1024,206 +1068,206 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
 
 const __creatorMap__ = new Map<string, (context: UIContext, options?: object) => FrameNode>(
   [
-    ['Text', (context: UIContext): FrameNode=> {
+    ['Text', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Text', (node: NodePtr, type: ModifierType): ArkTextComponent => {
         return new ArkTextComponent(node, type);
       })
     }],
-    ['Column', (context: UIContext): FrameNode=> {
+    ['Column', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Column', (node: NodePtr, type: ModifierType): ArkColumnComponent => {
         return new ArkColumnComponent(node, type);
       })
     }],
-    ['Row', (context: UIContext): FrameNode=> {
+    ['Row', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Row', (node: NodePtr, type: ModifierType): ArkRowComponent => {
         return new ArkRowComponent(node, type);
       })
     }],
-    ['Stack', (context: UIContext): FrameNode=> {
+    ['Stack', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Stack', (node: NodePtr, type: ModifierType): ArkStackComponent => {
         return new ArkStackComponent(node, type);
       })
     }],
-    ['GridRow', (context: UIContext): FrameNode=> {
+    ['GridRow', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridRow', (node: NodePtr, type: ModifierType): ArkGridRowComponent => {
         return new ArkGridRowComponent(node, type);
       });
       node.initialize();
       return node;
     }],
-    ['TextInput', (context: UIContext): FrameNode=> {
+    ['TextInput', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextInput', (node: NodePtr, type: ModifierType): ArkTextInputComponent => {
         return new ArkTextInputComponent(node, type);
       })
     }],
-    ['GridCol', (context: UIContext): FrameNode=> {
+    ['GridCol', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridCol', (node: NodePtr, type: ModifierType): ArkGridColComponent => {
         return new ArkGridColComponent(node, type);
       });
       node.initialize();
       return node;
     }],
-    ['Blank', (context: UIContext): FrameNode=> {
+    ['Blank', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Blank', (node: NodePtr, type: ModifierType): ArkBlankComponent => {
         return new ArkBlankComponent(node, type);
       })
     }],
-    ['Image', (context: UIContext): FrameNode=> {
+    ['Image', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Image', (node: NodePtr, type: ModifierType): ArkImageComponent => {
         return new ArkImageComponent(node, type);
       })
     }],
-    ['Flex', (context: UIContext): FrameNode=> {
+    ['Flex', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Flex', (node: NodePtr, type: ModifierType): ArkFlexComponent => {
         return new ArkFlexComponent(node, type);
       })
     }],
-    ['Swiper', (context: UIContext): FrameNode=> {
+    ['Swiper', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Swiper', (node: NodePtr, type: ModifierType): ArkSwiperComponent => {
         return new ArkSwiperComponent(node, type);
       })
     }],
-    ['Progress', (context: UIContext): FrameNode=> {
+    ['Progress', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Progress', (node: NodePtr, type: ModifierType): ArkProgressComponent => {
         return new ArkProgressComponent(node, type);
       })
     }],
-    ['Scroll', (context: UIContext): FrameNode=> {
+    ['Scroll', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Scroll', (node: NodePtr, type: ModifierType): ArkScrollComponent => {
         return new ArkScrollComponent(node, type);
       })
     }],
-    ['RelativeContainer', (context: UIContext): FrameNode=> {
+    ['RelativeContainer', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'RelativeContainer', (node: NodePtr, type: ModifierType): ArkRelativeContainerComponent => {
         return new ArkRelativeContainerComponent(node, type);
       })
     }],
-    ['List', (context: UIContext): FrameNode=> {
+    ['List', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'List', (node: NodePtr, type: ModifierType): ArkListComponent => {
         return new ArkListComponent(node, type);
       })
     }],
-    ['ListItem', (context: UIContext): FrameNode=> {
+    ['ListItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'ListItem', (node: NodePtr, type: ModifierType): ArkListItemComponent => {
         return new ArkListItemComponent(node, type);
       })
     }],
-    ['Divider', (context: UIContext): FrameNode=> {
+    ['Divider', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Divider', (node: NodePtr, type: ModifierType): ArkDividerComponent => {
         return new ArkDividerComponent(node, type);
       })
     }],
-    ['LoadingProgress', (context: UIContext): FrameNode=> {
+    ['LoadingProgress', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'LoadingProgress', (node: NodePtr, type: ModifierType): ArkLoadingProgressComponent => {
         return new ArkLoadingProgressComponent(node, type);
       })
     }],
-    ['Search', (context: UIContext): FrameNode=> {
+    ['Search', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Search', (node: NodePtr, type: ModifierType): ArkSearchComponent => {
         return new ArkSearchComponent(node, type);
       })
     }],
-    ['Button', (context: UIContext): FrameNode=> {
+    ['Button', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Button', (node: NodePtr, type: ModifierType): ArkButtonComponent => {
         return new ArkButtonComponent(node, type);
       })
     }],
-    ['XComponent', (context: UIContext, options?: object): FrameNode=> {
+    ['XComponent', (context: UIContext, options?: object): FrameNode => {
       return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
         return new ArkXComponentComponent(node, type);
       }, options);
     }],
-    ['ListItemGroup', (context: UIContext): FrameNode=> {
+    ['ListItemGroup', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'ListItemGroup', (node: NodePtr, type: ModifierType): ArkListItemGroupComponent => {
         return new ArkListItemGroupComponent(node, type);
       })
     }],
-    ['WaterFlow', (context: UIContext): FrameNode=> {
+    ['WaterFlow', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'WaterFlow', (node: NodePtr, type: ModifierType): ArkWaterFlowComponent => {
         return new ArkWaterFlowComponent(node, type);
       })
     }],
-    ['SymbolGlyph', (context: UIContext): FrameNode=> {
+    ['SymbolGlyph', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
         return new ArkSymbolGlyphComponent(node, type);
       })
     }],
-    ['FlowItem', (context: UIContext): FrameNode=> {
+    ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
         return new ArkFlowItemComponent(node, type);
       })
     }],
-    ['QRCode', (context: UIContext): FrameNode=> {
+    ['QRCode', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
         return new ArkQRCodeComponent(node, type);
       })
     }],
-    ['Badge', (context: UIContext): FrameNode=> {
+    ['Badge', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Badge', (node: NodePtr, type: ModifierType): ArkBadgeComponent => {
         return new ArkBadgeComponent(node, type);
       })
     }],
-    ['Grid', (context: UIContext): FrameNode=> {
+    ['Grid', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
         return new ArkGridComponent(node, type);
       })
     }],
-    ['GridItem', (context: UIContext): FrameNode=> {
+    ['GridItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
         return new ArkGridItemComponent(node, type);
       })
     }],
-    ['TextClock', (context: UIContext): FrameNode=> {
+    ['TextClock', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
         return new ArkTextClockComponent(node, type);
       })
     }],
-    ['TextTimer', (context: UIContext): FrameNode=> {
+    ['TextTimer', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
         return new ArkTextTimerComponent(node, type);
       })
     }],
-    ['Marquee', (context: UIContext): FrameNode=> {
+    ['Marquee', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
         return new ArkMarqueeComponent(node, type);
       })
     }],
-    ['TextArea', (context: UIContext): FrameNode=> {
+    ['TextArea', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
         return new ArkTextAreaComponent(node, type);
       })
     }],
-    ['Checkbox', (context: UIContext): FrameNode=> {
+    ['Checkbox', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
         return new ArkCheckboxComponent(node, type);
       });
     }],
-    ['CheckboxGroup', (context: UIContext): FrameNode=> {
+    ['CheckboxGroup', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
         return new ArkCheckboxGroupComponent(node, type);
       });
     }],
-    ['Radio', (context: UIContext): FrameNode=> {
+    ['Radio', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
         return new ArkRadioComponent(node, type);
       });
     }],
-    ['Rating', (context: UIContext): FrameNode=> {
+    ['Rating', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
         return new ArkRatingComponent(node, type);
       });
     }],
-    ['Slider', (context: UIContext): FrameNode=> {
+    ['Slider', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
         return new ArkSliderComponent(node, type);
       });
     }],
-    ['Select', (context: UIContext): FrameNode=> {
+    ['Select', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
         return new ArkSelectComponent(node, type);
       });
     }],
-    ['Toggle', (context: UIContext, options?: object): FrameNode=> {
+    ['Toggle', (context: UIContext, options?: object): FrameNode => {
       return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
         return new ArkToggleComponent(node, type);
       }, options);
@@ -1238,7 +1282,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1248,7 +1292,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1258,7 +1302,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkListComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1268,7 +1312,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkListItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1278,7 +1322,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkListItemGroupComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1288,7 +1332,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1298,7 +1342,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1308,7 +1352,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1318,7 +1362,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1344,21 +1388,21 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       return node._componentAttribute;
     }],
     ['TextArea', (node: FrameNode): ArkTextAreaComponent => {
-        if (node._componentAttribute) {
-          return node._componentAttribute;
-        }
-        if (!node.getNodePtr()) {
-          return undefined;
-        }
-        node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      if (node._componentAttribute) {
         return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
     }],
     ['Button', (node: FrameNode): ArkButtonComponent => {
       if (node._componentAttribute) {
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1368,7 +1412,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1378,7 +1422,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1388,7 +1432,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1398,7 +1442,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1468,7 +1512,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1478,7 +1522,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1488,7 +1532,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         return node._componentAttribute;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._componentAttribute = new ArkImageComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
@@ -1503,7 +1547,7 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return node._scrollableEvent;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._scrollableEvent = new UIListEvent(node.getNodePtr());
       node._scrollableEvent.setNodePtr(node);
@@ -1515,7 +1559,7 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return node._scrollableEvent;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
       node._scrollableEvent.setNodePtr(node);
@@ -1527,7 +1571,7 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return node._scrollableEvent;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._scrollableEvent = new UIGridEvent(node.getNodePtr());
       node._scrollableEvent.setNodePtr(node);
@@ -1539,7 +1583,7 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return node._scrollableEvent;
       }
       if (!node.getNodePtr()) {
-         return undefined;
+        return undefined;
       }
       node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
       node._scrollableEvent.setNodePtr(node);
@@ -1569,13 +1613,13 @@ const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controll
       getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
     }],
     ['Text', (node: FrameNode, controller: TextController) => {
-        getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
+      getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
     }],
     ['TextInput', (node: FrameNode, controller: TextInputController) => {
-        getUINativeModule().textInput.setController(node.getNodePtr(), controller);
+      getUINativeModule().textInput.setController(node.getNodePtr(), controller);
     }],
     ['TextArea', (node: FrameNode, controller: TextAreaController) => {
-        getUINativeModule().textArea.setController(node.getNodePtr(), controller);
+      getUINativeModule().textArea.setController(node.getNodePtr(), controller);
     }]
   ]
 )
@@ -1588,7 +1632,7 @@ class typeNode {
     }
     return creator(context, options);
   }
-  
+
   static getAttribute(node: FrameNode, nodeType: string): ArkComponent {
     if (node === undefined || node === null || node.getNodeType() !== nodeType) {
       return undefined;
@@ -1612,7 +1656,7 @@ class typeNode {
       return undefined;
     }
     return event(node);
-  } 
+  }
 
   static bindController(node: FrameNode, controller: Controller, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||

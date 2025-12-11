@@ -4430,9 +4430,9 @@ OffsetF FrameNode::ConvertPositionToWindow(OffsetF position, bool fromWindow)
         auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
         auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
         if (fromWindow) {
-            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
-        } else {
             point = point - Offset(parentOffset.GetX(), parentOffset.GetY());
+        } else {
+            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
         }
         point = parentMatrix * point;
         if (parent->tag_ == V2::ROOT_ETS_TAG) {

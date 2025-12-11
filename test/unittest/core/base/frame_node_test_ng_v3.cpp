@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gtest/gtest.h"
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/common/recorder/exposure_processor.h"
@@ -552,6 +553,49 @@ HWTEST_F(FrameNodeTestNg, ConvertPointTest, TestSize.Level1)
     frameNode->AddChild(child);
     auto result = child->ConvertPoint(position, targetNode);
     EXPECT_EQ(position, result);
+}
+
+/**
+ * @tc.name: ConvertPositionToWindow
+ * @tc.desc: Test ConvertPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ConvertPositionToWindowTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a root node as window
+     */
+    auto rootNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_TRUE(rootNode);
+    rootNode->SetActive(true);
+
+    /**
+     * @tc.steps: step2. initialize a frameNode and set paintRect is [10, 10, 10, 10]
+     */
+    auto frameNode = FrameNode::CreateFrameNode("test", 2, AceType::MakeRefPtr<Pattern>());
+    ASSERT_TRUE(rootNode);
+    frameNode->SetActive(true);
+    OffsetF position = { 10, 10 };
+    RectF rect = RectF(position.GetX(), position.GetY(), 10, 10);
+    ASSERT_TRUE(frameNode->renderContext_);
+    frameNode->renderContext_->UpdatePaintRect(rect);
+
+    /**
+     * @tc.steps: step3. frameNode mountToParent rootNode
+     */
+    rootNode->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step4. call ConvertPositionToWindow
+     */
+    OffsetF result = frameNode->ConvertPositionToWindow({ 0.0f, 0.0f }, false);
+    EXPECT_EQ(position, result);
+
+    /**
+     * @tc.steps: step5. call ConvertPositionFromWindow
+     */
+    result = frameNode->ConvertPositionToWindow({ 0.0f, 0.0f }, true);
+    EXPECT_EQ(OffsetF(0.0f, 0.0f) - position, result);
 }
 
 /**

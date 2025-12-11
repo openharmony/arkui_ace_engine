@@ -27386,6 +27386,10 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                                     Ark_FrameNode child);
     Ark_Boolean (*isOnRenderTree)(Ark_FrameNode peer);                                   
     Ark_Boolean (*isOnMainTree)(Ark_FrameNode peer);
+    Array_Float64 (*convertPositionToWindow)(Ark_FrameNode peer,
+                                             const Ark_Vector2* positionByLocal);
+    Array_Float64 (*convertPositionFromWindow)(Ark_FrameNode peer,
+                                               const Ark_Vector2* positionByWindow);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {

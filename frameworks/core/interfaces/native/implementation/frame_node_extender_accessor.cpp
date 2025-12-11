@@ -1074,6 +1074,42 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
     return resultValue;
 }
+
+Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                          const Ark_Vector2* positionByLocal)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByLocal, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, false);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
+Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByWindow, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, true);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1215,6 +1251,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+        FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+        FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

@@ -752,6 +752,58 @@ export class FrameNode implements MaterializedBase {
         const y = chanels[2];
         return { x: x, y: y } as NodePosition;
     }
+    public convertPositionToWindow(positionByLocal: NodePosition): NodePosition {
+        if (positionByLocal === undefined) {
+            const error = Error("The parameter 'positionByLocal' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (positionByLocal === null) {
+            const error = Error("The parameter 'positionByLocal' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed.");
+            throw new BusinessError(10026, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        let channels: Array<number> = [];
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        channels = FrameNodeExtender.convertPositionToWindow(this, positionByLocal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        if (channels.length < 3 || channels[0] === 0) {
+            const error = new Error("The current FrameNode is not on the main tree.");
+            throw new BusinessError(10028, error);
+        }
+        const x = channels[1];
+        const y = channels[2];
+        return { x: x, y: y } as NodePosition;
+    }
+    public convertPositionFromWindow(positionByWindow: NodePosition): NodePosition {
+        if (positionByWindow === undefined) {
+            const error = Error("The parameter 'positionByWindow' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (positionByWindow === null) {
+            const error = Error("The parameter 'positionByWindow' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed.");
+            throw new BusinessError(10026, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        let channels: Array<number> = [];
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        channels = FrameNodeExtender.convertPositionFromWindow(this, positionByWindow);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        if (channels.length < 3 || channels[0] === 0) {
+            const error = new Error("The current FrameNode is not on the main tree.");
+            throw new BusinessError(10028, error);
+        }
+        const x = channels[1];
+        const y = channels[2];
+        return { x: x, y: y } as NodePosition;
+    }
     public isInRenderState(): boolean {
         return FrameNodeExtender.isOnRenderTree(this);
     }
