@@ -268,6 +268,31 @@ void AssignGradientColors(Gradient *gradient,
     }
 }
 
+void AssignGradientMetricsColors(Gradient *gradient,
+    const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics)
+{
+    std::optional<ColorSpace> referenceColorSpace = std::nullopt;
+    for (int32_t i = 0; i < colorMetrics->value.length; i++) {
+        auto color =  Converter::OptConvert<Color>(colorMetrics->value.array[i].value0);
+        auto position = Convert<float>(colorMetrics->value.array[i].value1);
+        if (color.has_value()) {
+            ColorSpace currentColorSpace = color.value().GetColorSpace();
+            if (!referenceColorSpace.has_value()) {
+                referenceColorSpace = currentColorSpace;
+            } else if (currentColorSpace != referenceColorSpace.value()) {
+                gradient->ClearColors();
+                return;
+            }
+            NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
 void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
     const GradientDirection &direction)
 {
@@ -3922,6 +3947,7 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
     dst = Color::FromARGB(alpha, red, green, blue);
+    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
 }
 
 template<>

@@ -6600,6 +6600,7 @@ export interface SweepGradientOptions {
     end?: double | string;
     rotation?: double | string;
     colors: Array<[ ResourceColor, double ]>;
+    metricsColors?: Array<[ ColorMetrics, double ]>;
     repeating?: boolean;
 }
 export interface RadialGradientOptions {
@@ -17352,6 +17353,21 @@ export class SweepGradientOptions_serializer {
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
             valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
+        const valueHolderForMetricsColors  = value.metricsColors
+        if (valueHolderForMetricsColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMetricsColorsTmpValue  = valueHolderForMetricsColors!
+            valueSerializer.writeInt32((valueHolderForMetricsColorsTmpValue.length).toInt())
+            for (let valueHolderForMetricsColorsTmpValueCounterI = 0; valueHolderForMetricsColorsTmpValueCounterI < valueHolderForMetricsColorsTmpValue.length; valueHolderForMetricsColorsTmpValueCounterI++) {
+                const valueHolderForMetricsColorsTmpValueTmpElement : [ ColorMetrics, double ] = valueHolderForMetricsColorsTmpValue[valueHolderForMetricsColorsTmpValueCounterI]
+                const valueHolderForMetricsColorsTmpValueTmpElement_0  = valueHolderForMetricsColorsTmpValueTmpElement[0]
+                ColorMetrics_serializer.write(valueSerializer, valueHolderForMetricsColorsTmpValueTmpElement_0)
+                const valueHolderForMetricsColorsTmpValueTmpElement_1  = valueHolderForMetricsColorsTmpValueTmpElement[1]
+                valueSerializer.writeFloat64(valueHolderForMetricsColorsTmpValueTmpElement_1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -17454,13 +17470,26 @@ export class SweepGradientOptions_serializer {
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
         const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
+        const metricsColorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let metricsColorsTmpBuf : Array<[ ColorMetrics, double ]> | undefined = undefined
+        if ((metricsColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const metricsColorsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let metricsColorsTmpBuf_ : Array<[ ColorMetrics, double ]> = new Array<[ ColorMetrics, double ]>(metricsColorsTmpBuf_Length)
+            for (let metricsColorsTmpBuf_BufCounterI = 0; metricsColorsTmpBuf_BufCounterI < metricsColorsTmpBuf_Length; metricsColorsTmpBuf_BufCounterI++) {
+                const metricsColorsTmpBuf_TempBufValue0 : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
+                const metricsColorsTmpBuf_TempBufValue1 : double = valueDeserializer.readFloat64()
+                metricsColorsTmpBuf_[metricsColorsTmpBuf_BufCounterI] = ([metricsColorsTmpBuf_TempBufValue0, metricsColorsTmpBuf_TempBufValue1] as [ ColorMetrics, double ])
+            }
+            metricsColorsTmpBuf = metricsColorsTmpBuf_
+        }
+        const metricsColorsTmpResult : Array<[ ColorMetrics, double ]> | undefined = metricsColorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             repeatingTmpBuf = valueDeserializer.readBoolean()
         }
         const repeatingTmpResult : boolean | undefined = repeatingTmpBuf
-        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
+        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, metricsColors: metricsColorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
         return value
     }
 }

@@ -1133,6 +1133,8 @@ typedef struct Array_TouchObject Array_TouchObject;
 typedef struct Opt_Array_TouchObject Opt_Array_TouchObject;
 typedef struct Array_TouchTestInfo Array_TouchTestInfo;
 typedef struct Opt_Array_TouchTestInfo Opt_Array_TouchTestInfo;
+typedef struct Array_Tuple_ColorMetrics_F64 Array_Tuple_ColorMetrics_F64;
+typedef struct Opt_Array_Tuple_ColorMetrics_F64 Opt_Array_Tuple_ColorMetrics_F64;
 typedef struct Array_Tuple_ResourceColor_F64 Array_Tuple_ResourceColor_F64;
 typedef struct Opt_Array_Tuple_ResourceColor_F64 Opt_Array_Tuple_ResourceColor_F64;
 typedef struct Array_Tuple_ResourceColor_Number Array_Tuple_ResourceColor_Number;
@@ -2032,6 +2034,8 @@ typedef struct Ark_EditMenuOptions Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions Opt_EditMenuOptions;
 typedef struct Ark_EditModeOptions Ark_EditModeOptions;
 typedef struct Opt_EditModeOptions Opt_EditModeOptions;
+typedef struct Ark_EffectComponentOptions Ark_EffectComponentOptions;
+typedef struct Opt_EffectComponentOptions Opt_EffectComponentOptions;
 typedef struct Ark_EllipseOptions Ark_EllipseOptions;
 typedef struct Opt_EllipseOptions Opt_EllipseOptions;
 typedef struct Ark_EmbedOptions Ark_EmbedOptions;
@@ -2477,6 +2481,8 @@ typedef struct Ark_TouchResult Ark_TouchResult;
 typedef struct Opt_TouchResult Opt_TouchResult;
 typedef struct Ark_TranslateOptions Ark_TranslateOptions;
 typedef struct Opt_TranslateOptions Opt_TranslateOptions;
+typedef struct Ark_Tuple_ColorMetrics_F64 Ark_Tuple_ColorMetrics_F64;
+typedef struct Opt_Tuple_ColorMetrics_F64 Opt_Tuple_ColorMetrics_F64;
 typedef struct Ark_Tuple_ResourceColor_F64 Ark_Tuple_ResourceColor_F64;
 typedef struct Opt_Tuple_ResourceColor_F64 Opt_Tuple_ResourceColor_F64;
 typedef struct Ark_Tuple_ResourceColor_Number Ark_Tuple_ResourceColor_Number;
@@ -4262,6 +4268,14 @@ typedef struct Opt_ColoringStrategy {
     Ark_Tag tag;
     Ark_ColoringStrategy value;
 } Opt_ColoringStrategy;
+typedef enum Ark_ColorSpace {
+    ARK_COLOR_SPACE_SRGB = 0,
+    ARK_COLOR_SPACE_DISPLAY_P3 = 1,
+} Ark_ColorSpace;
+typedef struct Opt_ColorSpace {
+    Ark_Tag tag;
+    Ark_ColorSpace value;
+} Opt_ColorSpace;
 typedef enum Ark_ConfigurationConstant_ColorMode {
     ARK_CONFIGURATION_CONSTANT_COLOR_MODE_COLOR_MODE_NOT_SET = -1,
     ARK_CONFIGURATION_CONSTANT_COLOR_MODE_COLOR_MODE_DARK = 0,
@@ -4681,6 +4695,15 @@ typedef struct Opt_EffectFillStyle {
     Ark_Tag tag;
     Ark_EffectFillStyle value;
 } Opt_EffectFillStyle;
+typedef enum Ark_EffectLayer {
+    ARK_EFFECT_LAYER_NONE = 0,
+    ARK_EFFECT_LAYER_CHARGE_MOTION = 1,
+    ARK_EFFECT_LAYER_CHARGE_TEXT = 2,
+} Ark_EffectLayer;
+typedef struct Opt_EffectLayer {
+    Ark_Tag tag;
+    Ark_EffectLayer value;
+} Opt_EffectLayer;
 typedef enum Ark_EffectScope {
     ARK_EFFECT_SCOPE_LAYER = 0,
     ARK_EFFECT_SCOPE_WHOLE = 1,
@@ -10255,6 +10278,15 @@ typedef struct Opt_Array_TouchTestInfo {
     Ark_Tag tag;
     Array_TouchTestInfo value;
 } Opt_Array_TouchTestInfo;
+typedef struct Array_Tuple_ColorMetrics_F64 {
+    /* kind: ContainerType */
+    Ark_Tuple_ColorMetrics_F64* array;
+    Ark_Int32 length;
+} Array_Tuple_ColorMetrics_F64;
+typedef struct Opt_Array_Tuple_ColorMetrics_F64 {
+    Ark_Tag tag;
+    Array_Tuple_ColorMetrics_F64 value;
+} Opt_Array_Tuple_ColorMetrics_F64;
 typedef struct Array_Tuple_ResourceColor_F64 {
     /* kind: ContainerType */
     Ark_Tuple_ResourceColor_F64* array;
@@ -14095,6 +14127,7 @@ typedef struct Ark_ColorMetrics {
     Ark_Int32 green_;
     Ark_Int32 blue_;
     Ark_Int32 alpha_;
+    Ark_ColorSpace colorSpace_;
     Ark_Int32 resourceId_;
 } Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics {
@@ -14517,6 +14550,14 @@ typedef struct Opt_EditModeOptions {
     Ark_Tag tag;
     Ark_EditModeOptions value;
 } Opt_EditModeOptions;
+typedef struct Ark_EffectComponentOptions {
+    /* kind: Interface */
+    Opt_EffectLayer effectLayer;
+} Ark_EffectComponentOptions;
+typedef struct Opt_EffectComponentOptions {
+    Ark_Tag tag;
+    Ark_EffectComponentOptions value;
+} Opt_EffectComponentOptions;
 typedef struct Ark_EllipseOptions {
     /* kind: Interface */
     Opt_Union_String_F64 width;
@@ -16538,6 +16579,15 @@ typedef struct Opt_TranslateOptions {
     Ark_Tag tag;
     Ark_TranslateOptions value;
 } Opt_TranslateOptions;
+typedef struct Ark_Tuple_ColorMetrics_F64 {
+    /* kind: Interface */
+    Ark_ColorMetrics value0;
+    Ark_Float64 value1;
+} Ark_Tuple_ColorMetrics_F64;
+typedef struct Opt_Tuple_ColorMetrics_F64 {
+    Ark_Tag tag;
+    Ark_Tuple_ColorMetrics_F64 value;
+} Opt_Tuple_ColorMetrics_F64;
 typedef struct Ark_Tuple_ResourceColor_F64 {
     /* kind: Interface */
     Ark_ResourceColor value0;
@@ -20270,6 +20320,7 @@ typedef struct Ark_SweepGradientOptions {
     Opt_Union_F64_String end;
     Opt_Union_F64_String rotation;
     Array_Tuple_ResourceColor_F64 colors;
+    Opt_Array_Tuple_ColorMetrics_F64 metricsColors;
     Opt_Boolean repeating;
 } Ark_SweepGradientOptions;
 typedef struct Opt_SweepGradientOptions {
@@ -23558,7 +23609,8 @@ typedef struct GENERATED_ArkUIDividerModifier {
 typedef struct GENERATED_ArkUIEffectComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setEffectComponentOptions)(Ark_NativePointer node);
+    void (*setEffectComponentOptions)(Ark_NativePointer node,
+                                      const Opt_EffectComponentOptions* options);
 } GENERATED_ArkUIEffectComponentModifier;
 
 typedef struct GENERATED_ArkUIEllipseModifier {

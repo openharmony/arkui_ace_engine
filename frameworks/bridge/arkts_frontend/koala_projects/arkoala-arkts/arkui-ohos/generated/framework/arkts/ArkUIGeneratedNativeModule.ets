@@ -775,7 +775,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _EffectComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _EffectComponentInterface_setEffectComponentOptions(ptr: KPointer): void
+    native static _EffectComponentInterface_setEffectComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Ellipse_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct

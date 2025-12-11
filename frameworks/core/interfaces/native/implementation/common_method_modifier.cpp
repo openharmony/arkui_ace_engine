@@ -1513,7 +1513,9 @@ OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
     uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green_));
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
-    return Color::FromARGB(alpha, red, green, blue);
+    auto dst = Color::FromARGB(alpha, red, green, blue);
+    dst.SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
+    return dst;
 }
 
 template<>
@@ -4526,7 +4528,11 @@ void SetSweepGradientImpl(Ark_NativePointer node,
         CheckAngle(degreeRotation);
         sweep->rotation = CalcDimension(degreeRotation.value(), DimensionUnit::PX);
     }
-    Converter::AssignGradientColors(&gradient, &optValue->colors);
+    if (optValue->metricsColors.tag != INTEROP_TAG_UNDEFINED) {
+        Converter::AssignGradientMetricsColors(&gradient, &optValue->metricsColors);
+    } else {
+        Converter::AssignGradientColors(&gradient, &optValue->colors);
+    }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
 void SetRadialGradientImpl(Ark_NativePointer node,

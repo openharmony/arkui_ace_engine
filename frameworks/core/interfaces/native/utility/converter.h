@@ -384,6 +384,7 @@ namespace Converter {
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
+    void AssignGradientMetricsColors(Gradient *gradient, const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
         const GradientDirection &direction);
     // if src is not string or number, return directly. If src is invalid string, use defaultValue.

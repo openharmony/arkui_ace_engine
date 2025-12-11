@@ -70,6 +70,8 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
+    void SetEffectLayer(const ContextParam& param);
+
     void SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback) override;
 
     void RemoveSurfaceChangedCallBack() override;

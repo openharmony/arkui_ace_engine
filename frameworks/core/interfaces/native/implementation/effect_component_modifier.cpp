@@ -32,9 +32,19 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // EffectComponentModifier
 namespace EffectComponentInterfaceModifier {
-void SetEffectComponentOptionsImpl(Ark_NativePointer node)
+void SetEffectComponentOptionsImpl(Ark_NativePointer node,
+                                   const Opt_EffectComponentOptions* options)
 {
-    // keep it empty because EffectComponent doesn't have any options
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto effectComponentPattern = frameNode->GetPattern<EffectComponentPattern>();
+    CHECK_NULL_VOID(effectComponentPattern);
+    auto layer = EffectLayer::NONE;
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        options->value.effectLayer.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        layer = static_cast<EffectLayer>(options->value.effectLayer.value);
+    }
+    effectComponentPattern->SetEffectLayer(layer);
 }
 } // EffectComponentInterfaceModifier
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()
