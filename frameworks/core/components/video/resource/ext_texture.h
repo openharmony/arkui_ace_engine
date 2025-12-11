@@ -47,6 +47,19 @@ public:
     void AttachToGLContext(int64_t textureId, bool isAttach);
 
     void UpdateTextureImage(std::vector<float>& matrix);
+    
+    void* AttachNativeWindow();
+
+    void SetBounds(int64_t textureId, int32_t left, int32_t top, int32_t width, int32_t height);
+
+    void GetTextureIsVideo(int32_t& type);
+
+    void SetPatternType(int type)
+    {
+        if (patternType_ != type) {
+            patternType_ = type;
+        }
+    }
 
 private:
     void OnRefresh(const std::string& param);
@@ -59,6 +72,9 @@ private:
     std::function<void(int32_t, int64_t)> onTextureRefresh_;
     std::function<void()> onSurfaceCreated_;
     std::function<void(int32_t, int32_t)> onSurfaceChanged_;
+
+    void* nativeWindow_ = nullptr;
+    int patternType_ = 0;
 };
 } // namespace OHOS::Ace
 
