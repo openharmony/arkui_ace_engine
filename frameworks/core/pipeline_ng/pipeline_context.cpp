@@ -2766,6 +2766,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 #endif
 }
 
+void NotifyDirtyMenu(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto menuChildrens = node->GetChildren();
+    for (auto child : menuChildrens) {
+        if (child) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void PipelineContext::MarkDirtyOverlay()
 {
     CHECK_NULL_VOID(rootNode_);
@@ -2773,6 +2784,8 @@ void PipelineContext::MarkDirtyOverlay()
     for (auto child: childNodes) {
         if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
             child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            NotifyDirtyMenu(child);
         }
     }
 }

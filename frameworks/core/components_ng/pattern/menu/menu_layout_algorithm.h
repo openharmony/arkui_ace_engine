@@ -307,6 +307,10 @@ private:
     float CalcSubMenuMaxHeightNoPreview(const RefPtr<FrameNode>& parentItem, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
     RefPtr<SelectTheme> GetCurrentSelectTheme(const RefPtr<FrameNode>& frameNode);
+    void InitializeMenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode);
+    void MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
+        float keyboardTopPosition);
+    std::optional<float> GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -360,6 +364,7 @@ private:
     bool flag_ = false;
     // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
+    std::optional<float> maxSpaceHeight_ = std::nullopt;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
     bool isExpandDisplay_ = false;

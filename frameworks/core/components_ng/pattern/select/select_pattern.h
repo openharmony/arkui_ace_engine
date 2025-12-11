@@ -306,6 +306,7 @@ private:
     void SetItalicFontStyleMultiThread(const Ace::FontStyle& value);
     void ResetFontColorMultiThread();
     void SetValueMultiThread(const std::string& value);
+    void ConfigMenuParam();
 
     bool HasRowNode() const
     {
@@ -408,6 +409,7 @@ private:
     void ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const;
     void ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonMenuAvoidKeyboard(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;

@@ -3968,6 +3968,12 @@ let AvoidanceMode;
   AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
 })(AvoidanceMode || (AvoidanceMode = {}));
 
+let MenuKeyboardAvoidMode;
+(function (MenuKeyboardAvoidMode) {
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
+})(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';

@@ -2600,6 +2600,14 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetOnSelect));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetOnSelect));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuKeyboardAvoidMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuKeyboardAvoidMode));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuKeyboardAvoidMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuKeyboardAvoidMode));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinKeyboardAvoidDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMinKeyboardAvoidDistance));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinKeyboardAvoidDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMinKeyboardAvoidDistance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 

@@ -23736,6 +23736,16 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SelectBackgroundColorModifier.identity, SelectBackgroundColorModifier, value);
     return this;
   }
+  keyboardAvoidMode(mode) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuKeyboardAvoidModeModifier.identity, MenuKeyboardAvoidModeModifier, mode);
+    return this;
+  }
+  minKeyboardAvoidDistance(distance) {
+    modifierWithKey(
+      this._modifiersWithKeys, MinKeyboardAvoidDistanceModifier.identity, MinKeyboardAvoidDistanceModifier, distance);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -24325,6 +24335,39 @@ class SelectBackgroundColorModifier extends ModifierWithKey {
   }
 }
 SelectBackgroundColorModifier.identity = Symbol('selectBackgroundColor');
+class MenuKeyboardAvoidModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuKeyboardAvoidMode(node);
+    } else {
+      getUINativeModule().select.setMenuKeyboardAvoidMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+MenuKeyboardAvoidModeModifier.identity = Symbol('menuKeyboardAvoidMode');
+class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMinKeyboardAvoidDistance(node);
+    } else {
+      getUINativeModule().select.setMinKeyboardAvoidDistance(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
 class SelectOnSelectModifier extends ModifierWithKey{
   constructor(value) {
     super(value);

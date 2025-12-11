@@ -20,6 +20,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
@@ -75,6 +76,11 @@ enum class AvailableLayoutAreaMode {
     SAFE_AREA = 0,
 };
 
+enum class MenuKeyboardAvoidMode {
+    NONE = 0,
+    TRANSLATE_AND_RESIZE = 1,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -126,6 +132,8 @@ struct MenuParam {
     std::optional<ModalMode> modalMode;
     std::optional<PreviewScaleMode> previewScaleMode;
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
+    std::optional<MenuKeyboardAvoidMode> keyboardAvoidMode;
+    std::optional<Dimension> minKeyboardAvoidDistance;
     bool isDarkMode = false;
     bool isWithTheme = false;
     struct resourceUpdater {

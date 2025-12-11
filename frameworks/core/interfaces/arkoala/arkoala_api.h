@@ -7074,6 +7074,10 @@ struct ArkUISelectModifier {
     void (*resetSelectBackgroundColor)(ArkUINodeHandle node);
     void (*setSelectBackgroundColorWithColorSpacePtr)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
+    void (*setMenuKeyboardAvoidMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetMenuKeyboardAvoidMode)(ArkUINodeHandle node);
+    void (*setMinKeyboardAvoidDistance)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetMinKeyboardAvoidDistance)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
