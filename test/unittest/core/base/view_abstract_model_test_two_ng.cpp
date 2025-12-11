@@ -49,6 +49,7 @@ namespace {
     int32_t flag = 0;
     const std::string TEST_TEXT_HINT = "testTextHint";
     const std::string TEST_STATE_DESCRIPTION = "testStateDescription";
+    constexpr size_t STATE_DESCRIPTION_MAX_SIZE = 1000;
     constexpr int32_t TEST_NODE_ID = 1;
     const std::string VALUE_TAB = "TAB";
 }; // namespace
@@ -510,15 +511,19 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityStateDescription001, TestSi
     std::string tag = "uiNode1";
     int32_t nodeId = 1;
     auto frameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
     NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
-
     auto frameNodeMain = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNodeMain, nullptr);
-    EXPECT_FALSE(
-        frameNodeMain->GetOrCreateAccessibilityProperty()->accessibilityStateDescription_.has_value());
+    auto accessibilityProperty = frameNodeMain->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription(), "");
     viewAbstractModelNG.SetAccessibilityStateDescription(TEST_STATE_DESCRIPTION);
-    EXPECT_EQ(
-        frameNodeMain->GetOrCreateAccessibilityProperty()->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription(), TEST_STATE_DESCRIPTION);
+    auto strValue = std::string(1001, 'a');
+    viewAbstractModelNG.SetAccessibilityStateDescription(strValue);
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription().size(), STATE_DESCRIPTION_MAX_SIZE);
 }
 
 /**
@@ -533,12 +538,14 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityStateDescription002, TestSi
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    accessibilityProperty->SetAccessibilityStateDescription(TEST_STATE_DESCRIPTION);
 
     viewAbstractModelNG.SetAccessibilityStateDescription(&frameNode, "");
-    EXPECT_EQ(accessibilityProperty->accessibilityStateDescription_, "");
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription(), "");
     viewAbstractModelNG.SetAccessibilityStateDescription(&frameNode, TEST_STATE_DESCRIPTION);
-    EXPECT_EQ(accessibilityProperty->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription(), TEST_STATE_DESCRIPTION);
+    auto strValue = std::string(1001, 'a');
+    viewAbstractModelNG.SetAccessibilityStateDescription(&frameNode, strValue);
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityStateDescription().size(), STATE_DESCRIPTION_MAX_SIZE);
 }
 
 /**
