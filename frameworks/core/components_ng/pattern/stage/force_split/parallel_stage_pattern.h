@@ -40,9 +40,9 @@ public:
 
     void SetPrimaryPage(const RefPtr<FrameNode>& pageNode) override;
 
-    WeakPtr<FrameNode> GetPrimaryPage()
+    RefPtr<FrameNode> GetPrimaryPage()
     {
-        return primaryPageNode_;
+        return primaryPageNode_.Upgrade();
     }
 
     bool GetIsSplit() override
@@ -65,7 +65,7 @@ public:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
-    RefPtr<FrameNode> GetDividerNode() const
+    const RefPtr<FrameNode>& GetDividerNode() const
     {
         return dividerNode_;
     }
@@ -73,6 +73,31 @@ public:
     bool HasDividerNode() const
     {
         return hasDividerNode_;
+    }
+
+    void SetRelatedPage(const RefPtr<FrameNode>& page)
+    {
+        relatedPage_ = page;
+    }
+    const RefPtr<FrameNode>& GetRelatedPage() const
+    {
+        return relatedPage_;
+    }
+    void SetPlaceholderPage(const RefPtr<FrameNode>& page)
+    {
+        placeHolderPage_ = page;
+    }
+    const RefPtr<FrameNode>& GetPlaceholderPage() const
+    {
+        return placeHolderPage_;
+    }
+
+    const RefPtr<FrameNode>& GetRelatedOrPlaceHolderPage() const
+    {
+        if (relatedPage_) {
+            return relatedPage_;
+        }
+        return placeHolderPage_;
     }
 
     void OnWindowShow() override;
@@ -86,6 +111,8 @@ private:
 
     WeakPtr<FrameNode> primaryPageNode_;
     RefPtr<FrameNode> dividerNode_;
+    RefPtr<FrameNode> placeHolderPage_;
+    RefPtr<FrameNode> relatedPage_;
     PageMode mode_ = PageMode::STACK;
     bool hasDividerNode_ = false;
     std::function<void()> modeChangeCallback_;

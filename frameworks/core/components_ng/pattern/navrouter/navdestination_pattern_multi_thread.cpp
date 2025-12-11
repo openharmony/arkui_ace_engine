@@ -54,7 +54,7 @@ void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
     CHECK_NULL_VOID(host);
     backupStyle_.reset();
     currStyle_.reset();
-    if (!host->IsHomeDestination()) {
+    if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
@@ -83,4 +83,4 @@ void NavDestinationPattern::SetSystemBarStyleMultiThread(const RefPtr<SystemBarS
     };
     host->PostAfterAttachMainTreeTask(std::move(setTask));
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

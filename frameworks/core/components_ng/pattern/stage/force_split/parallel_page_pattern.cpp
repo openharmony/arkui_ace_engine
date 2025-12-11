@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
@@ -34,24 +35,6 @@ void ParallelPagePattern::OnHide(bool isAppStateChange)
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page hide");
         PagePattern::OnHide(isAppStateChange);
     }
-}
-
-RefPtr<FrameNode> ParallelPagePattern::GetOrCreatePlaceHolderPage()
-{
-    if (placeHolderPage_) {
-        return placeHolderPage_;
-    }
-    CHECK_NULL_RETURN(loadPlaceHolderPageCallback_, nullptr);
-    auto phPage = loadPlaceHolderPageCallback_();
-    CHECK_NULL_RETURN(phPage, nullptr);
-    auto phPattern = phPage->GetPattern<ParallelPagePattern>();
-    CHECK_NULL_RETURN(phPattern, nullptr);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    phPattern->SetPageType(RouterPageType::PLACEHOLDER_PAGE);
-    phPattern->SetPrimaryPage(host);
-    placeHolderPage_ = phPage;
-    return placeHolderPage_;
 }
 
 bool ParallelPagePattern::IsShowOrHideAllowed()
@@ -131,7 +114,7 @@ void ParallelPagePattern::BeforeCreateLayoutWrapper()
     if (!stagePattern->GetIsSplit()) {
         return;
     }
-    auto primaryPage = stagePattern->GetPrimaryPage().Upgrade();
+    auto primaryPage = stagePattern->GetPrimaryPage();
     if (!primaryPage) {
         return;
     }
@@ -148,5 +131,47 @@ void ParallelPagePattern::BeforeCreateLayoutWrapper()
         newSafeArea.left_.start = newSafeArea.left_.end;
     }
     props->UpdateSafeAreaInsets(newSafeArea);
+}
+
+void ParallelPagePattern::OnAttachToMainTree()
+{
+    if (type_ == RouterPageType::RELATED_PAGE || type_ == RouterPageType::PLACEHOLDER_PAGE) {
+#if defined(ENABLE_SPLIT_MODE)
+        if (!needFireObserver_) {
+            return;
+        }
+#endif
+        auto info = GetPageInfo();
+        CHECK_NULL_VOID(info);
+        // index of router page start from 1.
+        info->SetPageIndex(-1);
+        if (needNotifyRelatedPageAboutToAppear_) {
+            needNotifyRelatedPageAboutToAppear_ = false;
+            state_ = RouterPageState::ABOUT_TO_APPEAR;
+            UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
+        }
+        return;
+    }
+    PagePattern::OnAttachToMainTree();
+}
+
+void ParallelPagePattern::NotifyAboutToDisappear()
+{
+    needNotifyRelatedPageAboutToAppear_ = true;
+    state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
+}
+
+void ParallelPagePattern::OnDetachFromMainTree()
+{
+    if (type_ == RouterPageType::RELATED_PAGE || type_ == RouterPageType::PLACEHOLDER_PAGE) {
+        if (needNotifyRelatedPageAboutToDisappear_) {
+            needNotifyRelatedPageAboutToDisappear_ = false;
+            state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
+            UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
+        }
+        return;
+    }
+    PagePattern::OnDetachFromMainTree();
 }
 } // namespace OHOS::Ace::NG

@@ -611,7 +611,7 @@ public:
 
     bool IsTopFullScreenChanged() const
     {
-        return isTopFullScreenPage_;
+        return isTopFullScreenChanged_;
     }
     
     bool CheckNeedInitRangeCalculation(SizeF& newSize)
@@ -620,6 +620,22 @@ public:
     }
 
     void FireNavigateChangeCallback();
+
+    //-------for force split------- begin------
+    bool CreateRelatedDestination(
+        const std::string& name, RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& relatedDest);
+    bool IsRelatedDestinationShouldVisible();
+    bool IsRelatedDestinationAtTop();
+    void FireRelatedDestinationLifecycleForModeChange();
+    bool IsSplitDisplay() const
+    {
+        return isSplitDisplay_;
+    }
+    void SetIsSplitDisplay(bool isSplit)
+    {
+        isSplitDisplay_ = isSplit;
+    }
+    //-------for force split------- end------
 
 private:
     void UpdateCanForceSplitLayout();
@@ -819,6 +835,13 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
+    void UpdatePlaceholderOrRelatedPageVisible(bool phIsVisible);
+    void UpdateNavContentAndChildVisibility(const RefPtr<FrameNode>& navContentNode, bool isVisible);
+    void FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
+    void FireRelatedDestinationLifecycleInner(bool isOnShow, bool isFromWindow);
+    RefPtr<NavDestinationGroupNode> GetNonTopForceSplitHomeDestination();
+    RefPtr<NavDestinationGroupNode> GetVisibleRelatedDestination();
+    RefPtr<NavDestinationGroupNode> GetTopRelatedDestination();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -900,6 +923,7 @@ private:
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    bool isSplitDisplay_ = false;
     //-------for force split------- end  ------
 };
 

@@ -404,10 +404,10 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately006, TestSize.Level1
 }
 
 /*
- * @tc.name: HandleBackForHomeDestination001
+ * @tc.name: HandleBackForHomeOrRelatedDestination001
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationGroupNodeTestNg, HandleBackForHomeDestination001, TestSize.Level1)
+HWTEST_F(NavigationGroupNodeTestNg, HandleBackForHomeOrRelatedDestination001, TestSize.Level1)
 {
     NavigationGroupNodeTestNg::SetUpTestCase();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -418,7 +418,7 @@ HWTEST_F(NavigationGroupNodeTestNg, HandleBackForHomeDestination001, TestSize.Le
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
-    bool res = navigationNode->HandleBackForHomeDestination();
+    bool res = navigationNode->HandleBackForHomeOrRelatedDestination();
     EXPECT_FALSE(res);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }

@@ -193,6 +193,19 @@ void ParallelStagePattern::OnDetachFromMainTree()
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    do {
+        CHECK_NULL_BREAK(relatedPage_);
+        auto relatedPattern = relatedPage_->GetPattern<ParallelPagePattern>();
+        CHECK_NULL_BREAK(relatedPattern);
+        if (hostNode->GetChildIndex(relatedPage_) == -1) {
+            // relatedPage has already detach from main tree.
+            relatedPattern->NotifyAboutToDisappear();
+            relatedPage_ = nullptr;
+        } else {
+            // relatedPage still exist on main tree, it will detach from main tree late.
+            relatedPattern->SetNeedNotifyRelatedPageAboutToDisappear(true);
+        }
+    } while (false);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto id = hostNode->GetId();
