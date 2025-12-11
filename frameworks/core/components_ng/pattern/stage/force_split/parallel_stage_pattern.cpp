@@ -210,12 +210,9 @@ void ParallelStagePattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(pipeline);
     auto id = hostNode->GetId();
     pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
     auto mgr = pipeline->GetForceSplitManager();
     CHECK_NULL_VOID(mgr);
-    if (!mgr->IsForceSplitSupported(true)) {
-        return;
-    }
-    pipeline->RemoveWindowSizeChangeCallback(id);
     mgr->RemoveForceSplitStateListener(id);
 }
 

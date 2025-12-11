@@ -308,6 +308,14 @@ public:
     }
 
     void BeforeCreateLayoutWrapper() override;
+    std::optional<SizeF> GetCurrentNavDestinationSize() const
+    {
+        if (navDestinationContext_) {
+            return navDestinationContext_->GetCurrentSize();
+        }
+        return std::nullopt;
+    }
+    void NotifyNavDestinationSizeChange();
 
 private:
     struct HideBarOnSwipeContext {
@@ -347,6 +355,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckIfStatusBarConfigChanged();
     void CheckIfNavigationIndicatorConfigChagned();
+    void OnVisibleChange(bool isVisible) override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -371,6 +380,7 @@ private:
     bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     std::string serializedParam_ = "";
+    bool needNotifySizeChangeWhenVisible_ = false;
 };
 } // namespace OHOS::Ace::NG
 

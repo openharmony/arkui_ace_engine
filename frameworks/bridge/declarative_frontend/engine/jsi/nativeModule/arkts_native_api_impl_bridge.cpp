@@ -294,6 +294,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
         const char* routerPageKeys[] = { "context", "index", "name", "path", "state", "pageId" };
         auto routerPageObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(routerPageKeys), routerPageKeys,
             routerPageValues);
+        if (routerPageResult->size.has_value()) {
+            Local<JSValueRef> sizeValues[] = {
+                panda::NumberRef::New(vm, routerPageResult->size.value().Width()),
+                panda::NumberRef::New(vm, routerPageResult->size.value().Height()) };
+            const char* sizeKeys[] = { "width", "height" };
+            auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(sizeKeys), sizeKeys, sizeValues);
+            routerPageObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "size"), sizeObj);
+        }
         pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "routerPageInfo"), routerPageObj);
     }
 
@@ -312,6 +320,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
             "mode", "uniqueId" };
         auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
             navDestinationKeys, navDestinationValues);
+        if (navDestinationResult->size.has_value()) {
+            Local<JSValueRef> sizeValues[] = {
+                panda::NumberRef::New(vm, navDestinationResult->size.value().Width()),
+                panda::NumberRef::New(vm, navDestinationResult->size.value().Height()) };
+            const char* sizeKeys[] = { "width", "height" };
+            auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(sizeKeys), sizeKeys, sizeValues);
+            navDestinationObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "size"), sizeObj);
+        }
         pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestinationInfo"), navDestinationObj);
     }
 

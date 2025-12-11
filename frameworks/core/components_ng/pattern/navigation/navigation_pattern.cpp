@@ -118,6 +118,7 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
     int32_t uniqueId = context->GetUniqueId();
     info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
         navDestinationId, mode, uniqueId);
+    info->size = context->GetCurrentSize();
 }
 
 void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -1628,7 +1629,6 @@ RefPtr<NavDestinationGroupNode> NavigationPattern::GetVisibleRelatedDestination(
 
 RefPtr<NavDestinationGroupNode> NavigationPattern::GetTopRelatedDestination()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavigationPattern::GetTopRelatedDestination 1");
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, nullptr);
     auto context = host->GetContext();
@@ -1636,14 +1636,11 @@ RefPtr<NavDestinationGroupNode> NavigationPattern::GetTopRelatedDestination()
     auto manager = context->GetForceSplitManager();
     CHECK_NULL_RETURN(manager, nullptr);
     if (!manager->IsForceSplitSupported(false) || !forceSplitSuccess_) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavigationPattern::GetTopRelatedDestination 2");
         return nullptr;
     }
     if (IsRelatedDestinationAtTop()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavigationPattern::GetTopRelatedDestination 3");
         return AceType::DynamicCast<NavDestinationGroupNode>(host->GetRelatedPageDestNode());
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavigationPattern::GetTopRelatedDestination 4");
     return nullptr;
 }
 
