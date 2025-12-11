@@ -24368,7 +24368,7 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
   }
 }
 MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
-class SelectOnSelectModifier extends ModifierWithKey{
+class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }

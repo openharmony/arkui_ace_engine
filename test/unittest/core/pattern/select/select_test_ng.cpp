@@ -1427,5 +1427,6 @@ HWTEST_F(SelectTestNg, SelectKeyboardAvoidMode002, TestSize.Level1)
     selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::NONE);
     selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
     EXPECT_TRUE(json->Contains("keyboardAvoidMode"));
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 } // namespace OHOS::Ace::NG

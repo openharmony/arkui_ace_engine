@@ -45,6 +45,7 @@ constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_P1_OFFSET_Y = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_Y = 0.68_vp;
+constexpr Dimension MIN_KEYBOARD_AVOID_DISTANCE = 8.0_vp;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
@@ -3985,10 +3986,6 @@ std::optional<float> MenuLayoutAlgorithm::GetKeyboardTopPosition(const RefPtr<Fr
 void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
     const std::optional<Dimension>& minKeyboardAvoidDistance, float keyboardTopPosition)
 {
-    auto context = menuNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto menuTheme = context->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
@@ -4003,7 +4000,7 @@ void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
         return;
     }
     auto minKeyboardAvoidDistanceValue =
-        minKeyboardAvoidDistance.value_or(menuTheme->GetMinKeyboardAvoidDistance()).ConvertToPx();
+        minKeyboardAvoidDistance.value_or(MIN_KEYBOARD_AVOID_DISTANCE).ConvertToPx();
     auto isPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
     auto newRectBottom = keyboardTopPosition - minKeyboardAvoidDistanceValue;
     // In the preview menu, the bottom of the layout area of the menu is equal to the layout area of the menu
@@ -4019,7 +4016,7 @@ void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
     // If the layout area of the menu is less than or equal to 0 after the soft keyboard is avoided, the theme value is
     // restored.
     if (GreatOrEqual(rectTop, newRectBottom)) {
-        newRectBottom = keyboardTopPosition - menuTheme->GetMinKeyboardAvoidDistance().ConvertToPx();
+        newRectBottom = keyboardTopPosition - MIN_KEYBOARD_AVOID_DISTANCE.ConvertToPx();
     }
     
     float maxAvailableHeight = wrapperRect_.Height();
