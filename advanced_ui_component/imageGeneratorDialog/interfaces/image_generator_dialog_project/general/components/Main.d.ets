@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
-export var CanvasMode;
-(function (w8) {
-    w8[w8["GENERAL_MODE"] = 0] = "GENERAL_MODE";
-    w8[w8["DOODLE_MODE"] = 1] = "DOODLE_MODE";
-})(CanvasMode || (CanvasMode = {}));
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+@ComponentV2
+export declare struct ImageGeneratorDialog {
+    stack: NavPathStack;
+    options?: imageGeneration.GeneratorDialogOptions;
+    @Local
+    width_: Dimension;
+    @Local
+    height_: Dimension;
+    @Builder
+    pageMap(s2: string): void;
+    aboutToAppear(): void;
+    build(): void;
+}

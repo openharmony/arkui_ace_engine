@@ -13,27 +13,38 @@
  * limitations under the License.
  */
 
-import arkuiNamespaces from "@kit.ArkUI"
-import { CanvasHome } from "./canvasPages/CanvasHome";
-import { CanvasMode } from "../types/Declaration";
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { CanvasHome } from "./CanvasFramework";
 
 @ComponentV2
 export struct ImageGeneratorDialog {
-  options?: arkuiNamespaces.imageGeneration.GeneratorDialogOptions;
+  stack: NavPathStack = new NavPathStack();
+  options?: imageGeneration.GeneratorDialogOptions;
   @Local width_: Dimension = 650;
   @Local height_: Dimension = 560;
-  @Local currentCanvasMode: CanvasMode = CanvasMode.COMMON_MODE
+
+  @Builder
+  pageMap(name: string) {
+    if (name === 'home') {
+      CanvasHome()
+    }
+  }
+
+  aboutToAppear(): void {
+    this.stack.pushPath({name: 'home'})
+  }
 
   build() {
     Scroll() {
-      Column() {
-        if (this.currentCanvasMode === CanvasMode.COMMON_MODE) {
-          CanvasHome()
-        }
+      Navigation(this.stack) {
+
       }
+      .navDestination(this.pageMap)
+      .hideNavBar(true)
       .height(this.height_)
       .width(this.width_)
       .borderRadius(32)
+      .mode(NavigationMode.Stack)
       .clip(true)
       .alignSelf(ItemAlign.Center)
     }
