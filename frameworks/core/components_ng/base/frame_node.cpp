@@ -2466,7 +2466,8 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
                 tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), layoutPriority_, hostPageId_, depth_);
-            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::MEASURE_FOR_IGNORE);
+            SetIgnoreLayoutProcess(
+                layoutTaskType == LayoutType::MEASURE_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
             Measure(layoutConstraint);
             ResetIgnoreLayoutProcess();
         } else {
@@ -2478,7 +2479,8 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
                              "[pageId:%d][depth:%d]",
                 tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutPriority_, hostPageId_, depth_);
-            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE);
+            SetIgnoreLayoutProcess(
+                layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
             Layout();
             ResetIgnoreLayoutProcess();
         }
@@ -5129,14 +5131,14 @@ void FrameNode::PostTaskForIgnore()
     PostBundle(std::move(delayMeasureChildren_));
 }
 
-void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes)
+void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes, bool postByTraverse)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     IgnoreLayoutSafeAreaBundle bundle;
     bundle.second = Claim(this);
     bundle.first = std::move(nodes);
-    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), postByTraverse);
 }
 
 bool FrameNode::PostponedTaskForIgnore()
@@ -5193,7 +5195,8 @@ void FrameNode::TraverseForIgnore()
         UpdateIgnoreCount(recheckCount - subtreeIgnoreCount_);
     }
     if (!effectedNodes.empty()) {
-        PostBundle(std::move(effectedNodes));
+        //Post self, keep measure and layout paired
+        PostBundle({}, true);
     }
 }
 
@@ -5202,13 +5205,12 @@ void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subt
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
     for (const auto& child : children) {
-        if (!child || !child->SubtreeWithIgnoreChild()) {
+        if (!child || !child->SubtreeWithIgnoreChild() || child->CheckNeedForceMeasureAndLayout()) {
             continue;
         }
         auto property = child->GetLayoutProperty();
         if (property && property->IsIgnoreOptsValid()) {
             subtreeCollection.emplace_back(child);
-            child->SetDelaySelfLayoutForIgnore();
         } else {
             std::vector<RefPtr<FrameNode>> effectedNodes;
             int recheckCount = 0;
@@ -5217,7 +5219,8 @@ void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subt
                 child->UpdateIgnoreCount(recheckCount - child->subtreeIgnoreCount_);
             }
             if (!effectedNodes.empty()) {
-                child->PostBundle(std::move(effectedNodes));
+                //Post self, keep measure and layout paired
+                child->PostBundle({}, true);
             }
         }
         subtreeRecheck += child->subtreeIgnoreCount_;
