@@ -2602,6 +2602,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 }
                 return false;
             });
+    bool isCustomNodeDeleteInTransition = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ComponentDeleteInTransitionEnabled" && metaDataItem.value == "true"; });
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    if (pipelineContext) {
+        pipelineContext->SetIsCustomNodeDeleteInTransition(isCustomNodeDeleteInTransition);
+    }
+    
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),

@@ -373,6 +373,37 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
 }
 
 /*
+ * @tc.name: RemoveJsChildImmediately006
+ * @tc.desc: Test SetIsCustomNodeDeleteInTransition = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately006, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preTopNavDestinationNode->SetIsCacheNode(true);
+    preTopNavDestinationNode->SetDestroying(false);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsCustomNodeDeleteInTransition(true);
+
+    navigationNode->RemoveJsChildImmediately(preTopNavDestinationNode, false, 1);
+    EXPECT_FALSE(preTopNavDestinationNode->isInDestroying_);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
  * @tc.name: HandleBackForHomeDestination001
  * @tc.type: FUNC
  */

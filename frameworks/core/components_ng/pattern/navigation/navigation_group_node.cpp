@@ -900,7 +900,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
     int32_t preAnimationId)
 {
-    if (!CheckEnableCustomNodeDel()) {
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    if (!context->IsCustomNodeDeleteInTransition()) {
         return;
     }
 
