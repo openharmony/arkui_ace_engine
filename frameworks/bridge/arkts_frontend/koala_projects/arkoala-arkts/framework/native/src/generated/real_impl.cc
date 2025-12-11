@@ -5343,6 +5343,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Boolean* value)
     {
     }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
     void SetSearchButtonImpl(Ark_NativePointer node,
                              const Opt_String* value,
                              const Opt_SearchButtonOptions* option)
@@ -6645,6 +6649,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Boolean* value)
     {
     }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -6920,6 +6928,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetFallbackLineSpacingImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
+    {
+    }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -7293,6 +7305,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetFallbackLineSpacingImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
+    {
+    }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -9881,6 +9897,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetDividerColorImpl,
             SearchAttributeModifier::SetIncludeFontPaddingImpl,
             SearchAttributeModifier::SetFallbackLineSpacingImpl,
+            SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
             SearchAttributeModifier::SetCustomKeyboardImpl,
@@ -10280,6 +10297,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextAttributeModifier::SetIncludeFontPaddingImpl,
             TextAttributeModifier::SetFallbackLineSpacingImpl,
+            TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
             TextAttributeModifier::SetFontImpl,
             TextAttributeModifier::SetFontWeightImpl,
             TextAttributeModifier::SetSelectionImpl,
@@ -10353,6 +10371,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
             TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
+            TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
             TextAreaAttributeModifier::SetInputFilterImpl,
             TextAreaAttributeModifier::SetShowCounterImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
@@ -10456,6 +10475,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextInputAttributeModifier::SetIncludeFontPaddingImpl,
             TextInputAttributeModifier::SetFallbackLineSpacingImpl,
+            TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,

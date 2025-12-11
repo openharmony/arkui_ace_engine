@@ -27,7 +27,7 @@ import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./comp
 import { ResourceColor, Dimension, Font, Length, ResourceStr } from "./component/units"
 import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode } from "./component/enums"
 import { Resource } from "global.resource"
-import { EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./component/textCommon"
+import { EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { CustomBuilder } from "./component/builder"
 import { CancelButtonOptions, CancelButtonSymbolOptions } from "./component/search"
@@ -187,6 +187,8 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _includeFontPadding_0_0value?: boolean | undefined
     _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fallbackLineSpacing_0_0value?: boolean | undefined
+    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     _inputFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _inputFilter_0_0value?: ResourceStr | undefined
     _inputFilter_0_1value?: ((value0: string) => void) | undefined
@@ -1496,6 +1498,24 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (this._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._inputFilter_0_flag) {
@@ -2490,6 +2510,19 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (modifier._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._inputFilter_0_flag) {
@@ -3319,6 +3352,17 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedDragPreviewStyle_0_0value = value
+        } else
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

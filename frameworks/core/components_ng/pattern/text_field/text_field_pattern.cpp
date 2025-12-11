@@ -2494,37 +2494,40 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
 {
     TextDragInfo info;
     auto manager = selectOverlay_->GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_RETURN(manager, info);
-    auto selectOverlayInfo = manager->GetSelectOverlayInfo();
-    CHECK_NULL_RETURN(selectOverlayInfo, info);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_RETURN(textFieldTheme, info);
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, info);
+    if (manager != nullptr) {
+        auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+        CHECK_NULL_RETURN(selectOverlayInfo, info);
+        auto textFieldTheme = GetTheme();
+        CHECK_NULL_RETURN(textFieldTheme, info);
+        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_RETURN(paintProperty, info);
+
+        auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
+        auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
+        auto firstIndex = selectController_->GetFirstHandleIndex();
+        auto secondIndex = selectController_->GetSecondHandleIndex();
+        auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
+        auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
+        if (firstIndex > secondIndex) {
+            selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
+            info.isFirstHandleAnimation = secondIsShow;
+            info.isSecondHandleAnimation = firstIsShow;
+        } else {
+            selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
+            info.isFirstHandleAnimation = firstIsShow;
+            info.isSecondHandleAnimation = secondIsShow;
+        }
+        info.selectedBackgroundColor = selectedBackgroundColor;
+        info.handleColor = handleColor;
+    }
+
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, info);
-    auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
-    auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
-    auto firstIndex = selectController_->GetFirstHandleIndex();
-    auto secondIndex = selectController_->GetSecondHandleIndex();
-    auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
-    auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (firstIndex > secondIndex) {
-        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
-        info.isFirstHandleAnimation = secondIsShow;
-        info.isSecondHandleAnimation = firstIsShow;
-    } else {
-        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
-        info.isFirstHandleAnimation = firstIsShow;
-        info.isSecondHandleAnimation = secondIsShow;
-    }
-    info.selectedBackgroundColor = selectedBackgroundColor;
     if (layoutProperty->HasSelectedDragPreviewStyle()) {
         info.dragBackgroundColor = layoutProperty->GetSelectedDragPreviewStyleValue();
     } else {
         info.dragBackgroundColor = std::nullopt;
     }
-    info.handleColor = handleColor;
     return info;
 }
 
