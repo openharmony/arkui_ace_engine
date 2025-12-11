@@ -133,6 +133,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
+    if (ret == ERR_APPEXECFWK_FORM_NOT_SUPPORTED) {
+        ProcessFormUninstall(info.id);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, unsupported card");
+        return;
+    }
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
