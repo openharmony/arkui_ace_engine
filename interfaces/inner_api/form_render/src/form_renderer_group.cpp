@@ -114,6 +114,15 @@ void FormRendererGroup::OnUnlock()
     InnerAddForm(currentFormRequest);
 }
 
+void FormRendererGroup::SetRenderGroupEnableFlag(bool isEnable)
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("SetRenderGroupEnableFlag failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->SetRenderGroupEnableFlag(isEnable);
+}
+ 
 void FormRendererGroup::SetVisibleChange(bool isVisible)
 {
     if (formRenderer_ == nullptr) {

@@ -65,6 +65,7 @@ public:
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
+    void SetRenderGroupEnableFlag(bool isEnable);
     void SetVisibleChange(bool isVisible);
     void UpdateFormSize(float width, float height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
@@ -79,6 +80,7 @@ private:
     void RemoveFormDeathRecipient();
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
 
+    bool disableUIFirst_ = false;
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
     float width_ = 0.0f;

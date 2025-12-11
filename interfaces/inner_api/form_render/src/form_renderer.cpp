@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace Ace {
 namespace {
+constexpr char FORM_DISABLE_UIFIRST_KEY[] = "ohos.extra.param.key.disable_uifirst";
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
@@ -144,6 +145,7 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
 
 void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
 {
+    disableUIFirst_ = want.GetBoolParam(FORM_DISABLE_UIFIRST_KEY, false);
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
@@ -366,6 +368,10 @@ int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJs
         return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
     }
     HILOG_INFO("Form OnSurfaceCreate, id: %{public}" PRIu64, rsSurfaceNode->GetId());
+    if (disableUIFirst_) {
+        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
+        HILOG_INFO("force disable uifirst and rendergroup");
+    }
 
     int32_t ret = ERR_OK;
     if (formJsInfo.uiSyntax == OHOS::AppExecFwk::FormType::ETS) {
@@ -626,6 +632,23 @@ void FormRenderer::RecoverForm(const std::string& statusData)
     uiContent_->RecoverForm(statusData);
 }
 
+void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
+{
+    auto rsSurfaceNode = GetSurfaceNode();
+    if (!rsSurfaceNode) {
+        HILOG_ERROR("SetRenderGroupEnableFlag rsSurfaceNode is nullptr.");
+        return ;
+    }
+    
+    if (!isEnable) {
+        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
+        HILOG_INFO("force disable uifirst and rendergroup");
+    } else {
+        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::NONE);
+        HILOG_INFO("reset uifirst and rendergroup");
+    }
+}
+ 
 void FormRenderer::SetVisibleChange(bool isVisible)
 {
     if (formRendererDispatcherImpl_ != nullptr) {
