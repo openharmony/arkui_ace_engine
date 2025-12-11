@@ -428,6 +428,9 @@ public:
         }
         info += "] partFrameNodeChildren:[";
         for (const auto& child : partFrameNodeChildren_) {
+            if (!child.second->GetHostNode()) {
+                continue;
+            }
             info += std::to_string(child.second->GetHostNode()->GetId());
             info += ",";
         }

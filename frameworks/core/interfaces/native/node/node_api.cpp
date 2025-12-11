@@ -251,6 +251,7 @@ ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32
 ArkUINodeHandle GetNodeByViewStack()
 {
     auto node = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_RETURN(node, nullptr);
     node->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
 }

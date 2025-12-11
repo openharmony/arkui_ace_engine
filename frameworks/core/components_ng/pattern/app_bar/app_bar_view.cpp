@@ -372,6 +372,7 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
 void AppBarView::DestroyServicePanel()
 {
     auto node = atomicService_.Upgrade();
+    CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
