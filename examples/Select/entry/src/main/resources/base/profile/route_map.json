@@ -11,6 +11,11 @@
       "buildFunction": "SelectIndexBuilder"
     },
     {
+      "name": "SelectIndexStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/Index.ets",
+      "buildFunction": "SelectIndexStaticBuilder"
+    },
+    {
       "name": "SelectDivider",
       "pageSourceFile": "src/main/ets/pages/components/select/selectDivider.ets",
       "buildFunction": "SelectDividerBuilder"
@@ -71,9 +76,59 @@
       "buildFunction": "SelectArrowBuilder"
     },
     {
+      "name": "SelectArrowModifierStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectArrowModifier.ets",
+      "buildFunction": "SelectArrowModifierStaticBuilder"
+    },
+    {
       "name": "SelectOptionTextModifier",
       "pageSourceFile": "src/main/ets/pages/components/select/selectModifier.ets",
       "buildFunction": "SelectOptionTextModifierBuilder"
+    },
+    {
+      "name": "SelectOptionTextModifierStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectOptionTextModifier.ets",
+      "buildFunction": "SelectOptionTextModifierStaticBuilder"
+    },
+    {
+      "name": "SelectSelectedOptionTextModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectSelectedOptionTextModifier.ets",
+      "buildFunction": "SelectSelectedOptionTextModifierBuilder"
+    },
+    {
+      "name": "SelectSelectedOptionTextModifierStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectOptionTextModifier.ets",
+      "buildFunction": "SelectSelectedOptionTextModifierStaticBuilder"
+    },
+    {
+      "name": "SelectShowDefaultSelectedIcon",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectShowDefaultSelectedIcon.ets",
+      "buildFunction": "SelectShowDefaultSelectedIconBuilder"
+    },
+    {
+      "name": "SelectShowDefaultSelectedIconStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectShowDefaultSelectedIcon.ets",
+      "buildFunction": "SelectShowDefaultSelectedIconStaticBuilder"
+    },
+    {
+      "name": "SelectShowInSubWindow",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectShowInSubWindow.ets",
+      "buildFunction": "SelectShowInSubWindowBuilder"
+    },
+    {
+      "name": "SelectShowInSubWindowStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectShowInSubWindow.ets",
+      "buildFunction": "SelectShowInSubWindowStaticBuilder"
+    },
+    {
+      "name": "SelectTextModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectTextModifier.ets",
+      "buildFunction": "SelectTextModifierBuilder"
+    },
+    {
+      "name": "SelectSelectedOptionTextModifierStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectTextModifier.ets",
+      "buildFunction": "SelectTextModifierStaticBuilder"
     },
     {
       "name": "SelectLevel00",
@@ -119,6 +174,11 @@
       "name": "SelectMenuOutline",
       "pageSourceFile": "src/main/ets/pages/components/select/selectMenuOutline.ets",
       "buildFunction": "SelectMenuOutlineBuilder"
+    },
+    {
+      "name": "SelectMenuOutlineStatic",
+      "pageSourceFile": "src/main/ets/pages/components/select_static/selectMenuOutline.ets",
+      "buildFunction": "SelectMenuOutlineStaticBuilder"
     },
     {
       "name": "ButtonIndex",
@@ -391,6 +451,11 @@
       "buildFunction": "RatingIndexBuilder"
     },
     {
+      "name": "RatingIndexStatic",
+      "pageSourceFile": "src/main/ets/pages/components/rating_static/Index.ets",
+      "buildFunction": "RatingIndexStaticBuilder"
+    },
+    {
       "name": "RatingNormal",
       "pageSourceFile": "src/main/ets/pages/components/rating/ratingNormal.ets",
       "buildFunction": "RatingNormalBuilder"
@@ -399,6 +464,11 @@
       "name": "RatingStarStyle",
       "pageSourceFile": "src/main/ets/pages/components/rating/ratingStarStyle.ets",
       "buildFunction": "RatingStarStyleBuilder"
+    },
+    {
+      "name": "RatingStarStyleStatic",
+      "pageSourceFile": "src/main/ets/pages/components/rating_static/ratingStarStyle.ets",
+      "buildFunction": "RatingStarStyleStaticBuilder"
     },
     {
       "name": "RatingCustom",
@@ -424,6 +494,21 @@
       "name": "SliderIndex",
       "pageSourceFile": "src/main/ets/pages/components/slider/Index.ets",
       "buildFunction": "SliderIndexBuilder"
+    },
+    {
+      "name": "SliderIndexStatic",
+      "pageSourceFile": "src/main/ets/pages/components/slider_static/Index.ets",
+      "buildFunction": "SliderIndexStaticBuilder"
+    },
+    {
+      "name": "SliderBlockColor",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderBlockColor.ets",
+      "buildFunction": "SliderBlockColorBuilder"
+    },
+    {
+      "name": "SliderBlockColorStatic",
+      "pageSourceFile": "src/main/ets/pages/components/slider_static/sliderBlockColor.ets",
+      "buildFunction": "SliderBlockColorStaticBuilder"
     },
     {
       "name": "SliderStyle",
@@ -494,6 +579,21 @@
       "name": "SliderPrefixSuffix",
       "pageSourceFile": "src/main/ets/pages/components/slider/SliderPrefixSuffix.ets",
       "buildFunction": "SliderPrefixSuffixBuilder"
+    },
+    {
+      "name": "SliderPrefixSuffixStatic",
+      "pageSourceFile": "src/main/ets/pages/components/slider_static/SliderPrefixSuffix.ets",
+      "buildFunction": "SliderPrefixSuffixStaticBuilder"
+    },
+    {
+      "name": "SliderShowSteps",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderShowSteps.ets",
+      "buildFunction": "SliderShowStepsBuilder"
+    },
+    {
+      "name": "SliderShowStepsStatic",
+      "pageSourceFile": "src/main/ets/pages/components/slider_static/sliderShowSteps.ets",
+      "buildFunction": "SliderShowStepsStaticBuilder"
     },
     {
       "name": "RadioIndex",

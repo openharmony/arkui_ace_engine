@@ -12,35 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+'use static'
 import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function SliderIndexBuilder(name: string, param: Object) {
-  SliderIndex()
+export function RatingIndexStaticBuilder(name: string, param: Object) {
+  RatingIndexStatic()
 }
 
 @Entry
 @Component
-export struct SliderIndex {
+export struct RatingIndexStatic {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'SliderStyle', path: 'SliderStyle' },
-    { name: 'SliderBlockStyle', path: 'SliderBlockStyle' },
-    { name: 'SliderCustom', path: 'SliderCustom' },
-    { name: 'SliderTips', path: 'SliderTips' },
-    { name: 'SliderNormal', path: 'SliderNormal' },
-    { name: 'SliderLevel0', path: 'SliderLevel0' },
-    { name: 'SliderLevel01', path: 'SliderLevel01' },
-    { name: 'SliderLevel10', path: 'SliderLevel10' },
-    { name: 'SliderLevel11', path: 'SliderLevel11' },
-    { name: 'SliderLevel12', path: 'SliderLevel12' },
-    { name: 'SliderLevel13', path: 'SliderLevel13' },
-    { name: 'SliderLevel14', path: 'SliderLevel14' },
-    { name: 'SliderLevel15', path: 'SliderLevel15' },
-    { name: 'SliderPrefixSuffix', path: 'SliderPrefixSuffix' },
-    { name: 'SliderShowSteps', path: 'SliderShowSteps' },
-    { name: 'SliderBlockColor', path: 'SliderBlockColor' },
+    { name: 'RatingStarStyle', path: 'RatingStarStyle' }
   ]
 
   build() {
@@ -54,7 +39,7 @@ export struct SliderIndex {
         })
       }
     }
-    .title('Slider')
+    .title('RatingStatic')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
