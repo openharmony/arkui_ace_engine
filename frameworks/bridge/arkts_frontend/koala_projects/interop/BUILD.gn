@@ -53,8 +53,6 @@ action("interop.abc") {
     "run",
     "build:interop:gn",
   ]
-
-  deps = [ "../ui2abc:ui2abc" ]
 }
 
 group("interop") {
