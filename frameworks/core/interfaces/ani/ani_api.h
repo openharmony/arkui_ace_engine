@@ -384,6 +384,14 @@ struct ArkUIXComponentParams {
     std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
 };
 
+typedef struct ArkUIAniImageOnErrorParams {
+    std::string errorMessage;
+    int32_t componentWidth = 0;
+    int32_t componentHeight = 0;
+    int32_t errorCode = 0;
+    std::string errorInfo;
+} ArkUIAniImageOnErrorParams;
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem);
@@ -394,7 +402,8 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
-    void (*setImageOnErrorCallback)(ani_env* env, ArkUINodeHandle node, void* callback);
+    void (*setImageOnErrorCallback)(
+        ArkUINodeHandle node, std::function<void(const ArkUIAniImageOnErrorParams&)>&& callbackBack);
 };
 
 struct ArkUIWaterFlowSectionGap {
