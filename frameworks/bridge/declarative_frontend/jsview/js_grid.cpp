@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,16 +258,22 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
 
 void JSGrid::SetColumnsTemplate(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
-        GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         auto fillTypeParam = jsObj->GetProperty("fillType");
         if (!fillTypeParam->IsNull()) {
             auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
             if (type.has_value()) {
                 GridModel::GetInstance()->SetItemFillPolicy(type.value());
+            } else {
+                GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
             }
+        } else {
+            GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
         }
     } else {
         GridModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
@@ -322,19 +328,42 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        // null/undefined keep last grid height
-        return;
-    }
-    JSViewAbstract::JsHeight(info);
 
+    ViewAbstractModel::GetInstance()->ResetResObj("height");
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    RefPtr<ResourceObject> valueResObj;
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
+        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
+
+    if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
+        // JsHeight return false, check if set LayoutPolicy before return.
+        if (jsValue->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+            if (layoutPolicy->IsString()) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+                return;
+            }
+        }
+        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
+        return;
+    }
+
+    GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
+    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0)
+                                                 : (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         value.SetValue(0.0);
     }
+
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        ViewAbstractModel::GetInstance()->SetHeight(valueResObj);
+    }
+
     GridModel::GetInstance()->SetGridHeight(value);
 }
 
@@ -346,6 +375,7 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
                                  func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
                                      JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::pair<float, float>(0, 0));
         JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
         JSRef<JSVal> itemOffset = ConvertToJSValue(offset);
         JSRef<JSVal> params[2] = { itemIndex, itemOffset };
@@ -423,6 +453,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
     JSClass<JSGrid>::StaticMethod("syncLoad", &JSGrid::SetSyncLoad);
+    JSClass<JSGrid>::StaticMethod("supportLazyLoadingEmptyBranch", &JSGrid::SetSupportLazyLoadingEmptyBranch);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -747,6 +778,23 @@ void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
         }
     }
     GridModel::GetInstance()->SetSyncLoad(syncLoad);
+}
+
+/**
+ * JS API definition: supportLazyLoadingEmptyBranch(supported: boolean | undefined): GridAttribute;
+ * supported: true - enable lazy loading for empty branch, false - disable lazy loading for empty branch
+ * if supported is undefined, disable lazy loading for empty branch
+ */
+void JSGrid::SetSupportLazyLoadingEmptyBranch(const JSCallbackInfo& info)
+{
+    bool supportLazyLoadingEmptyBranch = false;
+    if (info.Length() == 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            supportLazyLoadingEmptyBranch = value->ToBoolean();
+        }
+    }
+    GridModel::GetInstance()->SetSupportLazyLoadingEmptyBranch(supportLazyLoadingEmptyBranch);
 }
 
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)

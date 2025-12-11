@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,9 +34,43 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
     return instance;
 }
 
+bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId,
+    bool isNavigation)
+{
+    CHECK_NULL_RETURN(root, false);
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsHostMainWindow()) {
+        return (pipeline->GetRootWidth() * pipeline->GetRootHeight() >= SystemProperties::GetDeviceWidth() *
+            SystemProperties::GetDeviceHeight() * TRANSPARENT_NODE_SIZE_THRESHOLD && root->IsContextTransparent());
+    }
+
+    if (isNavigation) {
+        RefPtr<NG::FrameNode> topNavDesNode;
+        root->FindTopNavDestination(topNavDesNode);
+        CHECK_NULL_RETURN(topNavDesNode, false);
+        if (!topNavDesNode->IsContextTransparent()) {
+            return false;
+        }
+    } else {
+        auto stageNode = root->GetChildren().front();
+        CHECK_NULL_RETURN(stageNode, false);
+        auto currentPageNode = stageNode->GetChildren().back();
+        CHECK_NULL_RETURN(currentPageNode, false);
+        auto jsView = currentPageNode->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(jsView, false);
+        auto rootNodeCurrentPage = jsView->GetChildAtIndex(0);
+        if (rootNodeCurrentPage && !rootNodeCurrentPage->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
+}
 
 void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, const std::string& pageUrl,
-    uint8_t detectCount)
+    bool isNav, uint8_t detectCount)
 {
     if (detectCount > TransparentNodeDetector::MAX_DETECT_COUNT || detectCount == 0) {
         return;
@@ -52,24 +87,23 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     CHECK_NULL_VOID(container);
     bool isUECWindow = container->IsUIExtensionWindow();
     if (!(isUECWindow || container->IsHostSubWindow() ||
-        container->IsHostDialogWindow()) || !pipelineContext->GetOnFocus()) {
+        container->IsHostDialogWindow() || container->IsHostMainWindow()) || !pipelineContext->GetOnFocus()) {
         return;
     }
     detectCount--;
     auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)),
-        detectCount, currentId, pageUrl, isUECWindow]() {
+        detectCount, currentId, pageUrl, isUECWindow, isNav]() {
         ContainerScope scope(currentId);
         auto root = weakNode.Upgrade();
         CHECK_NULL_VOID(root);
         auto pipeline = root->GetContext();
         CHECK_NULL_VOID(pipeline);
-        if (pipeline->GetRootWidth() * pipeline->GetRootHeight() < SystemProperties::GetDeviceWidth() *
-            SystemProperties::GetDeviceHeight() * TRANSPARENT_NODE_SIZE_THRESHOLD || !root->IsContextTransparent()) {
+        if (!TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, currentId, isNav)) {
             return;
         }
         if (detectCount > 0) {
             LOGW("try detect again");
-            TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(root, pageUrl, detectCount);
+            TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(root, pageUrl, isNav, detectCount);
             return;
         }
         LOGW("transparent node detected");
@@ -79,7 +113,8 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         auto container = Container::GetContainer(currentId);
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
-        EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        container->IsHostMainWindow() ? EventReport::ReportMainWindowTransparentEvent(pageUrl, bundleName, moduleName)
+            : EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
         if (isUECWindow) {
             window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT);
         }

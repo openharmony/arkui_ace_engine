@@ -2796,6 +2796,14 @@
         "name": "OH_ArkUI_GetNodeSnapshot"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SnapshotOptions_SetColorMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SnapshotOptions_SetDynamicRangeMode"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_StartImageAnalyzer"
     },
@@ -4108,6 +4116,14 @@
         "name": "OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NaviteModule_ConvertPositionToWindow"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NaviteModule_ConvertPositionFromWindow"
+    },
+    {
         "first_introduced": "21",
         "name": "OH_ArkUI_PositionEdges_Create"
     },
@@ -4245,6 +4261,14 @@
     },
     {
         "first_introduced": "22",
+        "name": "OH_ArkUI_NativeModule_GetDrawableDescriptorFromAniValue"  
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_NativeModule_GetDrawableDescriptorFromResourceAniValue"  
+    },
+    {
+        "first_introduced": "22",
         "name": "OH_ArkUI_UIInputEvent_GetCoastingAxisEvent"
     },
     {
@@ -4270,6 +4294,10 @@
     {
         "first_introduced": "22",
         "name": "OH_ArkUI_Swiper_FinishAnimation"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible"
     },
     {
         "first_introduced": "22",
@@ -4373,6 +4401,22 @@
     },
     {
         "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_SetMenuPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_GetMenuPolicy"
+    },
+    {
+        "first_introduced": "23",
         "name": "OH_ArkUI_RenderNodeUtils_GetRenderNode"
     },
     {
@@ -4406,5 +4450,297 @@
     {
         "name": "OH_ArkUI_NativeModule_IsInRenderState",
         "first_introduced": "23"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_NodeEvent_GetTouchTestInfo"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfo_GetTouchTestInfoList"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetX"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetY"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetWindowX"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetWindowY"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetXRelativeToParent"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetYRelativeToParent"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetChildRect"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfoItem_GetChildId"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfo_SetTouchResultStrategy"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_TouchTestInfo_SetTouchResultId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnDestroyMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetContent"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetContent"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetIcon"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetIcon"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetLabelInfo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetLabelInfo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_GetSize"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_GetItem"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Insert"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Erase"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Clear"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetSpanType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetSpanType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetContentNode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetContentNode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetResponseType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetResponseType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_DeleteBackward"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_ScrollToVisible"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStep"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStep"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetSpacing"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetSpacing"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetLoop"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetLoop"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetFromStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetFromStart"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetDelay"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetDelay"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetFadeout"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetFadeout"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetStartPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetStartPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_SetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
     }
 ]

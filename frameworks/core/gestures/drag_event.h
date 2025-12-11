@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -525,9 +525,20 @@ public:
         y_ = y;
     }
 
+    void SetFrameNode(const WeakPtr<NG::FrameNode>& frameNode)
+    {
+        frameNode_ = frameNode;
+    }
+
+    WeakPtr<NG::FrameNode> GetFrameNode() const
+    {
+        return frameNode_;
+    }
+
 private:
     double x_ = 0.0;
     double y_ = 0.0;
+    WeakPtr<NG::FrameNode> frameNode_;
 };
 
 class DragSpringLoadingContext : public AceType {

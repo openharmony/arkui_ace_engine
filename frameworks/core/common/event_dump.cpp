@@ -25,6 +25,7 @@ constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_AXIS_UPDATE_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_AXIS_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_GESTURE_CNT = 100;
+constexpr size_t MAX_HISTORY_TOUCH_INFO_SIZE = 2048;
 } // end of namespace
 
 void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -529,6 +530,52 @@ void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int3
         std::string header = "event tree_" + std::to_string(index - startNumber);
         json->Put(header.c_str(), children);
         ++index;
+    }
+}
+
+void EventTouchInfoRecord::AddTouchPoint(const TouchEvent& event, TimeStamp dispatchTime)
+{
+    touchHistory_.emplace_back(EventTouchInfo { .pointerID = event.touchEventId,
+        .creatTime = event.GetTimeStamp(),
+        .processTime = event.processTime,
+        .dispatchTime = dispatchTime });
+    if (touchHistory_.size() >= MAX_HISTORY_TOUCH_INFO_SIZE) {
+        dequeMaxCnt_++;
+        touchHistory_.clear();
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "Touch deque size is over limit! Deque is cleaned.");
+    }
+}
+
+void EventTouchInfoRecord::ClearDumpDeque()
+{
+    dequeMaxCnt_ = 0;
+    touchHistory_.clear();
+}
+
+std::string HighResTimePointToString(TimeStamp tp)
+{
+    auto duration = tp.time_since_epoch();
+    return std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count()) + " ns";
+}
+
+void EventTouchInfoRecord::DumpAndClear(std::list<std::string>& dumpList)
+{
+    std::deque<EventTouchInfo> temp = std::move(touchHistory_);
+    for (const auto& iter : temp) {
+        dumpList.emplace_back(std::to_string(iter.pointerID) + " " + HighResTimePointToString(iter.creatTime) + " " +
+                              HighResTimePointToString(iter.processTime) + " " +
+                              HighResTimePointToString(iter.dispatchTime) + " ");
+    }
+}
+
+void EventTouchInfoRecord::DumpAndClear(std::unique_ptr<JsonValue>& json)
+{
+    std::deque<EventTouchInfo> temp = std::move(touchHistory_);
+    for (const auto& iter : temp) {
+        json->Put(std::to_string(iter.pointerID).c_str(),
+            (HighResTimePointToString(iter.creatTime) + " " + HighResTimePointToString(iter.processTime) + " " +
+                HighResTimePointToString(iter.dispatchTime) + " ")
+                .c_str());
     }
 }
 } // namespace OHOS::Ace::NG

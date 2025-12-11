@@ -19,6 +19,7 @@
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -101,6 +102,7 @@ HWTEST_F(TextTestNineNg, HandleOnTranslate001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
@@ -128,7 +130,9 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
 
@@ -157,7 +161,9 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
 
@@ -217,6 +223,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);

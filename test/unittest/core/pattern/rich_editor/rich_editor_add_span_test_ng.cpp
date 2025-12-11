@@ -27,6 +27,7 @@ namespace {
     const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    const std::u16string URL_ADDRESS_1 = u"https://www.baidu.com";
     int32_t testNumber1 = 1;
     int32_t testNumber2 = 2;
 } // namespace
@@ -185,9 +186,16 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
     ASSERT_EQ(res, 0);
@@ -200,11 +208,18 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     options.image = IMAGE_VALUE;
     options.bundleName = BUNDLE_NAME;
@@ -219,11 +234,17 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
     ASSERT_NE(imageSpanItem, nullptr);
     auto imageAttribute = imageSpanItem->options.imageAttribute;
     bool hasImageAttribute = imageAttribute.has_value();
-    EXPECT_TRUE(hasImageAttribute);
+    ASSERT_TRUE(hasImageAttribute);
     auto verticalAlign = imageAttribute.value().verticalAlign;
     auto hasVerticalAlign = verticalAlign.has_value();
     EXPECT_TRUE(hasVerticalAlign);
     EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
+    auto objectFit = imageAttribute.value().objectFit;
+    auto hasObjectFit = objectFit.has_value();
+    EXPECT_FALSE(hasObjectFit);
+    auto size = imageAttribute.value().size;
+    auto hasSize = size.has_value();
+    EXPECT_FALSE(hasSize);
 }
 
 /**
@@ -257,6 +278,57 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
     options.value = u"hello\n";
     auto index3 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index3, 1);
+}
+
+/**
+ * @tc.name: AddTextSpan002
+ * @tc.desc: test add text span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.useThemeFontColor = false;
+    auto index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 1);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = false;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 2);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 3);
+
+    options.urlAddress = std::nullopt;
+    options.useThemeFontColor = false;
+    options.style = TEXT_STYLE_1;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 4);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 5);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = false;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 6);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 7);
 }
 
 /**
@@ -857,4 +929,27 @@ HWTEST_F(RichEditorAddSpanTestNg, ResetFirstNodeStyle001, TestSize.Level0)
     EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
+/**
+ * @tc.name: InitPlaceholderAccessibility001
+ * @tc.desc: Test the function InitPlaceholderAccessibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, InitPlaceholderAccessibility001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+
+    // AddPlaceholderSpan
+    auto index = richEditorPattern->AddPlaceholderSpan(BUILDER_NODE_1, {});
+    auto host = richEditorPattern->GetContentHost();
+    CHECK_NULL_VOID(host);
+    auto spanNode = AceType::DynamicCast<PlaceholderSpanNode>(host->GetChildAtIndex(index));
+    CHECK_NULL_VOID(spanNode);
+    richEditorPattern->InitPlaceholderAccessibility(spanNode, {});
+    auto accessibilityProperty = spanNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityDescription().empty());
+}
 } // namespace OHOS::Ace::NG

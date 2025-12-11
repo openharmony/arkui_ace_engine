@@ -64,6 +64,7 @@ CJ_EXPORT void FfiTextTimerVectorNativeTextShadowDelete(VectorNativeTextTimerSha
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerCreate(bool isCountDown, int64_t count, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontColor(uint32_t textColor);
+CJ_EXPORT void FfiOHOSAceFrameworkTextTimerResetFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontSize(double fontSize, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontStyle(int32_t fontStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontWeight(const char* fontWeight);

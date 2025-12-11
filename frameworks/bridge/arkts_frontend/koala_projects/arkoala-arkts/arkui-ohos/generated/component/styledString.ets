@@ -32,6 +32,7 @@ import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.dra
 import { default as image } from "@ohos.multimedia.image"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
+import { TextDirection } from "./textCommon"
 import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -250,11 +251,11 @@ export class DecorationStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readInt32()
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -262,7 +263,7 @@ export class DecorationStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -541,6 +542,7 @@ export class ParagraphStyle implements MaterializedBase {
     readonly wordBreak?: WordBreak | undefined
     readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
     readonly paragraphSpacing?: double | undefined
+    readonly textDirection?: TextDirection | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -550,6 +552,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.wordBreak = this.getWordBreak()
         this.leadingMargin = this.getLeadingMargin()
         this.paragraphSpacing = this.getParagraphSpacing()
+        this.textDirection = this.getTextDirection()
     }
     constructor(value?: ParagraphStyleInterface) {
         this(false, ParagraphStyle.construct(value))
@@ -590,6 +593,9 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getParagraphSpacing(): double | undefined {
         return this.getParagraphSpacing_serialize()
+    }
+    private getTextDirection(): TextDirection | undefined {
+        return this.getTextDirection_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
@@ -677,6 +683,17 @@ export class ParagraphStyle implements MaterializedBase {
         const returnResult : double | undefined = buffer
         return returnResult
     }
+    private getTextDirection_serialize(): TextDirection | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextDirection(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextDirection | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextDirection.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : TextDirection | undefined = buffer
+        return returnResult
+    }
 }
 export class StyledStringInternal {
     public static fromPtr(ptr: KPointer): StyledString {
@@ -733,9 +750,9 @@ export class StyledString implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._StyledString_getFinalizer()
     }
-    static fromHtml_serialize(html: string): Promise<StyledString> {
+    static fromHtml_serialize(html: string): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -744,30 +761,44 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
         return retval
     }
-    static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer {
+    static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return new DeserializerBase(retval, retval.length).readBuffer()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
     }
-    static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+    static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeBuffer(buffer)
         thisSerializer.holdAndWriteCallback(callback_)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-    static marshalling1_serialize(styledString: StyledString): ArrayBuffer {
+    static marshalling1_serialize(styledString: StyledString): ArrayBuffer | undefined {
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString))
-        return new DeserializerBase(retval, retval.length).readBuffer()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
     }
-    static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString> {
+    static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeBuffer(buffer)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -775,7 +806,7 @@ export class StyledString implements MaterializedBase {
     public getString(): string {
         return this.getString_serialize()
     }
-    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
+    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
         const start_casted = start as (int32)
         const length_casted = length as (int32)
         const styledKey_casted = styledKey as (StyledStringKey | undefined)
@@ -785,12 +816,12 @@ export class StyledString implements MaterializedBase {
         const other_casted = other as (StyledString)
         return this.equals_serialize(other_casted)
     }
-    public subStyledString(start: int32, length?: int32): StyledString {
+    public subStyledString(start: int32, length?: int32): StyledString | undefined {
         const start_casted = start as (int32)
         const length_casted = length as (int32 | undefined)
         return this.subStyledString_serialize(start_casted, length_casted)
     }
-    public static fromHtml(html: string): Promise<StyledString> {
+    public static fromHtml(html: string): Promise<StyledString | undefined> {
         const html_casted = html as (string)
         return StyledString.fromHtml_serialize(html_casted)
     }
@@ -798,21 +829,21 @@ export class StyledString implements MaterializedBase {
         const styledString_casted = styledString as (StyledString)
         return StyledString.toHtml_serialize(styledString_casted)
     }
-    public static marshalling(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer {
+    public static marshalling(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
         const styledString_casted = styledString as (StyledString)
         const callback__casted = callback_ as (StyledStringMarshallCallback)
         return StyledString.marshalling0_serialize(styledString_casted, callback__casted)
     }
-    public static unmarshalling(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+    public static unmarshalling(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
         const buffer_casted = buffer as (ArrayBuffer)
         const callback__casted = callback_ as (StyledStringUnmarshallCallback)
         return StyledString.unmarshalling0_serialize(buffer_casted, callback__casted)
     }
-    public static marshalling(styledString: StyledString): ArrayBuffer {
+    public static marshalling(styledString: StyledString): ArrayBuffer | undefined {
         const styledString_casted = styledString as (StyledString)
         return StyledString.marshalling1_serialize(styledString_casted)
     }
-    public static unmarshalling(buffer: ArrayBuffer): Promise<StyledString> {
+    public static unmarshalling(buffer: ArrayBuffer): Promise<StyledString | undefined> {
         const buffer_casted = buffer as (ArrayBuffer)
         return StyledString.unmarshalling1_serialize(buffer_casted)
     }
@@ -828,7 +859,7 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
         return retval
     }
-    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
+    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (styledKey !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -840,19 +871,24 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<SpanStyle> = new Array<SpanStyle>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<SpanStyle> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<SpanStyle> = new Array<SpanStyle>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<SpanStyle> = buffer
+        const returnResult : Array<SpanStyle> | undefined = buffer
         return returnResult
     }
     equals_serialize(other: StyledString): boolean {
         const retval  = ArkUIGeneratedNativeModule._StyledString_equals(this.peer!.ptr, toPeerPtr(other))
         return retval
     }
-    subStyledString_serialize(start: int32, length?: int32): StyledString {
+    subStyledString_serialize(start: int32, length?: int32): StyledString | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (length !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -863,8 +899,14 @@ export class StyledString implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._StyledString_subStyledString(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : StyledString = StyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : StyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
+        }
+        const returnResult : StyledString | undefined = buffer
+        return returnResult
     }
     private getLength_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getLength(this.peer!.ptr)
@@ -993,11 +1035,11 @@ export class TextStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readInt32()
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -1005,7 +1047,7 @@ export class TextStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -1088,30 +1130,6 @@ export class UrlStyle implements MaterializedBase {
         return retval
     }
 }
-export class UserDataSpanInternal {
-    public static fromPtr(ptr: KPointer): UserDataSpan {
-        return new UserDataSpan(ptr)
-    }
-}
-export class UserDataSpan implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, UserDataSpan.getFinalizer())
-    }
-    constructor() {
-        this(UserDataSpan.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._UserDataSpan_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._UserDataSpan_getFinalizer()
-    }
-}
 export type StyledStringMarshallingValue = UserDataSpan;
 export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => ArrayBuffer;
 export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => UserDataSpan;
@@ -1135,7 +1153,7 @@ export interface TextStyleInterface {
     fontStyle?: FontStyle;
 }
 export interface DecorationStyleInterface {
-    type: TextDecorationType;
+    type: TextDecorationType | undefined;
     color?: ResourceColor;
     style?: TextDecorationStyle;
 }
@@ -1151,6 +1169,7 @@ export interface ParagraphStyleInterface {
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
     paragraphSpacing?: LengthMetrics;
+    textDirection?: TextDirection;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
@@ -1204,6 +1223,8 @@ export interface CustomSpanDrawInfo {
 }
 export interface CustomSpanMeasureInfo {
     fontSize: double;
+}
+export abstract class UserDataSpan {
 }
 export class GestureStyle_serializer {
     public static write(buffer: SerializerBase, value: GestureStyle): void {
@@ -1269,17 +1290,6 @@ export class UrlStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return UrlStyleInternal.fromPtr(ptr)
-    }
-}
-export class UserDataSpan_serializer {
-    public static write(buffer: SerializerBase, value: UserDataSpan): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): UserDataSpan {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return UserDataSpanInternal.fromPtr(ptr)
     }
 }
 export class BaselineOffsetStyle_serializer {
@@ -1454,7 +1464,13 @@ export class DecorationStyleInterface_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleInterface): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForType  = value.type
-        valueSerializer.writeInt32(valueHolderForType.valueOf())
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = (valueHolderForType as TextDecorationType)
+            valueSerializer.writeInt32(valueHolderForTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForColor  = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1463,10 +1479,10 @@ export class DecorationStyleInterface_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1490,16 +1506,21 @@ export class DecorationStyleInterface_serializer {
     }
     public static read(buffer: DeserializerBase): DecorationStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
-        const typeTmpResult : TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : TextDecorationType | undefined = undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        }
+        const typeTmpResult : TextDecorationType | undefined = typeTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1507,7 +1528,7 @@ export class DecorationStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1542,10 +1563,10 @@ export class TextStyleInterface_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -1617,11 +1638,11 @@ export class TextStyleInterface_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1629,7 +1650,7 @@ export class TextStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1861,6 +1882,14 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
@@ -1915,7 +1944,13 @@ export class ParagraphStyleInterface_serializer {
             paragraphSpacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
-        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
+        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as ParagraphStyleInterface)
         return value
     }
 }
@@ -2252,7 +2287,7 @@ export class StyleOptions_serializer {
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
-            UserDataSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx11)
+            valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
@@ -2299,7 +2334,7 @@ export class StyleOptions_serializer {
         } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
         } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
-            styledValueTmpBuf = (UserDataSpan_serializer.read(valueDeserializer) as UserDataSpan)
+            styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {
@@ -2367,7 +2402,7 @@ export class SpanStyle_serializer {
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
-            UserDataSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx11)
+            valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
@@ -2404,7 +2439,7 @@ export class SpanStyle_serializer {
         } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
         } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
-            styledValueTmpBuf = (UserDataSpan_serializer.read(valueDeserializer) as UserDataSpan)
+            styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {

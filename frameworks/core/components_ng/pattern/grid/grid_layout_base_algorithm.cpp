@@ -15,9 +15,20 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<LayoutWrapper> CreateDummyGridItemChild()
+{
+    auto wrapper = GridItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    wrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+    return wrapper;
+}
+} // namespace
 
 void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
 {
@@ -88,7 +99,6 @@ void GridLayoutBaseAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize(true));
 }
 
-
 void GridLayoutBaseAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -141,5 +151,20 @@ void GridLayoutBaseAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper, fl
         info_.contentStartOffset_ = 0.0f;
         info_.contentEndOffset_ = 0.0f;
     }
+}
+
+RefPtr<LayoutWrapper> GridLayoutBaseAlgorithm::GetGridItem(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
+{
+    const auto& layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false) &&
+        ScrollableUtils::IsChildLazy(layoutWrapper->GetHostNode(), index)) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        if (!wrapper) {
+            wrapper = CreateDummyGridItemChild();
+        }
+        return wrapper;
+    }
+    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
 }
 } // namespace OHOS::Ace::NG

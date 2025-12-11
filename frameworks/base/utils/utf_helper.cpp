@@ -522,7 +522,11 @@ std::u16string Str8DebugToStr16(const std::string& str)
         return DEFAULT_U16STR;
     }
     icu::UnicodeString ustring = icu::UnicodeString::fromUTF8(str);
-    return std::u16string(ustring.getBuffer(), static_cast<size_t>(ustring.length()));
+    auto buffer = ustring.getBuffer();
+    if (buffer == nullptr) {
+        return u"";
+    }
+    return std::u16string(buffer, static_cast<size_t>(ustring.length()));
 }
 
 std::string Str16ToStr8(const std::u16string& str)

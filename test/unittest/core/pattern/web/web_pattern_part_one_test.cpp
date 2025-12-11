@@ -377,6 +377,38 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyMenuLifeCycleEvent_001
+ * @tc.desc: NotifyMenuLifeCycleEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
+    EXPECT_TRUE(webPattern->isMenuShownFromWeb_);
+    webPattern->isFocus_ = true;
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
+    webPattern->isFocus_ = false;
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
+#endif
+}
+
+/**
  * @tc.name: ShowPreviewMenu_001
  * @tc.desc: ShowPreviewMenu.
  * @tc.type: FUNC
@@ -1361,6 +1393,31 @@ HWTEST_F(WebPatternPartOneTest, OnScrollBarColorUpdate_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->needOnFocus_ = true;
     webPattern->OnScrollBarColorUpdate("red");
+#endif
+}
+
+/**
+ * @tc.name: OnEnableAutoFillUpdate_001
+ * @tc.desc: Test OnEnableAutoFillUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, OnEnableAutoFillUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->UpdateEnableAutoFill(false);
+    webPattern->OnEnableAutoFillUpdate(false);
+    auto isEnabled = webPattern->GetEnableAutoFill();
+    ASSERT_EQ(isEnabled, false);
 #endif
 }
 

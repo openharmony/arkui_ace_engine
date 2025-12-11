@@ -19,6 +19,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "core/components/common/layout/common_text_constants.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -44,10 +45,8 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -76,21 +75,6 @@ TextModel* TextModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 
-const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
-    TextAlign::LEFT, TextAlign::RIGHT };
-const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
-    TextContentAlign::BOTTOM };
-const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
-    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
-    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
-const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
-const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
-    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
@@ -169,10 +153,10 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
+    UnRegisterResource("FontFamily");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
-        UnRegisterResource("FontFamily");
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj)) {
             font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && fontFamiliesResObj) {
@@ -362,8 +346,8 @@ void JSText::SetEllipsisMode(const JSCallbackInfo& info)
         return;
     }
     uint32_t index = args->ToNumber<uint32_t>();
-    if (index < ELLIPSIS_MODALS.size()) {
-        TextModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+    if (index < ELLIPSIS_MODES.size()) {
+        TextModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODES[index]);
     }
 }
 
@@ -530,6 +514,22 @@ void JSText::SetTextAlign(int32_t value)
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
 }
 
+void JSText::SetTextDirection(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        TextModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    TextModel::GetInstance()->SetTextDirection(TEXT_DIRECTIONS[index]);
+}
+
 void JSText::SetAlign(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsAlign(info);
@@ -582,10 +582,9 @@ void JSText::SetLineHeightMultiply(const JSCallbackInfo& info)
     double value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("LineHeightMultiply");
     if (!ParseJsDouble(args, value, resObj) || LessNotEqual(value, 0.0)) {
         TextModel::GetInstance()->ResetLineHeightMultiply();
-        UnRegisterResource("LineHeightMultiply");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -600,11 +599,9 @@ void JSText::SetMinimumLineHeight(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("MinimumLineHeight");
     if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
-        value.Reset();
         TextModel::GetInstance()->ResetMinimumLineHeight();
-        UnRegisterResource("MinimumLineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -618,11 +615,9 @@ void JSText::SetMaximumLineHeight(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("MaximumLineHeight");
     if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
-        value.Reset();
         TextModel::GetInstance()->ResetMaximumLineHeight();
-        UnRegisterResource("MaximumLineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -1080,28 +1075,6 @@ void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
     }
 }
 
-void JSText::SetSelectDetectConfig(const JSCallbackInfo& info)
-{
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        TextModel::GetInstance()->ResetSelectDetectConfig();
-        return;
-    }
-    CHECK_NULL_VOID(info[0]->IsObject());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getTypes = paramObject->GetProperty("types");
-    CHECK_NULL_VOID(getTypes->IsArray());
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    CHECK_NULL_VOID(array->IsArray());
-    std::vector<TextDataDetectType> typesList;
-    for (size_t i = 0; i < array->Length(); ++i) {
-        JSRef<JSVal> type = array->GetValueAt(i);
-        if (type->IsNumber()) {
-            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
-        }
-    }
-    TextModel::GetInstance()->SetSelectDetectConfig(typesList);
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1249,6 +1222,17 @@ void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
+{
+    bool state = false;
+
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    
+    TextModel::GetInstance()->SetCompressLeadingPunctuation(state);
+}
+
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
 {
     bool state = false;
@@ -1267,6 +1251,24 @@ void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
+void JSText::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSText::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetFallbackLineSpacing(enabled);
 }
 
 void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
@@ -1375,6 +1377,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
+    JSClass<JSText>::StaticMethod("textDirection", &JSText::SetTextDirection, opt);
     JSClass<JSText>::StaticMethod("textContentAlign", &JSText::SetTextContentAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
     JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
@@ -1408,7 +1411,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("enableSelectedDataDetector", &JSText::SetSelectDetectEnable);
-    JSClass<JSText>::StaticMethod("selectedDataDetectorConfig", &JSText::SetSelectDetectConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
@@ -1427,6 +1429,10 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("lineHeightMultiple", &JSText::SetLineHeightMultiply);
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
+    JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
+    JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
+    JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1448,6 +1454,42 @@ void JSTextController::GetLayoutManager(const JSCallbackInfo& args)
     auto layoutInfoInterface = controller->GetLayoutInfoInterface();
     jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
     args.SetReturnValue(obj);
+}
+
+void JSTextController::SetTextSelection(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2) { /* 2:args number */
+        return;
+    }
+    auto controller = controllerWeak_.Upgrade();
+    int32_t selectionStart = 0;
+    int32_t selectionEnd = 0;
+    SelectionOptions options;
+    if (controller) {
+        const auto& start = info[0];
+        const auto& end = info[1];
+        if (start->IsUndefined() || start->IsNull()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The selectionStart is NULL");
+        } else if (start->IsNumber()) {
+            selectionStart = start->ToNumber<int32_t>();
+        }
+        if (end->IsUndefined() || end->IsNull()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The selectionEnd is NULL");
+        } else if (end->IsNumber()) {
+            selectionEnd = end->ToNumber<int32_t>();
+        }
+        if (info.Length() == 3 && info[2]->IsObject()) { /* 2, 3:args number */
+            JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(info[2]); /* 2:args number */
+            JSRef<JSVal> menuPolicy = optionsObj->GetProperty("menuPolicy");
+            int32_t tempPolicy = 0;
+            if (!menuPolicy->IsNull() && JSContainerBase::ParseJsInt32(menuPolicy, tempPolicy)) {
+                options.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+            }
+        }
+        controller->SetTextSelection(selectionStart, selectionEnd, options);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The JSTextController is NULL");
+    }
 }
 
 void JSTextController::SetStyledString(const JSCallbackInfo& info)
@@ -1477,6 +1519,7 @@ void JSTextController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextController>::Declare("TextController");
     JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
+    JSClass<JSTextController>::CustomMethod("setTextSelection", &JSTextController::SetTextSelection);
     JSClass<JSTextController>::CustomMethod("setStyledString", &JSTextController::SetStyledString);
     JSClass<JSTextController>::CustomMethod("getLayoutManager", &JSTextController::GetLayoutManager);
     JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
@@ -1606,8 +1649,7 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
 
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
-        auto delayDouble = delay->ToNumber<double>();
-        auto delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delay->ToNumber<double>());
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1629,6 +1671,25 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
     if (getStartPolicy->IsNumber()) {
         auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
         options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
+
+    auto getUpdatePolicy = paramObject->GetProperty("marqueeUpdatePolicy");
+    if (getUpdatePolicy->IsNumber()) {
+        auto updatePolicy = static_cast<MarqueeUpdatePolicy>(getUpdatePolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeUpdatePolicy(updatePolicy);
+    }
+
+    auto getSpacing = paramObject->GetProperty("spacing");
+    if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
+        CalcDimension value;
+        UnRegisterResource("MarqueeSpacing");
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()) {
+            options.UpdateTextMarqueeSpacing(value);
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<CalcDimension>("MarqueeSpacing", resObj, value);
+        }
     }
 }
 
@@ -1660,5 +1721,30 @@ void JSText::EditMenuOptions(const JSCallbackInfo& info)
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     TextModel::GetInstance()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
+}
+
+void JSText::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    UnRegisterResource("selectedDragPreviewStyleColor");
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        TextModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColor(param, color, resourceObject)) {
+        TextModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
+    }
+    TextModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 } // namespace OHOS::Ace::Framework

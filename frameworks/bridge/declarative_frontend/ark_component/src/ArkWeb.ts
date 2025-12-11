@@ -1038,6 +1038,22 @@ class WebOnWindowNewModifier extends ModifierWithKey<(isAlert: boolean, isUserTr
   }
 }
 
+class WebOnWindowNewExtModifier extends ModifierWithKey<(isAlert: boolean, isUserTrigger: boolean, targetUrl: string,
+    handler: ControllerHandler, windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void> {
+  constructor(value: (isAlert: boolean, isUserTrigger: boolean, targetUrl: string, handler: ControllerHandler,
+    windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnWindowNewExtModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnWindowNewExt(node);
+    } else {
+      getUINativeModule().web.setOnWindowNewExt(node, this.value);
+    }
+  }
+}
+
 class WebOnGeolocationShowModifier extends ModifierWithKey<(origin: string, geolocation: JsGeolocation) => void>{
   constructor (value: (origin: string, geolocation: JsGeolocation) => void) {
     super(value);
@@ -1164,6 +1180,20 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey<(result: FileSelecto
   }
 }
 
+class WebOnTextSelectionChangeModifier extends ModifierWithKey<OnTextSelectionChangeCallback> {
+  constructor(value: OnTextSelectionChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnTextSelectionChangeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().web.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
 class WebOnDetectedBlankScreenModifier extends ModifierWithKey<OnDetectBlankScreenCallback> {
   constructor (value: OnDetectBlankScreenCallback) {
     super(value);
@@ -1192,6 +1222,20 @@ class WebBlankScreenDetectionConfigModifier extends ModifierWithKey<BlankScreenD
                                                             this.value.detectionTiming,
                                                             this.value.detectionMethods,
                                                             this.value.contentfulNodesCountThreshold);
+    }
+  }
+}
+
+class WebOnFirstScreenPaintModifier extends ModifierWithKey<OnFirstScreenPaintCallback> {
+  constructor (value: OnFirstScreenPaintCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnFirstScreenPaintModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnFirstScreenPaint(node);
+    } else {
+      getUINativeModule().web.setOnFirstScreenPaint(node, this.value);
     }
   }
 }
@@ -1524,6 +1568,21 @@ class WebJavaScriptProxyModifier extends ModifierWithKey<JavaScriptProxy> {
     }
   }
 }
+
+class WebEnableImageAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableImageAnalyzerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableImageAnalyzer(node);
+    } else {
+      getUINativeModule().web.setEnableImageAnalyzer(node, this.value);
+    }
+  }
+}
+
 class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1548,6 +1607,48 @@ class WebBackToTopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetBackToTop(node);
     } else {
       getUINativeModule().web.setBackToTop(node, this.value);
+    }
+  }
+}
+
+class WebOnCameraCaptureStateChangeModifier extends ModifierWithKey<(OnCameraCaptureStateChangeCallback) => void> {
+  constructor(value: (OnCameraCaptureStateChangeCallback) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnCameraCaptureStateChangeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    } else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
+    }
+  }
+}
+
+class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicrophoneCaptureStateChangeCallback) => void> {
+  constructor(value: (OnMicrophoneCaptureStateChangeCallback) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnMicrophoneCaptureStateChangeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnMicrophoneCaptureStateChanged(node);
+    } else {
+      getUINativeModule().web.setOnMicrophoneCaptureStateChanged(node, this.value);
+    }
+  }
+}
+
+class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableAutoFill');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().web.setEnableAutoFill(node, this.value);
     }
   }
 }
@@ -1735,12 +1836,20 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onFileSelectorShow(callback: (event?: { callback: Function; fileSelector: object; } | undefined) => void): this {
     throw new Error('Method not implemented.');
   }
+  onTextSelectionChange(callback: OnTextSelectionChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnTextSelectionChangeModifier.identity, WebOnTextSelectionChangeModifier, callback);
+    return this;
+  }
   onDetectedBlankScreen(callback: OnDetectBlankScreenCallback): this {
     modifierWithKey(this._modifiersWithKeys, WebOnDetectedBlankScreenModifier.identity, WebOnDetectedBlankScreenModifier, callback);
     return this;
   }
   blankScreenDetectionConfig(config: BlankScreenDetectionConfig): this {
     modifierWithKey(this._modifiersWithKeys, WebBlankScreenDetectionConfigModifier.identity, WebBlankScreenDetectionConfigModifier, config);
+    return this;
+  }
+  onFirstScreenPaint(callback: OnFirstScreenPaintCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnFirstScreenPaintModifier.identity, WebOnFirstScreenPaintModifier, callback);
     return this;
   }
   onResourceLoad(callback: (event: { url: string; }) => void): this {
@@ -1812,6 +1921,11 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onWindowNew(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
+    return this;
+  }
+  onWindowNewExt(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler;
+      windowFeatures: WindowFeatures; navigationPolicy: NavigationPolicy; }) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnWindowNewExtModifier.identity, WebOnWindowNewExtModifier, callback);
     return this;
   }
   onWindowExit(callback: () => void): this {
@@ -2076,6 +2190,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
+  enableImageAnalyzer(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableImageAnalyzerModifier.identity, WebEnableImageAnalyzerModifier, enabled);
+    return this;
+  }
   forceEnableZoom(forceEnableZoom: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, forceEnableZoom);
     return this;
@@ -2086,6 +2204,18 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   backToTop(backToTop: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
+    return this;
+  }
+  onCameraCaptureStateChange(callback: OnCameraCaptureStateChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangeModifier.identity, WebOnCameraCaptureStateChangeModifier, callback);
+    return this;
+  }
+  onMicrophoneCaptureStateChange(callback: OnMicrophoneCaptureStateChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangeModifier.identity, WebOnMicrophoneCaptureStateChangeModifier, callback);
+    return this;
+  }
+  enableAutoFill(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
 }

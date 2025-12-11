@@ -358,7 +358,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     if (!isInitialized_) {
         FireObserverOnReachEnd();
     }
-    if (!NearZero(mainSizeChanged_)) {
+    if (!NearZero(info_.prevHeight_) && !NearZero(mainSizeChanged_)) {
         info_.prevHeight_ += mainSizeChanged_;
     }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
@@ -542,7 +542,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
     if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
-        endHeight_ = GetTotalHeight() - info_.contentStartOffset_ - GetMainContentSize();
+        bool irregular = UseIrregularLayout();
+        float mainGap = GetMainGap();
+        auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular) + info_.contentEndOffset_;
+        auto overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+        endHeight_ = info_.currentHeight_ + overScroll;
     }
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);

@@ -15,8 +15,9 @@
 
 import image from '@ohos.multimedia.image';
 import { BusinessError, AsyncCallback } from '@ohos.base';
-import { CustomBuilder } from '@ohos.arkui.component';
+import { CustomBuilder, DynamicRangeMode } from '@ohos.arkui.component';
 import { ComponentContent } from '@ohos.arkui.node';
+import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 
 export default namespace componentSnapshot {
 
@@ -29,30 +30,42 @@ export default namespace componentSnapshot {
     };
     
     export interface LocalizedSnapshotRegion {
-        start: number
-        top: number
-        end: number
-        bottom: number
+        start: double
+        top: double
+        end: double
+        bottom: double
     }
 
     export interface SnapshotRegion {
-        left: number
-        right: number
-        top: number
-        bottom: number
+        left: double
+        right: double
+        top: double
+        bottom: double
     }
 
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
 
+    export interface ColorModeOptions {  
+        colorSpace?: colorSpaceManager.ColorSpace
+        isAuto?: boolean
+    }
+
+    export interface DynamicRangeModeOptions {
+        dynamicRangeMode?: DynamicRangeMode
+        isAuto?: boolean
+    }
+
     export interface SnapshotOptions {
-        scale?: number
+        scale?: double
         waitUntilRenderFinished?: boolean
         region?: SnapshotRegionType
+        colorMode?: ColorModeOptions
+        dynamicRangeMode?: DynamicRangeModeOptions
     }
 
     export native function get(id: string, callback: AsyncCallback<image.PixelMap>, options?: SnapshotOptions): void;
-    export native function get(id: string, options?: SnapshotOptions): Promise<image.PixelMap>;
-    export native function getSync(id: string, options?: SnapshotOptions): image.PixelMap;
-    export native function getWithUniqueId(uniqueId: number, options?: SnapshotOptions): Promise<image.PixelMap>;
+    export native function get(id: string, options?: SnapshotOptions): Promise<image.PixelMap> | null;
+    export native function getSync(id: string, options?: SnapshotOptions): image.PixelMap | null;
+    export native function getWithUniqueId(uniqueId: number, options?: SnapshotOptions): Promise<image.PixelMap> | null;
     export native function getSyncWithUniqueId(uniqueId: number, options?: SnapshotOptions): image.PixelMap;
 }

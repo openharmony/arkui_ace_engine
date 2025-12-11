@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 
+#include "base/image/image_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -882,11 +883,11 @@ ArkUINativeModuleValue ImageBridge::ResetImageInterpolation(ArkUIRuntimeCallInfo
 
 void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, ArkUINodeHandle nativeNode)
 {
-    Framework::JSColorFilter* colorFilter = nullptr;
+    OHOS::Ace::ImageColorFilter* colorFilter = nullptr;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
     if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
-        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
+        colorFilter = static_cast<OHOS::Ace::ImageColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
     } else {
         nodeModifiers->getImageModifier()->setColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
@@ -1446,6 +1447,38 @@ ArkUINativeModuleValue ImageBridge::ResetContentTransition(ArkUIRuntimeCallInfo*
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getImageModifier()->resetContentTransition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        bool antiAlias = secondArg->ToBoolean(vm)->Value();
+        nodeModifiers->getImageModifier()->setAntiAlias(nativeNode, antiAlias);
+    } else {
+        nodeModifiers->getImageModifier()->resetAntiAlias(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getImageModifier()->resetAntiAlias(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

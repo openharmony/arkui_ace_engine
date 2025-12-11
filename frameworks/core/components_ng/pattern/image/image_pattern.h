@@ -170,6 +170,8 @@ public:
 
     void UpdateOrientation();
 
+    void PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host);
+
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
@@ -233,6 +235,7 @@ public:
     inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpInterpolation(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpAntiAlias(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpOtherInfo();
     inline void DumpMenmoryNameId();
@@ -460,6 +463,7 @@ private:
     void OnKeyEvent(const KeyEvent& event);
     void InitFromThemeIfNeed();
     void LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceInfo);
+    void ReportCompleteLoadEvent(const RefPtr<FrameNode>& host);
 
 private:
     RefPtr<DrawableDescriptor> drawable_;

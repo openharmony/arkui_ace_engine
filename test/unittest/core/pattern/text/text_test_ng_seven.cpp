@@ -24,6 +24,7 @@
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/typed_text.h"
@@ -514,6 +515,78 @@ HWTEST_F(TextTestNgSeven, TextEnableAutoSpacing, TestSize.Level1)
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);
+}
+
+/**
+ * @tc.name: TextIncludeFontPadding
+ * @tc.desc: Test the enable or disable the IncludeFontPadding attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, TextIncludeFontPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetIncludeFontPadding(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get IncludeFontPadding Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), true);
+    EXPECT_EQ(TextModelNG::GetIncludeFontPadding(frameNode), true);
+    /**
+     * @tc.expected: Set IncludeFontPadding False.
+     */
+    TextModelNG::SetIncludeFontPadding(frameNode, false);
+    /**
+     * @tc.expected: Get IncludeFontPadding Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), false);
+    EXPECT_EQ(TextModelNG::GetIncludeFontPadding(frameNode), false);
+}
+
+/**
+ * @tc.name: TextFallbackLineSpacing
+ * @tc.desc: Test the enable or disable the FallbackLineSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, TextFallbackLineSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetFallbackLineSpacing(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get FallbackLineSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), true);
+    EXPECT_EQ(TextModelNG::GetFallbackLineSpacing(frameNode), true);
+    /**
+     * @tc.expected: Set FallbackLineSpacing False.
+     */
+    TextModelNG::SetFallbackLineSpacing(frameNode, false);
+    /**
+     * @tc.expected: Get FallbackLineSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), false);
+    EXPECT_EQ(TextModelNG::GetFallbackLineSpacing(frameNode), false);
 }
 
 /**

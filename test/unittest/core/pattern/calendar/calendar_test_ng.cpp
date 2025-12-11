@@ -34,6 +34,7 @@
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
@@ -1042,5 +1043,395 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest006, TestSize.Level1)
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetOptions001
+ * @tc.desc: Test CalendarModelNG::SetOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarData calendarData;
+    calendarData.date.day = 1;
+    calendarData.currentData.days.clear();
+    calendarData.preData.days.clear();
+    calendarData.nextData.days.clear();
+    CalendarModelNG::SetOptions(frameNode, calendarData);
+    CalendarModelNG::SetShowHoliday(frameNode, true);
+    CalendarModelNG::SetShowLunar(frameNode, true);
+    CalendarModelNG::SetNeedSlide(frameNode, true);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCalendarDay().day, 1);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetOptions002
+ * @tc.desc: Test CalendarModelNG::SetOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarData calendarData;
+    calendarData.date.today = false;
+    calendarData.currentData.days.clear();
+    calendarData.preData.days.clear();
+    calendarData.nextData.days.clear();
+    CalendarModelNG::SetOptions(frameNode, calendarData);
+    CalendarModelNG::SetStartOfWeek(frameNode, static_cast<int32_t>(Week::Sun));
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_FALSE(calendarPattern->GetCalendarDay().today);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetOptions003
+ * @tc.desc: Test CalendarModelNG::SetOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarData calendarData;
+    calendarData.date.today = true;
+    calendarData.currentData.days.clear();
+    calendarData.preData.days.clear();
+    calendarData.nextData.days.clear();
+    CalendarModelNG::SetOptions(frameNode, calendarData);
+    CalendarModelNG::SetShowHoliday(frameNode, false);
+    CalendarModelNG::SetShowLunar(frameNode, false);
+    CalendarModelNG::SetNeedSlide(frameNode, false);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_TRUE(calendarPattern->GetCalendarDay().today);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCurrentData001
+ * @tc.desc: Test CalendarModelNG::SetCurrentData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    ObtainedMonth currentData;
+    currentData.days.clear();
+    CalendarModelNG::SetCurrentData(currentData);
+    CalendarModelNG::SetOffDays(frameNode, OFF_DAYS_VALUE);
+    CalendarModelNG::SetDirection(frameNode, std::optional<Axis>(Axis::HORIZONTAL));
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCurrentMonthData().days.size(), 0);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCurrentData002
+ * @tc.desc: Test CalendarModelNG::SetCurrentData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    ObtainedMonth currentData;
+    currentData.days.clear();
+    CalendarModelNG::SetCurrentData(currentData);
+    CalendarModelNG::SetOffDays(frameNode, std::nullopt);
+    CalendarModelNG::SetDirection(frameNode, std::nullopt);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCurrentMonthData().days.size(), 0);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetPreData001
+ * @tc.desc: Test CalendarModelNG::SetPreData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetPreData001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    ObtainedMonth preData;
+    preData.days.clear();
+    CalendarModelNG::SetPreData(preData);
+    CurrentDayStyleData styleData;
+    styleData.dayColor = Color::RED;
+    styleData.lunarColor = Color::BLUE;
+    styleData.dayFontSize = Dimension(20.0f);
+    CalendarModelNG::SetCurrentDayStyle(frameNode, styleData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetPreMonthData().days.size(), 0);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetNextData001
+ * @tc.desc: Test CalendarModelNG::SetNextData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetNextData001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    ObtainedMonth nextData;
+    nextData.days.clear();
+    CalendarModelNG::SetNextData(nextData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetNextMonthData().days.size(), 0);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCalendarDay001
+ * @tc.desc: Test CalendarModelNG::SetCalendarDay
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarDay calendarDay;
+    calendarDay.day = 5;
+    CalendarModelNG::SetCalendarDay(calendarDay);
+
+    NonCurrentDayStyleData styleData;
+    styleData.nonCurrentMonthDayColor = Color::GRAY;
+    styleData.nonCurrentMonthLunarColor = Color::GREEN;
+    CalendarModelNG::SetNonCurrentDayStyle(frameNode, styleData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCalendarDay().day, 5);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCalendarDay002
+ * @tc.desc: Test CalendarModelNG::SetCalendarDay
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarDay calendarDay;
+    calendarDay.day = 4;
+    CalendarModelNG::SetCalendarDay(calendarDay);
+
+    TodayStyleData styleData;
+    styleData.focusedDayColor = Color::RED;
+    styleData.focusedLunarColor = Color::BLUE;
+    CalendarModelNG::SetTodayStyle(frameNode, styleData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCalendarDay().day, 4);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCalendarDay003
+ * @tc.desc: Test CalendarModelNG::SetCalendarDay
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarDay calendarDay;
+    calendarDay.day = 3;
+    CalendarModelNG::SetCalendarDay(calendarDay);
+
+    WeekStyleData styleData;
+    styleData.weekColor = Color::BLACK;
+    styleData.weekendDayColor = Color::WHITE;
+    CalendarModelNG::SetWeekStyle(frameNode, styleData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCalendarDay().day, 3);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCalendarDay004
+ * @tc.desc: Test CalendarModelNG::SetCalendarDay
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay004, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarDay calendarDay;
+    calendarDay.day = 2;
+    CalendarModelNG::SetCalendarDay(calendarDay);
+
+    WorkStateStyleData styleData;
+    styleData.workDayMarkColor = Color::BLACK;
+    styleData.offDayMarkColor = Color::BLUE;
+    CalendarModelNG::SetWorkStateStyle(frameNode, styleData);
+
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    EXPECT_EQ(calendarPattern->GetCalendarDay().day, 2);
+}
+
+/**
+ * @tc.name: CalendarModelNG_Create_Test
+ * @tc.desc: Test Create function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_Create_Test, TestSize.Level1)
+{
+    CalendarData calendarData;
+    calendarData.date.month.year = 2023;
+    calendarData.date.month.month = 1;
+    calendarData.date.day = 1;
+    calendarData.currentData.year = 2023;
+    calendarData.currentData.month = 1;
+    calendarData.preData.year = 2022;
+    calendarData.preData.month = 12;
+    calendarData.nextData.year = 2023;
+    calendarData.nextData.month = 2;
+    
+    CalendarModelNG::Create(calendarData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetCurrentDayStyle_Test
+ * @tc.desc: Test SetCurrentDayStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentDayStyle_Test, TestSize.Level1)
+{
+    CalendarModelNG::Create({});
+    
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CurrentDayStyleData styleData;
+    styleData.dayColor = Color::RED;
+    styleData.lunarColor = Color::BLUE;
+    styleData.dayFontSize = Dimension(16.0);
+    
+    CalendarModelNG::SetCurrentDayStyle(frameNode, styleData);
+    
+    auto swiperNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto calendarNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto paintProperty = calendarNode->GetPaintProperty<CalendarPaintProperty>();
+    
+    EXPECT_EQ(paintProperty->GetDayColorValue(Color()), Color::RED);
+    EXPECT_EQ(paintProperty->GetLunarColorValue(Color()), Color::BLUE);
+    EXPECT_EQ(paintProperty->GetDayFontSizeValue(Dimension()), Dimension(16.0));
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetNonCurrentDayStyle_Test
+ * @tc.desc: Test SetNonCurrentDayStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetNonCurrentDayStyle_Test, TestSize.Level1)
+{
+    CalendarModelNG::Create({});
+    
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    NonCurrentDayStyleData styleData;
+    styleData.nonCurrentMonthDayColor = Color::GRAY;
+    styleData.nonCurrentMonthLunarColor = Color::WHITE;
+    
+    CalendarModelNG::SetNonCurrentDayStyle(frameNode, styleData);
+    
+    auto swiperNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto calendarNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto paintProperty = calendarNode->GetPaintProperty<CalendarPaintProperty>();
+    
+    EXPECT_EQ(paintProperty->GetNonCurrentMonthDayColorValue(Color()), Color::GRAY);
+    EXPECT_EQ(paintProperty->GetNonCurrentMonthLunarColorValue(Color()), Color::WHITE);
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetWeekStyle_Test
+ * @tc.desc: Test SetWeekStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetWeekStyle_Test, TestSize.Level1)
+{
+    CalendarModelNG::Create({});
+    
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeekStyleData styleData;
+    styleData.weekColor = Color::BLACK;
+    styleData.weekFontSize = Dimension(14.0);
+    
+    CalendarModelNG::SetWeekStyle(frameNode, styleData);
+    
+    auto swiperNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto calendarNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto paintProperty = calendarNode->GetPaintProperty<CalendarPaintProperty>();
+    
+    EXPECT_EQ(paintProperty->GetWeekColorValue(Color()), Color::BLACK);
+    EXPECT_EQ(paintProperty->GetWeekFontSizeValue(Dimension()), Dimension(14.0));
+}
+
+/**
+ * @tc.name: CalendarModelNG_SetWorkStateStyle_Test
+ * @tc.desc: Test SetWorkStateStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_SetWorkStateStyle_Test, TestSize.Level1)
+{
+    CalendarModelNG::Create({});
+    
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WorkStateStyleData styleData;
+    styleData.workDayMarkColor = Color::GREEN;
+    styleData.offDayMarkColor = Color::RED;
+    
+    CalendarModelNG::SetWorkStateStyle(frameNode, styleData);
+    
+    auto swiperNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto calendarNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto paintProperty = calendarNode->GetPaintProperty<CalendarPaintProperty>();
+    
+    EXPECT_EQ(paintProperty->GetWorkDayMarkColorValue(Color()), Color::GREEN);
+    EXPECT_EQ(paintProperty->GetOffDayMarkColorValue(Color()), Color::RED);
+}
+
+/**
+ * @tc.name: CalendarModelNG_EdgeCase_Test
+ * @tc.desc: Test edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarModelNG_EdgeCase_Test, TestSize.Level1)
+{
+    // Test empty calendar
+    CalendarModelNG::Create({});
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    // Test SetOffDays and SetDirection
+    CalendarModelNG::SetOffDays(frameNode, "1,2,3");
+    CalendarModelNG::SetDirection(frameNode, Axis::VERTICAL);
+    
+    // Verify SetOffDays and SetDirection
+    auto swiperNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto calendarNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto paintProperty = calendarNode->GetPaintProperty<CalendarPaintProperty>();
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    
+    EXPECT_EQ(paintProperty->GetOffDaysValue(""), "1,2,3");
+    EXPECT_EQ(swiperLayoutProperty->GetDirectionValue(Axis::HORIZONTAL), Axis::VERTICAL);
 }
 } // namespace OHOS::Ace::NG

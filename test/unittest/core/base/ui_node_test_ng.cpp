@@ -37,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 
@@ -345,6 +346,36 @@ HWTEST_F(UINodeTestNg, UINodeTestNg010, TestSize.Level1)
     ZERO->AddChild(THREE);
     retIndex = ZERO->GetChildIndex(THREE);
     EXPECT_EQ(retIndex, 2);
+    ZERO->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetHostPageId
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetHostPageId, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call the MountToParent and set hostPageId_ is 0
+     * @tc.expected: step2. mount failure
+     */
+    ZERO->hostPageId_ = 0;
+    ONE->MountToParent(ZERO, 1, false);
+    int retPageId = ONE->GetHostPageId();
+    EXPECT_EQ(retPageId, 0);
+    ONE->Clean();
+    /**
+     * @tc.steps: step2. call the MountToParent and set hostPageId_ is 0
+     * @tc.expected: mount sucess and pageid is 1
+     */
+    ZERO->hostPageId_ = 1;
+    ZERO->SetInDestroying();
+    ONE->MountToParent(ZERO, 1, false);
+    retPageId = ONE->GetHostPageId();
+    EXPECT_EQ(retPageId, 1);
+    ZERO->SetDestroying(false);
+    ONE->Clean();
     ZERO->Clean();
 }
 

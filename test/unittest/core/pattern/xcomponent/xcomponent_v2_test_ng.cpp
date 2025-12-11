@@ -1147,4 +1147,38 @@ HWTEST_F(XComponentV2TestNg, InitializeRenderContextTest, TestSize.Level1)
     pattern->InitializeRenderContext(true);
     EXPECT_TRUE(pattern->renderContextForSurface_);
 }
+
+/**
+ * @tc.name: XComponentV2InitAndDisposeSurfaceTest
+ * @tc.desc: Test FlushImplicitTransaction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentV2InitAndDisposeSurfaceTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode.
+     * @tc.expected: xcomponent frameNode create successfully.
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call InitializeRenderContext.
+     * @tc.expected: surface renderContext create successfully.
+     */
+    pattern->InitializeRenderContext();
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+    EXPECT_EQ(pattern->renderContextForSurface_, pattern->handlingSurfaceRenderContext_);
+
+    /**
+     * @tc.steps: step3. call DisposeSurface.
+     * @tc.expected: surface renderContext dispose successfully.
+     */
+    pattern->DisposeSurface();
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+    EXPECT_EQ(pattern->renderContextForSurface_, pattern->handlingSurfaceRenderContext_);
+}
 } // namespace OHOS::Ace::NG

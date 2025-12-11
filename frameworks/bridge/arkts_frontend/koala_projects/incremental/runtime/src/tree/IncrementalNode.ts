@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,19 +22,13 @@ import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
  * It allows nodes to be added or removed incrementally using the state manager.
  */
 export class IncrementalNode implements Disposable, ReadonlyTreeNode {
+    private _disposing = false
     private _disposed = false
     private _child: IncrementalNode | undefined = undefined
     private _prev: IncrementalNode | undefined = undefined
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
-
-    /**
-     * It disables parent nodes invalidation and node revalidation.
-     */
-    get disabledStateUpdates(): boolean {
-        return false
-    }
 
     /**
      * This callback is called when a child node is added to this parent.
@@ -67,7 +61,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @see PrimeNumbers
      */
     isKind(kind: uint32): boolean {
-        return this.kind % kind == 0
+        return this.kind % kind === 0
     }
 
     /**
@@ -85,10 +79,31 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param scope - The scope to recycle.
      * @param reuseKey - The type of the scope (used as the key in the pool).
      * @param id - The id of the scope to recycle.
-     * @return true if child is successfully recycled
+     * @returns `true` if the given child is successfully recycled
      */
     recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
+    }
+
+    /**
+     * @returns `true` if invalidation of this node should not trigger its revalidation
+     */
+    get disabledStateUpdates(): boolean {
+        return false
+    }
+
+    /**
+     * @returns `true` if this node is removing from the hierarchy
+     */
+    get disposing(): boolean {
+        return this._disposing
+    }
+
+    /**
+     * This method is called to mark this node as being removed
+     */
+    set disposing(value: boolean) {
+        this._disposing = value
     }
 
     /**
@@ -102,7 +117,9 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * This method is called to remove this node from the hierarchy and cleanup related resources.
      */
     dispose(): void {
-        if (this._disposed) return
+        if (this._disposed) {
+            return
+        }
         this._disposed = true
         this.detach()
     }
@@ -143,17 +160,21 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @returns text representation of the node
      */
     toString(): string {
-        return className(this) + ": " + this.kind
+        return className(this) + ': ' + this.kind
     }
 
     /**
      * @returns text representation of a tree hierarchy starting from this node
      */
     toHierarchy(): string {
-        let str = ""
-        for (let node = this._parent; node; node = node!._parent) str += "  "
+        let str = ''
+        for (let node = this._parent; node; node = node!._parent) {
+            str += '  '
+        }
         str += this.toString()
-        for (let node = this._child; node; node = node!._next) str += "\n" + node!.toHierarchy()
+        for (let node = this._child; node; node = node!._next) {
+            str += '\n' + node!.toHierarchy()
+        }
         return str
     }
 
@@ -184,17 +205,21 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param count - a number of child nodes to skip during the incremental update
      * @internal
      */
-    incrementalUpdateSkip(count: uint32) {
+    incrementalUpdateSkip(count: uint32): void {
         if (count > 0) {
             const prev = this._incremental
             let next = prev ? prev._next : this._child
             while (1 < count--) {
-                if (next === undefined) throw new Error("child node is expected here")
+                if (next === undefined) {
+                    throw new Error('child node is expected here')
+                }
                 next = next._next
             }
             this._incremental = next
         }
-        else throw new Error("unexpected count of child nodes to skip: " + count)
+        else {
+            throw new Error('unexpected count of child nodes to skip: ' + count)
+        }
     }
 
     /**
@@ -202,24 +227,36 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * when the incremental update of all children of this node is completed.
      * @internal
      */
-    incrementalUpdateDone(parent?: IncrementalNode) {
-        if (this._disposed) throw new Error("child node is already disposed")
+    incrementalUpdateDone(parent?: IncrementalNode): void {
+        if (this._disposed) {
+            throw new Error('child node is already disposed')
+        }
         this._incremental = undefined
         if (parent) {
             const prev = parent._incremental
             const next = prev ? prev._next : parent._child
             if (this._parent) {
-                if (this._parent != parent) throw new Error("child node belongs to another parent")
-                if (this != next) throw new Error("child node is not expected here")
+                if (this._parent !== parent) {
+                    throw new Error('child node belongs to another parent')
+                }
+                if (this !== next) {
+                    throw new Error('child node is not expected here')
+                }
                 parent._incremental = this
             } else {
                 parent._incremental = this
                 this._prev = prev
                 this._next = next
                 this._parent = parent
-                if (next) next._prev = this
-                if (prev) prev._next = this
-                else parent._child = this;
+                if (next) {
+                    next._prev = this
+                }
+                if (prev) {
+                    prev._next = this
+                }
+                else {
+                    parent._child = this;
+                }
 
                 // TODO: this is to workaround ast dumper bug #24055
                 if (0) {} else {}

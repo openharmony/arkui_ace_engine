@@ -25,11 +25,12 @@ struct PixelMapConfig {
     AIImageQuality imageQuality = AIImageQuality::NONE;
     bool isHdrDecoderNeed = false;
     PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN;
+    PixelFormat desiredDecodeFormat = PixelFormat::UNKNOWN;
 
     bool operator==(const PixelMapConfig& other) const
     {
         return (imageQuality == other.imageQuality) && (isHdrDecoderNeed == other.isHdrDecoderNeed) &&
-               (photoDecodeFormat == other.photoDecodeFormat);
+               (photoDecodeFormat == other.photoDecodeFormat) && (desiredDecodeFormat == other.desiredDecodeFormat);
     }
 
     bool operator!=(const PixelMapConfig& other) const
@@ -75,6 +76,7 @@ public:
     virtual std::string GetEncodedFormat() = 0;
     virtual int32_t GetLoopCount() = 0;
     virtual std::vector<int32_t> GetDelayTime() = 0;
+    virtual bool IsHeifWithoutAlpha() = 0;
 };
 } // namespace OHOS::Ace
 

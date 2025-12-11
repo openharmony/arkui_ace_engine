@@ -425,7 +425,6 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
     };
     RadioModel::GetInstance()->SetOnChange(std::move(onChange));
     args.ReturnSelf();

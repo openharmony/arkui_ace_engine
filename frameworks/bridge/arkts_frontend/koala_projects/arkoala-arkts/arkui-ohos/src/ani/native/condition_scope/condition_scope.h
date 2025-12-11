@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Ani {
 
 ani_long ConstructConditionScope(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+void ConditionScopeMarkDirty(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 
 } // namespace OHOS::Ace::Ani
 

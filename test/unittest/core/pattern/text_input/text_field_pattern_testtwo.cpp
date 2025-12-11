@@ -834,47 +834,6 @@ HWTEST_F(TextFieldPatternTestTwo, GetMaxLines001, TestSize.Level0)
 }
 
 /**
- * @tc.name: TextAreaInputRectUpdate001
- * @tc.desc: test TextAreaInputRectUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestTwo, TextAreaInputRectUpdate001, TestSize.Level0)
-{
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    ASSERT_NE(pattern->contentController_, nullptr);
-    pattern->contentController_->content_ = u"Test";
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(pattern->paragraph_, nullptr);
-
-    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->GetOrCreateTextLineStyle();
-    ASSERT_NE(layoutProperty->propTextLineStyle_, nullptr);
-    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::START);
-
-    auto rect = RectF(1.0f, 1.0f, 2.0f, 1.0f);
-    pattern->contentRect_ = RectF(1.0f, 1.0f, -10.0f, 10.0f);
-    layoutProperty->propTextLineStyle_->UpdateMaxLines(1);
-    pattern->TextAreaInputRectUpdate(rect);
-    EXPECT_EQ(rect.Width(), 2.0f);
-
-    layoutProperty->propTextLineStyle_->UpdateMaxLines(2);
-    pattern->TextAreaInputRectUpdate(rect);
-    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::CENTER);
-    pattern->TextAreaInputRectUpdate(rect);
-    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::END);
-    pattern->TextAreaInputRectUpdate(rect);
-    layoutProperty->propTextLineStyle_->UpdateTextAlign(TextAlign::LEFT);
-    pattern->TextAreaInputRectUpdate(rect);
-    EXPECT_EQ(rect.Width(), 2.0f);
-}
-
-/**
  * @tc.name: GetMarginBottom001
  * @tc.desc: test GetMarginBottom
  * @tc.type: FUNC
@@ -1134,38 +1093,39 @@ HWTEST_F(TextFieldPatternTestTwo, NotifyFillRequestSuccess001, TestSize.Level0)
     auto nodeWrap = AceType::MakeRefPtr<TextFieldPatternTestTwoPageNodeInfoWrap>();
     ASSERT_NE(nodeWrap, nullptr);
 
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    auto triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED, triggerType);
 
     nodeWrap->SetValue("Test");
     pattern->lastAutoFillTextValue_ = "";
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED, triggerType);
     EXPECT_EQ(pattern->lastAutoFillTextValue_, "Test");
 
     /* Simulate contentControl_ as nullptr */
     auto contentController = pattern->contentController_;
     pattern->contentController_ = nullptr;
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED, triggerType);
     pattern->contentController_ = contentController;
 
     nodeWrap->SetIsFocus(true);
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED, triggerType);
 
     /* Give the pattern focus */
     auto focusHub = pattern->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD, triggerType);
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateTextContentType(TextContentType::NEW_PASSWORD);
     pattern->lastAutoFillTextValue_ = "";
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD, triggerType);
     EXPECT_NE(pattern->lastAutoFillTextValue_, "Test");
 
     viewDataWrap->SetOtherAccount(true);
     pattern->lastAutoFillTextValue_ = "";
-    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD);
+    pattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_NEW_PASSWORD, triggerType);
     EXPECT_NE(pattern->lastAutoFillTextValue_, "Test");
 }
 

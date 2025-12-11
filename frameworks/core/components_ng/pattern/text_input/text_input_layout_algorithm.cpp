@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Construct text style.
     TextStyle textStyle;
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
+    textDirection_ = textFieldLayoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
     ConstructTextStyles(layoutWrapper, textStyle, textContent_, showPlaceHolder_);
     std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
@@ -249,12 +251,6 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
         } else {
             auto border = params.pattern->GetBorderWidthProperty();
             textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft(border);
-        }
-        bool isEmptyTextEditValue = params.pattern->GetTextUtf16Value().empty();
-        bool isInlineStyle = params.pattern->IsNormalInlineState();
-        if (!isEmptyTextEditValue && !isInlineStyle) {
-            TextAlign textAlign = params.layoutProperty->GetTextAlignValue(TextAlign::START);
-            params.pattern->CheckTextAlignByDirection(textAlign, direction_);
         }
         if (params.isRTL) {
             if (params.responseArea) {

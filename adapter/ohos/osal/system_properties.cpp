@@ -124,6 +124,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsAttributeSetTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.attribute_set.enabled", "false") == "true");
+}
+
 bool IsTextTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
@@ -474,6 +479,11 @@ float ReadDragStartPanDistanceThreshold()
         DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
 }
 
+bool ReadIsOpenYuvDecode()
+{
+    return system::GetBoolParameter("persist.ace.yuv.decode.enabled", false);
+}
+
 uint32_t ReadCanvasDebugMode()
 {
     return system::GetUintParameter("persist.ace.canvas.debug.mode", 0u);
@@ -525,6 +535,12 @@ int32_t ReadDragDropFrameworkStatus()
 int32_t ReadTouchAccelarateMode()
 {
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
+int32_t ReadPageLoadTimeThreshold()
+{
+    return system::GetIntParameter(
+        "const.arkui.pageload.timethreshold", 1500); // page load max timethreshold is 1500ms.
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -664,6 +680,7 @@ std::string InitSysDeviceType()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
+std::atomic<bool> SystemProperties::attributeSetTraceEnable_(IsAttributeSetTraceEnabled() && developerModeOn_);
 bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
@@ -754,6 +771,7 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
+int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -768,8 +786,9 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPoint
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
+bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
-
+bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -902,6 +921,7 @@ void SystemProperties::InitDeviceInfo(
     multiInstanceEnabled_ = IsMultiInstanceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+    attributeSetTraceEnable_.store(IsAttributeSetTraceEnabled() && developerModeOn_);
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
@@ -950,6 +970,8 @@ void SystemProperties::InitDeviceInfo(
     InitDeviceTypeBySystemProperty();
     GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
     isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
+    isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+    isOpenYuvDecode_ = ReadIsOpenYuvDecode();
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1395,6 +1417,11 @@ bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
     return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
 }
 
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
@@ -1413,6 +1440,11 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 int32_t SystemProperties::GetTouchAccelarate()
 {
     return touchAccelarate_;
+}
+
+int32_t SystemProperties::GetPageLoadTimethreshold()
+{
+    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

@@ -419,7 +419,9 @@ void setCallbackCallerSync(int apiKind, Callback_Caller_Sync_t callbackCallerSyn
     g_callbackCallerSync[apiKind] = callbackCallerSync;
 }
 
-void impl_CallCallbackSync(KVMContext vmContext, KInt apiKind, KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
+void impl_CallCallbackSync(
+    KVMContext vmContext, KInt apiKind, KInt callbackKind, KSerializerBuffer args, KInt argsSize)
+{
     CHECK_HAS_CALLBACK_CALLER(apiKind, g_callbackCallerSync);
     g_callbackCallerSync[apiKind](vmContext, callbackKind, args, argsSize);
 }
@@ -741,7 +743,8 @@ KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
 #endif
 
-#if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || defined(KOALA_ETS_NAPI) || defined(KOALA_ANI) || defined(KOALA_KOTLIN)
+#if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || \
+    defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
 KStringPtr impl_StdStringToString(KVMContext vmContext, KNativePointer stringPtr) {
     std::string* string = reinterpret_cast<std::string*>(stringPtr);
     KStringPtr result(string->c_str(), string->size(), false);

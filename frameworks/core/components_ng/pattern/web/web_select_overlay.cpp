@@ -200,6 +200,13 @@ void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
 
 bool WebSelectOverlay::IsSelectHandleReverse()
 {
+    if (selectOverlayDragging_) {
+        if (startSelectionHandle_->IsDragging()) {
+            return !isCurrentStartHandleDragging_;
+        } else if (endSelectionHandle_->IsDragging()) {
+            return isCurrentStartHandleDragging_;
+        }
+    }
     if (startSelectionHandle_->GetTouchHandleType() ==
         OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE &&
         endSelectionHandle_->GetTouchHandleType() ==
@@ -378,17 +385,19 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     bool detectFlag = !isSelectAll_;
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showTranslate = false;
     if (!queryWord.empty()) {
         selectInfo.menuInfo.showSearch = true;
         selectInfo.menuInfo.showTranslate = true;
-    } else {
-        selectInfo.menuInfo.showSearch = false;
-        selectInfo.menuInfo.showTranslate = false;
     }
-    selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
-        (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
     bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
-                     (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+    selectInfo.menuInfo.showAIWrite = false;
+    if (pattern->IsShowAIWrite() && canCopyOut &&
+        (selectInfo.isSingleHandle || (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT))) {
+        selectInfo.menuInfo.showAIWrite = true;
+    }
     selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
     canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) && !queryWord.empty();
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
@@ -1041,9 +1050,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
-    isSelectAll_ = false;
     selectOverlayDragging_ = false;
-    webSelectInfo_.menuInfo.showCopyAll = true;
     UpdateSelectMenuOptions();
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1062,6 +1069,7 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->SetOverlayCreating(false);
         delegate->HandleTouchCancel();
     }
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     UpdateTouchHandleForOverlay(true);
     if (!IsShowMenu()) {
         ChangeVisibilityOfQuickMenu();
@@ -1094,6 +1102,9 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     }
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
+    auto delegate = pattern->delegate_;
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     aiMenuType_ = TextDataDetectType::INVALID;
@@ -1323,6 +1334,7 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (isSelectAll_) {
+        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
     if (!queryWord.empty()) {
@@ -1581,6 +1593,9 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
     } else {
         menuOffset.SetY(member.avoidPositionY);
     }
+    if (NearEqual(member.info->selectArea.Width(), 0.0) && NearEqual(member.info->selectArea.Height(), 0.0)) {
+        return;
+    }
     menuOffset.SetX(member.avoidPositionX);
 }
 
@@ -1595,5 +1610,25 @@ bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& me
                                GreatNotEqual(member.downPaint.Bottom(), member.bottomArea);
     member.fixWrongNewAvoid = !upHandleIsNotShow || !downHandleIsNotShow;
     return !member.fixWrongNewAvoid;
+}
+
+void WebSelectOverlay::UpdateSelectAreaInfo()
+{
+    webSelectInfo_.selectArea = ComputeSelectAreaRect(selectArea_);
+    UpdateSelectArea();
+}
+
+void WebSelectOverlay::UpdateSelectArea()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
+}
+
+void WebSelectOverlay::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    RectF rect(x, y, width, height);
+    selectArea_ = rect;
+    UpdateSelectAreaInfo();
 }
 } // namespace OHOS::Ace::NG

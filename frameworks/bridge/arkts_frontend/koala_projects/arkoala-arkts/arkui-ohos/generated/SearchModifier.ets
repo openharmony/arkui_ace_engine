@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -30,9 +31,11 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
+import { ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
 export class SearchModifier extends CommonMethodModifier implements SearchAttribute,AttributeModifier<SearchAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -130,6 +133,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _compressLeadingPunctuation_0_0value?: boolean | undefined
+    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _includeFontPadding_0_0value?: boolean | undefined
+    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fallbackLineSpacing_0_0value?: boolean | undefined
+    _dividerColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dividerColor_0_0value?: ColorMetrics | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _searchButton_0_0value?: string | undefined
     _searchButton_0_1value?: SearchButtonOptions | undefined
@@ -140,6 +151,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSearchPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -934,6 +946,78 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._dividerColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dividerColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerColorAttribute((this._dividerColor_0_0value as ColorMetrics | undefined));
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -991,6 +1075,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     }
     mergeModifier(modifier: SearchModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_0_flag) {
@@ -1563,6 +1648,58 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._dividerColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dividerColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dividerColor(modifier._dividerColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.dividerColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2084,6 +2221,50 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    dividerColor(value: ColorMetrics | undefined): this {
+        if (((this._dividerColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dividerColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dividerColor_0_0value = value
+        } else
+        {
+            this._dividerColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._compressLeadingPunctuation_0_0value = value
+        } else
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
+            this._includeFontPadding_0_0value = value
+        } else
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fallbackLineSpacing_0_0value = value
+        } else
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

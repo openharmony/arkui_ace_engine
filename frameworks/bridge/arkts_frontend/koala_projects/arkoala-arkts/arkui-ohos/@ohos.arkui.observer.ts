@@ -1,26 +1,72 @@
 import { ResourceStr } from '/arkui/component/units';
-import { NavPathStack } from 'arkui/framework'
+import { NavPathStack, NavigationOperation, NavBar } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
+import { int32 } from "@koalaui/common"
 
 declare namespace uiObserver {
     export class DensityInfo {
-        density: number;
+        density: double;
     }
     type Callback<T,V = void> = (data: T) => V
       
-    export interface UIObserver {
+    export class UIObserver {
         on(type: string, callback: object): void;
         off(type: string, callback?: object): void;
-        
+
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
-        onTabChange(callback: object): void;
-        offTabChange(callback?: object): void;
-        onTabChange(options: ObserverOptions, callback: object): void;
-        offTabChange(options: ObserverOptions, callback?: object): void;
+        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
+        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+
+        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
+
+        onTabChange(callback: Callback<TabContentInfo>): void;
+        offTabChange(callback?: Callback<TabContentInfo>): void;
+        onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        onDensityUpdate(callback: Callback<DensityInfo>): void;
+        offDensityUpdate(callback?: Callback<DensityInfo>): void;
+
+        onWillDraw(callback: Callback<void>): void;
+        offWillDraw(callback?: Callback<void>): void;
+
+        onDidLayout(callback: Callback<void>): void;
+        offDidLayout(callback?: Callback<void>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -39,11 +85,20 @@ declare namespace uiObserver {
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId: int32 | undefined;
+    }
+
+    export interface NavDestinationSwitchInfo {
+
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
     }
 
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int32;
         name: string;
         path: string;
         state: RouterPageState;
@@ -54,10 +109,10 @@ declare namespace uiObserver {
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int32;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
+        uniqueId?: int32;
         mode?: NavDestinationMode;
     }
 
@@ -72,6 +127,26 @@ declare namespace uiObserver {
         navigationId: ResourceStr;
     }
 
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+    }
+
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
+    }
+
+    export enum Axis {
+        VERTICAL = 0,
+        Vertical = 0,
+        HORIZONTAL = 1,
+        Horizontal = 1
+    }
+
     export enum TabContentState {
         ON_SHOW = 0,
         ON_HIDE = 1
@@ -79,11 +154,11 @@ declare namespace uiObserver {
 
     export interface TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
     }
 

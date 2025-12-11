@@ -212,9 +212,13 @@ std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool&
         return "";
     }
     ani_string dataTypeAni;
-    if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
-        isSuccess = false;
-        return "";
+    if (AniUtils::IsString(env, static_cast<ani_object>(modeRef))) {
+        dataTypeAni = static_cast<ani_string>(modeRef);
+    } else {
+        if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
+            isSuccess = false;
+            return "";
+        }
     }
     return AniUtils::ANIStringToStdString(env, dataTypeAni);
 }
@@ -483,19 +487,19 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
     if (AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Boolean")) {
         previewOptions.isNumber = false;
         ani_boolean aniValue;
-        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "unboxed", nullptr, &aniValue)) {
+        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "toBoolean", ":z", &aniValue)) {
             previewOptions.isShowBadge = static_cast<bool>(aniValue);
         }
         return true;
     }
-    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Numeric")) {
+    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Long")) {
         return false;
     }
-    ani_double numberValue;
-    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":d", &numberValue))) {
+    ani_long numberValue;
+    if (ANI_OK != env->Object_CallMethodByName_Long(numberBadgeObj, "toLong", ":l", &numberValue)) {
         return false;
     }
-    auto number = static_cast<double>(numberValue);
+    auto number = static_cast<int64_t>(numberValue);
     if (number < 0 || number > INT_MAX) {
         previewOptions.isNumber = false;
         previewOptions.isShowBadge = true;
@@ -549,7 +553,7 @@ void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool
         return;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "unboxed", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "toBoolean", ":z", &aniValue)) {
         return;
     }
     target = static_cast<bool>(aniValue);

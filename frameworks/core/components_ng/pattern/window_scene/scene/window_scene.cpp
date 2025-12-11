@@ -355,6 +355,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent([windowNode = std::move(host)]() { },
+        "ArkUIWindowDestoryWindowNode", TaskExecutor::TaskType::UI);
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {
@@ -543,7 +548,9 @@ void WindowScene::SetSubSessionVisible()
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "BufferAvailableCallbackForSnapshot id:%{public}d", session_->GetPersistentId());
+        "BufferAvailableCallbackForSnapshot id:%{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
@@ -667,7 +674,9 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d", session_->GetPersistentId());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     if (session_->GetBlank()) {
         return;
     }

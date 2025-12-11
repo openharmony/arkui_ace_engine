@@ -20,6 +20,7 @@
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
@@ -200,7 +201,6 @@ void ClickRecognizer::OnAccepted()
     auto lastRefereeState = refereeState_;
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
         touchPoints_ = backupTouchPointsForSucceedBlock_.value();
         backupTouchPointsForSucceedBlock_.reset();
@@ -295,7 +295,8 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
         if (!frameNode.Invalid()) {
             auto host = frameNode.Upgrade();
             CHECK_NULL_VOID(host);
-            responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+            responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(
+                static_cast<int32_t>(event.sourceType), static_cast<int32_t>(event.sourceTool));
         }
     }
     if (fingersId_.find(event.id) == fingersId_.end()) {
@@ -454,8 +455,12 @@ void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
     CHECK_NULL_VOID(refereeNG);
     if (refereeNG->QueryAllDone()) {
         for (const auto& recognizer : responseLinkRecognizer_) {
-            if (recognizer && recognizer != AceType::Claim(this)) {
-                recognizer->ResetResponseLinkRecognizer();
+            if (recognizer.Invalid()) {
+                continue;
+            }
+            auto upgradeRecognizer = recognizer.Upgrade();
+            if (upgradeRecognizer && upgradeRecognizer != AceType::Claim(this)) {
+                upgradeRecognizer->ResetResponseLinkRecognizer();
             }
         }
         ResetResponseLinkRecognizer();
@@ -609,6 +614,10 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         tapReport.SetFingerList(info.GetFingerList());
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
+    pipeline->GetClickOptimizer()->ReportClick(GetAttachedNode(), info);
 }
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
@@ -728,6 +737,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "distanceThreshold: " << distanceThreshold_.Value() << ", "
         << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();

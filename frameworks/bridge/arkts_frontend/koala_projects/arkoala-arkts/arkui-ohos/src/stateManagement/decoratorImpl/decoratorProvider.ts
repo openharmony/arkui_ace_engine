@@ -18,6 +18,7 @@ import { IProviderDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
@@ -26,16 +27,22 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         super('@Provider', owningView, varName);
         this.provideAlias_ = provideAlias;
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
-        owningView.addProvider(provideAlias, this);
+        owningView.__addProvider__Internal(provideAlias, this);
     }
 
     get(): T {
-        const value = this.backing_.get(this.shouldAddRef());
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provider ${this.getTraceInfo()}`);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 
     set(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provider ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }

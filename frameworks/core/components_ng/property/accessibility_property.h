@@ -20,12 +20,16 @@
 #include <string>
 #include <unordered_set>
 
+#include "ui/accessibility/accessibility_constants.h"
+#include "ui/focus/focus_constants.h"
+
 #include "accessibility_property_function.h"
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Accessibility {
 class ExtraElementInfo;
@@ -48,8 +52,20 @@ struct AccessibilityGroupOptions {
     std::string actionControllerByInspector;
 };
 
+struct AccessibilityActionOptions {
+    int32_t scrollStep = 1;
+};
+
 struct OverlayAccessibilityProperty {
     bool isModal = true; // true means cannot focus lower component of dialog like components
+};
+
+enum ScrollableStatus : int32_t {
+    NOT_SUPPORT = 0,
+    AT_TOP = 1,
+    AT_BOTTOM = 2,
+    AT_BOTH_TOP_BOTTOM = 3,
+    AT_NEITHER_TOP_BOTTOM = 4,
 };
 
 using ActionNoParam = std::function<void()>;
@@ -78,6 +94,7 @@ using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSc
 
 using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF& point)>;
 
+class UINode;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
@@ -602,6 +619,9 @@ public:
     bool HasAccessibilitySamePage();
     std::string GetAccessibilitySamePage();
 
+    void SetAccessibilityStateDescription(const std::string& stateDescription);
+    std::string GetAccessibilityStateDescription() const;
+
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
 
@@ -670,10 +690,24 @@ public:
     bool HasAccessibilityGroupOptions();
     AccessibilityGroupOptions GetAccessibilityGroupOptions();
     void ResetAccessibilityGroupOptions();
+    void SetAccessibilityActionOptions(const AccessibilityActionOptions& accessibilityActionOptions);
+    AccessibilityActionOptions GetAccessibilityActionOptions();
+    void ResetAccessibilityActionOptions();
 
     // used to indicate whether a dialog like component is modal
     void SetIsAccessibilityModal(bool isModal);
     virtual bool IsAccessibilityModal() const;
+    virtual bool GetAccessibilityInnerVisibleRect(RectF& rect)
+    {
+        return false;
+    }
+
+    void SetIsHeaderOrFooter(bool isFlag);
+    bool IsHeaderOrFooter() const;
+    virtual ScrollableStatus GetScrollableStatus() const
+    {
+        return NOT_SUPPORT;
+    }
 
 private:
     // node should be not-null
@@ -710,6 +744,8 @@ private:
     bool HasAccessibilityTextOrDescription() const;
 
     bool HasAction() const;
+
+    static bool NotConsumeByModal(const RefPtr<FrameNode>& node);
 
     static bool CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node);
 
@@ -778,6 +814,7 @@ protected:
     std::optional<std::string> accessibilityRole_;
     std::optional<std::string> accessibilityCustomRole_;
     std::optional<std::string> accessibilityUseSamePage_;
+    std::optional<std::string> accessibilityStateDescription_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 
     std::optional<bool> isDisabled_;
@@ -802,6 +839,8 @@ protected:
     std::optional<AccessibilityGroupOptions> accessibilityGroupOptions_;
     // used to maintain overlay, dialog like components' options
     std::optional<OverlayAccessibilityProperty> overlayProperty_;
+    std::optional<bool> isHeaderOrFooter_;
+    std::optional<AccessibilityActionOptions> accessibilityActionOptions_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -18,6 +18,7 @@ import { IParamOnceDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamOnceDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
@@ -26,12 +27,18 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase imple
     }
 
     get(): T {
-        const value = this.backing_.get(this.shouldAddRef());
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ParamOnce ${this.getTraceInfo()}`);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 
     set(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ParamOnce ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }

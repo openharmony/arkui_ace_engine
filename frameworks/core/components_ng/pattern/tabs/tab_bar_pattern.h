@@ -44,6 +44,7 @@ class TextLayoutProperty;
 const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(-1.0f, 1.0f, 228.0f, 30.f);
 
 using TabBarBuilderFunc = std::function<void()>;
+using OnTabBarItemsChangeEvent = std::function<void()>;
 class TabBarParam : public virtual Referenced {
 public:
     TabBarParam(const std::string& textParam, const std::string& iconParam, TabBarBuilderFunc&& builderParam)
@@ -610,6 +611,11 @@ public:
         tabBarItemIds_[position] = tabBarItemId;
     }
 
+    int32_t GetTabBarItemSize()
+    {
+        return tabBarItemIds_.size();
+    }
+
     bool IsNewTabBar(int32_t tabBarItemId) const
     {
         return std::find(tabBarItemIds_.begin(), tabBarItemIds_.end(), tabBarItemId) == tabBarItemIds_.end();
@@ -645,6 +651,11 @@ public:
             return false;
         }
         return true;
+    }
+
+    void SetOnTabBarItemsChangeEvent(OnTabBarItemsChangeEvent&& event)
+    {
+        onTabBarItemsChangeEvent_ = std::move(event);
     }
 
 private:
@@ -783,6 +794,9 @@ private:
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
+    void LoadCompleteManagerStartCollect(int32_t index);
+    void LoadCompleteManagerStopCollect();
+    void NotifyTabBarItemsChange();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;
@@ -802,6 +816,7 @@ private:
     RefPtr<DragEvent> dragEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
+    OnTabBarItemsChangeEvent onTabBarItemsChangeEvent_;
 
     float bigScale_ = 0.0f;
     float largeScale_ = 0.0f;

@@ -101,6 +101,7 @@ public:
     static ArkUINativeModuleValue IsVisible(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsClipToFrame(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsAttached(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue IsOnMainTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetCustomPropertyCapiByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCustomPropertyModiferByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -153,6 +154,10 @@ public:
     static ArkUINativeModuleValue RemoveAdoptedChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard start
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard end
 };
 
 } // namespace OHOS::Ace::NG

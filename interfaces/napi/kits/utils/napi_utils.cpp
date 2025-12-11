@@ -18,6 +18,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "jsnapi.h"
+#include "base/i18n/localization.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -28,6 +29,7 @@ const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
+constexpr int32_t INVALID_PRECISION = -1;
 constexpr char BUNDLE_NAME[] = "bundleName";
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
@@ -61,6 +63,20 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_value error = nullptr;
     napi_create_error(env, code, msg, &error);
     napi_throw(env, error);
+}
+
+std::string GetLocalizedParamStr(const std::string& paramStr, const std::string& type)
+{
+    auto localization = Localization::GetInstance();
+    if (!localization || (type != "d" && type != "f")) {
+        return paramStr;
+    }
+
+    int32_t precision = (type == "d") ? 0 : INVALID_PRECISION;
+    std::string result = paramStr;
+    std::string backup = paramStr;
+
+    return localization->LocalizeNumber(result, precision) ? result : backup;
 }
 
 void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount)
@@ -101,7 +117,7 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
             }
         }
         if (static_cast<uint32_t>(index) < size) {
-            replaceContentStr = params[index];
+            replaceContentStr = GetLocalizedParamStr(params[index], type);
         } else {
             LOGE("index = %{public}d size = %{public}d", static_cast<uint32_t>(index), size);
         }
@@ -1153,5 +1169,14 @@ bool HasGetter(napi_env env, napi_value value, const std::string& key)
 int32_t GetStringFormatStartIndex(bool hasGetter)
 {
     return hasGetter ? 1 : 0;
+}
+
+int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext)
+{
+    int32_t result = 0;
+    napi_value instanceId = nullptr;
+    napi_get_named_property(env, uiContext, "instanceId_", &instanceId);
+    napi_get_value_int32(env, instanceId, &result);
+    return result;
 }
 } // namespace OHOS::Ace::Napi

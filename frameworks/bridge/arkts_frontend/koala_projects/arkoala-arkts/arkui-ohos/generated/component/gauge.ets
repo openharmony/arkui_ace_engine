@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { LinearGradient_serializer, LinearGradient } from "./dataPanel"
@@ -29,6 +30,7 @@ import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -48,48 +50,49 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGaugeOptionsAttribute(options: GaugeOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GaugeOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GaugeInterface_setGaugeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setValueAttribute(value: number | undefined): void {
+    setValueAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GaugeAttribute_setValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStartAngleAttribute(value: number | undefined): void {
+    setStartAngleAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GaugeAttribute_setStartAngle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setEndAngleAttribute(value: number | undefined): void {
+    setEndAngleAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GaugeAttribute_setEndAngle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorsAttribute(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): void {
+    setColorsAttribute(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -101,10 +104,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -118,12 +121,12 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LinearGradient
                 LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (TypeChecker.isArray_Tuple_Union_ResourceColor_LinearGradient_Number(valueTmpValue)) {
+            } else if (TypeChecker.isArray_Tuple_Union_ResourceColor_LinearGradient_F64(valueTmpValue)) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Array<[ ResourceColor | LinearGradient, number ]>
+                const valueTmpValueForIdx2  = valueTmpValue as Array<[ ResourceColor | LinearGradient, double ]>
                 thisSerializer.writeInt32((valueTmpValueForIdx2.length).toInt())
                 for (let valueTmpValueForIdx2CounterI = 0; valueTmpValueForIdx2CounterI < valueTmpValueForIdx2.length; valueTmpValueForIdx2CounterI++) {
-                    const valueTmpValueForIdx2TmpElement : [ ResourceColor | LinearGradient, number ] = valueTmpValueForIdx2[valueTmpValueForIdx2CounterI]
+                    const valueTmpValueForIdx2TmpElement : [ ResourceColor | LinearGradient, double ] = valueTmpValueForIdx2[valueTmpValueForIdx2CounterI]
                     const valueTmpValueForIdx2TmpElement_0  = valueTmpValueForIdx2TmpElement[0]
                     if (valueTmpValueForIdx2TmpElement_0 instanceof ResourceColor) {
                         thisSerializer.writeInt8((0).toByte())
@@ -132,10 +135,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                             thisSerializer.writeInt8((0).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0  = valueTmpValueForIdx2TmpElement_0ForIdx0 as Color
                             thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0.getOrdinal())
-                        } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof number) {
+                        } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof int32) {
                             thisSerializer.writeInt8((1).toByte())
-                            const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as number
-                            thisSerializer.writeNumber(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1)
+                            const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as int32
+                            thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1)
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof string) {
                             thisSerializer.writeInt8((2).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx2  = valueTmpValueForIdx2TmpElement_0ForIdx0 as string
@@ -151,7 +154,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                         LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx2TmpElement_0ForIdx1)
                     }
                     const valueTmpValueForIdx2TmpElement_1  = valueTmpValueForIdx2TmpElement[1]
-                    thisSerializer.writeNumber(valueTmpValueForIdx2TmpElement_1)
+                    thisSerializer.writeFloat64(valueTmpValueForIdx2TmpElement_1)
                 }
             }
         } else {
@@ -169,10 +172,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -184,9 +187,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDescriptionAttribute(value: CustomBuilder | undefined): void {
+    setDescriptionAttribute(value: CustomBuilder | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
@@ -196,9 +199,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: GaugeShadowOptions | undefined): void {
+    setTrackShadowAttribute(value: GaugeShadowOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             GaugeShadowOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -208,9 +211,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setIndicatorAttribute(value: GaugeIndicatorOptions | undefined): void {
+    setIndicatorAttribute(value: GaugeIndicatorOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             GaugeIndicatorOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -234,9 +237,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value: number | undefined;
-    min?: number;
-    max?: number;
+    value: double | undefined;
+    min?: double;
+    max?: double;
 }
 export interface GaugeShadowOptions extends MultiShadowOptions {
 }
@@ -245,36 +248,36 @@ export interface GaugeIndicatorOptions {
     space?: Dimension;
 }
 export interface GaugeConfiguration extends CommonConfiguration<GaugeConfiguration> {
-    value: number;
-    min: number;
-    max: number;
+    value: double;
+    min: double;
+    max: double;
 }
 export interface GaugeAttribute extends CommonMethod {
     setGaugeOptions(options: GaugeOptions): this {
         throw new Error("Unimplemented method setGaugeOptions")
     }
-    value(value: number | undefined): this {
+    value(value: double | undefined): this {
         throw new Error("Unimplemented method value")
     }
-    startAngle(value: number | undefined): this {
+    startAngle(value: double | undefined): this {
         throw new Error("Unimplemented method startAngle")
     }
-    endAngle(value: number | undefined): this {
+    endAngle(value: double | undefined): this {
         throw new Error("Unimplemented method endAngle")
     }
-    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
+    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined): this {
         throw new Error("Unimplemented method colors")
     }
     strokeWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeWidth")
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         throw new Error("Unimplemented method description")
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         throw new Error("Unimplemented method trackShadow")
     }
-    indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | null | undefined): this {
         throw new Error("Unimplemented method indicator")
     }
     privacySensitive(value: boolean | undefined): this {
@@ -288,42 +291,42 @@ export interface GaugeAttribute extends CommonMethod {
     }
 }
 export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribute {
-    value_value?: number | undefined
-    startAngle_value?: number | undefined
-    endAngle_value?: number | undefined
-    colors_value?: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined
+    value_value?: double | undefined
+    startAngle_value?: double | undefined
+    endAngle_value?: double | undefined
+    colors_value?: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined
     strokeWidth_value?: Length | undefined
-    description_value?: CustomBuilder | undefined
-    trackShadow_value?: GaugeShadowOptions | undefined
-    indicator_value?: GaugeIndicatorOptions | undefined
+    description_value?: CustomBuilder | null | undefined
+    trackShadow_value?: GaugeShadowOptions | null | undefined
+    indicator_value?: GaugeIndicatorOptions | null | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<GaugeConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined
     setGaugeOptions(options: GaugeOptions): this {
         return this
     }
-    value(value: number | undefined): this {
+    value(value: double | undefined): this {
         return this
     }
-    startAngle(value: number | undefined): this {
+    startAngle(value: double | undefined): this {
         return this
     }
-    endAngle(value: number | undefined): this {
+    endAngle(value: double | undefined): this {
         return this
     }
-    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
+    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined): this {
         return this
     }
     strokeWidth(value: Length | undefined): this {
         return this
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         return this
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         return this
     }
-    indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | null | undefined): this {
         return this
     }
     privacySensitive(value: boolean | undefined): this {
@@ -348,37 +351,38 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         if (this.checkPriority("setGaugeOptions")) {
             const options_casted = options as (GaugeOptions)
             this.getPeer()?.setGaugeOptionsAttribute(options_casted)
+            this.applyOptionsFinish('GaugeAttribute');
             return this
         }
         return this
     }
-    public value(value: number | undefined): this {
+    public value(value: double | undefined): this {
         if (this.checkPriority("value")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setValueAttribute(value_casted)
             return this
         }
         return this
     }
-    public startAngle(value: number | undefined): this {
+    public startAngle(value: double | undefined): this {
         if (this.checkPriority("startAngle")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setStartAngleAttribute(value_casted)
             return this
         }
         return this
     }
-    public endAngle(value: number | undefined): this {
+    public endAngle(value: double | undefined): this {
         if (this.checkPriority("endAngle")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setEndAngleAttribute(value_casted)
             return this
         }
         return this
     }
-    public colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
+    public colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined): this {
         if (this.checkPriority("colors")) {
-            const value_casted = value as (ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined)
+            const value_casted = value as (ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined)
             this.getPeer()?.setColorsAttribute(value_casted)
             return this
         }
@@ -392,25 +396,25 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         }
         return this
     }
-    public description(value: CustomBuilder | undefined): this {
+    public description(value: CustomBuilder | null | undefined): this {
         if (this.checkPriority("description")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | null | undefined)
             this.getPeer()?.setDescriptionAttribute(value_casted)
             return this
         }
         return this
     }
-    public trackShadow(value: GaugeShadowOptions | undefined): this {
+    public trackShadow(value: GaugeShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
-            const value_casted = value as (GaugeShadowOptions | undefined)
+            const value_casted = value as (GaugeShadowOptions | null | undefined)
             this.getPeer()?.setTrackShadowAttribute(value_casted)
             return this
         }
         return this
     }
-    public indicator(value: GaugeIndicatorOptions | undefined): this {
+    public indicator(value: GaugeIndicatorOptions | null | undefined): this {
         if (this.checkPriority("indicator")) {
-            const value_casted = value as (GaugeIndicatorOptions | undefined)
+            const value_casted = value as (GaugeIndicatorOptions | null | undefined)
             this.getPeer()?.setIndicatorAttribute(value_casted)
             return this
         }
@@ -431,12 +435,17 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         return this
     }
     public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGaugeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGaugeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -466,19 +475,19 @@ export class GaugeConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        valueSerializer.writeFloat64(valueHolderForValue)
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeFloat64(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeFloat64(valueHolderForMax)
     }
     public static read(buffer: DeserializerBase): GaugeConfiguration {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<GaugeConfiguration> = (valueDeserializer.readObject() as ContentModifier<GaugeConfiguration>)
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : double = valueDeserializer.readFloat64()
+        const minTmpResult : double = valueDeserializer.readFloat64()
+        const maxTmpResult : double = valueDeserializer.readFloat64()
         let value : GaugeConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, min: minTmpResult, max: maxTmpResult} as GaugeConfiguration)
         return value
     }
@@ -490,7 +499,7 @@ export class GaugeOptions_serializer {
         if (valueHolderForValue !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueTmpValue  = valueHolderForValue!
-            valueSerializer.writeNumber(valueHolderForValueTmpValue)
+            valueSerializer.writeFloat64(valueHolderForValueTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -498,7 +507,7 @@ export class GaugeOptions_serializer {
         if (valueHolderForMin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinTmpValue  = valueHolderForMin!
-            valueSerializer.writeNumber(valueHolderForMinTmpValue)
+            valueSerializer.writeFloat64(valueHolderForMinTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -506,7 +515,7 @@ export class GaugeOptions_serializer {
         if (valueHolderForMax !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxTmpValue  = valueHolderForMax!
-            valueSerializer.writeNumber(valueHolderForMaxTmpValue)
+            valueSerializer.writeFloat64(valueHolderForMaxTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -514,23 +523,23 @@ export class GaugeOptions_serializer {
     public static read(buffer: DeserializerBase): GaugeOptions {
         let valueDeserializer : DeserializerBase = buffer
         const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let valueTmpBuf : number | undefined = undefined
+        let valueTmpBuf : double | undefined = undefined
         if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            valueTmpBuf = (valueDeserializer.readNumber() as number)
+            valueTmpBuf = valueDeserializer.readFloat64()
         }
-        const valueTmpResult : number | undefined = valueTmpBuf
+        const valueTmpResult : double | undefined = valueTmpBuf
         const minTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minTmpBuf : number | undefined = undefined
+        let minTmpBuf : double | undefined = undefined
         if ((minTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            minTmpBuf = (valueDeserializer.readNumber() as number)
+            minTmpBuf = valueDeserializer.readFloat64()
         }
-        const minTmpResult : number | undefined = minTmpBuf
+        const minTmpResult : double | undefined = minTmpBuf
         const maxTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxTmpBuf : number | undefined = undefined
+        let maxTmpBuf : double | undefined = undefined
         if ((maxTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxTmpBuf = (valueDeserializer.readNumber() as number)
+            maxTmpBuf = valueDeserializer.readFloat64()
         }
-        const maxTmpResult : number | undefined = maxTmpBuf
+        const maxTmpResult : double | undefined = maxTmpBuf
         let value : GaugeOptions = ({value: valueTmpResult, min: minTmpResult, max: maxTmpResult} as GaugeOptions)
         return value
     }
@@ -542,10 +551,10 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
-            if (valueHolderForRadiusTmpValue instanceof number) {
+            if (valueHolderForRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
+                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
@@ -558,10 +567,10 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
+            if (valueHolderForOffsetXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
@@ -574,10 +583,10 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
+            if (valueHolderForOffsetYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
@@ -590,50 +599,50 @@ export class GaugeShadowOptions_serializer {
     public static read(buffer: DeserializerBase): GaugeShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusTmpBuf : number | Resource | undefined = undefined
+        let radiusTmpBuf : double | Resource | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let radiusTmpBuf_ : number | Resource | undefined
+            let radiusTmpBuf_ : double | Resource | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
-                radiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                radiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            radiusTmpBuf = (radiusTmpBuf_ as number | Resource)
+            radiusTmpBuf = (radiusTmpBuf_ as double | Resource)
         }
-        const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
+        const radiusTmpResult : double | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         let value : GaugeShadowOptions = ({radius: radiusTmpResult, offsetX: offsetXTmpResult, offsetY: offsetYTmpResult} as GaugeShadowOptions)
         return value
     }

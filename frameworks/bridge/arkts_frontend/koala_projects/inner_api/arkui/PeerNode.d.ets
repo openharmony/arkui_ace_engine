@@ -14,11 +14,11 @@
  */
 
 import { int32, KoalaCallsiteKey } from '@koalaui/common';
-import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
-import { Disposable } from '@koalaui.runtime.states.Disposable';
+import { IncrementalNode } from '@koalaui/runtime/tree/IncrementalNode';
+import { Disposable } from '@koalaui/runtime/states/Disposable';
 import { NativePeerNode } from 'arkui/NativePeerNode';
 import { int64 } from '@koalaui/compat';
-import { RecordData } from "@ohos.base"
+import { RecordData } from '@ohos.base';
 
 type pointer = int64
 

@@ -163,4 +163,18 @@ HWTEST_F(ColorTest, ColorTest007, TestSize.Level1)
     EXPECT_EQ(lineColor.GetBlue(), 127);
     EXPECT_EQ(lineColor.GetGreen(), 127);
 }
+
+/**
+ * @tc.name: ColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTest008, TestSize.Level1)
+{
+    auto color = Color::FromARGB(200, 200, 200, 200);
+    EXPECT_EQ(color.GetAlpha(), 200);
+    EXPECT_EQ(color.GetRed(), 200);
+    EXPECT_EQ(color.GetBlue(), 200);
+    EXPECT_EQ(color.GetGreen(), 200);
+}
 } // namespace OHOS::Ace

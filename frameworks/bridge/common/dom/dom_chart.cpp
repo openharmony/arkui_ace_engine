@@ -289,7 +289,7 @@ void DOMChart::SetChart(MainChart& chartDataset)
             (chartType_ == ChartType::LINE && point.GetX() > chartOptions_.GetXAxis().max) ||
             ((chartType_ != ChartType::LINE && chartType_ != ChartType::BAR)
             && (point.GetY() < chartOptions_.GetYAxis().min || point.GetY() > chartOptions_.GetYAxis().max))) {
-            points.erase(pointInfo);
+            pointInfo = points.erase(pointInfo);
         } else {
             if (point.GetY() > topPoint.GetY()) {
                 topPoint = point;

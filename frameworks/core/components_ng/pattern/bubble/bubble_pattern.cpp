@@ -107,14 +107,6 @@ void BubblePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    OnAttachToFrameNodeImpl();
-}
-
-void BubblePattern::OnAttachToFrameNodeImpl()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);

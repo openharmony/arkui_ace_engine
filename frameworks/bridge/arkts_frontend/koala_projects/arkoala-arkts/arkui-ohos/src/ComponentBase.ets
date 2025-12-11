@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from '@koalaui/runtime/annotations'
 import { PeerNode } from './PeerNode'
-import { ArkUINativeModule } from "#components"
+import { ArkUINativeModule } from '#components'
 import { AnimateParam, UIGestureEvent } from './framework'
 import { UICommonBase } from './base'
-import { unsafeCast } from "@koalaui/common"
+import { AceTrace } from './base/AceTrace'
+import { unsafeCast } from '@koalaui/common'
 
 export class ComponentBase implements UICommonBase {
     protected peer?: PeerNode
@@ -32,7 +33,7 @@ export class ComponentBase implements UICommonBase {
     getPeer(): PeerNode | undefined {
         return this.peer;
     }
-    setGestureEvent(gestureEvent: UIGestureEvent) {
+    setGestureEvent(gestureEvent: UIGestureEvent | undefined) {
         this.gestureEvent = gestureEvent
     }
     getGestureEvent(): UIGestureEvent | undefined {
@@ -43,8 +44,16 @@ export class ComponentBase implements UICommonBase {
         return true
     }
     public applyAttributesFinish(): void {
+        if (AceTrace.GetAttributeSetTraceEnabled()) {
+            AceTrace.end()
+        }
         this.isFirstBuild = false;
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
+    }
+    public applyOptionsFinish(traceName: string): void {
+        if (AceTrace.GetAttributeSetTraceEnabled()) {
+            AceTrace.begin(traceName)
+        }
     }
     public applyAttributes(attrs: Object): void {
         this.applyAttributesFinish()

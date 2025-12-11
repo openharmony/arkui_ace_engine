@@ -912,7 +912,6 @@ void SecurityComponentLayoutAlgorithm::HandleSecCompBorderRadius(LayoutWrapper* 
     auto layoutProperty =
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    CHECK_NULL_VOID(layoutProperty->GetFocusBoxFlag());
     auto scNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scNode);
     auto renderContext = scNode->GetRenderContext();

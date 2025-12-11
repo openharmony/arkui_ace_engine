@@ -74,6 +74,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     delta = -FireObserverOnWillScroll(-delta);
+    if (source == SCROLL_FROM_BAR && InstanceOf<WaterFlowLayoutInfo>(layoutInfo_) &&
+        GreatOrEqual(layoutInfo_->CurrentPos() + delta, layoutInfo_->TopFinalPos())) {
+        delta = -layoutInfo_->CurrentPos() + layoutInfo_->TopFinalPos();
+    }
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
@@ -139,7 +143,8 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_, layoutInfo_->EstimateTotalHeight(),
+    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_,
+        layoutInfo_->EstimateTotalHeight() + layoutInfo_->contentStartOffset_ + layoutInfo_->contentEndOffset_,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
@@ -809,14 +814,7 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
     int32_t footerOffset = layoutInfo_->footerIndex_ + 1; // 1 if footer present, 0 if not
     while (idx - footerOffset >= 0 && idx < GetChildrenCount()) {
         int32_t itemIdx = idx - footerOffset;
-        if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
-            ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
-            host->SetActive();
-            auto context = host->GetContext();
-            if (context) {
-                context->FlushUITaskWithSingleDirtyNode(host);
-            }
-        }
+        ScrollToFocusItem(itemIdx);
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);
         auto focus = next->GetHostNode()->GetFocusHub();
@@ -972,5 +970,18 @@ void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void WaterFlowPattern::ScrollToFocusItem(int32_t itemIdx)
+{
+    ScrollAlign align = ScrollAlign::AUTO;
+    ScrollToIndex(itemIdx, false, align);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -31,7 +31,10 @@ class ACE_EXPORT MovingPhotoNode : public FrameNode {
 public:
     MovingPhotoNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
         : FrameNode(tag, nodeId, pattern, isRoot)
-    {}
+    {
+        // MovingPhoto consumes too much memory and is unsuitable for using th asynchronous release.
+        RegisterReleaseFunc(false);
+    }
     ~MovingPhotoNode() override = default;
 
     static RefPtr<MovingPhotoNode> GetOrCreateMovingPhotoNode(

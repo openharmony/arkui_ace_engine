@@ -63,18 +63,32 @@ HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetThemesMapKey001
+ * @tc.name: GetThemesMultiThread001
  * @tc.desc: GetThemesMapKey
  * @tc.type: FUNC
  */
-HWTEST_F(ThemeManagerTestNg, GetThemesMapKey001, TestSize.Level1)
+HWTEST_F(ThemeManagerTestNg, GetThemesMultiThread001, TestSize.Level1)
 {
     /**
      * @tc.steps: create themeManager
      */
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-    auto theme = themeManager->GetThemeOrigin(ButtonTheme::TypeId());
-    themeManager->GetThemesMapKey(ButtonTheme::TypeId());
+    auto theme = themeManager->GetThemeMultiThread(ButtonTheme::TypeId());
+    EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
+}
+
+/**
+ * @tc.name: GetThemesMultiThread001
+ * @tc.desc: GetThemesMapKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, GetThemesMultiThread002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create themeManager
+     */
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    auto theme = themeManager->GetThemeMultiThread(ButtonTheme::TypeId(), 0);
     EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
 }
 }

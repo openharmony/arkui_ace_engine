@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32 } from "@koalaui/common"
@@ -24,6 +25,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRichTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -44,6 +46,7 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRichTextOptionsAttribute(content: string | Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
             thisSerializer.writeInt8((0).toByte())
@@ -125,6 +128,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         if (this.checkPriority("setRichTextOptions")) {
             const content_casted = content as (string | Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
+            this.applyOptionsFinish('RichTextAttribute');
             return this
         }
         return this
@@ -146,12 +150,17 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         return this
     }
     public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRichTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -17,7 +17,7 @@ import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdTy
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
-import { ObserveWrappedBase } from './observeWrappedBase';
+import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { UIUtils } from '../utils';
 import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
@@ -25,7 +25,7 @@ final class CONSTANT {
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
+export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Map<K, V>;
     // Use public access to enable unit testing.
     @JSONStringifyIgnore
@@ -259,5 +259,14 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         return this.store_.forEach(callbackfn);
+    }
+
+    public override addRefAnyKey(): void {
+        this.meta_.addRef(CONSTANT.OB_MAP_ANY_PROPERTY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
+    }
+
+    public override addRefLength(): void {
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
     }
 }

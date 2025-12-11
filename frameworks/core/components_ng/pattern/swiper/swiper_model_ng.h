@@ -212,6 +212,7 @@ public:
         FrameNode* frameNode);
     static void SetFillType(FrameNode* frameNode, int32_t options);
     static int32_t GetFillType(FrameNode* frameNode);
+    static void ResetFillType(FrameNode* frameNode);
     static void ResetDisplayCountWithObject(FrameNode* frameNode);
 };
 

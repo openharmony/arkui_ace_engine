@@ -96,7 +96,7 @@ void DrawOntoCanvas(const std::shared_ptr<RSBitmap>& bitMap, int32_t width, int3
 
 void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image,
     const std::shared_ptr<RSBitmap>& background, const std::shared_ptr<RSBitmap>& foreground,
-    bool foregroundOverBackground)
+    bool foregroundOverBackground, int32_t blendMode)
 {
     if (!foreground || !background || foreground->GetWidth() == 0 || foreground->GetHeight() == 0) {
         return;
@@ -112,7 +112,7 @@ void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image,
     auto dstOffsetY = static_cast<float>((background->GetHeight() - destHeight) * HALF);
     RSRect rsSrcRect(0.0, 0.0, foreground->GetWidth(), foreground->GetHeight());
     RSRect rsDstRect(dstOffsetX, dstOffsetY, destWidth + dstOffsetX, destHeight + dstOffsetY);
-    brush.SetBlendMode(foregroundOverBackground ? RSBlendMode::SRC_OVER : RSBlendMode::SRC_ATOP);
+    brush.SetBlendMode(foregroundOverBackground ? static_cast<RSBlendMode>(blendMode) : RSBlendMode::SRC_ATOP);
     bitmapCanvas.AttachBrush(brush);
     image.BuildFromBitmap(*foreground);
     bitmapCanvas.DrawImageRect(
@@ -153,8 +153,8 @@ RefPtr<PixelMap> BitMapToPixelMap(const RSBitmap& bitmap, InitializationOptions&
     return pixelmap;
 }
 
-RefPtr<PixelMap> CompositeLayerAdaptive(
-    RefPtr<PixelMap>& foreground, RefPtr<PixelMap>& background, RefPtr<PixelMap>& mask, bool foregroundOverBackground)
+RefPtr<PixelMap> CompositeLayerAdaptive(RefPtr<PixelMap>& foreground, RefPtr<PixelMap>& background,
+    RefPtr<PixelMap>& mask, bool foregroundOverBackground, int32_t blendMode)
 {
     if (!background) {
         return nullptr;
@@ -179,7 +179,7 @@ RefPtr<PixelMap> CompositeLayerAdaptive(
 
     RSImage image;
     if (foregroundOverBackground && foreBitmap) {
-        BlendForeground(bitmapCanvas, brush, image, backBitmap, foreBitmap, foregroundOverBackground);
+        BlendForeground(bitmapCanvas, brush, image, backBitmap, foreBitmap, foregroundOverBackground, blendMode);
     }
     if (maskBitmap) {
         RSRect dstRect(
@@ -194,7 +194,7 @@ RefPtr<PixelMap> CompositeLayerAdaptive(
     }
 
     if (!foregroundOverBackground && foreBitmap) {
-        BlendForeground(bitmapCanvas, brush, image, backBitmap, foreBitmap, foregroundOverBackground);
+        BlendForeground(bitmapCanvas, brush, image, backBitmap, foreBitmap, foregroundOverBackground, blendMode);
     }
 
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
@@ -205,8 +205,8 @@ RefPtr<PixelMap> CompositeLayerAdaptive(
     return pixelmap;
 }
 
-RefPtr<PixelMap> CompositeLayerNotAdaptive(
-    RefPtr<PixelMap>& foreground, RefPtr<PixelMap>& background, RefPtr<PixelMap>& mask, bool foregroundOverBackground)
+RefPtr<PixelMap> CompositeLayerNotAdaptive(RefPtr<PixelMap>& foreground, RefPtr<PixelMap>& background,
+    RefPtr<PixelMap>& mask, bool foregroundOverBackground, int32_t blendMode)
 {
     auto foreBitmap = PixelMapToBitMap(foreground);
     auto backBitmap = PixelMapToBitMap(background);
@@ -225,7 +225,7 @@ RefPtr<PixelMap> CompositeLayerNotAdaptive(
         bitmapCanvas.DetachBrush();
     }
     if (foregroundOverBackground && foreground) {
-        brush.SetBlendMode(RSBlendMode::SRC_OVER);
+        brush.SetBlendMode(static_cast<RSBlendMode>(blendMode));
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(foreBitmap, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();
@@ -270,9 +270,10 @@ void LayeredDrawableDescriptor::CreatePixelMap()
     auto background = GetBackground();
     auto mask = GetMask();
     if (foreground && foreground->GetWidth() == NOT_ADAPTIVE_SIZE && foreground->GetHeight() == NOT_ADAPTIVE_SIZE) {
-        composePixelMap_ = CompositeLayerNotAdaptive(foreground, background, mask, foregroundOverBackground_);
+        composePixelMap_ =
+            CompositeLayerNotAdaptive(foreground, background, mask, foregroundOverBackground_, blendMode_);
     } else {
-        composePixelMap_ = CompositeLayerAdaptive(foreground, background, mask, foregroundOverBackground_);
+        composePixelMap_ = CompositeLayerAdaptive(foreground, background, mask, foregroundOverBackground_, blendMode_);
     }
 }
 
@@ -301,6 +302,25 @@ RefPtr<PixelMap> LayeredDrawableDescriptor::GetMask()
     }
     CreateMask();
     return mask_;
+}
+
+void LayeredDrawableDescriptor::SetBlendMode(int32_t blendMode)
+{
+    if (blendMode < static_cast<int32_t>(RSBlendMode::CLEAR) ||
+        blendMode > static_cast<int32_t>(RSBlendMode::LUMINOSITY)) {
+        return;
+    }
+    blendMode_ = blendMode;
+    if (blendMode_ >= 0) {
+        foregroundOverBackground_ = true;
+    }
+}
+
+void LayeredDrawableDescriptor::InitBlendMode()
+{
+    if (foregroundOverBackground_) {
+        blendMode_ = static_cast<int32_t>(RSBlendMode::SRC_OVER);
+    }
 }
 
 void LayeredDrawableDescriptor::CreateForeground()

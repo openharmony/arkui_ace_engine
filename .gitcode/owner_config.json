@@ -40,7 +40,8 @@
             "liukaii1",
             "npisanov",
             "skrobagleb",
-            "huaweimaxuchu"
+            "huaweimaxuchu",
+            "zenix_zxy"
         ],
         "arkui_architecture": [
             "sunfei2021",
@@ -70,7 +71,8 @@
             "zhangboren",
             "spirinandrey",
             "npisanov",
-            "huaweimaxuchu"
+            "huaweimaxuchu",
+            "sergeymalenkov"
         ],
         "arkuieco3": [
             "ZhangYu-Home",
@@ -89,7 +91,10 @@
             "yylong",
             "zcdqs",
             "rongShao-Z",
-            "fangyuhao",
+            "shengu_lancer",
+            "tomkl123",
+            "fuhanfeng",
+            "wind_",
             "ilyaerokhin",
             "npisanov",
             "huaweimaxuchu"
@@ -186,6 +191,8 @@
         ],
         "arkuicodepulse": [
             "xi-heqiong",
+            "CCFFWW",
+            "hehongyang3",
             "ilyaerokhin",
             "spirinandrey",
             "huaweimaxuchu"
@@ -200,7 +207,8 @@
             "huaweimaxuchu"
         ],
         "arkui_framework_resource": [
-            "demon_coffee",
+            "xi-heqiong",
+            "raulnaruto_admin",
             "fangzhiyuan1",
             "lushi871202",
             "yesiyuanjim",
@@ -279,8 +287,11 @@
         "Hu_ZeQi": {
             "info": "[swiper huzeqi]"
         },
-        "cheng-feiwang": {
-            "info": "[模态类组件 chenfeiwang]"
+        "CCFFWW": {
+            "info": "[模态类组件 chengfeiwang]"
+        },
+        "hehongyang3": {
+            "info": "[视效动效组件 hehongyang]"
         },
         "H-xinwei": {
             "info": "[模态类组件 huangxinwei]"
@@ -337,7 +348,7 @@
             "info": "[信息展示类组件 xuqingfeng]"
         },
         "huaweimaxuchu": {
-            "info": "[Image能力 maxuchu]"
+            "info": "[CAPI UT maxuchu]"
         },
         "liyujie43": {
             "info": "[Image类组件/公共 liyujie]"
@@ -369,20 +380,32 @@
         "guido_grassel": {
             "info": "[状态管理 guido]"
         },
+        "sergeymalenkov": {
+            "info": "[default group member sergeymalenkov]"
+        },
         "rongShao-Z": {
             "info": "[Scroll zhangrongjie]"
         },
+        "shengu_lancer": {
+            "info": "[Scroll组件/ScrollBar组件 haoshuo]"
+        },
+        "tomkl123": {
+            "info": "[Grid组件/Refresh组件 wangyansong]"
+        },
+        "fuhanfeng": {
+            "info": "[WaterFlow组件 fuhanfeng]"
+        },
+        "wind_": {
+            "info": "[List组件 lijianing]"
+        },
         "yangcan18": {
-            "info": "[Refresh组件 yangcan]"
+            "info": "[List组件 yangcan]"
         },
         "yylong": {
             "info": "[List组件/Scroll组件 yeyinglong]"
         },
         "zcdqs": {
-            "info": "[Grid组件 lijunfeng]"
-        },
-        "fangyuhao": {
-            "info": "[WaterFlow组件 fangyuhao]"
+            "info": "[Grid组件/WaterFlow组件 lijunfeng]"
         },
         "zhangfanfan21": {
             "info": "[Scroll zhangfanfan]"

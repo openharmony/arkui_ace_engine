@@ -18,6 +18,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/extension_handler.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/grid_property.h"
@@ -605,7 +606,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson02, TestSize.Level1)
      */
     frameNode->paintProperty_ = nullptr;
     frameNode->propInspectorId_ = "123";
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
 
     InspectorConfig testConfig;
@@ -633,7 +634,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson03, TestSize.Level1)
     auto pattern = frameNode->pattern_;
     frameNode->pattern_ = nullptr;
     frameNode->paintProperty_ = nullptr;
-    frameNode->accessibilityProperty_->accessibilityText_ = "test";
+    frameNode->GetOrCreateAccessibilityProperty()->accessibilityText_ = "test";
     frameNode->layoutProperty_ = nullptr;
 
     InspectorConfig testConfig;

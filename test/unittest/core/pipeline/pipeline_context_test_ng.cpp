@@ -25,6 +25,7 @@
 #include "test/mock/core/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -2012,9 +2013,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     MockContainer::Current()->SetIsUIExtensionWindow(true);
     context_->ChangeDarkModeBrightness();
     auto rsUIDirector = context_->GetRSUIDirector();
-    context_->RSTransactionBegin(rsUIDirector);
-    context_->SetAppBgColor(Color::BLUE);
-    context_->RSTransactionCommit(rsUIDirector);
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
     context_->ChangeDarkModeBrightness();
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
@@ -2708,7 +2707,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
-    
+    context_->touchOptimizer_->rvsSignalEnable_ = true;
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     
@@ -2837,6 +2836,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
 }
 
 /**
+ * @tc.name: RSTransactionBeginAndCommit
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, RSTransactionBeginAndCommit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
+}
+
+/**
  * @tc.name: PipelineContextTestNg_TouchEvent_NoNeedTpFlush_Test
  * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
  * @tc.type: FUNC
@@ -2877,5 +2910,56 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     
     testing::Mock::VerifyAndClearExpectations(mockWindow);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
+}
+
+
+/**
+ * @tc.name: PipelineContextTestNg096
+ * @tc.desc: Test get Focused windowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: GetFocusWindowId
+     * @tc.expected: windowId equals 0
+     */
+    auto focusedWindowId = context_->GetFocusWindowId();
+    EXPECT_EQ(focusedWindowId, 0);
+}
+
 } // namespace NG
 } // namespace OHOS::Ace

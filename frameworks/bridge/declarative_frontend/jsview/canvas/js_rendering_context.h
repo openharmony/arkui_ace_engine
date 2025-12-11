@@ -39,6 +39,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSRenderingContext* controller);
+    static void JsGetContext2DFromDrawingContext(const JSCallbackInfo& args);
 
     void OnAttachToCanvas();
     void OnDetachFromCanvas();

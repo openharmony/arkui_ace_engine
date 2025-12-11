@@ -26,6 +26,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 
+namespace OHOS::Ace {
+    struct NavigateChangeInfo;
+}
+
 namespace OHOS::Ace::NG {
 class NavigationStack;
 struct NavigationInfo {
@@ -73,6 +77,8 @@ struct NavdestinationRecoveryInfo {
 };
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
+
+using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>;
 
 const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
 
@@ -300,6 +306,10 @@ public:
     }
     //-------force split end-------
 
+    int32_t RegisterNavigateChangeCallback(TransitionCallback callback);
+
+    void FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -351,8 +361,10 @@ private:
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     std::string homePageName_;
+    int navigateCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     bool ignoreOrientation_ = false;
+    std::unordered_map<int32_t, TransitionCallback> changeCallbacks_; // page or navigation change callback
 
     //-------force split begin-------
     int32_t currNestedDepth_ = 0;

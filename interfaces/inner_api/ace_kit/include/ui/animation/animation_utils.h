@@ -21,6 +21,7 @@
 
 #include "ui/animation/animation_option.h"
 #include "ui/base/macros.h"
+#include "ui/view/ui_context.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -34,7 +35,8 @@ public:
         const AnimationCallback& finishCallback = nullptr, const AnimationCallback& repeatCallback = nullptr);
     static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
         const AnimationCallback& callback, const AnimationCallback& finishCallback = nullptr,
-        const AnimationCallback& repeatCallback = nullptr, bool flushUITasks = true);
+        const AnimationCallback& repeatCallback = nullptr, bool flushUITasks = true,
+        const RefPtr<UIContext>& uiContext = nullptr);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     // need to reset the attribute of arkui node after Reverse in case of attribute inconsistent

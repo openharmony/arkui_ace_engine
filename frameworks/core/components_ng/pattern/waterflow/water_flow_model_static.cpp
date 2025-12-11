@@ -109,10 +109,15 @@ void WaterFlowModelStatic::SetCachedCount(FrameNode* frameNode, const std::optio
     }
 }
 
-void WaterFlowModelStatic::SetShowCached(FrameNode* frameNode, const std::optional<bool>& show)
+void WaterFlowModelStatic::SetCachedCount(
+    FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (show) {
+    if (count.has_value() && count.value() >= 0) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
+    }
+    if (show.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, frameNode);
@@ -173,10 +178,11 @@ void WaterFlowModelStatic::SetColumnsGap(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            WaterFlowLayoutProperty, ColumnsGap, PROPERTY_UPDATE_MEASURE, frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
         CHECK_NULL_VOID(layout);
-        layout->ResetColumnsGap();
-        layout->OnColumnsGapUpdate(Dimension());
+        layout->OnColumnsGapUpdate(Dimension(0.0));
     }
 }
 
@@ -186,10 +192,11 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            WaterFlowLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
         CHECK_NULL_VOID(layout);
-        layout->ResetRowsGap();
-        layout->OnRowsGapUpdate(Dimension());
+        layout->OnRowsGapUpdate(Dimension(0.0));
     }
 }
 

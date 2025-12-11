@@ -13,10 +13,12 @@
  * limitations under the License.
 */
 
-#pragma once
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SCROLL_RESULT_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SCROLL_RESULT_PEER_H
 
 #include "arkoala_api_generated.h"
 
 struct ScrollResultPeer {
-    int32_t offsetRemain = 0;
+    double offsetRemain = 0;
 };
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SCROLL_RESULT_PEER_H

@@ -18,7 +18,6 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -83,12 +82,13 @@ void ResetFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextClockTheme>();
+    auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
+    TextClockModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
     if (SystemProperties::ConfigChangePerform()) {
         TextClockModelNG::SetFontColorByUser(frameNode, false);
         TextClockModelNG::CreateWithTextColorResourceObj(frameNode, nullptr);
+        TextClockModelNG::ResetFontColor(frameNode);
     }
 }
 

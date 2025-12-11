@@ -104,6 +104,8 @@ void FormManagerDelegate::OnGetRectRelativeToWindow(AccessibilityParentRectInfo&
 
 void FormManagerDelegate::SetObscured(bool isObscured) {}
 
+void FormManagerDelegate::SetColorMode(int32_t colorMode) {}
+
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(
     uint32_t windowId, int32_t treeId, int64_t accessibilityId) {}
 void FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
@@ -157,6 +159,9 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
 {
     return false;
 }
+
+void FormManagerDelegate::SendNonTransparencyRatio(int32_t ratio)
+{}
 
 void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher) {}
 

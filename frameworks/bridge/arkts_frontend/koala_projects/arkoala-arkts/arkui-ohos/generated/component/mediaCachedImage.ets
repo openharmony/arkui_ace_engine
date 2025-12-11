@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Resource_serializer } from "./../framework/resource"
@@ -26,6 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
 import { AttributeModifier, extractors, hookMediaCachedImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { default as image } from "@ohos.multimedia.image"
 import { ResourceStr } from "./units"
@@ -50,6 +52,7 @@ export class ArkMediaCachedImagePeer extends ArkImagePeer {
         return _peer
     }
     setMediaCachedImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toByte())
@@ -111,17 +114,23 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
         if (this.checkPriority("setMediaCachedImageOptions")) {
             const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource)
             this.getPeer()?.setMediaCachedImageOptionsAttribute(src_casted)
+            this.applyOptionsFinish('MediaCachedImageAttribute');
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMediaCachedImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMediaCachedImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

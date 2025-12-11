@@ -446,6 +446,23 @@ void SecurityComponentModelNG::SetIconBorderRadius(const Dimension& value)
     }
 }
 
+void SecurityComponentModelNG::SetIconBorderRadius(FrameNode* frameNode,
+    const std::optional<BorderRadiusProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false)) {
+        if (value) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius,
+                value.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius, frameNode);
+        }
+    }
+}
+
 void SecurityComponentModelNG::SetIconBorderRadius(const std::optional<Dimension>& topLeft,
     const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
     const std::optional<Dimension>& bottomRight)
@@ -509,6 +526,45 @@ void SecurityComponentModelNG::SetIcon(const ImageSourceInfo& value)
     }
 }
 
+void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, const std::optional<ImageSourceInfo>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false) && value.has_value()) {
+        auto secCompTheme = GetTheme();
+        CHECK_NULL_VOID(secCompTheme);
+        bool isButtonVisible = false;
+        if (prop) {
+            isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+        }
+        RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+        if (iconNode == nullptr) {
+            iconNode = FrameNode::CreateFrameNode(
+                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            iconNode->SetInternal();
+            InternalResource::ResourceId iconId;
+            int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
+            if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
+                SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
+            }
+            CHECK_NULL_VOID(iconNode);
+            frameNode->AddChild(iconNode);
+
+            prop->UpdateIconStyle(iconStyle);
+        }
+
+        ImageSourceInfo imageSourceInfo = value.value();
+        if (isButtonVisible) {
+            imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+        } else {
+            imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetText(const std::string& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -537,6 +593,34 @@ void SecurityComponentModelNG::SetText(const std::string& value)
             prop->UpdateSecurityComponentDescription(static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD));
         }
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextContent, value);
+    }
+}
+
+void SecurityComponentModelNG::SetText(FrameNode* frameNode, const std::optional<std::string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false) && value.has_value()) {
+        RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+        if (textNode == nullptr) {
+            textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_VOID(textNode);
+            textNode->SetInternal();
+            std::string textStr = value.value();
+            bool isButtonVisible = false;
+            if (prop) {
+                isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+            }
+            SetDefaultTextStyle(textNode, textStr, isButtonVisible);
+            CHECK_NULL_VOID(textNode);
+            frameNode->AddChild(textNode);
+
+            prop->UpdateSecurityComponentDescription(static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD));
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextContent, value.value(), frameNode);
     }
 }
 
@@ -666,6 +750,17 @@ void SecurityComponentModelNG::SetStateEffect(const bool& value)
     }
 }
 
+void SecurityComponentModelNG::SetStateEffect(FrameNode* frameNode, const bool& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, StateEffect, value, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetTipPosition(const TipPosition& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -683,6 +778,16 @@ void SecurityComponentModelNG::SetTipPosition(const TipPosition& value)
 void SecurityComponentModelNG::SetUserCancelEvent(const bool& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value);
+}
+
+void SecurityComponentModelNG::SetUserCancelEvent(FrameNode* frameNode, const std::optional<bool>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
@@ -1095,10 +1200,5 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, frameNode);
     }
-}
-
-void SecurityComponentModelNG::SetFocusBox()
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true);
 }
 } // namespace OHOS::Ace::NG

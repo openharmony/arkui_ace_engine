@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,11 @@ void SetOnGridDidScroll(ArkUINodeHandle node, void* extraParam);
 void ResetOnGridDidScroll(ArkUINodeHandle node);
 void SetOnGridScrollBarUpdate(ArkUINodeHandle node, void* extraParam);
 void ResetOnGridScrollBarUpdate(ArkUINodeHandle node);
+void SetGridOnItemDragEnter(ArkUINodeHandle node, void* extraParam);
+void SetGridOnItemDragLeave(ArkUINodeHandle node, void* extraParam);
+void SetGridOnItemDragMove(ArkUINodeHandle node, void* extraParam);
+void SetGridOnItemDragStart(ArkUINodeHandle node, void* extraParam);
+void SetGridOnItemDrop(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

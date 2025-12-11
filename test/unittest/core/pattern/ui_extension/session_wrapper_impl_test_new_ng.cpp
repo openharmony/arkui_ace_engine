@@ -62,6 +62,8 @@
 #include "accessibility_event_info.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
+#include "interfaces/inner_api/ace/constants.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,6 +73,8 @@ namespace {
     const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
     constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
     const std::string EMBEDDED_UI("embeddedUI");
+    const char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
+        "ohos.ace.uiextension.allowCrossProcessNesting";
 } // namespace
 
 class SessionWrapperImplNewTestNg : public testing::Test {
@@ -1015,6 +1019,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg027, TestSize.L
     auto ret = sessionWrapper->NotifyOccupiedAreaChangeInfo(info, needWaitLayout);
     EXPECT_NE(patternUpgrade, nullptr);
     EXPECT_TRUE(ret);
+    needWaitLayout = false;
+    ret = sessionWrapper->NotifyOccupiedAreaChangeInfo(info, needWaitLayout);
+    EXPECT_NE(patternUpgrade, nullptr);
+    EXPECT_TRUE(ret);
+    EXPECT_NE(pipeline, nullptr);
+    EXPECT_NE(sessionWrapper->displayAreaWindow_, curWindow);
 }
 
 /**
@@ -1324,5 +1334,41 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg039, TestSize.L
     customId = static_cast<uint32_t>(UIContentBusinessCode::WINDOW_CODE_BEGIN);
     sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
     EXPECT_NE(patternUpgrade, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg040
+ * @tc.desc: Test the method UpdateWantPtr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    std::shared_ptr<AAFwk::Want> wantPtr = nullptr;
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceId());
+    EXPECT_NE(container, nullptr);
+    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
+    wantPtr = std::make_shared<AAFwk::Want>();
+    container->containerHandler_ = nullptr;
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+
+    container->SetUIContentType(UIContentType::UI_EXTENSION);
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+
+    auto uIExtensionContainerHandler = AceType::MakeRefPtr<UIExtensionContainerHandler>();
+    container->containerHandler_ = uIExtensionContainerHandler;
+    uIExtensionContainerHandler->allowCrossProcessNesting_ = true;
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+
+    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
+    auto platformContainerHandler = AceType::MakeRefPtr<PlatformContainerHandler>();
+    container->containerHandler_ = platformContainerHandler;
+    platformContainerHandler->allowCrossProcessNesting_ = true;
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 }
 } // namespace OHOS::Ace::NG

@@ -69,7 +69,7 @@ void ShowPreviousImpl(Ark_SwiperController peer)
     peerImpl->TriggerShowPrevious();
 }
 void ChangeIndexImpl(Ark_SwiperController peer,
-                     const Opt_Number* index,
+                     const Opt_Int32* index,
                      const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
@@ -96,7 +96,7 @@ void FinishAnimationImpl(Ark_SwiperController peer,
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
                       Ark_SwiperController peer,
-                      const Opt_Array_Number* indices,
+                      const Opt_Array_Int32* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);

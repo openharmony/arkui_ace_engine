@@ -45,6 +45,36 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string TEST_TEXT = "test text";
+
+
+class MockFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
+
+public:
+    MockFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+
+    ~MockFrameNode() override = default;
+
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool) override
+    {
+        return mockResponseRegionList_;
+    }
+
+public:
+    std::vector<RectF> mockResponseRegionList_;
+};
+
+RefPtr<MockFrameNode> CreateMockFrameNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+{
+    auto frameNode = AceType::MakeRefPtr<MockFrameNode>(tag, nodeId, pattern);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
 } // namespace
 
 class MockPattern : public Pattern {
@@ -52,6 +82,12 @@ public:
     MockPattern() = default;
     ~MockPattern() override = default;
 };
+
+class MockRenderContextTest : public NG::RenderContext {
+public:
+    MOCK_METHOD1(PaintAccessibilityFocus, void(bool isRectUpdate));
+};
+
 class AccessibilityPropertyTestThreeNg : public testing::Test {
 public:
     static void SetUpTestSuite()
@@ -382,7 +418,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, Te
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     node->renderContext_ = mockRenderContext;
     RectF rect1(100, 100, 100, 100);
-    mockRenderContext->SetPaintRectWithTransform(rect1);
+    mockRenderContext->UpdatePaintRect(rect1);
 
     PointF selfPoint = parentPoint;
     mockRenderContext->GetPointWithRevert(selfPoint);
@@ -510,5 +546,155 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree020, Te
     std::string accessibilityLevel = "auto";
     accessibilityProperty.SetAccessibilityLevel(accessibilityLevel);
     EXPECT_EQ(accessibilityProperty.accessibilityLevel_.value_or(""), accessibilityLevel);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree021
+ * @tc.desc: HoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree021, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    NG::PointF parentPoint(150, 160);
+    auto node = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>(), false);
+    AccessibilityHoverTestPath path;
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    bool ancestorGroupFlag = false;
+    node->SetAccessibilityNodeVirtual();
+    
+    auto eventHub = node->GetEventHub<EventHub>();
+    eventHub->enabled_ = false;
+
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect(100, 100, 100, 100);
+    mockRenderContext->UpdatePaintRect(rect);
+
+    PointF selfPoint = parentPoint;
+    mockRenderContext->GetPointWithRevert(selfPoint);
+
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    property->accessibilityLevel_ = AccessibilityProperty::Level::YES_STR;
+
+    auto result = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
+    EXPECT_TRUE(result);
+}
+/**
+ * @tc.name: AccessibilityPropertyTestThree022
+ * @tc.desc: IsResponseRegionOverRectWithPrecision
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree022, TestSize.Level1)
+{
+    auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(node, nullptr);
+
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect(100, 100, 100, 100);
+    mockRenderContext->UpdatePaintRect(rect);
+
+    RectF responseRect(99, 99, 100, 101);
+    node->mockResponseRegionList_.emplace_back(responseRect);
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    // precision < 1.0001f, Match ResponseRegion
+    auto result = property->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_TRUE(result);
+
+    RectF responseRect1(99, 99, 101, 100);
+    node->mockResponseRegionList_.clear();
+    node->mockResponseRegionList_.emplace_back(responseRect1);
+    // precision < 1.0001f, Match ResponseRegion
+    result = property->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_TRUE(result);
+
+    RectF responseRect2(99, 99, 101, 99);
+    node->mockResponseRegionList_.clear();
+    node->mockResponseRegionList_.emplace_back(responseRect2);
+    // precision > 1.0001f, Match ResponseRegion
+    result = property->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_FALSE(result);
+
+    RectF responseRect3(99, 99, 99, 101);
+    node->mockResponseRegionList_.clear();
+    node->mockResponseRegionList_.emplace_back(responseRect3);
+    // precision > 1.0001f, Match ResponseRegion
+    result = property->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree023
+ * @tc.desc: Match ResponseRegion but not IsAccessibilityCompInResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree023, TestSize.Level1)
+{
+    auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(node, nullptr);
+    
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect(100, 100, 100, 100);
+    mockRenderContext->UpdatePaintRect(rect);
+    mockRenderContext->SetPaintRectWithTransform(rect);
+    RectF responseRect(99, 99, 100, 101);
+    node->mockResponseRegionList_.emplace_back(responseRect);
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    // precision < 1.0001f, Match ResponseRegion but not IsAccessibilityCompInResponseRegion
+    auto result = property->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_TRUE(result);
+    NG::RectT<int32_t> resultRect;
+    resultRect = property->GetAccessibilityResponseRegionRect(false);
+    EXPECT_EQ(resultRect.GetX(), 0);
+    EXPECT_EQ(resultRect.GetY(), 0);
+    EXPECT_EQ(resultRect.Width(), rect.Width());
+    EXPECT_EQ(resultRect.Height(), rect.Height());
+    // virtual node Match ResponseRegion but not IsAccessibilityCompInResponseRegion
+    result = property->IsMatchAccessibilityResponseRegion(true);
+    EXPECT_TRUE(result);
+    resultRect = property->GetAccessibilityResponseRegionRect(true);
+    EXPECT_EQ(resultRect.GetX(), rect.GetX());
+    EXPECT_EQ(resultRect.GetY(), rect.GetX());
+    EXPECT_EQ(resultRect.Width(), rect.Width());
+    EXPECT_EQ(resultRect.Height(), rect.Height());
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree023
+ * @tc.desc: UpdatePaintAccessibilityFocus in FlushRender
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree024, TestSize.Level1)
+{
+    auto screenEnableBackup = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+
+    auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(node, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContextTest>();
+    node->renderContext_ = mockRenderContext;
+
+    node->SetActive();
+    node->isLayoutDirtyMarked_ = true;
+    node->CreateLayoutTask();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(mockRenderContext, nullptr, nullptr);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto renderContextWrapper = paintWrapper->renderContext_.Upgrade();
+    ASSERT_NE(renderContextWrapper, nullptr);
+
+    paintWrapper->FlushRender();
+
+    mockRenderContext->UpdateAccessibilityFocus(true);
+    EXPECT_CALL(*mockRenderContext, PaintAccessibilityFocus(_))
+        .Times(1);
+    paintWrapper->FlushRender();
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(screenEnableBackup);
 }
 } // namespace OHOS::Ace::NG

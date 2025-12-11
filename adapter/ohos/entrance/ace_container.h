@@ -316,10 +316,10 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
-    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const;
-    RefPtr<PageViewportConfig> GetTargetViewportConfig(
-        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const;
+    bool GetPageViewportConfig(
+        const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+        const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig) const;
+    void PrintCachedCurrentViewportConfig() const;
 
     uint64_t GetDisplayId() const override
     {
@@ -358,6 +358,9 @@ public:
     bool DumpExistDarkRes(const std::vector<std::string>& params);
 
     bool OnDumpInfo(const std::vector<std::string>& params);
+
+    void DumpSimplifyTreeWithParamConfig(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) override;
 
     void TriggerGarbageCollection() override;
 
@@ -728,7 +731,8 @@ public:
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
@@ -1003,6 +1007,9 @@ private:
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
+
+    void LoadCompleteManagerStartCollect(const std::string& url) override;
+    void LoadCompleteManagerStopCollect() override;
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

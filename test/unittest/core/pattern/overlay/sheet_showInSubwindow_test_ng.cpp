@@ -36,6 +36,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
@@ -63,7 +64,7 @@ public:
 
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>(int32_t id)> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetApiVersion(int32_t apiTargetVersion);
@@ -135,7 +136,7 @@ void SheetShowInSubwindowTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
 
 void SheetShowInSubwindowTestNg::CreateSheetBuilder(float builderHeight, float titleHeight)
 {
-    auto builderFunc = [builderHeight]() -> RefPtr<UINode> {
+    auto builderFunc = [builderHeight](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1436,6 +1437,34 @@ HWTEST_F(SheetShowInSubwindowTestNg, UpdateSheetObject, TestSize.Level1)
     ASSERT_NE(object6, nullptr);
     EXPECT_TRUE(object6->GetSheetType() == SheetType::SHEET_POPUP);
     EXPECT_FLOAT_EQ(object6->sheetWidth_, 20.0f);
+}
+
+/**
+ * @tc.name: ResetPopupScrollUserDefinedIdealSize
+ * @tc.desc: Test SheetPresentationPattern::ResetPopupScrollUserDefinedIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, ResetPopupScrollUserDefinedIdealSize, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+
+    SheetStyle style;
+    style.sheetType = SheetType::SHEET_POPUP;
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollProps, nullptr);
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1000)));
+    sheetPattern->ResetPopupScrollUserDefinedIdealSize(SheetType::SHEET_POPUP);
+    EXPECT_EQ(scrollProps->GetCalcLayoutConstraint()->selfIdealSize->Height(), std::nullopt);
 }
 
 /**

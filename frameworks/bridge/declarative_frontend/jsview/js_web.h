@@ -107,6 +107,7 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnWindowNewExt(const JSCallbackInfo& args);
     static void OnActivateContent(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
@@ -165,8 +166,12 @@ public:
     static void SetCallbackFromController(const JSRef<JSObject> controller);
     static void SetForceEnableZoom(const JSCallbackInfo& args);
     static void JSBackToTop(const JSCallbackInfo& info);
+    static void OnCameraCaptureStateChanged(const JSCallbackInfo& args);
+    static void OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
+    static JSRef<JSVal> CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo);
+    static bool HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
     static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
     static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
@@ -223,10 +228,14 @@ public:
     static void RotateRenderEffect(int32_t webRotateEffect);
     static void OnDetectedBlankScreen(const JSCallbackInfo& args);
     static void BlankScreenDetectionConfig(const JSCallbackInfo& args);
+    static void OnFirstScreenPaint(const JSCallbackInfo& args);
+    static void OnTextSelectionChange(const JSCallbackInfo& args);
+    static void EnableImageAnalyzer(const JSCallbackInfo& args);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
     static void OnVerifyPinRequest(const JSCallbackInfo& args);
+    static void EnableAutoFill(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
@@ -236,7 +245,7 @@ protected:
 
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
-        ScriptItemsByOrder& scriptItemsByOrder);
+        ScriptRegexItems& scriptRegexItems, ScriptItemsByOrder& scriptItemsByOrder);
     static void GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params);
     static void GetBlankScreenDetectionMethodVectorFromJSArray(
         const JSRef<JSArray>& jsArray, std::vector<int32_t>& params);

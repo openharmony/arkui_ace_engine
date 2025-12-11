@@ -30,6 +30,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
@@ -611,9 +612,9 @@ HWTEST_F(ShapePatternTestNg, SetStroke001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetStrokeValue(), Color::TRANSPARENT);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetStroke(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStroke());
@@ -651,9 +652,9 @@ HWTEST_F(ShapePatternTestNg, SetFill001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetFill(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFill());
@@ -691,9 +692,9 @@ HWTEST_F(ShapePatternTestNg, SetForegroundColor001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetForegroundColor(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFill());
@@ -731,9 +732,9 @@ HWTEST_F(ShapePatternTestNg, SetStrokeOpacity001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeOpacityValue()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, OPACITY);
+    AddMockResourceData(ID_OPACITY, OPACITY);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetStrokeOpacity(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeOpacity());
@@ -771,9 +772,9 @@ HWTEST_F(ShapePatternTestNg, SetFillOpacity001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetFillOpacityValue()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, OPACITY);
+    AddMockResourceData(ID_OPACITY, OPACITY);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetFillOpacity(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFillOpacity());
@@ -811,9 +812,9 @@ HWTEST_F(ShapePatternTestNg, SetStrokeWidth001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToVp()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Dimension(STROKE_WIDTH));
+    AddMockResourceData(ID_STROKE_WIDTH, Dimension(STROKE_WIDTH));
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_STROKE_WIDTH, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetStrokeWidth(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeWidth());
@@ -850,9 +851,9 @@ HWTEST_F(ShapePatternTestNg, SetWidth001, TestSize.Level1)
     EXPECT_TRUE(layoutProperty->GetCalcLayoutConstraint() == nullptr);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Dimension(WIDTH));
+    AddMockResourceData(ID_WIDTH, Dimension(WIDTH));
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_WIDTH, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetWidth(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     auto mesureLayout = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
@@ -890,9 +891,9 @@ HWTEST_F(ShapePatternTestNg, SetHeight001, TestSize.Level1)
     EXPECT_TRUE(layoutProperty->GetCalcLayoutConstraint() == nullptr);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Dimension(HEIGHT));
+    AddMockResourceData(ID_HEIGHT, Dimension(HEIGHT));
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_HEIGHT, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeAbstractModelNG.SetHeight(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     auto mesureLayout = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;

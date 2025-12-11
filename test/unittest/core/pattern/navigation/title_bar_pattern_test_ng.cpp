@@ -22,6 +22,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"

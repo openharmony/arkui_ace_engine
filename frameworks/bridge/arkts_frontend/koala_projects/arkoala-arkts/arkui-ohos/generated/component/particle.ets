@@ -30,8 +30,8 @@ import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer } from "./../framework/resource"
 export interface VelocityOptions {
-    speed: [ number, number ];
-    angle: [ number, number ];
+    speed: [ double, double ];
+    angle: [ double, double ];
 }
 export interface PointParticleParameters {
     radius: VP;
@@ -45,20 +45,20 @@ export type ParticleConfigs = PointParticleParameters | ImageParticleParameters;
 export interface EmitterParticleOptions {
     type: ParticleType;
     config: ParticleConfigs;
-    count: number;
-    lifetime?: number;
-    lifetimeRange?: number;
+    count: int32;
+    lifetime?: int32;
+    lifetimeRange?: int32;
 }
-export type ParticlePropertyUpdaterConfigs = [ number, number ] | Array<ParticlePropertyAnimation<number>> | undefined;
+export type ParticlePropertyUpdaterConfigs = [ double, double ] | Array<ParticlePropertyAnimation<double>> | undefined;
 export interface ParticleUpdaterOptions {
     type: ParticleUpdater;
     config: ParticlePropertyUpdaterConfigs;
 }
 export interface ParticleColorOptions {
-    r: [ number, number ];
-    g: [ number, number ];
-    b: [ number, number ];
-    a: [ number, number ];
+    r: [ int32, int32 ];
+    g: [ int32, int32 ];
+    b: [ int32, int32 ];
+    a: [ int32, int32 ];
 }
 export interface ParticleColorUpdaterOptions {
     type: ParticleUpdater;
@@ -68,8 +68,8 @@ export type ParticleColorPropertyUpdaterConfigs = ParticleColorOptions | Array<P
 export interface ParticlePropertyAnimation<T = void> {
     from: T;
     to: T;
-    startMillis: number;
-    endMillis: number;
+    startMillis: int32;
+    endMillis: int32;
     curve?: curves.Curve | curves.ICurve;
 }
 export enum ParticleType {
@@ -100,31 +100,31 @@ export interface ParticleAnnulusRegion {
     center?: Vector2T<LengthMetrics>;
     outerRadius: LengthMetrics;
     innerRadius: LengthMetrics;
-    startAngle?: number;
-    endAngle?: number;
+    startAngle?: double;
+    endAngle?: double;
 }
 export class VelocityOptions_serializer {
     public static write(buffer: SerializerBase, value: VelocityOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSpeed  = value.speed
         const valueHolderForSpeed_0  = valueHolderForSpeed[0]
-        valueSerializer.writeNumber(valueHolderForSpeed_0)
+        valueSerializer.writeFloat64(valueHolderForSpeed_0)
         const valueHolderForSpeed_1  = valueHolderForSpeed[1]
-        valueSerializer.writeNumber(valueHolderForSpeed_1)
+        valueSerializer.writeFloat64(valueHolderForSpeed_1)
         const valueHolderForAngle  = value.angle
         const valueHolderForAngle_0  = valueHolderForAngle[0]
-        valueSerializer.writeNumber(valueHolderForAngle_0)
+        valueSerializer.writeFloat64(valueHolderForAngle_0)
         const valueHolderForAngle_1  = valueHolderForAngle[1]
-        valueSerializer.writeNumber(valueHolderForAngle_1)
+        valueSerializer.writeFloat64(valueHolderForAngle_1)
     }
     public static read(buffer: DeserializerBase): VelocityOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const speedTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const speedTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const speedTmpResult : [ number, number ] = ([speedTmpBufValue0, speedTmpBufValue1] as [ number, number ])
-        const angleTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const angleTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const angleTmpResult : [ number, number ] = ([angleTmpBufValue0, angleTmpBufValue1] as [ number, number ])
+        const speedTmpBufValue0 : double = valueDeserializer.readFloat64()
+        const speedTmpBufValue1 : double = valueDeserializer.readFloat64()
+        const speedTmpResult : [ double, double ] = ([speedTmpBufValue0, speedTmpBufValue1] as [ double, double ])
+        const angleTmpBufValue0 : double = valueDeserializer.readFloat64()
+        const angleTmpBufValue1 : double = valueDeserializer.readFloat64()
+        const angleTmpResult : [ double, double ] = ([angleTmpBufValue0, angleTmpBufValue1] as [ double, double ])
         let value : VelocityOptions = ({speed: speedTmpResult, angle: angleTmpResult} as VelocityOptions)
         return value
     }
@@ -134,39 +134,39 @@ export class ParticleColorOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForR  = value.r
         const valueHolderForR_0  = valueHolderForR[0]
-        valueSerializer.writeNumber(valueHolderForR_0)
+        valueSerializer.writeInt32(valueHolderForR_0)
         const valueHolderForR_1  = valueHolderForR[1]
-        valueSerializer.writeNumber(valueHolderForR_1)
+        valueSerializer.writeInt32(valueHolderForR_1)
         const valueHolderForG  = value.g
         const valueHolderForG_0  = valueHolderForG[0]
-        valueSerializer.writeNumber(valueHolderForG_0)
+        valueSerializer.writeInt32(valueHolderForG_0)
         const valueHolderForG_1  = valueHolderForG[1]
-        valueSerializer.writeNumber(valueHolderForG_1)
+        valueSerializer.writeInt32(valueHolderForG_1)
         const valueHolderForB  = value.b
         const valueHolderForB_0  = valueHolderForB[0]
-        valueSerializer.writeNumber(valueHolderForB_0)
+        valueSerializer.writeInt32(valueHolderForB_0)
         const valueHolderForB_1  = valueHolderForB[1]
-        valueSerializer.writeNumber(valueHolderForB_1)
+        valueSerializer.writeInt32(valueHolderForB_1)
         const valueHolderForA  = value.a
         const valueHolderForA_0  = valueHolderForA[0]
-        valueSerializer.writeNumber(valueHolderForA_0)
+        valueSerializer.writeInt32(valueHolderForA_0)
         const valueHolderForA_1  = valueHolderForA[1]
-        valueSerializer.writeNumber(valueHolderForA_1)
+        valueSerializer.writeInt32(valueHolderForA_1)
     }
     public static read(buffer: DeserializerBase): ParticleColorOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const rTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const rTmpResult : [ number, number ] = ([rTmpBufValue0, rTmpBufValue1] as [ number, number ])
-        const gTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const gTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const gTmpResult : [ number, number ] = ([gTmpBufValue0, gTmpBufValue1] as [ number, number ])
-        const bTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const bTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const bTmpResult : [ number, number ] = ([bTmpBufValue0, bTmpBufValue1] as [ number, number ])
-        const aTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const aTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const aTmpResult : [ number, number ] = ([aTmpBufValue0, aTmpBufValue1] as [ number, number ])
+        const rTmpBufValue0 : int32 = valueDeserializer.readInt32()
+        const rTmpBufValue1 : int32 = valueDeserializer.readInt32()
+        const rTmpResult : [ int32, int32 ] = ([rTmpBufValue0, rTmpBufValue1] as [ int32, int32 ])
+        const gTmpBufValue0 : int32 = valueDeserializer.readInt32()
+        const gTmpBufValue1 : int32 = valueDeserializer.readInt32()
+        const gTmpResult : [ int32, int32 ] = ([gTmpBufValue0, gTmpBufValue1] as [ int32, int32 ])
+        const bTmpBufValue0 : int32 = valueDeserializer.readInt32()
+        const bTmpBufValue1 : int32 = valueDeserializer.readInt32()
+        const bTmpResult : [ int32, int32 ] = ([bTmpBufValue0, bTmpBufValue1] as [ int32, int32 ])
+        const aTmpBufValue0 : int32 = valueDeserializer.readInt32()
+        const aTmpBufValue1 : int32 = valueDeserializer.readInt32()
+        const aTmpResult : [ int32, int32 ] = ([aTmpBufValue0, aTmpBufValue1] as [ int32, int32 ])
         let value : ParticleColorOptions = ({r: rTmpResult, g: gTmpResult, b: bTmpResult, a: aTmpResult} as ParticleColorOptions)
         return value
     }
@@ -179,24 +179,24 @@ export class PointParticleParameters_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRadiusForIdx0  = valueHolderForRadius as string
             valueSerializer.writeString(valueHolderForRadiusForIdx0)
-        } else if (valueHolderForRadius instanceof number) {
+        } else if (valueHolderForRadius instanceof double) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRadiusForIdx1  = valueHolderForRadius as number
-            valueSerializer.writeNumber(valueHolderForRadiusForIdx1)
+            const valueHolderForRadiusForIdx1  = valueHolderForRadius as double
+            valueSerializer.writeFloat64(valueHolderForRadiusForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): PointParticleParameters {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : string | number | undefined
+        let radiusTmpBuf : string | double | undefined
         if (radiusTmpBufUnionSelector == (0).toChar()) {
             radiusTmpBuf = (valueDeserializer.readString() as string)
         } else if (radiusTmpBufUnionSelector == (1).toChar()) {
-            radiusTmpBuf = (valueDeserializer.readNumber() as number)
+            radiusTmpBuf = valueDeserializer.readFloat64()
         } else {
             throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
         }
-        const radiusTmpResult : VP = (radiusTmpBuf as string | number)
+        const radiusTmpResult : VP = (radiusTmpBuf as string | double)
         let value : PointParticleParameters = ({radius: radiusTmpResult} as PointParticleParameters)
         return value
     }
@@ -315,12 +315,12 @@ export class EmitterParticleOptions_serializer {
             ImageParticleParameters_serializer.write(valueSerializer, valueHolderForConfigForIdx1)
         }
         const valueHolderForCount  = value.count
-        valueSerializer.writeNumber(valueHolderForCount)
+        valueSerializer.writeInt32(valueHolderForCount)
         const valueHolderForLifetime  = value.lifetime
         if (valueHolderForLifetime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLifetimeTmpValue  = valueHolderForLifetime!
-            valueSerializer.writeNumber(valueHolderForLifetimeTmpValue)
+            valueSerializer.writeInt32(valueHolderForLifetimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -328,7 +328,7 @@ export class EmitterParticleOptions_serializer {
         if (valueHolderForLifetimeRange !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLifetimeRangeTmpValue  = valueHolderForLifetimeRange!
-            valueSerializer.writeNumber(valueHolderForLifetimeRangeTmpValue)
+            valueSerializer.writeInt32(valueHolderForLifetimeRangeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -346,19 +346,19 @@ export class EmitterParticleOptions_serializer {
             throw new Error("One of the branches for configTmpBuf has to be chosen through deserialisation.")
         }
         const configTmpResult : ParticleConfigs = (configTmpBuf as PointParticleParameters | ImageParticleParameters)
-        const countTmpResult : number = (valueDeserializer.readNumber() as number)
+        const countTmpResult : int32 = valueDeserializer.readInt32()
         const lifetimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lifetimeTmpBuf : number | undefined = undefined
+        let lifetimeTmpBuf : int32 | undefined = undefined
         if ((lifetimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lifetimeTmpBuf = (valueDeserializer.readNumber() as number)
+            lifetimeTmpBuf = valueDeserializer.readInt32()
         }
-        const lifetimeTmpResult : number | undefined = lifetimeTmpBuf
+        const lifetimeTmpResult : int32 | undefined = lifetimeTmpBuf
         const lifetimeRangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lifetimeRangeTmpBuf : number | undefined = undefined
+        let lifetimeRangeTmpBuf : int32 | undefined = undefined
         if ((lifetimeRangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lifetimeRangeTmpBuf = (valueDeserializer.readNumber() as number)
+            lifetimeRangeTmpBuf = valueDeserializer.readInt32()
         }
-        const lifetimeRangeTmpResult : number | undefined = lifetimeRangeTmpBuf
+        const lifetimeRangeTmpResult : int32 | undefined = lifetimeRangeTmpBuf
         let value : EmitterParticleOptions = ({type: typeTmpResult, config: configTmpResult, count: countTmpResult, lifetime: lifetimeTmpResult, lifetimeRange: lifetimeRangeTmpResult} as EmitterParticleOptions)
         return value
     }

@@ -23,28 +23,51 @@
 
 int g_defaultValue = 0;
 
+namespace {
+constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
+constexpr size_t XS = 0;
+constexpr size_t SM = 1;
+constexpr size_t MD = 2;
+constexpr size_t LG = 3;
+constexpr size_t XL = 4;
+constexpr size_t XXL = 5;
+}
 namespace OHOS::Ace::NG {
 namespace Converter {
+    void InheritGridContainerSize(V2::GridContainerSize& gridContainerSize,
+        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], int32_t defaultVal)
+    {
+        if (!containerSizeArray[0].has_value() || containerSizeArray[0].value() < 0) {
+            containerSizeArray[0] = defaultVal;
+        }
+        for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
+            if (!containerSizeArray[i].has_value() || containerSizeArray[i].value() < 0) {
+                containerSizeArray[i] = containerSizeArray[i - 1].value();
+            }
+        }
+        gridContainerSize.xs = containerSizeArray[XS].value();
+        gridContainerSize.sm = containerSizeArray[SM].value();
+        gridContainerSize.md = containerSizeArray[MD].value();
+        gridContainerSize.lg = containerSizeArray[LG].value();
+        gridContainerSize.xl = containerSizeArray[XL].value();
+        gridContainerSize.xxl = containerSizeArray[XXL].value();
+    }
     template<>
     V2::GridContainerSize Convert(const Ark_GridColColumnOption& value)
     {
         V2::GridContainerSize toValue;
-        auto optVal = Converter::OptConvert<int32_t>(value.xs);
-        toValue.xs = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.sm);
-        toValue.sm = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.md);
-        toValue.md = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.lg);
-        toValue.lg = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.xl);
-        toValue.xl = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.xxl);
-        toValue.xxl = optVal.has_value() ? optVal.value() : g_defaultValue;
+        std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
+        containerSizeArray[XS] = Converter::OptConvert<int32_t>(value.xs);
+        containerSizeArray[SM] = Converter::OptConvert<int32_t>(value.sm);
+        containerSizeArray[MD] = Converter::OptConvert<int32_t>(value.md);
+        containerSizeArray[LG] = Converter::OptConvert<int32_t>(value.lg);
+        containerSizeArray[XL] = Converter::OptConvert<int32_t>(value.xl);
+        containerSizeArray[XXL] = Converter::OptConvert<int32_t>(value.xxl);
+        InheritGridContainerSize(toValue, containerSizeArray, g_defaultValue);
         return toValue;
     }
     template<>
-    V2::GridContainerSize Convert(const Ark_Number& value)
+    V2::GridContainerSize Convert(const Ark_Int32& value)
     {
         V2::GridContainerSize toValue;
         int32_t iValue = Converter::Convert<int32_t>(value);
@@ -99,7 +122,7 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
 void SetSpanImpl(Ark_NativePointer node,
-                 const Opt_Union_Number_GridColColumnOption* value)
+                 const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +133,7 @@ void SetSpanImpl(Ark_NativePointer node,
     GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
 }
 void SetGridColOffsetImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_GridColColumnOption* value)
+                          const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,7 +143,7 @@ void SetGridColOffsetImpl(Ark_NativePointer node,
     GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
 }
 void SetOrderImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_GridColColumnOption* value)
+                  const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

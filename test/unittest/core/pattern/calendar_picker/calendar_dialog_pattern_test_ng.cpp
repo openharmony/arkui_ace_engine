@@ -40,6 +40,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"

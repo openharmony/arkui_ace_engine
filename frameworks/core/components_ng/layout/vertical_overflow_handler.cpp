@@ -204,15 +204,20 @@ void VerticalOverflowHandler::UnRegisterScrollableEvent()
 
 bool VerticalOverflowHandler::IsVerticalOverflow() const
 {
-    return IsVerticalLayout() && (GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top()) ||
-        LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom()));
+    return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top()) ||
+        LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom());
+}
+bool VerticalOverflowHandler::IsHorizontalOverflow() const
+{
+    return GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left()) ||
+        LessNotEqual(contentRect_.Right(), totalChildFrameRect_.Right());
 }
 
 void VerticalOverflowHandler::HandleContentOverflow()
 {
     hasParentAdjust_ = false;
     AdjustTotalChildFrameRect();
-    auto overflow = IsVerticalOverflow();
+    auto overflow = IsVerticalOverflow() && IsVerticalLayout();
     if (overflow && !overflowDisabled_) {
         InitOffsetAfterLayout();
         RegisterScrollableEvent();

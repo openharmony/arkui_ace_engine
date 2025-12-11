@@ -37,7 +37,7 @@ public:
     void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true) override;
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
         std::vector<RectF>* regionList = nullptr) override;
-    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool) override;
 
 private:
     RectF ConvertHotRect(const RectF& rect, int32_t sourceType);

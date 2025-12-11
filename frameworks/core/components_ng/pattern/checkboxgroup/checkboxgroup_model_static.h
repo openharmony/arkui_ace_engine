@@ -25,11 +25,13 @@ public:
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetCheckMarkColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void ResetCheckMarkColor(FrameNode* frameNode);
     static void SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
     static void SetCheckboxGroupStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxGroupStyle);
     static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
     static void SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange);
+    static void TriggerChange(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_STATIC_H

@@ -17,20 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavigationMenuItem, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
+import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuItem, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { Length, Dimension, ResourceStr } from "./component/units"
 import { Resource } from "global.resource"
+import { PageMapBuilder, CustomBuilder } from "./component/builder"
+import { default as window } from "@ohos.window"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CustomBuilder, PageMapBuilder } from "./component/builder"
-import { default as window } from "@ohos.window"
 export class NavigationModifier extends CommonMethodModifier implements NavigationAttribute,AttributeModifier<NavigationAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -100,6 +102,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
     _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkNavigationPeer;
         if (this._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -448,7 +451,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._backButtonIcon_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined));
+                    peer.setBackButtonIconAttribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_0_1value as ResourceStr | undefined | undefined));
                     this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -502,7 +505,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._menus_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined));
+                    peer.setMenusAttribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_0_1value as NavigationMenuOptions | undefined | undefined));
                     this._menus_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -573,6 +576,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     }
     mergeModifier(modifier: NavigationModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._navBarWidth_0_flag) {

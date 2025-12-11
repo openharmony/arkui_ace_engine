@@ -17,11 +17,12 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookTextClockContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTextClockPeer, TextClockConfiguration, TextClockAttribute } from "./component/textClock"
-import { int32 } from "@koalaui/common"
+import { int32, int64 } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
 import { ResourceStr, ResourceColor, Length } from "./component/units"
 import { Resource } from "global.resource"
@@ -29,6 +30,7 @@ import { Color, FontStyle, FontWeight } from "./component/enums"
 import { default as intl } from "@ohos.intl"
 export class TextClockModifier extends CommonMethodModifier implements TextClockAttribute,AttributeModifier<TextClockAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,7 +43,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _format_0_0value?: ResourceStr | undefined
     _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDateChange_0_0value?: ((value: number) => void) | undefined
+    _onDateChange_0_0value?: ((value: int64) => void) | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -49,7 +51,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -61,6 +63,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<TextClockConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextClockPeer;
         if (this._format_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -85,7 +88,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             switch (this._onDateChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as ((value: number) => void) | undefined));
+                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as ((value: int64) => void) | undefined));
                     this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -95,7 +98,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                 }
                 default: {
                     this._onDateChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDateChangeAttribute((undefined as ((value: number) => void) | undefined));
+                    peer.setOnDateChangeAttribute((undefined as ((value: int64) => void) | undefined));
                 }
             }
         }
@@ -157,7 +160,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -167,7 +170,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -264,6 +267,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     }
     mergeModifier(modifier: TextClockModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._format_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._format_0_flag) {
@@ -286,7 +290,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                     break;
                 }
                 default: {
-                    this.onDateChange((undefined as ((value: number) => void) | undefined));
+                    this.onDateChange((undefined as ((value: int64) => void) | undefined));
                 }
             }
         }
@@ -338,7 +342,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -419,7 +423,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         }
         return this
     }
-    onDateChange(value: ((value: number) => void) | undefined): this {
+    onDateChange(value: ((value: int64) => void) | undefined): this {
         if (((this._onDateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -463,7 +467,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

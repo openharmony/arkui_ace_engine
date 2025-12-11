@@ -16,15 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, MenuType } from "./textCommon"
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, MenuType } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { LengthMetrics_serializer } from "./../Graphics"
-import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Font_serializer, ResourceColor, Length, Font, VoidCallback } from "./units"
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from "./richEditor"
 import { ComponentBase } from "./../ComponentBase"
@@ -33,6 +34,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { AttributeModifier, hookTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -72,8 +74,15 @@ export class TextController implements MaterializedBase {
         this.setStyledString_serialize(value_casted)
         return
     }
-    public getLayoutManager(): LayoutManager {
+    public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
+    }
+    public setTextSelection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32 | undefined)
+        const selectionEnd_casted = selectionEnd as (int32 | undefined)
+        const options_casted = options as (SelectionOptions | undefined)
+        this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
+        return
     }
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextController_closeSelectionMenu(this.peer!.ptr)
@@ -81,10 +90,42 @@ export class TextController implements MaterializedBase {
     setStyledString_serialize(value: StyledString): void {
         ArkUIGeneratedNativeModule._TextController_setStyledString(this.peer!.ptr, toPeerPtr(value))
     }
-    getLayoutManager_serialize(): LayoutManager {
+    getLayoutManager_serialize(): LayoutManager | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextController_getLayoutManager(this.peer!.ptr)
-        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LayoutManager | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
+        }
+        const returnResult : LayoutManager | undefined = buffer
+        return returnResult
+    }
+    setTextSelection_serialize(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (selectionStart !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionStartTmpValue  = selectionStart!
+            thisSerializer.writeInt32(selectionStartTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (selectionEnd !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionEndTmpValue  = selectionEnd!
+            thisSerializer.writeInt32(selectionEndTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SelectionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextController_setTextSelection(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class ArkTextPeer extends ArkCommonMethodPeer {
@@ -100,10 +141,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
-        // instructive change begin
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        // instructive change end
-
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -139,10 +177,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -507,10 +545,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -567,10 +605,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -595,10 +633,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -758,6 +796,42 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -862,7 +936,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TextOverflowOptions {
-    overflow: TextOverflow;
+    overflow: TextOverflow | undefined;
 }
 export interface TextAttribute extends CommonMethod {
     setTextOptions(content?: string | Resource, value?: TextOptions): this {
@@ -983,6 +1057,15 @@ export interface TextAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
@@ -1039,6 +1122,9 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     editMenuOptions_value?: EditMenuOptions | undefined
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined
     setTextOptions(content?: string | Resource, value?: TextOptions): this {
         return this
@@ -1160,6 +1246,15 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        return this
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
@@ -1197,17 +1292,23 @@ export enum MarqueeStartPolicy {
     DEFAULT = 0,
     ON_FOCUS = 1
 }
+export enum MarqueeUpdatePolicy {
+    DEFAULT = 0,
+    PRESERVE_POSITION = 1
+}
 export interface TextOptions {
     controller: TextController;
 }
 export interface TextMarqueeOptions {
     start: boolean;
     step?: double;
+    spacing?: LengthMetrics;
     loop?: int32;
     fromStart?: boolean;
     delay?: int32;
     fadeout?: boolean;
     marqueeStartPolicy?: MarqueeStartPolicy;
+    marqueeUpdatePolicy?: MarqueeUpdatePolicy;
 }
 
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
@@ -1222,6 +1323,7 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
             const content_casted = content as (string | Resource | undefined)
             const value_casted = value as (TextOptions | undefined)
             this.getPeer()?.setTextOptionsAttribute(content_casted, value_casted)
+            this.applyOptionsFinish('TextAttribute');
             return this
         }
         return this
@@ -1538,6 +1640,30 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("font")) {
             const fontValue_casted = fontValue as (Font | undefined)
@@ -1577,12 +1703,17 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -1632,11 +1763,22 @@ export class TextOverflowOptions_serializer {
     public static write(buffer: SerializerBase, value: TextOverflowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForOverflow  = value.overflow
-        valueSerializer.writeInt32(valueHolderForOverflow.valueOf())
+        if (valueHolderForOverflow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOverflowTmpValue  = (valueHolderForOverflow as TextOverflow)
+            valueSerializer.writeInt32(valueHolderForOverflowTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextOverflowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const overflowTmpResult : TextOverflow = TextOverflow.fromValue(valueDeserializer.readInt32())
+        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let overflowTmpBuf : TextOverflow | undefined = undefined
+        if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            overflowTmpBuf = TextOverflow.fromValue(valueDeserializer.readInt32())
+        }
+        const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
         let value : TextOverflowOptions = ({overflow: overflowTmpResult} as TextOverflowOptions)
         return value
     }
@@ -1651,6 +1793,14 @@ export class TextMarqueeOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStepTmpValue  = valueHolderForStep!
             valueSerializer.writeFloat64(valueHolderForStepTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpacing  = value.spacing
+        if (valueHolderForSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpacingTmpValue  = valueHolderForSpacing!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1694,6 +1844,14 @@ export class TextMarqueeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForMarqueeUpdatePolicy  = value.marqueeUpdatePolicy
+        if (valueHolderForMarqueeUpdatePolicy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarqueeUpdatePolicyTmpValue  = (valueHolderForMarqueeUpdatePolicy as MarqueeUpdatePolicy)
+            valueSerializer.writeInt32(valueHolderForMarqueeUpdatePolicyTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextMarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -1704,6 +1862,12 @@ export class TextMarqueeOptions_serializer {
             stepTmpBuf = valueDeserializer.readFloat64()
         }
         const stepTmpResult : double | undefined = stepTmpBuf
+        const spacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spacingTmpBuf : LengthMetrics | undefined = undefined
+        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spacingTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        }
+        const spacingTmpResult : LengthMetrics | undefined = spacingTmpBuf
         const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let loopTmpBuf : int32 | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1734,7 +1898,13 @@ export class TextMarqueeOptions_serializer {
             marqueeStartPolicyTmpBuf = MarqueeStartPolicy.fromValue(valueDeserializer.readInt32())
         }
         const marqueeStartPolicyTmpResult : MarqueeStartPolicy | undefined = marqueeStartPolicyTmpBuf
-        let value : TextMarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, delay: delayTmpResult, fadeout: fadeoutTmpResult, marqueeStartPolicy: marqueeStartPolicyTmpResult} as TextMarqueeOptions)
+        const marqueeUpdatePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marqueeUpdatePolicyTmpBuf : MarqueeUpdatePolicy | undefined = undefined
+        if ((marqueeUpdatePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            marqueeUpdatePolicyTmpBuf = MarqueeUpdatePolicy.fromValue(valueDeserializer.readInt32())
+        }
+        const marqueeUpdatePolicyTmpResult : MarqueeUpdatePolicy | undefined = marqueeUpdatePolicyTmpBuf
+        let value : TextMarqueeOptions = ({start: startTmpResult, step: stepTmpResult, spacing: spacingTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, delay: delayTmpResult, fadeout: fadeoutTmpResult, marqueeStartPolicy: marqueeStartPolicyTmpResult, marqueeUpdatePolicy: marqueeUpdatePolicyTmpResult} as TextMarqueeOptions)
         return value
     }
 }

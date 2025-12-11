@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"

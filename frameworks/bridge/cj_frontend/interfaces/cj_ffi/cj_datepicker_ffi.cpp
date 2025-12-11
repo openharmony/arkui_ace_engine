@@ -549,6 +549,7 @@ extern "C" {
 void ConvertToNoramlDate(PickerDate& date)
 {
     auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     if (date.GetYear() < MIN_YEAR) {
         date = theme->GetDefaultStartDate();
     }

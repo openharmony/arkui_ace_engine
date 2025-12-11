@@ -33,6 +33,7 @@ namespace OHOS::Ace {
 
 struct LocaleProxy;
 
+
 struct LunarDate : Date {
     bool isLeapMonth = false;
 
@@ -135,6 +136,8 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         return isInit_;
     }
+
+    bool LocalizeNumber(std::string &inputOutputNum, const int32_t precision = -1);
 
     std::string GetLanguage();
     std::string GetLanguageTag();
@@ -273,6 +276,8 @@ public:
      * @return error description
      */
     std::string GetErrorDescription(const std::string& errorIndex);
+    static bool ConvertToDouble(const std::string& str, double& outValue);
+    static bool IsValidValue(const char* end, const std::string& str);
 
 private:
     void SetLocaleImpl(const std::string& language, const std::string& countryOrRegion, const std::string& script,

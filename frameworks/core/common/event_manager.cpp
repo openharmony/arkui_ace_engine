@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
+#include "core/common/reporter/reporter.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
@@ -855,7 +856,9 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
 
 void EventManager::UpdateDragInfo(TouchEvent& point)
 {
-    if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
+    if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE ||
+            point.type == TouchType::PULL_IN_WINDOW || point.pullType == TouchType::PULL_IN_WINDOW ||
+            point.type == TouchType::PULL_OUT_WINDOW || point.pullType == TouchType::PULL_OUT_WINDOW) {
         isDragging_ = false;
         point.type = TouchType::CANCEL;
         point.pullType = TouchType::PULL_MOVE;
@@ -883,8 +886,22 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
     return dispatchSuccess;
 }
 
+void EventManager::AddDumpTouchInfo(const TouchEvent& event)
+{
+    CHECK_RUN_ON(UI);
+    if (IsUseDumpTouchInfo()) {
+        NG::EventTouchInfoRecord& eventTouchInfoRecord = GetEventTouchInfoRecord();
+        eventTouchInfoRecord.AddTouchPoint(event, std::chrono::high_resolution_clock::now());
+        if (eventTouchInfoRecord.dequeMaxCnt_ > 1) {
+            SetIsUseDumpTouchInfo(false);
+            eventTouchInfoRecord.dequeMaxCnt_ = 0;
+        }
+    }
+}
+
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+    AddDumpTouchInfo(event);
     if (event.sourceType == SourceType::TOUCH) {
         NG::GestureExtraHandler::NotifiyTouchEvent(event);
     }
@@ -909,6 +926,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         }
     }
 
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(point);
     bool dispatchSuccess = true;
     dispatchSuccess = DispatchMultiContainerEvent(point);
     // If one gesture recognizer has already been won, other gesture recognizers will still be affected by
@@ -1614,6 +1632,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     if (validAction.find(event.action) == validAction.end()) {
         return false;
     }
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     lastMouseEvent_ = event;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         return DispatchMouseEventInGreatOrEqualAPI13(event);
@@ -1947,6 +1966,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
+    touchRestrict.sourceTool = touchRestrict.touchEvent.sourceTool;
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
     auto item = axisTestResultsMap_.find(event.id);
     passThroughResult_ = (item != axisTestResultsMap_.end() && !item->second.empty());
@@ -1954,6 +1974,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
+    NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     // when api >= 15, do not block this event.
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
@@ -2238,6 +2259,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
     falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.sourceTool = lastTouchEvent_.sourceTool;
     falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
@@ -2636,6 +2658,47 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
             for (auto& item : dumpList) {
                 DumpLog::GetInstance().Print(item.first, item.second);
             }
+        }
+    }
+}
+
+
+void EventManager::DoDumpTouchInfo(bool hasJson)
+{
+    CHECK_RUN_ON(UI);
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        eventTouchInfo_.DumpAndClear(children);
+        json->Put("DumpTouchInfo", children);
+        DumpLog::GetInstance().PrintJson(json->ToString());
+    } else {
+        std::list<std::string> dumpList;
+        eventTouchInfo_.DumpAndClear(dumpList);
+        for (const auto& item : dumpList) {
+            DumpLog::GetInstance().Print(item);
+        }
+    }
+}
+
+void EventManager::DumpTouchInfo(const std::vector<std::string>& params, bool hasJson)
+{
+    CHECK_RUN_ON(UI);
+    if (params.size() >= DUMP_DOUBLE_NUMBER) {
+        if (params[1] == "-b") {
+            SetIsUseDumpTouchInfo(true);
+            eventTouchInfo_.ClearDumpDeque();
+            return;
+        } else if (params[1] == "-d") {
+            DoDumpTouchInfo(hasJson);
+            return;
+        } else if (params[1] == "-e") {
+            SetIsUseDumpTouchInfo(false);
+            eventTouchInfo_.ClearDumpDeque();
+            return;
+        } else if (params[1] == "-c") {
+            DumpLog::GetInstance().Print(std::to_string(eventTouchInfo_.touchHistory_.size()));
+            return;
         }
     }
 }

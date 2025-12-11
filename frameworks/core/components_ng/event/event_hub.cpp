@@ -78,22 +78,23 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
-void EventHub::AddSupportedUIStateWithCallback(
+bool EventHub::AddSupportedUIStateWithCallback(
     UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
+    auto result = stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
     AddPressedListener();
+    return result;
 }
 
-void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+bool EventHub::RemoveSupportedUIState(UIState state, bool isInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
+    return stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
 bool EventHub::GetUserSetStateStyle()
@@ -1131,6 +1132,11 @@ void EventHub::ClearSingleKeyboardShortcut()
     }
 }
 
+void EventHub::ClearSingleKeyboardShortcutAll()
+{
+    keyboardShortcut_.clear();
+}
+
 std::vector<KeyboardShortcut>& EventHub::GetKeyboardShortcut()
 {
     return keyboardShortcut_;
@@ -1202,17 +1208,14 @@ void EventHub::CleanVisibleAreaCallback(bool isUser, bool isThrottled)
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->innerVisibleAreaChange);
         visibleAreaChangeCallbackSet_->innerVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->innerVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->innerVisibleAreaChange = nullptr;
     } else if (isThrottled) {
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->throttledVisibleAreaChange);
         visibleAreaChangeCallbackSet_->throttledVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->throttledVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->throttledVisibleAreaChange = nullptr;
     } else {
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->userVisibleAreaChange);
         visibleAreaChangeCallbackSet_->userVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->userVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->userVisibleAreaChange = nullptr;
     }
 }
 
@@ -1289,8 +1292,16 @@ void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
         return;
     }
-    auto cb = ndkDrawCompletedCallback_;
-    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    executor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            auto cb = eventHub->ndkDrawCompletedCallback_;
+            if (cb) {
+                cb();
+            }
+        },
+        TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
 }
 
 void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
@@ -1307,7 +1318,15 @@ void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
         return;
     }
-    auto cb = ndkLayoutCallback_;
-    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    executor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            auto cb = eventHub->ndkLayoutCallback_;
+            if (cb) {
+                cb();
+            }
+        },
+        TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
 } // namespace OHOS::Ace::NG

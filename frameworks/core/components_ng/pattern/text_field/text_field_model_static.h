@@ -104,12 +104,15 @@ public:
     static void SetShowUnderline(FrameNode* frameNode, const std::optional<bool>& showUnderLine);
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
     static void SetDefaultCancelIcon(FrameNode* frameNode);
-
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetWidthAuto(FrameNode* frameNode, bool val);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp);
     static void SetMargin(FrameNode* frameNode);
     static void SetBackBorder(FrameNode* frameNode);
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
+    static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 private:
 
 };

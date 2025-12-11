@@ -35,6 +35,7 @@ public:
     std::string GetEncodedFormat() override;
     int32_t GetLoopCount() override;
     std::vector<int32_t> GetDelayTime() override;
+    bool IsHeifWithoutAlpha() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

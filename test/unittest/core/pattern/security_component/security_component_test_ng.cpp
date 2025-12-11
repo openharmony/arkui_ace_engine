@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -1108,12 +1109,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, Tes
         V2::SAVE_BUTTON_ETS_TAG);
     SaveButtonModelNG saveSc;
     saveSc.SetTextIconSpace(Dimension(15.0)); // 15.0vp
+    saveSc.SetBackgroundBorderRadius(Dimension(3.0), std::nullopt, std::nullopt, std::nullopt);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 15.0);
+    NG::BorderRadiusProperty borderRadiusSetted;
+    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
+    NG::BorderRadiusProperty borderRadiusEmpty;
+    EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
 }
 
 /**
@@ -1134,8 +1140,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
     SaveButtonModelNG sc;
     std::optional<NG::CalcLength> width(Dimension(15.0));
     std::optional<NG::CalcLength> height(Dimension(15.0));
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG);
     sc.SetIconSize(CalcSize(width, height));
     sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetIcon(imageSourceInfo);
     sc.SetText(CUSTOMIZE_TEXT);
     sc.SetStateEffect(false);
     sc.SetTipPosition(TipPosition::BELOW_TOP);
@@ -1151,6 +1160,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
     EXPECT_EQ(property->GetIconCalcSize().value_or(CalcSize(widthDefault, heightDefault)), CalcSize(width, height));
     EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
     EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
+    EXPECT_EQ(property->GetImageSourceInfo().has_value(), true);
     EXPECT_EQ(property->GetStateEffect().value_or(true), false);
     EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::BELOW_TOP);
 
@@ -1180,9 +1190,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, Tes
     SaveButtonModelNG sc;
     std::optional<NG::CalcLength> width(Dimension(15.0));
     std::optional<NG::CalcLength> height(Dimension(15.0));
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG);
     sc.SetIconSize(CalcSize(width, height));
     sc.SetIconBorderRadius(Dimension(3.0));
     sc.SetText(CUSTOMIZE_TEXT);
+    sc.SetIcon(imageSourceInfo);
     sc.SetStateEffect(false);
     sc.SetTipPosition(TipPosition::BELOW_TOP);
 
@@ -1198,6 +1211,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, Tes
         CalcSize(width, height));
     EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
     EXPECT_EQ(property->GetTextContent().value_or(""), "");
+    EXPECT_EQ(property->GetImageSourceInfo().has_value(), false);
     EXPECT_EQ(property->GetStateEffect().value_or(true), true);
     EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::ABOVE_BOTTOM);
 
@@ -2680,6 +2694,26 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
 
+    SecurityComponentModelNG::SetAlign(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMaxFontScale(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMinFontScale(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMaxLines(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode.GetRawPtr(), std::nullopt);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_EQ(property->GetAlignment().has_value(), false);
+    ASSERT_EQ(property->GetMaxFontScale().has_value(), false);
+    ASSERT_EQ(property->GetMinFontScale().has_value(), false);
+    ASSERT_EQ(property->GetMaxLines().has_value(), false);
+    ASSERT_EQ(property->GetAdaptMaxFontSize().has_value(), false);
+    ASSERT_EQ(property->GetAdaptMinFontSize().has_value(), false);
+    ASSERT_EQ(property->GetHeightAdaptivePolicy().has_value(), false);
+    ASSERT_EQ(property->GetUserCancelEvent().has_value(), false);
+
     SecurityComponentModelNG::SetAlign(frameNode.GetRawPtr(), Alignment::CENTER_LEFT);
     SecurityComponentModelNG::SetMaxFontScale(frameNode.GetRawPtr(), 1.5);
     SecurityComponentModelNG::SetMinFontScale(frameNode.GetRawPtr(), 1.0);
@@ -2688,9 +2722,8 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     SecurityComponentModelNG::SetAdaptMinFontSize(frameNode.GetRawPtr(), Dimension(20.0));
     SecurityComponentModelNG::SetHeightAdaptivePolicy(
         frameNode.GetRawPtr(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode.GetRawPtr(), true);
 
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    ASSERT_NE(property, nullptr);
     ASSERT_EQ(property->GetAlignment().value_or(Alignment::CENTER_RIGHT), Alignment::CENTER_LEFT);
     ASSERT_EQ(property->GetMaxFontScale().value_or(0.0), 1.5);
     ASSERT_EQ(property->GetMinFontScale().value_or(0.0), 1.0);
@@ -2699,5 +2732,6 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     ASSERT_EQ(property->GetAdaptMinFontSize().value_or(Dimension(0.0)).ConvertToVp(), 20.0);
     ASSERT_EQ(property->GetHeightAdaptivePolicy().value_or(
         TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    ASSERT_EQ(property->GetUserCancelEvent().value_or(false), true);
 }
 } // namespace OHOS::Ace::NG

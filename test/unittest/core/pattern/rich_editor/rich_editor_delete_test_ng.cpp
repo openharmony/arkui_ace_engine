@@ -263,6 +263,46 @@ HWTEST_F(RichEditorDeleteTestNg, HandleOnDelete001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DeleteBackwardFunction001
+ * @tc.desc: test DeleteBackwardFunction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteBackwardFunction001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteBackwardFunction();
+
+    EXPECT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
+ * @tc.name: DeleteBackwardFunction002
+ * @tc.desc: test DeleteBackwardFunction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteBackwardFunction002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = false;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteBackwardFunction();
+
+    EXPECT_FALSE(richEditorPattern->IsPreviewTextInputting());
+}
+
+/**
  * @tc.name: DeleteBackward001
  * @tc.desc: test DeleteBackward
  * @tc.type: FUNC
@@ -666,7 +706,7 @@ HWTEST_F(RichEditorDeleteTestNg, ProcessDeleteNodes002, TestSize.Level0)
     ASSERT_NE(spanNode, nullptr);
     auto spanItem = spanNode->GetSpanItem();
     ASSERT_NE(spanItem, nullptr);
-    auto textTemp = spanItem->content;
+    auto textTemp = u"";
     std::list<RichEditorAbstractSpanResult> list;
     list.emplace_back(span);
     richEditorPattern->ProcessDeleteNodes(list);
@@ -724,10 +764,17 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation001, TestSize.Level0)
  */
 HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
+
+    /**
+     * @tc.steps: step2. set empty styledString
+     */
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
@@ -736,6 +783,10 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level0)
     auto newFrameNode = ImageSpanNode::GetOrCreateSpanNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     richEditorNode_->children_.push_back(newFrameNode);
+
+    /**
+     * @tc.steps: step3. process delete operation
+     */
     richEditorPattern->DeleteSpansOperation(0, 5);
     EXPECT_EQ(richEditorPattern->textForDisplay_.size(), 0);
 }
@@ -1304,7 +1355,7 @@ HWTEST_F(RichEditorDeleteTestNg, RichEditorDeleteForwardEmoji, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan("😄3😄😄");
-    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
     richEditorPattern->DeleteForward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);
@@ -1323,7 +1374,7 @@ HWTEST_F(RichEditorDeleteTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan("😄3😄😄");
-    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
     richEditorPattern->DeleteBackward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);

@@ -23,17 +23,17 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RatingOpsAccessor {
 Ark_NativePointer RegisterRatingCallbackImpl(Ark_NativePointer node,
-                                             const Ark_Number* rating,
+                                             const Ark_Float64* rating,
                                              const RatingCallback* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     std::optional<double> ratingOpt = Converter::Convert<double>(*rating);
     std::optional<bool> indicator = false;
-    RatingModelStatic::SetRatingOptions(frameNode, ratingOpt, indicator);
+    RatingModelStatic::SetRatingOptions(frameNode, ratingOpt.value_or(0), indicator);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& value) {
-        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        Ark_Float64 nValue = Converter::ArkValue<Ark_Float64>(std::stof(value));
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(nValue);
     };

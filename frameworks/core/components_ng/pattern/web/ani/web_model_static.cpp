@@ -134,6 +134,15 @@ void WebModelStatic::SetSharedRenderProcessToken(FrameNode* frameNode,
     webPatternStatic->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
 }
 
+void WebModelStatic::SetEmulateTouchFromMouseEvent(FrameNode* frameNode,
+    const std::optional<bool>& emulateTouchFromMouseEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent.value_or(false));
+}
+
 void WebModelStatic::SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController)
 {
     CHECK_NULL_VOID(frameNode);
@@ -339,10 +348,31 @@ void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptI
     webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
-void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems)
+void WebModelStatic::JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
-    (void)frameNode;
-    (void)scriptItems;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+}
+
+void WebModelStatic::JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+}
+
+void WebModelStatic::JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
@@ -1429,6 +1459,14 @@ void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool is
     webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
+void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableImageAnalyzer(isEnabled);
+}
+
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
@@ -1522,5 +1560,13 @@ void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
+
+void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetJsProxyCallback(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

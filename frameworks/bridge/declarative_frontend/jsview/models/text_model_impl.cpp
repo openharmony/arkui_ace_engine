@@ -218,6 +218,8 @@ void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
 
 void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
 
+void TextModelImpl::SetCompressLeadingPunctuation(bool enabled) {}
+
 void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
 
 void TextModelImpl::SetColorShaderStyle(const Color& value) {}
@@ -252,11 +254,7 @@ void TextModelImpl::SetTextDetectConfig(const TextDetectConfig& textDetectConfig
 
 void TextModelImpl::SetSelectDetectEnable(bool value) {};
 
-void TextModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {};
-
 void TextModelImpl::ResetSelectDetectEnable() {}
-
-void TextModelImpl::ResetSelectDetectConfig() {}
 
 void TextModelImpl::OnSetWidth()
 {

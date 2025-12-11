@@ -202,7 +202,7 @@ void RatingModifier::PaintStar(DrawingContext& context)
 
     // step4: draw background image.
     for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
-        if (i == 0 && foregroundImageRepeatNum == 0 && isFocus_) {
+        if (i == 0 && foregroundImageRepeatNum == 0 && isFocus_ && isNeedFocusStyle_) {
             backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
             continue;

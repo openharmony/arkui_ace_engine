@@ -37,6 +37,7 @@ public:
     MOCK_METHOD0(GetEncodedFormat, std::string());
     MOCK_METHOD0(GetLoopCount, int32_t());
     MOCK_METHOD0(GetDelayTime, std::vector<int32_t>());
+    MOCK_METHOD0(IsHeifWithoutAlpha, bool());
 
     static RefPtr<MockImageSource> mockImageSource_;
 };

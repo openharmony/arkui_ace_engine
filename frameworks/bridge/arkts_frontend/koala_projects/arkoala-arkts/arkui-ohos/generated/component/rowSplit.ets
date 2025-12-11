@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRowSplitAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -42,6 +44,7 @@ export class ArkRowSplitPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRowSplitOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._RowSplitInterface_setRowSplitOptions(this.peer.ptr)
     }
     setResizeableAttribute(value: boolean | undefined): void {
@@ -92,6 +95,7 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
     public setRowSplitOptions(): this {
         if (this.checkPriority("setRowSplitOptions")) {
             this.getPeer()?.setRowSplitOptionsAttribute()
+            this.applyOptionsFinish('RowSplitAttribute');
             return this
         }
         return this
@@ -105,12 +109,17 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
         return this
     }
     public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRowSplitAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRowSplitAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

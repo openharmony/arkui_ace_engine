@@ -390,10 +390,11 @@ bool FontManager::RegisterCallbackNG(
     if (!hasRegistered) {
         RegisterTextEngineLoadCallback(node, familyName, callback);
     }
-    if (!hasRegisterLoadFontCallback_) {
-        RegisterLoadFontCallbacks();
-        hasRegisterLoadFontCallback_ = true;
-    }
+    std::call_once(load_font_flag_, [weak = WeakClaim(this)]() {
+        auto fontManager = weak.Upgrade();
+        CHECK_NULL_VOID(fontManager);
+        fontManager->RegisterLoadFontCallbacks();
+    });
     return false;
 }
 
@@ -407,6 +408,7 @@ void FontManager::RegisterTextEngineLoadCallback(
         NativeEngine* nativeEngine = engine ? engine->GetNativeEngine() : nullptr;
         uint64_t runtimeId = nativeEngine ? static_cast<uint64_t>(reinterpret_cast<uintptr_t>(nativeEngine)) : 0;
         FormLoadFontCallbackInfo formCallbackInfo = { callback, runtimeId };
+        std::unique_lock lock(formCallbackLock_);
         auto iter = formLoadCallbacks_.find(node);
         if (iter != formLoadCallbacks_.end()) {
             iter->second.emplace(familyName, formCallbackInfo);
@@ -416,6 +418,7 @@ void FontManager::RegisterTextEngineLoadCallback(
             formLoadCallbacks_.emplace(node, familyMap);
         }
     }
+    std::unique_lock lock(externalCallbackLock_);
     auto iter = externalLoadCallbacks_.find(node);
     if (iter != externalLoadCallbacks_.end()) {
         iter->second.emplace(familyName, callback);
@@ -520,6 +523,7 @@ void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtime
         return;
     }
     // global font change event.
+    std::shared_lock lock(externalCallbackLock_);
     for (const auto& element : externalLoadCallbacks_) {
         for (const auto& family : element.second) {
             if (family.first == fontName && family.second) {
@@ -531,6 +535,7 @@ void FontManager::NotifyFontChange(const std::string& fontName, uint64_t runtime
 
 void FontManager::NotifyFormFontChange(const std::string& fontName, uint64_t runtimeId)
 {
+    std::shared_lock lock(formCallbackLock_);
     for (const auto& element : formLoadCallbacks_) {
         for (const auto& [currentFontName, callbackInfo] : element.second) {
             if (currentFontName != fontName || !callbackInfo.callback || callbackInfo.formRuntimeId == 0 ||

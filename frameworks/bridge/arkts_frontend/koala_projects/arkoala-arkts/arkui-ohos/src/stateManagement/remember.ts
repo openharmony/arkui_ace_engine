@@ -21,9 +21,14 @@ import {
     StateManagerImpl,
     GlobalStateManager,
     StateToScopes,
+    __id,
 } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { MemoState } from './memorize/state';
+import { IObservedObject } from './decorator';
+import { ObserveSingleton } from './base/observeSingleton';
+import { NullableObject } from './base/types';
+import { functionOverValue } from '@koalaui/common';
 
 export class CascadeMemoState<Value> implements MemoState<Value> {
     private manager: StateManagerImpl | undefined = undefined;
@@ -68,4 +73,38 @@ export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
         receiver.value = factory();
         return receiver;
     });
+}
+
+/** @memo:intrinsic */
+export function rememberVariable<Value>(initial: (() => Value) | Value): MutableVariable<Value> {
+    const scope = (__context() as StateManagerImpl).scopeEx<BuilderVariable<Value>>(
+        __id(), 0, undefined, undefined, undefined, true);
+    if (scope.unchanged) {
+        return scope.cached;
+    }
+    const isFunction: boolean = functionOverValue<Value>(initial);
+    const value: Value = isFunction ? (initial as (() => Value))() : (initial as Value);
+
+    return scope.recache(new BuilderVariable<Value>((__context() as StateManagerImpl).mutableState<Value>(value)));
+}
+
+export interface MutableVariable<T> {
+	value: T;
+}
+
+class BuilderVariable<T> implements MutableVariable<T> {
+    private mutableState: MutableState<T>;
+    constructor(mutableState: MutableState<T>) {
+        this.mutableState = mutableState;
+    }
+    set value(newValue: T) {
+        this.mutableState.value = newValue;
+    }
+    get value(): T {
+        const value = this.mutableState.value;
+        if (value instanceof IObservedObject) {
+            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        }
+        return value;
+    }
 }

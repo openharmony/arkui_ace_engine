@@ -39,6 +39,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -88,6 +89,13 @@ void SelectOverlayTestTwoNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto rootNode = MockPipelineContext::GetCurrent()->rootNode_;
+    if (rootNode) {
+        auto rootRenderContext = rootNode->GetRenderContext();
+        if (rootRenderContext) {
+            rootRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 1280.0f, 2480.0f));
+        }
+    }
 }
 
 void SelectOverlayTestTwoNg::TearDownTestCase()
@@ -2034,6 +2042,48 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams004, TestSize.Level1)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
+}
+
+HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams005, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    auto info_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(info_);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateNodePaintMethod();
+    auto overlayModifier = pattern->selectOverlayModifier_;
+    EXPECT_NE(overlayModifier, nullptr);
+    std::vector<MenuOptionsParam> menuOptionItems;
+    for (int32_t i = 0; i < 10; i++) {
+        MenuOptionsParam item;
+        item.id = std::to_string(i);
+        item.content = std::to_string(i);
+        menuOptionItems.push_back(item);
+    }
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->showShortcut_ = true;
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(textOverlayTheme))
+        .WillOnce(Return(textOverlayTheme))
+        .WillRepeatedly(Return(selectTheme));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
+    EXPECT_NE(menuWrapper, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 
 /**

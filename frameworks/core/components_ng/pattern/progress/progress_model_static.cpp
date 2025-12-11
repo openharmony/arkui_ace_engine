@@ -146,6 +146,16 @@ void ProgressModelStatic::SetBorderColor(FrameNode* frameNode, const std::option
     }
 }
 
+void ProgressModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER,
+            frameNode);
+    }
+}
+
 void ProgressModelStatic::SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
     if (value) {
@@ -180,15 +190,17 @@ void ProgressModelStatic::SetText(FrameNode* frameNode, const std::optional<std:
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        int32_t curPercent = curValue.value() * 100 / maxValue.value();
-        std::string number = std::to_string(curPercent) + "%";
-        bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
-        if (!isShowText) {
-            number = "";
+        if (maxValue.has_value() && curValue.has_value()) {
+            int32_t curPercent = curValue.value() * 100 / maxValue.value();
+            std::string number = std::to_string(curPercent) + "%";
+            bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+            if (!isShowText) {
+                number = "";
+            }
+            textLayoutProperty->UpdateContent(number);
+            context = number;
+            pattern->SetTextFromUser(false);
         }
-        textLayoutProperty->UpdateContent(number);
-        context = number;
-        pattern->SetTextFromUser(false);
     } else {
         textLayoutProperty->UpdateContent(value.value());
         context = value.value();
@@ -314,6 +326,114 @@ void ProgressModelStatic::SetValue(FrameNode* frameNode, const std::optional<dou
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsTextFromUser()) {
         SetText(frameNode, std::nullopt);
+    }
+}
+
+void ProgressModelStatic::Initialize(FrameNode* frameNode, double min, double value, double cachedValue, double max,
+    NG::ProgressType type)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Value, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
+    auto progressFocusNode = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(progressFocusNode);
+    if (type == ProgressType::CAPSULE) {
+        progressFocusNode->SetFocusable(true);
+    } else {
+        progressFocusNode->SetFocusable(false);
+    }
+
+    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (type == ProgressType::CAPSULE) {
+        if (frameNode->GetChildren().empty()) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->SetInternal();
+            textNode->MountToParent(AceType::Claim(reinterpret_cast<FrameNode*>(frameNode)));
+        }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(frameNode, textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+    } else {
+        if (!frameNode->GetChildren().empty()) {
+            frameNode->RemoveChildAtIndex(0);
+        }
+        eventHub->SetHoverEffect(HoverEffectType::NONE);
+    }
+
+    auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    if (pros) {
+        pros->ResetCapsuleStyleFontColorSetByUser();
+        pros->ResetCapsuleStyleSetByUser();
+        pros->ResetGradientColorSetByUser();
+    }
+}
+
+void ProgressModelStatic::SetTextDefaultStyle(FrameNode* frameNode, const RefPtr<FrameNode>& textNode,
+    double value, double maxValue)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
+    RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(progressTheme);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    int32_t curPercent = 0;
+    if (!NearZero(maxValue)) {
+        curPercent = value * 100 / maxValue;
+    }
+    std::string number = std::to_string(curPercent) + "%";
+    textProps->UpdateContent(number);
+    textProps->UpdateFontSize(progressTheme->GetTextSize());
+    textProps->UpdateTextColor(progressTheme->GetTextColor());
+    textProps->UpdateFontWeight(FontWeight::MEDIUM);
+    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textProps->UpdateMaxLines(1);
+    MarginProperty margin;
+    margin.left = CalcLength(progressTheme->GetTextMargin());
+    margin.right = CalcLength(progressTheme->GetTextMargin());
+    margin.top = CalcLength(0.0_vp);
+    margin.bottom = CalcLength(0.0_vp);
+    textProps->UpdateMargin(margin);
+    bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+    if (!isShowText) {
+        number = "";
+        textProps->UpdateContent(number);
+    }
+    textNode->MarkModifyDone();
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
+}
+
+void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserInitiatedBgColor(value.has_value());
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

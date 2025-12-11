@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
+#include "ui/properties/ui_material.h"
+
 #include "base/utils/multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -175,6 +177,11 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("useEffect", propUseEffect_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("useEffectType",
         UseEffectTypeToString(propUseEffectType_.value_or(EffectType::DEFAULT)).c_str(), filter);
+    json->PutExtAttr("renderStrategy",
+        StringUtils::ToString(GetRenderStrategyValue(RenderStrategy::FAST)).c_str(), filter);
+    if (GetExcludeFromRenderGroup().has_value()) {
+        json->PutExtAttr("excludeFromRenderGroup", GetExcludeFromRenderGroupValue() ? "true" : "false", filter);
+    }
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -209,5 +216,15 @@ void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
     } else {
         LOGE("UITree |ERROR| invalid clip=%{public}s", clip.c_str());
     }
+}
+
+void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
+{
+    uiMaterial_ = material;
+}
+
+RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
+{
+    return uiMaterial_;
 }
 } // namespace OHOS::Ace::NG

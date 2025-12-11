@@ -237,6 +237,11 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* abilit
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instanceId)
+{
+    return UIContentImpl::GetUIContentWindowID(instanceId);
+}
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime)
     : instanceId_(ACE_INSTANCE_ID), runtime_(runtime)
 {
@@ -604,7 +609,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     viewPtr->NotifyDensityChanged(config.Density());
     viewPtr->NotifySurfaceChanged(config.Width(), config.Height());
     if (deviceConfig_.orientation != runArgs_.deviceConfig.orientation ||
-        deviceConfig_.density != runArgs_.deviceConfig.density) {
+        !NearEqual(deviceConfig_.density, runArgs_.deviceConfig.density)) {
         container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
         runArgs_.deviceConfig.orientation = deviceConfig_.orientation;
         runArgs_.deviceConfig.density = deviceConfig_.density;
@@ -646,7 +651,7 @@ int32_t UIContentImpl::CreateModalUIExtension(
 }
 
 void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
-
+void UIContentImpl::SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) {}
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)
 {
     ContainerScope scope(instanceId_);
@@ -778,5 +783,17 @@ bool UIContentImpl::OperateComponent(const std::string& attrsJson)
         TaskExecutor::TaskType::UI, "ArkUIOperateComponent");
     LOGI("Fast Preview end");
     return true;
+}
+
+int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, -1);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, -1);
+    auto windowId = pipelineContext->GetFocusWindowId();
+    LOGI(
+        "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
+    return static_cast<int32_t>(windowId);
 }
 } // namespace OHOS::Ace

@@ -170,6 +170,8 @@ void OffscreenCanvasRenderingContext2DModelNG::Translate(double x, double y) {}
 
 void OffscreenCanvasRenderingContext2DModelNG::SetLineDash(const std::vector<double>& lineDash) {}
 
+void OffscreenCanvasRenderingContext2DModelNG::AddRoundRect(const Rect& rect, const std::vector<double>& radii) {}
+
 void OffscreenCanvasRenderingContext2DModelNG::SetTextAlign(const TextAlign& align) {}
 
 void OffscreenCanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaseline& baseline) {}

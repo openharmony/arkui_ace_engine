@@ -257,6 +257,17 @@ public:
 
     void DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson = false);
 
+    NG::EventTouchInfoRecord& GetEventTouchInfoRecord()
+    {
+        return eventTouchInfo_;
+    }
+
+    void DoDumpTouchInfo(bool hasJson);
+
+    void DumpTouchInfo(const std::vector<std::string>& params, bool hasJson = false);
+
+    void AddDumpTouchInfo(const TouchEvent& event);
+
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
@@ -387,6 +398,14 @@ public:
     {
         return isDragCancelPending_;
     }
+    bool IsUseDumpTouchInfo() const
+    {
+        return eventTouchInfo_.isUseDumpTouchInfo_;
+    }
+    void SetIsUseDumpTouchInfo(bool isUseDumpTouchInfo)
+    {
+        eventTouchInfo_.isUseDumpTouchInfo_ = isUseDumpTouchInfo;
+    }
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -484,6 +503,7 @@ private:
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
+    NG::EventTouchInfoRecord eventTouchInfo_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;

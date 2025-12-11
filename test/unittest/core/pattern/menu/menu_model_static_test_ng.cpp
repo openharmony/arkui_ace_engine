@@ -108,6 +108,25 @@ HWTEST_F(MenuModelStaticTestNg, SetExpandingMode001, TestSize.Level1)
     EXPECT_EQ(menuProperty->GetExpandingMode(), SubMenuExpandingMode::SIDE);
 }
 
+/**
+ * @tc.name: SetExpandSymbol001
+ * @tc.desc: Test SetExpandSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, SetExpandSymbol001, TestSize.Level1)
+{
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_EQ(menuProperty->GetExpandSymbol(), nullptr);
+
+    MenuModelStatic::SetExpandSymbol(node, [](WeakPtr<NG::FrameNode> weakPtr) {});
+    EXPECT_NE(menuProperty->GetExpandSymbol(), nullptr);
+}
+
  /**
  * @tc.name: SetItemDivider001
  * @tc.desc: Test SetItemDivider001

@@ -32,7 +32,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
-const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 
 namespace CanvasRendererAccessor {
@@ -55,18 +54,16 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void DrawImage0Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
-                    const Ark_Number* dx,
-                    const Ark_Number* dy)
+                    Ark_Float64 dx,
+                    Ark_Float64 dy)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(image);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
     CanvasRendererPeerImpl::DrawImageParam params = {
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
+        .dx = Converter::Convert<double>(dx),
+        .dy = Converter::Convert<double>(dy),
         .size = CanvasRendererPeerImpl::SizeParam::TWO_ARGS,
     };
     Converter::VisitUnion(
@@ -86,24 +83,20 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
 }
 void DrawImage1Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
-                    const Ark_Number* dx,
-                    const Ark_Number* dy,
-                    const Ark_Number* dw,
-                    const Ark_Number* dh)
+                    Ark_Float64 dx,
+                    Ark_Float64 dy,
+                    Ark_Float64 dw,
+                    Ark_Float64 dh)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(image);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    CHECK_NULL_VOID(dw);
-    CHECK_NULL_VOID(dh);
     CanvasRendererPeerImpl::DrawImageParam params = {
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
-        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
-        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+        .dx = Converter::Convert<double>(dx),
+        .dy = Converter::Convert<double>(dy),
+        .dWidth = Converter::Convert<double>(dw),
+        .dHeight = Converter::Convert<double>(dh),
         .size = CanvasRendererPeerImpl::SizeParam::FOUR_ARGS,
     };
     Converter::VisitUnion(
@@ -123,36 +116,28 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
 }
 void DrawImage2Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
-                    const Ark_Number* sx,
-                    const Ark_Number* sy,
-                    const Ark_Number* sw,
-                    const Ark_Number* sh,
-                    const Ark_Number* dx,
-                    const Ark_Number* dy,
-                    const Ark_Number* dw,
-                    const Ark_Number* dh)
+                    Ark_Float64 sx,
+                    Ark_Float64 sy,
+                    Ark_Float64 sw,
+                    Ark_Float64 sh,
+                    Ark_Float64 dx,
+                    Ark_Float64 dy,
+                    Ark_Float64 dw,
+                    Ark_Float64 dh)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(image);
-    CHECK_NULL_VOID(sx);
-    CHECK_NULL_VOID(sy);
-    CHECK_NULL_VOID(sw);
-    CHECK_NULL_VOID(sh);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    CHECK_NULL_VOID(dw);
-    CHECK_NULL_VOID(dh);
     CanvasRendererPeerImpl::DrawImageParam params = {
-        .sx = static_cast<double>(Converter::Convert<float>(*sx)),
-        .sy = static_cast<double>(Converter::Convert<float>(*sy)),
-        .sWidth = static_cast<double>(Converter::Convert<float>(*sw)),
-        .sHeight = static_cast<double>(Converter::Convert<float>(*sh)),
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
-        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
-        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+        .sx = Converter::Convert<double>(sx),
+        .sy = Converter::Convert<double>(sy),
+        .sWidth = Converter::Convert<double>(sw),
+        .sHeight = Converter::Convert<double>(sh),
+        .dx = Converter::Convert<double>(dx),
+        .dy = Converter::Convert<double>(dy),
+        .dWidth = Converter::Convert<double>(dw),
+        .dHeight = Converter::Convert<double>(dh),
         .size = CanvasRendererPeerImpl::SizeParam::EIGHT_ARGS,
     };
     Converter::VisitUnion(
@@ -235,21 +220,17 @@ void StrokeImpl(Ark_CanvasRenderer peer,
     peerImpl->Stroke(arg);
 }
 Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
-                                            const Ark_Number* x0,
-                                            const Ark_Number* y0,
-                                            const Ark_Number* x1,
-                                            const Ark_Number* y1)
+                                            Ark_Float64 x0,
+                                            Ark_Float64 y0,
+                                            Ark_Float64 x1,
+                                            Ark_Float64 y1)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(x0, {});
-    CHECK_NULL_RETURN(y0, {});
-    CHECK_NULL_RETURN(x1, {});
-    CHECK_NULL_RETURN(y1, {});
-    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
-    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
-    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
-    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
+    double cx0 = Converter::Convert<double>(x0);
+    double cy0 = Converter::Convert<double>(y0);
+    double cx1 = Converter::Convert<double>(x1);
+    double cy1 = Converter::Convert<double>(y1);
     auto gradient = peerImpl->CreateLinearGradient(cx0, cy0, cx1, cy1);
     CHECK_NULL_RETURN(gradient, {});
     auto canvasGradientPeer = GetCanvasGradientAccessor()->construct();
@@ -272,28 +253,22 @@ Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
     return Converter::ArkValue<Opt_CanvasPattern>(pattern);
 }
 Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
-                                            const Ark_Number* x0,
-                                            const Ark_Number* y0,
-                                            const Ark_Number* r0,
-                                            const Ark_Number* x1,
-                                            const Ark_Number* y1,
-                                            const Ark_Number* r1)
+                                            Ark_Float64 x0,
+                                            Ark_Float64 y0,
+                                            Ark_Float64 r0,
+                                            Ark_Float64 x1,
+                                            Ark_Float64 y1,
+                                            Ark_Float64 r1)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(x0, {});
-    CHECK_NULL_RETURN(y0, {});
-    CHECK_NULL_RETURN(r0, {});
-    CHECK_NULL_RETURN(x1, {});
-    CHECK_NULL_RETURN(y1, {});
-    CHECK_NULL_RETURN(r1, {});
     CanvasRendererPeerImpl::RadialGradientParam params = {
-        .x0 = static_cast<double>(Converter::Convert<float>(*x0)),
-        .y0 = static_cast<double>(Converter::Convert<float>(*y0)),
-        .r0 = static_cast<double>(Converter::Convert<float>(*r0)),
-        .x1 = static_cast<double>(Converter::Convert<float>(*x1)),
-        .y1 = static_cast<double>(Converter::Convert<float>(*y1)),
-        .r1 = static_cast<double>(Converter::Convert<float>(*r1)),
+        .x0 = Converter::Convert<double>(x0),
+        .y0 = Converter::Convert<double>(y0),
+        .r0 = Converter::Convert<double>(r0),
+        .x1 = Converter::Convert<double>(x1),
+        .y1 = Converter::Convert<double>(y1),
+        .r1 = Converter::Convert<double>(r1),
     };
     auto gradient = peerImpl->CreateRadialGradient(params);
     CHECK_NULL_RETURN(gradient, {});
@@ -303,18 +278,15 @@ Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
     return canvasGradientPeer;
 }
 Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
-                                           const Ark_Number* startAngle,
-                                           const Ark_Number* x,
-                                           const Ark_Number* y)
+                                           Ark_Float64 startAngle,
+                                           Ark_Float64 x,
+                                           Ark_Float64 y)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(startAngle, {});
-    CHECK_NULL_RETURN(x, {});
-    CHECK_NULL_RETURN(y, {});
-    double ca = static_cast<double>(Converter::Convert<float>(*startAngle));
-    double cx = static_cast<double>(Converter::Convert<float>(*x));
-    double cy = static_cast<double>(Converter::Convert<float>(*y));
+    double ca = Converter::Convert<double>(startAngle);
+    double cx = Converter::Convert<double>(x);
+    double cy = Converter::Convert<double>(y);
     auto gradient = peerImpl->CreateConicGradient(cx, cy, ca);
     CHECK_NULL_RETURN(gradient, {});
     auto canvasGradientPeer = GetCanvasGradientAccessor()->construct();
@@ -322,99 +294,19 @@ Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
     canvasGradientPeer->SetGradient(gradient);
     return canvasGradientPeer;
 }
-Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
-                                   const Ark_Number* sw,
-                                   const Ark_Number* sh)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(sw, {});
-    CHECK_NULL_RETURN(sh, {});
-    auto fWidth = static_cast<double>(Converter::Convert<float>(*sw));
-    auto fHeight = static_cast<double>(Converter::Convert<float>(*sh));
-    std::vector<uint8_t> vbuffer(0);
-    uint32_t width = 0;
-    uint32_t height = 0;
-    peerImpl->CreateImageData(vbuffer, fWidth, fHeight, width, height);
-    InteropBuffer interOpBuffer = {
-        .data = vbuffer.data(),
-        .length = vbuffer.size()
-    };
-    auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
-    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
-    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
-}
-Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
-                                   Ark_ImageData imagedata)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(imagedata, {});
-    std::vector<uint8_t> vbuffer(0);
-    uint32_t width = 0;
-    uint32_t height = 0;
-    peerImpl->CreateImageData(vbuffer, imagedata->value, width, height);
-    InteropBuffer interOpBuffer = {
-        .data = vbuffer.data(),
-        .length = vbuffer.size()
-    };
-    auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
-    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
-    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
-}
-Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
-                               const Ark_Number* sx,
-                               const Ark_Number* sy,
-                               const Ark_Number* sw,
-                               const Ark_Number* sh)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(sx, {});
-    CHECK_NULL_RETURN(sy, {});
-    CHECK_NULL_RETURN(sw, {});
-    CHECK_NULL_RETURN(sh, {});
-    ImageSize imageSize = {
-        .left = static_cast<double>(Converter::Convert<float>(*sx)),
-        .top = static_cast<double>(Converter::Convert<float>(*sy)),
-        .width = static_cast<double>(Converter::Convert<float>(*sw)),
-        .height = static_cast<double>(Converter::Convert<float>(*sh))
-    };
-    std::vector<uint8_t> vbuffer(0);
-    uint32_t width = 0;
-    uint32_t height = 0;
-    peerImpl->GetImageData(vbuffer, imageSize,  width, height);
-    InteropBuffer interOpBuffer = {
-        .data = vbuffer.data(),
-        .length = vbuffer.size()
-    };
-    auto optBuffer = Converter::ArkValue<Opt_Buffer>(interOpBuffer);
-    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
-    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
-    return GetImageDataAccessor()->construct(&arkWidth, &arkHeight, &optBuffer, nullptr);
-}
 Ark_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
-                                   const Ark_Number* sx,
-                                   const Ark_Number* sy,
-                                   const Ark_Number* sw,
-                                   const Ark_Number* sh)
+                                   Ark_Float64 sx,
+                                   Ark_Float64 sy,
+                                   Ark_Float64 sw,
+                                   Ark_Float64 sh)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(sx, {});
-    CHECK_NULL_RETURN(sy, {});
-    CHECK_NULL_RETURN(sw, {});
-    CHECK_NULL_RETURN(sh, {});
-    auto x = static_cast<double>(Converter::Convert<float>(*sx));
-    auto y = static_cast<double>(Converter::Convert<float>(*sy));
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    auto x = Converter::Convert<double>(sx);
+    auto y = Converter::Convert<double>(sy);
+    auto width = Converter::Convert<double>(sw);
+    auto height = Converter::Convert<double>(sh);
     auto pixelMap = peerImpl->GetPixelMap(x, y, width, height);
     CHECK_NULL_RETURN(pixelMap, {});
     auto pixelMapPeer = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -422,66 +314,16 @@ Ark_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
     pixelMapPeer->pixelMap = pixelMap;
     return pixelMapPeer;
 }
-void PutImageData0Impl(Ark_CanvasRenderer peer,
-                       Ark_ImageData imagedata,
-                       const Ark_Union_Number_String* dx,
-                       const Ark_Union_Number_String* dy)
-{
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(imagedata);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    CanvasRendererPeerImpl::PutImageDataParam params = {
-        .x = Converter::OptConvert<Dimension>(*dx),
-        .y = Converter::OptConvert<Dimension>(*dy),
-        .size = CanvasRendererPeerImpl::SizeParam::TWO_ARGS,
-    };
-    auto src = imagedata->value;
-    peerImpl->PutImageData(src, params);
-}
-void PutImageData1Impl(Ark_CanvasRenderer peer,
-                       Ark_ImageData imagedata,
-                       const Ark_Union_Number_String* dx,
-                       const Ark_Union_Number_String* dy,
-                       const Ark_Union_Number_String* dirtyX,
-                       const Ark_Union_Number_String* dirtyY,
-                       const Ark_Union_Number_String* dirtyWidth,
-                       const Ark_Union_Number_String* dirtyHeight)
-{
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(imagedata);
-    CHECK_NULL_VOID(dx);
-    CHECK_NULL_VOID(dy);
-    CHECK_NULL_VOID(dirtyX);
-    CHECK_NULL_VOID(dirtyY);
-    CHECK_NULL_VOID(dirtyWidth);
-    CHECK_NULL_VOID(dirtyHeight);
-    CanvasRendererPeerImpl::PutImageDataParam params = {
-        .x = Converter::OptConvert<Dimension>(*dx),
-        .y = Converter::OptConvert<Dimension>(*dy),
-        .dirtyX = Converter::OptConvert<Dimension>(*dirtyX),
-        .dirtyY = Converter::OptConvert<Dimension>(*dirtyY),
-        .dirtyWidth = Converter::OptConvert<Dimension>(*dirtyWidth),
-        .dirtyHeight = Converter::OptConvert<Dimension>(*dirtyHeight),
-        .size = CanvasRendererPeerImpl::SizeParam::SIX_ARGS,
-    };
-    auto src = imagedata->value;
-    peerImpl->PutImageData(src, params);
-}
-Array_Number GetLineDashImpl(Ark_CanvasRenderer peer)
+Array_Float64 GetLineDashImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
     auto lineDash = peerImpl->GetLineDash();
-    return Converter::ArkValue<Array_Number>(lineDash, Converter::FC);
+    return Converter::ArkValue<Array_Float64>(lineDash, Converter::FC);
 }
 void SetLineDashImpl(Ark_CanvasRenderer peer,
-                     const Array_Number* segments)
+                     const Array_Float64* segments)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(segments);
@@ -492,60 +334,48 @@ void SetLineDashImpl(Ark_CanvasRenderer peer,
     peerImpl->SetLineDash(lineDash);
 }
 void ClearRectImpl(Ark_CanvasRenderer peer,
-                   const Ark_Number* x,
-                   const Ark_Number* y,
-                   const Ark_Number* w,
-                   const Ark_Number* h)
+                   Ark_Float64 x,
+                   Ark_Float64 y,
+                   Ark_Float64 w,
+                   Ark_Float64 h)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(w);
-    CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto cx = static_cast<double>(Converter::Convert<float>(*x));
-    auto cy = static_cast<double>(Converter::Convert<float>(*y));
-    auto cw = static_cast<double>(Converter::Convert<float>(*w));
-    auto ch = static_cast<double>(Converter::Convert<float>(*h));
+    auto cx = Converter::Convert<double>(x);
+    auto cy = Converter::Convert<double>(y);
+    auto cw = Converter::Convert<double>(w);
+    auto ch = Converter::Convert<double>(h);
     peerImpl->ClearRect(cx, cy, cw, ch);
 }
 void FillRectImpl(Ark_CanvasRenderer peer,
-                  const Ark_Number* x,
-                  const Ark_Number* y,
-                  const Ark_Number* w,
-                  const Ark_Number* h)
+                  Ark_Float64 x,
+                  Ark_Float64 y,
+                  Ark_Float64 w,
+                  Ark_Float64 h)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(w);
-    CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto cx = static_cast<double>(Converter::Convert<float>(*x));
-    auto cy = static_cast<double>(Converter::Convert<float>(*y));
-    auto cw = static_cast<double>(Converter::Convert<float>(*w));
-    auto ch = static_cast<double>(Converter::Convert<float>(*h));
+    auto cx = Converter::Convert<double>(x);
+    auto cy = Converter::Convert<double>(y);
+    auto cw = Converter::Convert<double>(w);
+    auto ch = Converter::Convert<double>(h);
     peerImpl->FillRect(cx, cy, cw, ch);
 }
 void StrokeRectImpl(Ark_CanvasRenderer peer,
-                    const Ark_Number* x,
-                    const Ark_Number* y,
-                    const Ark_Number* w,
-                    const Ark_Number* h)
+                    Ark_Float64 x,
+                    Ark_Float64 y,
+                    Ark_Float64 w,
+                    Ark_Float64 h)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(w);
-    CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto cx = static_cast<double>(Converter::Convert<float>(*x));
-    auto cy = static_cast<double>(Converter::Convert<float>(*y));
-    auto cw = static_cast<double>(Converter::Convert<float>(*w));
-    auto ch = static_cast<double>(Converter::Convert<float>(*h));
+    auto cx = Converter::Convert<double>(x);
+    auto cy = Converter::Convert<double>(y);
+    auto cw = Converter::Convert<double>(w);
+    auto ch = Converter::Convert<double>(h);
     peerImpl->StrokeRect(cx, cy, cw, ch);
 }
 void RestoreImpl(Ark_CanvasRenderer peer)
@@ -564,19 +394,17 @@ void SaveImpl(Ark_CanvasRenderer peer)
 }
 void FillTextImpl(Ark_CanvasRenderer peer,
                   const Ark_String* text,
-                  const Ark_Number* x,
-                  const Ark_Number* y,
-                  const Opt_Number* maxWidth)
+                  Ark_Float64 x,
+                  Ark_Float64 y,
+                  const Opt_Float64* maxWidth)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(text);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
-    auto valueX = static_cast<double>(Converter::Convert<float>(*x));
-    auto valueY = static_cast<double>(Converter::Convert<float>(*y));
+    auto valueX = Converter::Convert<double>(x);
+    auto valueY = Converter::Convert<double>(y);
     auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->FillText(valueText, valueX, valueY, optMaxWidth);
 }
@@ -594,19 +422,17 @@ Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
 }
 void StrokeTextImpl(Ark_CanvasRenderer peer,
                     const Ark_String* text,
-                    const Ark_Number* x,
-                    const Ark_Number* y,
-                    const Opt_Number* maxWidth)
+                    Ark_Float64 x,
+                    Ark_Float64 y,
+                    const Opt_Float64* maxWidth)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(text);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
-    auto valueX = static_cast<double>(Converter::Convert<float>(*x));
-    auto valueY = static_cast<double>(Converter::Convert<float>(*y));
+    auto valueX = Converter::Convert<double>(x);
+    auto valueY = Converter::Convert<double>(y);
     auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->StrokeText(valueText, valueX, valueY, optMaxWidth);
 }
@@ -627,51 +453,44 @@ void ResetTransformImpl(Ark_CanvasRenderer peer)
     peerImpl->ResetTransform();
 }
 void RotateImpl(Ark_CanvasRenderer peer,
-                const Ark_Number* angle)
+                Ark_Float64 angle)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(angle);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto rotateAngle = static_cast<double>(Converter::Convert<float>(*angle));
+    auto rotateAngle = Converter::Convert<double>(angle);
     peerImpl->Rotate(rotateAngle);
 }
 void ScaleImpl(Ark_CanvasRenderer peer,
-               const Ark_Number* x,
-               const Ark_Number* y)
+               Ark_Float64 x,
+               Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto scaleX = static_cast<double>(Converter::Convert<float>(*x));
-    auto scaleY = static_cast<double>(Converter::Convert<float>(*y));
+    auto scaleX = Converter::Convert<double>(x);
+    auto scaleY = Converter::Convert<double>(y);
     peerImpl->Scale(scaleX, scaleY);
 }
 void SetTransform0Impl(Ark_CanvasRenderer peer,
-                       const Ark_Number* a,
-                       const Ark_Number* b,
-                       const Ark_Number* c,
-                       const Ark_Number* d,
-                       const Ark_Number* e,
-                       const Ark_Number* f)
+                       Ark_Float64 a,
+                       Ark_Float64 b,
+                       Ark_Float64 c,
+                       Ark_Float64 d,
+                       Ark_Float64 e,
+                       Ark_Float64 f)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    if (!a || !b || !c || !d || !e || !f) {
-        peerImpl->ResetTransform();
-        return;
-    }
     auto param = TransformParam {
-        .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*c)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*b)),
-        .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
-        .translateX = static_cast<double>(Converter::Convert<float>(*e)),
-        .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
+        .scaleX = Converter::Convert<double>(a),
+        .skewX = Converter::Convert<double>(c),
+        .skewY = Converter::Convert<double>(b),
+        .scaleY = Converter::Convert<double>(d),
+        .translateX = Converter::Convert<double>(e),
+        .translateY = Converter::Convert<double>(f) };
     peerImpl->SetTransform(param);
 }
 void SetTransform1Impl(Ark_CanvasRenderer peer,
@@ -684,42 +503,34 @@ void SetTransform1Impl(Ark_CanvasRenderer peer,
     peerImpl->SetTransform(optMatrix);
 }
 void TransformImpl(Ark_CanvasRenderer peer,
-                   const Ark_Number* a,
-                   const Ark_Number* b,
-                   const Ark_Number* c,
-                   const Ark_Number* d,
-                   const Ark_Number* e,
-                   const Ark_Number* f)
+                   Ark_Float64 a,
+                   Ark_Float64 b,
+                   Ark_Float64 c,
+                   Ark_Float64 d,
+                   Ark_Float64 e,
+                   Ark_Float64 f)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(a);
-    CHECK_NULL_VOID(b);
-    CHECK_NULL_VOID(c);
-    CHECK_NULL_VOID(d);
-    CHECK_NULL_VOID(e);
-    CHECK_NULL_VOID(f);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto param = TransformParam {
-        .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*b)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*c)),
-        .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
-        .translateX = static_cast<double>(Converter::Convert<float>(*e)),
-        .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
+        .scaleX = Converter::Convert<double>(a),
+        .skewX = Converter::Convert<double>(b),
+        .skewY = Converter::Convert<double>(c),
+        .scaleY = Converter::Convert<double>(d),
+        .translateX = Converter::Convert<double>(e),
+        .translateY = Converter::Convert<double>(f) };
     peerImpl->Transform(param);
 }
 void TranslateImpl(Ark_CanvasRenderer peer,
-                   const Ark_Number* x,
-                   const Ark_Number* y)
+                   Ark_Float64 x,
+                   Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto transX = static_cast<double>(Converter::Convert<float>(*x));
-    auto transY = static_cast<double>(Converter::Convert<float>(*y));
+    auto transX = Converter::Convert<double>(x);
+    auto transY = Converter::Convert<double>(y);
     peerImpl->Translate(transX, transY);
 }
 void SetPixelMapImpl(Ark_CanvasRenderer peer,
@@ -770,7 +581,13 @@ void ResetImpl(Ark_CanvasRenderer peer)
 }
 Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
 {
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
+        Converter::ArkValue<Ark_LengthMetrics>(0.0_vp));
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
+        Converter::ArkValue<Ark_LengthMetrics>(peerImpl->GetLetterSpacing()));
 }
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
@@ -791,28 +608,31 @@ void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
         },
         []() {});
 }
-Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
-        "for getter method of GlobalAlpha.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(1.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetGlobalAlpha());
 }
 void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
-                        const Ark_Number* globalAlpha)
+                        Ark_Float64 globalAlpha)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(globalAlpha);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto alpha = static_cast<double>(Converter::Convert<float>(*globalAlpha));
+    auto alpha = Converter::Convert<double>(globalAlpha);
     peerImpl->SetGlobalAlpha(alpha);
 }
 Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetGlobalCompositeOperationImpl method should return "
-        "object with specific type");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("source-over");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation(), Converter::FC);
 }
 void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
@@ -824,14 +644,32 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     auto compositeStr = Converter::Convert<std::string>(*globalCompositeOperation);
     peerImpl->SetGlobalCompositeOperation(compositeStr);
 }
-Ark_Union_String_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFillStyleImpl there is no implementation in controller "
-        "for getter method of FillStyle.");
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+        Converter::ArkValue<Ark_String>("#000000"));
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    auto type = peerImpl->GetFillStyleType();
+    switch (type) {
+        case ParamType::STRING:
+        case ParamType::COLOR:
+        case ParamType::INT32:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+                peerImpl->GetFillStyleString(), Converter::FC);
+        case ParamType::CANVAS_GRADIENT:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+                peerImpl->GetFillStyleGradient());
+        case ParamType::CANVAS_PATTERN:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+                peerImpl->GetFillStylePattern());
+        default:
+            return defaultValue;
+    }
 }
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                      const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle)
+                      const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -843,28 +681,50 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetFillStyle(colorStr);
         },
+        [peerImpl](const Ark_Color& style) {
+            auto color = Converter::OptConvert<Color>(style);
+            peerImpl->SetFillStyle(color);
+        },
         [peerImpl](const Ark_Int32& style) {
             auto colorNum = Converter::Convert<int32_t>(style);
-            peerImpl->SetFillStyle(colorNum);
+            if (colorNum >= 0) {
+                peerImpl->SetFillStyle(static_cast<uint32_t>(colorNum));
+            }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
-            CHECK_NULL_VOID(gradient);
-            peerImpl->SetFillStyle(gradient->GetGradient());
+            peerImpl->SetFillStyle(gradient);
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
-            CHECK_NULL_VOID(pattern);
-            peerImpl->SetFillStyle(pattern->GetId());
+            peerImpl->SetFillStyle(pattern);
         },
         []() {});
 }
-Ark_Union_String_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetStrokeStyleImpl there is no implementation in controller "
-        "for getter method of StrokeStyle.");
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+        "#000000");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    auto type = peerImpl->GetStrokeStyleType();
+    switch (type) {
+        case ParamType::STRING:
+        case ParamType::COLOR:
+        case ParamType::INT32:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+                peerImpl->GetStrokeStyleString(), Converter::FC);
+        case ParamType::CANVAS_GRADIENT:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+                peerImpl->GetStrokeStyleGradient());
+        case ParamType::CANVAS_PATTERN:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+                peerImpl->GetStrokeStylePattern());
+        default:
+            return defaultValue;
+    }
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                        const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle)
+                        const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -876,24 +736,31 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetStrokeStyle(colorStr);
         },
+        [peerImpl](const Ark_Color& style) {
+            auto color = Converter::OptConvert<Color>(style);
+            peerImpl->SetStrokeStyle(color);
+        },
         [peerImpl](const Ark_Int32& style) {
             auto colorNum = Converter::Convert<int32_t>(style);
-            peerImpl->SetStrokeStyle(colorNum);
+            if (colorNum >= 0) {
+                peerImpl->SetStrokeStyle(static_cast<uint32_t>(colorNum));
+            }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
-            CHECK_NULL_VOID(gradient);
-            peerImpl->SetStrokeStyle(gradient->GetGradient());
+            peerImpl->SetStrokeStyle(gradient);
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
-            CHECK_NULL_VOID(pattern);
-            peerImpl->SetStrokeStyle(pattern->GetId());
+            peerImpl->SetStrokeStyle(pattern);
         },
         []() {});
 }
 Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFilterImpl method should return object with specific type");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("none");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFilter(), Converter::FC);
 }
 void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
@@ -908,9 +775,11 @@ void SetFilterImpl(Ark_CanvasRenderer peer,
 }
 Ark_Boolean GetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingEnabledImpl there is no implementation in controller "
-        "for getter method of ImageSmoothingEnabled.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Boolean>(peerImpl->GetImageSmoothingEnabled());
 }
 void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
                                   Ark_Boolean imageSmoothingEnabled)
@@ -924,9 +793,11 @@ void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetImageSmoothingQualityImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingQualityImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("low");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetImageSmoothingQuality(), Converter::FC);
 }
 void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -940,9 +811,11 @@ void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetLineCapImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller "
-        "for getter method of LineCap.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("butt");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineCap(), Converter::FC);
 }
 void SetLineCapImpl(Ark_CanvasRenderer peer,
                     const Ark_String* lineCap)
@@ -954,27 +827,30 @@ void SetLineCapImpl(Ark_CanvasRenderer peer,
     auto capStr = Converter::Convert<std::string>(*lineCap);
     peerImpl->SetLineCap(capStr);
 }
-Ark_Number GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl there is no implementation in controller "
-        "for getter method of LinewDashOffset.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetLineDashOffset());
 }
 void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
-                           const Ark_Number* lineDashOffset)
+                           Ark_Float64 lineDashOffset)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(lineDashOffset);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto offset = static_cast<double>(Converter::Convert<float>(*lineDashOffset));
+    auto offset = Converter::Convert<double>(lineDashOffset);
     peerImpl->SetLineDashOffset(offset);
 }
 Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl there is no implementation in controller "
-        "for getter method of LineJoin.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("miter");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineJoin(), Converter::FC);
 }
 void SetLineJoinImpl(Ark_CanvasRenderer peer,
                      const Ark_String* lineJoin)
@@ -986,61 +862,66 @@ void SetLineJoinImpl(Ark_CanvasRenderer peer,
     auto joinStr = Converter::Convert<std::string>(*lineJoin);
     peerImpl->SetLineJoin(joinStr);
 }
-Ark_Number GetLineWidthImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetLineWidthImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller "
-        "for getter method of LinewWidth.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(1.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetLineWidth());
 }
 void SetLineWidthImpl(Ark_CanvasRenderer peer,
-                      const Ark_Number* lineWidth)
+                      Ark_Float64 lineWidth)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(lineWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto width = static_cast<double>(Converter::Convert<float>(*lineWidth));
+    auto width = Converter::Convert<double>(lineWidth);
     peerImpl->SetLineWidth(width);
 }
-Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetMiterLimitImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetMiterLimitImpl there is no implementation in controller "
-        "for getter method of MiterLimit.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetMiterLimit());
 }
 void SetMiterLimitImpl(Ark_CanvasRenderer peer,
-                       const Ark_Number* miterLimit)
+                       Ark_Float64 miterLimit)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(miterLimit);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto limit = static_cast<double>(Converter::Convert<float>(*miterLimit));
+    auto limit = Converter::Convert<double>(miterLimit);
     peerImpl->SetMiterLimit(limit);
 }
-Ark_Number GetShadowBlurImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetShadowBlurImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowBlurImpl there is no implementation in controller "
-        "for getter method of ShadowBlur.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowBlur());
 }
 void SetShadowBlurImpl(Ark_CanvasRenderer peer,
-                       const Ark_Number* shadowBlur)
+                       Ark_Float64 shadowBlur)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(shadowBlur);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto blur = static_cast<double>(Converter::Convert<float>(*shadowBlur));
+    auto blur = Converter::Convert<double>(shadowBlur);
     peerImpl->SetShadowBlur(blur);
 }
 Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowColorImpl there is no implementation in controller "
-        "for getter method of ShadowColor.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("#00000000");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetShadowColor(), Converter::FC);
 }
 void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
@@ -1053,43 +934,47 @@ void SetShadowColorImpl(Ark_CanvasRenderer peer,
     auto colorStr = Converter::Convert<std::string>(*shadowColor);
     peerImpl->SetShadowColor(colorStr);
 }
-Ark_Number GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetXImpl there is no implementation in controller "
-        "for getter method of ShadowOffsetXImpl.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowOffsetX());
 }
 void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
-                          const Ark_Number* shadowOffsetX)
+                          Ark_Float64 shadowOffsetX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(shadowOffsetX);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto offsetX = Converter::Convert<double>(*shadowOffsetX);
+    auto offsetX = Converter::Convert<double>(shadowOffsetX);
     peerImpl->SetShadowOffsetX(offsetX);
 }
-Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
+Ark_Float64 GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetYImpl there is no implementation in controller "
-        "for getter method of ShadowOffsetYImpl.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowOffsetY());
 }
 void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
-                          const Ark_Number* shadowOffsetY)
+                          Ark_Float64 shadowOffsetY)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(shadowOffsetY);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto offsetY = Converter::Convert<double>(*shadowOffsetY);
+    auto offsetY = Converter::Convert<double>(shadowOffsetY);
     peerImpl->SetShadowOffsetY(offsetY);
 }
 Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller "
-        "for getter method of Direction.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("inherit");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetDirection(), Converter::FC);
 }
 void SetDirectionImpl(Ark_CanvasRenderer peer,
                       const Ark_String* direction)
@@ -1103,9 +988,11 @@ void SetDirectionImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetFontImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFontImpl there is no implementation in controller "
-        "for getter method of Font.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("normal normal 14px sans-serif");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFont(), Converter::FC);
 }
 void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)
@@ -1119,9 +1006,11 @@ void SetFontImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetTextAlignImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller "
-        "for getter method of TextAlign.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("left");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextAlign(), Converter::FC);
 }
 void SetTextAlignImpl(Ark_CanvasRenderer peer,
                       const Ark_String* textAlign)
@@ -1135,9 +1024,11 @@ void SetTextAlignImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetTextBaselineImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller "
-        "for getter method of TextBaseline.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("alphabetic");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextBaseline(), Converter::FC);
 }
 void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                          const Ark_String* textBaseline)
@@ -1169,12 +1060,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::CreatePatternImpl,
         CanvasRendererAccessor::CreateRadialGradientImpl,
         CanvasRendererAccessor::CreateConicGradientImpl,
-        CanvasRendererAccessor::CreateImageData0Impl,
-        CanvasRendererAccessor::CreateImageData1Impl,
-        CanvasRendererAccessor::GetImageDataImpl,
         CanvasRendererAccessor::GetPixelMapImpl,
-        CanvasRendererAccessor::PutImageData0Impl,
-        CanvasRendererAccessor::PutImageData1Impl,
         CanvasRendererAccessor::GetLineDashImpl,
         CanvasRendererAccessor::SetLineDashImpl,
         CanvasRendererAccessor::ClearRectImpl,

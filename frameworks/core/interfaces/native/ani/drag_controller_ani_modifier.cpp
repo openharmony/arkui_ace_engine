@@ -82,24 +82,16 @@ struct DragControllerAsyncCtx {
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
     std::optional<DimensionOffset> touchPoint;
-    DragAction *dragAction = nullptr;
+    std::shared_ptr<DragAction> dragAction = nullptr;
     NG::DragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
-    ~DragControllerAsyncCtx();
 };
 } // namespace
 void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx);
 void CreatePixelMapArrayByCustom(
     std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ArkUINodeHandle customBuilder, int arrayLength);
 ParameterType GetParameterType(std::shared_ptr<DragControllerAsyncCtx> asyncCtx);
-
-DragControllerAsyncCtx::~DragControllerAsyncCtx()
-{
-    if (!dragAction) {
-        dragAction = nullptr;
-    }
-}
 
 static bool CheckDragging(const RefPtr<Container>& container)
 {
@@ -245,7 +237,7 @@ void prepareDataForCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     ArkUIDragNotifyMessage& notifyMsg)
 {
     arkUIAsync->env = asyncCtx->env;
-    arkUIAsync->extraParams = asyncCtx->extraParams.c_str();
+    arkUIAsync->extraParams = asyncCtx->extraParams;
     arkUIAsync->isArray = asyncCtx->isArray;
     arkUIAsync->dragAction = asyncCtx->dragAction;
     arkUIAsync->deferred = asyncCtx->deferred;
@@ -540,6 +532,8 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
+        Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
         asyncCtx->isSwitchedToSubWindow = true;
     }
@@ -738,6 +732,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
+        Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
         asyncCtx->isSwitchedToSubWindow = true;
     }
@@ -880,8 +876,8 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     CHECK_NULL_RETURN(dragAsyncContext, nullptr);
     dragAsyncContext->env = asyncCtx.env;
     dragAsyncContext->isArray = asyncCtx.isArray;
-    if (asyncCtx.extraParams) {
-        dragAsyncContext->extraParams = std::string(asyncCtx.extraParams);
+    if (!asyncCtx.extraParams.empty()) {
+        dragAsyncContext->extraParams = asyncCtx.extraParams;
     }
     dragAsyncContext->hasHandle = asyncCtx.hasHandle;
     void* touchPointPtr = asyncCtx.touchPoint;

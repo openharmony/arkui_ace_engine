@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -37,6 +38,7 @@ import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class TextModifier extends CommonMethodModifier implements TextAttribute,AttributeModifier<TextAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -124,6 +126,12 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _halfLeading_0_0value?: boolean | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _compressLeadingPunctuation_0_0value?: boolean | undefined
+    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _includeFontPadding_0_0value?: boolean | undefined
+    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fallbackLineSpacing_0_0value?: boolean | undefined
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _font_0_1value?: FontSettingOptions | undefined
@@ -139,6 +147,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _bindSelectionMenu_0_2value?: TextResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -843,6 +852,60 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {
@@ -918,6 +981,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     }
     mergeModifier(modifier: TextModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_0_flag) {
@@ -1425,6 +1489,45 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {
@@ -1904,6 +2007,39 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._compressLeadingPunctuation_0_0value = value
+        } else
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
+            this._includeFontPadding_0_0value = value
+        } else
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fallbackLineSpacing_0_0value = value
+        } else
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

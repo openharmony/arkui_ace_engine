@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-export function errorAsString(error: Error): string {
-    const stack = error.stack
-    return stack
-        ? error.toString() + '\n' + stack
-        : error.toString()
+export function errorAsString(error: Any): string {
+    if (error instanceof Error) {
+        const stack = error.stack
+        return stack ? error.toString() + '\n' + stack : error.toString()
+    }
+    return JSON.stringify(error)
 }
 
 export function unsafeCast<T>(value: Object): T {
@@ -32,20 +33,8 @@ export function memoryStats(): string {
     return `used ${GC.getUsedHeapSize()} free ${GC.getFreeHeapSize()}`
 }
 
-export function launchJob(job: () => void): Promise<void> {
-    throw new Error("unsupported yet: return launch job()")
+export function launchJob(task: () => void): Promise<Any> {
+    return taskpool.execute(task)
 }
 
-export class CoroutineLocalValue<T> {
-    private map = new containers.ConcurrentHashMap<int, T>
-    get(): T | undefined {
-        return this.map.get(CoroutineExtras.getWorkerId())
-    }
-    set(value: T | undefined) {
-        if (value) {
-            this.map.set(CoroutineExtras.getWorkerId(), value)
-        } else {
-            this.map.delete(CoroutineExtras.getWorkerId())
-        }
-    }
-}
+export type WorkerLocalValue<T> = WorkerLocal<T>

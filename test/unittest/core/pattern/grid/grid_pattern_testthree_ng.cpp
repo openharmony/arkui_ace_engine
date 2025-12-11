@@ -48,7 +48,7 @@ HWTEST_F(GridTestThreeNg, SkipRegularLines001, TestSize.Level1)
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = -20.0f;
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->SkipRegularLines(true);
     EXPECT_EQ(layout->info_.currentOffset_, 24.0f);
 }
@@ -70,7 +70,7 @@ HWTEST_F(GridTestThreeNg, SkipRegularLinesForward, TestSize.Level1)
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0;
-    layout->crossCount_ = 3;
+    layout->info_.crossCount_ = 3;
     layout->SkipRegularLines(true);
     EXPECT_EQ(layout->info_.currentOffset_, 0.0f);
 }
@@ -93,7 +93,7 @@ HWTEST_F(GridTestThreeNg, SkipIrregularLines001, TestSize.Level1)
     gridLayoutInfo.gridMatrix_[1] = { { 5, -6 }, { 7, -8 } };
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -132,7 +132,7 @@ HWTEST_F(GridTestThreeNg, SkipIrregularLines002, TestSize.Level1)
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -172,7 +172,7 @@ HWTEST_F(GridTestThreeNg, FillNewLineBackward001, TestSize.Level1)
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -213,7 +213,7 @@ HWTEST_F(GridTestThreeNg, MeasureNewChild001, TestSize.Level1)
     gridLayoutInfo.gridMatrix_[1] = { { 5, 6 }, { 7, 8 } };
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -277,7 +277,7 @@ HWTEST_F(GridTestThreeNg, MeasureChildPlaced001, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 5;
     auto result = layout->MeasureChildPlaced(frameSize, 2, 2, &layoutWrapper, childLayoutWrapper);
     EXPECT_EQ(result, 0);
@@ -314,7 +314,7 @@ HWTEST_F(GridTestThreeNg, CheckNeedMeasure001, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 5;
     LayoutConstraintF layoutConstraint;
     auto result = layout->CheckNeedMeasure(childLayoutWrapper, layoutConstraint);
@@ -352,10 +352,10 @@ HWTEST_F(GridTestThreeNg, CheckNeedMeasure002, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 5;
     LayoutConstraintF layoutConstraint;
-    layout->axis_ = Axis::HORIZONTAL;
+    layout->info_.axis_ = Axis::HORIZONTAL;
     auto result = layout->CheckNeedMeasure(childLayoutWrapper, layoutConstraint);
     EXPECT_TRUE(result);
 }
@@ -374,7 +374,7 @@ HWTEST_F(GridTestThreeNg, CheckGridPlaced001, TestSize.Level1)
     gridLayoutInfo.endMainLineIndex_ = 2;
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     auto result = layout->CheckGridPlaced(2, 2, 3, 2, 5);
     EXPECT_FALSE(result);
 }
@@ -393,7 +393,7 @@ HWTEST_F(GridTestThreeNg, ComputeItemCrossPosition001, TestSize.Level1)
     gridLayoutInfo.endMainLineIndex_ = 2;
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->itemsCrossSize_[0] = 1.0f;
     layout->itemsCrossSize_[1] = 2.0f;
     layout->crossPaddingOffset_ = 2.0f;
@@ -433,7 +433,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild001, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 5;
     LayoutConstraintF layoutConstraint;
     auto result = layout->MeasureCachedChild(frameSize, 2, &layoutWrapper, childLayoutWrapper);
@@ -471,7 +471,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild002, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 3;
     layout->lastCross_ = 4;
@@ -511,7 +511,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild003, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 4;
+    layout->info_.crossCount_ = 4;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 3;
     layout->lastCross_ = 3;
@@ -552,7 +552,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild004, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 2;
+    layout->info_.crossCount_ = 2;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 3;
     layout->lastCross_ = 3;
@@ -593,7 +593,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild005, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 5;
+    layout->info_.crossCount_ = 5;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 4;
     layout->lastCross_ = 3;
@@ -634,7 +634,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild006, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 5;
+    layout->info_.crossCount_ = 5;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 4;
     layout->lastCross_ = 3;
@@ -675,7 +675,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild007, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 3;
+    layout->info_.crossCount_ = 3;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 4;
     layout->lastCross_ = 3;
@@ -718,7 +718,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild008, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 2;
+    layout->info_.crossCount_ = 2;
     layout->currentItemColSpan_ = 1;
     layout->currentItemColStart_ = 3;
     layout->lastCross_ = 3;
@@ -761,7 +761,7 @@ HWTEST_F(GridTestThreeNg, MeasureCachedChild009, TestSize.Level1)
     SizeF frameSize(100.0f, 100.0f);
     RefPtr<LayoutWrapper> childLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, gridItemLayoutProperty);
-    layout->crossCount_ = 2;
+    layout->info_.crossCount_ = 2;
     layout->currentItemColSpan_ = 2;
     layout->currentItemColStart_ = 3;
     layout->lastCross_ = 3;

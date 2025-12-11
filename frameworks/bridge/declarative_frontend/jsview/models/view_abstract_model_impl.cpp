@@ -1607,7 +1607,7 @@ void ViewAbstractModelImpl::BindMenu(
 }
 
 void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
-    const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+    NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
@@ -1700,6 +1700,9 @@ void ViewAbstractModelImpl::SetAccessibilityImportance(const std::string& import
     inspector->SetAccessibilityImportance(importance);
 }
 
+void ViewAbstractModelImpl::SetAccessibilityStateDescription(const std::string& stateDescription)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilitySelected(bool selected, bool resetValue)
 {}
 
@@ -1742,5 +1745,11 @@ void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
 {}
 
 void ViewAbstractModelImpl::SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc)
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions)
+{}
+
+void ViewAbstractModelImpl::ResetAccessibilityActionOptions()
 {}
 } // namespace OHOS::Ace::Framework

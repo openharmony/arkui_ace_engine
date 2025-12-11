@@ -80,6 +80,48 @@ ScriptItems Convert(const Array_ScriptItem& src)
 }
 
 template<>
+ScriptItemsByOrder Convert(const Array_ScriptItem& src)
+{
+    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
+    ScriptItemsByOrder scriptItemsByOrder;
+    std::unordered_set<std::string> temp;
+    for (auto item : items) {
+
+        if (temp.insert(item.first).second) {
+            scriptItemsByOrder.push_back(item.first);
+        }
+    }
+    return scriptItemsByOrder;
+}
+
+template<>
+ScriptRegexItems Convert(const Array_ScriptItem& src)
+{
+    ScriptRegexItems scriptRegexItems;
+    auto convScriptItem = Converter::OptConvert<std::vector<Ark_ScriptItem>>(src);
+    if (!convScriptItem) {
+        // Implement Reset value
+        return scriptRegexItems;
+    }
+    for (auto scriptItem : *convScriptItem) {
+        auto script = Converter::Convert<std::string>(scriptItem.script);
+        std::vector<std::pair<std::string, std::string>> regexRules;
+        auto urlRegexRules = Converter::OptConvert<std::vector<Ark_UrlRegexRule>>(scriptItem.urlRegexRules)
+            .value_or(std::vector<Ark_UrlRegexRule>{});
+        for (auto regexRule : urlRegexRules) {
+            auto secondLevelDomain = Converter::Convert<std::string>(regexRule.secondLevelDomain);
+            auto rule = Converter::Convert<std::string>(regexRule.rule);
+            regexRules.push_back(std::make_pair(secondLevelDomain, rule));
+        }
+        if (scriptRegexItems.find(script) == scriptRegexItems.end()) {
+            scriptRegexItems.insert(std::make_pair(script, regexRules));
+        }
+    }
+ 
+    return scriptRegexItems;
+}
+
+template<>
 NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
 {
     NestedScrollOptionsExt nestedOpt = {
@@ -236,6 +278,8 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
     WebModelStatic::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
+    auto emulateTouchFromMouseEvent = Converter::OptConvert<bool>(value->emulateTouchFromMouseEvent);
+    WebModelStatic::SetEmulateTouchFromMouseEvent(frameNode, emulateTouchFromMouseEvent);
 #endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier
@@ -1009,7 +1053,7 @@ void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                               const Opt_Type_WebAttribute_onInterceptRequest* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2148,23 +2192,33 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    auto createMenuCallback = Converter::GetOpt(optValue->onCreateMenu);
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onCreateMenuCallback =
+        nullptr;
+    if (createMenuCallback) {
+        onCreateMenuCallback =
+            [arkCreateMenu = CallbackHelper(*createMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
             auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
             return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    }
+    auto menuItemClickCallback = Converter::GetOpt(optValue->onMenuItemClick);
+    std::function<bool(NG::MenuItemParam)> onMenuItemClickCallback = nullptr;
+    if (menuItemClickCallback) {
+        onMenuItemClickCallback = [arkMenuItemClick = CallbackHelper(*menuItemClickCallback)](
+                                      NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range { .start = menuOptionsParam.start, .end = menuOptionsParam.end };
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            auto arkResult =
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    WebModelStatic::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    }
+    WebModelStatic::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClickCallback));
 #endif // WEB_SUPPORTED
 }
 void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
@@ -2222,7 +2276,19 @@ void SetRunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnDocumentStart(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentStartByOrder(
+        frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetRunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
@@ -2236,7 +2302,19 @@ void SetRunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnDocumentEnd(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentEndByOrder(
+        frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
@@ -2250,7 +2328,18 @@ void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
@@ -2734,7 +2823,8 @@ void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
     if (detectionMethods.size() == 0) {
         detectionMethods = { 0 };
     }
-    auto contentfulNodesCountThreshold = *(Converter::OptConvert<int32_t>(optValue->contentfulNodesCountThreshold));
+    auto contentfulNodesCountThreshold =
+        Converter::OptConvert<int32_t>(optValue->contentfulNodesCountThreshold).value_or(0);
     contentfulNodesCountThreshold = contentfulNodesCountThreshold < 0 ? 0 : contentfulNodesCountThreshold;
 
     BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};
@@ -2769,6 +2859,17 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
         return;
     }
     WebModelStatic::SetEnableSelectedDataDetector(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
+void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
@@ -2913,6 +3014,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };

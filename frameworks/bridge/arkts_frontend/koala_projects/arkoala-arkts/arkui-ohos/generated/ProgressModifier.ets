@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookProgressContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { Resource } from "global.resource"
 import { LinearGradient } from "./component/dataPanel"
 export class ProgressModifier extends CommonMethodModifier implements ProgressAttribute,AttributeModifier<ProgressAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -49,6 +51,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<ProgressConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkProgressPeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -144,6 +147,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
     }
     mergeModifier(modifier: ProgressModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._value_0_flag) {

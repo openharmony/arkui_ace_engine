@@ -33,6 +33,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -568,10 +569,10 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
 
     selectTheme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
 
     menuPattern->isSelectMenu_ = true;
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg045
@@ -607,7 +608,7 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->Layout(&layoutWrapper);
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, &layoutWrapper);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
 }
 
 /**

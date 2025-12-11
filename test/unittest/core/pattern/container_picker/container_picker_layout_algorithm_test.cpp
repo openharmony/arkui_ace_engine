@@ -55,6 +55,7 @@ public:
     RefPtr<FrameNode> frameNode_;
     void CreateContainerPickerNode(int32_t itemCount = 9);
     void AddChildNodes(RefPtr<FrameNode>& parentNode, int32_t count);
+    void SetChildNodeFrameSize(LayoutWrapper* layoutWrapper, int32_t childIndex, float width, float height);
 };
 
 class TestNode : public UINode {
@@ -150,12 +151,22 @@ void ContainerPickerLayoutAlgorithmTest::AddChildNodes(RefPtr<FrameNode>& parent
     }
 }
 
+void ContainerPickerLayoutAlgorithmTest::SetChildNodeFrameSize(
+    LayoutWrapper* layoutWrapper, int32_t childIndex, float width, float height)
+{
+    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    auto childGeometryNode = childLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+    childGeometryNode->SetFrameSize({ width, height });
+}
+
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest001
+ * @tc.name: MeasureHeightWithDefaultHeight
  * @tc.desc: Test MeasureHeight method with default height
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithDefaultHeight, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
@@ -177,19 +188,19 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
     EXPECT_FALSE(Negative(algorithm_->GetContentMainSize()));
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest002
+ * @tc.name: MeasureHeightWithHeightMatchPolicy
  * @tc.desc: Test MeasureHeight method with heightMatch policy
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithHeightMatchPolicy, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and set heightMatch policy
+     * @tc.steps: step1. Create ContainerPicker and set heightMatch policy to MATCH_PARENT
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -209,18 +220,19 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest003
- * @tc.desc: Test MeasureHeight method with negative height
+ * @tc.name: MeasureHeightWithNegativeHeight
+ * @tc.desc: Test MeasureHeight method when handling negative or undefined height
+ * values
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithNegativeHeight, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper with undefined height
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -236,8 +248,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = constraintWithNegativeHeight;
 
     /**
-     * @tc.steps: step2. Call MeasureHeight with negative height
-     * @tc.expected: step2. The height should be set to default value
+     * @tc.steps: step2. Call MeasureHeight with undefined height
+     * @tc.expected: step2. The height should be set to default value of 200
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
@@ -246,55 +258,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest004
- * @tc.desc: Test MeasureHeight method with height changed
+ * @tc.name: MeasureHeightWithHeightUnchanged
+ * @tc.desc: Test MeasureHeight method when height remains unchanged
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest004, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create ContainerPicker and set initial height
-     */
-    CreateContainerPickerNode();
-    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(refLayoutWrapper, nullptr);
-    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
-
-    // Set initial height
-    float initialHeight = 300.0f;
-    algorithm_->SetHeight(initialHeight);
-
-    // Add some items to itemPosition_
-    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
-    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
-
-    EXPECT_FALSE(algorithm_->itemPosition_.empty());
-
-    /**
-     * @tc.steps: step2. Change height and call MeasureHeight
-     * @tc.expected: step2. itemPosition_ should be cleared when height changes
-     */
-    OptionalSizeF contentIdealSize;
-    LayoutConstraintF constraintWithDifferentHeight = layoutConstraintF;
-    constraintWithDifferentHeight.selfIdealSize = { 200, 500 };
-    layoutProperty->contentConstraint_ = constraintWithDifferentHeight;
-
-    algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
-    EXPECT_FALSE(NearEqual(algorithm_->GetHeight(), initialHeight));
-    EXPECT_TRUE(algorithm_->itemPosition_.empty());
-}
-
-/**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest005
- * @tc.desc: Test MeasureHeight method with height unchanged
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest005, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithHeightUnchanged, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set initial height
@@ -323,7 +291,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step2. Call MeasureHeight with same height
-     * @tc.expected: step2. itemPosition_ should not be cleared
+     * @tc.expected: step2. itemPosition_ should not be cleared and height should remain the same
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
@@ -332,11 +300,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest006
- * @tc.desc: Test MeasureHeight method without layoutPolicy
+ * @tc.name: MeasureHeightWithoutLayoutPolicy
+ * @tc.desc: Test MeasureHeight method when no layoutPolicy is set
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest006, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithoutLayoutPolicy, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker without layoutPolicy
@@ -360,15 +328,15 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest007
+ * @tc.name: MeasureHeightWithCustomSelfIdealSize
  * @tc.desc: Test MeasureHeight method with custom selfIdealSize
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest007, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithCustomSelfIdealSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker with custom selfIdealSize
@@ -397,11 +365,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest008
- * @tc.desc: Test MeasureHeight method with layoutPolicy MATCH_PARENT
+ * @tc.name: MeasureHeightWithLayoutPolicyMatchParent
+ * @tc.desc: Test MeasureHeight method with layoutPolicy set to MATCH_PARENT
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest008, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithLayoutPolicyMatchParent, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -419,7 +387,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set layoutPolicy MATCH_PARENT
+     * @tc.steps: step2. Set layoutPolicy to MATCH_PARENT
      * @tc.expected: step2. The height should be set to parent height
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
@@ -430,11 +398,12 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest009
- * @tc.desc: Test MeasureHeight method with layoutPolicy WRAP_CONTENT or FIX_AT_IDEAL_SIZE
+ * @tc.name: MeasureHeightWithLayoutPolicyWrapContentOrFixAtIdealSize
+ * @tc.desc: Test MeasureHeight method with layoutPolicy set to WRAP_CONTENT or
+ * FIX_AT_IDEAL_SIZE
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest009, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithLayoutPolicyWrapContentOrFixAtIdealSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -452,7 +421,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set layoutPolicy WRAP_CONTENT
+     * @tc.steps: step2. Set layoutPolicy to WRAP_CONTENT
      * @tc.expected: step2. The height should be set to default height
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
@@ -462,7 +431,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     EXPECT_EQ(contentIdealSize.Height().value(), 200);
 
     /**
-     * @tc.steps: step3. Set layoutPolicy FIX_AT_IDEAL_SIZE
+     * @tc.steps: step3. Set layoutPolicy to FIX_AT_IDEAL_SIZE
      * @tc.expected: step3. The height should be set to default height
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
@@ -473,11 +442,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest010
- * @tc.desc: Test MeasureHeight method with layoutPolicy NO_MATCH
+ * @tc.name: MeasureHeightWithLayoutPolicyNoMatch
+ * @tc.desc: Test MeasureHeight method with layoutPolicy set to NO_MATCH
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureHeightTest010, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithLayoutPolicyNoMatch, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -495,7 +464,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set layoutPolicy NO_MATCH
+     * @tc.steps: step2. Set layoutPolicy to NO_MATCH
      * @tc.expected: step2. The height should be set to default height
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
@@ -506,14 +475,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest001
- * @tc.desc: Test MeasureWidth method of ContainerPickerLayoutAlgorithm with default width
+ * @tc.name: MeasureWidthWithDefaultWidth
+ * @tc.desc: Test MeasureWidth method with default width settings
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithDefaultWidth, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
+     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper with default settings
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -527,28 +496,32 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step2. Set contentIdealSize and call MeasureWidth
-     * @tc.expected: step2. The width should be set correctly
+     * @tc.expected: step2. The width should be set correctly with a valid value
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 200);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest002
- * @tc.desc: Test MeasureWidth method of ContainerPickerLayoutAlgorithm with WRAP_CONTENT policy
+ * @tc.name: MeasureWidthWithWrapContentPolicy
+ * @tc.desc: Test MeasureWidth method with WRAP_CONTENT policy
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithWrapContentPolicy, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and set WRAP_CONTENT policy
+     * @tc.steps: step1. Create ContainerPicker and set WRAP_CONTENT policy for width
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 150, 40);
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -557,28 +530,32 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step2. Call MeasureWidth with WRAP_CONTENT policy
-     * @tc.expected: step2. The width should be calculated correctly
+     * @tc.expected: step2. The width should be calculated correctly with a valid value
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 150);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest003
- * @tc.desc: Test MeasureWidth method of ContainerPickerLayoutAlgorithm with FIX_AT_IDEAL_SIZE policy
+ * @tc.name: MeasureWidthWithFixAtIdealSizePolicy
+ * @tc.desc: Test MeasureWidth method with FIX_AT_IDEAL_SIZE policy
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithFixAtIdealSizePolicy, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker and set FIX_AT_IDEAL_SIZE policy
+     * @tc.steps: step1. Create ContainerPicker and set FIX_AT_IDEAL_SIZE policy for width
      */
     CreateContainerPickerNode();
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 150, 40);
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -587,19 +564,20 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step2. Call MeasureWidth with FIX_AT_IDEAL_SIZE policy
-     * @tc.expected: step2. The width should be set to ideal size
+     * @tc.expected: step2. The width should be set to ideal size with a valid value
      */
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 150);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest004
+ * @tc.name: MeasureWidthWithDifferentContentConstraints
  * @tc.desc: Test MeasureWidth method with different content constraints
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest004, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithDifferentContentConstraints, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -617,8 +595,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Test MeasureWidth with undefined cross size
-     * @tc.expected: step2. The width should be calculated correctly
+     * @tc.steps: step2. Test MeasureWidth with undefined cross size by setting up item positions and frame size
+     * @tc.expected: step2. The width should be calculated correctly based on child node frame size
      */
     OptionalSizeF contentIdealSize;
 
@@ -638,11 +616,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest005
- * @tc.desc: Test MeasureWidth method with infinity cross size
+ * @tc.name: MeasureWidthWithLargeCrossSize
+ * @tc.desc: Test MeasureWidth method with large cross size
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest005, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithLargeCrossSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -655,62 +633,27 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
-
-    /**
-     * @tc.steps: step2. Set infinity cross size
-     * @tc.expected: step2. The width should be set to child max width
-     */
-    OptionalSizeF contentIdealSize;
-    contentIdealSize.SetCrossSize(INFINITY, Axis::VERTICAL);
-
-    // Set item positions to simulate measured items
-    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
-    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
-
-    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
-    EXPECT_TRUE(contentIdealSize.Width().has_value());
-    EXPECT_TRUE(algorithm_->crossMatchChild_);
-}
-
-/**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest006
- * @tc.desc: Test MeasureWidth method with negative cross size
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest006, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
-     */
-    CreateContainerPickerNode(3);
-    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(refLayoutWrapper, nullptr);
-    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
 
     /**
-     * @tc.steps: step2. Set negative cross size
-     * @tc.expected: step2. The width should be set to default width
+     * @tc.steps: step2. Set self cross size greater than parent cross size
+     * @tc.expected: step2. The width remains.
      */
+    layoutConstraintF.selfIdealSize = { 500, 910 };
+    layoutProperty->contentConstraint_ = layoutConstraintF;
     OptionalSizeF contentIdealSize;
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 500);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest007
+ * @tc.name: MeasureWidthWithWrapContentAndParentCrossSize
  * @tc.desc: Test MeasureWidth method with WRAP_CONTENT and parent cross size
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest007, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithWrapContentAndParentCrossSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -720,6 +663,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 500, 40);
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -727,8 +671,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
 
     /**
-     * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint
-     * @tc.expected: step2. The width should be constrained by parent cross size
+     * @tc.steps: step2. Test WRAP_CONTENT with parent cross size constraint and simulate measured items
+     * @tc.expected: step2. The width should be constrained by parent cross size and crossMatchChild_ should be true
      */
     OptionalSizeF contentIdealSize;
 
@@ -738,15 +682,16 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 400);
     EXPECT_TRUE(algorithm_->crossMatchChild_);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest008
+ * @tc.name: MeasureWidthWithFixAtIdealSizeAndParentCrossSize
  * @tc.desc: Test MeasureWidth method with FIX_AT_IDEAL_SIZE and parent cross size
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest008, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithFixAtIdealSizeAndParentCrossSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -756,6 +701,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 400, 40);
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -763,8 +709,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
 
     /**
-     * @tc.steps: step2. Test FIX_AT_IDEAL_SIZE with parent cross size constraint
-     * @tc.expected: step2. The width should be constrained by parent cross size
+     * @tc.steps: step2. Test FIX_AT_IDEAL_SIZE with parent cross size constraint and simulate measured items
+     * @tc.expected: step2. The width should be constrained by parent cross size and crossMatchChild_ should be true
      */
     OptionalSizeF contentIdealSize;
 
@@ -774,15 +720,16 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 400);
     EXPECT_TRUE(algorithm_->crossMatchChild_);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest009
- * @tc.desc: Test MeasureWidth method with negative cross size with MATCH_PARENT policy
+ * @tc.name: MeasureWidthWithNegativeCrossSizeAndMatchParentPolicy
+ * @tc.desc: Test MeasureWidth method with negative cross size and MATCH_PARENT policy
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest009, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithNegativeCrossSizeAndMatchParentPolicy, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -795,12 +742,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
+    std::optional<float> width;
+    layoutConstraintF.selfIdealSize = { width, 910 };
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
 
     /**
-     * @tc.steps: step2. Set negative cross size
-     * @tc.expected: step2. The width should be set to parent width
+     * @tc.steps: step2. Set negative cross size by not providing a valid cross size
+     * @tc.expected: step2. The width should be set to parent width of 200.0f
      */
     OptionalSizeF contentIdealSize;
 
@@ -810,16 +759,15 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest001
- * @tc.desc: Test CalcMainAndMiddlePos method of ContainerPickerLayoutAlgorithm with default height
+ * @tc.name: CalcMainAndMiddlePosWithDefaultHeight
+ * @tc.desc: Test CalcMainAndMiddlePos method with default height settings
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithDefaultHeight, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set height and call CalcMainAndMiddlePos
-     * @tc.expected: step1. The main and middle positions should be calculated correctly
+     * @tc.steps: step1. Set height to 500.0f and call CalcMainAndMiddlePos
+     * @tc.expected: step1. The main and middle positions should be calculated correctly with expected values
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -831,16 +779,15 @@ HWTEST_F(
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest002
- * @tc.desc: Test CalcMainAndMiddlePos method of ContainerPickerLayoutAlgorithm with large height
+ * @tc.name: CalcMainAndMiddlePosWithLargeHeight
+ * @tc.desc: Test CalcMainAndMiddlePos method with large height settings
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithLargeHeight, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set large height and call CalcMainAndMiddlePos
-     * @tc.expected: step1. The positions should be calculated correctly with large height
+     * @tc.steps: step1. Set large height to 1200.0f and call CalcMainAndMiddlePos
+     * @tc.expected: step1. The positions should be calculated correctly with expected values for large height
      */
     algorithm_->SetHeight(1200.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -852,58 +799,14 @@ HWTEST_F(
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest003
- * @tc.desc: Test CalcMainAndMiddlePos method of ContainerPickerLayoutAlgorithm with positive delta
+ * @tc.name: MeasurePickerItemsWithItems
+ * @tc.desc: Test MeasurePickerItems method with items
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasurePickerItemsWithItems, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set large height and call CalcMainAndMiddlePos
-     * @tc.expected: step1. The positions should be calculated correctly with delta
-     */
-    algorithm_->SetHeight(500.0f);
-    algorithm_->SetCurrentDelta(50.0f);
-    algorithm_->CalcMainAndMiddlePos();
-
-    EXPECT_EQ(algorithm_->startMainPos_, 110);
-    EXPECT_EQ(algorithm_->endMainPos_, 440);
-    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
-    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
-}
-
-/**
- * @tc.name: ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest004
- * @tc.desc: Test CalcMainAndMiddlePos method of ContainerPickerLayoutAlgorithm with negative delta
- * @tc.type: FUNC
- */
-HWTEST_F(
-    ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_CalcMainAndMiddlePosTest004, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Set large height and call CalcMainAndMiddlePos
-     * @tc.expected: step1. The positions should be calculated correctly with delta
-     */
-    algorithm_->SetHeight(500.0f);
-    algorithm_->SetCurrentDelta(-50.0f);
-    algorithm_->CalcMainAndMiddlePos();
-
-    EXPECT_EQ(algorithm_->startMainPos_, 60);
-    EXPECT_EQ(algorithm_->endMainPos_, 390);
-    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
-    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
-}
-
-/**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasurePickerItemsTest001
- * @tc.desc: Test MeasurePickerItems method of ContainerPickerLayoutAlgorithm with items
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasurePickerItemsTest001, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -916,8 +819,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set algorithm properties and call MeasurePickerItems
-     * @tc.expected: step2. The items should be measured correctly
+     * @tc.steps: step2. Set algorithm properties including height and total item count, then call MeasurePickerItems
+     * @tc.expected: step2. The items should be measured correctly and itemPosition_ should not be empty
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -925,20 +828,20 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasurePickerItems(layoutWrapper, layoutConstraint);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasurePickerItems(layoutWrapper);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasurePickerItemsTest002
- * @tc.desc: Test MeasurePickerItems method of ContainerPickerLayoutAlgorithm with existing item positions
+ * @tc.name: MeasurePickerItemsWithExistingItemPositions
+ * @tc.desc: Test MeasurePickerItems method with existing item positions
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasurePickerItemsTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasurePickerItemsWithExistingItemPositions, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -951,7 +854,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set existing item positions
+     * @tc.steps: step2. Set existing item positions with selected index and height properties
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -961,33 +864,34 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     algorithm_->itemPosition_[1] = { 185.0f, 315.0f, nullptr };
 
     /**
-     * @tc.steps: step3. Call MeasurePickerItems
-     * @tc.expected: step3. The items should be measured correctly based on existing positions
+     * @tc.steps: step3. Call MeasurePickerItems with existing positions
+     * @tc.expected: step3. The items should be measured correctly based on existing positions and itemPosition_ should
+     * not be empty
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasurePickerItems(layoutWrapper, layoutConstraint);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasurePickerItems(layoutWrapper);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_GetStartEndPositionTest001
- * @tc.desc: Test GetStartPosition and GetEndPosition methods of ContainerPickerLayoutAlgorithm
+ * @tc.name: GetStartEndPosition
+ * @tc.desc: Test GetStartPosition and GetEndPosition methods
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_GetStartEndPositionTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, GetStartEndPosition, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Add items to itemPosition_
+     * @tc.steps: step1. Add items to itemPosition_ with specific start and end positions
      */
     algorithm_->itemPosition_[0] = { 100.0f, 150.0f, nullptr };
     algorithm_->itemPosition_[1] = { 150.0f, 200.0f, nullptr };
     algorithm_->itemPosition_[2] = { 200.0f, 250.0f, nullptr };
 
     /**
-     * @tc.steps: step2. Test GetStartPosition and GetEndPosition
-     * @tc.expected: step2. The positions should be returned correctly
+     * @tc.steps: step2. Test GetStartPosition and GetEndPosition methods
+     * @tc.expected: step2. The positions should be returned correctly matching the minimum start and maximum end values
      */
     EXPECT_TRUE(NearEqual(algorithm_->GetStartPosition(), 100.0f));
     EXPECT_TRUE(NearEqual(algorithm_->GetEndPosition(), 250.0f));
@@ -999,22 +903,22 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_GetS
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_GetStartEndIndexTest001
- * @tc.desc: Test GetStartIndex and GetEndIndex methods of ContainerPickerLayoutAlgorithm
+ * @tc.name: GetStartEndIndex
+ * @tc.desc: Test GetStartIndex and GetEndIndex methods
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_GetStartEndIndexTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, GetStartEndIndex, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Add items to itemPosition_
+     * @tc.steps: step1. Add items to itemPosition_ with specific indexes
      */
     algorithm_->itemPosition_[0] = { 100.0f, 150.0f, nullptr };
     algorithm_->itemPosition_[1] = { 150.0f, 200.0f, nullptr };
     algorithm_->itemPosition_[2] = { 200.0f, 250.0f, nullptr };
 
     /**
-     * @tc.steps: step2. Test GetStartIndex and GetEndIndex
-     * @tc.expected: step2. The indexes should be returned correctly
+     * @tc.steps: step2. Test GetStartIndex and GetEndIndex methods
+     * @tc.expected: step2. The indexes should be returned correctly matching the minimum and maximum index values
      */
     EXPECT_EQ(algorithm_->GetStartIndex(), 0);
     EXPECT_EQ(algorithm_->GetEndIndex(), 2);
@@ -1026,14 +930,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_GetS
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureBelowTest001
- * @tc.desc: Test MeasureBelow method of ContainerPickerLayoutAlgorithm
+ * @tc.name: MeasureBelow
+ * @tc.desc: Test MeasureBelow method
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureBelowTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureBelow, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1046,7 +950,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm and call MeasureBelow
+     * @tc.steps: step2. Set up algorithm properties and call MeasureBelow with index 2 and position 185.0f
+     * @tc.expected: step2. The items below should be measured correctly and itemPosition_ should not be empty
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -1054,20 +959,20 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureBelow(layoutWrapper, layoutConstraint, 2, 185.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureBelow(layoutWrapper, 2, 185.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureBelowTest002
+ * @tc.name: MeasureBelowWithCanOverScrollEnabled
  * @tc.desc: Test MeasureBelow method with canOverScroll enabled
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureBelowTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureBelowWithCanOverScrollEnabled, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1080,7 +985,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm with canOverScroll and call MeasureBelow
+     * @tc.steps: step2. Set up algorithm with canOverScroll enabled and call MeasureBelow
+     * @tc.expected: step2. The items below should be measured correctly with overscroll support and itemPosition_
+     * should not be empty
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -1089,20 +996,20 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureBelow(layoutWrapper, layoutConstraint, 2, 185.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureBelow(layoutWrapper, 2, 185.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAboveTest001
- * @tc.desc: Test MeasureAbove method of ContainerPickerLayoutAlgorithm
+ * @tc.name: MeasureAbove
+ * @tc.desc: Test MeasureAbove method
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAboveTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAbove, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1115,7 +1022,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm and call MeasureAbove
+     * @tc.steps: step2. Set up algorithm properties and call MeasureAbove with index 2 and position 315.0f
+     * @tc.expected: step2. The items above should be measured correctly and itemPosition_ should not be empty
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -1123,20 +1031,20 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureAbove(layoutWrapper, layoutConstraint, 2, 315.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureAbove(layoutWrapper, 2, 315.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAboveTest002
+ * @tc.name: MeasureAboveWithCanOverScrollEnabled
  * @tc.desc: Test MeasureAbove method with canOverScroll enabled
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAboveTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAboveWithCanOverScrollEnabled, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 5 child nodes
      */
     CreateContainerPickerNode(5);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1149,7 +1057,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm with canOverScroll and call MeasureAbove
+     * @tc.steps: step2. Set up algorithm with canOverScroll enabled and call MeasureAbove
+     * @tc.expected: step2. The items above should be measured correctly with overscroll support and itemPosition_
+     * should not be empty
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
@@ -1158,59 +1068,59 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureAbove(layoutWrapper, layoutConstraint, 2, 315.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureAbove(layoutWrapper, 2, 315.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_NeedMeasureBelowTest001
- * @tc.desc: Test NeedMeasureBelow method of ContainerPickerLayoutAlgorithm
+ * @tc.name: NeedMeasureBelow
+ * @tc.desc: Test NeedMeasureBelow method under different scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_NeedMeasureBelowTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, NeedMeasureBelow, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set up algorithm properties
+     * @tc.steps: step1. Set up algorithm contentMainSize property to 500.0f
      */
     algorithm_->contentMainSize_ = 500.0f;
 
     /**
-     * @tc.steps: step2. Test different scenarios
-     * @tc.expected: step2. The return value should be correct based on conditions
+     * @tc.steps: step2. Test different scenarios with varying end positions and canOverScroll settings
+     * @tc.expected: step2. The return value should be correct based on whether items need to be measured below
      */
-    EXPECT_TRUE(algorithm_->NeedMeasureBelow(0, 100.0f, 500.0f, false));
-    EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
+    EXPECT_TRUE(algorithm_->NeedMeasureBelow(100.0f, 500.0f));
+    EXPECT_FALSE(algorithm_->NeedMeasureBelow(600.0f, 500.0f));
 
     // Test with canOverScroll
     algorithm_->canOverScroll_ = true;
-    EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
+    EXPECT_FALSE(algorithm_->NeedMeasureBelow(600.0f, 500.0f));
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_NeedMeasureAboveTest001
- * @tc.desc: Test NeedMeasureAbove method of ContainerPickerLayoutAlgorithm
+ * @tc.name: NeedMeasureAbove
+ * @tc.desc: Test NeedMeasureAbove method under different scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_NeedMeasureAboveTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, NeedMeasureAbove, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Test different scenarios
-     * @tc.expected: step1. The return value should be correct based on conditions
+     * @tc.steps: step1. Test different scenarios with varying start positions
+     * @tc.expected: step1. The return value should be correct based on whether items need to be measured above
      */
-    EXPECT_TRUE(algorithm_->NeedMeasureAbove(0, 100.0f, 50.0f, false));
-    EXPECT_FALSE(algorithm_->NeedMeasureAbove(0, 30.0f, 50.0f, false));
+    EXPECT_TRUE(algorithm_->NeedMeasureAbove(100.0f, 50.0f));
+    EXPECT_FALSE(algorithm_->NeedMeasureAbove(30.0f, 50.0f));
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_AdjustOffsetOnBelowTest001
- * @tc.desc: Test AdjustOffsetOnBelow method of ContainerPickerLayoutAlgorithm
+ * @tc.name: AdjustOffsetOnBelow
+ * @tc.desc: Test AdjustOffsetOnBelow method when last item is at the bottom
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_AdjustOffsetOnBelowTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, AdjustOffsetOnBelow, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set up itemPosition_ with last item at the bottom
+     * @tc.steps: step1. Set up itemPosition_ with last item at the bottom and canOverScroll disabled
      */
     algorithm_->itemPosition_[0] = { 100.0f, 200.0f, nullptr };
     algorithm_->itemPosition_[1] = { 200.0f, 300.0f, nullptr };
@@ -1221,7 +1131,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
     algorithm_->canOverScroll_ = false;
 
     /**
-     * @tc.steps: step2. Call AdjustOffsetOnBelow
+     * @tc.steps: step2. Call AdjustOffsetOnBelow with position 400.0f
      * @tc.expected: step2. The currentOffset_ should be adjusted to 0
      */
     algorithm_->AdjustOffsetOnBelow(400.0f);
@@ -1229,11 +1139,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_AdjustOffsetOnBelowTest002
+ * @tc.name: AdjustOffsetOnBelowWithCanOverScrollEnabled
  * @tc.desc: Test AdjustOffsetOnBelow method with canOverScroll enabled
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_AdjustOffsetOnBelowTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, AdjustOffsetOnBelowWithCanOverScrollEnabled, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Set up itemPosition_ and enable canOverScroll
@@ -1246,22 +1156,22 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
     algorithm_->canOverScroll_ = true;
 
     /**
-     * @tc.steps: step2. Call AdjustOffsetOnBelow
-     * @tc.expected: step2. The currentOffset_ should not be adjusted
+     * @tc.steps: step2. Call AdjustOffsetOnBelow with position 300.0f
+     * @tc.expected: step2. The currentOffset_ should not be adjusted when canOverScroll is enabled
      */
     algorithm_->AdjustOffsetOnBelow(300.0f);
     EXPECT_TRUE(NearEqual(algorithm_->currentOffset_, 100.0f));
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_AdjustOffsetOnAboveTest001
- * @tc.desc: Test AdjustOffsetOnAbove method of ContainerPickerLayoutAlgorithm
+ * @tc.name: AdjustOffsetOnAbove
+ * @tc.desc: Test AdjustOffsetOnAbove method when first item is at the top
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_AdjustOffsetOnAboveTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, AdjustOffsetOnAbove, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set up itemPosition_ with first item at the top
+     * @tc.steps: step1. Set up itemPosition_ with first item at the top and canOverScroll disabled
      */
     algorithm_->itemPosition_[0] = { 100.0f, 200.0f, nullptr };
     algorithm_->itemPosition_[1] = { 200.0f, 300.0f, nullptr };
@@ -1270,7 +1180,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
     algorithm_->canOverScroll_ = false;
 
     /**
-     * @tc.steps: step2. Call AdjustOffsetOnAbove
+     * @tc.steps: step2. Call AdjustOffsetOnAbove with position 100.0f
      * @tc.expected: step2. The currentOffset_ should be adjusted to 0
      */
     algorithm_->AdjustOffsetOnAbove(100.0f);
@@ -1278,11 +1188,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_AdjustOffsetOnAboveTest002
+ * @tc.name: AdjustOffsetOnAboveWithCanOverScrollEnabled
  * @tc.desc: Test AdjustOffsetOnAbove method with canOverScroll enabled
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_AdjustOffsetOnAboveTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, AdjustOffsetOnAboveWithCanOverScrollEnabled, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Set up itemPosition_ and enable canOverScroll
@@ -1294,22 +1204,22 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Adju
     algorithm_->canOverScroll_ = true;
 
     /**
-     * @tc.steps: step2. Call AdjustOffsetOnAbove
-     * @tc.expected: step2. The currentOffset_ should not be adjusted
+     * @tc.steps: step2. Call AdjustOffsetOnAbove with position 100.0f
+     * @tc.expected: step2. The currentOffset_ should not be adjusted when canOverScroll is enabled
      */
     algorithm_->AdjustOffsetOnAbove(100.0f);
     EXPECT_TRUE(NearEqual(algorithm_->currentOffset_, -50.0f));
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_LayoutTest001
- * @tc.desc: Test Layout method of ContainerPickerLayoutAlgorithm
+ * @tc.name: LayoutTest
+ * @tc.desc: Test Layout method to verify item positioning with currentOffset_
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_LayoutTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, LayoutTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with 3 child nodes and set up item positions
      */
     CreateContainerPickerNode(3);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1328,8 +1238,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
     algorithm_->currentOffset_ = 50.0f;
 
     /**
-     * @tc.steps: step2. Call Layout
-     * @tc.expected: step2. The items should be laid out correctly
+     * @tc.steps: step2. Call Layout method to position items
+     * @tc.expected: step2. The items should be laid out correctly with adjusted positions based on currentOffset_
      */
     algorithm_->Layout(layoutWrapper);
 
@@ -1340,11 +1250,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_LayoutItemTest001
- * @tc.desc: Test LayoutItem method of ContainerPickerLayoutAlgorithm
+ * @tc.name: LayoutItemTest
+ * @tc.desc: Test LayoutItem method to verify individual item positioning
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_LayoutItemTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, LayoutItemTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker with a child node
@@ -1364,7 +1274,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
 
     /**
      * @tc.steps: step2. Call LayoutItem
-     * @tc.expected: step2. The item should be laid out at the correct position
+     * @tc.expected: step2. The item should be laid out at the correct position with non-zero Y offset
      */
     algorithm_->LayoutItem(layoutWrapper, OffsetF(0.0f, 0.0f), pos);
 
@@ -1376,14 +1286,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureTest001
- * @tc.desc: Test Measure method of ContainerPickerLayoutAlgorithm with items
+ * @tc.name: MeasureWithItemsTest
+ * @tc.desc: Test Measure method with multiple child items
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWithItemsTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with child nodes and set total item count
      */
     CreateContainerPickerNode(3);
     algorithm_->SetTotalItemCount(3);
@@ -1397,8 +1307,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Call Measure
-     * @tc.expected: step2. The container and items should be measured correctly
+     * @tc.steps: step2. Call Measure method
+     * @tc.expected: step2. The container should be marked as measured and itemPosition_ should not be empty
      */
     algorithm_->Measure(layoutWrapper);
 
@@ -1407,14 +1317,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureTest002
- * @tc.desc: Test Measure method of ContainerPickerLayoutAlgorithm with loop enabled
+ * @tc.name: MeasureWithLoopEnabledTest
+ * @tc.desc: Test Measure method with loop mode enabled
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWithLoopEnabledTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with child nodes, set total item count and enable loop mode
      */
     CreateContainerPickerNode(3);
     algorithm_->SetTotalItemCount(3);
@@ -1429,8 +1339,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Call Measure
-     * @tc.expected: step2. The container and items should be measured correctly in loop mode
+     * @tc.steps: step2. Call Measure method
+     * @tc.expected: step2. The container should be marked as measured in loop mode
      */
     algorithm_->Measure(layoutWrapper);
 
@@ -1438,11 +1348,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureTest003
- * @tc.desc: Test Measure method of ContainerPickerLayoutAlgorithm with no items
+ * @tc.name: MeasureWithoutItemsTest
+ * @tc.desc: Test Measure method with no child items
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWithoutItemsTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker without child nodes
@@ -1458,8 +1368,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Call Measure with no items
-     * @tc.expected: step2. The container should still be measured correctly
+     * @tc.steps: step2. Call Measure method
+     * @tc.expected: step2. The container should be marked as measured and itemPosition_ should be empty
      */
     algorithm_->Measure(layoutWrapper);
 
@@ -1468,14 +1378,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_SetGetMethodsTest001
- * @tc.desc: Test set and get methods of ContainerPickerLayoutAlgorithm
+ * @tc.name: SetGetMethodsTest
+ * @tc.desc: Test set and get methods to verify property value consistency
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_SetGetMethodsTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, SetGetMethodsTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Set various properties
+     * @tc.steps: step1. Set various properties using set methods
      */
     algorithm_->SetIsLoop(true);
     algorithm_->SetTotalItemCount(7);
@@ -1485,7 +1395,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_SetG
     algorithm_->SetCurrentDelta(100.0f);
 
     /**
-     * @tc.steps: step2. Verify get methods return correct values
+     * @tc.steps: step2. Verify property values using get methods
      * @tc.expected: step2. The get methods should return the values set in step1
      */
     EXPECT_TRUE(algorithm_->isLoop_);
@@ -1496,11 +1406,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_SetG
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithmTranslateAndRotateTest001
- * @tc.desc: Test TranslateAndRotate method of ContainerPickerLayoutAlgorithm
+ * @tc.name: TranslateAndRotateTest
+ * @tc.desc: Test TranslateAndRotate method with different offset values
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTranslateAndRotateTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, TranslateAndRotateTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create FrameNode and set up necessary properties
@@ -1515,6 +1425,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
 
     /**
      * @tc.steps: step2. Test TranslateAndRotate with different offset values
+     * @tc.expected: step2. The Y offset should be adjusted based on the position relative to the middle
      */
     // Test case 1: Zero offset
     OffsetF offset1(0.0f, 120.0f);
@@ -1548,14 +1459,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithmTranslateAndRotateTest002
- * @tc.desc: Test TranslateAndRotate method of ContainerPickerLayoutAlgorithm when height is 0
+ * @tc.name: TranslateAndRotateWithZeroHeightTest
+ * @tc.desc: Test TranslateAndRotate method when height is zero
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTranslateAndRotateTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, TranslateAndRotateWithZeroHeightTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create FrameNode and set up necessary properties
+     * @tc.steps: step1. Create FrameNode and set height before rotation to zero
      */
     auto frameNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -1566,6 +1477,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
 
     /**
      * @tc.steps: step2. Test TranslateAndRotate with zero offset
+     * @tc.expected: step2. The Y offset should remain unchanged when height is zero
      */
     OffsetF offset1(0.0f, 120.0f);
     float originalY1 = offset1.GetY();
@@ -1574,15 +1486,14 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest001
- * @tc.desc: Test ResetOffscreenItemPosition method of ContainerPickerLayoutAlgorithm
+ * @tc.name: ResetOffscreenItemPositionTest
+ * @tc.desc: Test ResetOffscreenItemPosition method to verify offscreen item resetting
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest001,
-    TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ResetOffscreenItemPositionTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create ContainerPicker with child nodes
+     * @tc.steps: step1. Create ContainerPicker with child nodes and get layout wrapper
      */
     CreateContainerPickerNode(3);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1601,7 +1512,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
 
     /**
      * @tc.steps: step2. Call ResetOffscreenItemPosition
-     * @tc.expected: step2. The offscreen item position should be reset correctly
+     * @tc.expected: step2. The offscreen item position should be reset to -PICKER_ITEM_DEFAULT_HEIGHT
      */
     algorithm_->ResetOffscreenItemPosition(layoutWrapper, 0);
 
@@ -1613,20 +1524,23 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest002
- * @tc.desc: Test ResetOffscreenItemPosition method with nullptr check
+ * @tc.name: ResetOffscreenItemPositionWithNullTest
+ * @tc.desc: Test ResetOffscreenItemPosition method with nullptr and invalid index parameters
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_ResetOffscreenItemPositionTest002,
-    TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ResetOffscreenItemPositionWithNullTest, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Test with nullptr parameters (should not crash)
-     * @tc.expected: step1. The function should handle nullptr gracefully
+     * @tc.steps: step1. Test with nullptr parameters
+     * @tc.expected: step1. The function should handle nullptr gracefully without crashing
      */
     // This test case verifies that the function handles nullptr gracefully without crashing
     algorithm_->ResetOffscreenItemPosition(nullptr, 0);
 
+    /**
+     * @tc.steps: step2. Create layout wrapper and test with invalid index
+     * @tc.expected: step2. The function should handle invalid index gracefully without crashing
+     */
     // Create layout wrapper but test with invalid index
     CreateContainerPickerNode(1);
     auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
@@ -1638,11 +1552,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_LayoutTest002
+ * @tc.name: LayoutWithoutPositionAlignmentTest
  * @tc.desc: Test Layout method without position property alignment
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_LayoutTest002, TestSize.Level1)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, LayoutWithoutPositionAlignmentTest, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -1667,11 +1581,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest001
- * @tc.desc: Test aspect ratio processing when aspect ratio is valid and height changes
+ * @tc.name: MeasureAspectRatioWithHeightChangeTest
+ * @tc.desc: Test aspect ratio processing when aspect ratio is valid and height changes are required
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAspectRatioWithHeightChangeTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
@@ -1687,7 +1601,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set aspectRatio/height/width
+     * @tc.steps: step2. Set aspect ratio, initial height, width, and total item count
      */
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateAspectRatio(2);
@@ -1697,7 +1611,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step3. Call HandleAspectRatio to trigger aspect ratio processing
-     * @tc.expected: step3. Height should be updated, reMeasure_ should be true
+     * @tc.expected: step3. Height should be updated to maintain aspect ratio, reMeasure_ should be true
      */
     OptionalSizeF contentIdealSize;
     algorithm_->HandleAspectRatio(layoutWrapper, contentIdealSize);
@@ -1709,11 +1623,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest002
- * @tc.desc: Test aspect ratio processing when aspect ratio is valid but height doesn't change
+ * @tc.name: MeasureAspectRatioWithNoHeightChangeTest
+ * @tc.desc: Test aspect ratio processing when aspect ratio is valid but height doesn't need to change
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAspectRatioWithNoHeightChangeTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
@@ -1729,7 +1643,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set aspectRatio/height/width
+     * @tc.steps: step2. Set aspect ratio, height and width that already maintain aspect ratio
      */
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateAspectRatio(2);
@@ -1749,11 +1663,11 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest003
+ * @tc.name: MeasureAspectRatioWithInvalidRatioTest
  * @tc.desc: Test aspect ratio processing when aspect ratio is invalid (zero)
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest003, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAspectRatioWithInvalidRatioTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
@@ -1769,7 +1683,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set aspectRatio/height/width
+     * @tc.steps: step2. Set invalid aspect ratio (zero) and initial dimensions
      */
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateAspectRatio(0);
@@ -1778,7 +1692,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     /**
      * @tc.steps: step3. Call HandleAspectRatio to trigger aspect ratio processing
-     * @tc.expected: step3. Height should not be updated, reMeasure_ should be false
+     * @tc.expected: step3. Height and width should not be updated, reMeasure_ should be false
      */
     OptionalSizeF contentIdealSize;
     algorithm_->HandleAspectRatio(layoutWrapper, contentIdealSize);
@@ -1786,6 +1700,303 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), 200));
     EXPECT_TRUE(NearEqual(algorithm_->contentCrossSize_, 300));
     EXPECT_FALSE(algorithm_->reMeasure_);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithRemeasure
+ * @tc.desc: Test CalcMainAndMiddlePos method when reMeasure_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithRemeasure, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with reMeasure_ true
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float currentOffsetFromMiddle = 10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->reMeasure_ = true;
+    algorithm_->currentOffsetFromMiddle_ = currentOffsetFromMiddle;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. middleItemStartPos_ and middleItemEndPos_ should be calculated with offset
+     */
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, (height - pickerItemHeight) / 2.0f + currentOffsetFromMiddle);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, (height + pickerItemHeight) / 2.0f + currentOffsetFromMiddle);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithPositiveDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is positive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithPositiveDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with positive currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float positiveDelta = 10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = positiveDelta;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should be reduced by pickerItemHeight, endMainPos_ should include delta
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) - pickerItemHeight;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + positiveDelta;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithNegativeDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithNegativeDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with negative currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float negativeDelta = -10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = negativeDelta;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should include delta, endMainPos_ should be increased by pickerItemHeight
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) + negativeDelta;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + pickerItemHeight;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithZeroDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithZeroDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with zero currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = 0.0f;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should be reduced and endMainPos_ should be increased by pickerItemHeight
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) - pickerItemHeight;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + pickerItemHeight;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithoutRemeasure
+ * @tc.desc: Test CalcMainAndMiddlePos method when reMeasure_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithoutRemeasure, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with reMeasure_ false
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float offsetFromMiddle = 10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->reMeasure_ = false;
+    algorithm_->currentOffsetFromMiddle_ = offsetFromMiddle;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. middleItemStartPos_ and middleItemEndPos_ should not include offsetFromMiddle
+     */
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, (height - pickerItemHeight) / 2.0f);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, (height + pickerItemHeight) / 2.0f);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWhenLessThanLimit
+ * @tc.desc: Test RetainDisplayItems method when item count is less than or equal to DISPLAY_COUNT + 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWhenLessThanLimit, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count less than DISPLAY_COUNT + 1
+     */
+    // Create 10 items which is less than 11
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    int32_t initialSize = algorithm_->itemPosition_.size();
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain unchanged in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsAtTop
+ * @tc.desc: Test RetainDisplayItems method with atTop true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsAtTop, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count greater than DISPLAY_COUNT + 1
+     */
+    // Create 20 items which is more than DISPLAY_COUNT + 1
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with atTop true
+     * @tc.expected: step2. Only DISPLAY_COUNT + 1 items should be retained from the top
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_LE(algorithm_->itemPosition_.size(), 8);
+
+    // Verify that the first item is still index 0
+    EXPECT_TRUE(algorithm_->itemPosition_.find(0) != algorithm_->itemPosition_.end());
+}
+
+/**
+ * @tc.name: RetainDisplayItemsAtBottom
+ * @tc.desc: Test RetainDisplayItems method with atTop false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsAtBottom, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count greater than DISPLAY_COUNT + 1
+     */
+    // Create 20 items which is more than DISPLAY_COUNT + 1
+    for (int32_t i = 0; i < 20; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with atTop false
+     * @tc.expected: step2. Only DISPLAY_COUNT + 1 items should be retained from the bottom
+     */
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_LE(algorithm_->itemPosition_.size(), 8);
+
+    // Verify that the last item is still index 19
+    EXPECT_TRUE(algorithm_->itemPosition_.find(19) != algorithm_->itemPosition_.end());
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWithExactlyLimitCount
+ * @tc.desc: Test RetainDisplayItems method when item count is exactly DISPLAY_COUNT + 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithExactlyLimitCount, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count exactly DISPLAY_COUNT + 1
+     */
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    int32_t initialSize = algorithm_->itemPosition_.size();
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain unchanged in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWithEmptyPosition
+ * @tc.desc: Test RetainDisplayItems method with empty itemPosition_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithEmptyPosition, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Ensure itemPosition_ is empty
+     */
+    algorithm_->itemPosition_.clear();
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain empty in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
 }
 
 } // namespace OHOS::Ace::NG

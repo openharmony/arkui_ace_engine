@@ -464,6 +464,9 @@ public:
     std::string LayoutInfoToString();
     std::string GetAlignmentStringFromLocalized(TextDirection layoutDirection, std::string localizedAlignment);
 
+    void UpdateIsUserSetBackgroundColor(bool value);
+    bool GetIsUserSetBackgroundColor() const;
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -541,6 +544,8 @@ private:
     bool needOffsetLocalizedEdges_ = false;
     bool needLazyLayout_ = false;
     bool isUserSetVisibility_ = false;
+
+    bool isUserSetBackgroundColor_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

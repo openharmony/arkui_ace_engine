@@ -451,10 +451,10 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    for (uint32_t i = 0; i < res.size(); i++) {
+    for (std::size_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
-        std::size_t start = temp.find(openBrace);
-        std::size_t end = temp.find(":");
+        auto start = temp.find(openBrace);
+        auto end = temp.find(":");
         if (temp.empty() || end < start + 1) {
             break;
         }

@@ -61,6 +61,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -95,12 +96,14 @@ constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
 
 struct FontInfo;
 struct FontConfigJsonInfo;
+struct FrameMetrics;
 class Frontend;
 class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
 class NavigationController;
+class StatisticEventReporter;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
@@ -1232,6 +1235,9 @@ public:
         nextFrameLayoutCallback_ = std::move(callback);
     }
 
+    void SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback);
+    void FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info);
+
     void SetForegroundCalled(bool isForegroundCalled)
     {
         isForegroundCalled_ = isForegroundCalled;
@@ -1473,6 +1479,11 @@ public:
 
     virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
 
+    virtual void GetComponentOverlayInspector(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {};
+
+    virtual void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {};
+
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
         return "";
@@ -1656,6 +1667,10 @@ public:
     {
         asyncEventsHookListener_ = asyncEventsExecution;
     }
+    const std::shared_ptr<StatisticEventReporter>& GetStatisticEventReporter() const
+    {
+        return statisticEventReporter_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1790,6 +1805,7 @@ protected:
     KeyboardAnimationConfig keyboardAnimationConfig_;
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    std::function<void(OHOS::Ace::FrameMetrics info)> frameMetricsCallBack_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
@@ -1869,6 +1885,7 @@ private:
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
+    std::shared_ptr<StatisticEventReporter> statisticEventReporter_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

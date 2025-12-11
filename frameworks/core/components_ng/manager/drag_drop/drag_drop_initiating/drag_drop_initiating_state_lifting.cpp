@@ -463,8 +463,8 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     if (!dragPreviewOption.isLiftingDisabled) {
         SetPixelMap();
-        SetGatherAnimation(pipeline);
         SetScaleAnimation(params.idleFingerId);
+        SetGatherAnimation(pipeline);
     }
     SetEventColumn();
     pipeline->FlushSyncGeometryNodeTasks();

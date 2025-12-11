@@ -16,38 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
-#include <functional>
-#include <optional>
-#include <vector>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "core/components_v2/inspector/utils.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
 class JSIndicatorControllerBase;
+struct SwiperItemInfoNG;
 
 enum class GestureStatus {
     INIT = 0,
@@ -865,6 +851,22 @@ public:
         mainSizeIsMeasured_ = mainSizeIsMeasured;
     }
 
+    void SetArrowTouched(bool isArrowTouched)
+    {
+        isArrowTouched_ = isArrowTouched;
+    }
+
+    std::vector<SwiperItemInfoNG> GetShownItemInfoFromIndex(int32_t index);
+
+    void SetIsPureSwiper(bool isPureSwiper)
+    {
+        isPureSwiper_ = isPureSwiper;
+    }
+
+    bool IsPureSwiper() const
+    {
+        return isPureSwiper_;
+    }
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -901,6 +903,7 @@ protected:
     int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;
     int32_t propertyAnimationIndex_ = -1;
 
+    bool isPureSwiper_ = false;
     bool hasTabsAncestor_ = false;
     bool usePropertyAnimation_ = false;
     bool stopIndicatorAnimation_ = true;
@@ -956,6 +959,7 @@ protected:
 
 private:
     void OnModifyDone() override;
+    void OnHostChildUpdateDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -1342,6 +1346,8 @@ private:
     void UpdateDefaultColor();
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1526,6 +1532,7 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
+    bool isArrowTouched_ = false;
     WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
     std::function<void()> resetFunc_;

@@ -99,6 +99,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_COPY_SVG, "ic_public_copy" },
     { InternalResource::ResourceId::IC_PASTE_SVG, "ic_public_paste" },
     { InternalResource::ResourceId::IC_SELECT_ALL_SVG, "ic_public_select_all" },
+    { InternalResource::ResourceId::IC_AUTO_FILL_SVG, "ic_public_auto_fill" },
+    { InternalResource::ResourceId::IC_PASSWORD_VAULT_SVG, "ic_public_password_vault" },
     { InternalResource::ResourceId::IC_SHARE_SVG, "ic_public_share" },
     { InternalResource::ResourceId::IC_TRANSLATE_SVG, "ic_public_translate_c2e" },
     { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" },

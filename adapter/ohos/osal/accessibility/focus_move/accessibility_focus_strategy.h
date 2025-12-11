@@ -42,11 +42,24 @@ enum class AceFocusMoveResult : int32_t {
     FIND_EMBED_TARGET,
     FIND_FAIL_IN_CHILDTREE,
     FIND_FAIL_IN_SCROLL,
+    FIND_FAIL_LOST_NODE,
+    FIND_FAIL_IN_ROOT_TYPE,
 };
 
 struct AceFocusMoveDetailCondition {
     bool bypassSelf = true;
     bool bypassDescendants = false;
+};
+
+enum class CheckSupportScrollAction : int32_t {
+    FIND_FORWARD = 0,
+    FIND_BACKWARD,
+    FIND_ANY,
+};
+
+struct AceDetectThroughAncestorParam {
+    bool changeToAncestorFocusable = false; // change to parent's focusable component
+    bool needCheckValid = false; // check node is valid in detect
 };
 
 class FocusRulesCheckNode : public Accessibility::ReadableRulesNode {
@@ -88,6 +101,21 @@ public:
     {
         return false;
     }
+
+    virtual bool IsHeaderFooterInScroll()
+    {
+        return false;
+    }
+
+    virtual bool IsBackward()
+    {
+        return false;
+    }
+
+    virtual bool IsForward()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {
@@ -101,7 +129,7 @@ public:
     virtual bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
     std::shared_ptr<FocusRulesCheckNode> GetParentNodeStopByRootType(
-        const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode, bool& hitRootType);
 
     AceFocusMoveResult FindNextReadableNode (
         AceFocusMoveDetailCondition condition,
@@ -127,6 +155,12 @@ public:
         AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
+
+    AceFocusMoveResult FindAnyScrollAncestor(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
+
 private:
     AceFocusMoveResult FindNextReadableNodeBySelfAndSameLevel (
         AceFocusMoveDetailCondition condition,
@@ -144,6 +178,30 @@ private:
 
     AceFocusMoveResult FindPrevReadableNodeToHigherLevel(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult IsFindNextReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult IsFindPrevReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    virtual bool IsForceSupportScrollType(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+
+    AceFocusMoveResult FindScrollAncestor(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
+        CheckSupportScrollAction checkAction,
+        bool checkType);
+
+    AceFocusMoveResult CheckParentEarlyStop(
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     std::string GetChildrenIdsStr(

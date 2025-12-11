@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -52,12 +53,15 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childLayoutConstraint = ContainerPickerUtils::CreateChildConstraint(pickerLayoutProperty, contentIdealSize);
     childLayoutConstraint_ = childLayoutConstraint;
     if (totalItemCount_ > 0) {
-        MeasurePickerItems(layoutWrapper, childLayoutConstraint);
+        middleIndexInVisibleWindow_ = selectedIndex_;
+        MeasurePickerItems(layoutWrapper);
     } else {
         itemPosition_.clear();
     }
     MeasureWidth(layoutWrapper, contentIdealSize);
     HandleAspectRatio(layoutWrapper, contentIdealSize);
+    SetPatternHeight(layoutWrapper);
+    HandleOffScreenItems(layoutWrapper);
 
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentIdealSize);
@@ -101,14 +105,14 @@ void ContainerPickerLayoutAlgorithm::HandleAspectRatio(LayoutWrapper* layoutWrap
     if (NearEqual(newHeight, height_)) {
         return;
     }
-    SetHeight(newHeight);
+    height_ = newHeight;
     contentMainSize_ = newHeight;
     contentIdealSize.SetMainSize(newHeight, axis_);
     reMeasure_ = true;
     itemPosition_.clear();
     CalcMainAndMiddlePos();
     if (totalItemCount_ > 0) {
-        MeasurePickerItems(layoutWrapper, childLayoutConstraint_);
+        MeasurePickerItems(layoutWrapper);
     } else {
         itemPosition_.clear();
     }
@@ -133,19 +137,12 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
             height = parentMainSize.has_value() ? std::min(pickerDefaultHeight_, parentMainSize.value())
                                                 : pickerDefaultHeight_;
         } else {
-            height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
-                                        : std::min(mainSize, parentMainSize.value());
+            height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value()) : mainSize;
         }
     } else {
-        height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
-                                    : std::min(mainSize, parentMainSize.value());
+        height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value()) : mainSize;
     }
-
-    if (!NearEqual(height, height_)) {
-        // picker height changed
-        itemPosition_.clear();
-    }
-    SetHeight(height);
+    height_ = height;
     contentMainSize_ = height;
     contentIdealSize.SetMainSize(height, axis_);
 }
@@ -166,11 +163,11 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
     auto commonSetWidth = [crossSize, parentCrossSize, childMaxWidth, &width]() -> bool {
         bool crossMatchChild = false;
-        if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
+        if (Negative(crossSize)) {
             width = parentCrossSize.has_value() ? std::min(childMaxWidth, parentCrossSize.value()) : childMaxWidth;
             crossMatchChild = true;
         } else {
-            width = parentCrossSize.has_value() ? std::min(crossSize, parentCrossSize.value()) : crossSize;
+            width = crossSize;
         }
         return crossMatchChild;
     };
@@ -196,15 +193,25 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    startMainPos_ = std::max((height_ - pickerHeightBeforeRotate_) / HALF, 0.0f);
-    endMainPos_ = startMainPos_ + std::min(height_, pickerHeightBeforeRotate_);
-    if (Positive(currentDelta_)) {
-        endMainPos_ += currentDelta_;
-    } else {
-        startMainPos_ += currentDelta_;
-    }
     middleItemStartPos_ = (height_ - pickerItemHeight_) / HALF;
     middleItemEndPos_ = (height_ + pickerItemHeight_) / HALF;
+    int32_t halfOfDisplayCount = static_cast<int32_t>(DISPLAY_COUNT / 2.0f);
+    startMainPos_ = middleItemStartPos_ - pickerItemHeight_ * (halfOfDisplayCount - 1);
+    endMainPos_ = middleItemEndPos_ + pickerItemHeight_ * (halfOfDisplayCount - 1);
+    if (Positive(currentDelta_)) {
+        endMainPos_ += currentDelta_;
+        startMainPos_ -= pickerItemHeight_;
+    } else if (Negative(currentDelta_)) {
+        startMainPos_ += currentDelta_;
+        endMainPos_ += pickerItemHeight_;
+    } else {
+        startMainPos_ -= pickerItemHeight_;
+        endMainPos_ += pickerItemHeight_;
+    }
+    if (reMeasure_) {
+        middleItemStartPos_ += currentOffsetFromMiddle_;
+        middleItemEndPos_ += currentOffsetFromMiddle_;
+    }
 }
 
 float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrapper) const
@@ -237,35 +244,61 @@ void ContainerPickerLayoutAlgorithm::SetPatternContentMainSize(LayoutWrapper* la
     pickerPattern->SetContentMainSize(contentMainSize_);
 }
 
-void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
+void ContainerPickerLayoutAlgorithm::SetPatternHeight(LayoutWrapper* layoutWrapper)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pickerPattern = hostNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetHeightFromAlgo(height_);
+}
+
+float ContainerPickerLayoutAlgorithm::GetPatternHeight(LayoutWrapper* layoutWrapper)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, height_);
+    auto pickerPattern = hostNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, height_);
+    return pickerPattern->GetHeightFromAlgo();
+}
+
+void ContainerPickerLayoutAlgorithm::MeasurePickerItems(LayoutWrapper* layoutWrapper)
 {
     float startPos = middleItemStartPos_;
     float endPos = middleItemEndPos_;
-    int32_t middleIndexInVisibleWindow = selectedIndex_;
+    middleIndexInVisibleWindow_ = selectedIndex_;
     if (!itemPosition_.empty()) {
-        auto middleItem = ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
-        middleIndexInVisibleWindow = middleItem.first;
-        startPos = middleItem.second.startPos;
-        endPos = middleItem.second.endPos;
+        auto prevHeight = GetPatternHeight(layoutWrapper);
+        auto middleItem =
+            ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, prevHeight, totalItemCount_, isLoop_);
+        currentOffsetFromMiddle_ = (middleItem.second.startPos + middleItem.second.endPos - prevHeight) / HALF;
+        middleIndexInVisibleWindow_ = middleItem.first;
+        startPos += currentOffsetFromMiddle_;
+        endPos += currentOffsetFromMiddle_;
         itemPosition_.clear();
     }
-
-    MeasureBelow(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow, startPos);
-    MeasureAbove(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow - 1, GetStartPosition());
-
-    std::vector<int32_t> prevItemsIndex;
-    std::vector<int32_t> curItemsIndex;
-    for (const auto& pair : prevItemPosition_) {
-        prevItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, prevTotalItemCount_));
+    MeasureBelow(layoutWrapper, middleIndexInVisibleWindow_, startPos);
+    MeasureAbove(layoutWrapper, middleIndexInVisibleWindow_ - 1, GetStartPosition());
+    if (Positive(currentDelta_)) {
+        RetainDisplayItems(false);
     }
+    if (Negative(currentDelta_)) {
+        RetainDisplayItems(true);
+    }
+}
+
+void ContainerPickerLayoutAlgorithm::HandleOffScreenItems(LayoutWrapper* layoutWrapper)
+{
+    std::unordered_set<int32_t> curItemsIndex;
     for (const auto& pair : itemPosition_) {
-        curItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
+        curItemsIndex.insert(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
     }
-    std::sort(prevItemsIndex.begin(), prevItemsIndex.end());
-    std::sort(curItemsIndex.begin(), curItemsIndex.end());
-    std::set_difference(prevItemsIndex.begin(), prevItemsIndex.end(), curItemsIndex.begin(), curItemsIndex.end(),
-        std::back_inserter(offScreenItemsIndex_));
+    for (const auto& pair : prevItemPosition_) {
+        int32_t index = ContainerPickerUtils::GetLoopIndex(pair.first, prevTotalItemCount_);
+        if (curItemsIndex.find(index) == curItemsIndex.end()) {
+            offScreenItemsIndex_.push_back(index);
+        }
+    }
 
     for (int32_t index : offScreenItemsIndex_) {
         ResetOffscreenItemPosition(layoutWrapper, index);
@@ -283,13 +316,32 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
 
     OffsetF offset(0.0f, 0.0f);
     offset.SetY(-pickerItemHeight_);
-
     childGeometryNode->SetMarginFrameOffset(offset);
+
+    NG::ViewAbstract::SetRotate(
+        childWrapper->GetHostNode().GetRawPtr(), NG::Vector5F(1.0f, 0.0f, 0.0f, VERTICAL_ANGLE, 0.0f));
+    childWrapper->Measure(childLayoutConstraint_);
     childWrapper->Layout();
 }
 
-void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
-    const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, bool cachedLayout)
+void ContainerPickerLayoutAlgorithm::RetainDisplayItems(bool atTop)
+{
+    if (itemPosition_.size() <= DISPLAY_COUNT + 1) {
+        return;
+    }
+    // Retain 8 items at most.
+    auto it = itemPosition_.begin();
+    if (atTop) {
+        std::advance(it, DISPLAY_COUNT + 1);
+        itemPosition_.erase(it, itemPosition_.end());
+    } else {
+        std::advance(it, itemPosition_.size() - DISPLAY_COUNT - 1);
+        itemPosition_.erase(itemPosition_.begin(), it);
+    }
+}
+
+void ContainerPickerLayoutAlgorithm::MeasureBelow(
+    LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos, bool cachedLayout)
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
@@ -298,12 +350,11 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
     auto currentIndex = startIndex - 1;
     do {
         currentStartPos = currentEndPos;
-        auto result = MeasureBelowItem(layoutWrapper, layoutConstraint, currentIndex, currentStartPos, currentEndPos);
+        auto result = MeasureBelowItem(layoutWrapper, currentIndex, currentStartPos, currentEndPos);
         if (!result) {
             break;
         }
-    } while (NeedMeasureBelow(currentIndex, currentStartPos, endMainPos, cachedLayout));
-
+    } while (NeedMeasureBelow(currentStartPos, endMainPos));
     if (canOverScroll_ || isLoop_) {
         return;
     }
@@ -313,8 +364,8 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
     }
 }
 
-void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
-    const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos, bool cachedLayout)
+void ContainerPickerLayoutAlgorithm::MeasureAbove(
+    LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos, bool cachedLayout)
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
@@ -323,12 +374,11 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
 
     do {
         currentEndPos = currentStartPos;
-        auto result = MeasureAboveItem(layoutWrapper, layoutConstraint, currentIndex, currentEndPos, currentStartPos);
+        auto result = MeasureAboveItem(layoutWrapper, currentIndex, currentEndPos, currentStartPos);
         if (!result) {
             break;
         }
-    } while (NeedMeasureAbove(currentIndex, currentEndPos, startMainPos, cachedLayout));
-
+    } while (NeedMeasureAbove(currentEndPos, startMainPos));
     if (canOverScroll_ || isLoop_) {
         return;
     }
@@ -338,11 +388,10 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
     }
 }
 
-bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(LayoutWrapper* layoutWrapper,
-    const LayoutConstraintF& layoutConstraint, int32_t& currentIndex, float startPos, float& endPos)
+bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(
+    LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos)
 {
-    if ((currentIndex + 1 >= totalItemCount_ && !isLoop_) ||
-        (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_)) {
+    if (currentIndex + 1 >= totalItemCount_ && !isLoop_) {
         return false;
     }
 
@@ -350,22 +399,17 @@ bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(LayoutWrapper* layoutWrapp
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     ++currentIndex;
     if (!reMeasure_) {
-        wrapper->Measure(layoutConstraint);
+        wrapper->Measure(childLayoutConstraint_);
     }
-
-    auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(pickerLayoutProperty, false);
 
     endPos = startPos + pickerItemHeight_;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
 }
 
-bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapper,
-    const LayoutConstraintF& layoutConstraint, int32_t& currentIndex, float endPos, float& startPos)
+bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(
+    LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos)
 {
-    auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(pickerLayoutProperty, false);
     if (currentIndex - 1 < 0 && !isLoop_) {
         return false;
     }
@@ -374,7 +418,7 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     --currentIndex;
     if (!reMeasure_) {
-        wrapper->Measure(layoutConstraint);
+        wrapper->Measure(childLayoutConstraint_);
     }
 
     startPos = endPos - pickerItemHeight_;
@@ -382,14 +426,12 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
     return true;
 }
 
-bool ContainerPickerLayoutAlgorithm::NeedMeasureBelow(
-    int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const
+bool ContainerPickerLayoutAlgorithm::NeedMeasureBelow(float currentStartPos, float endMainPos) const
 {
     return LessNotEqual(currentStartPos, endMainPos);
 }
 
-bool ContainerPickerLayoutAlgorithm::NeedMeasureAbove(
-    int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const
+bool ContainerPickerLayoutAlgorithm::NeedMeasureAbove(float currentEndPos, float startMainPos) const
 {
     return GreatNotEqual(currentEndPos, startMainPos);
 }

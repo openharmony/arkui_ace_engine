@@ -17,6 +17,15 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 
 namespace OHOS::Ace {
+
+namespace {
+    // Reset info enum for RVS point reset
+    enum RVS_RESET_INFO : int32_t {
+        RVS_RESET_ALL = 0,     // Reset all data
+        RVS_RESET_CUR_ID = 1,  // Reset current ID data only
+    };
+}
+
 ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
 }
@@ -103,5 +112,17 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, TouchEve
     TouchEvent& resamplePoint, TouchEvent& resultPoint)
 {
     resultPoint = hasResamplePoint ? resamplePoint : tpPoint;
+}
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
 } // namespace OHOS::Ace

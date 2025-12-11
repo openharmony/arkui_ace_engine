@@ -204,7 +204,7 @@ export interface Router {
 
     getState(): router.RouterState
 
-    getStateByIndex(index: number): router.RouterState | undefined
+    getStateByIndex(index: int): router.RouterState | undefined
 
     getStateByUrl(url: string): Array<router.RouterState>
 
@@ -883,11 +883,11 @@ class RouterImpl implements Router {
         return state
     }
 
-    getStateByIndex(index: number): router.RouterState | undefined {
+    getStateByIndex(index: int): router.RouterState | undefined {
         if (index > this.showingPageIndex + 1 || index <= 0) {
             return undefined
         }
-        let page = this.visiblePages.at(index.toInt() - 1);
+        let page = this.visiblePages.at(index - 1);
         let state: router.RouterState = {
             index: index,
             name: page.url,
@@ -903,7 +903,7 @@ class RouterImpl implements Router {
             if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
-                    index: index + 1,
+                    index: index.toInt() + 1,
                     name: element.url,
                     path: element.path,
                     params: element.params !== undefined ? element.params! : new Object()

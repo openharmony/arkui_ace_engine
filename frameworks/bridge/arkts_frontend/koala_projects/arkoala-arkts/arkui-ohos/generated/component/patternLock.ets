@@ -20,6 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -28,6 +29,7 @@ import { Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
 import { AttributeModifier, hookPatternLockAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -87,6 +89,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setPatternLockOptionsAttribute(controller?: PatternLockController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (controller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -107,10 +110,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -131,10 +134,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -155,10 +158,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -183,10 +186,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -211,10 +214,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -239,10 +242,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -267,10 +270,10 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -286,15 +289,15 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setPathStrokeWidthAttribute(value: number | string | undefined): void {
+    setPathStrokeWidthAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -306,7 +309,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPatternCompleteAttribute(value: ((input: Array<number>) => void) | undefined): void {
+    setOnPatternCompleteAttribute(value: ((input: Array<int32>) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -330,7 +333,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setAutoReset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDotConnectAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnDotConnectAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -400,16 +403,16 @@ export interface PatternLockAttribute extends CommonMethod {
     pathColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method pathColor")
     }
-    pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method pathStrokeWidth")
     }
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         throw new Error("Unimplemented method onPatternComplete")
     }
     autoReset(value: boolean | undefined): this {
         throw new Error("Unimplemented method autoReset")
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onDotConnect")
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -430,10 +433,10 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     selectedColor_value?: ResourceColor | undefined
     activeColor_value?: ResourceColor | undefined
     pathColor_value?: ResourceColor | undefined
-    pathStrokeWidth_value?: number | string | undefined
-    onPatternComplete_value?: ((input: Array<number>) => void) | undefined
+    pathStrokeWidth_value?: double | string | undefined
+    onPatternComplete_value?: ((input: Array<int32>) => void) | undefined
     autoReset_value?: boolean | undefined
-    onDotConnect_value?: ((value0: number) => void) | undefined
+    onDotConnect_value?: ((value0: int32) => void) | undefined
     activateCircleStyle_value?: CircleStyleOptions | undefined
     skipUnselectedPoint_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -461,16 +464,16 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     pathColor(value: ResourceColor | undefined): this {
         return this
     }
-    pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: double | string | undefined): this {
         return this
     }
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         return this
     }
     autoReset(value: boolean | undefined): this {
         return this
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         return this
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -495,6 +498,7 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setPatternLockOptions")) {
             const controller_casted = controller as (PatternLockController | undefined)
             this.getPeer()?.setPatternLockOptionsAttribute(controller_casted)
+            this.applyOptionsFinish('PatternLockAttribute');
             return this
         }
         return this
@@ -555,17 +559,17 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public pathStrokeWidth(value: number | string | undefined): this {
+    public pathStrokeWidth(value: double | string | undefined): this {
         if (this.checkPriority("pathStrokeWidth")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setPathStrokeWidthAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    public onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         if (this.checkPriority("onPatternComplete")) {
-            const value_casted = value as (((input: Array<number>) => void) | undefined)
+            const value_casted = value as (((input: Array<int32>) => void) | undefined)
             this.getPeer()?.setOnPatternCompleteAttribute(value_casted)
             return this
         }
@@ -579,9 +583,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public onDotConnect(value: ((value0: number) => void) | undefined): this {
+    public onDotConnect(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onDotConnect")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnDotConnectAttribute(value_casted)
             return this
         }
@@ -604,12 +608,17 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPatternLockAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPatternLockAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -653,10 +662,10 @@ export class CircleStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -700,11 +709,11 @@ export class CircleStyleOptions_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -712,7 +721,7 @@ export class CircleStyleOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

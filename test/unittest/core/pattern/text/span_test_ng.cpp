@@ -18,6 +18,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -377,6 +378,20 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
     spanNode->SetParent(node);
     spanNode->RequestTextFlushDirty();
     ASSERT_NE(spanNode->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: SpanNodeCreateTest001
+ * @tc.desc: Test SpanNode GetOrCreateSpanNode when span node is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeCreateTest001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto node = spanNode->GetOrCreateSpanNode(-1);
+    ASSERT_NE(node, nullptr);
 }
 
 /**

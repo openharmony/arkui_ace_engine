@@ -19,10 +19,13 @@
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { extractors, AttributeModifier, hookTabContentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ComponentContent_serializer } from "./../ComponentContent"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -134,6 +137,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTabContentOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._TabContentInterface_setTabContentOptions(this.peer.ptr)
     }
     setTabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
@@ -144,7 +148,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx0)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof SubTabBarStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
@@ -222,9 +226,9 @@ export interface BoardStyle {
 }
 export interface TabBarLabelStyle {
     overflow?: TextOverflow;
-    maxLines?: number;
-    minFontSize?: number | ResourceStr;
-    maxFontSize?: number | ResourceStr;
+    maxLines?: int32;
+    minFontSize?: double | ResourceStr;
+    maxFontSize?: double | ResourceStr;
     heightAdaptivePolicy?: TextHeightAdaptivePolicy;
     font?: Font;
     selectedColor?: ResourceColor;
@@ -287,6 +291,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     public setTabContentOptions(): this {
         if (this.checkPriority("setTabContentOptions")) {
             this.getPeer()?.setTabContentOptionsAttribute()
+            this.applyOptionsFinish('TabContentAttribute');
             return this
         }
         return this
@@ -316,12 +321,17 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabContentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTabContentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class SubTabBarStyle {
@@ -354,7 +364,11 @@ export class SubTabBarStyle {
         this._labelStyle = style
         return this
     }
-    public padding(value: Padding | Dimension | LocalizedPadding): this {
+    public padding(value: Padding | Dimension): this {
+        this._padding = value
+        return this
+    }
+    public padding(value: LocalizedPadding): this {
         this._padding = value
         return this
     }
@@ -431,10 +445,10 @@ export class TabBarIconStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
@@ -455,10 +469,10 @@ export class TabBarIconStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
@@ -478,11 +492,11 @@ export class TabBarIconStyle_serializer {
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                selectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -490,18 +504,18 @@ export class TabBarIconStyle_serializer {
             } else {
                 throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | number | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
         const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                unselectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -509,7 +523,7 @@ export class TabBarIconStyle_serializer {
             } else {
                 throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         let value : TabBarIconStyle = ({selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarIconStyle)
@@ -599,10 +613,10 @@ export class BoardStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
-            } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
+            } else if (valueHolderForBorderRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
@@ -618,17 +632,17 @@ export class BoardStyle_serializer {
         let borderRadiusTmpBuf : Length | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderRadiusTmpBuf_ : string | number | Resource | undefined
+            let borderRadiusTmpBuf_ : string | double | Resource | undefined
             if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
                 borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                borderRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                borderRadiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
                 borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | number | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | double | Resource)
         }
         const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
         let value : BoardStyle = ({borderRadius: borderRadiusTmpResult} as BoardStyle)
@@ -646,10 +660,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -670,10 +684,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
-            } else if (valueHolderForHeightTmpValue instanceof number) {
+            } else if (valueHolderForHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
@@ -690,10 +704,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof number) {
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
@@ -710,10 +724,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
-            } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
+            } else if (valueHolderForBorderRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
@@ -730,10 +744,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTopTmpValueForIdx0  = valueHolderForMarginTopTmpValue as string
                 valueSerializer.writeString(valueHolderForMarginTopTmpValueForIdx0)
-            } else if (valueHolderForMarginTopTmpValue instanceof number) {
+            } else if (valueHolderForMarginTopTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMarginTopTmpValueForIdx1)
+                const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMarginTopTmpValueForIdx1)
             } else if (valueHolderForMarginTopTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as Resource
@@ -749,11 +763,11 @@ export class SubTabBarIndicatorStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -761,75 +775,75 @@ export class SubTabBarIndicatorStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightTmpBuf : Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | number | Resource | undefined
+            let heightTmpBuf_ : string | double | Resource | undefined
             if (heightTmpBuf_UnionSelector == (0).toChar()) {
                 heightTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                heightTmpBuf_ = valueDeserializer.readFloat64()
             } else if (heightTmpBuf_UnionSelector == (2).toChar()) {
                 heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBuf_ as string | number | Resource)
+            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
         }
         const heightTmpResult : Length | undefined = heightTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | number | Resource | undefined
+            let widthTmpBuf_ : string | double | Resource | undefined
             if (widthTmpBuf_UnionSelector == (0).toChar()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                widthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
                 widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
         const widthTmpResult : Length | undefined = widthTmpBuf
         const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderRadiusTmpBuf : Length | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderRadiusTmpBuf_ : string | number | Resource | undefined
+            let borderRadiusTmpBuf_ : string | double | Resource | undefined
             if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
                 borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                borderRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                borderRadiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
                 borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | number | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | double | Resource)
         }
         const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
         const marginTopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let marginTopTmpBuf : Length | undefined = undefined
         if ((marginTopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const marginTopTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let marginTopTmpBuf_ : string | number | Resource | undefined
+            let marginTopTmpBuf_ : string | double | Resource | undefined
             if (marginTopTmpBuf_UnionSelector == (0).toChar()) {
                 marginTopTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (marginTopTmpBuf_UnionSelector == (1).toChar()) {
-                marginTopTmpBuf_ = (valueDeserializer.readNumber() as number)
+                marginTopTmpBuf_ = valueDeserializer.readFloat64()
             } else if (marginTopTmpBuf_UnionSelector == (2).toChar()) {
                 marginTopTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for marginTopTmpBuf_ has to be chosen through deserialisation.")
             }
-            marginTopTmpBuf = (marginTopTmpBuf_ as string | number | Resource)
+            marginTopTmpBuf = (marginTopTmpBuf_ as string | double | Resource)
         }
         const marginTopTmpResult : Length | undefined = marginTopTmpBuf
         let value : SubTabBarIndicatorStyle = ({color: colorTmpResult, height: heightTmpResult, width: widthTmpResult, borderRadius: borderRadiusTmpResult, marginTop: marginTopTmpResult} as SubTabBarIndicatorStyle)
@@ -851,7 +865,7 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMaxLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -859,10 +873,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMinFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
-            if (valueHolderForMinFontSizeTmpValue instanceof number) {
+            if (valueHolderForMinFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMinFontSizeTmpValueForIdx0)
+                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
@@ -883,10 +897,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMaxFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
-            if (valueHolderForMaxFontSizeTmpValue instanceof number) {
+            if (valueHolderForMaxFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMaxFontSizeTmpValueForIdx0)
+                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
@@ -927,10 +941,10 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
@@ -951,10 +965,10 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
@@ -977,18 +991,18 @@ export class TabBarLabelStyle_serializer {
         }
         const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : number | undefined = undefined
+        let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
+            maxLinesTmpBuf = valueDeserializer.readInt32()
         }
-        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
         const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let minFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((minFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const minFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let minFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let minFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (minFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                minFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                minFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (minFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const minFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let minFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -1003,16 +1017,16 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for minFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as number | ResourceStr)
+            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const minFontSizeTmpResult : number | ResourceStr | undefined = minFontSizeTmpBuf
+        const minFontSizeTmpResult : double | ResourceStr | undefined = minFontSizeTmpBuf
         const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let maxFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((maxFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maxFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maxFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let maxFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (maxFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                maxFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maxFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (maxFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const maxFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let maxFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -1027,9 +1041,9 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for maxFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as number | ResourceStr)
+            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const maxFontSizeTmpResult : number | ResourceStr | undefined = maxFontSizeTmpBuf
+        const maxFontSizeTmpResult : double | ResourceStr | undefined = maxFontSizeTmpBuf
         const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightAdaptivePolicyTmpBuf : TextHeightAdaptivePolicy | undefined = undefined
         if ((heightAdaptivePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1046,11 +1060,11 @@ export class TabBarLabelStyle_serializer {
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                selectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1058,18 +1072,18 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | number | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
         const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                unselectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1077,7 +1091,7 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         let value : TabBarLabelStyle = ({overflow: overflowTmpResult, maxLines: maxLinesTmpResult, minFontSize: minFontSizeTmpResult, maxFontSize: maxFontSizeTmpResult, heightAdaptivePolicy: heightAdaptivePolicyTmpResult, font: fontTmpResult, selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarLabelStyle)
@@ -1230,7 +1244,7 @@ export class SubTabBarStyle_serializer {
             } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
-                valueSerializer.holdAndWriteObject(valueHolderFor_contentTmpValueForIdx2)
+                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)

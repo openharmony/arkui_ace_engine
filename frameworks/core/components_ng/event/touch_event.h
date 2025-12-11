@@ -19,8 +19,10 @@
 #include <list>
 
 #include "base/memory/referenced.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/event/touch_event.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::Ace::NG {
 

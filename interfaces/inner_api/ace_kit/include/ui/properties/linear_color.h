@@ -31,7 +31,7 @@ public:
         blue_ = static_cast<int16_t>(argb & 0xFF);
     }
     explicit LinearColor(const Color& color)
-        : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue())
+        : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue()), placeholder_(color.GetPlaceholder())
     {}
     LinearColor(int16_t alpha, int16_t red, int16_t green, int16_t blue)
         : alpha_(alpha), red_(red), green_(green), blue_(blue)
@@ -68,7 +68,7 @@ public:
     bool operator==(const LinearColor& color) const
     {
         return alpha_ == color.GetAlpha() && red_ == color.GetRed() && green_ == color.GetGreen() &&
-               blue_ == color.GetBlue();
+               blue_ == color.GetBlue() && placeholder_ == color.placeholder_;
     }
 
     LinearColor& operator+=(const LinearColor& color) {
@@ -145,11 +145,17 @@ public:
             static_cast<uint8_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX)));
     }
 
+    ColorPlaceholder GetPlaceholder() const
+    {
+        return placeholder_;
+    }
+
 private:
     int16_t alpha_;
     int16_t red_;
     int16_t green_;
     int16_t blue_;
+    ColorPlaceholder placeholder_ = ColorPlaceholder::NONE;
 };
 
 } // namespace OHOS::Ace

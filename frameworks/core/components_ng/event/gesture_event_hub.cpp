@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -92,6 +93,8 @@ bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
 }
 
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
+
+GestureEventHub::~GestureEventHub() = default;
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 {
@@ -598,6 +601,16 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
     }
 }
 
+double GestureEventHub::GetClickDistance() const
+{
+    if (parallelCombineClick) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        return clickRecognizer->GetDistanceThreshold();
+    }
+    auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    return clickRecognizer->GetDistanceThreshold();
+}
+
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold)
 {
     CheckClickActuator();
@@ -754,6 +767,13 @@ void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
     }
     showMenu_ = MakeRefPtr<ClickEvent>(std::move(showMenu));
     AddClickEvent(showMenu_);
+}
+
+void GestureEventHub::RemoveBindMenu()
+{
+    if (showMenu_) {
+        RemoveClickEvent(showMenu_);
+    }
 }
 
 void GestureEventHub::RegisterMenuOnTouch(TouchEventFunc&& callback)
@@ -1064,6 +1084,33 @@ void GestureEventHub::SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEvent
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
     touchEventActuator_->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetResponseRegionMap(
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+{
+    responseRegionMap_ = responseRegionMap;
+    if (!responseRegionMap_.empty()) {
+        isResponseRegion_ = true;
+    }
+}
+
+const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>&
+GestureEventHub::GetResponseRegionMap()
+{
+    return responseRegionMap_;
+}
+
+std::vector<CalcDimensionRect> GestureEventHub::GetFingerResponseRegionFromMap()
+{
+    std::vector<CalcDimensionRect> rectResult;
+    auto responseRegionMap = GetResponseRegionMap();
+    for (const auto& [tool, rectVec] : responseRegionMap) {
+        if (tool == ResponseRegionSupportedTool::FINGER || tool == ResponseRegionSupportedTool::ALL) {
+            rectResult.insert(rectResult.end(), rectVec.begin(), rectVec.end());
+        }
+    }
+    return rectResult;
 }
 
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)

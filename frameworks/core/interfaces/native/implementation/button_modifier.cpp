@@ -50,7 +50,7 @@ template<>
 ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
 {
     ButtonParameters parameters;
-    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow).value_or(TextOverflow::ELLIPSIS);
     auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
     if (maxLines) {
         maxLines = std::max(maxLines.value(), 1);
@@ -74,6 +74,7 @@ ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
             parameters.fontFamily = labelFont->fontFamilies;
         }
     }
+    parameters.textAlign = Converter::OptConvert<TextAlign>(src.textAlign);
     return parameters;
 }
 }
@@ -124,7 +125,9 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
         ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
         ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        if (buttonOptions.controlSize.has_value()) {
+            ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        }
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
     }
     ButtonModelStatic::SetCreateWithLabel(frameNode, false);
@@ -186,7 +189,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     ButtonModelStatic::SetFontSize(frameNode, fontSize);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,10 +219,13 @@ void SetLabelStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
+    if (!parameters->textAlign.has_value()) {
+        ButtonModelStatic::ResetTextAlign(frameNode);
+    }
     ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -229,7 +235,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     ButtonModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

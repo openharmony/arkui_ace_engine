@@ -16,3 +16,8 @@
 export interface ObserveWrappedBase {
     getRaw(): Object;
 }
+
+export interface ObserveWrappedKeyedMeta extends ObserveWrappedBase {
+    addRefAnyKey(): void;
+    addRefLength(): void;   
+}

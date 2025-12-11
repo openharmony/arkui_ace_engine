@@ -31,6 +31,7 @@ void AnimatedImageObject::MakeCanvasImage(
     CHECK_NULL_VOID(ctx);
     if (!image) {
         ctx->FailCallback("failed to create animated image");
+        return;
     }
     ctx->SuccessCallback(image);
 }

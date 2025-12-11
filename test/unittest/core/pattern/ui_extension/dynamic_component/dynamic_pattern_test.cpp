@@ -23,6 +23,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
@@ -394,7 +395,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest009, TestSize.Level1)
     EXPECT_EQ(property->GetChildWindowId(), 1);
     EXPECT_EQ(property->GetChildTreeId(), 1);
 
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     pattern->InitializeAccessibility();
     pattern->OnSetAccessibilityChildTree(1, 1);
     pattern->OnAccessibilityChildTreeRegister(1, 1, 1);
@@ -1116,4 +1117,20 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest029, TestSize.Level1)
     EXPECT_TRUE(dynamicPattern->lastPointerEvent_);
 }
 
+/**
+ * @tc.name: GetAccessibilityParentRect031
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect pattern nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest031, TestSize.Level1)
+{
+    PlatformContainerHandler handler;
+    EXPECT_FALSE(handler.IsAllowCrossProcessNesting());
+
+    handler.allowCrossProcessNesting_ = true;
+    EXPECT_TRUE(handler.IsAllowCrossProcessNesting());
+
+    handler.allowCrossProcessNesting_ = false;
+    EXPECT_FALSE(handler.IsAllowCrossProcessNesting());
+}
 } // namespace OHOS::Ace::NG

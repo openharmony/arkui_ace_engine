@@ -266,6 +266,8 @@ private:
      */
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
+    void ScrollToFocusItem(int32_t itemIdx);
+
     std::optional<int32_t> targetIndex_;
     RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::TOP_DOWN);
     RefPtr<WaterFlowSections> sections_;

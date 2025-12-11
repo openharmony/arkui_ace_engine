@@ -33,6 +33,7 @@ public:
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) override;
+    void SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance = false) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(TextSpanType& editorType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
@@ -66,10 +67,14 @@ public:
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
     void SetScrollBarColor(std::optional<Color> value) override;
+    void SetSingleLine(bool isEnable) override;
 
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
@@ -92,6 +97,10 @@ public:
     static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetCustomKeyboard(
+        FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
+    static void SetCustomKeyboardWithNode(
+        FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
@@ -114,11 +123,15 @@ public:
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
+    static void SetSingleLine(FrameNode* frameNode, bool isEnable);
 
 private:
     void SetDraggable(bool draggable);

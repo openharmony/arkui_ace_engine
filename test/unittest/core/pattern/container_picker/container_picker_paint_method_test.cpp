@@ -54,11 +54,11 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    
+
     RefPtr<FrameNode> CreateContainerPickerNode();
     RefPtr<MockCanvas> CreateMockCanvas();
     RefPtr<PaintWrapper> CreateMockPaintWrapper(const RefPtr<FrameNode>& node);
-    
+
     RefPtr<ContainerPickerPaintMethod> paintMethod_;
     RefPtr<PickerTheme> mockTheme_;
 };
@@ -128,14 +128,14 @@ HWTEST_F(ContainerPickerPaintMethodTest, GetForegroundDrawFunctionTest001, TestS
     auto node = CreateContainerPickerNode();
     auto paintWrapper = CreateMockPaintWrapper(node);
     Testing::MockCanvas rsCanvas;
-    
+
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
     layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
-    
+
     auto drawFunction = paintMethod_->GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
     ASSERT_NE(drawFunction, nullptr);
-    
+
     // Test with valid canvas
     drawFunction(rsCanvas);
 }
@@ -150,9 +150,9 @@ HWTEST_F(ContainerPickerPaintMethodTest, ClipPaddingTest001, TestSize.Level1)
     auto node = CreateContainerPickerNode();
     auto paintWrapper = CreateMockPaintWrapper(node);
     Testing::MockCanvas rsCanvas;
-    
+
     EXPECT_CALL(rsCanvas, ClipRect(_, _, _)).Times(1);
-    
+
     paintMethod_->ClipPadding(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
@@ -166,15 +166,15 @@ HWTEST_F(ContainerPickerPaintMethodTest, ClipPaddingTest002, TestSize.Level1)
     auto node = CreateContainerPickerNode();
     auto paintWrapper = CreateMockPaintWrapper(node);
     Testing::MockCanvas rsCanvas;
-    
+
     // Set safe area padding
     PaddingPropertyF safeAreaPadding;
     safeAreaPadding.left = 20.0f;
     safeAreaPadding.right = 20.0f;
     paintMethod_->SetSafeAreaPadding(safeAreaPadding);
-    
+
     EXPECT_CALL(rsCanvas, ClipRect(_, _, _)).Times(1);
-    
+
     paintMethod_->ClipPadding(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
@@ -188,15 +188,15 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundTest00
     auto node = CreateContainerPickerNode();
     auto paintWrapper = CreateMockPaintWrapper(node);
     Testing::MockCanvas rsCanvas;
-    
+
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
     layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
-    
+
     // Should not call any canvas methods
     EXPECT_CALL(rsCanvas, Save()).Times(0);
     EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(0);
-    
+
     paintMethod_->PaintSelectionIndicatorBackground(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
@@ -210,48 +210,52 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest001, 
     auto node = CreateContainerPickerNode();
     auto paintWrapper = CreateMockPaintWrapper(node);
     Testing::MockCanvas rsCanvas;
-    
+
     // Set indicator type to background
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
     layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
-    
+
     // Should not call DrawLine
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(0);
-    
+
     paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
 /**
- * @tc.name: CheckMarginAndLengthTest001
- * @tc.desc: Test ContainerPickerPaintMethod CheckMarginAndLength with normal margins
+ * @tc.name: ParseDividerMarginTest001
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with normal margins
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest001, TestSize.Level1)
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest001, TestSize.Level1)
 {
     float length = 100.0f;
     double startMargin = 10.0f;
     double endMargin = 10.0f;
-    
-    paintMethod_->CheckMarginAndLength(length, startMargin, endMargin);
-    
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
     EXPECT_FLOAT_EQ(length, 80.0f);
     EXPECT_FLOAT_EQ(startMargin, 10.0f);
     EXPECT_FLOAT_EQ(endMargin, 10.0f);
 }
 
 /**
- * @tc.name: CheckMarginAndLengthTest002
- * @tc.desc: Test ContainerPickerPaintMethod CheckMarginAndLength with margins exceeding length
+ * @tc.name: ParseDividerMarginTest002
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with margins exceeding length
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest002, TestSize.Level1)
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest002, TestSize.Level1)
 {
     float length = 100.0f;
     double startMargin = 60.0f;
     double endMargin = 60.0f;
-    
-    paintMethod_->CheckMarginAndLength(length, startMargin, endMargin);
-    
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
     // Margins should be reset to default
     EXPECT_FLOAT_EQ(startMargin, 0.0);
     EXPECT_FLOAT_EQ(endMargin, 0.0);
@@ -259,31 +263,186 @@ HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest002, TestSize.L
 }
 
 /**
- * @tc.name: CheckMarginAndLengthTest003
- * @tc.desc: Test ContainerPickerPaintMethod CheckMarginAndLength with RTL mode
+ * @tc.name: ParseDividerMarginTest003
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with RTL mode
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest003, TestSize.Level1)
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest003, TestSize.Level1)
 {
     // Save original RTL setting
     bool originalRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    
+
     // Set RTL mode
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    
+
     float length = 100.0f;
     double startMargin = 10.0f;
     double endMargin = 20.0f;
-    
-    paintMethod_->CheckMarginAndLength(length, startMargin, endMargin);
-    
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
     // Margins should be swapped in RTL mode
     EXPECT_FLOAT_EQ(startMargin, 20.0f);
     EXPECT_FLOAT_EQ(endMargin, 10.0f);
     EXPECT_FLOAT_EQ(length, 70.0f);
-    
+
     // Restore original RTL setting
     AceApplicationInfo::GetInstance().isRightToLeft_ = originalRtl;
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest004
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with negative start margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest004, TestSize.Level1)
+{
+    float length = 100.0f;
+    double startMargin = -10.0f;
+    double endMargin = 10.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Negative start margin should be reset to 0
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 10.0f);
+    EXPECT_FLOAT_EQ(length, 90.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest005
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with negative end margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest005, TestSize.Level1)
+{
+    float length = 100.0f;
+    double startMargin = 10.0f;
+    double endMargin = -20.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Negative end margin should be reset to 0
+    EXPECT_FLOAT_EQ(startMargin, 10.0f);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 90.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest006
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with both margins negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest006, TestSize.Level1)
+{
+    float length = 100.0f;
+    double startMargin = -10.0f;
+    double endMargin = -20.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Both negative margins should be reset to 0
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 100.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest007
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with margins exactly equal to length
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest007, TestSize.Level1)
+{
+    float length = 100.0f;
+    double startMargin = 40.0f;
+    double endMargin = 60.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Margins exactly equal to length should not be reset
+    EXPECT_FLOAT_EQ(startMargin, 40.0f);
+    EXPECT_FLOAT_EQ(endMargin, 60.0f);
+    EXPECT_FLOAT_EQ(length, 0.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest008
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with negative margins in RTL mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest008, TestSize.Level1)
+{
+    // Set RTL mode
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    float length = 100.0f;
+    double startMargin = -10.0f;
+    double endMargin = 20.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Negative start margin should be reset to 0 and then swapped with end margin in RTL mode
+    EXPECT_FLOAT_EQ(startMargin, 20.0f);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 80.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest009
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with margins exceeding length in RTL mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest009, TestSize.Level1)
+{
+    // Set RTL mode
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    float length = 100.0f;
+    double startMargin = 70.0f;
+    double endMargin = 50.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // Margins exceeding length should be reset to 0, swapping in RTL mode has no effect
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 100.0f);
+}
+
+/**
+ * @tc.name: ParseDividerMarginTest010
+ * @tc.desc: Test ContainerPickerPaintMethod ParseDividerMargin with zero length and margins exceeding length
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, ParseDividerMarginTest010, TestSize.Level1)
+{
+    float length = 0.0f;
+    double startMargin = 10.0f;
+    double endMargin = 10.0f;
+
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    paintMethod_->ParseDividerMargin(AceType::RawPtr(paintWrapper), length, startMargin, endMargin);
+
+    // With zero length, margins exceeding length should be reset to 0
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 0.0f);
 }
 
 /**
@@ -316,7 +475,8 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, 
      */
     float itemHeightHalf = PICKER_ITEM_HEIGHT.ConvertToPx() / HALF;
     layoutProperty->UpdateIndicatorDividerWidth(Dimension(itemHeightHalf));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(AnyNumber());
     paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
 
     /**
@@ -326,6 +486,84 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, 
     float excessiveWidth = itemHeightHalf + 1.0f;
     layoutProperty->UpdateIndicatorDividerWidth(Dimension(excessiveWidth));
     paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+}
+
+/**
+ * @tc.name: PaintLineWithNormalParametersTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintLine with normal parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintLineWithNormalParametersTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create mock canvas and set up PaintLine parameters
+     */
+    Testing::MockCanvas rsCanvas;
+    OffsetF offset(10.0f, 20.0f);
+    PickerDividerPaintInfo dividerInfo;
+    dividerInfo.dividerLength = 100.0f;
+    dividerInfo.strokeWidth = 2.0f;
+    dividerInfo.dividerColor = Color::RED;
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintLine method
+     * @tc.expected: step3. Canvas methods should be called with correct parameters
+     */
+    paintMethod_->PaintLine(offset, dividerInfo, rsCanvas);
+}
+
+/**
+ * @tc.name: PaintSelectionIndicatorBackgroundWithPaddingTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintSelectionIndicatorBackground with padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundWithPaddingTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with background indicator type and padding
+     */
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    Testing::MockCanvas rsCanvas;
+
+    auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+
+    PaddingProperty padding;
+    padding.left = CalcLength(20.0f);
+    padding.right = CalcLength(20.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdatePadding(padding);
+
+    auto geometryNode = node->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(300.0f, 500.0f));
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintSelectionIndicatorBackground method
+     * @tc.expected: step3. Should use contentRect with padding applied
+     */
+    paintMethod_->PaintSelectionIndicatorBackground(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
 } // namespace OHOS::Ace::NG

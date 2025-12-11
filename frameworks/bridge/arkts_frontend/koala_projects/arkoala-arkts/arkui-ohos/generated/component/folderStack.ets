@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -24,6 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Alignment, FoldStatus, AppRotation } from "./enums"
 import { AttributeModifier, hookFolderStackAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -44,6 +46,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFolderStackOptionsAttribute(options?: FolderStackOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -195,6 +198,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setFolderStackOptions")) {
             const options_casted = options as (FolderStackOptions | undefined)
             this.getPeer()?.setFolderStackOptionsAttribute(options_casted)
+            this.applyOptionsFinish('FolderStackAttribute');
             return this
         }
         return this
@@ -240,12 +244,17 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFolderStackAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFolderStackAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -156,6 +156,11 @@ public:
         return limitPos_;
     }
     RefPtr<PipelineContext> GetToastContext();
+    void SetOriginalTextHeight(double originalTextHeight)
+    {
+        originalTextHeight_ = originalTextHeight;
+    }
+
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
@@ -173,7 +178,9 @@ private:
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
     NG::SizeF GetSystemTopMostSubwindowSize() const;
 
-    void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom);
+    void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom,
+        const RefPtr<LayoutWrapper>& layoutWrapper);
+    Dimension InitOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper, double textHeight);
 
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToFrameNodeImpl();
@@ -196,6 +203,7 @@ private:
     Rect uiExtensionHostWindowRect_;
     Dimension limitPos_;
     int32_t rowKeyboardCallbackId_ = -1;
+    double originalTextHeight_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

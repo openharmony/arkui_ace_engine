@@ -75,6 +75,14 @@ void CheckBoxGroupModelStatic::SetCheckMarkColor(FrameNode* frameNode, const std
     }
 }
 
+void CheckBoxGroupModelStatic::ResetCheckMarkColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
+
 void CheckBoxGroupModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
     if (size.has_value()) {
@@ -120,4 +128,13 @@ void CheckBoxGroupModelStatic::SetOnChange(FrameNode* frameNode, GroupChangeEven
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void CheckBoxGroupModelStatic::TriggerChange(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCheckBoxGroupSelect(value);
+}
+
 } // namespace OHOS::Ace::NG

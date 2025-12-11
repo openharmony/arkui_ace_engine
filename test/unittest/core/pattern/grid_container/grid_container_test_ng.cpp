@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/grid_container/grid_container_model_ng.h"
 #include "core/components_ng/pattern/grid_container/grid_container_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

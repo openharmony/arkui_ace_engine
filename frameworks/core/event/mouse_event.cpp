@@ -187,6 +187,9 @@ AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(Touch
         case TouchType::PULL_OUT_WINDOW:
         case TouchType::PROXIMITY_IN:
         case TouchType::PROXIMITY_OUT:
+        case TouchType::LEVITATE_MOVE:
+        case TouchType::LEVITATE_IN_WINDOW:
+        case TouchType::LEVITATE_OUT_WINDOW:
         case TouchType::UNKNOWN:
             return AccessibilityHoverAction::UNKNOWN;
     }

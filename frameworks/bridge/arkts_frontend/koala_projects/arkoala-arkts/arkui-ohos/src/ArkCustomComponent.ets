@@ -22,6 +22,7 @@ import {
 } from "#generated"
 import { PeerNode } from "./PeerNode"
 import { Theme } from '@ohos/arkui/theme';
+import { int32 } from '@koalaui/common';
 
 /**
  * This is basically the CustomComponent
@@ -52,6 +53,8 @@ export interface ArkCustomComponent {
     // Theme
     onWillApplyTheme(theme: Theme): void
     onGlobalThemeChanged(theme: Theme): void
+    setThemeScopeId(themeScopeId: int32): void
+    getThemeScopeId(): int32 | undefined
 
     // Form recover
     onFormRecycle(): string

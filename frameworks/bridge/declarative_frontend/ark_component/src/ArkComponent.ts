@@ -443,8 +443,8 @@ class ChainModeifier extends ModifierWithKey<Length> {
   }
 }
 
-class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | LocalizedBorderRadius> {
-  constructor(value: Length | BorderRadiuses | LocalizedBorderRadius) {
+class BorderRadiusModifier extends ModifierWithKey<ArkBorderRadiusOpts | undefined> {
+  constructor(value: ArkBorderRadiusOpts | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('borderRadius');
@@ -452,44 +452,64 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | Loc
     if (reset) {
       getUINativeModule().common.resetBorderRadius(node);
     } else {
-      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      if (isNumber(this.value.value) || isString(this.value.value) || isResource(this.value.value)) {
+        getUINativeModule().common.setBorderRadius(node, this.value.value, this.value.value, this.value.value, this.value.value, this.value.type);
       } else {
-        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        if (isUndefined(this.value.value) || isNull(this.value.value)) {
+          getUINativeModule().common.setBorderRadius(node, undefined, undefined, undefined, undefined, this.value.type);
+          return;
+        }
+        if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value.value).indexOf('bottomEnd') >= 0)) {
           getUINativeModule().common.setBorderRadius(node,
-            (this.value as LocalizedBorderRadius).topStart,
-            (this.value as LocalizedBorderRadius).topEnd,
-            (this.value as LocalizedBorderRadius).bottomStart,
-            (this.value as LocalizedBorderRadius).bottomEnd);
+            (this.value.value as LocalizedBorderRadius).topStart,
+            (this.value.value as LocalizedBorderRadius).topEnd,
+            (this.value.value as LocalizedBorderRadius).bottomStart,
+            (this.value.value as LocalizedBorderRadius).bottomEnd,
+            (this.value.type as RenderStrategy));
         } else {
           getUINativeModule().common.setBorderRadius(node,
-            (this.value as BorderRadiuses).topLeft,
-            (this.value as BorderRadiuses).topRight,
-            (this.value as BorderRadiuses).bottomLeft,
-            (this.value as BorderRadiuses).bottomRight);
+            (this.value.value as BorderRadiuses).topLeft,
+            (this.value.value as BorderRadiuses).topRight,
+            (this.value.value as BorderRadiuses).bottomLeft,
+            (this.value.value as BorderRadiuses).bottomRight,
+            (this.value.type as RenderStrategy));
         }
       }
     }
   }
 
   checkObjectDiff(): boolean {
-    if (!isResource(this.stageValue) && !isResource(this.value)) {
-      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
-        return !((this.stageValue as LocalizedBorderRadius).topStart === (this.value as LocalizedBorderRadius).topStart &&
-          (this.stageValue as LocalizedBorderRadius).topEnd === (this.value as LocalizedBorderRadius).topEnd &&
-          (this.stageValue as LocalizedBorderRadius).bottomStart === (this.value as LocalizedBorderRadius).bottomStart &&
-          (this.stageValue as LocalizedBorderRadius).bottomEnd === (this.value as LocalizedBorderRadius).bottomEnd);
+    if (isNull(this.value.value)) {
+      return !isNull(this.stageValue.value);
+    }
+    if (isNull(this.stageValue.value)) {
+      return !isNull(this.value.value);
+    }
+    if (isUndefined(this.value.value)) {
+      return !isUndefined(this.stageValue.value);
+    }
+    if (isUndefined(this.stageValue.value)) {
+      return !isUndefined(this.value.value);
+    }
+    if (!isResource(this.stageValue.value) && !isResource(this.value.value)) {
+      if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value.value).indexOf('bottomEnd') >= 0)) {
+        return !((this.stageValue.value as LocalizedBorderRadius).topStart === (this.value.value as LocalizedBorderRadius).topStart &&
+          (this.stageValue.value as LocalizedBorderRadius).topEnd === (this.value.value as LocalizedBorderRadius).topEnd &&
+          (this.stageValue.value as LocalizedBorderRadius).bottomStart === (this.value.value as LocalizedBorderRadius).bottomStart &&
+          (this.stageValue.value as LocalizedBorderRadius).bottomEnd === (this.value.value as LocalizedBorderRadius).bottomEnd &&
+          (this.stageValue.type as RenderStrategy) === (this.value.type as RenderStrategy));
       }
-      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
-        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
-        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
-        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+      return !((this.stageValue.value as BorderRadiuses).topLeft === (this.value.value as BorderRadiuses).topLeft &&
+        (this.stageValue.value as BorderRadiuses).topRight === (this.value.value as BorderRadiuses).topRight &&
+        (this.stageValue.value as BorderRadiuses).bottomLeft === (this.value.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue.value as BorderRadiuses).bottomRight === (this.value.value as BorderRadiuses).bottomRight &&
+        (this.stageValue.type as RenderStrategy) === (this.value.type as RenderStrategy));
     } else {
       return true;
     }
@@ -1849,6 +1869,20 @@ class RenderGroupModifier extends ModifierWithKey<boolean> {
       getUINativeModule().common.resetRenderGroup(node);
     } else {
       getUINativeModule().common.setRenderGroup(node, this.value);
+    }
+  }
+}
+
+class ExcludeFromRenderGroupModifier extends ModifierWithKey<boolean|undefined> {
+  constructor(value: boolean|undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('excludeFromRenderGroup');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetExcludeFromRenderGroup(node);
+    } else {
+      getUINativeModule().common.setExcludeFromRenderGroup(node, this.value);
     }
   }
 }
@@ -3256,6 +3290,64 @@ class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangl
     }
   }
 }
+class ResponseRegionListModifier extends ModifierWithKey<Array<ArkResponseRegionList> | ArkResponseRegionList> {
+  constructor(value: Array<ArkResponseRegionList> | ArkResponseRegionList) {
+    super(value);
+  }
+  static identity = Symbol('responseRegionList');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetResponseRegionList(node);
+    } else {
+      let responseRegion: (number | LengthMetrics | string)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].tool ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.tool ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      getUINativeModule().common.setResponseRegionList(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].tool, this.value[i].tool) &&
+            isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.tool, this.value.tool) &&
+        isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
+    }
+  }
+}
 class FlexGrowModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -3573,6 +3665,20 @@ class AccessibilityFocusDrawLevelModifier extends ModifierWithKey<FocusDrawLevel
   }
 }
 
+class AccessibilityStateDescriptionModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityStateDescription');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityStateDescription(node);
+    } else {
+      getUINativeModule().common.setAccessibilityStateDescription(node, this.value);
+    }
+  }
+}
+
 class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
@@ -3604,22 +3710,27 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
-class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
-  constructor(value: ArkKeyBoardShortCut) {
+class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
+  constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
   }
   static identity: Symbol = Symbol('keyboardShortcut');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else if (this.value.action === undefined) {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.resetKeyBoardShortCutAll(node);
     } else {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
+      while (this.value.length !== 0) {
+        let item = this.value.shift();
+        if (item === undefined) {
+          continue;
+        }
+        if (item.action === undefined) {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys);
+        } else {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys, item.action);
+        }
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -3916,6 +4027,33 @@ class CompositingFilterModifier extends ModifierWithKey<Filter> {
   }
 }
 
+class MaterialFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('materialFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaterialFilter(node);
+    } else {
+      getUINativeModule().common.setMaterialFilter(node, this.value);
+    }
+  }
+}
+
+class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityActionOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityActionOptions(node);
+    } else {
+      getUINativeModule().common.setAccessibilityActionOptions(node, this.value);
+    }
+  }
+}
 class FreezeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -3992,6 +4130,35 @@ class OnChildTouchTestModifier extends ModifierWithKey<ChildTouchTestCallback> {
   }
 }
 
+class SystemMaterialModifier extends ModifierWithKey<SystemUiMaterial | undefined> {
+  constructor(value: SystemUiMaterial | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemMaterial');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSystemMaterial(node);
+    }
+    else {
+      getUINativeModule().common.setSystemMaterial(node, this.value);
+    }
+  }
+}
+
+class ChainWeightModifier extends ModifierWithKey<ChainWeightOptions> {
+  constructor(chainWeight: ChainWeightOptions) {
+    super(chainWeight);
+  }
+  static identity: Symbol = Symbol('chainWeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainWeight(node);
+    } else {
+      getUINativeModule().common.setChainWeight(node, this.value!);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -4049,6 +4216,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
   _needDiff: boolean;
+  _keyboardShortcutList: Array<ArkKeyBoardShortCut>;
   private _onVisibleAreaChange: ArkOnVisibleAreaChange = null;
   private _onPreDragEvent: PreDragCallback = null;
   private _onTouchInterceptEvent: TouchInterceptCallback = null;
@@ -4081,6 +4249,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
+    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -4307,6 +4476,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
+    return this;
+  }
+
+  responseRegionList(value: Array<ArkResponseRegionList>): this {
+    modifierWithKey(this._modifiersWithKeys, ResponseRegionListModifier.identity,
+      ResponseRegionListModifier, value);
     return this;
   }
 
@@ -4727,8 +4902,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  borderRadius(value: Length | BorderRadiuses): this {
-    modifierWithKey(this._modifiersWithKeys, BorderRadiusModifier.identity, BorderRadiusModifier, value);
+  borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadius, type?: RenderStrategy): this {
+    let opts = new ArkBorderRadiusOpts();
+    opts.value = value;
+    opts.type = type;
+    modifierWithKey(this._modifiersWithKeys, BorderRadiusModifier.identity, BorderRadiusModifier, opts);
     return this;
   }
 
@@ -5009,6 +5187,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   renderGroup(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, RenderGroupModifier.identity, RenderGroupModifier, value);
+    return this;
+  }
+
+  excludeFromRenderGroup(value: boolean | undefined): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ExcludeFromRenderGroupModifier.identity, ExcludeFromRenderGroupModifier, value);
     return this;
   }
 
@@ -5614,7 +5798,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
+    this._keyboardShortcutList.push(keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
+      this._keyboardShortcutList);
     return this;
   }
 
@@ -5732,6 +5918,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  accessibilityActionOptions(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  accessibilityStateDescription(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityStateDescriptionModifier.identity, AccessibilityStateDescriptionModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityStateDescriptionModifier.identity, AccessibilityStateDescriptionModifier, undefined);
+    }
+    return this;
+  }
+
   obscured(reasons: Array<ObscuredReasons>): this {
     modifierWithKey(this._modifiersWithKeys, ObscuredModifier.identity, ObscuredModifier, reasons);
     return this;
@@ -5823,6 +6023,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
     return this;
   }
+  materialFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, MaterialFilterModifier.identity, MaterialFilterModifier, filter);
+    return this;
+  }
   foregroundEffect(options: ForegroundEffectOptions): this {
     modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, options);
     return this;
@@ -5837,6 +6041,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   clipShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
     modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
+    return this;
+  }
+  systemMaterial(material: SystemUiMaterial | undefined) {
+    modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
+    return this;
+  }
+  chainWeight(chainWeight: ChainWeightOptions): this {
+    let weight = new ArkChainWeight();
+    if (!isUndefined(chainWeight?.horizontal) && chainWeight?.horizontal !== null) {
+      if (isNumber(chainWeight.horizontal)) {
+        weight.horizontal = chainWeight.horizontal;
+      }  
+    }
+    if (!isUndefined(chainWeight?.vertical) && chainWeight?.vertical !== null) {
+      if (isNumber(chainWeight.vertical)) {
+        weight.vertical = chainWeight.vertical;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, ChainWeightModifier.identity, ChainWeightModifier, weight);
     return this;
   }
 }
@@ -6127,7 +6350,8 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold, 
+          tapGesture.limitFingerCount, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
@@ -6231,7 +6455,7 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
       getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
-        tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback,
+        tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold, tapGesture.limitFingerCount, tapGesture.onActionCallback,
         gestureGroupPtr);
       break;
     }

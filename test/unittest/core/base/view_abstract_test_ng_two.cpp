@@ -14,8 +14,12 @@
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "base/geometry/calc_dimension_rect.h"
+#include "base/geometry/response_region.h"
+#include "base/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "test/mock/base/mock_system_properties.h"
 
@@ -108,5 +112,76 @@ HWTEST_F(ViewAbstractTestNg, BindMenuTest001, TestSize.Level1)
         std::move(buildFunc), targetNode, OFFSETF, menuParam, std::move(previewBuildFunc));
     ASSERT_NE(targetNode->GetOrCreateGestureEventHub(), nullptr);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isShow, false);
+}
+
+/**
+ * @tc.name: SetResponseRegionListWithMap001
+ * @tc.desc: Test SetResponseRegionList and GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetResponseRegionListWithMap001, TestSize.Level1)
+{
+    std::vector<ResponseRegion> regionNotRect;
+    ViewAbstract::SetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(regionNotRect));
+    auto regionMapResult = ViewAbstract::GetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(regionMapResult.size(), 1);
+
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    ViewAbstract::SetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(regionMap));
+    auto regionMapResult2 = ViewAbstract::GetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(regionMapResult2.size(), 1);
+
+    auto region = regionMapResult[toolType][0];
+    EXPECT_EQ(region.GetX().Value(), xDimen.Value());
+    EXPECT_EQ(region.GetY().Value(), yDimen.Value());
+    EXPECT_EQ(region.GetWidth().Value(), widthDimen.Value());
+    EXPECT_EQ(region.GetHeight().Value(), heightDimen.Value());
+}
+
+/**
+ * @tc.name: GetCommonLayoutTest001
+ * @tc.desc: Test GetChainWeight of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetChainWeightTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(ViewAbstract::GetLayoutGravity(frameNode), Alignment::CENTER);
+    EXPECT_EQ(ViewAbstract::GetRenderStrategy(frameNode), RenderStrategy::FAST);
+
+    NG::ChainWeightPair chainWeightPair(2.0f, 5.0f);
+    ViewAbstract::SetChainWeight(frameNode, chainWeightPair);
+    EXPECT_EQ(ViewAbstract::GetChainWeight(frameNode), chainWeightPair);
+
+    ViewAbstract::SetLayoutGravity(frameNode, Alignment::TOP_LEFT);
+    EXPECT_EQ(ViewAbstract::GetLayoutGravity(frameNode), Alignment::TOP_LEFT);
+
+    ViewAbstract::SetRenderStrategy(frameNode, RenderStrategy::OFFSCREEN);
+    EXPECT_EQ(ViewAbstract::GetRenderStrategy(frameNode), RenderStrategy::OFFSCREEN);
+}
+
+/**
+ * @tc.name: GetDashParamsTest001
+ * @tc.desc: Test BorderDashParams of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetDashParamsTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ViewAbstract::SetDashGap(frameNode, Dimension(2));
+    ViewAbstract::SetDashWidth(frameNode, Dimension(5));
+
+    EXPECT_EQ(ViewAbstract::GetDashGap(frameNode).rightDimen, Dimension(2));
+    EXPECT_EQ(ViewAbstract::GetDashWidth(frameNode).rightDimen, Dimension(5));
 }
 } // namespace OHOS::Ace::NG

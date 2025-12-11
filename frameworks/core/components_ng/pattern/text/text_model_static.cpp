@@ -102,7 +102,7 @@ void TextModelStatic::SetTextOverflow(FrameNode* frameNode, const std::optional<
     if (value.has_value()) {
         TextModelNG::SetTextOverflow(frameNode, value.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextOverflow, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -382,4 +382,29 @@ void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::o
     TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
 }
 
+void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetIncludeFontPadding(frameNode, valueOpt.value_or(false));
+}
+
+void TextModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetFallbackLineSpacing(frameNode, valueOpt.value_or(false));
+}
+
+void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+    
+    if (color.has_value()) {
+        TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
 } // namespace OHOS::Ace::NG

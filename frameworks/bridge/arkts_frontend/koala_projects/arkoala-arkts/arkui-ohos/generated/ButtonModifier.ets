@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookButtonContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkButtonPeer, ButtonType, ButtonStyleMode, ControlSize, ButtonRole, ButtonConfiguration, ButtonLabelStyle, ButtonAttribute } from "./component/button"
@@ -28,6 +29,7 @@ import { Color, FontWeight, FontStyle } from "./component/enums"
 import { Resource } from "global.resource"
 export class ButtonModifier extends CommonMethodModifier implements ButtonAttribute,AttributeModifier<ButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -52,7 +54,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: Length | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -60,10 +62,13 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _labelStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _labelStyle_0_0value?: ButtonLabelStyle | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<ButtonConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkButtonPeer;
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -196,7 +201,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -206,7 +211,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -268,7 +273,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -278,7 +283,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -286,7 +291,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -296,13 +301,32 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookButtonContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<ButtonConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookButtonContentModifier(peer, (undefined as ContentModifier<ButtonConfiguration> | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: ButtonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._type_0_flag) {
@@ -403,7 +427,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -455,7 +479,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -468,7 +492,20 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<ButtonConfiguration> | undefined));
                 }
             }
         }
@@ -550,7 +587,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -594,7 +631,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -605,7 +642,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -613,6 +650,17 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

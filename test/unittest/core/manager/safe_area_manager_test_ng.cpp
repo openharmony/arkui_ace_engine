@@ -34,7 +34,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
-
 constexpr double SYSTEM_LEFT_START = 0.0f;
 constexpr double SYSTEM_LEFT_END = 30.0f;
 constexpr double SYSTEM_RIGHT_START = DISPLAY_WIDTH - 30.0f;
@@ -76,11 +75,11 @@ constexpr double KEYBOARD_HEIGHT = 420.0f;
 
 class SafeAreaManagerTest : public testing::Test {
 public:
+
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
     struct Rect {
         float left;
         float right;
@@ -89,30 +88,24 @@ public:
     };
 
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
-
     RefPtr<SafeAreaManager> safeAreaManager_;
+    
     NG::SafeAreaInsets cutoutArea =
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
-    
     NG::SafeAreaInsets systemArea =
         NG::SafeAreaInsets({ SYSTEM_LEFT_START, SYSTEM_LEFT_END }, { SYSTEM_TOP_START, SYSTEM_TOP_END },
             { SYSTEM_RIGHT_START, SYSTEM_RIGHT_END }, { SYSTEM_BOTTOM_START, SYSTEM_BOTTOM_END });
-    
     NG::SafeAreaInsets navArea = NG::SafeAreaInsets({ NAV_LEFT_START, NAV_LEFT_END }, { NAV_TOP_START, NAV_TOP_END },
         { NAV_RIGHT_START, NAV_RIGHT_END }, { NAV_BOTTOM_START, NAV_BOTTOM_END });
-    
     NG::SafeAreaInsets cutoutAreaNotValid =
         NG::SafeAreaInsets({ CUTOUT_LEFT_END, CUTOUT_LEFT_START }, { CUTOUT_TOP_END, CUTOUT_TOP_START },
             { CUTOUT_RIGHT_END, CUTOUT_RIGHT_START }, { CUTOUT_BOTTOM_END, CUTOUT_BOTTOM_START });
-    
     NG::SafeAreaInsets systemAreaNotValid =
         NG::SafeAreaInsets({ SYSTEM_LEFT_END, SYSTEM_LEFT_START }, { SYSTEM_TOP_END, SYSTEM_TOP_START },
             { SYSTEM_RIGHT_END, SYSTEM_RIGHT_START }, { SYSTEM_BOTTOM_END, SYSTEM_BOTTOM_START });
-    
     NG::SafeAreaInsets navAreaNotValid = NG::SafeAreaInsets({ NAV_LEFT_END, NAV_LEFT_START },
         { NAV_TOP_END, NAV_TOP_START }, { NAV_RIGHT_END, NAV_RIGHT_START }, { NAV_BOTTOM_END, NAV_BOTTOM_START });
-    
     NG::SafeAreaInsets cutoutAreaWithRoot =
         NG::SafeAreaInsets({ CUTOUT_WITH_ROOT_LEFT_START, CUTOUT_WITH_ROOT_LEFT_END }, { CUTOUT_WITH_ROOT_TOP_START,
             CUTOUT_WITH_ROOT_TOP_END }, { CUTOUT_WITH_ROOT_RIGHT_START, CUTOUT_WITH_ROOT_RIGHT_END },
@@ -1303,25 +1296,27 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     // create nodes
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode2 = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode3 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     frameNode1->MountToParent(frameNode0);
     frameNode2->MountToParent(frameNode1);
     frameNode3->MountToParent(frameNode2);
+
     // make sure nodes mount correctly
     EXPECT_EQ(frameNode1->GetParent()->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_EQ(frameNode2->GetParent()->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(frameNode3->GetParent()->GetTag(), V2::FLEX_ETS_TAG);
+
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP };
     auto columnLayoutProperty = frameNode1->GetLayoutProperty();
     EXPECT_NE(columnLayoutProperty, nullptr);
+
     columnLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto flexLayoutProperty = frameNode2->GetLayoutProperty();
     EXPECT_NE(flexLayoutProperty, nullptr);
+
     flexLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto rowLayoutProperty = frameNode3->GetLayoutProperty();
     EXPECT_NE(rowLayoutProperty, nullptr);
@@ -1365,17 +1360,14 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 {
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<NavigationPattern>(), false);
-
     auto frameNode2 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<NavDestinationPattern>(), true);
-
     auto frameNode3 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_CONTENT_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true), false);
-
     auto frameNode4 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
@@ -1408,6 +1400,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         KeyBoardAvoidMode::RESIZE_WITH_CARET,
         KeyBoardAvoidMode::NONE
     };
+
     std::vector<std::pair<bool, bool>> expectedRes = {
         { true, false },
         { false, true },
@@ -1415,6 +1408,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         { false, true },
         { false, false }
     };
+
     for (int i= 0; i < modeArr.size(); ++i) {
         safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);

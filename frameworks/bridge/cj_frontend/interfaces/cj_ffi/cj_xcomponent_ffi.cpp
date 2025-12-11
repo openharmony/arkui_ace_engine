@@ -235,6 +235,7 @@ void FfiOHOSAceFrameworkXComponentCreate(
 const char* FfiOHOSAceFrameworkXComponentControllerGetSurfaceId(int64_t selfID)
 {
     auto self = FFIData::GetData<NativeXComponentController>(selfID);
+    CHECK_NULL_RETURN(self, nullptr);
     std::string surfaceId = self->GetSurfaceId();
     char* result = strdup(surfaceId.c_str());
     return result;

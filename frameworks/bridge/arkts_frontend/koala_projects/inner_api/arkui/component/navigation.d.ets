@@ -16,8 +16,8 @@
 import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
-} from 'arkui.stateManagement.runtime';
-import { memo } from '@koalaui.runtime.annotations';
+} from 'arkui.incremental.runtime.state';
+import { memo } from '@koalaui/runtime/annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
@@ -26,9 +26,9 @@ import {
 } from 'arkui/component/common';
 import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { ComponentBase } from 'arkui/ComponentBase';
 import { LayoutSafeAreaEdge, LayoutSafeAreaType } from 'arkui.component.common';
-import { CustomBuilder } from 'arkui.component.builder';
+import { CustomBuilder, PageMapBuilder } from 'arkui.component.builder';
 import {
     NavBarPosition,
     NavigationMenuItem,
@@ -55,13 +55,15 @@ import image from '@ohos.multimedia.image';
 type PixelMap = image.PixelMap;
 type SystemBarStyle = window.SystemBarStyle;
 
+export interface NavigationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+    isUserCreateStack?: boolean;
+}
+
 export declare class ArkNavigationPeer extends ArkCommonMethodPeer {
-    constructor(peerPtr: KPointer, id: int32, name: string);
-    constructor(peerPtr: KPointer, id: int32);
     protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkNavigationPeer;
-    public setNavigationOptions0Attribute(): void;
-    public setNavigationOptions1Attribute(pathInfos: NavPathStack): void;
     public navBarWidthAttribute(value: Length | undefined): void;
     public navBarPositionAttribute(value: NavBarPosition | undefined): void;
     public navBarWidthRangeAttribute(value: [Dimension, Dimension] | undefined): void;
@@ -137,8 +139,7 @@ export interface NavigationAttribute extends CommonMethod {
     onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
-        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
+    navDestination(value: (PageMapBuilder | undefined)): this;
     customNavContentTransition(
         value:
             ((
@@ -215,8 +216,7 @@ export declare class ArkNavigationStyle extends ArkCommonMethodStyle implements 
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
-        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
+    navDestination(value: (PageMapBuilder | undefined)): this;
     public customNavContentTransition(
         value:
             ((
@@ -246,7 +246,7 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
         name: string, param: (Object | null | undefined)) => void;
     public _needSync: boolean;
     public getPeer(): ArkNavigationPeer;
-    public setNavigationOptions(pathInfos?: NavPathStack): this;
+    public setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this;
     public navBarWidth(value: Length | undefined): this;
     public navBarPosition(value: NavBarPosition | undefined): this;
     public navBarWidthRange(value: [Dimension, Dimension] | undefined): this;
@@ -268,8 +268,7 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    navDestination(@memo() value: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type,
-        name: string, param: (Object | null | undefined)) => void) | undefined)): this;
+    navDestination(value: (PageMapBuilder | undefined)): this;
     public customNavContentTransition(
         value:
             ((

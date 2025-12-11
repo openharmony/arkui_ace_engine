@@ -56,20 +56,29 @@ public:
 
     void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target)
     {
-        if (!overlayManager_ && isShow) {
-            overlayManager_ = MakeRefPtr<OverlayManager>(target);
-            overlayManager_->SetIsAttachToCustomNode(true);
+        auto targetId = target->GetId();
+        auto it = targetOverlayMap_.find(targetId);
+        if (it == targetOverlayMap_.end() && isShow) {
+            targetOverlayMap_[targetId] = MakeRefPtr<OverlayManager>(target);
+            targetOverlayMap_[targetId]->SetIsAttachToCustomNode(true);
         }
     }
 
-    const RefPtr<OverlayManager>& GetOverlayManager()
+    RefPtr<OverlayManager> GetOverlayManager(int32_t targetId)
     {
-        return overlayManager_;
+        auto it = targetOverlayMap_.find(targetId);
+        if (it != targetOverlayMap_.end()) {
+            return it->second;
+        }
+        return nullptr;
     }
 
-    void DeleteOverlayManager()
+    void DeleteOverlayManager(int32_t targetId)
     {
-        overlayManager_.Reset();
+        auto it = targetOverlayMap_.find(targetId);
+        if (it != targetOverlayMap_.end()) {
+            targetOverlayMap_.erase(it);
+        }
     }
     uint32_t GetWindowPatternType() const override;
 
@@ -96,8 +105,8 @@ private:
     int32_t instanceId_ = Container::CurrentId();
 
     CancelableCallback<void()> checkContextTransparentTask_;
-    RefPtr<OverlayManager> overlayManager_;
     std::map<int32_t, std::function<void(bool)>> visibleChangeCallbackMap_;
+    std::map<int32_t, RefPtr<OverlayManager>> targetOverlayMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };

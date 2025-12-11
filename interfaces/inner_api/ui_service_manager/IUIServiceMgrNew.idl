@@ -15,6 +15,8 @@
 
 sequenceable want..OHOS.AAFwk.Want;
 interface OHOS.Ace.IUIServiceNew;
+sequenceable UiServiceStatisticEvent..OHOS.Ace.StatisticEventInfoParcel;
+sequenceable UiServiceStatisticEvent..OHOS.Ace.AppInfoParcel;
 
 interface OHOS.Ace.IUIServiceMgrNew {
     [oneway] void RegisterCallBack([in] Want want, [in] IUIServiceNew uiService);
@@ -22,4 +24,5 @@ interface OHOS.Ace.IUIServiceMgrNew {
     [oneway] void Push([in] Want want, [in] String name, [in] String jsonPath, [in] String dataStr, [in] String extraData);
     [oneway] void Request([in] Want want, [in] String name, [in] String dataStr);
     [oneway] void ReturnRequest([in] Want want, [in] String resource, [in] String dataStr, [in] String extraData);
+    [oneway] void ReportStatisticEvents([in] AppInfoParcel appInfo, [in] List<StatisticEventInfoParcel> events);
 }

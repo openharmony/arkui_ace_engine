@@ -148,7 +148,7 @@ void SetOnRefreshingImpl(Ark_NativePointer node,
     RefreshModelStatic::SetOnRefreshing(frameNode, std::move(onRefreshing));
 }
 void SetRefreshOffsetImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -163,8 +163,15 @@ void SetPullToRefreshImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RefreshModelStatic::SetPullToRefresh(frameNode, convValue);
 }
+void setPullUpToCancelRefreshImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RefreshModelStatic::SetPullUpToCancelRefresh(frameNode, convValue);
+}
 void SetOnOffsetChangeImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Void* value)
+                           const Opt_Callback_F64_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,13 +181,13 @@ void SetOnOffsetChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onOffsetChange = [arkCallback = CallbackHelper(*optValue)](const float indexValue) {
-        Ark_Number index = Converter::ArkValue<Ark_Number>(indexValue);
+        Ark_Float64 index = Converter::ArkValue<Ark_Float64>(indexValue);
         arkCallback.Invoke(index);
     };
     RefreshModelStatic::SetOnOffsetChange(frameNode, std::move(onOffsetChange));
 }
 void SetPullDownRatioImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -199,6 +206,7 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshAttributeModifier::SetOnRefreshingImpl,
         RefreshAttributeModifier::SetRefreshOffsetImpl,
         RefreshAttributeModifier::SetPullToRefreshImpl,
+        RefreshAttributeModifier::setPullUpToCancelRefreshImpl,
         RefreshAttributeModifier::SetOnOffsetChangeImpl,
         RefreshAttributeModifier::SetPullDownRatioImpl,
     };

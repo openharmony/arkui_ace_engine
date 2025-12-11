@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -279,7 +280,7 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
         return;
     }
     auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
@@ -352,12 +353,10 @@ void SetOnPasteImpl(Ark_NativePointer node,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_PasteEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_PasteEvent arkEvent = PasteEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(arkContent, arkEvent);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
@@ -658,22 +657,34 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
         TextFieldModelStatic::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
         return;
     }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onCreateMenuCallback =
+        nullptr;
+    std::function<bool(NG::MenuItemParam)> onMenuItemClick = nullptr;
+    auto createMenuCallbackArk = Converter::GetOpt(optValue->onCreateMenu);
+    if (createMenuCallbackArk.has_value()) {
+        auto createMenuCallback = createMenuCallbackArk.value();
+        onCreateMenuCallback =
+            [arkCreateMenu = CallbackHelper(createMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
             auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
             return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    }
+    auto clickCallbackArk = Converter::GetOpt(optValue->onMenuItemClick);
+    if (clickCallbackArk.has_value()) {
+        auto clickCallback = clickCallbackArk.value();
+        onMenuItemClick = [arkMenuItemClick = CallbackHelper(clickCallback)](
+                              NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range { .start = menuOptionsParam.start, .end = menuOptionsParam.end };
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            auto arkResult =
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
+    }
     TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback),
         std::move(onMenuItemClick));
 }
@@ -698,6 +709,8 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
+    TextFieldModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -750,6 +763,30 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     TextFieldModelStatic::SetKeyboardAppearance(frameNode, convValue);
+}
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
@@ -884,6 +921,9 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetStopBackPressImpl,
         TextAreaAttributeModifier::SetOnWillChangeImpl,
         TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
+        TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
+        TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,

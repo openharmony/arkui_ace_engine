@@ -1119,7 +1119,8 @@ void MenuView::ShowMenuTargetScaleToOrigin(
     auto scaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
 
     CHECK_NULL_VOID(previewPattern);
-    auto scale = previewPattern->GetHoverTargetOriginScale() * scaleFrom;
+    auto originScale = previewPattern->GetHoverTargetOriginScale();
+    auto scale = originScale * scaleFrom;
 
     auto targetNode = GetMenuTargetNode(wrapperPattern);
     CHECK_NULL_VOID(targetNode);
@@ -1129,10 +1130,17 @@ void MenuView::ShowMenuTargetScaleToOrigin(
     auto menuTheme = GetMenuTheme(wrapperPattern->GetHost());
     CHECK_NULL_VOID(menuTheme);
     AnimationOption option = AnimationOption(Curves::SHARP, menuTheme->GetHoverImageDelayDuration(true));
-    AnimationUtils::Animate(option, [targetRenderContext, scale]() {
-        CHECK_NULL_VOID(targetRenderContext);
-        targetRenderContext->UpdateTransformScale(scale);
-    }, nullptr, nullptr, targetNode->GetContextRefPtr());
+    AnimationUtils::Animate(
+        option,
+        [targetRenderContext, scale]() {
+            CHECK_NULL_VOID(targetRenderContext);
+            targetRenderContext->UpdateTransformScale(scale);
+        },
+        [targetRenderContext, originScale]() {
+            CHECK_NULL_VOID(targetRenderContext);
+            targetRenderContext->UpdateTransformScale(originScale);
+        },
+        nullptr, targetNode->GetContextRefPtr());
 }
 
 void MenuView::UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern)

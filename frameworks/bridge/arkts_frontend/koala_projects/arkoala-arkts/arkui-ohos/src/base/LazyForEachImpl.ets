@@ -14,8 +14,8 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
-import { StateContext } from 'arkui.incremental.runtime.state';
+    rememberDisposable, scheduleCallback } from '@koalaui/runtime'
+import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
@@ -23,11 +23,11 @@ import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
-import { LazyItemNode } from './LazyItemNode'
-import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { LazyNodePeer, LazyItemNode, NodeHolder } from './SyntaxNodeBase'
 import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
+import { STATE_MGMT_FACTORY } from '../stateManagement/decorator'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
@@ -44,24 +44,31 @@ export function updateLazyItems() {
 /** @memo:intrinsic */
 export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
-    isRepeat: boolean = false,
+    itemGenerator: (item: T, index: int32) => void,
+    keyGenerator?: (item: T, index: int32) => string,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
+    isRepeat: boolean = false
 ) {
     const node = createLazyNode(isRepeat)
 
-    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
-        pool?.dispose()
-    })
-    let changeCounter = rememberMutableState(0)
-    changeCounter.value //subscribe
+    let pool = rememberDisposable(
+        () => new LazyItemPool(node, CustomComponent.current),
+        (pool?: LazyItemPool) => {
+            pool?.dispose()
+        }
+    )
+    if (pool.total !== dataSource.totalCount()) {
+        console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
+        pool.total = dataSource.totalCount()
+    }
     let listener = remember(() => {
+        let changeCounter = STATE_MGMT_FACTORY.makeStaticLocal<int32>('__backing_value_change_counter', 0)
         let res = new InternalListener(changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
+    listener.version.get() // subscribe
     const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
@@ -84,6 +91,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
                 currentRenderingComponent, currentExtendableComponent)
         } catch (error) {
             InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
+            InteropNativeModule._NativeLog(`${(error as Error).stack}`)
             return nullptr
         } finally {
             ObserveSingleton.instance.renderingComponent = lastRenderingComponent
@@ -98,32 +106,17 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
-export class NodeHolder {
-    node?: PeerNode
-}
-
 /** @memo:intrinsic */
 function createLazyNode(isRepeat: boolean): PeerNode {
     /**
      * We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
      *   therefore LazyForEach implementation is outside NodeAttach,
-     *   and LazyForEachNode is provided through a remembered NodeHolder.
+     *   and LazyNode is provided through a remembered NodeHolder.
      */
     let nodeHolder = remember(() => new NodeHolder())
-    NodeAttach(
-        () => {
-            const peerId = PeerNode.nextId()
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
-            if (!_peerPtr) {
-                throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
-            }
-            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? 'Repeat' : 'LazyForEach', 0)
-            return _peer
-        },
-        (node: PeerNode) => {
-            nodeHolder.node = node
-        }
-    )
+    NodeAttach(() => LazyNodePeer.create(isRepeat), (node: PeerNode) => {
+        nodeHolder.node = node
+    })
     return nodeHolder.node!
 }
 
@@ -153,6 +146,7 @@ class LazyItemPool implements Disposable {
     private _parent: PeerNode
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
+    public total: int32 = 0 // total count of data source
     disposed: boolean = false
 
     /**
@@ -182,7 +176,7 @@ class LazyItemPool implements Disposable {
         index: int32,
         data: T,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (item: T, index: int32) => void,
         currentRenderingComponent: int32,
         currentExtendableComponent: object | undefined
     ): pointer {
@@ -199,7 +193,7 @@ class LazyItemPool implements Disposable {
                 const lastExtendableComponent = ExtendableComponent.current
                 ObserveSingleton.instance.renderingComponent = currentRenderingComponent
                 ExtendableComponent.current = currentExtendableComponent
-                memoEntry2<T, number, void>(
+                memoEntry2<T, int32, void>(
                     context,
                     0,
                     itemGenerator,
@@ -223,7 +217,8 @@ class LazyItemPool implements Disposable {
      */
     pruneBy(criteria: (index: int32) => boolean) {
         this._activeItems.forEach((node, index) => {
-            if (criteria(index)) {
+            if (criteria(index)) { // dispose items outside the active range
+                console.log(`LazyItemPool.pruneBy(): node will be disposed for index ${index}`)
                 node.dispose()
                 this._activeItems.delete(index)
                 globalLazyItems.delete(node)
@@ -236,14 +231,19 @@ class LazyItemPool implements Disposable {
      * @param start 
      * @param end 
      */
-    updateActiveRange(start: int32, end: int32) {
-        if (start > end) {
-            return
-        }
+    updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)
-                return index < start || index > end
+                return !this.isInCacheRange(
+                    index,
+                    start,
+                    end,
+                    cacheStart,
+                    cacheEnd,
+                    isLoop,
+                    this.total
+                )
             })
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
@@ -331,5 +331,67 @@ class LazyItemPool implements Disposable {
             return index + 1;
         }
         return index;
+    }
+
+    // check if index is in cache range
+    private isInCacheRange(
+        index: int32,
+        start: int32,
+        end: int32,
+        cacheStart: int32,
+        cacheEnd: int32,
+        isLoop: boolean,
+        total: int32
+    ): boolean {
+        if (total <= 0 || index < 0 || index >= total) {
+            return false;
+        }
+
+        // calculate cache boundaries
+        const cacheStartBound = start - cacheStart;
+        const cacheEndBound = end + cacheEnd;
+
+        if (!isLoop) {
+            // non-loop mode: simple clamping
+            const actualStart = Math.max(0, cacheStartBound);
+            const actualEnd = Math.min(total - 1, cacheEndBound);
+            return index >= actualStart && index <= actualEnd;
+        } else {
+            // loop mode
+            const normalize = (idx: int32): int32 => {
+                return ((idx % total) + total) % total;
+            };
+
+            const normIndex = normalize(index);
+            const normStart = normalize(start);
+            const normEnd = normalize(end);
+
+            // check if visible region is wrapped
+            const isWrapped = normStart > normEnd;
+            if (isWrapped) {
+                // wrapped case: visible region is [start, totalCount-1] + [0, end]
+                // cache region is [start-cacheStart, totalCount-1] + [0, end+cacheEnd]
+                // full coverage condition: cache regions connect or overlap
+                if (cacheStartBound <= cacheEndBound + 1) {
+                    return true;
+                }
+            } else {
+                // normal case: check if cache region covers entire list
+                if (cacheStartBound - cacheEndBound + 1 >= total) {
+                    return true;
+                }
+            }
+
+            // non-full coverage case
+            const normCacheStart = normalize(cacheStartBound);
+            const normCacheEnd = normalize(cacheEndBound);
+            if (normCacheStart <= normCacheEnd) {
+                // single continuous region
+                return normIndex >= normCacheStart && normIndex <= normCacheEnd;
+            } else {
+                // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
+                return normIndex >= normCacheStart || normIndex <= normCacheEnd;
+            }
+        }
     }
 }

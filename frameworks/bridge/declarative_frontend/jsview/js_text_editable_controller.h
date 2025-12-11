@@ -35,6 +35,7 @@ public:
     void SetTextSelection(const JSCallbackInfo& info);
     void ShowPassword(const JSCallbackInfo& info);
     void HidePassword(const JSCallbackInfo& info);
+    void ScrollToVisible(const JSCallbackInfo& info);
     void StopEditing();
     void GetTextContentRect(const JSCallbackInfo& info);
     void GetTextContentLinesNum(const JSCallbackInfo& info);
@@ -54,6 +55,7 @@ public:
     void SetPlaceholderStyledString(const JSCallbackInfo& info);
     RefPtr<SpanString> GetPlaceholderStyledString() const;
     void ClearPlaceholderStyledString();
+    void DeleteBackward();
 
 private:
     WeakPtr<TextFieldControllerBase> controllerWeak_;

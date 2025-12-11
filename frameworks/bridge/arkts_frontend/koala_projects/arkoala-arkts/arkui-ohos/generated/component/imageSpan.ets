@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -28,6 +29,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { extractors, AttributeModifier, hookImageSpanAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as drawing } from "@ohos.graphics.drawing"
 import { ImageErrorCallback, ImageError } from "./image"
 import { default as image } from "@ohos.multimedia.image"
@@ -52,6 +54,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         return _peer
     }
     setImageSpanOptionsAttribute(value: ResourceStr | image.PixelMap): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof ResourceStr) {
             thisSerializer.writeInt8((0).toByte())
@@ -237,6 +240,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         if (this.checkPriority("setImageSpanOptions")) {
             const value_casted = value as (ResourceStr | image.PixelMap)
             this.getPeer()?.setImageSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ImageSpanAttribute');
             return this
         }
         return this
@@ -290,12 +294,17 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -98,8 +98,8 @@ export interface ActionSheetButtonOptions {
     action: VoidCallback;
 }
 export interface ActionSheetOffset {
-    dx: number | string | Resource;
-    dy: number | string | Resource;
+    dx: double | string | Resource;
+    dy: double | string | Resource;
 }
 export interface ActionSheetOptions {
     title: string | Resource;
@@ -134,7 +134,7 @@ export interface ActionSheetOptions {
     onWillAppear?: (() => void);
     onWillDisappear?: (() => void);
     levelMode?: LevelMode;
-    levelUniqueId?: number;
+    levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
 }
@@ -239,10 +239,10 @@ export class ActionSheetOffset_serializer {
     public static write(buffer: SerializerBase, value: ActionSheetOffset): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForDx  = value.dx
-        if (valueHolderForDx instanceof number) {
+        if (valueHolderForDx instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForDxForIdx0  = valueHolderForDx as number
-            valueSerializer.writeNumber(valueHolderForDxForIdx0)
+            const valueHolderForDxForIdx0  = valueHolderForDx as double
+            valueSerializer.writeFloat64(valueHolderForDxForIdx0)
         } else if (valueHolderForDx instanceof string) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForDxForIdx1  = valueHolderForDx as string
@@ -253,10 +253,10 @@ export class ActionSheetOffset_serializer {
             Resource_serializer.write(valueSerializer, valueHolderForDxForIdx2)
         }
         const valueHolderForDy  = value.dy
-        if (valueHolderForDy instanceof number) {
+        if (valueHolderForDy instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForDyForIdx0  = valueHolderForDy as number
-            valueSerializer.writeNumber(valueHolderForDyForIdx0)
+            const valueHolderForDyForIdx0  = valueHolderForDy as double
+            valueSerializer.writeFloat64(valueHolderForDyForIdx0)
         } else if (valueHolderForDy instanceof string) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForDyForIdx1  = valueHolderForDy as string
@@ -270,9 +270,9 @@ export class ActionSheetOffset_serializer {
     public static read(buffer: DeserializerBase): ActionSheetOffset {
         let valueDeserializer : DeserializerBase = buffer
         const dxTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let dxTmpBuf : number | string | Resource | undefined
+        let dxTmpBuf : double | string | Resource | undefined
         if (dxTmpBufUnionSelector == (0).toChar()) {
-            dxTmpBuf = (valueDeserializer.readNumber() as number)
+            dxTmpBuf = valueDeserializer.readFloat64()
         } else if (dxTmpBufUnionSelector == (1).toChar()) {
             dxTmpBuf = (valueDeserializer.readString() as string)
         } else if (dxTmpBufUnionSelector == (2).toChar()) {
@@ -280,11 +280,11 @@ export class ActionSheetOffset_serializer {
         } else {
             throw new Error("One of the branches for dxTmpBuf has to be chosen through deserialisation.")
         }
-        const dxTmpResult : number | string | Resource = (dxTmpBuf as number | string | Resource)
+        const dxTmpResult : double | string | Resource = (dxTmpBuf as double | string | Resource)
         const dyTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let dyTmpBuf : number | string | Resource | undefined
+        let dyTmpBuf : double | string | Resource | undefined
         if (dyTmpBufUnionSelector == (0).toChar()) {
-            dyTmpBuf = (valueDeserializer.readNumber() as number)
+            dyTmpBuf = valueDeserializer.readFloat64()
         } else if (dyTmpBufUnionSelector == (1).toChar()) {
             dyTmpBuf = (valueDeserializer.readString() as string)
         } else if (dyTmpBufUnionSelector == (2).toChar()) {
@@ -292,7 +292,7 @@ export class ActionSheetOffset_serializer {
         } else {
             throw new Error("One of the branches for dyTmpBuf has to be chosen through deserialisation.")
         }
-        const dyTmpResult : number | string | Resource = (dyTmpBuf as number | string | Resource)
+        const dyTmpResult : double | string | Resource = (dyTmpBuf as double | string | Resource)
         let value : ActionSheetOffset = ({dx: dxTmpResult, dy: dyTmpResult} as ActionSheetOffset)
         return value
     }
@@ -489,10 +489,10 @@ export class ActionSheetOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -660,10 +660,10 @@ export class ActionSheetOptions_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as int32
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
@@ -777,7 +777,7 @@ export class ActionSheetOptions_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -904,11 +904,11 @@ export class ActionSheetOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -916,7 +916,7 @@ export class ActionSheetOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1058,11 +1058,11 @@ export class ActionSheetOptions_serializer {
             let borderColorTmpBuf_ : ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
             if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
                 const borderColorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let borderColorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let borderColorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (borderColorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     borderColorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (borderColorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    borderColorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    borderColorTmpBuf_BufU = valueDeserializer.readInt32()
                 } else if (borderColorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     borderColorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (borderColorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -1070,7 +1070,7 @@ export class ActionSheetOptions_serializer {
                 } else {
                     throw new Error("One of the branches for borderColorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | number | string | Resource)
+                borderColorTmpBuf_ = (borderColorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
                 borderColorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
@@ -1198,11 +1198,11 @@ export class ActionSheetOptions_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

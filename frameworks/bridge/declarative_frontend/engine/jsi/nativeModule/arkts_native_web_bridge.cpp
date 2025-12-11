@@ -2668,6 +2668,66 @@ ArkUINativeModuleValue WebBridge::ResetOnWindowNew(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WebBridge::SetOnWindowNewExt(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnWindowNewExt(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(WebWindowNewExtEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
+                                                              WebWindowNewExtEvent& event) {
+        auto frameNodeUpgrade = weak.Upgrade();
+        CHECK_NULL_VOID(frameNodeUpgrade);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(frameNodeUpgrade);
+        const char* keys[] = { "isAlert", "isUserTrigger", "targetUrl", "handler", "windowFeatures",
+            "navigationPolicy" };
+        Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateJSWindowNewExtHandler(event);
+
+        const char* featureKeys[] = { "height", "width", "x", "y" };
+        Local<JSValueRef> featureValues[] = { panda::NumberRef::New(vm, static_cast<int32_t>(event.GetHeight())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetWidth())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetX())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetY())) };
+        auto windowFeaturesObj =
+            panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(featureKeys), featureKeys, featureValues);
+        Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, event.IsAlert()),
+            panda::BooleanRef::New(vm, event.IsUserTrigger()),
+            panda::StringRef::NewFromUtf8(vm, event.GetTargetUrl().c_str()), handlerObj->GetLocalHandle(),
+            windowFeaturesObj, panda::NumberRef::New(vm, static_cast<int32_t>(event.GetNavigationPolicy())) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnWindowNewExt(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnWindowNewExt(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnWindowNewExt(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WebBridge::SetOnGeolocationShow(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -3086,6 +3146,48 @@ ArkUINativeModuleValue WebBridge::ResetOnShowFileSelector(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetOnShowFileSelector(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetOnTextSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnTextSelectionChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(TextSelectionChangedEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                  func = panda::CopyableGlobal(vm, func)](
+                                                                  TextSelectionChangedEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        auto eventObject = panda::StringRef::NewFromUtf8(vm, event.GetselectionText().c_str());
+        panda::Local<panda::JSValueRef> params[CALL_ARG_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnTextSelectionChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnTextSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnTextSelectionChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4030,6 +4132,68 @@ ArkUINativeModuleValue WebBridge::ResetOnClientAuthenticationRequest(ArkUIRuntim
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WebBridge::SetEnableImageAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enable = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getWebModifier()->setEnableImageAnalyzer(nativeNode, enable);
+    } else {
+        GetArkUINodeModifiers()->getWebModifier()->resetEnableImageAnalyzer(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetEnableImageAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetEnableImageAnalyzer(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetEnableAutoFill(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enable = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getWebModifier()->setEnableAutoFill(nativeNode, enable);
+    } else {
+        GetArkUINodeModifiers()->getWebModifier()->resetEnableAutoFill(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetEnableAutoFill(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetEnableAutoFill(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WebBridge::SetForceEnableZoom(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -4556,9 +4720,12 @@ ArkUINativeModuleValue WebBridge::SetOnDetectedBlankScreen(ArkUIRuntimeCallInfo*
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weak);
         const char* detailsKeys[] = { "detectedContentfulNodesCount" };
-        Local<JSValueRef> detailsValues[] = { panda::NumberRef::New(vm, event.GetDetectedContentfulNodesCount()) };
-        auto detailsObject =
-            panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(detailsKeys), detailsKeys, detailsValues);
+        auto detailsObject = panda::JSValueRef::Undefined(vm);
+        if (event.GetDetectedContentfulNodesCount()) {
+            Local<JSValueRef> detailsValues[] = { panda::NumberRef::New(vm, event.GetDetectedContentfulNodesCount()) };
+            detailsObject =
+                panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(detailsKeys), detailsKeys, detailsValues);
+        }
         const char* eventKeys[] = { "url", "blankScreenReason", "blankScreenDetails" };
         Local<JSValueRef> eventValues[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
             panda::NumberRef::New(vm, event.GetBlankScreenReason()), detailsObject };
@@ -4649,6 +4816,147 @@ ArkUINativeModuleValue WebBridge::ResetBlankScreenDetectionConfig(ArkUIRuntimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetBlankScreenDetectionConfig(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetOnFirstScreenPaint(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnFirstScreenPaint(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(FirstScreenPaintEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func)](
+                                                               FirstScreenPaintEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        const char* eventKeys[] = { "url", "navigationStartTime", "firstScreenPaintTime" };
+        Local<JSValueRef> eventValues[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
+            panda::NumberRef::New(vm, event.GetNavigationStartTime()),
+            panda::NumberRef::New(vm, event.GetFirstScreenPaintTime()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(eventKeys), eventKeys, eventValues);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[CALL_ARG_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnFirstScreenPaint(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnFirstScreenPaint(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnFirstScreenPaint(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetOnCameraCaptureStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnCameraCaptureStateChanged(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(CameraCaptureStateEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                  func = panda::CopyableGlobal(vm, func)](
+                                                                  CameraCaptureStateEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        const char* keys[] = { "originalState", "newState" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetOriginalCameraCaptureState()),
+            panda::NumberRef::New(vm, event.GetNewCameraCaptureState()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[CALL_ARG_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnCameraCaptureStateChanged(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnCameraCaptureStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnCameraCaptureStateChanged(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetOnMicrophoneCaptureStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnMicrophoneCaptureStateChanged(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(MicrophoneCaptureStateEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                  func = panda::CopyableGlobal(vm, func)](
+                                                                  MicrophoneCaptureStateEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        const char* keys[] = { "originalState", "newState" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetOriginalMicrophoneCaptureState()),
+            panda::NumberRef::New(vm, event.GetNewMicrophoneCaptureState()) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[CALL_ARG_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnMicrophoneCaptureStateChanged(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnMicrophoneCaptureStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnMicrophoneCaptureStateChanged(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

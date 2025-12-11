@@ -264,6 +264,23 @@ const Monitor = function (key : string, ...keys: string[]): (target: any, _: any
   };
 };
 
+const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
+  // Path can end with the star
+  const isValidPath = (typeof key === 'string') && keys.every(item => typeof item === 'string');
+  const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
+  return function (target, _, descriptor): void {
+    const monitorFunc = descriptor.value;
+    if (!isValidPath) {
+      const message = `@SyncMonitor '${monitorFunc.name}' owned by '${target.constructor.name}' - failed to initialize, path type not valid, path(s) must be of type string`;
+      throw new BusinessError(SYNC_MONITOR_FAIL_PATH_ILLEGAL, message);
+    }
+    stateMgmtConsole.debug(`@SyncMonitor('${pathsUniqueString}')`);
+    let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + target.constructor.name);
+    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc
+                      : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+  };
+};
+
 /**
 * @Monitor decorated function parameter type IMonitor
 * and sub-type IMonitorValue<T>
@@ -319,9 +336,12 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
  * @partof SDK
  * @since 22
  */
-const Env = (envKey: string) => {
+const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Env`, envKey);
+
   return (proto: object, varName: string): void => {
+    EnvV2.addEnvKeyVariableDecoMeta(proto, varName, envKey);
+    const storeProp = ObserveV2.ENV_PREFIX + varName;
     Reflect.defineProperty(proto, varName, {
       get() {
         if (!(envKey in envFactoryMap)) {
@@ -335,7 +355,14 @@ const Env = (envKey: string) => {
           stateMgmtConsole.applicationError(message);
           throw new Error(message);
         }
-        return EnvV2.registerEnv(envKey as keyof EnvTypeMap, this.getUIContext(), this.getMainInstanceId());
+        ObserveV2.getObserve().addRef(this, varName);
+        if (!this[storeProp]) {
+          // first init env value
+          stateMgmtConsole.debug(`Env get first register EnvValue key ${envKey} varName ${varName} in ${this.debugInfo__()}`);
+          this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateForEnvValue__Internal.bind(this));
+          this[storeProp] = EnvV2.registerEnv(envKey, this, varName);
+        }
+        return this[storeProp];
       },
       set(_) {
           const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;

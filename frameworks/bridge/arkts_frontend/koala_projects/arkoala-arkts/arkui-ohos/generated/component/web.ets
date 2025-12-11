@@ -20,7 +20,8 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, AttributeModifier, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as webview } from "@ohos.web.webview"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
@@ -130,6 +131,9 @@ export class ConsoleMessage implements MaterializedBase {
     public getMessageLevel(): MessageLevel {
         return this.getMessageLevel_serialize()
     }
+    public getSource(): ConsoleMessageSource {
+        return this.getSource_serialize()
+    }
     getMessage_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessage(this.peer!.ptr)
         return retval
@@ -145,6 +149,10 @@ export class ConsoleMessage implements MaterializedBase {
     getMessageLevel_serialize(): MessageLevel {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessageLevel(this.peer!.ptr)
         return MessageLevel.fromValue(retval)
+    }
+    getSource_serialize(): ConsoleMessageSource {
+        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSource(this.peer!.ptr)
+        return ConsoleMessageSource.fromValue(retval)
     }
 }
 export class ControllerHandlerInternal {
@@ -1869,7 +1877,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): void {
+    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2965,6 +2973,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableImageAnalyzerAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableImageAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3046,7 +3066,7 @@ export interface WebKeyboardOptions {
 }
 export interface WebKeyboardCallbackInfo {
     controller: WebKeyboardController;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
@@ -3121,8 +3141,8 @@ export interface ScreenCaptureConfig {
 }
 export interface FullScreenEnterEvent {
     handler: FullScreenExitHandler;
-    videoWidth?: number;
-    videoHeight?: number;
+    videoWidth?: int32;
+    videoHeight?: int32;
 }
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
 export type MouseInfoCallback = (event: NativeEmbedMouseInfo) => void;
@@ -3240,6 +3260,21 @@ export enum ViewportFit {
     CONTAINS = 1,
     COVER = 2
 }
+export enum ConsoleMessageSource {
+    XML = 0,
+    JAVASCRIPT = 1,
+    NETWORK = 2,
+    CONSOLE_API = 3,
+    STORAGE = 4,
+    RENDERING = 5,
+    SECURITY = 6,
+    OTHER = 7,
+    DEPRECATION = 8,
+    WORKER = 9,
+    VIOLATION = 10,
+    INTERVENTION = 11,
+    RECOMMENDATION = 12
+}
 export interface Header {
     headerKey: string;
     headerValue: string;
@@ -3250,10 +3285,16 @@ export interface WebOptions {
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
+    emulateTouchFromMouseEvent?: boolean;
+}
+export interface UrlRegexRule {
+    secondLevelDomain: string;
+    rule: string;
 }
 export interface ScriptItem {
     script: string;
     scriptRules: Array<string>;
+    urlRegexRules?: Array<UrlRegexRule>;
 }
 export interface LoadCommittedDetails {
     isMainFrame: boolean;
@@ -3704,7 +3745,7 @@ export interface WebAttribute extends CommonMethod {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onHttpAuthRequest")
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         throw new Error("Unimplemented method onInterceptRequest")
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -3971,6 +4012,9 @@ export interface WebAttribute extends CommonMethod {
     enableSelectedDataDetector(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableSelectedDataDetector")
     }
+    enableImageAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableImageAnalyzer")
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error("Unimplemented method registerNativeEmbedRule")
     }
@@ -4029,7 +4073,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
     onScaleChange_value?: ((value0: OnScaleChangeEvent) => void) | undefined
     onHttpAuthRequest_value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
     onPermissionRequest_value?: ((value0: OnPermissionRequestEvent) => void) | undefined
     onScreenCaptureRequest_value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
     onContextMenuShow_value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
@@ -4118,6 +4162,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     blankScreenDetectionConfig_value?: BlankScreenDetectionConfig | undefined
     zoomControlAccess_value?: boolean | undefined
     enableSelectedDataDetector_value?: boolean | undefined
+    enableImageAnalyzer_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
     setWebOptions(value: WebOptions): this {
         return this
@@ -4263,7 +4308,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         return this
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4530,6 +4575,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     enableSelectedDataDetector(value: boolean | undefined): this {
         return this
     }
+    enableImageAnalyzer(value: boolean | undefined): this {
+        return this
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         return this
     }
@@ -4576,6 +4624,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("setWebOptions")) {
             const value_casted = value as (WebOptions)
             this.getPeer()?.setWebOptionsAttribute(value_casted)
+            this.applyOptionsFinish('WebAttribute');
             return this
         }
         return this
@@ -4654,9 +4703,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     }
     public javaScriptProxy(value: JavaScriptProxy | undefined): this {
         if (this.checkPriority("javaScriptProxy")) {
-            const value_casted = value as (JavaScriptProxy | undefined)
-            this.getPeer()?.setJavaScriptProxyAttribute(value_casted)
-            return this
+            hookJavaScriptProxy(this, value)
         }
         return this
     }
@@ -4956,9 +5003,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         if (this.checkPriority("onInterceptRequest")) {
-            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
+            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined)
             this.getPeer()?.setOnInterceptRequestAttribute(value_casted)
             return this
         }
@@ -5668,6 +5715,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public enableImageAnalyzer(value: boolean | undefined): this {
+        if (this.checkPriority("enableImageAnalyzer")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableImageAnalyzerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         if (this.checkPriority("registerNativeEmbedRule")) {
             const tag_casted = tag as (string | undefined)
@@ -5689,12 +5744,17 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWebAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWebAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -6050,6 +6110,22 @@ export class SslErrorHandler_serializer {
         return SslErrorHandlerInternal.fromPtr(ptr)
     }
 }
+export class UrlRegexRule_serializer {
+    public static write(buffer: SerializerBase, value: UrlRegexRule): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSecondLevelDomain  = value.secondLevelDomain
+        valueSerializer.writeString(valueHolderForSecondLevelDomain)
+        const valueHolderForRule  = value.rule
+        valueSerializer.writeString(valueHolderForRule)
+    }
+    public static read(buffer: DeserializerBase): UrlRegexRule {
+        let valueDeserializer : DeserializerBase = buffer
+        const secondLevelDomainTmpResult : string = (valueDeserializer.readString() as string)
+        const ruleTmpResult : string = (valueDeserializer.readString() as string)
+        let value : UrlRegexRule = ({secondLevelDomain: secondLevelDomainTmpResult, rule: ruleTmpResult} as UrlRegexRule)
+        return value
+    }
+}
 export class WebContextMenuParam_serializer {
     public static write(buffer: SerializerBase, value: WebContextMenuParam): void {
         let valueSerializer : SerializerBase = buffer
@@ -6323,7 +6399,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoWidthTmpValue  = valueHolderForVideoWidth!
-            valueSerializer.writeNumber(valueHolderForVideoWidthTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6331,7 +6407,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoHeightTmpValue  = valueHolderForVideoHeight!
-            valueSerializer.writeNumber(valueHolderForVideoHeightTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6340,17 +6416,17 @@ export class FullScreenEnterEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : FullScreenExitHandler = (FullScreenExitHandler_serializer.read(valueDeserializer) as FullScreenExitHandler)
         const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoWidthTmpBuf : number | undefined = undefined
+        let videoWidthTmpBuf : int32 | undefined = undefined
         if ((videoWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoWidthTmpBuf = (valueDeserializer.readNumber() as number)
+            videoWidthTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoWidthTmpResult : number | undefined = videoWidthTmpBuf
+        const videoWidthTmpResult : int32 | undefined = videoWidthTmpBuf
         const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoHeightTmpBuf : number | undefined = undefined
+        let videoHeightTmpBuf : int32 | undefined = undefined
         if ((videoHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoHeightTmpBuf = (valueDeserializer.readNumber() as number)
+            videoHeightTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoHeightTmpResult : number | undefined = videoHeightTmpBuf
+        const videoHeightTmpResult : int32 | undefined = videoHeightTmpBuf
         let value : FullScreenEnterEvent = ({handler: handlerTmpResult, videoWidth: videoWidthTmpResult, videoHeight: videoHeightTmpResult} as FullScreenEnterEvent)
         return value
     }
@@ -7343,6 +7419,18 @@ export class ScriptItem_serializer {
             const valueHolderForScriptRulesTmpElement : string = valueHolderForScriptRules[valueHolderForScriptRulesCounterI]
             valueSerializer.writeString(valueHolderForScriptRulesTmpElement)
         }
+        const valueHolderForUrlRegexRules  = value.urlRegexRules
+        if (valueHolderForUrlRegexRules !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUrlRegexRulesTmpValue  = valueHolderForUrlRegexRules!
+            valueSerializer.writeInt32((valueHolderForUrlRegexRulesTmpValue.length).toInt())
+            for (let valueHolderForUrlRegexRulesTmpValueCounterI = 0; valueHolderForUrlRegexRulesTmpValueCounterI < valueHolderForUrlRegexRulesTmpValue.length; valueHolderForUrlRegexRulesTmpValueCounterI++) {
+                const valueHolderForUrlRegexRulesTmpValueTmpElement : UrlRegexRule = valueHolderForUrlRegexRulesTmpValue[valueHolderForUrlRegexRulesTmpValueCounterI]
+                UrlRegexRule_serializer.write(valueSerializer, valueHolderForUrlRegexRulesTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ScriptItem {
         let valueDeserializer : DeserializerBase = buffer
@@ -7353,7 +7441,18 @@ export class ScriptItem_serializer {
             scriptRulesTmpBuf[scriptRulesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
         const scriptRulesTmpResult : Array<string> = scriptRulesTmpBuf
-        let value : ScriptItem = ({script: scriptTmpResult, scriptRules: scriptRulesTmpResult} as ScriptItem)
+        const urlRegexRulesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let urlRegexRulesTmpBuf : Array<UrlRegexRule> | undefined = undefined
+        if ((urlRegexRulesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const urlRegexRulesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let urlRegexRulesTmpBuf_ : Array<UrlRegexRule> = new Array<UrlRegexRule>(urlRegexRulesTmpBuf_Length)
+            for (let urlRegexRulesTmpBuf_BufCounterI = 0; urlRegexRulesTmpBuf_BufCounterI < urlRegexRulesTmpBuf_Length; urlRegexRulesTmpBuf_BufCounterI++) {
+                urlRegexRulesTmpBuf_[urlRegexRulesTmpBuf_BufCounterI] = UrlRegexRule_serializer.read(valueDeserializer)
+            }
+            urlRegexRulesTmpBuf = urlRegexRulesTmpBuf_
+        }
+        const urlRegexRulesTmpResult : Array<UrlRegexRule> | undefined = urlRegexRulesTmpBuf
+        let value : ScriptItem = ({script: scriptTmpResult, scriptRules: scriptRulesTmpResult, urlRegexRules: urlRegexRulesTmpResult} as ScriptItem)
         return value
     }
 }
@@ -7429,14 +7528,14 @@ export class WebKeyboardCallbackInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const controllerTmpResult : WebKeyboardController = (WebKeyboardController_serializer.read(valueDeserializer) as WebKeyboardController)
         const attributesTmpBufSizeVar : int32 = valueDeserializer.readInt32()
-        let attributesTmpBuf : Map<string, string> = new Map<string, string>()
+        let attributesTmpBuf : Record<string, string> = {}
         // TODO: TS map resize
         for (let attributesTmpBufIVar = 0; attributesTmpBufIVar < attributesTmpBufSizeVar; attributesTmpBufIVar++) {
             const attributesTmpBufKeyVar : string = (valueDeserializer.readString() as string)
             const attributesTmpBufValueVar : string = (valueDeserializer.readString() as string)
-            attributesTmpBuf.set(attributesTmpBufKeyVar, attributesTmpBufValueVar)
+            attributesTmpBuf[attributesTmpBufKeyVar] = attributesTmpBufValueVar
         }
-        const attributesTmpResult : Map<string, string> = attributesTmpBuf
+        const attributesTmpResult : Record<string, string> = attributesTmpBuf
         let value : WebKeyboardCallbackInfo = ({controller: controllerTmpResult, attributes: attributesTmpResult} as WebKeyboardCallbackInfo)
         return value
     }
@@ -7584,6 +7683,14 @@ export class WebOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEmulateTouchFromMouseEvent  = value.emulateTouchFromMouseEvent
+        if (valueHolderForEmulateTouchFromMouseEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmulateTouchFromMouseEventTmpValue  = valueHolderForEmulateTouchFromMouseEvent!
+            valueSerializer.writeBoolean(valueHolderForEmulateTouchFromMouseEventTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): WebOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -7616,7 +7723,15 @@ export class WebOptions_serializer {
             sharedRenderProcessTokenTmpBuf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessTokenTmpResult : string | undefined = sharedRenderProcessTokenTmpBuf
-        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult, incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult} as WebOptions)
+        const emulateTouchFromMouseEventTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let emulateTouchFromMouseEventTmpBuf : boolean | undefined = undefined
+        if ((emulateTouchFromMouseEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            emulateTouchFromMouseEventTmpBuf = valueDeserializer.readBoolean()
+        }
+        const emulateTouchFromMouseEventTmpResult : boolean | undefined = emulateTouchFromMouseEventTmpBuf
+        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult,
+            incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult,
+            emulateTouchFromMouseEvent: emulateTouchFromMouseEventTmpResult} as WebOptions)
         return value
     }
 }

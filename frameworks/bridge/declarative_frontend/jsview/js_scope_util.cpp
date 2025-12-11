@@ -28,6 +28,11 @@ void JSScopeUtil::JSBind(BindingTarget globalObj)
     JSClass<JSScopeUtil>::Declare("__JSScopeUtil__");
     JSClass<JSScopeUtil>::StaticMethod("syncInstanceId", &JSScopeUtil::SyncInstanceId);
     JSClass<JSScopeUtil>::StaticMethod("restoreInstanceId", &JSScopeUtil::RestoreInstanceId);
+    JSClass<JSScopeUtil>::StaticMethod("getCallingScopeUIContext", &JSScopeUtil::GetCallingScopeUIContext);
+    JSClass<JSScopeUtil>::StaticMethod("getLastFocusedUIContext", &JSScopeUtil::GetLastFocusedUIContext);
+    JSClass<JSScopeUtil>::StaticMethod("getLastForegroundUIContext", &JSScopeUtil::GetLastForegroundUIContext);
+    JSClass<JSScopeUtil>::StaticMethod("getAllUIContexts", &JSScopeUtil::GetAllUIContexts);
+    JSClass<JSScopeUtil>::StaticMethod("resolveUIContext", &JSScopeUtil::ResolveUIContext);
     JSClass<JSScopeUtil>::Bind(globalObj);
 }
 
@@ -54,5 +59,41 @@ void JSScopeUtil::RestoreInstanceId(const JSCallbackInfo& info)
     }
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
     restoreInstanceIds_.pop_back();
+}
+
+void JSScopeUtil::GetCallingScopeUIContext(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ContainerScope::CurrentId())));
+}
+
+void JSScopeUtil::GetLastFocusedUIContext(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ContainerScope::RecentActiveId())));
+}
+
+void JSScopeUtil::GetLastForegroundUIContext(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ContainerScope::RecentForegroundId())));
+}
+
+void JSScopeUtil::GetAllUIContexts(const JSCallbackInfo& info)
+{
+    JSRef<JSArray> jsAllUIContexts = JSRef<JSArray>::New();
+    uint32_t uiContextIdx = 0;
+    auto allUIContexts = ContainerScope::GetAllUIContexts();
+    for (const auto item : allUIContexts) {
+        jsAllUIContexts->SetValueAt(uiContextIdx++, JSRef<JSVal>::Make(ToJSValue(item)));
+    }
+    info.SetReturnValue(jsAllUIContexts);
+}
+
+void JSScopeUtil::ResolveUIContext(const JSCallbackInfo& info)
+{
+    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
+    JSRef<JSArray> jsCurrentIdWithReason = JSRef<JSArray>::New();
+    jsCurrentIdWithReason->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(currentIdWithReason.first)));
+    jsCurrentIdWithReason->SetValueAt(
+        1, JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(currentIdWithReason.second))));
+    info.SetReturnValue(jsCurrentIdWithReason);
 }
 } // namespace OHOS::Ace::Framework

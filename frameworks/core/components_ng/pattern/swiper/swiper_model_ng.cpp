@@ -59,6 +59,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetIsPureSwiper(true);
     return pattern->GetSwiperController();
 }
 
@@ -1838,9 +1839,14 @@ void SwiperModelNG::SetFillType(FrameNode* frameNode, int32_t options)
 
 int32_t SwiperModelNG::GetFillType(FrameNode* frameNode)
 {
-    int32_t value = 0;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, FillType, value, frameNode, value);
     return value;
+}
+
+void SwiperModelNG::ResetFillType(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
 }
 
 void SwiperModelNG::ResetDisplayCountWithObject()

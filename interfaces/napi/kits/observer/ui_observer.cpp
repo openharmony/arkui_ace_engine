@@ -96,6 +96,10 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::textChangeEventListen
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedTextChangeEventListeners_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedSwiperContentListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedSwiperContentListeners_;
+
 template<typename ListenerList, typename... Args>
 void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
 {
@@ -534,19 +538,23 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
 
 void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
 {
+    auto env = GetCurrentNapiEnv();
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
         auto localInfo = infosForRouterPage_[ref];
         if (info.IsEqual(localInfo)) {
-            auto env = GetCurrentNapiEnv();
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
-
             NG::RouterPageInfoNG abilityPageInfo(
-                abilityContext, pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
+                pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
             auto holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
-                listener->OnRouterPageStateChange(abilityPageInfo);
+                listener->OnRouterPageStateChange(abilityPageInfo, abilityContext);
             }
             break;
         }
@@ -555,12 +563,15 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const
     auto currentId = Container::CurrentId();
     auto iter = specifiedRouterPageListeners_.find(currentId);
     if (iter == specifiedRouterPageListeners_.end()) {
+        napi_close_handle_scope(env, scope);
         return;
     }
+    auto context = GetContextValue();
     auto holder = iter->second;
     for (const auto& listener : holder) {
-        listener->OnRouterPageStateChange(pageInfo);
+        listener->OnRouterPageStateChange(pageInfo, context);
     }
+    napi_close_handle_scope(env, scope);
 }
 
 // UIObserver.on(type: "densityUpdate", uiContext | null, callback)
@@ -662,7 +673,7 @@ void UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInst
         holder.end());
 }
 
-void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info)
+void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const WindowSizeBreakpoint& info)
 {
     auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(instanceId);
     if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {
@@ -844,14 +855,20 @@ void UIObserver::UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanc
 void UIObserver::HandleNavDestinationSwitch(
     const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
 {
+    auto env = GetCurrentNapiEnv();
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     HandleAbilityUIContextNavDestinationSwitch(info, switchInfo);
     HandleUIContextNavDestinationSwitch(switchInfo);
+    napi_close_handle_scope(env, scope);
 }
 
 void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
     const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo)
 {
-    napi_value uiContextBackup = switchInfo.context;
     for (auto listenerPair : abilityUIContextNavDesSwitchListeners_) {
         auto ref = listenerPair.first;
         auto localInfo = infosForNavDesSwitch_[ref];
@@ -863,13 +880,11 @@ void UIObserver::HandleAbilityUIContextNavDestinationSwitch(
         napi_value abilityContext = nullptr;
         napi_get_reference_value(env, ref, &abilityContext);
 
-        switchInfo.context = abilityContext;
         auto listenersMap = listenerPair.second;
-        HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
-        HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+        HandleListenersWithEmptyNavigationId(listenersMap, switchInfo, abilityContext);
+        HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo, abilityContext);
         break;
     }
-    switchInfo.context = uiContextBackup;
 }
 
 void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
@@ -880,25 +895,26 @@ void UIObserver::HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwi
         return;
     }
     auto listenersMap = listenersMapIter->second;
-    HandleListenersWithEmptyNavigationId(listenersMap, switchInfo);
-    HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo);
+    auto context = GetContextValue();
+    HandleListenersWithEmptyNavigationId(listenersMap, switchInfo, context);
+    HandleListenersWithSpecifiedNavigationId(listenersMap, switchInfo, context);
 }
 
 void UIObserver::HandleListenersWithEmptyNavigationId(
-    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     std::optional<std::string> navId;
     auto it = listenersMap.find(navId);
     if (it != listenersMap.end()) {
         const auto listeners = it->second;
         for (const auto& listener : listeners) {
-            listener->OnNavDestinationSwitch(switchInfo);
+            listener->OnNavDestinationSwitch(switchInfo, context);
         }
     }
 }
 
 void UIObserver::HandleListenersWithSpecifiedNavigationId(
-    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     std::string navigationId;
     if (switchInfo.from.has_value()) {
@@ -912,7 +928,7 @@ void UIObserver::HandleListenersWithSpecifiedNavigationId(
         if (it != listenersMap.end()) {
             const auto listeners = it->second;
             for (const auto& listener : listeners) {
-                listener->OnNavDestinationSwitch(switchInfo);
+                listener->OnNavDestinationSwitch(switchInfo, context);
             }
         }
     }
@@ -2033,6 +2049,100 @@ void UIObserver::UnRegisterTextChangeEventCallback(const std::string& id, napi_v
     );
 }
 
+void UIObserver::RegisterSwiperContentUpdateCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(unspecifiedSwiperContentListeners_.begin(), unspecifiedSwiperContentListeners_.end(), listener) !=
+        unspecifiedSwiperContentListeners_.end()) {
+        return;
+    }
+    unspecifiedSwiperContentListeners_.emplace_back(listener);
+}
+
+void UIObserver::RegisterSwiperContentUpdateCallback(
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedSwiperContentListeners_.find(id);
+    if (iter == specifiedSwiperContentListeners_.end()) {
+        specifiedSwiperContentListeners_.emplace(
+            id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterSwiperContentUpdateCallback(napi_value callback)
+{
+    // remove all anonymous callback in unspecifiedSwiperContentListeners_
+    if (callback == nullptr) {
+        unspecifiedSwiperContentListeners_.clear();
+        return;
+    }
+    // remove specified callback in unspecifiedSwiperContentListeners_
+    unspecifiedSwiperContentListeners_.erase(
+        std::remove_if(
+            unspecifiedSwiperContentListeners_.begin(),
+            unspecifiedSwiperContentListeners_.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }
+        ),
+        unspecifiedSwiperContentListeners_.end()
+    );
+}
+
+void UIObserver::UnRegisterSwiperContentUpdateCallback(const std::string& id, napi_value callback)
+{
+    auto iter = specifiedSwiperContentListeners_.find(id);
+    if (iter == specifiedSwiperContentListeners_.end()) {
+        return;
+    }
+    if (callback == nullptr) {
+        specifiedSwiperContentListeners_.erase(iter);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "erase all observer of id: %{public}s", id.c_str());
+        return;
+    }
+    auto& holder = iter->second;
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleSwiperContentUpdate(const NG::SwiperContentInfo& info)
+{
+    // use copy instead of origin listeners to avoid listeners_ change during callback executing
+    auto unspecifiedSwiperContentListeners = unspecifiedSwiperContentListeners_;
+    auto specifiedSwiperContentListeners = specifiedSwiperContentListeners_;
+    for (const auto& listener : unspecifiedSwiperContentListeners) {
+        listener->HandleSwiperContentUpdate(info);
+    }
+
+    auto iter = specifiedSwiperContentListeners.find(info.id);
+    if (iter == specifiedSwiperContentListeners.end()) {
+        return;
+    }
+
+    auto holder = iter->second;
+    for (const auto& listener : holder) {
+        listener->HandleSwiperContentUpdate(info);
+    }
+}
+
+bool UIObserver::IsSwiperContentObserverEmpty()
+{
+    return unspecifiedSwiperContentListeners_.empty() && specifiedSwiperContentListeners_.empty();
+}
+
+
 void UIObserver::HandleTextChangeEvent(const NG::TextChangeEventInfo& info)
 {
     for (const auto& listener : textChangeEventListeners_) {
@@ -2094,5 +2204,14 @@ napi_env UIObserver::GetCurrentNapiEnv()
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, nullptr);
     return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+napi_value UIObserver::GetContextValue()
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, nullptr);
+    return frontend->GetContextValue();
 }
 } // namespace OHOS::Ace::Napi

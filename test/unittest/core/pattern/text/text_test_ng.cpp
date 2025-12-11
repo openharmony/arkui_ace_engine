@@ -24,6 +24,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
@@ -115,7 +116,6 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetFontWeight(FontWeight::W900);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
-
     textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
@@ -171,14 +171,11 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     int32_t endIndex = 10;
     textModelNG.SetTextSelection(frameNode, startIndex, endIndex);
     EXPECT_NE(textPattern->textSelector_.GetStart(), startIndex);
-
     std::u16string eventValue;
     auto onCopyResult = [&eventValue](const std::u16string& param) { eventValue = param; };
-
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
     EXPECT_NE(eventHub->onCopy_, nullptr);
-
     bool isSelectChanged = false;
     auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) { isSelectChanged = true; };
     textModelNG.SetOnTextSelectionChange(frameNode, onSelectionChanged);
@@ -197,7 +194,6 @@ HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -210,12 +206,10 @@ HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
      * @tc.expected: pManager's paragraphs will be reseted
      */
     EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
-
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
     EXPECT_FALSE(textPattern->pManager_->GetParagraphs().empty());
-
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
 }
@@ -718,6 +712,7 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     SpanModelNG spanModelNG;
     spanModelNG.Create(u"h\n");
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
@@ -726,13 +721,16 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     textPattern->spans_.emplace_back(spanNode->spanItem_);
     textPattern->childNodes_.push_back(spanNode);
     ASSERT_FALSE(textPattern->spans_.empty());
+
     auto firstSpanItem = textPattern->spans_.front();
     ASSERT_NE(firstSpanItem, nullptr);
+
     bool isTouchTrigger = false;
     firstSpanItem->position = 2;
     firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
+
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
@@ -854,6 +852,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     pattern->AttachToFrameNode(frameNode);
     pattern->selectOverlayProxy_ = nullptr;
     DirtySwapConfig config;
@@ -861,6 +860,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
+
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -930,6 +930,24 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     pattern->selectOverlayProxy_ = proxy;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetTextSelection001
+ * @tc.desc: Test SetTextSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextSelection001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t start = 1;
+    int32_t end = 1;
+    OHOS::Ace::SelectionOptions options;
+    pattern->SetSelectionFlag(start, end, options);
+    EXPECT_EQ(pattern->selectOverlay_, 1);
 }
 
 /**

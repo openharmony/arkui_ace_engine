@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -26,6 +27,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonSha
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookLineAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -45,6 +47,7 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setLineOptionsAttribute(options?: LineOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -66,10 +69,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
                 thisSerializer.writeString(valueTmpValue_0ForIdx0)
-            } else if (valueTmpValue_0 instanceof number) {
+            } else if (valueTmpValue_0 instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
-                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
+                thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
             } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
@@ -80,10 +83,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
                 thisSerializer.writeString(valueTmpValue_1ForIdx0)
-            } else if (valueTmpValue_1 instanceof number) {
+            } else if (valueTmpValue_1 instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
-                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
+                thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
             } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
@@ -105,10 +108,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
                 thisSerializer.writeString(valueTmpValue_0ForIdx0)
-            } else if (valueTmpValue_0 instanceof number) {
+            } else if (valueTmpValue_0 instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
-                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
+                thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
             } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
@@ -119,10 +122,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
                 thisSerializer.writeString(valueTmpValue_1ForIdx0)
-            } else if (valueTmpValue_1 instanceof number) {
+            } else if (valueTmpValue_1 instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
-                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
+                thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
             } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
@@ -186,6 +189,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         if (this.checkPriority("setLineOptions")) {
             const options_casted = options as (LineOptions | undefined)
             this.getPeer()?.setLineOptionsAttribute(options_casted)
+            this.applyOptionsFinish('LineAttribute');
             return this
         }
         return this
@@ -207,12 +211,17 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLineAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookLineAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

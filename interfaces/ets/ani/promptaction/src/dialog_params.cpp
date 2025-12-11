@@ -28,9 +28,9 @@
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
 std::unordered_map<int32_t, OHOS::Ace::BorderStyle> borderStyleMap = {
-    { 0, OHOS::Ace::BorderStyle::DOTTED },
+    { 2, OHOS::Ace::BorderStyle::DOTTED },
     { 1, OHOS::Ace::BorderStyle::DASHED },
-    { 2, OHOS::Ace::BorderStyle::SOLID },
+    { 0, OHOS::Ace::BorderStyle::SOLID },
 };
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
@@ -119,46 +119,14 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    ani_ref dxRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "x", &dxRef);
-    if (status != ANI_OK) {
-        return false;
-    }
     OHOS::Ace::CalcDimension dx;
-    if (!GetLengthParam(env, dxRef, dx)) {
-        return false;
-    }
-
-    ani_ref dyRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "y", &dyRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "x", dx);
     OHOS::Ace::CalcDimension dy;
-    if (!GetLengthParam(env, dyRef, dy)) {
-        return false;
-    }
-
-    ani_ref widthRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "width", &widthRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "y", dy);
     OHOS::Ace::CalcDimension width;
-    if (!GetLengthParam(env, widthRef, width)) {
-        return false;
-    }
-
-    ani_ref heightRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "height", &heightRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "width", width);
     OHOS::Ace::CalcDimension height;
-    if (!GetLengthParam(env, heightRef, height)) {
-        return false;
-    }
-
+    GetLengthParam(env, resultObj, "height", height);
     maskRect.SetOffset(OHOS::Ace::DimensionOffset(dx, dy));
     maskRect.SetSize(OHOS::Ace::DimensionSize(width, height));
     result = std::make_optional<OHOS::Ace::DimensionRect>(maskRect);
@@ -222,9 +190,8 @@ bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result)
             continue;
         }
 
-        ani_object itemObj = static_cast<ani_object>(itemRef);
         double itemValue;
-        if (GetDoubleParam(env, itemObj, itemValue)) {
+        if (GetDoubleParam(env, itemRef, itemValue)) {
             uint32_t itemInt32 = static_cast<int32_t>(itemValue);
             floatArray.emplace_back(static_cast<float>(itemInt32));
         }
@@ -464,9 +431,8 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetOnLanguageChange(dialogProps);
     return true;
@@ -499,7 +465,7 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
     }
 
     ani_method ctorMethod;
-    status = env->Class_FindMethod(responseCls, "<ctor>", nullptr, &ctorMethod);
+    status = env->Class_FindMethod(responseCls, "<ctor>", ":", &ctorMethod);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Class_FindMethod <ctor> fail. status: %{public}d", status);
         return nullptr;
@@ -512,11 +478,11 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_double aniIndex = static_cast<ani_double>(index);
-    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
+    ani_int aniIndex = static_cast<ani_int>(index);
+    status = env->Object_SetPropertyByName_Int(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
-            "[ANI] Object_SetPropertyByName_Double fail. status: %{public}d", status);
+            "[ANI] Object_SetPropertyByName_Int fail. status: %{public}d", status);
         return nullptr;
     }
     return reinterpret_cast<ani_ref>(responseObj);
@@ -723,10 +689,13 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
+    GetFunctionParam(env, object, "onDidAppear", dialogProps.onDidAppear);
+    GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
+    GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
+    GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
     return true;
 }
 
@@ -741,7 +710,7 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
     }
 
     ani_method ctorMethod;
-    status = env->Class_FindMethod(responseCls, "<ctor>", nullptr, &ctorMethod);
+    status = env->Class_FindMethod(responseCls, "<ctor>", ":", &ctorMethod);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] Class_FindMethod fail. status: %{public}d", status);
         return nullptr;
@@ -754,11 +723,11 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_double aniIndex = static_cast<ani_double>(index);
-    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
+    ani_int aniIndex = static_cast<ani_int>(index);
+    status = env->Object_SetPropertyByName_Int(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
-            "[ANI] Object_SetPropertyByName_Double fail. status: %{public}d", status);
+            "[ANI] Object_SetPropertyByName_Int fail. status: %{public}d", status);
         return nullptr;
     }
     return reinterpret_cast<ani_ref>(responseObj);
@@ -910,6 +879,13 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         return false;
     }
 
+    ani_vm* vm = nullptr;
+    status = env->GetVM(&vm);
+    if (status != ANI_OK || vm == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
+        return false;
+    }
+
     ani_ref globalRef;
     status = env->GlobalReference_Create(resultRef, &globalRef);
     if (status != ANI_OK) {
@@ -917,10 +893,17 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         return false;
     }
 
-    result = [env, globalRef](const int32_t reason, const int32_t instanceId) {
+    result = [vm, globalRef](const int32_t reason, const int32_t instanceId) {
         TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
         if (!globalRef) {
+            return;
+        }
+
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetEnv fail. status: %{public}d", status);
             return;
         }
 
@@ -928,15 +911,9 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
         ani_fn_object func = static_cast<ani_fn_object>(globalRef);
         ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
+        status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
         if (status != ANI_OK) {
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] FunctionalObject_Call fail. status: %{public}d", status);
-        }
-
-        status = env->GlobalReference_Delete(globalRef);
-        if (status != ANI_OK) {
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
-                "[ANI] GlobalReference_Delete fail. status: %{public}d", status);
         }
     };
     return true;
@@ -1021,9 +998,8 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     if (!dialogProps.isShowInSubWindow) {
         GetLevelMode(env, object, dialogProps.dialogLevelMode);
     }
-    double levelUniqueId = -1;
-    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
-    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
+    dialogProps.dialogLevelUniqueId = -1;
+    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetBoolParam(env, object, "focusable", dialogProps.focusable);
     return true;
@@ -1188,7 +1164,7 @@ bool GetCustomBuilderWithId(ani_env* env, ani_object object,
         }
 
         ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
-        ani_object dialogIdObj = CreateANIDoubleObject(env, static_cast<double>(dialogId));
+        ani_object dialogIdObj = CreateANIIntObject(env, dialogId);
         ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
         ani_ref fnReturnVal {};
         status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
@@ -1205,7 +1181,7 @@ bool GetCustomBuilderWithId(ani_env* env, ani_object object,
 
         ani_object builderObj = static_cast<ani_object>(fnReturnVal);
         ani_long builder;
-        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
+        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", ":l", &builder);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] CallMethodByName_Long fail. status: %{public}d", status);
             return;
@@ -1232,14 +1208,14 @@ bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::N
         return false;
     }
 
-    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimensionParam(env, resultObj, dimension)) {
+    if (GetDimensionParam(env, resultRef, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderRadiusProperty(dimension);
         return true;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::NG::BorderRadiusProperty borderRadius;
     OHOS::Ace::CalcDimension topLeft;
     if (GetDimensionParam(env, resultObj, "topLeft", topLeft)) {
@@ -1331,14 +1307,14 @@ bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
     }
 
     OHOS::Ace::NG::BorderColorProperty borderColor;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::Color color;
-    if (GetResourceColorParam(env, resultObj, color)) {
+    if (GetResourceColorParam(env, resultRef, color)) {
         borderColor.SetColor(color);
         result = std::make_optional<OHOS::Ace::NG::BorderColorProperty>(borderColor);
         return true;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::Color left;
     if (GetResourceColorParam(env, resultObj, "left", left)) {
         borderColor.leftColor = left;
@@ -1503,8 +1479,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
             }
 
             if (dialogId > 0) {
-                double returnDialogId = static_cast<double>(dialogId);
-                ani_object dialogIdObj = CreateANIDoubleObject(env, returnDialogId);
+                ani_object dialogIdObj = CreateANIIntObject(env, dialogId);
                 ani_ref dialogRef = static_cast<ani_ref>(dialogIdObj);
                 status = env->PromiseResolver_Resolve(asyncContext->deferred, dialogRef);
                 if (status != ANI_OK) {

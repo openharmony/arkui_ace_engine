@@ -79,6 +79,7 @@
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
@@ -164,6 +165,11 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Float64>(src);
     }
 
+    inline void AssignArkValue(Ark_Int64& dst, const int32_t& src)
+    {
+        dst = static_cast<Ark_Int64>(src);
+    }
+
     inline void AssignArkValue(Ark_String& dst, const std::string_view& src, ConvContext *ctx)
     {
         if (ctx) {
@@ -198,6 +204,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src);
+    void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
@@ -238,6 +245,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_font_FontInfo& dst, const FontInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
+    void AssignArkValue(Ark_Frame& dst, const RectF& src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
@@ -250,6 +258,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
+    void AssignArkValue(Ark_Int32& dst, const Dimension& src);
     void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src);
     void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
@@ -270,6 +279,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src);
     void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
     void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src);
+    void AssignArkValue(Ark_TextDirection& dst, const TextDirection& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src);
@@ -279,6 +289,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_MarqueeState& dst, int32_t src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
     void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src);
+    void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
@@ -309,6 +320,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);
+    void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
     void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_Rectangle& dst, const Rect& src);
@@ -375,6 +387,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src);
     void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
+    void AssignArkValue(
+        Ark_NavPathStack& dst, const RefPtr<NG::GeneratedModifier::NavigationContext::NavigationStack>& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
@@ -407,10 +421,27 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src);
     void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src);
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& dst, const RefPtr<UnifiedData>& src);
+    void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
 
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
         ConvContext *ctx);
+    void AssignArkValue(Ark_text_Affinity& dst, const TextAffinity& src);
+    void AssignArkValue(Ark_common2D_Rect& dst, const OHOS::Ace::NG::RectT<float>& src);
+    void AssignArkValue(Ark_text_TextDirection& dst, const OHOS::Ace::TextDirection& src);
+    void AssignArkValue(Ark_text_TextBox& dst, const ParagraphManager::TextBox& src);
+    void AssignArkValue(Ark_text_LineMetrics& dst, const OHOS::Ace::TextLineMetrics& src, ConvContext *ctx);
+    void AssignArkValue(Map_Int32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_RunMetrics& dst, const RunMetrics& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextStyle& dst, const TextStyle& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_Decoration& dst, const TextDecoration& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextDecorationType& dst, const TextDecoration& src, ConvContext *ctx);
+    void AssignArkValue(Ark_common2D_Color& dst, const Color& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_FontWeight& dst, const FontWeight& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_FontStyle& dst, const OHOS::Ace::FontStyle& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextBaseline& dst, const TextBaseline& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_EllipsisMode& dst, const EllipsisMode& src, ConvContext *ctx);
+    void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
@@ -794,6 +825,15 @@ namespace OHOS::Ace::NG::Converter {
     // Create Ark_CallbackResource with async callback.
     template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkCallback(decltype(T().call) callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = callbackFunc, .callSync = nullptr
+        };
+    }
+
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(decltype(T().call) callbackFunc, Ark_Int32 resId = 0)
     {
         return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
@@ -802,6 +842,15 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Create Ark_CallbackResource with sync callback.
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkCallback(decltype(T().callSync) callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = nullptr, .callSync = callbackFunc
+        };
+    }
+
     template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(decltype(T().callSync) callbackFunc, Ark_Int32 resId = 0)
@@ -821,6 +870,13 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
+    // Optional callback
+    template <typename T, typename... Args>
+    std::enable_if_t<IsOptional<T>::value, T> ArkCallback(Args... args)
+    {
+        return ArkValue<T>(ArkCallback<decltype(T().value)>(args...));
+    }
+    
     template<typename Ark_Type, typename Peer = std::remove_pointer_t<Ark_Type>,
         typename AceEvent = typename Peer::AceEventInfo>
     class SyncEvent {

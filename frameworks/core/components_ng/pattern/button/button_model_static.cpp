@@ -315,6 +315,12 @@ void ButtonModelStatic::SetLabelStyle(FrameNode* frameNode, const std::optional<
         SetFontFamily(frameNode, std::nullopt);
         SetFontStyle(frameNode, std::nullopt);
     }
+    if (buttonParameters && buttonParameters->textAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, TextAlign, buttonParameters->textAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    }
 }
 
 void ButtonModelStatic::SetSize(
@@ -485,6 +491,16 @@ void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, c
     textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
 }
 
+void ButtonModelStatic::ResetTextAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetTextAlign();
+}
+
 void ButtonModelStatic::ResetButtonTextFontSize(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -509,7 +525,11 @@ void ButtonModelStatic::ResetFontFamily(FrameNode* frameNode)
 
 void ButtonModelStatic::ResetButtonFontColor(FrameNode* frameNode)
 {
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     Color textColor = buttonTheme->GetTextStyle().GetTextColor();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);

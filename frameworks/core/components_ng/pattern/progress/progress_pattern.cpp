@@ -507,6 +507,7 @@ void ProgressPattern::OnModifyDone()
     CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
         auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
         HandleEnabled();
         InitTouchEvent();
         InitHoverEvent();
@@ -654,8 +655,12 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
     }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
 
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -675,8 +680,12 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(
     }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
 
     auto jsonValue = JsonUtil::Create(true);
     auto strokeWidth = layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness());

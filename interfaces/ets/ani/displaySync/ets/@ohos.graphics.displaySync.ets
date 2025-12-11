@@ -80,8 +80,8 @@ export namespace displaySync {
     }
 
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
-    public native on(callbackType: string, callback: (intervalInfo: IntervalInfo) => void): void;
-    public native off(callbackType: string, callback?: (intervalInfo: IntervalInfo) => void): void;
+    public native onFrame(callback: (intervalInfo: IntervalInfo) => void): void;
+    public native offFrame(callback?: (intervalInfo: IntervalInfo) => void): void;
     public native start(): void;
     public native stop(): void;
     public native clean(): void;

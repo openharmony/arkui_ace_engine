@@ -25,6 +25,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"

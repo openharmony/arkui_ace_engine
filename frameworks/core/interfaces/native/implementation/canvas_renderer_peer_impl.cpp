@@ -22,6 +22,10 @@
 #include "canvas_pattern_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "pixel_map_peer.h"
+#include "canvas_gradient_peer.h"
+#include "canvas_pattern_peer.h"
+
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,6 +57,12 @@ constexpr double DIFF = 1e-10;
 constexpr uint32_t PIXEL_SIZE = 4;
 constexpr int32_t ALPHA_INDEX = 3;
 constexpr auto TEXT_FONT_STYLE_ITALIC = "italic";
+constexpr uint32_t RGB_SUB_SIZE = 3;
+constexpr uint32_t RGBA_SUB_SIZE = 4;
+constexpr double MIN_RGB_VALUE = 0.0;
+constexpr double MAX_RGB_VALUE = 255.0;
+constexpr double MIN_RGBA_OPACITY = 0.0;
+constexpr double MAX_RGBA_OPACITY = 1.0;
 const std::map<std::string, LineCapStyle> LINE_CAP_MAP = {
     { "butt", LineCapStyle::BUTT },
     { "round", LineCapStyle::ROUND },
@@ -67,6 +77,8 @@ const double ERROR_VALUE = 0;
 const std::string ERROR_STRING = "";
 const auto MULTI_BY_2 = 2;
 constexpr size_t EVEN_BY_2 = 2;
+const double DEFAULT_MITER_LIMIT = 10.0;
+const double DEFAULT_LINE_WIDTH = 1.0;
 
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
@@ -101,6 +113,56 @@ inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& fami
     }
     return fontFamilies;
 }
+static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
+{
+    if (colorStr.rfind("rgb(", 0) != 0 && colorStr.rfind("rgba(", 0) != 0) {
+        return false;
+    }
+    auto startPos = colorStr.find_first_of('(');
+    auto endPos = colorStr.find_last_of(')');
+    if (startPos == std::string::npos || endPos == std::string::npos || endPos != (colorStr.length() - 1)) {
+        return false;
+    }
+    auto valueStr = colorStr.substr(startPos + 1, endPos - startPos - 1);
+    std::vector<std::string> valueProps;
+    StringUtils::StringSplitter(valueStr.c_str(), ',', valueProps);
+    auto size = valueProps.size();
+    auto count = std::count(valueStr.begin(), valueStr.end(), ',');
+    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || static_cast<int32_t>(size) != (count + 1)) {
+        return false;
+    }
+    std::vector<uint8_t> colorInt;
+    double opacity = 1.0;
+    for (uint32_t i = 0; i < size; i++) {
+        StringUtils::TrimStrLeadingAndTrailing(valueProps[i]);
+        char* pEnd = nullptr;
+        errno = 0;
+        double val = std::strtod(valueProps[i].c_str(), &pEnd);
+        if (pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
+            return false;
+        }
+        if (i < RGB_SUB_SIZE) {
+            val = std::clamp(val, MIN_RGB_VALUE, MAX_RGB_VALUE);
+            colorInt.push_back(static_cast<uint8_t>(std::round(val)));
+        } else {
+            opacity = std::clamp(val, MIN_RGBA_OPACITY, MAX_RGBA_OPACITY);
+        }
+    }
+    color = Color::FromRGBO(colorInt[0], colorInt[1], colorInt[2], opacity); // 0: red, 1: green, 2: blue.
+    return true;
+}
+static bool ProcessColorFromString(std::string colorStr, Color& color)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+
+    StringUtils::TrimStrLeadingAndTrailing(colorStr);
+    std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
+    return (Color::MatchColorWithMagic(colorStr, COLOR_ALPHA_MASK, color) || MatchColorWithRGBA(colorStr, color) ||
+            Color::MatchColorWithMagicMini(colorStr, COLOR_ALPHA_MASK, color) ||
+            Color::MatchColorSpecialString(colorStr, color));
+}
 } // namespace
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -124,6 +186,8 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
             canvasRender->SetDensity();
         });
     }
+    miterLimit_ = DEFAULT_MITER_LIMIT / GetDensity();
+    lineWidth_ = DEFAULT_LINE_WIDTH / GetDensity();
 }
 CanvasRendererPeerImpl::~CanvasRendererPeerImpl()
 {
@@ -325,7 +389,7 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
         gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * ACE_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;
@@ -419,39 +483,6 @@ RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
     LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap PixelMap is not supported on current platform.");
     return nullptr;
 #endif
-}
-void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDataParam& params)
-{
-    CHECK_NULL_VOID(renderingContext2DModel_);
-    int32_t imgWidth = src.dirtyWidth;
-    int32_t imgHeight = src.dirtyHeight;
-    // Parse other parameters
-    Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
-    ParseImageData(imageData, params);
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
-                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
-                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
-    // copy the data from the image data.
-    std::vector<uint32_t> vbuffer = src.data;
-    auto* buffer = (uint8_t*)vbuffer.data();
-    int32_t bufferLength = vbuffer.size() * sizeof(uint32_t);
-    size_t dataSize =
-        (imageData.dirtyWidth > 0 && imageData.dirtyHeight > 0) ? imageData.dirtyWidth * imageData.dirtyHeight : 0;
-    imageData.data = std::vector<uint32_t>(dataSize);
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
-                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
-                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
-                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
-                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
-                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
-            }
-        }
-    }
-    renderingContext2DModel_->PutImageData(imageData);
 }
 void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& imageData)
 {
@@ -713,7 +744,14 @@ void CanvasRendererPeerImpl::SetGlobalAlpha(double alpha)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(alpha)) {
-        renderingContext2DModel_->SetGlobalAlpha(alpha);
+        globalAlpha_ = alpha;
+        if (LessNotEqual(globalAlpha_, 0.0)) {
+            globalAlpha_ = 0.0;
+        }
+        if (GreatNotEqual(globalAlpha_, 1.0)) {
+            globalAlpha_ = 1.0;
+        }
+        renderingContext2DModel_->SetGlobalAlpha(globalAlpha_);
     }
 }
 void CanvasRendererPeerImpl::SetGlobalCompositeOperation(const std::string& compositeStr)
@@ -736,6 +774,7 @@ void CanvasRendererPeerImpl::SetGlobalCompositeOperation(const std::string& comp
     auto type = ConvertStrToEnum(compositeStr.c_str(), compositeOperationTable, ArraySize(compositeOperationTable),
         CompositeOperation::SOURCE_OVER);
     renderingContext2DModel_->SetCompositeType(type);
+    globalCompositeOperation_ = (type == CompositeOperation::SOURCE_OVER) ? "source-over" : compositeStr;
 }
 void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
 {
@@ -743,24 +782,47 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
     Color color;
     if (Color::ParseColorString(colorStr, color)) {
         renderingContext2DModel_->SetFillColor(color, true);
+        fillStyleType_ = ParamType::STRING;
+        fillStyleString_ = color.ToString();
+    }
+}
+void CanvasRendererPeerImpl::SetFillStyle(const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (color) {
+        auto colorValue = color.value();
+        renderingContext2DModel_->SetFillColor(colorValue, true);
+        fillStyleType_ = ParamType::COLOR;
+        fillStyleString_ = colorValue.ToString();
     }
 }
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetFillColor(Color(ColorAlphaAdapt(colorNum)), false);
+    auto color = Color(ColorAlphaAdapt(colorNum));
+    renderingContext2DModel_->SetFillColor(color, false);
+    fillStyleType_ = ParamType::INT32;
+    fillStyleString_ = color.ToString();
 }
-void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
+void CanvasRendererPeerImpl::SetFillStyle(CanvasGradientPeer* gradientPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(gradientPeer);
+    auto gradient = gradientPeer->GetGradient();
     CHECK_NULL_VOID(gradient);
     renderingContext2DModel_->SetFillGradient(gradient);
+    fillStyleType_ = ParamType::CANVAS_GRADIENT;
+    fillStyleGradient_ = gradientPeer;
 }
 
-void CanvasRendererPeerImpl::SetFillStyle(int32_t id)
+void CanvasRendererPeerImpl::SetFillStyle(CanvasPatternPeer* canvasPatternPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasPatternPeer);
+    auto id = canvasPatternPeer->GetId();
     renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+    fillStyleType_ = ParamType::CANVAS_PATTERN;
+    fillStylePattern_ = canvasPatternPeer;
 }
 void CanvasRendererPeerImpl::SetStrokeStyle(const std::string& colorStr)
 {
@@ -768,41 +830,67 @@ void CanvasRendererPeerImpl::SetStrokeStyle(const std::string& colorStr)
     Color color;
     if (Color::ParseColorString(colorStr, color)) {
         renderingContext2DModel_->SetStrokeColor(color, true);
+        strokeStyleType_ = ParamType::STRING;
+        strokeStyleString_ = color.ToString();
+    }
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (color) {
+        auto colorValue = color.value();
+        renderingContext2DModel_->SetStrokeColor(colorValue, true);
+        strokeStyleType_ = ParamType::COLOR;
+        strokeStyleString_ = colorValue.ToString();
     }
 }
 void CanvasRendererPeerImpl::SetStrokeStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetStrokeColor(Color(ColorAlphaAdapt(colorNum)), false);
+    auto color = Color(ColorAlphaAdapt(colorNum));
+    renderingContext2DModel_->SetStrokeColor(color, false);
+    strokeStyleType_ = ParamType::INT32;
+    strokeStyleString_ = color.ToString();
 }
-void CanvasRendererPeerImpl::SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient)
+void CanvasRendererPeerImpl::SetStrokeStyle(CanvasGradientPeer* gradientPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(gradientPeer);
+    auto gradient = gradientPeer->GetGradient();
     CHECK_NULL_VOID(gradient);
     renderingContext2DModel_->SetStrokeGradient(gradient);
+    strokeStyleType_ = ParamType::CANVAS_GRADIENT;
+    strokeStyleGradient_ = gradientPeer;
 }
-void CanvasRendererPeerImpl::SetStrokeStyle(int32_t id)
+void CanvasRendererPeerImpl::SetStrokeStyle(CanvasPatternPeer* canvasPatternPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasPatternPeer);
+    auto id = canvasPatternPeer->GetId();
     renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+    strokeStyleType_ = ParamType::CANVAS_PATTERN;
+    strokeStylePattern_ = canvasPatternPeer;
 }
 void CanvasRendererPeerImpl::SetFilter(const std::string& filterStr)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (!filterStr.empty()) {
         renderingContext2DModel_->SetFilterParam(filterStr);
+        filter_ = filterStr;
     }
 }
 void CanvasRendererPeerImpl::SetImageSmoothingEnabled(bool enabled)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     renderingContext2DModel_->SetSmoothingEnabled(enabled);
+    imageSmoothingEnabled_ = enabled;
 }
 void CanvasRendererPeerImpl::SetImageSmoothingQuality(const std::string& quality)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (QUALITY_TYPE.find(quality) != QUALITY_TYPE.end()) {
         renderingContext2DModel_->SetSmoothingQuality(quality);
+        imageSmoothingQuality_ = quality;
     }
 }
 void CanvasRendererPeerImpl::SetLineCap(const std::string& capStr)
@@ -815,12 +903,14 @@ void CanvasRendererPeerImpl::SetLineCap(const std::string& capStr)
     };
     auto lineCap = ConvertStrToEnum(capStr.c_str(), lineCapTable, ArraySize(lineCapTable), LineCapStyle::BUTT);
     renderingContext2DModel_->SetLineCap(lineCap);
+    lineCap_ = capStr;
 }
 void CanvasRendererPeerImpl::SetLineDashOffset(double lineDashOffset)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(lineDashOffset)) {
         renderingContext2DModel_->SetLineDashOffset(lineDashOffset * GetDensity());
+        lineDashOffset_ = lineDashOffset;
     }
 }
 void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
@@ -833,38 +923,56 @@ void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
     };
     auto lineJoin = ConvertStrToEnum(joinStr.c_str(), lineJoinTable, ArraySize(lineJoinTable), LineJoinStyle::MITER);
     renderingContext2DModel_->SetLineJoin(lineJoin);
+    lineJoin_ = joinStr;
 }
 void CanvasRendererPeerImpl::SetLineWidth(double lineWidth)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(lineWidth)) {
-        renderingContext2DModel_->SetLineWidth(lineWidth * GetDensity());
+        lineWidth_ = lineWidth;
+        if (LessOrEqual(lineWidth_, 0.0)) {
+            lineWidth_ = DEFAULT_LINE_WIDTH / GetDensity();
+        }
+        renderingContext2DModel_->SetLineWidth(lineWidth_ * GetDensity());
     }
 }
 void CanvasRendererPeerImpl::SetMiterLimit(double limit)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(limit)) {
-        renderingContext2DModel_->SetMiterLimit(limit);
+        miterLimit_ = limit;
+        if (LessOrEqual(miterLimit_, 0.0)) {
+            miterLimit_ = DEFAULT_MITER_LIMIT / GetDensity();
+        }
+        renderingContext2DModel_->SetMiterLimit(miterLimit_);
     }
 }
 void CanvasRendererPeerImpl::SetShadowBlur(double blur)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(blur)) {
-        renderingContext2DModel_->SetShadowBlur(blur);
+        shadowBlur_ = blur;
+        if (LessNotEqual(shadowBlur_, 0.0)) {
+            shadowBlur_ = 0.0;
+        }
+        renderingContext2DModel_->SetShadowBlur(shadowBlur_);
     }
 }
 void CanvasRendererPeerImpl::SetShadowColor(const std::string& colorStr)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetShadowColor(Color::FromString(colorStr));
+    Color color;
+    if (ProcessColorFromString(colorStr, color)) {
+        renderingContext2DModel_->SetShadowColor(color);
+        shadowColor_ = color.ToString();
+    }
 }
 void CanvasRendererPeerImpl::SetShadowOffsetX(double offsetX)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(offsetX)) {
         renderingContext2DModel_->SetShadowOffsetX(offsetX * GetDensity());
+        shadowOffsetX_ = offsetX;
     }
 }
 void CanvasRendererPeerImpl::SetShadowOffsetY(double offsetY)
@@ -872,6 +980,7 @@ void CanvasRendererPeerImpl::SetShadowOffsetY(double offsetY)
     CHECK_NULL_VOID(renderingContext2DModel_);
     if (IfJudgeSpecialValue(offsetY)) {
         renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
+        shadowOffsetY_ = offsetY;
     }
 }
 void CanvasRendererPeerImpl::SetTextDirection(const std::string& directionStr)
@@ -886,6 +995,7 @@ void CanvasRendererPeerImpl::SetTextDirection(const std::string& directionStr)
     auto direction =
         ConvertStrToEnum(directionStr.c_str(), textDirectionTable, ArraySize(textDirectionTable), TextDirection::LTR);
     renderingContext2DModel_->SetTextDirection(direction);
+    direction_ = directionStr;
 }
 void CanvasRendererPeerImpl::SetFont(std::string fontStr)
 {
@@ -927,6 +1037,7 @@ void CanvasRendererPeerImpl::SetFont(std::string fontStr)
     if (!updateFontweight) {
         renderingContext2DModel_->SetFontWeight(Ace::FontWeight::NORMAL);
     }
+    font_ = fontStr;
 }
 void CanvasRendererPeerImpl::SetTextAlign(const std::string& alignStr)
 {
@@ -942,6 +1053,7 @@ void CanvasRendererPeerImpl::SetTextAlign(const std::string& alignStr)
     auto align = ConvertStrToEnum(alignStr.c_str(), textAlignTable, ArraySize(textAlignTable), TextAlign::CENTER);
     paintState_.SetTextAlign(align);
     renderingContext2DModel_->SetTextAlign(align);
+    textAlign_ = alignStr;
 }
 void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
 {
@@ -958,6 +1070,7 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
         ConvertStrToEnum(baselineStr.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
     paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
+    textBaseline_ = baselineStr;
 }
 void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingStr)
 {
@@ -967,8 +1080,9 @@ void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingSt
             renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
             return;
         }
-        renderingContext2DModel_->SetLetterSpacing(
-            Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity()));
+        auto letterSpacing = Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity());
+        renderingContext2DModel_->SetLetterSpacing(letterSpacing);
+        letterSpacing_ = letterSpacing;
     }
 }
 void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacing)
@@ -979,6 +1093,7 @@ void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacin
         letterSpacingCal.Reset();
     }
     renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+    letterSpacing_ = letterSpacing;
 }
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
@@ -1070,7 +1185,8 @@ void CanvasRendererPeerImpl::ExtractInfoToImage(Ace::CanvasImage& image, const D
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
-    return (StringUtils::StringToDimension(str));
+    auto dimension = StringUtils::StringToDimension(str);
+    return GetDimensionValue(dimension);
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const Dimension& dimension)
 {

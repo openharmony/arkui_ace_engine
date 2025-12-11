@@ -18,6 +18,7 @@
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
@@ -35,11 +36,12 @@ void JSContainerPicker::Create(const JSCallbackInfo& info)
             selectedIndex = paramObj->GetProperty("selectedIndex");
         }
     }
-    
+
+    int32_t index = 0;
     if (!selectedIndex->IsNull() && selectedIndex->IsNumber()) {
-        auto parseIndex = selectedIndex->ToNumber<int32_t>();
-        NG::ContainerPickerModel::SetSelectedIndex(parseIndex);
+        index = selectedIndex->ToNumber<int32_t>();
     }
+    NG::ContainerPickerModel::SetSelectedIndex(index);
 }
 
 void JSContainerPicker::SetCanLoop(const JSCallbackInfo& info)
@@ -109,13 +111,12 @@ void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
 
 void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
-    auto pickerTheme = GetTheme<PickerTheme>();
-    if (pickerTheme) {
-        indicatorStyle.strokeWidth = pickerTheme->GetDividerThickness();
-        indicatorStyle.dividerColor = pickerTheme->GetDividerColor();
-        indicatorStyle.startMargin = Dimension();
-        indicatorStyle.endMargin = Dimension();
-    }
+    auto pickerTheme = GetTheme<NG::ContainerPickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    indicatorStyle.strokeWidth = pickerTheme->GetStrokeWidth();
+    indicatorStyle.dividerColor = pickerTheme->GetIndicatorDividerColor();
+    indicatorStyle.startMargin = Dimension();
+    indicatorStyle.endMargin = Dimension();
     UnRegisterResource("containerPicker.strokeWidth");
     UnRegisterResource("containerPicker.dividerColor");
     UnRegisterResource("containerPicker.startMargin");
@@ -127,7 +128,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
     auto endMargin = paramObj->GetProperty("endMargin");
 
     if (!strokeWidth->IsUndefined() && !strokeWidth->IsNull()) {
-        CalcDimension strokeWidthVal = pickerTheme->GetDividerThickness();
+        CalcDimension strokeWidthVal = pickerTheme->GetStrokeWidth();
         RefPtr<ResourceObject> resObj;
         if (ParseLengthMetricsToDimension(strokeWidth, strokeWidthVal, resObj) &&
             GreatOrEqual(strokeWidthVal.Value(), 0.0f) && (strokeWidthVal.Unit() != DimensionUnit::PERCENT)) {
@@ -137,7 +138,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         NG::ContainerPickerModel::ProcessResourceObj("containerPicker.strokeWidth", resObj);
     }
     if (!dividerColor->IsUndefined() && !dividerColor->IsNull()) {
-        Color color = pickerTheme->GetDividerColor();
+        Color color = pickerTheme->GetIndicatorDividerColor();
         RefPtr<ResourceObject> resObj;
         if (ParseJsColor(dividerColor, color, resObj)) {
             indicatorStyle.dividerColor = color;
@@ -169,11 +170,10 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
 
 void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
-    auto pickerTheme = GetTheme<PickerTheme>();
-    if (pickerTheme) {
-        indicatorStyle.backgroundColor = pickerTheme->GetSelectedBackgroundColor();
-        indicatorStyle.borderRadius = NG::BorderRadiusProperty(NG::DEFAULT_RADIUS);
-    }
+    auto pickerTheme = GetTheme<NG::ContainerPickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    indicatorStyle.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
+    indicatorStyle.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
     UnRegisterResource("containerPicker.backgroundColor");
     UnRegisterResource("containerPicker.borderRadius");
 
@@ -181,7 +181,7 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
     auto borderRadius = paramObj->GetProperty("borderRadius");
 
     if (!color->IsUndefined() && !color->IsNull()) {
-        Color BgColor = pickerTheme->GetSelectedBackgroundColor();
+        Color BgColor = pickerTheme->GetIndicatorBackgroundColor();
         RefPtr<ResourceObject> resObj;
         if (ParseJsColor(color, BgColor, resObj)) {
             indicatorStyle.backgroundColor = BgColor;
@@ -191,14 +191,15 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
     }
     if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
         CalcDimension calcDimension;
-        NG::BorderRadiusProperty borderRadiusProperty = NG::BorderRadiusProperty(NG::DEFAULT_RADIUS);
+        NG::BorderRadiusProperty borderRadiusProperty =
+            NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
         if (ParseLengthMetricsToDimension(borderRadius, calcDimension, indicatorStyle.borderRadiusResObj)) {
             if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
                 indicatorStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
                 indicatorStyle.isDefaultBorderRadius = false;
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
-            SetBorderRadiusWithCheck(indicatorStyle.borderRadius, borderRadiusProperty);
+            indicatorStyle.borderRadius = borderRadiusProperty;
             indicatorStyle.isDefaultBorderRadius = false;
         }
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();

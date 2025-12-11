@@ -63,6 +63,11 @@ public:
         }
     }
 
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+    {
+        ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
     {
         if (height.Unit() == DimensionUnit::CALC) {
@@ -138,10 +143,11 @@ public:
         ViewAbstract::SetChainWeight(frameNode, value);
     }
 
-    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    static void BindPopup(const RefPtr<FrameNode>& targetNode,
+        const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
     {
         CHECK_NULL_VOID(targetNode);
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
     static void BindTips(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
@@ -262,6 +268,7 @@ public:
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
+    static void ResetBackground(FrameNode* frameNode);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void ResetFlexShrink(FrameNode* frameNode);
@@ -272,17 +279,20 @@ public:
     static void ResetAspectRatio(FrameNode* frameNode);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
+    static void SetLayoutGravity(FrameNode* frameNode, Alignment value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value);
     static void SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value);
     static void SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value);
+    static void SetRenderStrategy(FrameNode* frameNode, const RenderStrategy& type);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& boderImage, uint8_t bitset);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& imageSrc, const std::string& bundleName,
         const std::string& moduleName);
     static void SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, std::string localizedAlignment);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
@@ -294,6 +304,7 @@ public:
     static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
@@ -363,9 +374,11 @@ public:
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
+    static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static bool CheckMenuIsShow(
+        const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode,  bool isBuildFuncNull);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,

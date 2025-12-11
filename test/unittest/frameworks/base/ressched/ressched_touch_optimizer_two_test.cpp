@@ -71,6 +71,8 @@ public:
  */
 HWTEST_F(ResSchedTouchOptimizerTwoTest, RVSPointCheckWithoutSignal003, TestSize.Level1)
 {
+    optimizer_->rvsSignalEnable_ = true;
+    optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -725,13 +727,15 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, FineTuneTimeStampWhenFirstFrameAfterTpFl
 
 /**
  * @tc.name: SetPointReverseSignal001
- * @tc.desc: Test SetPointReverseSignal when RVS is disabled
+ * @tc.desc: Test SetPointReverseSignal when RVS and rvsSignalEnable_ is disabled
  * @tc.type: FUNC
  */
 HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal001, TestSize.Level1)
 {
     optimizer_->rvsEnable_ = false;
-    
+    optimizer_->rvsSignalEnable_ = false;
+    optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
+
     TouchEvent inputEvent;
     inputEvent.id = 1;
     inputEvent.x = 100;
@@ -751,13 +755,71 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal001, TestSize.Level
 
 /**
  * @tc.name: SetPointReverseSignal002
- * @tc.desc: Test SetPointReverseSignal when RVS is enabled
+ * @tc.desc: Test SetPointReverseSignal when RVS is true and rvsSignalEnable_ is false
  * @tc.type: FUNC
  */
 HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal002, TestSize.Level1)
 {
     optimizer_->rvsEnable_ = true;
+    optimizer_->rvsSignalEnable_ = false;
+    optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
+
+    TouchEvent inputEvent;
+    inputEvent.id = 1;
+    inputEvent.x = 100;
+    inputEvent.y = 200;
+    inputEvent.sourceTool = SourceTool::FINGER;
+    inputEvent.type = TouchType::MOVE;
+    inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     
+    TouchEvent resultEvent = optimizer_->SetPointReverseSignal(inputEvent);
+    
+    // When RVS is enabled, should process the event through RVSQueueUpdate
+    EXPECT_EQ(resultEvent.id, inputEvent.id);
+    EXPECT_EQ(resultEvent.x, inputEvent.x);
+    EXPECT_EQ(resultEvent.y, inputEvent.y);
+}
+
+/**
+ * @tc.name: SetPointReverseSignal003
+ * @tc.desc: Test SetPointReverseSignal when RVS is false and rvsSignalEnable_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal003, TestSize.Level1)
+{
+    optimizer_->rvsEnable_ = false;
+    optimizer_->rvsSignalEnable_ = true;
+    optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
+
+    TouchEvent inputEvent;
+    inputEvent.id = 1;
+    inputEvent.x = 100;
+    inputEvent.y = 200;
+    inputEvent.sourceTool = SourceTool::FINGER;
+    inputEvent.type = TouchType::MOVE;
+    inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    
+    TouchEvent resultEvent = optimizer_->SetPointReverseSignal(inputEvent);
+    
+    // When RVS is enabled, should process the event through RVSQueueUpdate
+    EXPECT_EQ(resultEvent.id, inputEvent.id);
+    EXPECT_EQ(resultEvent.x, inputEvent.x);
+    EXPECT_EQ(resultEvent.y, inputEvent.y);
+}
+
+/**
+ * @tc.name: SetPointReverseSignal004
+ * @tc.desc: Test SetPointReverseSignal when RVS is false and rvsSignalEnable_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal004, TestSize.Level1)
+{
+    optimizer_->rvsEnable_ = true;
+    optimizer_->rvsSignalEnable_ = true;
+    optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
+
     TouchEvent inputEvent;
     inputEvent.id = 1;
     inputEvent.x = 100;

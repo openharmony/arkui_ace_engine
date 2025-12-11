@@ -1485,7 +1485,6 @@ HWTEST_F(SelectOverlayManagerTestNg, UpdateSelectInfo, TestSize.Level1)
     SelectOverlayInfo selectOverlayInfo;
     const std::string selectInfo = "selectInfo";
     client.UpdateSelectInfo(selectInfo);
-    selectOverlayInfo.selectText = selectInfo;
     EXPECT_EQ(selectOverlayInfo.selectText, selectInfo);
 }
 

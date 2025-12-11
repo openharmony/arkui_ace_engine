@@ -49,6 +49,7 @@ public:
     ACE_FORCE_EXPORT static ElementRegister* GetInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
+    void IterateElements(const std::function<bool(ElementIdType, const RefPtr<AceType>&)>& visitor) const;
 
     ACE_FORCE_EXPORT RefPtr<AceType> GetNodeById(ElementIdType elementId);
     /**

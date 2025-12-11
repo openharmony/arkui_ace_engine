@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -79,6 +80,7 @@ protected:
 void CalendarPaintMethTest::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void CalendarPaintMethTest::TearDownTestCase()

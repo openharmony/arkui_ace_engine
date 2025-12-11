@@ -1463,7 +1463,7 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded005, TestS
  *               preFirstVisibleNode == curFirstVisibleNode) = false
  *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
  *               preFirstVisibleNode == curFirstVisibleNode = false
- *           Branch: if (curNodeOri == preNodeOri) = true
+ *           Branch: if (!preNodeOri.has_value() && !curNodeOri.has_value()) { => true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestSize.Level1)
@@ -1486,6 +1486,8 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestS
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
 
+    navDestination01Node->orientation_ = std::nullopt;
+    navDestination02Node->orientation_ = std::nullopt;
     RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
     RefPtr<NavDestinationGroupNode> topDestination = nullptr;
     navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
@@ -1503,7 +1505,7 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestS
  *               preFirstVisibleNode == curFirstVisibleNode) = false
  *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
  *               preFirstVisibleNode == curFirstVisibleNode = false
- *           Branch: if (curNodeOri == preNodeOri) = true
+ *           Branch: if (!preNodeOri.has_value() && !curNodeOri.has_value()) { => false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded007, TestSize.Level1)
@@ -1527,6 +1529,8 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded007, TestS
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
 
+    navDestination01Node->orientation_ = std::nullopt;
+    navDestination02Node->orientation_ = Orientation::HORIZONTAL;
     RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
     RefPtr<NavDestinationGroupNode> topDestination = nullptr;
     navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);

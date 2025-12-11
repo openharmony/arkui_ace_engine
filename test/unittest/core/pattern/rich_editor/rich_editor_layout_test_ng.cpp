@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -769,6 +770,398 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Leve
     layoutWrapper = nullptr;
     layoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutAlgorithm->parentGlobalOffset_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: ReMeasureContentTest001
+ * @tc.desc: Test ReMeasureContent when pattern GetMaxLinesHeight
+             is not FLT_MAX and layoutProperty GetMaxLinesValue is INT32_MAX
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, ReMeasureContentTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with null paraMapPtr
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    SizeF textSize(100.0f, 50.0f);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize = CONTAINER_SIZE;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. Set up conditions to cover lines 268-271
+     * @tc.case: pattern->GetMaxLinesHeight() != FLT_MAX &&
+                 layoutProperty->GetMaxLinesValue(INT32_MAX) == INT32_MAX
+     */
+    pattern->SetMaxLinesHeight(100.0f); // Not FLT_MAX
+    layoutProperty->UpdateMaxLines(INT32_MAX); // MaxLines is INT32_MAX
+
+    /**
+     * @tc.steps: step5. Call ReMeasureContent method
+     * @tc.expected: Should return early with newContentConstraint.maxSize.Height()
+     */
+    auto result = layoutAlgorithm->ReMeasureContent(textSize,
+        contentConstraint, layoutWrapper.GetRawPtr());
+
+    /**
+     * @tc.expected: The result.maxSize.Height() should equal to pattern's MaxLinesHeight
+     */
+    EXPECT_EQ(result.maxSize.Height(), 100.0f);
+    EXPECT_EQ(textSize.Width(), 100.0f);
+    EXPECT_EQ(textSize.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: LayoutTest001
+ * @tc.desc: Test RichEditorLayoutAlgorithm Layout with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, LayoutTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with null paraMapPtr
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Test Layout with null layoutWrapper
+     * @tc.expected: Should return early without crash
+     */
+    layoutAlgorithm->Layout(nullptr);
+    EXPECT_EQ(layoutAlgorithm->GetParentGlobalOffset().GetX(), 0.0f);
+
+    /**
+     * @tc.steps: step4. Test Layout with layoutWrapper but no host node
+     * @tc.expected: Should return early without crash
+     */
+    auto layoutWrapperWithoutHost = AceType::MakeRefPtr<LayoutWrapperNode>(
+        nullptr, AceType::MakeRefPtr<GeometryNode>(), nullptr);
+    layoutAlgorithm->Layout(layoutWrapperWithoutHost.GetRawPtr());
+    EXPECT_EQ(layoutAlgorithm->GetParentGlobalOffset().GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: LayoutTest002
+ * @tc.desc: Test RichEditorLayoutAlgorithm Layout with children size != CHILDREN_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, LayoutTest002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create layoutWrapper with richEditorNode
+     */
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Layout method
+     * @tc.expected: Should log error and return when children size is incorrect
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Test Layout with null layoutWrapper
+     * @tc.expected: Should return early without crash
+     */
+    layoutAlgorithm->Layout(layoutWrapper.GetRawPtr());
+    EXPECT_EQ(layoutAlgorithm->GetParentGlobalOffset().GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: LayoutTest003
+ * @tc.desc: Test RichEditorLayoutAlgorithm Layout with null contentLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, LayoutTest003, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Prepare layoutWrapper with null contentLayoutWrapper
+     * @tc.note: It's difficult to directly create this condition in a real scenario,
+     *           but we can at least verify the error handling logic
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call Layout method
+     * @tc.expected: Should handle null contentLayoutWrapper gracefully
+     */
+    layoutAlgorithm->Layout(layoutWrapper.GetRawPtr());
+    EXPECT_EQ(layoutAlgorithm->GetParentGlobalOffset().GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: LayoutTest004
+ * @tc.desc: Test RichEditorLayoutAlgorithm Layout with incorrect contentNode tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, LayoutTest004, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Prepare layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call Layout method
+     * @tc.expected: Should handle incorrect contentNode tag gracefully
+     */
+    layoutAlgorithm->Layout(layoutWrapper.GetRawPtr());
+    EXPECT_EQ(layoutAlgorithm->GetParentGlobalOffset().GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: AddImageToParagraphTest001
+ * @tc.desc: Test AddImageToParagraph when useParagraphCache_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddImageToParagraphTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to true
+    layoutAlgorithm->useParagraphCache_ = true;
+    layoutAlgorithm->currentParagraphPlaceholderCount_ = 0;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto imageSpanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    imageSpanItem->content = u"image test content";
+    RefPtr<LayoutWrapper> layoutWrapper = nullptr;
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    int32_t spanTextLength = 0;
+
+    /**
+     * @tc.steps: step4. Call AddImageToParagraph method
+     * @tc.expected: When useParagraphCache_ is true, should execute override logic
+     *               spanTextLength should be increased by content length
+     *               placeholderIndex should be set correctly
+     */
+    layoutAlgorithm->AddImageToParagraph(imageSpanItem, layoutWrapper, paragraph, spanTextLength);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length (18 characters)
+     * @tc.expected: imageSpanItem->placeholderIndex should be set to 10 (preParagraphsPlaceholderCount_)
+     */
+    EXPECT_EQ(spanTextLength, 18);
+    EXPECT_EQ(imageSpanItem->placeholderIndex, 10);
+}
+
+/**
+ * @tc.name: AddPlaceHolderToParagraphTest001
+ * @tc.desc: Test AddPlaceHolderToParagraph when useParagraphCache_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddPlaceHolderToParagraphTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to true
+    layoutAlgorithm->useParagraphCache_ = true;
+    layoutAlgorithm->currentParagraphPlaceholderCount_ = 3;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 7;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    placeholderSpanItem->content = u"placeholder content";
+    RefPtr<LayoutWrapper> layoutWrapper = nullptr;
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    int32_t spanTextLength = 10;
+
+    /**
+     * @tc.steps: step4. Call AddPlaceHolderToParagraph method
+     * @tc.expected: When useParagraphCache_ is true, should execute override logic
+     *               spanTextLength should be increased by content length
+     *               placeholderIndex should be set correctly
+     */
+    layoutAlgorithm->AddPlaceHolderToParagraph(placeholderSpanItem, layoutWrapper, paragraph, spanTextLength);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length (19 characters)
+     * @tc.expected: placeholderSpanItem->placeholderIndex should be set to 10
+     */
+    EXPECT_EQ(spanTextLength, 29);
+    EXPECT_EQ(placeholderSpanItem->placeholderIndex, 10);
+}
+
+/**
+ * @tc.name: UpdateParagraphByCustomSpanTest001
+ * @tc.desc: Test UpdateParagraphByCustomSpan when useParagraphCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = false
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to false
+    layoutAlgorithm->useParagraphCache_ = false;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto customSpanItem = AceType::MakeRefPtr<CustomSpanItem>();
+    customSpanItem->content = u"custom";
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    int32_t spanTextLength = 5;
+    CustomSpanPlaceholderInfo customSpanPlaceholder;
+
+    /**
+     * @tc.steps: step4. Call UpdateParagraphByCustomSpan method
+     * @tc.expected: When useParagraphCache_ is false, should call base class method
+     */
+    layoutAlgorithm->UpdateParagraphByCustomSpan(customSpanItem,
+        paragraph, spanTextLength, customSpanPlaceholder);
+
+    /**
+     * @tc.expected: spanTextLength should remain unchanged as we're calling base class method
+     */
+    EXPECT_EQ(spanTextLength, 6);
+}
+
+/**
+ * @tc.name: UpdateParagraphByCustomSpanTest002
+ * @tc.desc: Test UpdateParagraphByCustomSpan when useParagraphCache_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to true
+    layoutAlgorithm->useParagraphCache_ = true;
+    layoutAlgorithm->currentParagraphPlaceholderCount_ = 2;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 8;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters without onDraw
+     */
+    auto customSpanItem = AceType::MakeRefPtr<CustomSpanItem>();
+    customSpanItem->content = u"custom span content";
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    int32_t spanTextLength = 10;
+    CustomSpanPlaceholderInfo customSpanPlaceholder;
+
+    /**
+     * @tc.steps: step4. Call UpdateParagraphByCustomSpan method
+     * @tc.expected: When useParagraphCache_ is true, should execute override logic
+     *               spanTextLength should be increased by content length
+     *               placeholderIndex should be set correctly
+     *               customSpanPlaceholder.customSpanIndex should be set
+     */
+    layoutAlgorithm->UpdateParagraphByCustomSpan(customSpanItem, paragraph,
+        spanTextLength, customSpanPlaceholder);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length (18 characters)
+     * @tc.expected: customSpanItem->placeholderIndex should be set to 10
+     * @tc.expected: customSpanPlaceholder.customSpanIndex should be same as customSpanItem->placeholderIndex
+     */
+    EXPECT_EQ(spanTextLength, 29);
+    EXPECT_EQ(customSpanItem->placeholderIndex, 10);
+    EXPECT_EQ(customSpanPlaceholder.customSpanIndex, 10);
 }
 
 } // namespace OHOS::Ace::NG

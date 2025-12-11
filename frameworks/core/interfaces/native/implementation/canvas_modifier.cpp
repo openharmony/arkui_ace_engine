@@ -108,10 +108,10 @@ void SetOnReadyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        CanvasModelNG::SetOnReady(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.InvokeSync(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void SetEnableAnalyzerImpl(Ark_NativePointer node,

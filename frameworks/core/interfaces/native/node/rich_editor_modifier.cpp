@@ -626,6 +626,22 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
+void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
+    CHECK_NULL_VOID(customKeyboardNode);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
+}
+
+void ResetRichEditorCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+}
+
 void SetRichEditorOnDidIMEInput(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -692,6 +708,48 @@ void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
     RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
 }
  
+void SetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, value);
+}
+
+void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
+
+void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, value);
+}
+
+void ResetRichEditorIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetRichEditorFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, value);
+}
+
+void ResetRichEditorFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
 void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -783,6 +841,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
         .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
+        .setRichEditorCustomKeyboard = SetRichEditorCustomKeyboard,
+        .resetRichEditorCustomKeyboard = ResetRichEditorCustomKeyboard,
         .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
         .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
         .setRichEditorOnWillAttachIME = SetRichEditorOnWillAttachIME,
@@ -791,6 +851,12 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
+        .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
+        .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
+        .setRichEditorIncludeFontPadding = SetRichEditorIncludeFontPadding,
+        .resetRichEditorIncludeFontPadding = ResetRichEditorIncludeFontPadding,
+        .setRichEditorFallbackLineSpacing = SetRichEditorFallbackLineSpacing,
+        .resetRichEditorFallbackLineSpacing = ResetRichEditorFallbackLineSpacing,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,

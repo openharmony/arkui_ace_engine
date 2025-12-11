@@ -420,6 +420,12 @@ JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
 
 void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
 {
+    if (childArray_.IsEmpty()) {
+        return;
+    }
+    auto vm = const_cast<EcmaVM*>(childArray_->GetEcmaVM());
+    CHECK_NULL_VOID(vm);
+    panda::LocalScope socpe(vm);
     auto info = JSRef<JSObjTemplate>::Cast(childArray_->GetValueAt(index));
     auto layoutWrapper = GetChildByIndex(index);
     FillPlaceSizeProperty(info, size);

@@ -23,13 +23,6 @@
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ListItemModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
-{
-    // CHECK_NULL_VOID(frameNode);
-    // auto frameNodePattern = frameNode->GetPattern<ListItemPattern>();
-    // CHECK_NULL_VOID(frameNodePattern);
-    // frameNodePattern->SetShallowBuilder(std::move(shallowBuilder));
-}
 
 void ListItemModelStatic::SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode)
 {
@@ -40,27 +33,14 @@ void ListItemModelStatic::SetSticky(FrameNode* frameNode, const std::optional<V2
     }
 }
 
-RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCreateArc, bool isDelayedDeepRenderFunc)
+RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCreateArc)
 {
-    RefPtr<FrameNode> frameNode = nullptr;
-    if (isDelayedDeepRenderFunc) {
-        const char* tag = isCreateArc ? V2::ARC_LIST_ITEM_ETS_TAG : V2::LIST_ITEM_ETS_TAG;
-        if (!isCreateArc) {
-            frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
-                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
-        } else {
-            frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
-                []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
-        }
-    } else {
-        if (!isCreateArc) {
-            frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
-                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
-        } else {
-            frameNode = FrameNode::GetOrCreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
-                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
-        }
+    if (isCreateArc) {
+        return FrameNode::CreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
+            AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     }
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     return frameNode;
 }
 
@@ -149,6 +129,7 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
         }
     }
+    pattern->SetDeleteArea();
 }
 
 void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,

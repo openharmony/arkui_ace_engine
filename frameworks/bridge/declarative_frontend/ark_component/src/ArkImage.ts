@@ -749,6 +749,22 @@ class ImageContentTransitionModifier extends ModifierWithKey<ContentTransitionEf
     return this.stageValue !== this.value;
   }
 }
+class ImageAntiAliasModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('antialiased');
+  applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void {
+    if (reset) {
+      getUINativeModule().image.resetAntiAlias(node);
+    } else {
+      getUINativeModule().image.setAntiAlias(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -930,6 +946,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   contentTransition(value: ContentTransitionEffect): this {
     modifierWithKey(this._modifiersWithKeys, ImageContentTransitionModifier.identity,
       ImageContentTransitionModifier, value);
+    return this;
+  }
+  antialiased(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAntiAliasModifier.identity, ImageAntiAliasModifier, value);
     return this;
   }
 }

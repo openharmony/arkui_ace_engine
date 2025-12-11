@@ -247,13 +247,33 @@ ArkUINativeModuleValue ListBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     auto cacheCount = DEFAULT_CACHED_COUNT;
+    std::optional<int32_t> minOpt;
+    std::optional<int32_t> maxOpt;
     if (!cacheCountArg->IsUndefined()) {
-        ArkTSUtils::ParseJsInteger(vm, cacheCountArg, cacheCount);
-        if (cacheCount < 0) {
-            cacheCount = DEFAULT_CACHED_COUNT;
+        if (ArkTSUtils::ParseJsInteger(vm, cacheCountArg, cacheCount)) {
+            if (cacheCount < 0) {
+                cacheCount = DEFAULT_CACHED_COUNT;
+            }
+        } else if (cacheCountArg->IsObject(vm)) {
+            auto jsObj = cacheCountArg->ToObject(vm);
+            panda::Local<panda::JSValueRef> min = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "minCount"));
+            panda::Local<panda::JSValueRef> max = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "maxCount"));
+            if (min->IsNumber()) {
+                int32_t num = min->ToNumber(vm)->Value();
+                minOpt = num < 0 ? DEFAULT_CACHED_COUNT : num;
+            }
+            if (max->IsNumber()) {
+                int32_t num = max->ToNumber(vm)->Value();
+                maxOpt = num < minOpt.value_or(DEFAULT_CACHED_COUNT) ? minOpt.value_or(DEFAULT_CACHED_COUNT) : num;
+            }
         }
     }
-    GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cacheCount);
+    if (minOpt.has_value() && maxOpt.has_value()) {
+        GetArkUINodeModifiers()->getListModifier()->setCacheRange(nativeNode, minOpt.value(), maxOpt.value());
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetCacheRange(nativeNode);
+        GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cacheCount);
+    }
 
     bool show = !cacheShowArg.IsNull() && cacheShowArg->IsTrue();
     GetArkUINodeModifiers()->getListModifier()->setShowCached(nativeNode, show);
@@ -269,6 +289,7 @@ ArkUINativeModuleValue ListBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetCachedCount(nativeNode);
     GetArkUINodeModifiers()->getListModifier()->resetShowCached(nativeNode);
+    GetArkUINodeModifiers()->getListModifier()->resetCacheRange(nativeNode);
 
     return panda::JSValueRef::Undefined(vm);
 }

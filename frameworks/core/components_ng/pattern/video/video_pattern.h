@@ -117,6 +117,11 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void UpdateShowImagePreview(bool showImagePreview)
+    {
+        showImagePreview_ = showImagePreview;
+    }
+
     void UpdateShowFirstFrame(bool showFirstFrame)
     {
         showFirstFrame_ = showFirstFrame;
@@ -422,6 +427,7 @@ private:
 
     // Video src.
     VideoSourceInfo videoSrcInfo_;
+    bool showImagePreview_ = false;
     bool showFirstFrame_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;

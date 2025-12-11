@@ -941,6 +941,25 @@ HWTEST_F(TextFieldUXTest, MaxLength006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NeedSoftKeyboard002
+ * @tc.desc: Test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, NeedSoftKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Test whether text field need soft keyboard.
+     */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+
+/**
  * @tc.name: CopyOption001
  * @tc.desc: test testInput CopyOption
  * @tc.type: FUNC
@@ -1500,5 +1519,53 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo002, TestSize.Lev
     SelectMenuInfo menuInfo;
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showAIWrite, true);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo003
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(CopyOptions::None);
+    });
+    frameNode_->MarkModifyDone();
+
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    auto info = std::make_shared<SelectOverlayInfo>();
+    textSelectOverlay->OnHandleMarkInfoChange(info, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(info->menuInfo.showAIWrite, false);
+}
+
+/**
+ * @tc.name: SetPlaceholderColorInfo001
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetPlaceholderColorInfo("TextFieldPattern");
+    EXPECT_EQ(pattern_->placeholderColorInfo_, "[TextFieldPattern]");
 }
 } // namespace OHOS::Ace::NG

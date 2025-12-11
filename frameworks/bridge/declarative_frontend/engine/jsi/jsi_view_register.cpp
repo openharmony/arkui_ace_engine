@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/image/image_color_filter.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -50,6 +51,7 @@
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
@@ -109,11 +111,11 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     }
 
     JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
-    auto id = ContainerScope::CurrentId();
-    auto callback = [storage, setOrCreate, id](const std::string& data) {
+    auto callback = [storage, setOrCreate, id = ContainerScope::CurrentId()](const std::string& data) {
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        LocalScope localScope(vm);
         TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
@@ -1262,6 +1264,49 @@ panda::Local<panda::JSValueRef> WrapEventTargetInfoPointer(panda::JsiRuntimeCall
     return eventTargetObj.Get().GetLocalHandle();
 }
 
+panda::Local<panda::JSValueRef> GetColorFilterPointer(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> colorFilter = runtimeCallInfo->GetCallArgRef(0);
+    if (!colorFilter->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> colorFilterObj = panda::Local<panda::ObjectRef>(colorFilter);
+    if (colorFilterObj->GetNativePointerFieldCount(vm) < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto ptrValue = reinterpret_cast<int64_t>(colorFilterObj->GetNativePointerField(vm, 0));
+    return panda::NumberRef::New(vm, ptrValue);
+}
+
+panda::Local<panda::JSValueRef> WrapColorFilterPointer(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> colorFilterValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (colorFilterValueRef.IsNull() || colorFilterValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> dynamicColorFilter = panda::Local<panda::ObjectRef>(colorFilterValueRef);
+    panda::Local<panda::JSValueRef> pointerObj = runtimeCallInfo->GetCallArgRef(1);
+    if (pointerObj->IsNumber()) {
+        auto nativePointer = static_cast<int64_t>(pointerObj->ToNumber(vm)->Value());
+        ImageColorFilter* rawPtr = reinterpret_cast<ImageColorFilter*>(nativePointer);
+        auto colorFilter = Referenced::Claim<ImageColorFilter>(rawPtr);
+        colorFilter->IncRefCount();
+        dynamicColorFilter->SetNativePointerFieldCount(vm, 1);
+        dynamicColorFilter->SetNativePointerField(vm, 0, reinterpret_cast<void*>(nativePointer));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 template<typename T>
 panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -1626,7 +1671,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!windowConfig.autoDesignWidth) {
         windowConfig.UpdateDesignWidthScale(width);
     }
-    
+
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;
     return panda::NumberRef::New(vm, lpxValue);
@@ -1774,6 +1819,8 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModuleForm));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
@@ -1963,6 +2010,66 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
 }
+
+void JsRegisterFormJsXNodeLite(BindingTarget globalObj)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return;
+    }
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (globalObj.IsNull() || globalObj->IsUndefined()) {
+        return;
+    }
+    auto objRef = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getArkUINativeModuleForm__"));
+    if (objRef.IsNull() || objRef->IsUndefined() || !objRef->IsFunction(vm)) {
+        return;
+    }
+    auto obj = objRef->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto function = panda::CopyableGlobal(vm, func);
+    auto arkUINativeModuleRef = function->Call(vm, function.ToLocal(), nullptr, 0);
+    if (arkUINativeModuleRef.IsNull() || arkUINativeModuleRef->IsUndefined() || !arkUINativeModuleRef->IsObject(vm)) {
+        return;
+    }
+    auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
+    NG::ArkUINativeModule::RegisterArkUINativeModuleFormLite(arkUINativeModule, vm);
+    JsBindFormViewsForJsXNode(globalObj);
+    TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Lite successfully.");
+}
+
+void JsRegisterFormJsXNodeFull(BindingTarget globalObj, bool isLiteSetRegistered)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return;
+    }
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (globalObj.IsNull() || globalObj->IsUndefined()) {
+        return;
+    }
+    auto objRef = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getArkUINativeModuleForm__"));
+    if (objRef.IsNull() || objRef->IsUndefined() || !objRef->IsFunction(vm)) {
+        return;
+    }
+    auto obj = objRef->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto function = panda::CopyableGlobal(vm, func);
+    auto arkUINativeModuleRef = function->Call(vm, function.ToLocal(), nullptr, 0);
+    if (arkUINativeModuleRef.IsNull() || arkUINativeModuleRef->IsUndefined() || !arkUINativeModuleRef->IsObject(vm)) {
+        return;
+    }
+    auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
+    NG::ArkUINativeModule::RegisterArkUINativeModuleFormFull(arkUINativeModule, vm, isLiteSetRegistered);
+    JsBindFormViewsForJsXNode(globalObj);
+    TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Full successfully.");
+}
 #endif
 
 void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
@@ -2045,6 +2152,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapKeyEventPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapEventTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapEventTargetInfoPointer));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "WrapColorFilterPointer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapColorFilterPointer));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetColorFilterPointer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetColorFilterPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapImageAIOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::ImagePattern>));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapCanvasImageAIOptions"),
@@ -2091,6 +2202,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadImageGeneratorDialog"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadImageGeneratorDialog));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

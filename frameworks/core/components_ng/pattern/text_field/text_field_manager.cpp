@@ -47,6 +47,39 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
     }
 }
 
+bool TextFieldManagerNG::NeedCloseKeyboard()
+{
+    auto preNode = preNode_.Upgrade();
+    CHECK_NULL_RETURN(preNode, false);
+    auto prePattern = preNode->GetPattern();
+    CHECK_NULL_RETURN(prePattern, false);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->NeedCloseKeyboard();
+}
+
+void TextFieldManagerNG::ProcessCustomKeyboard(bool matched, int32_t nodeId)
+{
+    auto preNode = preNode_.Upgrade();
+    CHECK_NULL_VOID(preNode);
+    auto prePattern = preNode->GetPattern();
+    CHECK_NULL_VOID(prePattern);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
+    CHECK_NULL_VOID(textBasePattern);
+    textBasePattern->ProcessCustomKeyboard(matched, nodeId);
+}
+
+void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension)
+{
+    auto preNode = preNode_.Upgrade();
+    CHECK_NULL_VOID(preNode);
+    auto prePattern = preNode->GetPattern();
+    CHECK_NULL_VOID(prePattern);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
+    CHECK_NULL_VOID(textBasePattern);
+    textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
+}
+
 bool TextFieldManagerNG::OnBackPressed()
 {
     auto pattern = onFocusTextField_.Upgrade();
@@ -635,5 +668,15 @@ void TextFieldManagerNG::RemoveFillContentMap(int32_t id)
     if (fillContentMapIter != textFieldFillContentMaps_.end()) {
         textFieldFillContentMaps_.erase(fillContentMapIter);
     }
+}
+
+void TextFieldManagerNG::SetIsAskCeliaSupported(bool isAskCeliaSupported)
+{
+    isAskCeliaSupported_ = isAskCeliaSupported;
+}
+
+std::optional<bool> TextFieldManagerNG::IsAskCeliaSupported()
+{
+    return isAskCeliaSupported_;
 }
 } // namespace OHOS::Ace::NG

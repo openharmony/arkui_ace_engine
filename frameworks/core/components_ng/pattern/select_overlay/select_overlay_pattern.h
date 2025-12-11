@@ -224,6 +224,8 @@ public:
     }
 
     void DeleteHotAreas();
+    void OnMountToSubWindow();
+    void UpdateMenuAccessibility(bool menuIsShow);
 
 protected:
     virtual void CheckHandleReverse();
@@ -262,6 +264,11 @@ private:
     void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
     void SwitchHandleToOverlayMode(bool afterRender);
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void InitSurfaceChangedCallback();
+    void HandleSurfaceChanged();
+    void UpdateToolBarWidth();
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -293,6 +300,8 @@ private:
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
     // Used to identify whether the menu is actually displayed in the subwindow.
     bool isMenuShowInSubWindow_ = false;
+    std::optional<int32_t> surfaceChangeCallbackId_;
+    WeakPtr<PipelineContext> pipeline_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

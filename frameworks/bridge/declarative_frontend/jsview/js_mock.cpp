@@ -50,6 +50,11 @@ void JSMockScopeUtil::JSBind(BindingTarget globalObj)
     JSClass<JSMockScopeUtil>::Declare("__JSScopeUtil__");
     JSClass<JSMockScopeUtil>::StaticMethod("syncInstanceId", &JSMockScopeUtil::SyncInstanceId);
     JSClass<JSMockScopeUtil>::StaticMethod("restoreInstanceId", &JSMockScopeUtil::RestoreInstanceId);
+    JSClass<JSMockScopeUtil>::StaticMethod("getCallingScopeUIContext", &JSMockScopeUtil::GetCallingScopeUIContext);
+    JSClass<JSMockScopeUtil>::StaticMethod("getLastFocusedUIContext", &JSMockScopeUtil::GetLastFocusedUIContext);
+    JSClass<JSMockScopeUtil>::StaticMethod("getLastForegroundUIContext", &JSMockScopeUtil::GetLastForegroundUIContext);
+    JSClass<JSMockScopeUtil>::StaticMethod("getAllUIContexts", &JSMockScopeUtil::GetAllUIContexts);
+    JSClass<JSMockScopeUtil>::StaticMethod("resolveUIContext", &JSMockScopeUtil::ResolveUIContext);
 
     JSClass<JSMockScopeUtil>::Bind(globalObj);
 }

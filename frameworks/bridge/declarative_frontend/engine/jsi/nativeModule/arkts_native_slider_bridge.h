@@ -40,6 +40,8 @@ public:
     static ArkUINativeModuleValue ResetBlockColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTrackBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTrackBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTrackColorMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTrackColorMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShowSteps(ArkUIRuntimeCallInfo* runtimeCallInfo);

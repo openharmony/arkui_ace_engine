@@ -2161,23 +2161,933 @@ HWTEST_F(ImageTestOneNg, Matrix002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetImageModelNGInitialPixelMap001
+ * @tc.desc: test SetInitialPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGInitialPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set pixelMap to frameNode.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixMap = PixelMap::CreatePixelMap(voidPtr);
+    ImageModelNG::SetInitialPixelMap(frameNode, pixMap);
+    ImageSourceInfo defaultInfo;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    EXPECT_EQ(defaultInfo.GetPixmap(), pixMap);
+    /**
+     * @tc.steps: step3. set null src to frameNode.
+     */
+    pixMap = nullptr;
+    ImageModelNG::SetInitialPixelMap(frameNode, pixMap);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    EXPECT_EQ(defaultInfo.GetPixmap(), pixMap);
+}
+
+/**
+ * @tc.name: SetImageModelNGBorderRadius001
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGBorderRadius001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto topLeft = Dimension(RADIUS_DEFAULT);
+    auto topRight = Dimension(RADIUS_DEFAULT);
+    auto bottomLeft = Dimension(30.0);
+    auto bottomRight = Dimension(30.0);
+    ImageModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
+    /**
+     * @tc.steps: step3. get and check config value
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+
+/**
+ * @tc.name: SetImageModelNGBorderRadius002
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGBorderRadius002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto topLeft = Dimension(RADIUS_DEFAULT);
+    auto topRight = Dimension(RADIUS_DEFAULT);
+    auto bottomLeft = Dimension(30.0);
+    auto bottomRight = Dimension(30.0);
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = topLeft;
+    borderRadius.radiusTopRight = topRight;
+    borderRadius.radiusBottomLeft = bottomLeft;
+    borderRadius.radiusBottomRight = bottomRight;
+    borderRadius.multiValued = true;
+    ImageModelNG::SetBorderRadius(frameNode, borderRadius);
+    /**
+     * @tc.steps: step3. get and check config value.
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+
+/**
+ * @tc.name: ResetImageModelNGBackBorder001
+ * @tc.desc: test ResetBackBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ResetImageModelNGBackBorder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. reset back border to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageModelNG::ResetBackBorder(frameNode);
+    EXPECT_EQ(imagePattern->needBorderRadius_, false);
+}
+
+/**
+ * @tc.name: SetImageModelNGResizableLattice001
+ * @tc.desc: test SetResizableLattice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGResizableLattice001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    /**
+     * @tc.steps: step2. set image resizableLattice
+     */
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    auto resizableLattice = config->resizableLattice_;
+    imageModel.SetResizableLattice(resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+    /**
+     * @tc.steps: step3. set null resizableLattice to frameNode.
+     */
+    resizableLattice = nullptr;
+    imageModel.SetResizableLattice(resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+}
+
+/**
+ * @tc.name: SetImageModelNGResizableLattice002
+ * @tc.desc: test SetResizableLattice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGResizableLattice002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set resizableLattice to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    auto resizableLattice = config->resizableLattice_;
+    ImageModelNG::SetResizableLattice(frameNode, resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+    /**
+     * @tc.steps: step3. set null resizableLattice to frameNode.
+     */
+    resizableLattice = nullptr;
+    ImageModelNG::SetResizableLattice(frameNode, resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+}
+
+/**
+ * @tc.name: SetImageModelNGImageRenderMode001
+ * @tc.desc: test SetImageRenderMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGImageRenderMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set null to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    ImageRenderMode value = ImageRenderMode::TEMPLATE;
+    ImageModelNG::SetImageRenderMode(nullptr, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().has_value(), false);
+    /**
+     * @tc.steps: step3. set imageRenderMode to frameNode.
+     */
+    value = ImageRenderMode::TEMPLATE;
+    ImageModelNG::SetImageRenderMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), value);
+    value = ImageRenderMode::ORIGINAL;
+    ImageModelNG::SetImageRenderMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), value);
+}
+
+/**
+ * @tc.name: SetImageModelNGImageFit001
+ * @tc.desc: test SetImageFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGImageFit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set null to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    ImageFit value = ImageFit::BOTTOM;
+    ImageModelNG::SetImageFit(nullptr, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().has_value(), false);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().has_value(), false);
+    /**
+     * @tc.steps: step3. set ImageFit to frameNode.
+     */
+    value = ImageFit::BOTTOM;
+    ImageModelNG::SetImageFit(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().value(), value);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().value(), value);
+    value = ImageFit::FITWIDTH;
+    ImageModelNG::SetImageFit(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().value(), value);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().value(), value);
+}
+
+/**
+ * @tc.name: GetImageModelNGSyncLoad001
+ * @tc.desc: test GetSyncLoad
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, GetImageModelNGSyncLoad001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get syncLoad from null.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    bool load = ImageModelNG::GetSyncLoad(nullptr);
+    EXPECT_EQ(load, false);
+    /**
+     * @tc.steps: step3. get syncLoad from frameNode.
+     */
+    imagePattern->SetSyncLoad(true);
+    load = ImageModelNG::GetSyncLoad(frameNode);
+    EXPECT_EQ(load, true);
+}
+
+/**
+ * @tc.name: SetImageModelNGOrientation001
+ * @tc.desc: test SetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelNGOrientation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. set image orientation
+     */
+    ImageRotateOrientation value = ImageRotateOrientation::UP;
+    imageModel.SetOrientation(value);
+    EXPECT_EQ(imagePattern->GetOrientation(), value);
+    EXPECT_EQ(imageLayoutProperty->GetImageRotateOrientation().value(), value);
+}
+
+/**
  * @tc.name: SetImageModelStaticSrc001
  * @tc.desc: parse src
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set src to frameNode.
+     */
     ImageSourceInfo defaultInfo;
     ImageSourceInfo info("pages/image.png");
     ImageModelStatic::SetSrc(frameNode, info);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
     ASSERT_EQ(defaultInfo.GetSrc(), "pages/image.png");
+    /**
+     * @tc.steps: step3. set null src to frameNode.
+     */
     ImageModelStatic::SetSrc(frameNode, std::nullopt);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
     ASSERT_EQ(defaultInfo.GetSrc(), "");
+}
+
+/**
+ * @tc.name: SetImageModelStaticPixelMap001
+ * @tc.desc: test SetPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set pixelMap to frameNode.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixMap = PixelMap::CreatePixelMap(voidPtr);
+    ImageModelStatic::SetPixelMap(frameNode, pixMap);
+    ImageSourceInfo defaultInfo;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    EXPECT_EQ(defaultInfo.GetPixmap(), pixMap);
+    /**
+     * @tc.steps: step3. set null src to frameNode.
+     */
+    pixMap = nullptr;
+    ImageModelStatic::SetPixelMap(frameNode, pixMap);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    EXPECT_EQ(defaultInfo.GetPixmap(), pixMap);
+}
+
+/**
+ * @tc.name: SetImageModelStaticSmoothEdge001
+ * @tc.desc: test SetSmoothEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticSmoothEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set SmoothEdge to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<float> value = 0.5f;
+    ImageModelStatic::SetSmoothEdge(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSmoothEdge().value(), value.value());
+    value = 1.0f;
+    ImageModelStatic::SetSmoothEdge(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSmoothEdge().value(), value.value());
+    /**
+     * @tc.steps: step3. set null SmoothEdge to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetSmoothEdge(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSmoothEdge().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticCopyOption001
+ * @tc.desc: test SetCopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticCopyOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set copyOption to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    std::optional<CopyOptions> value = CopyOptions::InApp;
+    ImageModelStatic::SetCopyOption(frameNode, value);
+    EXPECT_EQ(imagePattern->GetCopyOption(), value.value());
+    value = CopyOptions::Distributed;
+    ImageModelStatic::SetCopyOption(frameNode, value);
+    EXPECT_EQ(imagePattern->GetCopyOption(), value.value());
+    /**
+     * @tc.steps: step3. set null copyOption to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetCopyOption(frameNode, value);
+    CopyOptions defaultValue = CopyOptions::None;
+    EXPECT_EQ(imagePattern->GetCopyOption(), defaultValue);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageRepeat001
+ * @tc.desc: test SetImageRepeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageRepeat001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set ImageRepeat to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<ImageRepeat> value = ImageRepeat::REPEAT_X;
+    ImageModelStatic::SetImageRepeat(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), value.value());
+    value = ImageRepeat::NO_REPEAT;
+    ImageModelStatic::SetImageRepeat(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), value.value());
+    /**
+     * @tc.steps: step3. set null ImageRepeat to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetImageRepeat(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageRenderMode001
+ * @tc.desc: test SetImageRenderMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageRenderMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set imageRenderMode to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<ImageRenderMode> value = ImageRenderMode::TEMPLATE;
+    ImageModelStatic::SetImageRenderMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), value.value());
+    value = ImageRenderMode::ORIGINAL;
+    ImageModelStatic::SetImageRenderMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().value(), value.value());
+    /**
+     * @tc.steps: step3. set null imageRenderMode to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetImageRenderMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageMatrix001
+ * @tc.desc: test SetImageMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageMatrix001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set ImageMatrix to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    Matrix4 matrix4Value = Matrix4(1.0f, 1.0f, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    ImageModelStatic::SetImageMatrix(frameNode, matrix4Value);
+    EXPECT_EQ(imageRenderProperty->GetImageMatrix().value(), matrix4Value);
+    /**
+     * @tc.steps: step3. set null ImageMatrix to frameNode.
+     */
+    Matrix4 matrix4DefaultValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    ImageModelStatic::SetImageMatrix(frameNode, std::nullopt);
+    EXPECT_EQ(imageRenderProperty->GetImageMatrix().value(), matrix4DefaultValue);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageFit001
+ * @tc.desc: test SetImageFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set ImageFit to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    std::optional<ImageFit> value = ImageFit::BOTTOM;
+    ImageModelStatic::SetImageFit(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().value(), value.value());
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().value(), value.value());
+    value = ImageFit::FITWIDTH;
+    ImageModelStatic::SetImageFit(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().value(), value.value());
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().value(), value.value());
+    /**
+     * @tc.steps: step3. set null ImageFit to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetImageFit(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageFit().has_value(), false);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageSourceSize001
+ * @tc.desc: test SetImageSourceSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageSourceSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set ImageSourceSize to frameNode.
+     */
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto pairSize = std::make_pair(Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT));
+    ImageModelStatic::SetImageSourceSize(frameNode, pairSize);
+    SizeF sourceSize = SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
+        static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx()));
+    EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(), sourceSize);
+    /**
+     * @tc.steps: step3. set null ImageSourceSize to frameNode.
+     */
+    ImageModelStatic::SetImageSourceSize(frameNode, std::nullopt);
+    EXPECT_EQ(imageLayoutProperty->GetSourceSize().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageFill001
+ * @tc.desc: test SetImageFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFill001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set ImageFill to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<Color> value = Color::RED;
+    ImageModelStatic::SetImageFill(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), value.value());
+    value = Color::BLUE;
+    ImageModelStatic::SetImageFill(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), value.value());
+    /**
+     * @tc.steps: step3. set null ImageFill to frameNode.
+     */
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ImageTheme>()));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    Color defaultThemeColor = Color::GREEN;
+    pipeline->GetTheme<ImageTheme>()->fillColor_ = defaultThemeColor;
+    value = std::nullopt;
+    ImageModelStatic::SetImageFill(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), defaultThemeColor);
+}
+
+/**
+ * @tc.name: SetImageModelStaticAlt001
+ * @tc.desc: test SetAlt
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticAlt001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set alt to frameNode.
+     */
+    ImageSourceInfo defaultInfo;
+    ImageSourceInfo info("pages/image.png");
+    ImageModelStatic::SetAlt(frameNode, info);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, Alt, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "pages/image.png");
+    /**
+     * @tc.steps: step3. set null alt to frameNode.
+     */
+    ImageModelStatic::SetAlt(frameNode, std::nullopt);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, Alt, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "");
+}
+
+/**
+ * @tc.name: SetImageModelStaticImageInterpolation001
+ * @tc.desc: test SetImageInterpolation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticImageInterpolation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set imageInterpolation to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<ImageInterpolation> value = ImageInterpolation::HIGH;
+    ImageModelStatic::SetImageInterpolation(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), value.value());
+    value = ImageInterpolation::LOW;
+    ImageModelStatic::SetImageInterpolation(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), value.value());
+    /**
+     * @tc.steps: step3. set null imageInterpolation to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetImageInterpolation(frameNode, value);
+    ImageInterpolation defaultValue = ImageInterpolation::NONE;
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), defaultValue);
+}
+
+/**
+ * @tc.name: SetImageModelStaticDynamicRangeMode001
+ * @tc.desc: test SetDynamicRangeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticDynamicRangeMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set dynamicRangeMode to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    std::optional<DynamicRangeMode> value = DynamicRangeMode::HIGH;
+    ImageModelStatic::SetDynamicRangeMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), value.value());
+    value = DynamicRangeMode::STANDARD;
+    ImageModelStatic::SetDynamicRangeMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), value.value());
+    /**
+     * @tc.steps: step3. set null dynamicRangeMode to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetDynamicRangeMode(frameNode, value);
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().has_value(), false);
+}
+
+/**
+ * @tc.name: SetImageModelStaticOrientation001
+ * @tc.desc: test SetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticOrientation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set orientation to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    std::optional<ImageRotateOrientation> value = ImageRotateOrientation::UP;
+    ImageModelStatic::SetOrientation(frameNode, value);
+    EXPECT_EQ(imagePattern->GetOrientation(), value.value());
+    EXPECT_EQ(imageLayoutProperty->GetImageRotateOrientation().value(), value.value());
+    value = ImageRotateOrientation::AUTO;
+    ImageModelStatic::SetOrientation(frameNode, value);
+    EXPECT_EQ(imagePattern->GetOrientation(), value.value());
+    EXPECT_EQ(imageLayoutProperty->GetImageRotateOrientation().value(), value.value());
+    /**
+     * @tc.steps: step3. set null orientation to frameNode.
+     */
+    value = std::nullopt;
+    ImageModelStatic::SetOrientation(frameNode, value);
+    ImageRotateOrientation defaultValue = ImageRotateOrientation::UP;
+    EXPECT_EQ(imagePattern->GetOrientation(), defaultValue);
+    EXPECT_EQ(imageLayoutProperty->GetImageRotateOrientation().value(), defaultValue);
+}
+
+/**
+ * @tc.name: SetImageModelStaticEnhancedImageQuality001
+ * @tc.desc: test SetEnhancedImageQuality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticEnhancedImageQuality001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set enhancedImageQuality to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    std::optional<AIImageQuality> value = AIImageQuality::HIGH;
+    ImageModelStatic::SetEnhancedImageQuality(frameNode, value);
+    EXPECT_EQ(imagePattern->GetImageQuality(), value.value());
+    value = AIImageQuality::NORMAL;
+    ImageModelStatic::SetEnhancedImageQuality(frameNode, value);
+    EXPECT_EQ(imagePattern->GetImageQuality(), value.value());
+    /**
+     * @tc.steps: step3. set null enhancedImageQuality to frameNode.
+     */
+    value = std::nullopt;
+    AIImageQuality defaultValue = AIImageQuality::NONE;
+    ImageModelStatic::SetEnhancedImageQuality(frameNode, value);
+    EXPECT_EQ(imagePattern->GetImageQuality(), defaultValue);
+}
+
+/**
+ * @tc.name: SetImageModelStaticResizableLattice001
+ * @tc.desc: test SetResizableLattice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticResizableLattice001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set resizableLattice to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    auto resizableLattice = config->resizableLattice_;
+    ImageModelStatic::SetResizableLattice(frameNode, resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+    /**
+     * @tc.steps: step3. set null resizableLattice to frameNode.
+     */
+    resizableLattice = nullptr;
+    ImageModelStatic::SetResizableLattice(frameNode, resizableLattice);
+    EXPECT_EQ(imageRenderProperty->GetImageResizableLattice().value(), resizableLattice);
+}
+
+/**
+ * @tc.name: SetImageModelStaticDrawingColorFilter001
+ * @tc.desc: test SetDrawingColorFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticDrawingColorFilter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set drawingColorFilter to frameNode.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
+    ImageModelStatic::SetDrawingColorFilter(frameNode, drawingColorFilter);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
+    /**
+     * @tc.steps: step3. set null drawingColorFilter to frameNode.
+     */
+    drawingColorFilter = nullptr;
+    ImageModelStatic::SetDrawingColorFilter(frameNode, drawingColorFilter);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
 }
 } // namespace OHOS::Ace::NG

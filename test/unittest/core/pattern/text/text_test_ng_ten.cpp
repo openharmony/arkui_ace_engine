@@ -844,4 +844,50 @@ HWTEST_F(TextTestNgTen, SetSpanEventFlagValue_OnClickAndPressCallback, TestSize.
     EXPECT_TRUE(isSpanHasClick);
     EXPECT_TRUE(isSpanHasLongPress);
 }
+
+
+/**
+ * @tc.name: UpdateMarqueeOptions001
+ * @tc.desc: test MarqueeOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTen, UpdateMarqueeOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+ 
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect：expect property as expect.
+     */
+    TextMarqueeOptions options;
+    options.UpdateTextMarqueeStart(true);
+    options.UpdateTextMarqueeStep(3);
+    options.UpdateTextMarqueeLoop(3);
+    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    options.UpdateTextMarqueeDelay(3);
+    options.UpdateTextMarqueeFadeout(false);
+    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    options.UpdateTextMarqueeUpdatePolicy(MarqueeUpdatePolicy::PRESERVE_POSITION);
+    options.UpdateTextMarqueeSpacing(CalcDimension(4.0f, DimensionUnit::VP));
+    textModelNG.SetMarqueeOptions(options);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStart().value(), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStep().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeLoop().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDirection().value(), MarqueeDirection::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDelay().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeout().value(), false);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicy().value(), MarqueeStartPolicy::ON_FOCUS);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeUpdatePolicy().value(), MarqueeUpdatePolicy::PRESERVE_POSITION);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeSpacing().value(), CalcDimension(4.0f, DimensionUnit::VP));
+}
 }

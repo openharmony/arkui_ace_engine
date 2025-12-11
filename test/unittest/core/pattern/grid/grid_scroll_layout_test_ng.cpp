@@ -245,8 +245,8 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest002, TestSize.Level1)
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(100, 100), 0, 1, 0);
-    EXPECT_EQ(ret.GetY(), 100.f - ITEM_MAIN_SIZE);
-    EXPECT_EQ(ret.GetX(), 100.f);
+    EXPECT_EQ(ret.GetX(), 100.f - ITEM_MAIN_SIZE);
+    EXPECT_EQ(ret.GetY(), 100.f);
 }
 
 /**
@@ -292,7 +292,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest004, TestSize.Level1)
     model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
-    gridScrollLayoutAlgorithm->crossCount_ = 2;
+    gridScrollLayoutAlgorithm->info_.crossCount_ = 2;
     auto ret1 = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
     EXPECT_EQ(ret1.GetY(), 100.0f);
     EXPECT_EQ(ret1.GetX(), 0.0f);
@@ -933,5 +933,47 @@ HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize002, TestSize.Level1)
     GetGrid();
     CreateDone();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, 500.f);
+}
+
+/**
+ * @tc.name: SpringAnimationWithReload
+ * @tc.desc: Test SpringAnimationWithReload
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SpringAnimationWithReload, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(5);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(2);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_GE(pattern_->info_.currentOffset_, 0.0);
+
+    frameNode_->childrenUpdatedFrom_ = 1;
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_GE(pattern_->info_.currentOffset_, 0.0);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_GE(pattern_->info_.currentOffset_, 0.0);
 }
 } // namespace OHOS::Ace::NG

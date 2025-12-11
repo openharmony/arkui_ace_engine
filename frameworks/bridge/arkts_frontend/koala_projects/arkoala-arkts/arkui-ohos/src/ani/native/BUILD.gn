@@ -74,6 +74,8 @@ ohos_shared_library("arkoala_native_ani") {
     "module.cpp",
     "node_adapter/node_adapter_module.cpp",
     "rich_editor/rich_editor_module.cpp",
+    "security_component/save_button_module.cpp",
+    "security_component/paste_button_module.cpp",
     "shape/shape_module_methods.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "styled_string/styled_string_module.cpp",

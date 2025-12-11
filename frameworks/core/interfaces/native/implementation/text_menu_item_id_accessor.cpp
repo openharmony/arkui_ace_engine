@@ -106,6 +106,12 @@ Ark_TextMenuItemId GetSHAREImpl()
     peer->id = "OH_DEFAULT_SHARE";
     return peer;
 }
+Ark_TextMenuItemId GetAutoFillImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AUTO_FILL";
+    return peer;
+}
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
@@ -125,6 +131,7 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetTRANSLATEImpl,
         TextMenuItemIdAccessor::GetSEARCHImpl,
         TextMenuItemIdAccessor::GetSHAREImpl,
+        TextMenuItemIdAccessor::GetAutoFillImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

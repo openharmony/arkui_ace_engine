@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SliderOpsAccessor {
 Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
-                                            const Ark_Number* value,
+                                            const Ark_Float64* value,
                                             const ValueCallback* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -34,7 +34,7 @@ Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto changeEvent = [arkCallback = CallbackHelper(*callback), weakNode](float value) {
         PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Float64>(value));
     };
     SliderModelStatic::SetOnChangeEvent(frameNode, std::move(changeEvent));
     return node;

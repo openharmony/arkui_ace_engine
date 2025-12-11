@@ -163,6 +163,7 @@ public:
         JSClass<JSWebConsoleLog>::StaticMethod("getMessage", &JSWeb::Mock);
         JSClass<JSWebConsoleLog>::StaticMethod("getMessageLevel", &JSWeb::Mock);
         JSClass<JSWebConsoleLog>::StaticMethod("getSourceId", &JSWeb::Mock);
+        JSClass<JSWebConsoleLog>::StaticMethod("getSource", &JSWeb::Mock);
         JSClass<JSWebConsoleLog>::Bind(globalObj);
     }
 };

@@ -66,6 +66,9 @@ namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
 class SpanString;
+class CalcDimensionRect;
+class ResponseRegion;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
@@ -89,6 +92,7 @@ struct OptionParam {
 
     bool isAIMenuOption = false;
     bool isAskCeliaOption = false;
+    std::vector<OptionParam> subMenuItems = {};
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -121,6 +125,11 @@ struct OptionParam {
         bool enabledParam, uint32_t symbolId)
         : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
           symbolId(symbolId)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam, uint32_t symbolId, const std::vector<OptionParam>& subMenuItems)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
+          symbolId(symbolId), subMenuItems(subMenuItems)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
@@ -190,6 +199,12 @@ public:
     static void RequestFrame();
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj);
+    // Bind a dynamic color placeholder to current component's render node. This does NOT set a concrete
+    // color immediately; instead it forwards the placeholder key to the render service which will resolve
+    // the actual color (e.g. dominant image or contrast text) asynchronously. Passing ColorPlaceholder::NONE
+    // clears any existing binding.
+    static void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE,
+        uint32_t interval = 0);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
@@ -257,6 +272,8 @@ public:
     static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter);
+    static void SetSystemMaterial(const UiMaterial* material);
 
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
@@ -335,6 +352,7 @@ public:
     static void SetAlign(std::string localizedAlignment);
     static void SetLayoutGravity(Alignment alignment);
     static void SetIsMirrorable(bool isMirrorable);
+    static void SetIsMirrorable(FrameNode* frameNode, bool isMirrorable);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetChainStyle(const ChainInfo& chainInfo);
     static void SetBias(const BiasPair& biasPair);
@@ -366,10 +384,14 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    // exclude self and children from renderGroup
+    static void SetExcludeFromRenderGroup(bool exclude);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
-    // cornerApplyType
-    static void SetCornerApplyType(CornerApplyType cornerApplyType);
+    // renderStrategy
+    static void SetRenderStrategy(RenderStrategy renderStrategy);
+    static void SetRenderStrategy(FrameNode* frameNode, RenderStrategy renderStrategy);
+    static bool IsRenderStrategyValid(RenderStrategy renderStrategy);
 
     // transform
     static void SetScale(const NG::VectorF &value);
@@ -428,6 +450,9 @@ public:
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList, bool measureFromViewport = false);
     static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
+    static void SetResponseRegionList(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap,
+        bool isResponseRegionSupported = false);
     static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
@@ -463,6 +488,7 @@ public:
     static void SetOnDragEnd(
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
+    static bool GetMonopolizeEvents(FrameNode* frameNode);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
     static void EnableDropDisallowedBadge(bool enableDropDisallowedBadge);
     static int32_t CancelDataLoading(const std::string& key);
@@ -698,6 +724,7 @@ public:
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, std::string localizedAlignment);
     static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
         const SysOptions& sysOptions = SysOptions());
@@ -755,6 +782,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, double radio);
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
+    static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
@@ -833,6 +861,9 @@ public:
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
+    static void SetResponseRegionList(FrameNode* frameNode,
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap);
+    static void SetResponseRegionList(FrameNode* frameNode, const std::vector<ResponseRegion>& responseRegionMap);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -851,6 +882,7 @@ public:
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
+    static HoverEffectType GetHoverEffect(FrameNode* frameNode);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
@@ -910,6 +942,8 @@ public:
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
+    static std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> GetResponseRegionList(
+        FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
@@ -1020,6 +1054,11 @@ public:
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
         bool arrowKeyStepOut);
+    static std::string GetFocusScopeId(FrameNode* frameNode);
+    static bool GetIsGroup(FrameNode* frameNode);
+    static bool GetArrowKeyStepOut(FrameNode* frameNode);
+    static uint32_t GetFocusScopePriority(FrameNode* frameNode);
+    static double GetClickDistance(FrameNode* frameNode);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
         const uint32_t focusPriority);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
@@ -1046,11 +1085,15 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void FreezeUINodeById(const std::string& id, bool isFreeze);
     static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
+    static void SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
@@ -1060,6 +1103,8 @@ public:
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
+    static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 
@@ -1102,6 +1147,11 @@ public:
     static void AllowForceDark(UINode* node, bool forceDarkAllowed);
     static void ResetAllowForceDark(UINode* node);
     static bool GetAllowForceDark(UINode* node);
+    static Alignment GetLayoutGravity(FrameNode* frameNode);
+    static ChainWeightPair GetChainWeight(FrameNode* frameNode);
+    static BorderWidthProperty GetDashGap(FrameNode* frameNode);
+    static BorderWidthProperty GetDashWidth(FrameNode* frameNode);
+    static RenderStrategy GetRenderStrategy(FrameNode* frameNode);
 
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
@@ -1130,6 +1180,7 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
     int32_t expectedUpdateInterval);
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
+void SetFocusableMultiThread(FrameNode* frameNode, bool focusable);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);

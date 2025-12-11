@@ -74,39 +74,39 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
+Ark_Float64 GetDisplayXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
+Ark_Float64 GetDisplayYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetWindowXImpl(Ark_DragEvent peer)
+Ark_Float64 GetWindowXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetX());
-    return ArkValue<Ark_Number>(value);
+    return ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetWindowYImpl(Ark_DragEvent peer)
+Ark_Float64 GetWindowYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetY());
-    return ArkValue<Ark_Number>(value);
+    return ArkValue<Ark_Float64>(value);
 }
 void SetDataImpl(Ark_DragEvent peer,
                  Ark_unifiedDataChannel_UnifiedData unifiedData)
@@ -116,30 +116,21 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
+Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
-    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
-    CHECK_NULL_RETURN(peer, unifiedPeer);
-    CHECK_NULL_RETURN(peer->dragInfo, unifiedPeer);
+    Opt_unifiedDataChannel_UnifiedData arkUnifiedData =
+        Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>();
+    CHECK_NULL_RETURN(peer, arkUnifiedData);
+    CHECK_NULL_RETURN(peer->dragInfo, arkUnifiedData);
     auto data = peer->dragInfo->GetData();
-    CHECK_NULL_RETURN(data, unifiedPeer);
+    CHECK_NULL_RETURN(data, arkUnifiedData);
+    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     unifiedPeer->unifiedData = data;
-    return unifiedPeer;
+    return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
 }
-Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
+Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    Ark_unifiedDataChannel_Summary arkValue{};
-#ifdef WRONG_GEN1
-    CHECK_NULL_RETURN(peer, arkValue);
-    auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, arkValue);
-    auto summary = info->GetSummary();
-    arkValue.summary = Converter::ArkValue<Map_String_Int64>(summary, Converter::FC);
-    for (const auto &item: summary) {
-        arkValue.totalSize += ArkValue<Ark_Int64>(item.second);
-    }
-#endif
-    return arkValue;
+    return Converter::ArkValue<Opt_unifiedDataChannel_Summary>();
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
@@ -165,32 +156,32 @@ Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(info, {});
     return ArkValue<Ark_Rectangle>(info->GetPreviewRect(), Converter::FC);
 }
-Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetVelocityImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)
@@ -248,7 +239,7 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
             std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
             (const Array_String keys, const Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();

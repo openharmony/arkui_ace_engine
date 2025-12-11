@@ -18,6 +18,7 @@
 
 #include <list>
 #include <vector>
+#include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
@@ -44,6 +45,7 @@ struct DragNotifyMsg;
 struct KeyEvent;
 class UnifiedData;
 class Subwindow;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::NG {
@@ -52,7 +54,7 @@ using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 using TouchTestDoneCallback = std::function<void(
-    const std::shared_ptr<BaseGestureEvent>&, const std::list<RefPtr<NGGestureRecognizer>>&)>;
+    const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -169,7 +171,7 @@ class PipelineContext;
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
-    ~GestureEventHub() override = default;
+    ~GestureEventHub() override;
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void ClearGesture();
@@ -203,6 +205,7 @@ public:
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
     void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
+    double GetClickDistance() const;
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent);
@@ -233,6 +236,7 @@ public:
     bool IsClickEventsEmpty() const;
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
+    void RemoveBindMenu();
     void RegisterMenuOnTouch(TouchEventFunc&& callback);
     void AddTouchEventForTips(TouchEventFunc&& tipsTouchEventFunc);
     bool IsLongClickable() const;
@@ -279,6 +283,10 @@ public:
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
+    std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& GetResponseRegionMap();
+    void SetResponseRegionMap(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap);
     void SetResponseRegionFunc(const OnReponseRegionFunc& func);
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback);
@@ -493,6 +501,7 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
 

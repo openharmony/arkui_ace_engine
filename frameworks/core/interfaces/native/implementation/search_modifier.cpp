@@ -24,6 +24,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -66,7 +67,7 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
 {
     NG::IconOptions options;
     auto iconColor = Converter::OptConvert<Color>(src.color);
-    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
+    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
     auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
         options.UpdateSrc(iconSrc->content, iconSrc->moduleName, iconSrc->bundleName);
@@ -86,7 +87,7 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 {
     SearchButtonOptions buttonOptions;
     buttonOptions.color = OptConvert<Color> (src.fontColor);
-    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.fontSize);
+    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.fontSize);
     buttonOptions.autoDisable = OptConvert<bool> (src.autoDisable);
     return buttonOptions;
 }
@@ -266,7 +267,7 @@ void SetOnSubmitImpl(Ark_NativePointer node, const Opt_SearchSubmitCallback* val
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnSubmit(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -326,7 +327,7 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        SearchModelNG::SetOnContentScroll(frameNode, nullptr);
         return;
     }
     auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
@@ -384,12 +385,10 @@ void SetOnPasteImpl(Ark_NativePointer node,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_PasteEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_PasteEvent arkEvent = PasteEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(arkContent, arkEvent);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
@@ -626,22 +625,34 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
         SearchModelStatic::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
         return;
     }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onCreateMenuCallback =
+        nullptr;
+    std::function<bool(NG::MenuItemParam)> onMenuItemClick = nullptr;
+    auto createMenuCallbackArk = Converter::GetOpt(optValue->onCreateMenu);
+    if (createMenuCallbackArk.has_value()) {
+        auto createMenuCallback = createMenuCallbackArk.value();
+        onCreateMenuCallback =
+            [arkCreateMenu = CallbackHelper(createMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
             auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
             return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    }
+    auto clickCallbackArk = Converter::GetOpt(optValue->onMenuItemClick);
+    if (clickCallbackArk.has_value()) {
+        auto clickCallback = clickCallbackArk.value();
+        onMenuItemClick = [arkMenuItemClick = CallbackHelper(clickCallback)](
+                              NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range { .start = menuOptionsParam.start, .end = menuOptionsParam.end };
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            auto arkResult =
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
+    }
     SearchModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void SetEnablePreviewTextImpl(Ark_NativePointer node,
@@ -665,6 +676,8 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
+    SearchModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -709,6 +722,36 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     SearchModelStatic::SetKeyboardAppearance(frameNode, convValue);
+}
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    SearchModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetDividerColorImpl(Ark_NativePointer node, const Opt_ColorMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetSearchButtonImpl(Ark_NativePointer node,
                          const Opt_String* value,
@@ -813,6 +856,10 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetStopBackPressImpl,
         SearchAttributeModifier::SetOnWillChangeImpl,
         SearchAttributeModifier::SetKeyboardAppearanceImpl,
+        SearchAttributeModifier::SetCompressLeadingPunctuationImpl,
+        SearchAttributeModifier::SetDividerColorImpl,
+        SearchAttributeModifier::SetIncludeFontPaddingImpl,
+        SearchAttributeModifier::SetFallbackLineSpacingImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,

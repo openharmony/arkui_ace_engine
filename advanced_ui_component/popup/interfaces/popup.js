@@ -214,7 +214,7 @@ export class d1 extends ViewPU {
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
         this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, "messageMaxWeight");
         this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
-        this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
+        this.__currentScreenStatus = new ObservedPropertySimplePU(undefined, this, "currentScreenStatus");
         this.__applySizeOptions = new ObservedPropertyObjectPU(undefined, this, "applySizeOptions");
         this.__closeButtonBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "closeButtonBackgroundColor");
         this.__firstButtonBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "firstButtonBackgroundColor");
@@ -666,7 +666,9 @@ export class d1 extends ViewPU {
     }
     aboutToAppear() {
         this.listener.on("change", (w1) => {
-            this.currentScreenStatus = w1.matches;
+            setTimeout(() => {
+                this.currentScreenStatus = w1.matches;
+            }, 10);
         });
     }
     aboutToDisappear() {
@@ -674,7 +676,8 @@ export class d1 extends ViewPU {
     }
     getScrollMaxHeight() {
         let v1 = undefined;
-        if (this.currentScreenStatus !== this.beforeScreenStatus) {
+        if (this.beforeScreenStatus === undefined ||
+            this.currentScreenStatus !== this.beforeScreenStatus) {
             this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
         }

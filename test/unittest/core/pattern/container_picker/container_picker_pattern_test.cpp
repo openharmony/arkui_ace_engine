@@ -224,13 +224,13 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetTargetIndex00
 
     /**
      * @tc.steps: step3. test SetTargetIndex with invalid index.
-     * @tc.expected: step3. the target index is set to 0.
+     * @tc.expected: step3. the target index is set to invalid index.
      */
     pattern->SetTargetIndex(-1);
-    EXPECT_EQ(pattern->targetIndex_, 0);
+    EXPECT_EQ(pattern->targetIndex_, -1);
 
     pattern->SetTargetIndex(10);
-    EXPECT_EQ(pattern->targetIndex_, 0);
+    EXPECT_EQ(pattern->targetIndex_, 10);
 }
 
 /**

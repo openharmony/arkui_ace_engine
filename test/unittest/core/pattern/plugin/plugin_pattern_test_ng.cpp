@@ -39,6 +39,7 @@
 #include "core/components/plugin/plugin_sub_container.h"
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/plugin/plugin_event_hub.h"

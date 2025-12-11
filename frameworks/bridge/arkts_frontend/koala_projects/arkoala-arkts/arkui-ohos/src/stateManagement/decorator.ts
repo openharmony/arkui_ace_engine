@@ -22,12 +22,12 @@ import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 
 export interface IVariableOwner {
     getUniqueId(): int;
-    isViewActive(): boolean;
-    getLocalStorage(): LocalStorage;
-    addProvide<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void;
-    findProvide<T>(alias: string): IProvideDecoratedVariable<T> | undefined;
-    addProvider<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
-    findProvider<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
+    __isViewActive__Internal(): boolean;
+    __getLocalStorage__Internal(): LocalStorage;
+    __addProvide__Internal<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void;
+    __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined;
+    __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
+    __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
 }
 
 export interface IDecoratedVariable {
@@ -132,6 +132,10 @@ export interface IObservedObject extends IWatchSubscriberRegister {
 
 export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl();
 
+export interface ConsumeOptions<T> {
+    defaultValue?: T
+}
+
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
@@ -188,6 +192,13 @@ export interface IStateMgmtFactory {
         varName: string,
         provideAlias: string,
         watchFunc?: WatchFuncType
+    ): IConsumeDecoratedVariable<T>;
+    makeConsume<T>(
+        owningView: IVariableOwner,
+        varName: string,
+        provideAlias: string,
+        watchFunc?: WatchFuncType,
+        consumeOptions?: ConsumeOptions<T>
     ): IConsumeDecoratedVariable<T>;
     makeObjectLink<T>(
         owningView: IVariableOwner,

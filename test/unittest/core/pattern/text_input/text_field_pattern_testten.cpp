@@ -469,21 +469,6 @@ HWTEST_F(TextFieldPatternTestten, OnTextGestureSelectionUpdate001, TestSize.Leve
 }
 
 /**
- * @tc.name: CheckTextAlignByDirection001
- * @tc.desc: Test CheckTextAlignByDirection
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, CheckTextAlignByDirection001, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    TextAlign textAlign = TextAlign::CENTER;
-    TextDirection direction = TextDirection::RTL;
-    textFieldPattern->CheckTextAlignByDirection(textAlign, direction);
-    EXPECT_NE(textAlign, TextAlign::START);
-}
-
-/**
  * @tc.name: CheckPasswordAreaState001
  * @tc.desc: Test CheckPasswordAreaState
  * @tc.type: FUNC

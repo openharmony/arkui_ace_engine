@@ -52,7 +52,7 @@ void ToggleButtonModelNG::SetIsOn(bool isOn)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 
-    ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn, frameNode);
 }
 
 void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool flag)
@@ -64,9 +64,10 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
         if (flag) {
-            ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor, frameNode);
         } else {
-            ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
+            ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+                ToggleButtonPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
         }
         return;
     }

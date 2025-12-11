@@ -134,6 +134,20 @@ void GridModelNG::SetGridHeight(const Dimension& value)
     ViewAbstract::SetHeight(NG::CalcLength(value));
 }
 
+void GridModelNG::ReSetGridHeightLayoutPolicy()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (!layoutPolicy->IsHeightNoMatch()) {
+            layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+        }
+    }
+}
+
 void GridModelNG::SetScrollBarMode(DisplayMode value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
@@ -552,11 +566,27 @@ void GridModelNG::SetEditable(FrameNode* frameNode, bool editMode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode, frameNode);
 }
 
+bool GridModelNG::GetEditable(FrameNode* frameNode)
+{
+    bool editMode = false;
+    CHECK_NULL_RETURN(frameNode, editMode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, Editable, editMode, frameNode, editMode);
+    return editMode;
+}
+
 void GridModelNG::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
 {
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(multiSelectable);
+}
+
+bool GridModelNG::GetMultiSelectable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->MultiSelectable();
 }
 
 void GridModelNG::SetMaxCount(FrameNode* frameNode, int32_t maxCount)
@@ -596,6 +626,14 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportAnimation(supportAnimation);
+}
+
+bool GridModelNG::GetSupportAnimation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->SupportAnimation();
 }
 
 EdgeEffect GridModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -882,6 +920,20 @@ void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(co
     AddDragFrameNodeToManager(frameNode);
 }
 
+void GridModelNG::SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragStart(std::move(value));
+
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    eventHub->InitItemDragEvent(gestureEventHub);
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
 void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1066,5 +1118,25 @@ void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<Resou
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, result, node);
     };
     pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));
+}
+
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(bool supportLazyLoadingEmptyBranch)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch);
+}
+
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool supportLazyLoadingEmptyBranch)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch, frameNode);
+}
+
+bool GridModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
+{
+    bool supportLazyLoadingEmptyBranch = false;
+    CHECK_NULL_RETURN(frameNode, supportLazyLoadingEmptyBranch);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch, frameNode, false);
+    return supportLazyLoadingEmptyBranch;
 }
 } // namespace OHOS::Ace::NG

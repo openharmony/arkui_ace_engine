@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectOpsAccessor {
 Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
-                                               const Ark_Union_Number_Resource* numCount,
+                                               const Ark_Union_I32_Resource* numCount,
                                                const SelectSelectedCallback* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -35,7 +35,7 @@ Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](int32_t index) {
         PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(index));
+        arkCallback.Invoke(Converter::ArkUnion<Ark_Union_I32_Resource, Ark_Int32>(index));
     };
     SelectModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
     return node;

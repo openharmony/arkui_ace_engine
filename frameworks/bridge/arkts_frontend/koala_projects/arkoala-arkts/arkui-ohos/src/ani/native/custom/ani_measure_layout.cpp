@@ -253,12 +253,12 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
     ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -281,7 +281,7 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
 
     if (ANI_OK != env->Object_New(cls, ctor, &edges_obj, top, bottom, start, end)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenEdgesGlobalized failed.");
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     return edges_obj;
 }
@@ -293,12 +293,12 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
     ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -321,7 +321,7 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
 
     if (ANI_OK != env->Object_New(cls, ctor, &edges_obj, top, bottom, start, end)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenBorderWidthGlobalized failed.");
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     return edges_obj;
 }
@@ -429,12 +429,12 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
     ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasureResultInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     Dimension measureWidth(size.Width(), DimensionUnit::PX);
     Dimension measureHeight(size.Height(), DimensionUnit::PX);
@@ -444,7 +444,7 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
     height = measureHeight.ConvertToVp();
     if (ANI_OK != env->Object_New(cls, ctor, &measureResult_obj, width, height)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenMeasureResult failed.");
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
 
     return measureResult_obj;
@@ -614,7 +614,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
 ani_object ANIGetMargin(ani_env* env,  ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
-    CHECK_NULL_RETURN(ptr, nullptr);
+    CHECK_NULL_RETURN(ptr, AniUtils::GetUndefined(env));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -626,7 +626,7 @@ ani_object ANIGetMargin(ani_env* env,  ani_object object)
 ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
-    CHECK_NULL_RETURN(ptr, nullptr);
+    CHECK_NULL_RETURN(ptr, AniUtils::GetUndefined(env));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -638,7 +638,7 @@ ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
-    CHECK_NULL_RETURN(ptr, nullptr);
+    CHECK_NULL_RETURN(ptr, AniUtils::GetUndefined(env));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized(env, {}, TextDirection::LTR);
@@ -651,7 +651,7 @@ ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
-    CHECK_NULL_RETURN(ptr, nullptr);
+    CHECK_NULL_RETURN(ptr, AniUtils::GetUndefined(env));
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return AniUtils::GetUndefined(env);
@@ -667,7 +667,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     
     ani_ref minWidth_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(sizeObj, "minWidth", &minWidth_ref)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     ani_object minWidth_obj = static_cast<ani_object>(minWidth_ref);
 
@@ -686,7 +686,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     CalcDimension maxWidth;
     ani_ref maxWidth_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(sizeObj, "maxWidth", &maxWidth_ref)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     ani_object maxWidth_obj = static_cast<ani_object>(maxWidth_ref);
     if (ParseAniDimensionVp(env, maxWidth_obj, maxWidth)) {
@@ -704,7 +704,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     CalcDimension minHeight;
     ani_ref minHeight_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(sizeObj, "minHeight", &minHeight_ref)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     ani_object minHeight_obj = static_cast<ani_object>(minHeight_ref);
     if (ParseAniDimensionVp(env, minHeight_obj, minHeight)) {
@@ -722,7 +722,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     CalcDimension maxHeight;
     ani_ref maxHeight_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(sizeObj, "maxHeight", &maxHeight_ref)) {
-        return nullptr;
+        return AniUtils::GetUndefined(env);
     }
     ani_object maxHeight_obj = static_cast<ani_object>(maxHeight_ref);
     if (ParseAniDimensionVp(env, maxHeight_obj, maxHeight)) {

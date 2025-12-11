@@ -24,6 +24,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context_deferred.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context_immediate.h"
 
 namespace OHOS::Ace::NG {
 CanvasPattern::~CanvasPattern()
@@ -36,7 +38,7 @@ CanvasPattern::~CanvasPattern()
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", frameNode->GetId());
-    DetachRenderContext();
+    DetachRenderContext(true);
 }
 
 void CanvasPattern::AttachRenderContext()
@@ -45,8 +47,12 @@ void CanvasPattern::AttachRenderContext()
     FireOnContext2DAttach();
 }
 
-void CanvasPattern::DetachRenderContext()
+void CanvasPattern::DetachRenderContext(bool forceDetach)
 {
+    // immediateRender will trigger detach only when Canvas is destroying
+    if (!forceDetach && immediateRender_.value_or(false)) {
+        return;
+    }
     if (isAttached_) {
         isAttached_ = false;
         FireOnContext2DDetach();
@@ -173,188 +179,158 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
     }
 }
 
+void CanvasPattern::FireReadyEvent() const
+{
+    ACE_SCOPED_TRACE("CanvasPattern::FireReadyEvent");
+    if (readyEventNew_) {
+        auto immediateRender = immediateRender_.value_or(false);
+        auto unit = immediateRender ? GetUnit() : CanvasUnit::DEFAULT;
+        if (paintMethod_ && immediateRender) {
+            paintMethod_->ResetRecordingCanvas();
+        }
+        readyEventNew_(immediateRender, unit);
+    } else if (readyEvent_) {
+        readyEvent_();
+    }
+}
+
 void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
     CHECK_NULL_VOID(paintMethod_);
-    auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetAntiAlias(isEnabled);
-    };
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod) { paintMethod.SetAntiAlias(isEnabled); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::FillRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod) {
-        paintMethod.FillRect(rect);
-    };
+    auto task = [rect](CanvasPaintMethod& paintMethod) { paintMethod.FillRect(rect); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::StrokeRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod) {
-        paintMethod.StrokeRect(rect);
-    };
+    auto task = [rect](CanvasPaintMethod& paintMethod) { paintMethod.StrokeRect(rect); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::ClearRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod) {
-        paintMethod.ClearRect(rect);
-    };
+    auto task = [rect](CanvasPaintMethod& paintMethod) { paintMethod.ClearRect(rect); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Fill()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Fill();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Fill(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
-    auto task = [path](CanvasPaintMethod& paintMethod) {
-        paintMethod.Fill(path);
-    };
+    auto task = [path](CanvasPaintMethod& paintMethod) { paintMethod.Fill(path); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Stroke()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Stroke();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Stroke(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
-    auto task = [path](CanvasPaintMethod& paintMethod) {
-        paintMethod.Stroke(path);
-    };
+    auto task = [path](CanvasPaintMethod& paintMethod) { paintMethod.Stroke(path); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Clip()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Clip();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Clip(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
-    auto task = [path](CanvasPaintMethod& paintMethod) {
-        paintMethod.Clip(path);
-    };
+    auto task = [path](CanvasPaintMethod& paintMethod) { paintMethod.Clip(path); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::BeginPath()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.BeginPath();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.BeginPath(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::ClosePath()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.ClosePath();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.ClosePath(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::MoveTo(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod) {
-        paintMethod.MoveTo(x, y);
-    };
+    auto task = [x, y](CanvasPaintMethod& paintMethod) { paintMethod.MoveTo(x, y); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::LineTo(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod) {
-        paintMethod.LineTo(x, y);
-    };
+    auto task = [x, y](CanvasPaintMethod& paintMethod) { paintMethod.LineTo(x, y); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Arc(const ArcParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.Arc(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.Arc(param); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::ArcTo(const ArcToParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.ArcTo(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.ArcTo(param); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::AddRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod) {
-        paintMethod.AddRect(rect);
-    };
+    auto task = [rect](CanvasPaintMethod& paintMethod) { paintMethod.AddRect(rect); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
 {
-    auto task = [rect, radii](CanvasPaintMethod& paintMethod) {
-        paintMethod.AddRoundRect(rect, radii);
-    };
+    auto task = [rect, radii](CanvasPaintMethod& paintMethod) { paintMethod.AddRoundRect(rect, radii); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::Ellipse(const EllipseParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.Ellipse(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.Ellipse(param); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::BezierCurveTo(const BezierCurveParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.BezierCurveTo(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.BezierCurveTo(param); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.QuadraticCurveTo(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.QuadraticCurveTo(param); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
-        paintMethod.FillText(text, x, y, maxWidth);
-    };
+    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) { paintMethod.FillText(text, x, y, maxWidth); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
-        paintMethod.StrokeText(text, x, y, maxWidth);
-    };
+    auto task = [text, x, y, maxWidth](
+                    CanvasPaintMethod& paintMethod) { paintMethod.StrokeText(text, x, y, maxWidth); };
     paintMethod_->PushTask(task);
 }
 
@@ -365,26 +341,20 @@ TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const Pai
 
 void CanvasPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
-    auto task = [image, width, height](CanvasPaintMethod& paintMethod) {
-        paintMethod.DrawImage(image, width, height);
-    };
+    auto task = [image, width, height](CanvasPaintMethod& paintMethod) { paintMethod.DrawImage(image, width, height); };
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::DrawSvgImage(
-    RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
+void CanvasPattern::DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
 {
-    auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod) {
-        paintMethod.DrawSvgImage(svgDom, image, imageFit);
-    };
+    auto task = [svgDom, image, imageFit](
+                    CanvasPaintMethod& paintMethod) { paintMethod.DrawSvgImage(svgDom, image, imageFit); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
-    auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
-        paintMethod.DrawPixelMap(pixelMap, image);
-    };
+    auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) { paintMethod.DrawPixelMap(pixelMap, image); };
     paintMethod_->PushTask(task);
 }
 
@@ -410,27 +380,21 @@ void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageDat
 
 void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 {
-    auto task = [imageData](CanvasPaintMethod& paintMethod) {
-        paintMethod.PutImageData(imageData);
-    };
+    auto task = [imageData](CanvasPaintMethod& paintMethod) { paintMethod.PutImageData(imageData); };
     paintMethod_->PushTask(task);
 }
 
 #ifdef PIXEL_MAP_SUPPORTED
 void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
-    auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
-        paintMethod.TransferFromImageBitmap(pixelMap);
-    };
+    auto task = [pixelMap](CanvasPaintMethod& paintMethod) { paintMethod.TransferFromImageBitmap(pixelMap); };
     paintMethod_->PushTask(task);
 }
 #else
 void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
 {
 #ifndef ACE_UNITTEST
-    auto task = [imageData](CanvasPaintMethod& paintMethod) {
-        paintMethod.PutImageData(imageData);
-    };
+    auto task = [imageData](CanvasPaintMethod& paintMethod) { paintMethod.PutImageData(imageData); };
     paintMethod_->PushTask(task);
 #endif
 }
@@ -443,228 +407,173 @@ void CanvasPattern::CloseImageBitmap(const std::string& src)
 
 void CanvasPattern::UpdateGlobalAlpha(double alpha)
 {
-    auto task = [alpha](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetAlpha(alpha);
-    };
+    auto task = [alpha](CanvasPaintMethod& paintMethod) { paintMethod.SetAlpha(alpha); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateCompositeOperation(CompositeOperation type)
 {
-    auto task = [type](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetCompositeType(type);
-    };
+    auto task = [type](CanvasPaintMethod& paintMethod) { paintMethod.SetCompositeType(type); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 {
-    auto task = [enabled](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetSmoothingEnabled(enabled);
-    };
+    auto task = [enabled](CanvasPaintMethod& paintMethod) { paintMethod.SetSmoothingEnabled(enabled); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 {
-    auto task = [quality](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetSmoothingQuality(quality);
-    };
+    auto task = [quality](CanvasPaintMethod& paintMethod) { paintMethod.SetSmoothingQuality(quality); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 {
-    auto task = [cap](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLineCap(cap);
-    };
+    auto task = [cap](CanvasPaintMethod& paintMethod) { paintMethod.SetLineCap(cap); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateLineDashOffset(double dash)
 {
-    auto task = [dash](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLineDashOffset(dash);
-    };
+    auto task = [dash](CanvasPaintMethod& paintMethod) { paintMethod.SetLineDashOffset(dash); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 {
-    auto task = [join](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLineJoin(join);
-    };
+    auto task = [join](CanvasPaintMethod& paintMethod) { paintMethod.SetLineJoin(join); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateLineWidth(double width)
 {
-    auto task = [width](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLineWidth(width);
-    };
+    auto task = [width](CanvasPaintMethod& paintMethod) { paintMethod.SetLineWidth(width); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateMiterLimit(double limit)
 {
-    auto task = [limit](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetMiterLimit(limit);
-    };
+    auto task = [limit](CanvasPaintMethod& paintMethod) { paintMethod.SetMiterLimit(limit); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateShadowBlur(double blur)
 {
-    auto task = [blur](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetShadowBlur(blur);
-    };
+    auto task = [blur](CanvasPaintMethod& paintMethod) { paintMethod.SetShadowBlur(blur); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateShadowColor(const Color& color)
 {
     CHECK_NULL_VOID(paintMethod_);
-    auto task = [color](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetShadowColor(color);
-    };
+    auto task = [color](CanvasPaintMethod& paintMethod) { paintMethod.SetShadowColor(color); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateShadowOffsetX(double offsetX)
 {
-    auto task = [offsetX](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetShadowOffsetX(offsetX);
-    };
+    auto task = [offsetX](CanvasPaintMethod& paintMethod) { paintMethod.SetShadowOffsetX(offsetX); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 {
-    auto task = [offsetY](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetShadowOffsetY(offsetY);
-    };
+    auto task = [offsetY](CanvasPaintMethod& paintMethod) { paintMethod.SetShadowOffsetY(offsetY); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
-    auto task = [align](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetTextAlign(align);
-    };
+    auto task = [align](CanvasPaintMethod& paintMethod) { paintMethod.SetTextAlign(align); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
-    auto task = [baseline](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetTextBaseline(baseline);
-    };
+    auto task = [baseline](CanvasPaintMethod& paintMethod) { paintMethod.SetTextBaseline(baseline); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    auto task = [pattern](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetStrokePatternNG(pattern);
-    };
+    auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetStrokePatternNG(pattern); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateStrokeColor(const Color& color)
 {
-    auto task = [color](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetStrokeColor(color);
-    };
+    auto task = [color](CanvasPaintMethod& paintMethod) { paintMethod.SetStrokeColor(color); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
-    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetStrokeGradient(gradientObj);
-    };
+    auto task = [gradientObj = *gradient](
+                    CanvasPaintMethod& paintMethod) { paintMethod.SetStrokeGradient(gradientObj); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFontWeight(FontWeight weight)
 {
-    auto task = [weight](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFontWeight(weight);
-    };
+    auto task = [weight](CanvasPaintMethod& paintMethod) { paintMethod.SetFontWeight(weight); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
 {
-    auto task = [style](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFontStyle(style);
-    };
+    auto task = [style](CanvasPaintMethod& paintMethod) { paintMethod.SetFontStyle(style); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 {
-    auto task = [families](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFontFamilies(families);
-    };
+    auto task = [families](CanvasPaintMethod& paintMethod) { paintMethod.SetFontFamilies(families); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
 {
-    auto task = [size](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFontSize(size);
-    };
+    auto task = [size](CanvasPaintMethod& paintMethod) { paintMethod.SetFontSize(size); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
 {
-    auto task = [letterSpacing](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLetterSpacing(letterSpacing);
-    };
+    auto task = [letterSpacing](CanvasPaintMethod& paintMethod) { paintMethod.SetLetterSpacing(letterSpacing); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
 {
-    auto task = [color](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillColor(color);
-    };
+    auto task = [color](CanvasPaintMethod& paintMethod) { paintMethod.SetFillColor(color); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
-    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillGradient(gradientObj);
-    };
+    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) { paintMethod.SetFillGradient(gradientObj); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    auto task = [pattern](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillPatternNG(pattern);
-    };
+    auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetFillPatternNG(pattern); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
-    auto task = [rule](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillRuleForPath(rule);
-    };
+    auto task = [rule](CanvasPaintMethod& paintMethod) { paintMethod.SetFillRuleForPath(rule); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 {
-    auto task = [rule](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillRuleForPath2D(rule);
-    };
+    auto task = [rule](CanvasPaintMethod& paintMethod) { paintMethod.SetFillRuleForPath2D(rule); };
     paintMethod_->PushTask(task);
 }
 
@@ -675,81 +584,63 @@ LineDashParam CanvasPattern::GetLineDash() const
 
 void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 {
-    auto task = [segments](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetLineDash(segments);
-    };
+    auto task = [segments](CanvasPaintMethod& paintMethod) { paintMethod.SetLineDash(segments); };
     paintMethod_->PushTask(task);
     paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Save();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Save(); };
     paintMethod_->PushTask(task);
     paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Restore();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Restore(); };
     paintMethod_->PushTask(task);
     paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod) {
-        paintMethod.Scale(x, y);
-    };
+    auto task = [x, y](CanvasPaintMethod& paintMethod) { paintMethod.Scale(x, y); };
     paintMethod_->PushTask(task);
     paintMethod_->ScaleMatrix(x, y);
 }
 
 void CanvasPattern::Rotate(double angle)
 {
-    auto task = [angle](CanvasPaintMethod& paintMethod) {
-        paintMethod.Rotate(angle);
-    };
+    auto task = [angle](CanvasPaintMethod& paintMethod) { paintMethod.Rotate(angle); };
     paintMethod_->PushTask(task);
     paintMethod_->RotateMatrix(angle);
 }
 
 void CanvasPattern::SetTransform(const TransformParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetTransform(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.SetTransform(param); };
     paintMethod_->PushTask(task);
     paintMethod_->SetTransformMatrix(param);
 }
 
 void CanvasPattern::ResetTransform()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.ResetTransform();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.ResetTransform(); };
     paintMethod_->PushTask(task);
     paintMethod_->ResetTransformMatrix();
 }
 
 void CanvasPattern::Transform(const TransformParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod) {
-        paintMethod.Transform(param);
-    };
+    auto task = [param](CanvasPaintMethod& paintMethod) { paintMethod.Transform(param); };
     paintMethod_->PushTask(task);
     paintMethod_->TransformMatrix(param);
 }
 
 void CanvasPattern::Translate(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod) {
-        paintMethod.Translate(x, y);
-    };
+    auto task = [x, y](CanvasPaintMethod& paintMethod) { paintMethod.Translate(x, y); };
     paintMethod_->PushTask(task);
     paintMethod_->TranslateMatrix(x, y);
 }
@@ -780,11 +671,13 @@ double CanvasPattern::GetHeight()
 
 void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
 {
+    CHECK_NULL_VOID(paintMethod_);
     paintMethod_->SetRSCanvasCallback(callback);
 }
 
 void CanvasPattern::SetInvalidate()
 {
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [](CanvasPaintMethod& paintMethod) {};
     paintMethod_->PushTask(task);
 }
@@ -804,17 +697,13 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
         direction = directionCommon;
     }
     CHECK_NULL_VOID(paintMethod_);
-    auto task = [direction](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetTextDirection(direction);
-    };
+    auto task = [direction](CanvasPaintMethod& paintMethod) { paintMethod.SetTextDirection(direction); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::SetFilterParam(const std::string& filterStr)
 {
-    auto task = [filterStr](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFilterParam(filterStr);
-    };
+    auto task = [filterStr](CanvasPaintMethod& paintMethod) { paintMethod.SetFilterParam(filterStr); };
     paintMethod_->PushTask(task);
 }
 
@@ -825,17 +714,13 @@ TransformParam CanvasPattern::GetTransform() const
 
 void CanvasPattern::SaveLayer()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.SaveLayer();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.SaveLayer(); };
     paintMethod_->PushTask(task);
 }
 
 void CanvasPattern::RestoreLayer()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.RestoreLayer();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.RestoreLayer(); };
     paintMethod_->PushTask(task);
 }
 
@@ -854,7 +739,7 @@ void CanvasPattern::EnableAnalyzer(bool enable)
     CHECK_NULL_VOID(imageAnalyzerManager_);
 
     CHECK_NULL_VOID(paintMethod_);
-    paintMethod_->SetOnModifierUpdateFunc([weak = WeakClaim(this)] () -> void {
+    paintMethod_->SetOnModifierUpdateFunc([weak = WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->DestroyAnalyzerOverlay();
@@ -887,11 +772,13 @@ void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnaly
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUICanvasStartImageAnalyzer");
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUICanvasStartImageAnalyzer");
 }
 
 void CanvasPattern::StopImageAnalyzer()
@@ -952,9 +839,7 @@ void CanvasPattern::DumpInfo()
 
 void CanvasPattern::Reset()
 {
-    auto task = [](CanvasPaintMethod& paintMethod) {
-        paintMethod.Reset();
-    };
+    auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Reset(); };
     paintMethod_->PushTask(task);
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
@@ -963,9 +848,7 @@ void CanvasPattern::Reset()
 
 void CanvasPattern::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
 {
-    auto task = [pattern, transform](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetTransform(pattern, transform);
-    };
+    auto task = [pattern, transform](CanvasPaintMethod& paintMethod) { paintMethod.SetTransform(pattern, transform); };
     paintMethod_->PushTask(task);
 }
 
@@ -1016,5 +899,43 @@ void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     auto arrayModifier = JsonUtil::Create();
     contentModifier_->GetSimplifyDumpInfo(arrayModifier);
     json->PutRef("CanvasModifier", std::move(arrayModifier));
+}
+
+void CanvasPattern::SetUpdateContextCallback(std::function<void(CanvasUnit)>&& updateContextCB)
+{
+    updateContextCB_ = std::move(updateContextCB);
+}
+
+void CanvasPattern::SetRSCanvasForDrawingContext()
+{
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->FireRSCanvasCallback(dirtyPixelGridRoundSize_.Width(), dirtyPixelGridRoundSize_.Height());
+}
+
+void CanvasPattern::UpdateUnit(CanvasUnit unit)
+{
+    if (unit_ == unit) {
+        return;
+    }
+    unit_ = unit;
+    if (updateContextCB_) {
+        updateContextCB_(unit_);
+    }
+}
+
+void CanvasPattern::SetImmediateRender(bool immediateRender)
+{
+    if (immediateRender_.has_value() && immediateRender_.value() == immediateRender) {
+        return;
+    }
+    immediateRender_ = immediateRender;
+    CHECK_NULL_VOID(paintMethod_);
+    RefPtr<CanvasRenderContext> canvasRenderContext;
+    if (immediateRender) {
+        canvasRenderContext = MakeRefPtr<CanvasRenderContextImmediate>();
+    } else {
+        canvasRenderContext = MakeRefPtr<CanvasRenderContextDeferred>();
+    }
+    paintMethod_->SetCanvasRenderContext(canvasRenderContext);
 }
 } // namespace OHOS::Ace::NG

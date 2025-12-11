@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class XComponentModifier extends CommonMethodModifier implements XComponentAttribute,AttributeModifier<XComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,9 +45,12 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     _enableAnalyzer_0_0value?: boolean | undefined
     _enableSecure_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableSecure_0_0value?: boolean | undefined
+    _enableTransparentLayer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableTransparentLayer_0_0value?: boolean | undefined
     _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hdrBrightness_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkXComponentPeer;
         if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -120,6 +125,24 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
+        if (this._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableTransparentLayerAttribute((this._enableTransparentLayer_0_0value as boolean | undefined));
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableTransparentLayerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hdrBrightness_0_flag) {
@@ -141,6 +164,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     }
     mergeModifier(modifier: XComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onLoad_0_flag) {
@@ -190,6 +214,19 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
                 default: {
                     this.enableSecure((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableTransparentLayer(modifier._enableTransparentLayer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableTransparentLayer((undefined as boolean | undefined));
                 }
             }
         }
@@ -248,6 +285,17 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         } else
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableTransparentLayer(value: boolean | undefined): this {
+        if (((this._enableTransparentLayer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableTransparentLayer_0_0value) !== (value)))
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableTransparentLayer_0_0value = value
+        } else
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

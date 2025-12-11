@@ -44,6 +44,7 @@ public:
     void ResetLoadingText() override;
     void SetRefreshOffset(const Dimension& offset) override;
     void SetPullToRefresh(bool isPullToRefresh) override;
+    void SetPullUpToCancelRefresh(bool isPullUpToCancelRefresh) override;
     void SetIsCustomBuilderExist(bool isCustomBuilderExist) override;
     // @deprecated
     void Pop() override {}
@@ -72,14 +73,16 @@ public:
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
     static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
+    static void SetPullUpToCancelRefresh(FrameNode* frameNode, bool isPullUpToCancelRefresh);
     static void SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance);
     static float GetMaxPullDownDistance(FrameNode* frameNode);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
     static Dimension GetRefreshOffset(FrameNode* frameNode);
     static bool GetPullToRefresh(FrameNode* frameNode);
+    static bool GetPullUpToCancelRefresh(FrameNode* frameNode);
     static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
-    static void SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset);
+    static void SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 

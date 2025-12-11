@@ -691,14 +691,7 @@ public:
         return spanItem_;
     }
 
-    void NotifyColorModeChange(uint32_t colorMode) override
-    {
-        UINode::NotifyColorModeChange(colorMode);
-        auto resourceMgr = GetResourceManager();
-        if (resourceMgr) {
-            resourceMgr->ReloadResources();
-        }
-    }
+    void NotifyColorModeChange(uint32_t colorMode) override;
 
     void UnregisterResource(const std::string& key) override;
     void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
@@ -812,11 +805,13 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextDirection, TextDirection, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);
 
@@ -903,6 +898,7 @@ public:
     PlaceholderRun run_;
     std::optional<Color> dragBackgroundColor_;
     bool isDragShadowNeeded_ = true;
+    std::optional<AccessibilitySpanOptions> accessibilityOptions;
     PlaceholderSpanItem()
     {
         this->spanItemType = SpanItemType::PLACEHOLDER;
@@ -915,6 +911,7 @@ public:
     virtual bool UpdatePlaceholderRun(PlaceholderStyle placeholderStyle);
 
     void DumpInfo() const;
+    void DumpTextStyleInfo() const;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 
     void SetCustomNode(const RefPtr<UINode>& customNode)
@@ -1218,14 +1215,7 @@ public:
         SpanNode::RequestTextFlushDirty(Claim(this));
     }
 
-    void NotifyColorModeChange(uint32_t colorMode) override
-    {
-        UINode::NotifyColorModeChange(colorMode);
-        auto resourceMgr = GetResourceManager();
-        if (resourceMgr) {
-            resourceMgr->ReloadResources();
-        }
-    }
+    void NotifyColorModeChange(uint32_t colorMode) override;
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);

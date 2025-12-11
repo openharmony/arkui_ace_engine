@@ -408,7 +408,7 @@ bool TransferSslErrorHandlerToStatic(void* peer, void* nativePtr)
     CHECK_NULL_RETURN(objectPeer, false);
     auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<SslErrorResult>>*>(nativePtr);
     CHECK_NULL_RETURN(transfer, false);
-    objectPeer->handler = transfer->get<0>();
+    objectPeer->sslErrorHandler = transfer->get<0>();
     return true;
 #else
     return false;
@@ -420,7 +420,7 @@ napi_value TransferSslErrorHandlerToDynamic(napi_env env, void* peer)
 #ifdef WEB_SUPPORTED
     auto* objectPeer = reinterpret_cast<SslErrorHandlerPeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
-    return OHOS::Ace::Framework::CreateJSWebSslErrorObject(env, objectPeer->handler);
+    return OHOS::Ace::Framework::CreateJSWebSslErrorObject(env, objectPeer->sslErrorHandler);
 #else
     return nullptr;
 #endif // WEB_SUPPORTED
@@ -501,10 +501,19 @@ napi_value TransferWebKeyboardControllerToDynamic(napi_env env, void* peer)
 #endif // WEB_SUPPORTED
 }
 
+void SetJavaScriptProxyController(void* node, std::function<void()>&& callback)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelStatic::SetJavaScriptProxy(frameNode, std::move(callback));
+#endif // WEB_SUPPORTED
+}
 
 const ArkUIAniWebModifier* GetWebAniModifier()
 {
     static const ArkUIAniWebModifier impl = {
+        .setJavaScriptProxyController = OHOS::Ace::NG::SetJavaScriptProxyController,
         .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
         .transferJsGeolocationToStatic = OHOS::Ace::NG::TransferJsGeolocationToStatic,
         .transferJsResultToStatic = OHOS::Ace::NG::TransferJsResultToStatic,

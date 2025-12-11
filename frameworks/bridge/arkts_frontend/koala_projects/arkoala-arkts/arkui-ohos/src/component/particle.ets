@@ -26,7 +26,7 @@ import { ParticleHelper, ParticlesInner, ParticleOptionsInner, EmitterOptionsInn
 import { ParticlePropertyOptionsInner, AccelerationOptionsInner, ParticleAnnulusRegionInner, ParticleColorUpdaterOptionsInner } from "./idlize"
 import { ParticleUpdaterOptionsInner, PositionLengthMetricsInner, ParticleColorPropertyUpdaterConfigsInner, EmitterPropertyInner } from "./idlize"
 import { ParticlePropertyUpdaterConfigsInner, ParticlePropertyAnimationColorInner, ParticlePropertyAnimationNumberInner } from "./idlize"
-import { PositionNumberInner, SizeNumberInner, DisturbanceFieldOptionsInner } from "./idlize"
+import { PositionF64Inner, SizeF64Inner, DisturbanceFieldOptionsInner } from "./idlize"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export interface AccelerationOptions {
@@ -44,16 +44,16 @@ export interface ParticleOptions {
 }
 
 export interface EmitterProperty {
-    index: number;
-    emitRate?: number;
-    position?: PositionT<number>;
-    size?: SizeT<number>;
+    index: int32;
+    emitRate?: int32;
+    position?: PositionT<double>;
+    size?: SizeT<double>;
     annulusRegion?: ParticleAnnulusRegion;
 }
 
 export interface EmitterOptions {
     particle: EmitterParticleOptions;
-    emitRate?: number;
+    emitRate?: int32;
     shape?: ParticleEmitterShape;
     position?: [ Dimension, Dimension ];
     size?: [ Dimension, Dimension ];
@@ -61,7 +61,7 @@ export interface EmitterOptions {
 }
 
 export interface ParticlePropertyOptions {
-    range: [ number, number ];
+    range: [ double, double ];
     updater?: ParticleUpdaterOptions;
 }
 export interface ParticleColorPropertyOptions {
@@ -73,14 +73,14 @@ export interface Particles {
     particles: Array<ParticleOptions>;
 }
 export interface DisturbanceFieldOptions {
-    strength?: number;
+    strength?: double;
     shape?: DisturbanceFieldShape;
-    size?: SizeT<number>;
-    position?: PositionT<number>;
-    feather?: number;
-    noiseScale?: number;
-    noiseFrequency?: number;
-    noiseAmplitude?: number;
+    size?: SizeT<double>;
+    position?: PositionT<double>;
+    feather?: int32;
+    noiseScale?: double;
+    noiseFrequency?: double;
+    noiseAmplitude?: double;
 }
 
 export interface ParticleAttribute extends CommonMethod {
@@ -199,10 +199,10 @@ class ParticleToParticleInnerHelper {
         if (input === undefined) {
             return input;
         }
-        if (input instanceof Tuple) {
-            return (input as [number, number]);
+        if (input instanceof Array) {
+            return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationNumber(input as Array<ParticlePropertyAnimation<number>>);
         }
-        return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationNumber(input as Array<ParticlePropertyAnimation<number>>);
+        return input;
     }
     static ConvertParticlePropertyAnimationColor(input: Array<ParticlePropertyAnimation<ResourceColor>>): Array<ParticlePropertyAnimationColorInner> {
         let result: Array<ParticlePropertyAnimationColorInner> = new Array<ParticlePropertyAnimationColorInner>();
@@ -246,7 +246,7 @@ class ParticleToParticleInnerHelper {
         });
         return result;
     }
-    static ConvertPositionNumber(input: PositionT<number> | undefined): PositionNumberInner | undefined {
+    static ConvertPositionNumber(input: PositionT<double> | undefined): PositionF64Inner | undefined {
         if (input === undefined) {
             return input;
         }
@@ -255,7 +255,7 @@ class ParticleToParticleInnerHelper {
             y: input.y,
         }
     }
-    static ConvertSizeNumber(input: SizeT<number> | undefined): SizeNumberInner | undefined {
+    static ConvertSizeNumber(input: SizeT<double> | undefined): SizeF64Inner | undefined {
         if (input === undefined) {
             return input;
         }

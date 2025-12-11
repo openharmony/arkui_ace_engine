@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -40,6 +41,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
     }
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -75,6 +77,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _symbolEffect_2_0value?: SymbolEffect | undefined
     _symbolEffect_2_1value?: int32 | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSymbolGlyphPeer;
         if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
@@ -276,6 +279,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
     }
     mergeModifier(value: CommonMethodModifier): void {
+        this._state = value._state;
         super.mergeModifier(value)
         const modifier = value as SymbolGlyphModifier;
         if (modifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {

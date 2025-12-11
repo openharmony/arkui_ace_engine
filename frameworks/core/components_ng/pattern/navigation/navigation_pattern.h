@@ -109,7 +109,7 @@ public:
 
     bool JudgeFoldStateChangeAndUpdateState();
 
-    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
+    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback = true);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
     {
@@ -464,6 +464,7 @@ public:
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     std::unique_ptr<JsonValue> GetTopNavdestinationJson(bool needParam);
     RefPtr<NavigationPattern> GetParentNavigationPattern();
+    SizeF GetNavigationFrameSize();
     void RestoreJsStackIfNeeded();
 
     RefPtr<FrameNode> GetNavBasePageNode() const
@@ -617,6 +618,9 @@ public:
     {
         return newSize != navigationSize_;
     }
+
+    void FireNavigateChangeCallback();
+
 private:
     void UpdateCanForceSplitLayout(const SizeF& frameSize);
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -801,6 +805,7 @@ private:
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
     void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
+    NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -812,6 +817,8 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

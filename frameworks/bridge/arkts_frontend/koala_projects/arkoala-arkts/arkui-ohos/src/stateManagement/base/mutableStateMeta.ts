@@ -16,11 +16,12 @@
 import { int32 } from '@koalaui/common';
 import { ArkUIAniModule } from 'arkui.ani';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { MutableState, StateImpl } from '@koalaui/runtime';
+import { Dependent, MutableState } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { StateUpdateLoop } from './stateUpdateLoop';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 class MutableStateMetaBase {
     public readonly info_: string;
@@ -78,6 +79,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
     public addRef(): void {
         const renderingComponent = ObserveSingleton.instance.renderingComponent;
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`MutableStateMeta addRef ${renderingComponent} ${ObserveSingleton.instance.renderingId}`);
         if (renderingComponent <= ObserveSingleton.RenderingComponent && !this.enableDynamicCompatible) {
             return;
         }
@@ -99,6 +101,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     }
 
     public fireChange(): void {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`MutableStateMeta fireChange ${this.hasFired} ${this.shouldFireChange()} ${StateUpdateLoop.canRequestFrame}`);
         if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed) {
             throw new Error('Attempt to modify state variables from @Computed function');
         }
@@ -134,8 +137,8 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     }
 
     shouldFireChange(): boolean {
-        const dependency = (this.__metaDependency as StateImpl<int32>).dependencies;
-        return !!(dependency && !dependency.empty);
+        const dependency = this.__metaDependency as Object as Dependent;
+        return dependency.hasDependencies();
     }
 }
 

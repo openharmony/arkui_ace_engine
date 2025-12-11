@@ -120,12 +120,12 @@ Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
     CHECK_NULL_RETURN(recognizer, false);
     return Converter::ArkValue<Ark_Boolean>(recognizer->IsInResponseLinkRecognizers());
 }
-Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+Ark_Int32 GetFingerCountImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto recognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(peer->GetRecognizer().Upgrade());
     CHECK_NULL_RETURN(recognizer, {});
-    return Converter::ArkValue<Ark_Number>(recognizer->GetFingers());
+    return Converter::ArkValue<Ark_Int32>(recognizer->GetFingers());
 }
 Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
 {

@@ -40,9 +40,9 @@ void SliderModelNG::Create(float value, float step, float min, float max)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Step, step);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, min);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, max);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, step, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, min, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, max, frameNode);
     SetSliderValue(value);
 }
 
@@ -170,7 +170,7 @@ void SliderModelNG::SetThickness(const Dimension& value)
         } else {
             themeTrackThickness = theme->GetNoneTrackThickness();
         }
-        ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness);
+        layoutProperty->UpdateThickness(themeTrackThickness);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
     }
@@ -218,7 +218,7 @@ void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height
     } else {
         blockSize.SetWidth(width);
         blockSize.SetHeight(height);
-        ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize, blockSize);
+        layoutProperty->UpdateBlockSize(blockSize);
     }
 }
 void SliderModelNG::SetBlockType(BlockStyleType value)
@@ -1047,7 +1047,7 @@ void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableH
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(sliderPattern);
     sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback, frameNode);
 }
 
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
@@ -1132,15 +1132,17 @@ void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
 void SliderModelNG::ResetTrackColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
-        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColorSetByUser, PROPERTY_UPDATE_RENDER);
 }
 
 void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
         TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
-        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, TrackBackgroundColorSetByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

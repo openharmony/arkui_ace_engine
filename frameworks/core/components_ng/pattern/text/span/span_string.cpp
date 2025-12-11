@@ -273,7 +273,7 @@ std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanSt
         RefPtr<NG::SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
             // unable to get text direction because no layoutwrapper
-            NG::ParagraphUtil::GetSpanParagraphStyle(nullptr, paraStyleSpanItem, spanParagraphStyle);
+            NG::ParagraphUtil::GetSpanParagraphStyle(nullptr, paraStyleSpanItem, spanParagraphStyle, group);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -1450,6 +1450,7 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     paragraphStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
     paragraphStyle.textIndent = spanItem->textLineStyle->GetTextIndent();
     paragraphStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
+    paragraphStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
     return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, start, end);
 }
 

@@ -53,17 +53,17 @@ std::optional<Converter::PickerValueType> ProcessBindableTextValue(
 }
 
 std::optional<Converter::PickerSelectedType> ProcessBindableTextSelected(
-    const Opt_Union_Number_Array_Number_Bindable_Bindable& value)
+    const Opt_Union_I32_Array_I32_Bindable_Bindable& value)
 {
     std::optional<Converter::PickerSelectedType> result;
     Converter::VisitUnion(
-        value, [&result](const Ark_Number& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
-        [&result](const Array_Number& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
-        [&result](const Ark_Bindable_Number& src) {
+        value, [&result](const Ark_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
+        [&result](const Array_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
+        [&result](const Ark_Bindable_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
         },
-        [&result](const Ark_Bindable_Array_Number& src) {
+        [&result](const Ark_Bindable_Array_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
         },
@@ -88,7 +88,39 @@ uint32_t CalculateTextPickerKind(bool fromRangeContent, const std::vector<NG::Ra
     return kind;
 }
 
-void ParseTextPickerOptions(const Ark_TextPickerDialogOptions& src, TextPickerOptions& dst)
+std::optional<DimensionRect> ConvertDimensionRectFromMaskRect(const Opt_Rectangle& rect)
+{
+    DimensionRect dimensionRect;
+    dimensionRect.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    dimensionRect.SetSize(
+        DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+    if (rect.tag == Ark_Tag::INTEROP_TAG_UNDEFINED) {
+        return dimensionRect;
+    }
+
+    auto width = Converter::OptConvert<Dimension>(rect.value.width);
+    auto height = Converter::OptConvert<Dimension>(rect.value.height);
+    if (width.has_value() && width.value().IsNonNegative()) {
+        dimensionRect.SetWidth(*width);
+    }
+    if (height.has_value() && height.value().IsNonNegative()) {
+        dimensionRect.SetHeight(*height);
+    }
+
+    auto offset = dimensionRect.GetOffset();
+    if (auto offsetX = Converter::OptConvert<Dimension>(rect.value.x); offsetX) {
+        offset.SetX(*offsetX);
+    }
+    if (auto offsetY = Converter::OptConvert<Dimension>(rect.value.y); offsetY) {
+        offset.SetY(*offsetY);
+    }
+
+    dimensionRect.SetOffset(offset);
+    return dimensionRect;
+}
+
+template<typename T>
+void ParseTextPickerOptions(const T& src, TextPickerOptions& dst)
 {
     // parse value
     auto pickerValueOpt = ProcessBindableTextValue(src.value);
@@ -154,8 +186,8 @@ void TextPickerOptions2SettingData(TextPickerOptions& textPickerOptions, TextPic
     settingData.attr.isHasSelectAttr = textPickerOptions.hasSelected;
 }
 
-void BuildTextPickerSettingData(
-    const Ark_TextPickerDialogOptions& arkOptions, TextPickerSettingData& settingData, TextPickerDialog& pickerDialog)
+template<typename T>
+void BuildTextPickerSettingData(const T& arkOptions, TextPickerSettingData& settingData, TextPickerDialog& pickerDialog)
 {
     // parse frontend input parameter type TextPickerOptions
     TextPickerOptions textPickerOptions;
@@ -208,6 +240,23 @@ void BuildTextPickerSettingData(
     }
 }
 
+void TextPickerBackgroundStyleSettingData(
+    const Ark_TextPickerDialogOptionsExt& arkOptions, TextPickerSettingData& settingData)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedBackgroundStyle = Converter::OptConvert<PickerBackgroundStyle>(arkOptions.selectedBackgroundStyle);
+    if (selectedBackgroundStyle) {
+        settingData.pickerBgStyle.color =
+            selectedBackgroundStyle->color ? selectedBackgroundStyle->color : pickerTheme->GetSelectedBackgroundColor();
+        settingData.pickerBgStyle.borderRadius = selectedBackgroundStyle->borderRadius
+                                                     ? selectedBackgroundStyle->borderRadius
+                                                     : pickerTheme->GetSelectedBorderRadius();
+    }
+}
+
 DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 {
     return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
@@ -224,13 +273,13 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         } else {
             indexes.push_back(jsonIndex->GetUInt());
         }
-        Converter::ArkArrayHolder<Array_Number> indexesHolder(indexes);
+        Converter::ArkArrayHolder<Array_Int32> indexesHolder(indexes);
         if (isIndexesArray) {
-            Array_Number arkValues = indexesHolder.ArkValue();
-            textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arkValues);
+            Array_Int32 arkValues = indexesHolder.ArkValue();
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(arkValues);
         } else if (static_cast<int32_t>(indexes.size()) > 0) {
-            // textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(
-            //     Converter::ArkValue<Ark_Number>(indexes.at(0)));
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
+                Converter::ArkValue<Ark_Int32>(indexes.at(0)));
         }
 
         std::vector<std::string> values;
@@ -256,7 +305,8 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
     };
 }
 
-void BuildTextPickerDialog(const Ark_TextPickerDialogOptions& options, TextPickerDialog& pickerDialog)
+template<typename T>
+void BuildTextPickerDialog(const T& options, TextPickerDialog& pickerDialog)
 {
     // selectedValue getRangeVector
     auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
@@ -271,7 +321,7 @@ void BuildTextPickerDialog(const Ark_TextPickerDialogOptions& options, TextPicke
     if (offset) {
         pickerDialog.offset = offset.value();
     }
-    pickerDialog.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    pickerDialog.maskRect = ConvertDimensionRectFromMaskRect(options.maskRect);
     pickerDialog.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
     if (blurStyle.has_value()) {
@@ -316,14 +366,40 @@ TextPickerDialogEvent BuildTextPickerDialogEvents(const Ark_TextPickerDialogOpti
     return dialogEvent;
 }
 
-TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDialogOptions& arkOptions)
+TextPickerDialogEvent BuildTextPickerDialogEventsExt(const Ark_TextPickerDialogOptionsExt& options)
+{
+    TextPickerDialogEvent dialogEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        dialogEvent.onDidAppear = onDidAppear;
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidDisappear = onDidDisappear;
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        dialogEvent.onWillAppear = onWillAppear;
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillDisappear = onWillDisappear;
+    }
+    return dialogEvent;
+}
+
+template<typename T>
+TextPickerInteractiveEvent BuildTextPickerResultEvents(const T& arkOptions)
 {
     TextPickerInteractiveEvent events;
-    // onCancel
-    auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
-    if (cancelCallbackOpt) {
-        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
-    }
     // onAccept
     auto acceptCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onAccept);
     if (acceptCallbackOpt) {
@@ -348,7 +424,30 @@ TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDial
     return events;
 }
 
-std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions& options)
+TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDialogOptions& arkOptions)
+{
+    TextPickerInteractiveEvent events = BuildTextPickerResultEvents(arkOptions);
+    // onCancel
+    auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
+    if (cancelCallbackOpt) {
+        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+    }
+    return events;
+}
+
+TextPickerInteractiveEvent BuildSelectInteractiveEventsExt(const Ark_TextPickerDialogOptionsExt& arkOptions)
+{
+    TextPickerInteractiveEvent events = BuildTextPickerResultEvents(arkOptions);
+    // onCancel
+    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(arkOptions.onCancel);
+    if (cancelCallbackOpt) {
+        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+    }
+    return events;
+}
+
+template<typename T>
+std::vector<ButtonInfo> BuildButtonInfos(const T& options)
 {
     std::vector<ButtonInfo> buttonInfos;
     auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
@@ -366,21 +465,40 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions& opti
     return buttonInfos;
 }
 
-void Show(const Ark_TextPickerDialogOptions* options)
+void Show(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* options)
 {
-    TextPickerSettingData settingData;
-    TextPickerDialog textPickerDialog;
-    BuildTextPickerSettingData(*options, settingData, textPickerDialog);
-    BuildTextPickerDialog(*options, textPickerDialog);
-    auto interEvents = BuildSelectInteractiveEvents(*options);
-    auto dialogEvents = BuildTextPickerDialogEvents(*options);
-    std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(*options);
-    // WARNING: don't use, only adapter backend function interface.
-    RefPtr<AceType> pickerText = nullptr;
-    TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
-        std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent), std::move(interEvents.changeEvent),
-        std::move(interEvents.scrollStopEvent), std::move(interEvents.enterSelectedAreaEvent), textPickerDialog,
-        dialogEvents, buttonInfos);
+    Converter::VisitUnion(
+        *options,
+        [](const Ark_TextPickerDialogOptions& src) {
+            TextPickerSettingData settingData;
+            TextPickerDialog textPickerDialog;
+            BuildTextPickerSettingData(src, settingData, textPickerDialog);
+            BuildTextPickerDialog(src, textPickerDialog);
+            auto interEvents = BuildSelectInteractiveEvents(src);
+            auto dialogEvents = BuildTextPickerDialogEvents(src);
+            std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(src);
+            RefPtr<AceType> pickerText = nullptr;
+            TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
+                std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent),
+                std::move(interEvents.changeEvent), std::move(interEvents.scrollStopEvent),
+                std::move(interEvents.enterSelectedAreaEvent), textPickerDialog, dialogEvents, buttonInfos);
+        },
+        [](const Ark_TextPickerDialogOptionsExt& src) {
+            TextPickerSettingData settingData;
+            TextPickerDialog textPickerDialog;
+            BuildTextPickerSettingData(src, settingData, textPickerDialog);
+            TextPickerBackgroundStyleSettingData(src, settingData);
+            BuildTextPickerDialog(src, textPickerDialog);
+            auto interEvents = BuildSelectInteractiveEventsExt(src);
+            auto dialogEvents = BuildTextPickerDialogEventsExt(src);
+            std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(src);
+            RefPtr<AceType> pickerText = nullptr;
+            TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
+                std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent),
+                std::move(interEvents.changeEvent), std::move(interEvents.scrollStopEvent),
+                std::move(interEvents.enterSelectedAreaEvent), textPickerDialog, dialogEvents, buttonInfos);
+        },
+        [] {});
 }
 } // namespace TextPickerDialogExtender
 } // namespace OHOS::Ace::NG

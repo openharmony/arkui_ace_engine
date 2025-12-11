@@ -52,6 +52,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -626,6 +627,8 @@ HWTEST_F(OverlayManagerToastTestNg, AdjustOffsetForKeyboard, TestSize.Level1)
      */
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     ASSERT_NE(toastPattern, nullptr);
     auto layoutAlgorithm = toastPattern->CreateLayoutAlgorithm();
@@ -635,7 +638,7 @@ HWTEST_F(OverlayManagerToastTestNg, AdjustOffsetForKeyboard, TestSize.Level1)
     double toastBottom = 100;
     float textHeight = 100;
     bool needResizeBottom = false;
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
     EXPECT_FALSE(toastPattern->IsDefaultToast());
 }
 
@@ -1631,6 +1634,8 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard001, Test
      */
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     ASSERT_NE(toastPattern, nullptr);
     Dimension offsetY = Dimension(0.0);
@@ -1644,7 +1649,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard001, Test
     ASSERT_NE(context, nullptr);
     context->safeAreaManager_ = nullptr;
     EXPECT_EQ(context->GetSafeAreaManager(), nullptr);
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
 
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
@@ -1654,7 +1659,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard001, Test
     context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1 };
     EXPECT_TRUE(toastPattern->IsAlignedWithHostWindow());
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
     EXPECT_FALSE(needResizeBottom);
 
     container->ResetContainer();
@@ -1680,6 +1685,8 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard002, Test
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     ASSERT_NE(toastPattern, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
     Dimension offsetY = Dimension(0.0);
     double toastBottom = 0.0;
     float textHeight = 10.0f;
@@ -1700,7 +1707,9 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard002, Test
     context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1 };
     auto toastSubwindow = SubwindowManager::GetInstance()->GetToastSubwindow(Container::CurrentId());
     EXPECT_EQ(toastSubwindow, nullptr);
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->wrapperRect_.y_ = context->GetRootHeight();
+    toastPattern->originalTextHeight_ = textHeight;
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
     EXPECT_TRUE(needResizeBottom);
 
     needResizeBottom = false;
@@ -1710,7 +1719,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard002, Test
     EXPECT_CALL(*mockSubwindow, GetChildContainerId()).Times(1).WillOnce(Return(0));
     SubwindowManager::GetInstance()->AddToastSubwindow(Container::CurrentId(), mockSubwindow);
     ASSERT_NE(SubwindowManager::GetInstance()->GetToastSubwindow(Container::CurrentId()), nullptr);
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
     EXPECT_TRUE(needResizeBottom);
 
     container->ResetContainer();
@@ -1737,6 +1746,8 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard003, Test
      */
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     ASSERT_NE(toastPattern, nullptr);
     Dimension offsetY = Dimension(0.0);
@@ -1765,7 +1776,9 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternAdjustOffsetForKeyboard003, Test
     auto deviceHeight = context->GetRootHeight();
     textHeight = deviceHeight;
 
-    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    toastPattern->wrapperRect_.y_ = context->GetRootHeight();
+    toastPattern->originalTextHeight_ = textHeight;
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom, layoutWrapper);
     EXPECT_TRUE(needResizeBottom);
 
     container->ResetContainer();

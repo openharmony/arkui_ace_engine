@@ -23,9 +23,9 @@ export class GestureHandler {
     addGestureToGroup(group: KPointer): void { }
 }
 export class TapGestureHandler extends GestureHandler {
-    finger?: number;
-    count?: number;
-    distanceThreshold?: number;
+    finger?: int32;
+    count?: int32;
+    distanceThreshold?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: (event: GestureEvent) => void;
     pointer: KPointer = nullptr;
@@ -33,6 +33,7 @@ export class TapGestureHandler extends GestureHandler {
         super();
         this.finger = options?.fingers;
         this.count = options?.count;
+        this.distanceThreshold = options?.distanceThreshold;
         this.isFingerCountLimited = options?.isFingerCountLimited;
     }
     onAction(event: (event: GestureEvent) => void): this {
@@ -63,8 +64,8 @@ export class TapGestureHandler extends GestureHandler {
     }
 }
 export class LongPressGestureHandler extends GestureHandler {
-    finger?: number;
-    duration?: number;
+    finger?: int32;
+    duration?: int32;
     repeat?: boolean;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
@@ -120,9 +121,9 @@ export class LongPressGestureHandler extends GestureHandler {
     }
 }
 export class PanGestureHandler extends GestureHandler {
-    finger?: number;
+    finger?: int32;
     direction?: PanDirection;
-    distance?: number;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -185,9 +186,9 @@ export class PanGestureHandler extends GestureHandler {
     }
 }
 export class SwipeGestureHandler extends GestureHandler {
-    finger?: number;
+    finger?: int32;
     direction?: SwipeDirection;
-    speed?: number;
+    speed?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
@@ -226,8 +227,8 @@ export class SwipeGestureHandler extends GestureHandler {
     }
 }
 export class PinchGestureHandler extends GestureHandler {
-    finger?: number;
-    distance?: number;
+    finger?: int32;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -289,8 +290,8 @@ export class PinchGestureHandler extends GestureHandler {
     }
 }
 export class RotationGestureHandler extends GestureHandler {
-    finger?: number;
-    angle?: number;
+    finger?: int32;
+    angle?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -421,9 +422,9 @@ export class Gesture {
     addGestureToGroup(group: KPointer): void { }
 }
 export class TapGesture extends Gesture {
-    finger?: number;
-    count?: number;
-    distanceThreshold?: number;
+    finger?: int32;
+    count?: int32;
+    distanceThreshold?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
@@ -465,8 +466,8 @@ export class TapGesture extends Gesture {
     }
 }
 export class LongPressGesture extends Gesture {
-    finger?: number;
-    duration?: number;
+    finger?: int32;
+    duration?: int32;
     repeat?: boolean;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
@@ -523,9 +524,9 @@ export class LongPressGesture extends Gesture {
     }
 }
 export class PanGesture extends Gesture {
-    finger?: number;
+    finger?: int32;
     direction?: PanDirection;
-    distance?: number;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     panGestureOptions?: PanGestureOptions;
@@ -601,8 +602,8 @@ export class PanGesture extends Gesture {
     }
 }
 export class PinchGesture extends Gesture {
-    finger?: number;
-    distance?: number;
+    finger?: int32;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -665,8 +666,8 @@ export class PinchGesture extends Gesture {
     }
 }
 export class RotationGesture extends Gesture {
-    finger?: number;
-    angle?: number;
+    finger?: int32;
+    angle?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -729,9 +730,9 @@ export class RotationGesture extends Gesture {
     }
 }
 export class SwipeGesture extends Gesture {
-    finger?: number;
+    finger?: int32;
     direction?: SwipeDirection;
-    speed?: number;
+    speed?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
@@ -906,7 +907,6 @@ export class ScrollableTargetInfoTransfer {
         if(input === null) {
             return new Object();
         }
-        let objectInternal : ScrollableTargetInfo = new ScrollableTargetInfo();
         let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
         let esValue: ESValue = ESValue.wrap(input);
         let id = esValue.invokeMethod("getId");
@@ -922,8 +922,7 @@ export class ScrollableTargetInfoTransfer {
         if (pointer.isNumber()) {
             ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, pointer.toNumber() as long)
         }
-        objectInternal.peer!.ptr = peer;
-        return objectInternal;
+        return ScrollableTargetInfoInternal.fromPtr(peer);
     }
     static transferDynamic(input: Object): Any { 
         if (input == null) {
@@ -949,15 +948,13 @@ export class EventTargetInfoTransfer {
         if(input === null) {
             return new Object();
         }
-        let objectInternal : EventTargetInfo = new EventTargetInfo();
         let esValue: ESValue = ESValue.wrap(input);
         let peer: KPointer = ArkUIAniModule._CreateEventTargetInfoAccessor()
         let id = esValue.invokeMethod("getId");
         if (id.isString()) {
             ArkUIAniModule._EventTargetInfoAccessorWithId(peer, id.toString())
         }
-        objectInternal.peer!.ptr = peer;
-        return objectInternal;
+        return EventTargetInfoInternal.fromPtr(peer);
     }
     static transferDynamic(input: Object): Any { 
         if (input == null) {
@@ -966,7 +963,7 @@ export class EventTargetInfoTransfer {
         
         let objectInternal: EventTargetInfo = input as EventTargetInfo;
         const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapEventTargetInfoPointer');
+        const wrapFunc = global.getProperty('wrapEventTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
             return new Object();
         }

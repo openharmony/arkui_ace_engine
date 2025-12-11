@@ -18,9 +18,9 @@ import common from '@ohos.app.ability.common';
 import { ErrorCallback, Callback, BusinessError} from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
-import { State } from '@ohos.arkui.stateManagement'
+import { State, Memo } from '@ohos.arkui.stateManagement';
 import { $$ } from '@kit.ArkUI';
-import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, memo, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component'
+import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component';
 import bundleManager from "@ohos.bundle.bundleManager"
 
 const errCodeAbnormal: number = 100014;
@@ -113,7 +113,7 @@ export struct FullScreenLaunchComponent {
     }
     if (this.options?.parameters) {
       const options: AtomicServiceOptions = this.options as AtomicServiceOptions;
-      const parameters: Record<string, Object> = options.parameters as Record<string, Object>;
+      const parameters: Record<string, RecordData> = options.parameters as Record<string, RecordData>;
       parameters['ohos.extra.param.key.showMode'] = 1;
       parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
       parameters['ability.want.params.IsModal'] = true;
@@ -126,7 +126,7 @@ export struct FullScreenLaunchComponent {
           'ability.want.params.IsNotifyOccupiedAreaChange': true,
           'ability.want.params.IsModal': true,
           'ohos.extra.atomicservice.param.key.isFollowHostWindowMode': isFollowHostWindowMode
-        } as Record<string, Object>
+        } as Record<string, RecordData>
       } as AtomicServiceOptions
     }
   }
@@ -177,7 +177,7 @@ export struct FullScreenLaunchComponent {
       (ev: ClickEvent) => {
         this.checkAbility();
       }
-    ).bindContentCover($$(this.isShow), (@memo () => {
+    ).bindContentCover($$(this.isShow), (@Memo () => {
       this.uiExtensionBuilder()
     }) as CustomBuilder, {} as ContentCoverOptions);
 

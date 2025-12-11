@@ -17,6 +17,8 @@
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -41,6 +43,7 @@ constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
+constexpr bool DEFAULT_LEADING_PUNCTUATION = false;
 const int32_t ERROR_INT_CODE = -1;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
@@ -176,6 +179,32 @@ void ResetSearchTextAlign(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextAlign(frameNode, TextAlign::START);
+}
+
+void SetSearchDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+        SearchModelNG::ResetTextDirection(frameNode);
+        return;
+    }
+    SearchModelNG::SetTextDirection(frameNode, TEXT_DIRECTIONS[textDirection]);
+}
+
+int32_t GetSearchDirection(ArkUINodeHandle node)
+{
+    auto defaultTextDirection = static_cast<int32_t>(OHOS::Ace::TextDirection::INHERIT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextDirection);
+    return static_cast<int32_t>(SearchModelNG::GetTextDirection(frameNode));
+}
+
+void ResetSearchDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetTextDirection(frameNode);
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
@@ -475,6 +504,41 @@ void ResetSearchInspectorId(ArkUINodeHandle node)
     SearchModelNG::SetId(frameNode, "");
 }
 
+void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color, static_cast<ColorSpace>(colorSpace));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("dividerColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("dividerColor");
+        }
+    }
+    SearchModelNG::SetDividerColor(frameNode, result);
+}
+
+void ResetSearchDividerColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetDividerColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("dividerColor");
+    }
+}
+
 void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
     ArkUI_Int32 style, void* resRawPtr)
 {
@@ -693,35 +757,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetSelectDetectEnable(frameNode);
-}
-
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    SearchModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = SearchModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::ResetSelectDetectConfig(frameNode);
 }
 
 void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
@@ -1360,6 +1395,89 @@ void ResetSearchOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void SetSearchCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, enable);
+}
+
+ArkUI_Int32 GetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(SearchModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, DEFAULT_LEADING_PUNCTUATION);
+}
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
+void SetSearchSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    auto pattern = frameNode->GetPattern();
+    SearchModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
+    } else {
+        pattern->UnRegisterResource("selectedDragPreviewStyleColor");
+    }
+}
+
+void ResetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return SearchModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1369,9 +1487,6 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,
@@ -1412,6 +1527,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchHalfLeading = ResetSearchHalfLeading,
         .setSearchFontFeature = SetSearchFontFeature,
         .resetSearchFontFeature = ResetSearchFontFeature,
+        .setSearchDividerColor = SetSearchDividerColor,
+        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
@@ -1488,7 +1605,20 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchCustomKeyboard = SetSearchCustomKeyboard,
         .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
         .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
-        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME
+        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME,
+        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
+        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
+        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
+        .setSearchDirection = SetSearchDirection,
+        .getSearchDirection = GetSearchDirection,
+        .resetSearchDirection = ResetSearchDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
+        .setSearchSelectedDragPreviewStyle = SetSearchSelectedDragPreviewStyle,
+        .resetSearchSelectedDragPreviewStyle = ResetSearchSelectedDragPreviewStyle,
+        .getSearchSelectedDragPreviewStyle = GetSearchSelectedDragPreviewStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1501,9 +1631,6 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,
@@ -1540,6 +1667,8 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
         .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchDividerColor = SetSearchDividerColor,
+        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,

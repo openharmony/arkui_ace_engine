@@ -24,6 +24,25 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType toggleType)
+{
+    switch (toggleType) {
+        case ToggleType::SWITCH: {
+            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+        }
+        case ToggleType::CHECKBOX: {
+            return FrameNode::CreateFrameNode(
+                V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleCheckBoxPattern>());
+        }
+        case ToggleType::BUTTON: {
+            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
+        }
+        default: {
+            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+        }
+    }
+}
+
 void ToggleModelStatic::SetPointRadius(FrameNode* frameNode, const std::optional<Dimension>& switchPointRadius)
 {
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +111,7 @@ void ToggleModelStatic::TriggerChange(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
-        checkboxPattern->UpdateUIStatus(value);
+        checkboxPattern->SetCheckBoxSelect(std::move(value));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());

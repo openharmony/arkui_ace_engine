@@ -2115,4 +2115,73 @@ HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
     textFieldModelNG.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::WORDS);
     EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
 }
+
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG001
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG001, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "挖矿时间到!");
+}
+
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG002
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG002, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    EXPECT_NE(pattern_, nullptr);
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    EXPECT_NE(pattern_, nullptr);
+}
+
+/**
+ * @tc.name: SetCompressLeadingPunctuation001
+ * @tc.desc: test TextInputArea set CompressLeadingPunctuation value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetCompressLeadingPunctuation(true);
+    EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), true);
+    layoutProperty->UpdateCompressLeadingPunctuation(false);
+    EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
+}
+
+/**
+ * @tc.name: SetCompressLeadingPunctuation002
+ * @tc.desc: test TextInputArea FrameNode set CompressLeadingPunctuation value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetCompressLeadingPunctuation(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), true);
+    layoutProperty->UpdateCompressLeadingPunctuation(false);
+    EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
+}
 } // namespace OHOS::Ace::NG

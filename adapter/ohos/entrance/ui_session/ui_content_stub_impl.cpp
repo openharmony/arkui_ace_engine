@@ -42,6 +42,11 @@ int32_t UIContentServiceStubImpl::RegisterSearchEventCallback(const EventCallbac
     UiSessionManager::GetInstance()->SetSearchEventRegistered(true);
     return NO_ERROR;
 }
+int32_t UIContentServiceStubImpl::RegisterTextChangeEventCallback(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->SetTextChangeEventRegistered(true);
+    return NO_ERROR;
+}
 int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance()->SetComponentChangeEventRegistered(true);
@@ -92,6 +97,11 @@ int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterSearchEventCallback()
 {
     UiSessionManager::GetInstance()->SetSearchEventRegistered(false);
+    return NO_ERROR;
+}
+int32_t UIContentServiceStubImpl::UnregisterTextChangeEventCallback()
+{
+    UiSessionManager::GetInstance()->SetTextChangeEventRegistered(false);
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterRouterChangeEventCallback()

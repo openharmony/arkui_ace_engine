@@ -21,11 +21,15 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
-import { Size_serializer, LengthMetrics_serializer } from "./../Graphics"
-import { Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
+import { ColorMetrics_serializer, Size_serializer, LengthMetrics_serializer } from "./../Graphics"
+import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
+import { ColorMetrics, Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
+import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, registerAttach, unregisterAttach, registerDetach, unregisterDetach } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
+import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -36,6 +40,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CanvasModifier } from "./../CanvasModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { Color } from "./enums"
 import { FrameNode } from "arkui.FrameNode"
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
@@ -60,14 +65,25 @@ export class CanvasGradient implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasGradient_getFinalizer()
     }
-    public addColorStop(offset: number, color: string): void {
-        const offset_casted = offset as (number)
-        const color_casted = color as (string)
+    public addColorStop(offset: double, color: string | ColorMetrics): void {
+        const offset_casted = offset as (double)
+        const color_casted = color as (string | ColorMetrics)
         this.addColorStop_serialize(offset_casted, color_casted)
         return
     }
-    addColorStop_serialize(offset: number, color: string): void {
-        ArkUIGeneratedNativeModule._CanvasGradient_addColorStop(this.peer!.ptr, offset, color)
+    addColorStop_serialize(offset: double, color: string | ColorMetrics): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const colorForIdx0  = color as string
+            thisSerializer.writeString(colorForIdx0)
+        } else if (color instanceof ColorMetrics) {
+            thisSerializer.writeInt8((1).toByte())
+            const colorForIdx1  = color as ColorMetrics
+            ColorMetrics_serializer.write(thisSerializer, colorForIdx1)
+        }
+        ArkUIGeneratedNativeModule._CanvasGradient_addColorStop(this.peer!.ptr, offset, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class CanvasPathInternal {
@@ -93,32 +109,32 @@ export class CanvasPath implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasPath_getFinalizer()
     }
-    public arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const radius_casted = radius as (number)
-        const startAngle_casted = startAngle as (number)
-        const endAngle_casted = endAngle as (number)
+    public arc(x: double, y: double, radius: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const radius_casted = radius as (double)
+        const startAngle_casted = startAngle as (double)
+        const endAngle_casted = endAngle as (double)
         const counterclockwise_casted = counterclockwise as (boolean | undefined)
         this.arc_serialize(x_casted, y_casted, radius_casted, startAngle_casted, endAngle_casted, counterclockwise_casted)
         return
     }
-    public arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void {
-        const x1_casted = x1 as (number)
-        const y1_casted = y1 as (number)
-        const x2_casted = x2 as (number)
-        const y2_casted = y2 as (number)
-        const radius_casted = radius as (number)
+    public arcTo(x1: double, y1: double, x2: double, y2: double, radius: double): void {
+        const x1_casted = x1 as (double)
+        const y1_casted = y1 as (double)
+        const x2_casted = x2 as (double)
+        const y2_casted = y2 as (double)
+        const radius_casted = radius as (double)
         this.arcTo_serialize(x1_casted, y1_casted, x2_casted, y2_casted, radius_casted)
         return
     }
-    public bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void {
-        const cp1x_casted = cp1x as (number)
-        const cp1y_casted = cp1y as (number)
-        const cp2x_casted = cp2x as (number)
-        const cp2y_casted = cp2y as (number)
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public bezierCurveTo(cp1x: double, cp1y: double, cp2x: double, cp2y: double, x: double, y: double): void {
+        const cp1x_casted = cp1x as (double)
+        const cp1y_casted = cp1y as (double)
+        const cp2x_casted = cp2x as (double)
+        const cp2y_casted = cp2y as (double)
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.bezierCurveTo_serialize(cp1x_casted, cp1y_casted, cp2x_casted, cp2y_casted, x_casted, y_casted)
         return
     }
@@ -126,47 +142,47 @@ export class CanvasPath implements MaterializedBase {
         this.closePath_serialize()
         return
     }
-    public ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const radiusX_casted = radiusX as (number)
-        const radiusY_casted = radiusY as (number)
-        const rotation_casted = rotation as (number)
-        const startAngle_casted = startAngle as (number)
-        const endAngle_casted = endAngle as (number)
+    public ellipse(x: double, y: double, radiusX: double, radiusY: double, rotation: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const radiusX_casted = radiusX as (double)
+        const radiusY_casted = radiusY as (double)
+        const rotation_casted = rotation as (double)
+        const startAngle_casted = startAngle as (double)
+        const endAngle_casted = endAngle as (double)
         const counterclockwise_casted = counterclockwise as (boolean | undefined)
         this.ellipse_serialize(x_casted, y_casted, radiusX_casted, radiusY_casted, rotation_casted, startAngle_casted, endAngle_casted, counterclockwise_casted)
         return
     }
-    public lineTo(x: number, y: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public lineTo(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.lineTo_serialize(x_casted, y_casted)
         return
     }
-    public moveTo(x: number, y: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public moveTo(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.moveTo_serialize(x_casted, y_casted)
         return
     }
-    public quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void {
-        const cpx_casted = cpx as (number)
-        const cpy_casted = cpy as (number)
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public quadraticCurveTo(cpx: double, cpy: double, x: double, y: double): void {
+        const cpx_casted = cpx as (double)
+        const cpy_casted = cpy as (double)
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.quadraticCurveTo_serialize(cpx_casted, cpy_casted, x_casted, y_casted)
         return
     }
-    public rect(x: number, y: number, w: number, h: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const w_casted = w as (number)
-        const h_casted = h as (number)
+    public rect(x: double, y: double, w: double, h: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
         this.rect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
-    arc_serialize(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
+    arc_serialize(x: double, y: double, radius: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (counterclockwise !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -178,16 +194,16 @@ export class CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasPath_arc(this.peer!.ptr, x, y, radius, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    arcTo_serialize(x1: number, y1: number, x2: number, y2: number, radius: number): void {
+    arcTo_serialize(x1: double, y1: double, x2: double, y2: double, radius: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_arcTo(this.peer!.ptr, x1, y1, x2, y2, radius)
     }
-    bezierCurveTo_serialize(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void {
+    bezierCurveTo_serialize(cp1x: double, cp1y: double, cp2x: double, cp2y: double, x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_bezierCurveTo(this.peer!.ptr, cp1x, cp1y, cp2x, cp2y, x, y)
     }
     closePath_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasPath_closePath(this.peer!.ptr)
     }
-    ellipse_serialize(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
+    ellipse_serialize(x: double, y: double, radiusX: double, radiusY: double, rotation: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (counterclockwise !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -199,16 +215,16 @@ export class CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasPath_ellipse(this.peer!.ptr, x, y, radiusX, radiusY, rotation, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    lineTo_serialize(x: number, y: number): void {
+    lineTo_serialize(x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_lineTo(this.peer!.ptr, x, y)
     }
-    moveTo_serialize(x: number, y: number): void {
+    moveTo_serialize(x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_moveTo(this.peer!.ptr, x, y)
     }
-    quadraticCurveTo_serialize(cpx: number, cpy: number, x: number, y: number): void {
+    quadraticCurveTo_serialize(cpx: double, cpy: double, x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_quadraticCurveTo(this.peer!.ptr, cpx, cpy, x, y)
     }
-    rect_serialize(x: number, y: number, w: number, h: number): void {
+    rect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_rect(this.peer!.ptr, x, y, w, h)
     }
 }
@@ -270,6 +286,12 @@ export class DrawingRenderingContext implements MaterializedBase {
     set size(size: Size) {
         this.setSize(size)
     }
+    get canvas(): drawing.Canvas | undefined {
+        return this.getCanvas()
+    }
+    set canvas(canvas: drawing.Canvas | undefined) {
+        this.setCanvas(canvas)
+    }
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DrawingRenderingContext.getFinalizer())
     }
@@ -304,6 +326,14 @@ export class DrawingRenderingContext implements MaterializedBase {
         this.setSize_serialize(size_casted)
         return
     }
+    private getCanvas(): drawing.Canvas | undefined {
+        return this.getCanvas_serialize()
+    }
+    private setCanvas(canvas: drawing.Canvas | undefined): void {
+        const canvas_casted = canvas as (drawing.Canvas | undefined)
+        this.setCanvas_serialize(canvas_casted)
+        return
+    }
     invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
     }
@@ -319,6 +349,29 @@ export class DrawingRenderingContext implements MaterializedBase {
         ArkUIGeneratedNativeModule._DrawingRenderingContext_setSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getCanvas_serialize(): drawing.Canvas | undefined {
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : drawing.Canvas | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (drawing_Canvas_serializer.read(retvalDeserializer) as drawing.Canvas)
+        }
+        const returnResult : drawing.Canvas | undefined = buffer
+        return returnResult
+    }
+    private setCanvas_serialize(canvas: drawing.Canvas | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (canvas !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const canvasTmpValue  = canvas!
+            drawing_Canvas_serializer.write(thisSerializer, canvasTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DrawingRenderingContext_setCanvas(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class ImageBitmapInternal {
     public static fromPtr(ptr: KPointer): ImageBitmap {
@@ -330,16 +383,16 @@ export class ImageBitmap implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get height(): number {
+    get height(): double {
         return this.getHeight()
     }
-    set height(height: number) {
+    set height(height: double) {
         this.setHeight(height)
     }
-    get width(): number {
+    get width(): double {
         return this.getWidth()
     }
-    set width(width: number) {
+    set width(width: double) {
         this.setWidth(width)
     }
     constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
@@ -377,144 +430,38 @@ export class ImageBitmap implements MaterializedBase {
         this.close_serialize()
         return
     }
-    private getHeight(): number {
+    private getHeight(): double {
         return this.getHeight_serialize()
     }
-    private setHeight(height: number): void {
-        const height_casted = height as (number)
+    private setHeight(height: double): void {
+        const height_casted = height as (double)
         this.setHeight_serialize(height_casted)
         return
     }
-    private getWidth(): number {
+    private getWidth(): double {
         return this.getWidth_serialize()
     }
-    private setWidth(width: number): void {
-        const width_casted = width as (number)
+    private setWidth(width: double): void {
+        const width_casted = width as (double)
         this.setWidth_serialize(width_casted)
         return
     }
     close_serialize(): void {
         ArkUIGeneratedNativeModule._ImageBitmap_close(this.peer!.ptr)
     }
-    private getHeight_serialize(): number {
+    private getHeight_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ImageBitmap_getHeight(this.peer!.ptr)
         return retval
     }
-    private setHeight_serialize(height: number): void {
+    private setHeight_serialize(height: double): void {
         ArkUIGeneratedNativeModule._ImageBitmap_setHeight(this.peer!.ptr, height)
     }
-    private getWidth_serialize(): number {
+    private getWidth_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ImageBitmap_getWidth(this.peer!.ptr)
         return retval
     }
-    private setWidth_serialize(width: number): void {
+    private setWidth_serialize(width: double): void {
         ArkUIGeneratedNativeModule._ImageBitmap_setWidth(this.peer!.ptr, width)
-    }
-}
-export class ImageDataInternal {
-    public static fromPtr(ptr: KPointer): ImageData {
-        return new ImageData(false, false, false, false, ptr)
-    }
-}
-export class ImageData implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get data(): ArrayBuffer {
-        return this.getData()
-    }
-    set data(data: ArrayBuffer) {
-        this.setData(data)
-    }
-    get height(): int32 {
-        return this.getHeight()
-    }
-    set height(height: int32) {
-        this.setHeight(height)
-    }
-    get width(): int32 {
-        return this.getWidth()
-    }
-    set width(width: int32) {
-        this.setWidth(width)
-    }
-    constructor(_0: boolean, _1: boolean, _2: boolean, _3: boolean, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ImageData.getFinalizer())
-    }
-    constructor(width: number, height: number, data?: ArrayBuffer, unit?: LengthMetricsUnit) {
-        this(false, false, false, false, ImageData.construct(width, height, data, unit))
-    }
-    static construct(width: number, height: number, data?: ArrayBuffer, unit?: LengthMetricsUnit): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (data !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const dataTmpValue  = data!
-            thisSerializer.writeBuffer(dataTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (unit !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const unitTmpValue  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(unitTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._ImageData_construct(width, height, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ImageData_getFinalizer()
-    }
-    private getData(): ArrayBuffer {
-        return this.getData_serialize()
-    }
-    private setData(data: ArrayBuffer): void {
-        const data_casted = data as (ArrayBuffer)
-        this.setData_serialize(data_casted)
-        return
-    }
-    private getHeight(): int32 {
-        return this.getHeight_serialize()
-    }
-    private setHeight(height: int32): void {
-        const height_casted = height as (int32)
-        this.setHeight_serialize(height_casted)
-        return
-    }
-    private getWidth(): int32 {
-        return this.getWidth_serialize()
-    }
-    private setWidth(width: int32): void {
-        const width_casted = width as (int32)
-        this.setWidth_serialize(width_casted)
-        return
-    }
-    private getData_serialize(): ArrayBuffer {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getData(this.peer!.ptr)
-        return new DeserializerBase(retval, retval.length).readBuffer()
-    }
-    private setData_serialize(data: ArrayBuffer): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeBuffer(data)
-        ArkUIGeneratedNativeModule._ImageData_setData(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getHeight_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getHeight(this.peer!.ptr)
-        return retval
-    }
-    private setHeight_serialize(height: int32): void {
-        ArkUIGeneratedNativeModule._ImageData_setHeight(this.peer!.ptr, height)
-    }
-    private getWidth_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getWidth(this.peer!.ptr)
-        return retval
-    }
-    private setWidth_serialize(width: int32): void {
-        ArkUIGeneratedNativeModule._ImageData_setWidth(this.peer!.ptr, width)
     }
 }
 export class OffscreenCanvasInternal {
@@ -527,25 +474,25 @@ export class OffscreenCanvas implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get height(): number {
+    get height(): double {
         return this.getHeight()
     }
-    set height(height: number) {
+    set height(height: double) {
         this.setHeight(height)
     }
-    get width(): number {
+    get width(): double {
         return this.getWidth()
     }
-    set width(width: number) {
+    set width(width: double) {
         this.setWidth(width)
     }
     constructor(_0: boolean, _1: boolean, _2: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, OffscreenCanvas.getFinalizer())
     }
-    constructor(width: number, height: number, unit?: LengthMetricsUnit) {
+    constructor(width: double, height: double, unit?: LengthMetricsUnit) {
         this(false, false, false, OffscreenCanvas.construct(width, height, unit))
     }
-    static construct(width: number, height: number, unit?: LengthMetricsUnit): KPointer {
+    static construct(width: double, height: double, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (unit !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -561,36 +508,42 @@ export class OffscreenCanvas implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._OffscreenCanvas_getFinalizer()
     }
-    public transferToImageBitmap(): ImageBitmap {
+    public transferToImageBitmap(): ImageBitmap | undefined {
         return this.transferToImageBitmap_serialize()
     }
     public getContext2d(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         const options_casted = options as (RenderingContextSettings | undefined)
         return this.getContext2d_serialize(options_casted)
     }
-    private getHeight(): number {
+    private getHeight(): double {
         return this.getHeight_serialize()
     }
-    private setHeight(height: number): void {
-        const height_casted = height as (number)
+    private setHeight(height: double): void {
+        const height_casted = height as (double)
         this.setHeight_serialize(height_casted)
         return
     }
-    private getWidth(): number {
+    private getWidth(): double {
         return this.getWidth_serialize()
     }
-    private setWidth(width: number): void {
-        const width_casted = width as (number)
+    private setWidth(width: double): void {
+        const width_casted = width as (double)
         this.setWidth_serialize(width_casted)
         return
     }
     getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        throw new Error("Improve")
+        return hookGetContext(this, contextType, options)
     }
-    transferToImageBitmap_serialize(): ImageBitmap {
+    transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
-        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ImageBitmap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (ImageBitmap_serializer.read(retvalDeserializer) as ImageBitmap)
+        }
+        const returnResult : ImageBitmap | undefined = buffer
+        return returnResult
     }
     getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -606,18 +559,18 @@ export class OffscreenCanvas implements MaterializedBase {
         const obj : OffscreenCanvasRenderingContext2D = OffscreenCanvasRenderingContext2DInternal.fromPtr(retval)
         return obj
     }
-    private getHeight_serialize(): number {
+    private getHeight_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getHeight(this.peer!.ptr)
         return retval
     }
-    private setHeight_serialize(height: number): void {
+    private setHeight_serialize(height: double): void {
         ArkUIGeneratedNativeModule._OffscreenCanvas_setHeight(this.peer!.ptr, height)
     }
-    private getWidth_serialize(): number {
+    private getWidth_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getWidth(this.peer!.ptr)
         return retval
     }
-    private setWidth_serialize(width: number): void {
+    private setWidth_serialize(width: double): void {
         ArkUIGeneratedNativeModule._OffscreenCanvas_setWidth(this.peer!.ptr, width)
     }
 }
@@ -704,6 +657,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCanvasOptionsAttribute(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (context !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -763,19 +717,19 @@ export type CanvasTextAlign = string;
 export type CanvasTextBaseline = string;
 export type ImageSmoothingQuality = string;
 export interface TextMetrics {
-    readonly actualBoundingBoxAscent: number;
-    readonly actualBoundingBoxDescent: number;
-    readonly actualBoundingBoxLeft: number;
-    readonly actualBoundingBoxRight: number;
-    readonly alphabeticBaseline: number;
-    readonly emHeightAscent: number;
-    readonly emHeightDescent: number;
-    readonly fontBoundingBoxAscent: number;
-    readonly fontBoundingBoxDescent: number;
-    readonly hangingBaseline: number;
-    readonly ideographicBaseline: number;
-    readonly width: number;
-    readonly height: number;
+    readonly actualBoundingBoxAscent: double;
+    readonly actualBoundingBoxDescent: double;
+    readonly actualBoundingBoxLeft: double;
+    readonly actualBoundingBoxRight: double;
+    readonly alphabeticBaseline: double;
+    readonly emHeightAscent: double;
+    readonly emHeightDescent: double;
+    readonly fontBoundingBoxAscent: double;
+    readonly fontBoundingBoxDescent: double;
+    readonly hangingBaseline: double;
+    readonly ideographicBaseline: double;
+    readonly width: double;
+    readonly height: double;
 }
 export interface CanvasAttribute extends CommonMethod {
     setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
@@ -822,6 +776,7 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
             const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
+            this.applyOptionsFinish('CanvasAttribute');
             return this
         }
         return this
@@ -843,12 +798,17 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCanvasAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCanvasAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -903,6 +863,17 @@ export class CanvasPattern_serializer {
         return CanvasPatternInternal.fromPtr(ptr)
     }
 }
+export class ImageBitmap_serializer {
+    public static write(buffer: SerializerBase, value: ImageBitmap): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ImageBitmap {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ImageBitmapInternal.fromPtr(ptr)
+    }
+}
 export class OffscreenCanvas_serializer {
     public static write(buffer: SerializerBase, value: OffscreenCanvas): void {
         let valueSerializer : SerializerBase = buffer
@@ -929,47 +900,47 @@ export class TextMetrics_serializer {
     public static write(buffer: SerializerBase, value: TextMetrics): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForActualBoundingBoxAscent  = value.actualBoundingBoxAscent
-        valueSerializer.writeNumber(valueHolderForActualBoundingBoxAscent)
+        valueSerializer.writeFloat64(valueHolderForActualBoundingBoxAscent)
         const valueHolderForActualBoundingBoxDescent  = value.actualBoundingBoxDescent
-        valueSerializer.writeNumber(valueHolderForActualBoundingBoxDescent)
+        valueSerializer.writeFloat64(valueHolderForActualBoundingBoxDescent)
         const valueHolderForActualBoundingBoxLeft  = value.actualBoundingBoxLeft
-        valueSerializer.writeNumber(valueHolderForActualBoundingBoxLeft)
+        valueSerializer.writeFloat64(valueHolderForActualBoundingBoxLeft)
         const valueHolderForActualBoundingBoxRight  = value.actualBoundingBoxRight
-        valueSerializer.writeNumber(valueHolderForActualBoundingBoxRight)
+        valueSerializer.writeFloat64(valueHolderForActualBoundingBoxRight)
         const valueHolderForAlphabeticBaseline  = value.alphabeticBaseline
-        valueSerializer.writeNumber(valueHolderForAlphabeticBaseline)
+        valueSerializer.writeFloat64(valueHolderForAlphabeticBaseline)
         const valueHolderForEmHeightAscent  = value.emHeightAscent
-        valueSerializer.writeNumber(valueHolderForEmHeightAscent)
+        valueSerializer.writeFloat64(valueHolderForEmHeightAscent)
         const valueHolderForEmHeightDescent  = value.emHeightDescent
-        valueSerializer.writeNumber(valueHolderForEmHeightDescent)
+        valueSerializer.writeFloat64(valueHolderForEmHeightDescent)
         const valueHolderForFontBoundingBoxAscent  = value.fontBoundingBoxAscent
-        valueSerializer.writeNumber(valueHolderForFontBoundingBoxAscent)
+        valueSerializer.writeFloat64(valueHolderForFontBoundingBoxAscent)
         const valueHolderForFontBoundingBoxDescent  = value.fontBoundingBoxDescent
-        valueSerializer.writeNumber(valueHolderForFontBoundingBoxDescent)
+        valueSerializer.writeFloat64(valueHolderForFontBoundingBoxDescent)
         const valueHolderForHangingBaseline  = value.hangingBaseline
-        valueSerializer.writeNumber(valueHolderForHangingBaseline)
+        valueSerializer.writeFloat64(valueHolderForHangingBaseline)
         const valueHolderForIdeographicBaseline  = value.ideographicBaseline
-        valueSerializer.writeNumber(valueHolderForIdeographicBaseline)
+        valueSerializer.writeFloat64(valueHolderForIdeographicBaseline)
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): TextMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const actualBoundingBoxAscentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxDescentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxLeftTmpResult : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxRightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const alphabeticBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
-        const emHeightAscentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const emHeightDescentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const fontBoundingBoxAscentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const fontBoundingBoxDescentTmpResult : number = (valueDeserializer.readNumber() as number)
-        const hangingBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
-        const ideographicBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const actualBoundingBoxAscentTmpResult : double = valueDeserializer.readFloat64()
+        const actualBoundingBoxDescentTmpResult : double = valueDeserializer.readFloat64()
+        const actualBoundingBoxLeftTmpResult : double = valueDeserializer.readFloat64()
+        const actualBoundingBoxRightTmpResult : double = valueDeserializer.readFloat64()
+        const alphabeticBaselineTmpResult : double = valueDeserializer.readFloat64()
+        const emHeightAscentTmpResult : double = valueDeserializer.readFloat64()
+        const emHeightDescentTmpResult : double = valueDeserializer.readFloat64()
+        const fontBoundingBoxAscentTmpResult : double = valueDeserializer.readFloat64()
+        const fontBoundingBoxDescentTmpResult : double = valueDeserializer.readFloat64()
+        const hangingBaselineTmpResult : double = valueDeserializer.readFloat64()
+        const ideographicBaselineTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : TextMetrics = ({actualBoundingBoxAscent: actualBoundingBoxAscentTmpResult, actualBoundingBoxDescent: actualBoundingBoxDescentTmpResult, actualBoundingBoxLeft: actualBoundingBoxLeftTmpResult, actualBoundingBoxRight: actualBoundingBoxRightTmpResult, alphabeticBaseline: alphabeticBaselineTmpResult, emHeightAscent: emHeightAscentTmpResult, emHeightDescent: emHeightDescentTmpResult, fontBoundingBoxAscent: fontBoundingBoxAscentTmpResult, fontBoundingBoxDescent: fontBoundingBoxDescentTmpResult, hangingBaseline: hangingBaselineTmpResult, ideographicBaseline: ideographicBaselineTmpResult, width: widthTmpResult, height: heightTmpResult} as TextMetrics)
         return value
     }
@@ -983,28 +954,6 @@ export class DrawingRenderingContext_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return DrawingRenderingContextInternal.fromPtr(ptr)
-    }
-}
-export class ImageBitmap_serializer {
-    public static write(buffer: SerializerBase, value: ImageBitmap): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ImageBitmap {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageBitmapInternal.fromPtr(ptr)
-    }
-}
-export class ImageData_serializer {
-    public static write(buffer: SerializerBase, value: ImageData): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ImageData {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageDataInternal.fromPtr(ptr)
     }
 }
 export class RenderingContextSettings_serializer {
@@ -1063,10 +1012,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set letterSpacing(letterSpacing: LengthMetrics | string) {
         this.setLetterSpacing(letterSpacing)
     }
-    get globalAlpha(): number {
+    get globalAlpha(): double {
         return this.getGlobalAlpha()
     }
-    set globalAlpha(globalAlpha: number) {
+    set globalAlpha(globalAlpha: double) {
         this.setGlobalAlpha(globalAlpha)
     }
     get globalCompositeOperation(): string {
@@ -1075,16 +1024,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set globalCompositeOperation(globalCompositeOperation: string) {
         this.setGlobalCompositeOperation(globalCompositeOperation)
     }
-    get fillStyle(): string | int32 | CanvasGradient | CanvasPattern {
+    get fillStyle(): string | Color | int32 | CanvasGradient | CanvasPattern {
         return this.getFillStyle()
     }
-    set fillStyle(fillStyle: string | int32 | CanvasGradient | CanvasPattern) {
+    set fillStyle(fillStyle: string | Color | int32 | CanvasGradient | CanvasPattern) {
         this.setFillStyle(fillStyle)
     }
-    get strokeStyle(): string | int32 | CanvasGradient | CanvasPattern {
+    get strokeStyle(): string | Color | int32 | CanvasGradient | CanvasPattern {
         return this.getStrokeStyle()
     }
-    set strokeStyle(strokeStyle: string | int32 | CanvasGradient | CanvasPattern) {
+    set strokeStyle(strokeStyle: string | Color | int32 | CanvasGradient | CanvasPattern) {
         this.setStrokeStyle(strokeStyle)
     }
     get filter(): string {
@@ -1111,10 +1060,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set lineCap(lineCap: CanvasLineCap) {
         this.setLineCap(lineCap)
     }
-    get lineDashOffset(): number {
+    get lineDashOffset(): double {
         return this.getLineDashOffset()
     }
-    set lineDashOffset(lineDashOffset: number) {
+    set lineDashOffset(lineDashOffset: double) {
         this.setLineDashOffset(lineDashOffset)
     }
     get lineJoin(): CanvasLineJoin {
@@ -1123,22 +1072,22 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set lineJoin(lineJoin: CanvasLineJoin) {
         this.setLineJoin(lineJoin)
     }
-    get lineWidth(): number {
+    get lineWidth(): double {
         return this.getLineWidth()
     }
-    set lineWidth(lineWidth: number) {
+    set lineWidth(lineWidth: double) {
         this.setLineWidth(lineWidth)
     }
-    get miterLimit(): number {
+    get miterLimit(): double {
         return this.getMiterLimit()
     }
-    set miterLimit(miterLimit: number) {
+    set miterLimit(miterLimit: double) {
         this.setMiterLimit(miterLimit)
     }
-    get shadowBlur(): number {
+    get shadowBlur(): double {
         return this.getShadowBlur()
     }
-    set shadowBlur(shadowBlur: number) {
+    set shadowBlur(shadowBlur: double) {
         this.setShadowBlur(shadowBlur)
     }
     get shadowColor(): string {
@@ -1147,16 +1096,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set shadowColor(shadowColor: string) {
         this.setShadowColor(shadowColor)
     }
-    get shadowOffsetX(): number {
+    get shadowOffsetX(): double {
         return this.getShadowOffsetX()
     }
-    set shadowOffsetX(shadowOffsetX: number) {
+    set shadowOffsetX(shadowOffsetX: double) {
         this.setShadowOffsetX(shadowOffsetX)
     }
-    get shadowOffsetY(): number {
+    get shadowOffsetY(): double {
         return this.getShadowOffsetY()
     }
-    set shadowOffsetY(shadowOffsetY: number) {
+    set shadowOffsetY(shadowOffsetY: double) {
         this.setShadowOffsetY(shadowOffsetY)
     }
     get direction(): CanvasDirection {
@@ -1196,32 +1145,32 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasRenderer_getFinalizer()
     }
-    public drawImage(image: ImageBitmap | image.PixelMap, dx: number, dy: number): void {
+    public drawImage(image: ImageBitmap | image.PixelMap, dx: double, dy: double): void {
         const image_casted = image as (ImageBitmap | image.PixelMap)
-        const dx_casted = dx as (number)
-        const dy_casted = dy as (number)
+        const dx_casted = dx as (double)
+        const dy_casted = dy as (double)
         this.drawImage0_serialize(image_casted, dx_casted, dy_casted)
         return
     }
-    public drawImage(image: ImageBitmap | image.PixelMap, dx: number, dy: number, dw: number, dh: number): void {
+    public drawImage(image: ImageBitmap | image.PixelMap, dx: double, dy: double, dw: double, dh: double): void {
         const image_casted = image as (ImageBitmap | image.PixelMap)
-        const dx_casted = dx as (number)
-        const dy_casted = dy as (number)
-        const dw_casted = dw as (number)
-        const dh_casted = dh as (number)
+        const dx_casted = dx as (double)
+        const dy_casted = dy as (double)
+        const dw_casted = dw as (double)
+        const dh_casted = dh as (double)
         this.drawImage1_serialize(image_casted, dx_casted, dy_casted, dw_casted, dh_casted)
         return
     }
-    public drawImage(image: ImageBitmap | image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
+    public drawImage(image: ImageBitmap | image.PixelMap, sx: double, sy: double, sw: double, sh: double, dx: double, dy: double, dw: double, dh: double): void {
         const image_casted = image as (ImageBitmap | image.PixelMap)
-        const sx_casted = sx as (number)
-        const sy_casted = sy as (number)
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        const dx_casted = dx as (number)
-        const dy_casted = dy as (number)
-        const dw_casted = dw as (number)
-        const dh_casted = dh as (number)
+        const sx_casted = sx as (double)
+        const sy_casted = sy as (double)
+        const sw_casted = sw as (double)
+        const sh_casted = sh as (double)
+        const dx_casted = dx as (double)
+        const dy_casted = dy as (double)
+        const dw_casted = dw as (double)
+        const dh_casted = dh as (double)
         this.drawImage2_serialize(image_casted, sx_casted, sy_casted, sw_casted, sh_casted, dx_casted, dy_casted, dw_casted, dh_casted)
         return
     }
@@ -1256,11 +1205,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.stroke_serialize(path_casted)
         return
     }
-    public createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient {
-        const x0_casted = x0 as (number)
-        const y0_casted = y0 as (number)
-        const x1_casted = x1 as (number)
-        const y1_casted = y1 as (number)
+    public createLinearGradient(x0: double, y0: double, x1: double, y1: double): CanvasGradient {
+        const x0_casted = x0 as (double)
+        const y0_casted = y0 as (double)
+        const x1_casted = x1 as (double)
+        const y1_casted = y1 as (double)
         return this.createLinearGradient_serialize(x0_casted, y0_casted, x1_casted, y1_casted)
     }
     public createPattern(image: ImageBitmap, repetition: string | null): CanvasPattern | null {
@@ -1268,91 +1217,72 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const repetition_casted = repetition as (string | null)
         return this.createPattern_serialize(image_casted, repetition_casted)
     }
-    public createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient {
-        const x0_casted = x0 as (number)
-        const y0_casted = y0 as (number)
-        const r0_casted = r0 as (number)
-        const x1_casted = x1 as (number)
-        const y1_casted = y1 as (number)
-        const r1_casted = r1 as (number)
+    public createRadialGradient(x0: double, y0: double, r0: double, x1: double, y1: double, r1: double): CanvasGradient {
+        const x0_casted = x0 as (double)
+        const y0_casted = y0 as (double)
+        const r0_casted = r0 as (double)
+        const x1_casted = x1 as (double)
+        const y1_casted = y1 as (double)
+        const r1_casted = r1 as (double)
         return this.createRadialGradient_serialize(x0_casted, y0_casted, r0_casted, x1_casted, y1_casted, r1_casted)
     }
-    public createConicGradient(startAngle: number, x: number, y: number): CanvasGradient {
-        const startAngle_casted = startAngle as (number)
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public createConicGradient(startAngle: double, x: double, y: double): CanvasGradient {
+        const startAngle_casted = startAngle as (double)
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         return this.createConicGradient_serialize(startAngle_casted, x_casted, y_casted)
     }
-    public createImageData(sw: number, sh: number): ImageData {
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        return this.createImageData0_serialize(sw_casted, sh_casted)
+    public createImageData(sw: double, sh: double): ImageData {
+        return hookCreateImageData(this, sw, sh)
     }
-    public createImageData(imagedata: ImageData): ImageData {
-        const imagedata_casted = imagedata as (ImageData)
-        return this.createImageData1_serialize(imagedata_casted)
+    public createImageData(imageData: ImageData): ImageData {
+        return hookCreateImageData(this, imageData)
     }
-    public getImageData(sx: number, sy: number, sw: number, sh: number): ImageData {
-        const sx_casted = sx as (number)
-        const sy_casted = sy as (number)
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        return this.getImageData_serialize(sx_casted, sy_casted, sw_casted, sh_casted)
+    public getImageData(sx: double, sy: double, sw: double, sh: double): ImageData {
+        return hookGetImageData(this, sx, sy, sw, sh)
     }
-    public getPixelMap(sx: number, sy: number, sw: number, sh: number): image.PixelMap {
-        const sx_casted = sx as (number)
-        const sy_casted = sy as (number)
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
+    public getPixelMap(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
+        const sx_casted = sx as (double)
+        const sy_casted = sy as (double)
+        const sw_casted = sw as (double)
+        const sh_casted = sh as (double)
         return this.getPixelMap_serialize(sx_casted, sy_casted, sw_casted, sh_casted)
     }
-    public putImageData(imagedata: ImageData, dx: number | string, dy: number | string): void {
-        const imagedata_casted = imagedata as (ImageData)
-        const dx_casted = dx as (number | string)
-        const dy_casted = dy as (number | string)
-        this.putImageData0_serialize(imagedata_casted, dx_casted, dy_casted)
-        return
+    public putImageData(imageData: ImageData, dx: double | string, dy: double | string): void {
+        hookPutImageData(this, imageData, dx, dy)
     }
-    public putImageData(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
-        const imagedata_casted = imagedata as (ImageData)
-        const dx_casted = dx as (number | string)
-        const dy_casted = dy as (number | string)
-        const dirtyX_casted = dirtyX as (number | string)
-        const dirtyY_casted = dirtyY as (number | string)
-        const dirtyWidth_casted = dirtyWidth as (number | string)
-        const dirtyHeight_casted = dirtyHeight as (number | string)
-        this.putImageData1_serialize(imagedata_casted, dx_casted, dy_casted, dirtyX_casted, dirtyY_casted, dirtyWidth_casted, dirtyHeight_casted)
-        return
+    public putImageData(imageData: ImageData, dx: double | string, dy: double | string, dirtyX: double | string, dirtyY: double | string, dirtyWidth: double | string, dirtyHeight: double | string): void {
+        hookPutImageData(this, imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight)
     }
-    public getLineDash(): Array<number> {
+    public getLineDash(): Array<double> {
         return this.getLineDash_serialize()
     }
-    public setLineDash(segments: Array<number>): void {
-        const segments_casted = segments as (Array<number>)
+    public setLineDash(segments: Array<double>): void {
+        const segments_casted = segments as (Array<double>)
         this.setLineDash_serialize(segments_casted)
         return
     }
-    public clearRect(x: number, y: number, w: number, h: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const w_casted = w as (number)
-        const h_casted = h as (number)
+    public clearRect(x: double, y: double, w: double, h: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
         this.clearRect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
-    public fillRect(x: number, y: number, w: number, h: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const w_casted = w as (number)
-        const h_casted = h as (number)
+    public fillRect(x: double, y: double, w: double, h: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
         this.fillRect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
-    public strokeRect(x: number, y: number, w: number, h: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const w_casted = w as (number)
-        const h_casted = h as (number)
+    public strokeRect(x: double, y: double, w: double, h: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
         this.strokeRect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
@@ -1364,11 +1294,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.save_serialize()
         return
     }
-    public fillText(text: string, x: number, y: number, maxWidth?: number): void {
+    public fillText(text: string, x: double, y: double, maxWidth?: double): void {
         const text_casted = text as (string)
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const maxWidth_casted = maxWidth as (number | undefined)
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const maxWidth_casted = maxWidth as (double | undefined)
         this.fillText_serialize(text_casted, x_casted, y_casted, maxWidth_casted)
         return
     }
@@ -1376,11 +1306,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const text_casted = text as (string)
         return this.measureText_serialize(text_casted)
     }
-    public strokeText(text: string, x: number, y: number, maxWidth?: number): void {
+    public strokeText(text: string, x: double, y: double, maxWidth?: double): void {
         const text_casted = text as (string)
-        const x_casted = x as (number)
-        const y_casted = y as (number)
-        const maxWidth_casted = maxWidth as (number | undefined)
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const maxWidth_casted = maxWidth as (double | undefined)
         this.strokeText_serialize(text_casted, x_casted, y_casted, maxWidth_casted)
         return
     }
@@ -1391,24 +1321,24 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.resetTransform_serialize()
         return
     }
-    public rotate(angle: number): void {
-        const angle_casted = angle as (number)
+    public rotate(angle: double): void {
+        const angle_casted = angle as (double)
         this.rotate_serialize(angle_casted)
         return
     }
-    public scale(x: number, y: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public scale(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.scale_serialize(x_casted, y_casted)
         return
     }
-    public setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void {
-        const a_casted = a as (number)
-        const b_casted = b as (number)
-        const c_casted = c as (number)
-        const d_casted = d as (number)
-        const e_casted = e as (number)
-        const f_casted = f as (number)
+    public setTransform(a: double, b: double, c: double, d: double, e: double, f: double): void {
+        const a_casted = a as (double)
+        const b_casted = b as (double)
+        const c_casted = c as (double)
+        const d_casted = d as (double)
+        const e_casted = e as (double)
+        const f_casted = f as (double)
         this.setTransform0_serialize(a_casted, b_casted, c_casted, d_casted, e_casted, f_casted)
         return
     }
@@ -1417,19 +1347,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setTransform1_serialize(transform_casted)
         return
     }
-    public transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
-        const a_casted = a as (number)
-        const b_casted = b as (number)
-        const c_casted = c as (number)
-        const d_casted = d as (number)
-        const e_casted = e as (number)
-        const f_casted = f as (number)
+    public transform(a: double, b: double, c: double, d: double, e: double, f: double): void {
+        const a_casted = a as (double)
+        const b_casted = b as (double)
+        const c_casted = c as (double)
+        const d_casted = d as (double)
+        const e_casted = e as (double)
+        const f_casted = f as (double)
         this.transform_serialize(a_casted, b_casted, c_casted, d_casted, e_casted, f_casted)
         return
     }
-    public translate(x: number, y: number): void {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public translate(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         this.translate_serialize(x_casted, y_casted)
         return
     }
@@ -1463,11 +1393,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setLetterSpacing_serialize(letterSpacing_casted)
         return
     }
-    private getGlobalAlpha(): number {
+    private getGlobalAlpha(): double {
         return this.getGlobalAlpha_serialize()
     }
-    private setGlobalAlpha(globalAlpha: number): void {
-        const globalAlpha_casted = globalAlpha as (number)
+    private setGlobalAlpha(globalAlpha: double): void {
+        const globalAlpha_casted = globalAlpha as (double)
         this.setGlobalAlpha_serialize(globalAlpha_casted)
         return
     }
@@ -1479,19 +1409,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setGlobalCompositeOperation_serialize(globalCompositeOperation_casted)
         return
     }
-    private getFillStyle(): string | int32 | CanvasGradient | CanvasPattern {
+    private getFillStyle(): string | Color | int32 | CanvasGradient | CanvasPattern {
         return this.getFillStyle_serialize()
     }
-    private setFillStyle(fillStyle: string | int32 | CanvasGradient | CanvasPattern): void {
-        const fillStyle_casted = fillStyle as (string | int32 | CanvasGradient | CanvasPattern)
+    private setFillStyle(fillStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
+        const fillStyle_casted = fillStyle as (string | Color | int32 | CanvasGradient | CanvasPattern)
         this.setFillStyle_serialize(fillStyle_casted)
         return
     }
-    private getStrokeStyle(): string | int32 | CanvasGradient | CanvasPattern {
+    private getStrokeStyle(): string | Color | int32 | CanvasGradient | CanvasPattern {
         return this.getStrokeStyle_serialize()
     }
-    private setStrokeStyle(strokeStyle: string | int32 | CanvasGradient | CanvasPattern): void {
-        const strokeStyle_casted = strokeStyle as (string | int32 | CanvasGradient | CanvasPattern)
+    private setStrokeStyle(strokeStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
+        const strokeStyle_casted = strokeStyle as (string | Color | int32 | CanvasGradient | CanvasPattern)
         this.setStrokeStyle_serialize(strokeStyle_casted)
         return
     }
@@ -1527,11 +1457,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setLineCap_serialize(lineCap_casted)
         return
     }
-    private getLineDashOffset(): number {
+    private getLineDashOffset(): double {
         return this.getLineDashOffset_serialize()
     }
-    private setLineDashOffset(lineDashOffset: number): void {
-        const lineDashOffset_casted = lineDashOffset as (number)
+    private setLineDashOffset(lineDashOffset: double): void {
+        const lineDashOffset_casted = lineDashOffset as (double)
         this.setLineDashOffset_serialize(lineDashOffset_casted)
         return
     }
@@ -1543,27 +1473,27 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setLineJoin_serialize(lineJoin_casted)
         return
     }
-    private getLineWidth(): number {
+    private getLineWidth(): double {
         return this.getLineWidth_serialize()
     }
-    private setLineWidth(lineWidth: number): void {
-        const lineWidth_casted = lineWidth as (number)
+    private setLineWidth(lineWidth: double): void {
+        const lineWidth_casted = lineWidth as (double)
         this.setLineWidth_serialize(lineWidth_casted)
         return
     }
-    private getMiterLimit(): number {
+    private getMiterLimit(): double {
         return this.getMiterLimit_serialize()
     }
-    private setMiterLimit(miterLimit: number): void {
-        const miterLimit_casted = miterLimit as (number)
+    private setMiterLimit(miterLimit: double): void {
+        const miterLimit_casted = miterLimit as (double)
         this.setMiterLimit_serialize(miterLimit_casted)
         return
     }
-    private getShadowBlur(): number {
+    private getShadowBlur(): double {
         return this.getShadowBlur_serialize()
     }
-    private setShadowBlur(shadowBlur: number): void {
-        const shadowBlur_casted = shadowBlur as (number)
+    private setShadowBlur(shadowBlur: double): void {
+        const shadowBlur_casted = shadowBlur as (double)
         this.setShadowBlur_serialize(shadowBlur_casted)
         return
     }
@@ -1575,19 +1505,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setShadowColor_serialize(shadowColor_casted)
         return
     }
-    private getShadowOffsetX(): number {
+    private getShadowOffsetX(): double {
         return this.getShadowOffsetX_serialize()
     }
-    private setShadowOffsetX(shadowOffsetX: number): void {
-        const shadowOffsetX_casted = shadowOffsetX as (number)
+    private setShadowOffsetX(shadowOffsetX: double): void {
+        const shadowOffsetX_casted = shadowOffsetX as (double)
         this.setShadowOffsetX_serialize(shadowOffsetX_casted)
         return
     }
-    private getShadowOffsetY(): number {
+    private getShadowOffsetY(): double {
         return this.getShadowOffsetY_serialize()
     }
-    private setShadowOffsetY(shadowOffsetY: number): void {
-        const shadowOffsetY_casted = shadowOffsetY as (number)
+    private setShadowOffsetY(shadowOffsetY: double): void {
+        const shadowOffsetY_casted = shadowOffsetY as (double)
         this.setShadowOffsetY_serialize(shadowOffsetY_casted)
         return
     }
@@ -1623,7 +1553,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setTextBaseline_serialize(textBaseline_casted)
         return
     }
-    drawImage0_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number): void {
+    drawImage0_serialize(image: ImageBitmap | image.PixelMap, dx: double, dy: double): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toByte())
@@ -1637,7 +1567,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
     }
-    drawImage1_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number, dw: number, dh: number): void {
+    drawImage1_serialize(image: ImageBitmap | image.PixelMap, dx: double, dy: double, dw: double, dh: double): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toByte())
@@ -1651,7 +1581,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
     }
-    drawImage2_serialize(image: ImageBitmap | image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
+    drawImage2_serialize(image: ImageBitmap | image.PixelMap, sx: double, sy: double, sw: double, sh: double, dx: double, dy: double, dw: double, dh: double): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toByte())
@@ -1728,7 +1658,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_stroke(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    createLinearGradient_serialize(x0: number, y0: number, x1: number, y1: number): CanvasGradient {
+    createLinearGradient_serialize(x0: double, y0: double, x1: double, y1: double): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createLinearGradient(this.peer!.ptr, x0, y0, x1, y1)
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
@@ -1753,146 +1683,49 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const returnResult : CanvasPattern | null = buffer
         return returnResult
     }
-    createRadialGradient_serialize(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient {
+    createRadialGradient_serialize(x0: double, y0: double, r0: double, x1: double, y1: double, r1: double): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createRadialGradient(this.peer!.ptr, x0, y0, r0, x1, y1, r1)
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
     }
-    createConicGradient_serialize(startAngle: number, x: number, y: number): CanvasGradient {
+    createConicGradient_serialize(startAngle: double, x: double, y: double): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createConicGradient(this.peer!.ptr, startAngle, x, y)
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
     }
-    createImageData0_serialize(sw: number, sh: number): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData0(this.peer!.ptr, sw, sh)
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
-        return obj
-    }
-    createImageData1_serialize(imagedata: ImageData): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData1(this.peer!.ptr, toPeerPtr(imagedata))
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
-        return obj
-    }
-    getImageData_serialize(sx: number, sy: number, sw: number, sh: number): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getImageData(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
-        return obj
-    }
-    getPixelMap_serialize(sx: number, sy: number, sw: number, sh: number): image.PixelMap {
+    getPixelMap_serialize(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
         const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
         return obj
     }
-    putImageData0_serialize(imagedata: ImageData, dx: number | string, dy: number | string): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (dx instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dxForIdx0  = dx as number
-            thisSerializer.writeNumber(dxForIdx0)
-        } else if (dx instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dxForIdx1  = dx as string
-            thisSerializer.writeString(dxForIdx1)
-        }
-        if (dy instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dyForIdx0  = dy as number
-            thisSerializer.writeNumber(dyForIdx0)
-        } else if (dy instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dyForIdx1  = dy as string
-            thisSerializer.writeString(dyForIdx1)
-        }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    putImageData1_serialize(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (dx instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dxForIdx0  = dx as number
-            thisSerializer.writeNumber(dxForIdx0)
-        } else if (dx instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dxForIdx1  = dx as string
-            thisSerializer.writeString(dxForIdx1)
-        }
-        if (dy instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dyForIdx0  = dy as number
-            thisSerializer.writeNumber(dyForIdx0)
-        } else if (dy instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dyForIdx1  = dy as string
-            thisSerializer.writeString(dyForIdx1)
-        }
-        if (dirtyX instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dirtyXForIdx0  = dirtyX as number
-            thisSerializer.writeNumber(dirtyXForIdx0)
-        } else if (dirtyX instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dirtyXForIdx1  = dirtyX as string
-            thisSerializer.writeString(dirtyXForIdx1)
-        }
-        if (dirtyY instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dirtyYForIdx0  = dirtyY as number
-            thisSerializer.writeNumber(dirtyYForIdx0)
-        } else if (dirtyY instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dirtyYForIdx1  = dirtyY as string
-            thisSerializer.writeString(dirtyYForIdx1)
-        }
-        if (dirtyWidth instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dirtyWidthForIdx0  = dirtyWidth as number
-            thisSerializer.writeNumber(dirtyWidthForIdx0)
-        } else if (dirtyWidth instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dirtyWidthForIdx1  = dirtyWidth as string
-            thisSerializer.writeString(dirtyWidthForIdx1)
-        }
-        if (dirtyHeight instanceof number) {
-            thisSerializer.writeInt8((0).toByte())
-            const dirtyHeightForIdx0  = dirtyHeight as number
-            thisSerializer.writeNumber(dirtyHeightForIdx0)
-        } else if (dirtyHeight instanceof string) {
-            thisSerializer.writeInt8((1).toByte())
-            const dirtyHeightForIdx1  = dirtyHeight as string
-            thisSerializer.writeString(dirtyHeightForIdx1)
-        }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    getLineDash_serialize(): Array<number> {
+    getLineDash_serialize(): Array<double> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<number> = new Array<number>(bufferLength)
+        let buffer : Array<double> = new Array<double>(bufferLength)
         for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
+            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
         }
-        const returnResult : Array<number> = buffer
+        const returnResult : Array<double> = buffer
         return returnResult
     }
-    setLineDash_serialize(segments: Array<number>): void {
+    setLineDash_serialize(segments: Array<double>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((segments.length).toInt())
         for (let segmentsCounterI = 0; segmentsCounterI < segments.length; segmentsCounterI++) {
-            const segmentsTmpElement : number = segments[segmentsCounterI]
-            thisSerializer.writeNumber(segmentsTmpElement)
+            const segmentsTmpElement : double = segments[segmentsCounterI]
+            thisSerializer.writeFloat64(segmentsTmpElement)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineDash(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    clearRect_serialize(x: number, y: number, w: number, h: number): void {
+    clearRect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_clearRect(this.peer!.ptr, x, y, w, h)
     }
-    fillRect_serialize(x: number, y: number, w: number, h: number): void {
+    fillRect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_fillRect(this.peer!.ptr, x, y, w, h)
     }
-    strokeRect_serialize(x: number, y: number, w: number, h: number): void {
+    strokeRect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_strokeRect(this.peer!.ptr, x, y, w, h)
     }
     restore_serialize(): void {
@@ -1901,12 +1734,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     save_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_save(this.peer!.ptr)
     }
-    fillText_serialize(text: string, x: number, y: number, maxWidth?: number): void {
+    fillText_serialize(text: string, x: double, y: double, maxWidth?: double): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (maxWidth !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const maxWidthTmpValue  = maxWidth!
-            thisSerializer.writeNumber(maxWidthTmpValue)
+            thisSerializer.writeFloat64(maxWidthTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1919,12 +1752,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const returnResult : TextMetrics = TextMetrics_serializer.read(retvalDeserializer)
         return returnResult
     }
-    strokeText_serialize(text: string, x: number, y: number, maxWidth?: number): void {
+    strokeText_serialize(text: string, x: double, y: double, maxWidth?: double): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (maxWidth !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const maxWidthTmpValue  = maxWidth!
-            thisSerializer.writeNumber(maxWidthTmpValue)
+            thisSerializer.writeFloat64(maxWidthTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1939,13 +1772,13 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     resetTransform_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_resetTransform(this.peer!.ptr)
     }
-    rotate_serialize(angle: number): void {
+    rotate_serialize(angle: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_rotate(this.peer!.ptr, angle)
     }
-    scale_serialize(x: number, y: number): void {
+    scale_serialize(x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_scale(this.peer!.ptr, x, y)
     }
-    setTransform0_serialize(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    setTransform0_serialize(a: double, b: double, c: double, d: double, e: double, f: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setTransform0(this.peer!.ptr, a, b, c, d, e, f)
     }
     setTransform1_serialize(transform?: Matrix2D): void {
@@ -1960,10 +1793,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_setTransform1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    transform_serialize(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    transform_serialize(a: double, b: double, c: double, d: double, e: double, f: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_transform(this.peer!.ptr, a, b, c, d, e, f)
     }
-    translate_serialize(x: number, y: number): void {
+    translate_serialize(x: double, y: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_translate(this.peer!.ptr, x, y)
     }
     setPixelMap_serialize(value?: image.PixelMap): void {
@@ -2019,11 +1852,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLetterSpacing(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getGlobalAlpha_serialize(): number {
+    private getGlobalAlpha_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getGlobalAlpha(this.peer!.ptr)
         return retval
     }
-    private setGlobalAlpha_serialize(globalAlpha: number): void {
+    private setGlobalAlpha_serialize(globalAlpha: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setGlobalAlpha(this.peer!.ptr, globalAlpha)
     }
     private getGlobalCompositeOperation_serialize(): string {
@@ -2033,84 +1866,96 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setGlobalCompositeOperation_serialize(globalCompositeOperation: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setGlobalCompositeOperation(this.peer!.ptr, globalCompositeOperation)
     }
-    private getFillStyle_serialize(): string | int32 | CanvasGradient | CanvasPattern {
+    private getFillStyle_serialize(): string | Color | int32 | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getFillStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
-        let buffer : string | int32 | CanvasGradient | CanvasPattern | undefined
-        if (bufferUnionSelector == (0).toChar()) {
+        let buffer : string | Color | int32 | CanvasGradient | CanvasPattern | undefined
+        if (bufferUnionSelector == (0).toByte()) {
             buffer = (retvalDeserializer.readString() as string)
-        } else if (bufferUnionSelector == (1).toChar()) {
+        } else if (bufferUnionSelector == (1).toByte()) {
+            buffer = Color.values()[retvalDeserializer.readInt32()]
+        } else if (bufferUnionSelector == (2).toByte()) {
             buffer = retvalDeserializer.readInt32()
-        } else if (bufferUnionSelector == (2).toChar()) {
+        } else if (bufferUnionSelector == (3).toByte()) {
             buffer = (CanvasGradient_serializer.read(retvalDeserializer) as CanvasGradient)
-        } else if (bufferUnionSelector == (3).toChar()) {
+        } else if (bufferUnionSelector == (4).toByte()) {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
         } else {
             throw new Error("One of the branches for buffer has to be chosen through deserialisation.")
         }
-        const returnResult : string | int32 | CanvasGradient | CanvasPattern = (buffer as string | int32 | CanvasGradient | CanvasPattern)
+        const returnResult : string | Color | int32 | CanvasGradient | CanvasPattern = (buffer as string | Color | int32 | CanvasGradient | CanvasPattern)
         return returnResult
     }
-    private setFillStyle_serialize(fillStyle: string | int32 | CanvasGradient | CanvasPattern): void {
+    private setFillStyle_serialize(fillStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fillStyle instanceof string) {
             thisSerializer.writeInt8((0).toByte())
             const fillStyleForIdx0  = fillStyle as string
             thisSerializer.writeString(fillStyleForIdx0)
-        } else if (fillStyle instanceof int32) {
+        } else if (fillStyle instanceof Color) {
             thisSerializer.writeInt8((1).toByte())
-            const fillStyleForIdx1  = fillStyle as int32
-            thisSerializer.writeInt32(fillStyleForIdx1)
-        } else if (fillStyle instanceof CanvasGradient) {
+            const fillStyleForIdx1  = fillStyle as Color
+            thisSerializer.writeInt32(fillStyleForIdx1.getOrdinal())
+        } else if (fillStyle instanceof int32) {
             thisSerializer.writeInt8((2).toByte())
-            const fillStyleForIdx2  = fillStyle as CanvasGradient
-            CanvasGradient_serializer.write(thisSerializer, fillStyleForIdx2)
-        } else if (fillStyle instanceof CanvasPattern) {
+            const fillStyleForIdx2  = fillStyle as int32
+            thisSerializer.writeInt32(fillStyleForIdx2)
+        } else if (fillStyle instanceof CanvasGradient) {
             thisSerializer.writeInt8((3).toByte())
-            const fillStyleForIdx3  = fillStyle as CanvasPattern
-            CanvasPattern_serializer.write(thisSerializer, fillStyleForIdx3)
+            const fillStyleForIdx3  = fillStyle as CanvasGradient
+            CanvasGradient_serializer.write(thisSerializer, fillStyleForIdx3)
+        } else if (fillStyle instanceof CanvasPattern) {
+            thisSerializer.writeInt8((4).toByte())
+            const fillStyleForIdx4  = fillStyle as CanvasPattern
+            CanvasPattern_serializer.write(thisSerializer, fillStyleForIdx4)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStrokeStyle_serialize(): string | int32 | CanvasGradient | CanvasPattern {
+    private getStrokeStyle_serialize(): string | Color | int32 | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getStrokeStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
-        let buffer : string | int32 | CanvasGradient | CanvasPattern | undefined
-        if (bufferUnionSelector == (0).toChar()) {
+        let buffer : string | Color | int32 | CanvasGradient | CanvasPattern | undefined
+        if (bufferUnionSelector == (0).toByte()) {
             buffer = (retvalDeserializer.readString() as string)
-        } else if (bufferUnionSelector == (1).toChar()) {
+        } else if (bufferUnionSelector == (1).toByte()) {
+            buffer = Color.values()[retvalDeserializer.readInt32()]
+        } else if (bufferUnionSelector == (2).toByte()) {
             buffer = retvalDeserializer.readInt32()
-        } else if (bufferUnionSelector == (2).toChar()) {
+        } else if (bufferUnionSelector == (3).toByte()) {
             buffer = (CanvasGradient_serializer.read(retvalDeserializer) as CanvasGradient)
-        } else if (bufferUnionSelector == (3).toChar()) {
+        } else if (bufferUnionSelector == (4).toByte()) {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
         } else {
             throw new Error("One of the branches for buffer has to be chosen through deserialisation.")
         }
-        const returnResult : string | int32 | CanvasGradient | CanvasPattern = (buffer as string | int32 | CanvasGradient | CanvasPattern)
+        const returnResult : string | Color | int32 | CanvasGradient | CanvasPattern = (buffer as string | Color | int32 | CanvasGradient | CanvasPattern)
         return returnResult
     }
-    private setStrokeStyle_serialize(strokeStyle: string | int32 | CanvasGradient | CanvasPattern): void {
+    private setStrokeStyle_serialize(strokeStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (strokeStyle instanceof string) {
             thisSerializer.writeInt8((0).toByte())
             const strokeStyleForIdx0  = strokeStyle as string
             thisSerializer.writeString(strokeStyleForIdx0)
-        } else if (strokeStyle instanceof int32) {
+        } else if (strokeStyle instanceof Color) {
             thisSerializer.writeInt8((1).toByte())
-            const strokeStyleForIdx1  = strokeStyle as int32
-            thisSerializer.writeInt32(strokeStyleForIdx1)
-        } else if (strokeStyle instanceof CanvasGradient) {
+            const strokeStyleForIdx1  = strokeStyle as Color
+            thisSerializer.writeInt32(strokeStyleForIdx1.getOrdinal())
+        } else if (strokeStyle instanceof int32) {
             thisSerializer.writeInt8((2).toByte())
-            const strokeStyleForIdx2  = strokeStyle as CanvasGradient
-            CanvasGradient_serializer.write(thisSerializer, strokeStyleForIdx2)
-        } else if (strokeStyle instanceof CanvasPattern) {
+            const strokeStyleForIdx2  = strokeStyle as int32
+            thisSerializer.writeInt32(strokeStyleForIdx2)
+        } else if (strokeStyle instanceof CanvasGradient) {
             thisSerializer.writeInt8((3).toByte())
-            const strokeStyleForIdx3  = strokeStyle as CanvasPattern
-            CanvasPattern_serializer.write(thisSerializer, strokeStyleForIdx3)
+            const strokeStyleForIdx3  = strokeStyle as CanvasGradient
+            CanvasGradient_serializer.write(thisSerializer, strokeStyleForIdx3)
+        } else if (strokeStyle instanceof CanvasPattern) {
+            thisSerializer.writeInt8((4).toByte())
+            const strokeStyleForIdx4  = strokeStyle as CanvasPattern
+            CanvasPattern_serializer.write(thisSerializer, strokeStyleForIdx4)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setStrokeStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2143,11 +1988,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setLineCap_serialize(lineCap: CanvasLineCap): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineCap(this.peer!.ptr, lineCap)
     }
-    private getLineDashOffset_serialize(): number {
+    private getLineDashOffset_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDashOffset(this.peer!.ptr)
         return retval
     }
-    private setLineDashOffset_serialize(lineDashOffset: number): void {
+    private setLineDashOffset_serialize(lineDashOffset: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineDashOffset(this.peer!.ptr, lineDashOffset)
     }
     private getLineJoin_serialize(): CanvasLineJoin {
@@ -2157,25 +2002,25 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setLineJoin_serialize(lineJoin: CanvasLineJoin): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineJoin(this.peer!.ptr, lineJoin)
     }
-    private getLineWidth_serialize(): number {
+    private getLineWidth_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineWidth(this.peer!.ptr)
         return retval
     }
-    private setLineWidth_serialize(lineWidth: number): void {
+    private setLineWidth_serialize(lineWidth: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineWidth(this.peer!.ptr, lineWidth)
     }
-    private getMiterLimit_serialize(): number {
+    private getMiterLimit_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getMiterLimit(this.peer!.ptr)
         return retval
     }
-    private setMiterLimit_serialize(miterLimit: number): void {
+    private setMiterLimit_serialize(miterLimit: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setMiterLimit(this.peer!.ptr, miterLimit)
     }
-    private getShadowBlur_serialize(): number {
+    private getShadowBlur_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getShadowBlur(this.peer!.ptr)
         return retval
     }
-    private setShadowBlur_serialize(shadowBlur: number): void {
+    private setShadowBlur_serialize(shadowBlur: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setShadowBlur(this.peer!.ptr, shadowBlur)
     }
     private getShadowColor_serialize(): string {
@@ -2185,18 +2030,18 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setShadowColor_serialize(shadowColor: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setShadowColor(this.peer!.ptr, shadowColor)
     }
-    private getShadowOffsetX_serialize(): number {
+    private getShadowOffsetX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getShadowOffsetX(this.peer!.ptr)
         return retval
     }
-    private setShadowOffsetX_serialize(shadowOffsetX: number): void {
+    private setShadowOffsetX_serialize(shadowOffsetX: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setShadowOffsetX(this.peer!.ptr, shadowOffsetX)
     }
-    private getShadowOffsetY_serialize(): number {
+    private getShadowOffsetY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getShadowOffsetY(this.peer!.ptr)
         return retval
     }
-    private setShadowOffsetY_serialize(shadowOffsetY: number): void {
+    private setShadowOffsetY_serialize(shadowOffsetY: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setShadowOffsetY(this.peer!.ptr, shadowOffsetY)
     }
     private getDirection_serialize(): CanvasDirection {
@@ -2307,16 +2152,16 @@ export class CanvasRenderingContext2DInternal {
     }
 }
 export class CanvasRenderingContext2D extends CanvasRenderer implements MaterializedBase {
-    get height(): number {
+    get height(): double {
         return this.getHeight()
     }
-    set height(height: number) {
+    set height(height: double) {
         this.setHeight(height)
     }
-    get width(): number {
+    get width(): double {
         return this.getWidth()
     }
-    set width(width: number) {
+    set width(width: double) {
         this.setWidth(width)
     }
     get canvas(): FrameNode {
@@ -2354,9 +2199,9 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getFinalizer()
     }
-    public toDataURL(type?: string, quality?: number): string {
+    public toDataURL(type?: string, quality?: double): string {
         const type_casted = type as (string | undefined)
-        const quality_casted = quality as (number | undefined)
+        const quality_casted = quality as (double | undefined)
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
     public startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void> {
@@ -2368,39 +2213,43 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.stopImageAnalyzer_serialize()
         return
     }
-    public onOnAttach(callback_: (() => void)): void {
-        const callback__casted = callback_ as ((() => void))
-        this.onOnAttach_serialize(callback__casted)
+    public onAttach(callback_: VoidCallback): void {
+        registerAttach(this, callback_)
+        const callback__casted = callback_ as (VoidCallback)
+        this.onAttach_serialize(callback__casted)
         return
     }
-    public offOnAttach(callback_?: (() => void)): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
-        this.offOnAttach_serialize(callback__casted)
+    public offAttach(callback_?: VoidCallback): void {
+        unregisterAttach(this, callback_)
+        const callback__casted = callback_ as (VoidCallback | undefined)
+        this.offAttach_serialize(callback__casted)
         return
     }
-    public onOnDetach(callback_: (() => void)): void {
-        const callback__casted = callback_ as ((() => void))
-        this.onOnDetach_serialize(callback__casted)
+    public onDetach(callback_: VoidCallback): void {
+        registerDetach(this, callback_)
+        const callback__casted = callback_ as (VoidCallback)
+        this.onDetach_serialize(callback__casted)
         return
     }
-    public offOnDetach(callback_?: (() => void)): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
-        this.offOnDetach_serialize(callback__casted)
+    public offDetach(callback_?: VoidCallback): void {
+        unregisterDetach(this, callback_)
+        const callback__casted = callback_ as (VoidCallback | undefined)
+        this.offDetach_serialize(callback__casted)
         return
     }
-    private getHeight(): number {
+    private getHeight(): double {
         return this.getHeight_serialize()
     }
-    private setHeight(height: number): void {
-        const height_casted = height as (number)
+    private setHeight(height: double): void {
+        const height_casted = height as (double)
         this.setHeight_serialize(height_casted)
         return
     }
-    private getWidth(): number {
+    private getWidth(): double {
         return this.getWidth_serialize()
     }
-    private setWidth(width: number): void {
-        const width_casted = width as (number)
+    private setWidth(width: double): void {
+        const width_casted = width as (double)
         this.setWidth_serialize(width_casted)
         return
     }
@@ -2412,13 +2261,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.setCanvas_serialize(canvas_casted)
         return
     }
-    on(type: string, callback_: (() => void)): void {
-        throw new Error("Improve")
-    }
-    off(type: string, callback_: (() => void)): void {
-        throw new Error("Improve")
-    }
-    toDataURL_serialize(type?: string, quality?: number): string {
+    toDataURL_serialize(type?: string, quality?: double): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (type !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2430,7 +2273,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         if (quality !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const qualityTmpValue  = quality!
-            thisSerializer.writeNumber(qualityTmpValue)
+            thisSerializer.writeFloat64(qualityTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2449,13 +2292,13 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_stopImageAnalyzer(this.peer!.ptr)
     }
-    onOnAttach_serialize(callback_: (() => void)): void {
+    onAttach_serialize(callback_: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offOnAttach_serialize(callback_?: (() => void)): void {
+    offAttach_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2464,16 +2307,16 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onOnDetach_serialize(callback_: (() => void)): void {
+    onDetach_serialize(callback_: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offOnDetach_serialize(callback_?: (() => void)): void {
+    offDetach_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2482,21 +2325,21 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getHeight_serialize(): number {
+    private getHeight_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getHeight(this.peer!.ptr)
         return retval
     }
-    private setHeight_serialize(height: number): void {
+    private setHeight_serialize(height: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_setHeight(this.peer!.ptr, height)
     }
-    private getWidth_serialize(): number {
+    private getWidth_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getWidth(this.peer!.ptr)
         return retval
     }
-    private setWidth_serialize(width: number): void {
+    private setWidth_serialize(width: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_setWidth(this.peer!.ptr, width)
     }
     private getCanvas_serialize(): FrameNode {
@@ -2517,10 +2360,10 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     constructor(_0: boolean, _1: boolean, _2: boolean, _3: boolean, peerPtr: KPointer) {
         super(peerPtr)
     }
-    constructor(width: number, height: number, settings?: RenderingContextSettings, unit?: LengthMetricsUnit) {
+    constructor(width: double, height: double, settings?: RenderingContextSettings, unit?: LengthMetricsUnit) {
         this(false, false, false, false, OffscreenCanvasRenderingContext2D.construct(width, height, settings, unit))
     }
-    static construct(width: number, height: number, settings?: RenderingContextSettings, unit?: LengthMetricsUnit): KPointer {
+    static construct(width: double, height: double, settings?: RenderingContextSettings, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (settings !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2543,15 +2386,15 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_getFinalizer()
     }
-    public toDataURL(type?: string, quality?: number): string {
+    public toDataURL(type?: string, quality?: double): string {
         const type_casted = type as (string | undefined)
-        const quality_casted = quality as (number | undefined)
+        const quality_casted = quality as (double | undefined)
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
-    public transferToImageBitmap(): ImageBitmap {
+    public transferToImageBitmap(): ImageBitmap | undefined {
         return this.transferToImageBitmap_serialize()
     }
-    toDataURL_serialize(type?: string, quality?: number): string {
+    toDataURL_serialize(type?: string, quality?: double): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (type !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2563,7 +2406,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         if (quality !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const qualityTmpValue  = quality!
-            thisSerializer.writeNumber(qualityTmpValue)
+            thisSerializer.writeFloat64(qualityTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2571,9 +2414,15 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         thisSerializer.release()
         return retval
     }
-    transferToImageBitmap_serialize(): ImageBitmap {
+    transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_transferToImageBitmap(this.peer!.ptr)
-        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ImageBitmap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (ImageBitmap_serializer.read(retvalDeserializer) as ImageBitmap)
+        }
+        const returnResult : ImageBitmap | undefined = buffer
+        return returnResult
     }
 }

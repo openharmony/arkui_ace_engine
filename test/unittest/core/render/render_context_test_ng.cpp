@@ -19,10 +19,12 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 #undef private

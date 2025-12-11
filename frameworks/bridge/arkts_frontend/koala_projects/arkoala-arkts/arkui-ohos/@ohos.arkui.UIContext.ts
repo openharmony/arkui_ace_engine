@@ -23,22 +23,25 @@ import { SizeOptions } from 'arkui/framework';
 import { AnimateParam } from 'arkui/framework';
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
 import { Context, PointerStyle, PixelMap } from '#external';
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework';
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/framework';
 import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { default as mediaquery } from '@ohos/mediaquery';
+import { default as mediaquery } from '@ohos.mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
-import { TextPickerDialogOptions } from 'arkui/framework';
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
+import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -51,7 +54,10 @@ import { ComputableState, IncrementalNode } from '@koalaui/runtime';
 import { PeerNode } from 'arkui/PeerNode';
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { int32 } from "@koalaui/common"
+import { int32, int64 } from "@koalaui/common";
+import { KPointer } from '@koalaui/interop';
+import { TabsController } from 'arkui/component/tabs';
+import { Scroller } from 'arkui/component/scroll';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -60,8 +66,8 @@ export class UIInspector {
 }
 
 export interface TargetInfo {
-    id: string | number;
-    componentId?: number;
+    id: string | int32;
+    componentId?: int32;
 }
 
 export class Font {
@@ -164,7 +170,7 @@ export class Router {
         throw Error("getState not implemented in Router!");
     }
 
-    public getStateByIndex(index: number): router.RouterState | undefined {
+    public getStateByIndex(index: int): router.RouterState | undefined {
         throw Error("getStateByIndex not implemented in Router!");
     }
 
@@ -219,6 +225,9 @@ export class FocusController {
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
         throw Error("setKeyProcessingMode not implemented in FocusController!")
     }
+    public isActive(): boolean {
+        throw Error('isActive not implemented in FocusController!')
+    }
 }
 
 export class ComponentSnapshot {
@@ -228,7 +237,7 @@ export class ComponentSnapshot {
         throw Error("get with callback not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
-    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("get with promise not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
@@ -239,13 +248,13 @@ export class ComponentSnapshot {
     }
     //@ts-ignore
     public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
-                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
     }
-    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap | null {
         throw Error("getSync not implemented in ComponentSnapshot!")
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
@@ -253,7 +262,8 @@ export class ComponentSnapshot {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 }
@@ -266,7 +276,7 @@ export class DragController {
     }
     //@ts-ignore
     public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
-        Promise<dragController.DragEventParam> {
+        Promise<dragController.DragEventParam> | null {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
     public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
@@ -312,7 +322,7 @@ export class OverlayManager {
         throw Error("getOverlayManagerOptions not implemented in OverlayManager!")
     }
 
-    addComponentContent(content: ComponentContent, index?: number): void {
+    addComponentContent(content: ComponentContent, index?: int32): void {
         throw Error("addComponentContent not implemented in OverlayManager!")
     }
 
@@ -341,18 +351,18 @@ export class OverlayManager {
     }
 }
 
-export type CustomBuilderWithId = (id: number) => void;
+export type CustomBuilderWithId = (id: int32) => void;
 
 export class PromptAction {
     showToast(options: promptAction.ShowToastOptions): void {
         throw Error("showToast not implemented in PromptAction!")
     }
 
-    openToast(options: promptAction.ShowToastOptions): Promise<number> {
+    openToast(options: promptAction.ShowToastOptions): Promise<int32> {
         throw Error("openToast not implemented in PromptAction!")
     }
 
-    closeToast(toastId: number): void {
+    closeToast(toastId: int32): void {
         throw Error("closeToast not implemented in PromptAction!")
     }
 
@@ -384,7 +394,7 @@ export class PromptAction {
     }
 
     //@ts-ignore
-    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
+    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<int32> {
         throw Error("openCustomDialog not implemented in PromptAction!")
     }
 
@@ -398,7 +408,7 @@ export class PromptAction {
     }
 
     //@ts-ignore
-    closeCustomDialog(dialogId: number): void {
+    closeCustomDialog(dialogId: int32): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
     }
 
@@ -407,8 +417,8 @@ export class PromptAction {
         throw Error("openCustomDialogWithController not implemented in PromptAction!")
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
-        options?: promptAction.DialogOptions): Promise<number> {
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<int32>, controller?: promptAction.DialogController,
+        options?: promptAction.DialogOptions): Promise<int32> {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
@@ -508,6 +518,9 @@ export class UIContext {
     getFrameNodeByUniqueId(id: number): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
+    getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
+    }
     getHostContext(): Context | undefined {
         throw Error("getHostContext not implemented in UIContext!")
     }
@@ -571,8 +584,8 @@ export class UIContext {
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         throw Error("setFrameCallback not implemented in UIContext!")
     }
     runScopedTask(callback: () => void): void {
@@ -584,7 +597,7 @@ export class UIContext {
     postFrameCallback(frameCallback: FrameCallback): void {
         throw Error("postFrameCallback not implemented in UIContext!")
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         throw Error("postDelayedFrameCallback not implemented in UIContext!")
     }
     public getUIInspector(): UIInspector {
@@ -623,7 +636,7 @@ export class UIContext {
         throw Error("showTimePickerDialog not implemented in UIContext!")
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
         throw Error("showTextPickerDialog not implemented in UIContext!")
     }
 
@@ -631,7 +644,7 @@ export class UIContext {
         throw Error("showDatePickerDialog not implemented in UIContext!")
     }
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
@@ -640,8 +653,15 @@ export class UIContext {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
+    public enableSwipeBack(enabled: boolean | undefined): void {
+        throw Error("enableSwipeBack not implemented in UIContext!")
+    }
+
     public getWindowName(): string | undefined {
         throw Error("getWindowName not implemented in UIContext!")
+    }
+    public getWindowId(): int32 | undefined {
+        return undefined;
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
@@ -649,22 +669,22 @@ export class UIContext {
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
         throw Error("vp2px not implemented in UIContext!")
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
         throw Error("px2vp not implemented in UIContext!")
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
         throw Error("fp2px not implemented in UIContext!")
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
         throw Error("px2fp not implemented in UIContext!")
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
         throw Error("lpx2px not implemented in UIContext!")
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
         throw Error("px2lpx not implemented in UIContext!")
     }
 
@@ -674,11 +694,17 @@ export class UIContext {
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        return UIContextImpl.createUIContextWithoutWindow(context)
+    }
+    static destroyUIContextWithoutWindow() {
+        UIContextImpl.destroyUIContextWithoutWindow()
+    }
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
  
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
         throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
     }
     public setImageCacheCount(value: int): void {
@@ -688,10 +714,48 @@ export class UIContext {
     public setImageRawDataCacheSize(value: int): void {
         throw Error("setImageRawDataCacheSize not implemented in UIContext!")
     }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        throw Error("requireDynamicSyncScene not implemented in UIContext!");
+    }
+
+    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+        throw Error("openBindSheet not implemented in UIContext!")
+    }
+
+    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateBindSheet not implemented in UIContext!")
+    }
+
+    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+        throw Error("closeBindSheet not implemented in UIContext!")
+    }
+
+    public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("bindTabsToScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("unbindTabsFromScrollable not implemented in UIContext!")
+    }
+
+    public bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("bindTabsToNestedScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
+    }
+    
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
-    onFrame(frameTimeInNano: number): void {}
-    onIdle(timeLeftInNano: number): void {}
+    onFrame(frameTimeInNano: long): void {}
+    onIdle(timeLeftInNano: long): void {}
 }
 
 export class UIObserver {
@@ -732,30 +796,222 @@ export class UIObserver {
         }
     }
 
-    public onTabChange(callback: ((param: object) => void)): void {
+    public onScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(options, callback);
+        }
+    }
+
+    public offScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(options, callback);
+        }
+    }
+
+    public onScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(callback);
+        }
+    }
+
+    public offScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(callback);
+        }
+    }
+
+    public onNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public offNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public onNavDestinationUpdate(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(callback);
+        }
+    }
+
+    public offNavDestinationUpdate(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(callback);
+        }
+    }
+
+    public onRouterPageUpdate(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageUpdate(callback);
+        }
+    }
+
+    public offRouterPageUpdate(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageUpdate(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(callback: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(callback);
+        }
+    }
+
+    public offNavDestinationSwitch(callback?: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(observerOptions, callback);
+        }
+    }
+
+    public offNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(observerOptions, callback);
+        }
+    }
+
+    public onTabChange(callback: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTabChange(callback);
         }
     }
 
-    public offTabChange(callback?: ((param: object) => void)): void {
+    public offTabChange(callback?: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.offTabChange(callback);
         }
     }
 
-    public onTabChange(options: uiObserver.ObserverOptions, callback: ((param: object) => void)): void {
+    public onTabChange(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTabChange(options, callback);
         }
     }
 
-    public offTabChange(options: uiObserver.ObserverOptions, callback?: ((param: object) => void)): void {
+    public offTabChange(options: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.offTabChange(options, callback);
         }
     }
+
+    public onTabContentUpdate(callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(callback);
+        }
+    }
+
+    public offTabContentUpdate(callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(callback);
+        }
+    }
+
+    public onTabContentUpdate(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(options, callback);
+        }
+    }
+
+    public offTabContentUpdate(options: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(options, callback);
+        }
+    }
+
+    public onDensityUpdate(callback: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDensityUpdate(callback);
+        }
+    }
+
+    public offDensityUpdate(callback?: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDensityUpdate(callback);
+        }
+    }
+
+    public onWillDraw(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onWillDraw(callback);
+        }
+    }
+
+    public offWillDraw(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offWillDraw(callback);
+        }
+    }
+
+    public onDidLayout(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDidLayout(callback);
+        }
+    }
+
+    public offDidLayout(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDidLayout(callback);
+        }
+    }
 }
-export interface PageInfo {}
+export interface PageInfo {
+        routerPageInfo?: uiObserver.RouterPageInfo;
+        navDestinationInfo?: uiObserver.NavDestinationInfo;
+}
 export interface ContentCoverController {}
-export declare class DynamicSyncScene {}
+export class DynamicSyncScene {
+    private range: ExpectedFrameRateRange;
+    constructor(range: ExpectedFrameRateRange) {
+        this.range = range;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        this.range = range;
+    }
+
+    getFrameRateRange(): ExpectedFrameRateRange {
+        return this.range;
+    }
+}
+
+export const enum SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATION = 1,
+}
+
+export class SwiperDynamicSyncScene extends DynamicSyncScene {
+    readonly type: SwiperDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
+}

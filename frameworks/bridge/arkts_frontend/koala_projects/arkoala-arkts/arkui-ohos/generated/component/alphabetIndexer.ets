@@ -16,10 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, Position_serializer, ResourceColor, Font, Position, Length } from "./units"
-import { Bindable_Number_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Bindable_I32_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -27,6 +28,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookAlphabetIndexerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -46,6 +48,7 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setAlphabetIndexerOptionsAttribute(options: AlphabetIndexerOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         AlphabetIndexerOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._AlphabetIndexerInterface_setAlphabetIndexerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -60,10 +63,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -88,10 +91,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -116,10 +119,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -144,10 +147,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -172,10 +175,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -200,10 +203,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -228,10 +231,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -256,10 +259,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -323,7 +326,7 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setPopupItemFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setItemSizeAttribute(value: string | number | undefined): void {
+    setItemSizeAttribute(value: string | double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -332,10 +335,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -391,19 +394,19 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setOnPopupSelect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectedAttribute(value: number | Bindable<number> | undefined): void {
+    setSelectedAttribute(value: int32 | Bindable<int32> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<number>) {
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable<int32>) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<int32>
+                Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -435,24 +438,24 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setAutoCollapse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setPopupItemBorderRadiusAttribute(value: number | undefined): void {
+    setPopupItemBorderRadiusAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setPopupItemBorderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setItemBorderRadiusAttribute(value: number | undefined): void {
+    setItemBorderRadiusAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -480,10 +483,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -527,10 +530,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const offsetTmpValueForIdx0  = offsetTmpValue as string
                 thisSerializer.writeString(offsetTmpValueForIdx0)
-            } else if (offsetTmpValue instanceof number) {
+            } else if (offsetTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const offsetTmpValueForIdx1  = offsetTmpValue as number
-                thisSerializer.writeNumber(offsetTmpValueForIdx1)
+                const offsetTmpValueForIdx1  = offsetTmpValue as double
+                thisSerializer.writeFloat64(offsetTmpValueForIdx1)
             } else if (offsetTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const offsetTmpValueForIdx2  = offsetTmpValue as Resource
@@ -553,11 +556,11 @@ export enum IndexerAlign {
 }
 export interface AlphabetIndexerOptions {
     arrayValue: Array<string>;
-    selected: number | Bindable<number>;
+    selected: int32 | Bindable<int32>;
 }
-export type OnAlphabetIndexerSelectCallback = (index: number) => void;
-export type OnAlphabetIndexerPopupSelectCallback = (index: number) => void;
-export type OnAlphabetIndexerRequestPopupDataCallback = (index: number) => Array<string>;
+export type OnAlphabetIndexerSelectCallback = (index: int32) => void;
+export type OnAlphabetIndexerPopupSelectCallback = (index: int32) => void;
+export type OnAlphabetIndexerRequestPopupDataCallback = (index: int32) => Array<string>;
 export interface AlphabetIndexerAttribute extends CommonMethod {
     setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
         throw new Error("Unimplemented method setAlphabetIndexerOptions")
@@ -598,7 +601,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     popupItemFont(value: Font | undefined): this {
         throw new Error("Unimplemented method popupItemFont")
     }
-    itemSize(value: string | number | undefined): this {
+    itemSize(value: string | double | undefined): this {
         throw new Error("Unimplemented method itemSize")
     }
     font(value: Font | undefined): this {
@@ -613,7 +616,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         throw new Error("Unimplemented method onPopupSelect")
     }
-    selected(value: number | Bindable<number> | undefined): this {
+    selected(value: int32 | Bindable<int32> | undefined): this {
         throw new Error("Unimplemented method selected")
     }
     popupPosition(value: Position | undefined): this {
@@ -622,10 +625,10 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     autoCollapse(value: boolean | undefined): this {
         throw new Error("Unimplemented method autoCollapse")
     }
-    popupItemBorderRadius(value: number | undefined): this {
+    popupItemBorderRadius(value: double | undefined): this {
         throw new Error("Unimplemented method popupItemBorderRadius")
     }
-    itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: double | undefined): this {
         throw new Error("Unimplemented method itemBorderRadius")
     }
     popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
@@ -657,16 +660,16 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     selectedFont_value?: Font | undefined
     popupFont_value?: Font | undefined
     popupItemFont_value?: Font | undefined
-    itemSize_value?: string | number | undefined
+    itemSize_value?: string | double | undefined
     font_value?: Font | undefined
     onSelect_value?: OnAlphabetIndexerSelectCallback | undefined
     onRequestPopupData_value?: OnAlphabetIndexerRequestPopupDataCallback | undefined
     onPopupSelect_value?: OnAlphabetIndexerPopupSelectCallback | undefined
-    selected_value?: number | Bindable<number> | undefined
+    selected_value?: int32 | Bindable<int32> | undefined
     popupPosition_value?: Position | undefined
     autoCollapse_value?: boolean | undefined
-    popupItemBorderRadius_value?: number | undefined
-    itemBorderRadius_value?: number | undefined
+    popupItemBorderRadius_value?: double | undefined
+    itemBorderRadius_value?: double | undefined
     popupBackgroundBlurStyle_value?: BlurStyle | undefined
     popupTitleBackground_value?: ResourceColor | undefined
     enableHapticFeedback_value?: boolean | undefined
@@ -710,7 +713,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     popupItemFont(value: Font | undefined): this {
         return this
     }
-    itemSize(value: string | number | undefined): this {
+    itemSize(value: string | double | undefined): this {
         return this
     }
     font(value: Font | undefined): this {
@@ -725,7 +728,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         return this
     }
-    selected(value: number | Bindable<number> | undefined): this {
+    selected(value: int32 | Bindable<int32> | undefined): this {
         return this
     }
     popupPosition(value: Position | undefined): this {
@@ -734,10 +737,10 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     autoCollapse(value: boolean | undefined): this {
         return this
     }
-    popupItemBorderRadius(value: number | undefined): this {
+    popupItemBorderRadius(value: double | undefined): this {
         return this
     }
-    itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: double | undefined): this {
         return this
     }
     popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
@@ -768,6 +771,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         if (this.checkPriority("setAlphabetIndexerOptions")) {
             const options_casted = options as (AlphabetIndexerOptions)
             this.getPeer()?.setAlphabetIndexerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('AlphabetIndexerAttribute');
             return this
         }
         return this
@@ -868,9 +872,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    public itemSize(value: string | number | undefined): this {
+    public itemSize(value: string | double | undefined): this {
         if (this.checkPriority("itemSize")) {
-            const value_casted = value as (string | number | undefined)
+            const value_casted = value as (string | double | undefined)
             this.getPeer()?.setItemSizeAttribute(value_casted)
             return this
         }
@@ -908,9 +912,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    public selected(value: number | Bindable<number> | undefined): this {
+    public selected(value: int32 | Bindable<int32> | undefined): this {
         if (this.checkPriority("selected")) {
-            const value_casted = value as (number | Bindable<number> | undefined)
+            const value_casted = value as (int32 | Bindable<int32> | undefined)
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
         }
@@ -932,17 +936,17 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    public popupItemBorderRadius(value: number | undefined): this {
+    public popupItemBorderRadius(value: double | undefined): this {
         if (this.checkPriority("popupItemBorderRadius")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setPopupItemBorderRadiusAttribute(value_casted)
             return this
         }
         return this
     }
-    public itemBorderRadius(value: number | undefined): this {
+    public itemBorderRadius(value: double | undefined): this {
         if (this.checkPriority("itemBorderRadius")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setItemBorderRadiusAttribute(value_casted)
             return this
         }
@@ -982,12 +986,17 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookAlphabetIndexerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookAlphabetIndexerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -1019,14 +1028,14 @@ export class AlphabetIndexerOptions_serializer {
             valueSerializer.writeString(valueHolderForArrayValueTmpElement)
         }
         const valueHolderForSelected  = value.selected
-        if (valueHolderForSelected instanceof number) {
+        if (valueHolderForSelected instanceof int32) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForSelectedForIdx0  = valueHolderForSelected as number
-            valueSerializer.writeNumber(valueHolderForSelectedForIdx0)
-        } else if (valueHolderForSelected instanceof Bindable<number>) {
+            const valueHolderForSelectedForIdx0  = valueHolderForSelected as int32
+            valueSerializer.writeInt32(valueHolderForSelectedForIdx0)
+        } else if (valueHolderForSelected instanceof Bindable<int32>) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForSelectedForIdx1  = valueHolderForSelected as Bindable<number>
-            Bindable_Number_serializer.write(valueSerializer, valueHolderForSelectedForIdx1)
+            const valueHolderForSelectedForIdx1  = valueHolderForSelected as Bindable<int32>
+            Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): AlphabetIndexerOptions {
@@ -1038,15 +1047,15 @@ export class AlphabetIndexerOptions_serializer {
         }
         const arrayValueTmpResult : Array<string> = arrayValueTmpBuf
         const selectedTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let selectedTmpBuf : number | Bindable<number> | undefined
+        let selectedTmpBuf : int32 | Bindable<int32> | undefined
         if (selectedTmpBufUnionSelector == (0).toChar()) {
-            selectedTmpBuf = (valueDeserializer.readNumber() as number)
+            selectedTmpBuf = valueDeserializer.readInt32()
         } else if (selectedTmpBufUnionSelector == (1).toChar()) {
-            selectedTmpBuf = Bindable_Number_serializer.read(valueDeserializer)
+            selectedTmpBuf = Bindable_I32_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for selectedTmpBuf has to be chosen through deserialisation.")
         }
-        const selectedTmpResult : number | Bindable<number> = (selectedTmpBuf as number | Bindable<number>)
+        const selectedTmpResult : int32 | Bindable<int32> = (selectedTmpBuf as int32 | Bindable<int32>)
         let value : AlphabetIndexerOptions = ({arrayValue: arrayValueTmpResult, selected: selectedTmpResult} as AlphabetIndexerOptions)
         return value
     }

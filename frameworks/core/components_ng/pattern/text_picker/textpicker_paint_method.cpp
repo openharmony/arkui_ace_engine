@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint8_t DOUBLE = 2;
-const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
 
 void UpdateDividerColor(ItemDivider& divider)
 {
@@ -138,11 +137,12 @@ void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const Rec
     auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
     auto dividerLength = contentRect.Width();
     auto dividerMargin = contentRect.GetX();
+    auto pickerDialogDividerMargin = theme->GetPickerDialogDividerMargin();
     auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPickerPattern);
     if (textPickerPattern->GetIsShowInDialog()) {
-        dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
-        dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();
+        dividerLength -= pickerDialogDividerMargin.ConvertToPx() * DOUBLE;
+        dividerMargin += pickerDialogDividerMargin.ConvertToPx();
     }
 
     DividerInfo info;
@@ -187,6 +187,11 @@ bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, cons
     info.startMargin = std::max(0.0, divider.startMargin.ConvertToPx());
     info.endMargin = std::max(0.0, divider.endMargin.ConvertToPx());
     info.dividerColor = divider.color;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto pickerDialogDividerMargin = theme->GetPickerDialogDividerMargin();
 
     auto dividerLength = contentRect.Width();
     auto dividerMargin = contentRect.GetX();
@@ -195,8 +200,8 @@ bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, cons
         return false;
     }
     if (textPickerPattern->GetIsShowInDialog()) {
-        dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
-        dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();
+        dividerLength -= pickerDialogDividerMargin.ConvertToPx() * DOUBLE;
+        dividerMargin += pickerDialogDividerMargin.ConvertToPx();
     }
 
     float checkMargin = dividerLength - info.startMargin - info.endMargin;

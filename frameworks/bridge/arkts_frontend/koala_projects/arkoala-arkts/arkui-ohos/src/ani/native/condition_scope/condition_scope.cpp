@@ -31,4 +31,15 @@ ani_long ConstructConditionScope(ani_env* env, [[maybe_unused]] ani_object aniCl
     return modifier->getArkUIAniConditionScopeModifier()->constructConditionScope(id);
 }
 
+void ConditionScopeMarkDirty(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    // ani_object obj from ts is supposed to be processed here
+    return modifier->getArkUIAniConditionScopeModifier()->markDirty(ptr);
+}
+
 } // namespace OHOS::Ace::Ani

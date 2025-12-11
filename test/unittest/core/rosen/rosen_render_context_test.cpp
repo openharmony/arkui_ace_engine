@@ -2376,6 +2376,28 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation002, TestSize.Lev
 }
 
 /**
+ * @tc.name: RemoveKeyFrameNode
+ * @tc.desc: Test RemoveKeyFrameNode Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveKeyFrameNode, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->CreateKeyFrameNode();
+    ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    rosenRenderContext->reDraggingFlag_ = true;
+    rosenRenderContext->RemoveKeyFrameNode();
+    ASSERT_EQ(rosenRenderContext->reDraggingFlag_, false);
+    ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    rosenRenderContext->RemoveKeyFrameNode();
+    ASSERT_EQ(rosenRenderContext->keyFrameNode_, nullptr);
+}
+
+/**
  * @tc.name: RSUIContext001
  * @tc.desc: Test RSUIContext001 Func.
  * @tc.type: FUNC

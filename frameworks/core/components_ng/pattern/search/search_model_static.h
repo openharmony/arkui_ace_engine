@@ -43,6 +43,7 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
+    static void SetDividerColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style);
@@ -59,6 +60,7 @@ public:
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest);
@@ -71,6 +73,9 @@ public:
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     static void SetSearchSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetCancelSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
+    static void SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, std::optional<bool>& optValue);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 private:
 
 };

@@ -804,6 +804,7 @@ int32_t NativeRichEditorController::AddImageSpan(std::string value, NativeRichEd
     int32_t spanIndex = 0;
     ImageSpanOptions options;
     auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, -1);
     bool isCard = context->IsFormRender();
     std::string image = value;
     std::string bundleName;
@@ -853,6 +854,7 @@ int32_t NativeRichEditorController::AddImageSpan(std::string value, NativeRichEd
     int32_t spanIndex = 0;
     ImageSpanOptions options;
     auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, -1);
     bool isCard = context->IsFormRender();
     std::string image = value;
     std::string bundleName;
@@ -1282,7 +1284,10 @@ int32_t NativeRichEditorController::AddSymbolSpan(uint32_t value, NativeRichEdit
         options.offset = params.offset;
 
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_RETURN(pipelineContext, 0);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, 0);
+        auto theme = themeManager->GetTheme<NG::RichEditorTheme>();
         TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
         ParseSymbolStyle(params.style, style, updateSpanStyle_);
         options.style = style;
@@ -1416,7 +1421,9 @@ void NativeRichEditorController::SetTypingStyle(NativeRichEditorTextStyle12 valu
         LOGE("pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
 
     auto controller = controller_.Upgrade();
@@ -1429,7 +1436,7 @@ void NativeRichEditorController::SetTypingStyle(NativeRichEditorTextStyle12 valu
 NativeRichEditorTextStyleResult12 NativeRichEditorController::GetTypingStyle()
 {
     auto controller = controller_.Upgrade();
-    NativeRichEditorTextStyleResult12 result;
+    NativeRichEditorTextStyleResult12 result = {};
     if (controller) {
         auto typingStyle = controller->GetTypingStyle();
         NativeRichEditorTextStyleResult12 result;

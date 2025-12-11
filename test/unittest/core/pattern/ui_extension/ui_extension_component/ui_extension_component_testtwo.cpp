@@ -762,6 +762,40 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnFrameNodeChangedTest002, TestSize.Leve
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern DispatchDisplayAreaWithDelay
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, DispatchDisplayAreaWithDelay001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test DispatchDisplayAreaWithDelay
+     */
+    uint32_t delayTime = 0;
+    pattern->DispatchDisplayAreaWithDelay(delayTime);
+    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_.lastTaskTime > 0);
+    delayTime = 2;
+    pattern->DispatchDisplayAreaWithDelay(delayTime);
+    pattern->DispatchDisplayAreaWithDelay(delayTime);
+    pattern->DispatchDisplayAreaWithDelay(delayTime);
+    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_.lastTaskTime > 0);
+#endif
+}
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
  * @tc.desc: Test the method of pattern GetAccessibilityRectInfo
  * @tc.type: FUNC
  */
@@ -1465,5 +1499,53 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     context->frontendType_ = FrontendType::DECLARATIVE_JS;
     pattern2->OnAttachContext(rawContext);
     EXPECT_EQ(pattern2->hasAttachContext_, false);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTouchTest001
+ * @tc.desc: Test UIExtension HandleTouch windowLeave
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct pointer event
+    */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 5.0f, 5.0f };
+    PointF parentRevertPoint = { 5.0f, 5.0f };
+    TouchRestrict touchRestrict;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.mouseAction = MouseAction::NONE;
+    TouchTestResult result;
+    int32_t touchId = 0;
+    ResponseLinkResult responseLinkResult;
+    bool isDispatch = false;
+    /**
+    * @tc.steps: step2. construct UIExtensionNode
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    uiextensionNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    uiextensionNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->rect_ = RectF(0, 0, 100, 100);
+    renderContext->paintRect_ = RectF(0, 0, 100, 100);
+    uiextensionNode->renderContext_ = renderContext;
+    /**
+    * @tc.steps: step3. test UIExtensionNode TouchTest
+    */
+    auto res = uiextensionNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_NE(res, HitTestResult::OUT_OF_REGION);
+    touchRestrict.mouseAction = MouseAction::WINDOW_LEAVE;
+    uiextensionNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::BUBBLING);
 }
 } // namespace OHOS::Ace::NG

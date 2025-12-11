@@ -70,219 +70,246 @@ void SetFingerListImpl(Ark_GestureEvent peer,
     auto convValue = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     event->SetFingerList(convValue);
 }
-Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
+Array_FingerInfo GetFingerInfosImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    std::list<FingerInfo> fingerInfos;
+    std::list<FingerInfo> touchFingers;
+    std::list<FingerInfo> otherFingers;
+    
+    for (const auto& finger : fingerList) {
+        if (finger.sourceType_ == SourceType::TOUCH &&
+            finger.sourceTool_ == SourceTool::FINGER) {
+            touchFingers.push_back(finger);
+        } else {
+            otherFingers.push_back(finger);
+        }
+    }
+    fingerInfos.splice(fingerInfos.end(), touchFingers);
+    fingerInfos.splice(fingerInfos.end(), otherFingers);
+    return Converter::ArkValue<Array_FingerInfo>(fingerInfos, Converter::FC);
+}
+Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetOffsetXImpl(Ark_GestureEvent peer,
-                    const Ark_Number* offsetX)
+                    Ark_Float64 offsetX)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(offsetX);
 
-    auto convValue = Converter::Convert<float>(*offsetX);
+    auto convValue = Converter::Convert<float>(offsetX);
     event->SetOffsetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
+Ark_Float64 GetOffsetYImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetOffsetYImpl(Ark_GestureEvent peer,
-                    const Ark_Number* offsetY)
+                    Ark_Float64 offsetY)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(offsetY);
 
-    auto convValue = Converter::Convert<float>(*offsetY);
+    auto convValue = Converter::Convert<float>(offsetY);
     event->SetOffsetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
-Ark_Number GetAngleImpl(Ark_GestureEvent peer)
+Ark_Float64 GetAngleImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetAngle();
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetAngleImpl(Ark_GestureEvent peer,
-                  const Ark_Number* angle)
+                  Ark_Float64 angle)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(angle);
 
-    auto convValue = Converter::Convert<float>(*angle);
+    auto convValue = Converter::Convert<float>(angle);
     event->SetAngle(convValue);
 }
-Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
+Ark_Float64 GetSpeedImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetSpeed();
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetSpeedImpl(Ark_GestureEvent peer,
-                  const Ark_Number* speed)
+                  Ark_Float64 speed)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(speed);
 
-    auto convValue = Converter::Convert<float>(*speed);
+    auto convValue = Converter::Convert<float>(speed);
     event->SetSpeed(convValue);
 }
-Ark_Number GetScaleImpl(Ark_GestureEvent peer)
+Ark_Float64 GetScaleImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetScale();
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetScaleImpl(Ark_GestureEvent peer,
-                  const Ark_Number* scale)
+                  Ark_Float64 scale)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(scale);
 
-    auto convValue = Converter::Convert<float>(*scale);
+    auto convValue = Converter::Convert<float>(scale);
     event->SetScale(convValue);
 }
-Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
+Ark_Float64 GetPinchCenterXImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetPinchCenterXImpl(Ark_GestureEvent peer,
-                         const Ark_Number* pinchCenterX)
+                         Ark_Float64 pinchCenterX)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(pinchCenterX);
-
-    auto convValue = Converter::Convert<float>(*pinchCenterX);
+    auto convValue = Converter::Convert<float>(pinchCenterX);
     Offset pinchCenter;
     pinchCenter.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     pinchCenter.SetY(event->GetPinchCenter().GetY());
     event->SetPinchCenter(pinchCenter);
 }
-Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
+Ark_Float64 GetPinchCenterYImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetPinchCenterYImpl(Ark_GestureEvent peer,
-                         const Ark_Number* pinchCenterY)
+                         Ark_Float64 pinchCenterY)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(pinchCenterY);
-
-    auto convValue = Converter::Convert<float>(*pinchCenterY);
+    auto convValue = Converter::Convert<float>(pinchCenterY);
     Offset pinchCenter;
     pinchCenter.SetX(event->GetPinchCenter().GetX());
     pinchCenter.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetPinchCenter(pinchCenter);
 }
-Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
+Ark_Float64 GetVelocityXImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetVelocityXImpl(Ark_GestureEvent peer,
-                      const Ark_Number* velocityX)
+                      Ark_Float64 velocityX)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(velocityX);
 
-    auto convValue = Converter::Convert<float>(*velocityX);
+    auto convValue = Converter::Convert<float>(velocityX);
     Offset offsetPerSecond = event->GetVelocity().GetOffsetPerSecond();
     offsetPerSecond.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
+Ark_Float64 GetVelocityYImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetVelocityYImpl(Ark_GestureEvent peer,
-                      const Ark_Number* velocityY)
+                      Ark_Float64 velocityY)
 {
     CHECK_NULL_VOID(peer);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    CHECK_NULL_VOID(velocityY);
 
-    auto convValue = Converter::Convert<float>(*velocityY);
+    auto convValue = Converter::Convert<float>(velocityY);
     Offset offsetPerSecond = event->GetVelocity().GetOffsetPerSecond();
     offsetPerSecond.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     event->SetVelocity(Velocity(offsetPerSecond));
 }
-Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
+Ark_Float64 GetVelocityImpl(Ark_GestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     GestureEvent* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
 
     double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetVelocityImpl(Ark_GestureEvent peer,
-                     const Ark_Number* velocity)
+                     Ark_Float64 velocity)
 {
     LOGE("GestureEventAccessor::SetVelocityImpl not implemented");
+}
+Ark_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    EventLocationInfo tapLocation;
+    if (!fingerList.empty()) {
+        tapLocation = {
+            fingerList.back().localLocation_,
+            fingerList.back().screenLocation_,
+            fingerList.back().globalLocation_
+        };
+    }
+    return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation, Converter::FC);
 }
 } // GestureEventAccessor
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
@@ -295,6 +322,7 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::SetRepeatImpl,
         GestureEventAccessor::GetFingerListImpl,
         GestureEventAccessor::SetFingerListImpl,
+        GestureEventAccessor::GetFingerInfosImpl,
         GestureEventAccessor::GetOffsetXImpl,
         GestureEventAccessor::SetOffsetXImpl,
         GestureEventAccessor::GetOffsetYImpl,
@@ -315,6 +343,7 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::SetVelocityYImpl,
         GestureEventAccessor::GetVelocityImpl,
         GestureEventAccessor::SetVelocityImpl,
+        GestureEventAccessor::GetTapLocationImpl,
     };
     return &GestureEventAccessorImpl;
 }

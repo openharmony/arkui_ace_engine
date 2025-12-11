@@ -455,6 +455,13 @@ void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
     ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
 }
 
+ArkUI_Bool GetToggleState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ToggleModelNG::GetToggleState(frameNode);
+}
+
 void SetToggleOnChange(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -516,12 +523,13 @@ const ArkUIToggleModifier* GetToggleModifier()
         .setToggleState = SetToggleState,
         .setToggleOnChange = SetToggleOnChange,
         .resetToggleOnChange = ResetToggleOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
         .setToggleSelectedColorPtr = SetToggleSelectedColorPtr,
         .setToggleSwitchPointColorPtr = SetToggleSwitchPointColorPtr,
         .setTogglePointRadiusPtr = SetTogglePointRadiusPtr,
         .setToggleUnselectedColorPtr = SetToggleUnselectedColorPtr,
         .setToggleTrackBorderRadiusPtr = SetToggleTrackBorderRadiusPtr,
-        .setIsUserSetMargin = SetIsUserSetMargin,
+        .getToggleState = GetToggleState,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

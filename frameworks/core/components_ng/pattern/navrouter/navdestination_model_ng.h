@@ -116,6 +116,8 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
     void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) override;
+    static void UpdateBindingWithScrollable(FrameNode* frameNode,
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback);
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid);
@@ -161,6 +163,9 @@ public:
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
     static void SetTitleAnimationElapsedTime(FrameNode* frameNode, int32_t elapsedTime);
+    static void SetBackButtonTextResource(FrameNode *frameNode, const std::string& text,
+        const RefPtr<ResourceObject>& resourceObject);
+    static void ResetBackButtonText(FrameNode* frameNode);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

@@ -18,13 +18,12 @@ import sys
 import time
 import shutil
 import subprocess
-import re
-
 
 def main(argv):
     if len(argv) < 4:
         print("Usage: python script.py <path_to_project> <path_to_node_modules> <js_output_path> [--release]")
         sys.exit(1)
+
     # Determine if it's a release build
     is_release = len(argv) > 4 and argv[4] == "--release"
     print(f": is_release set to {is_release}")
@@ -43,15 +42,11 @@ def main(argv):
     print(f"ark_breakpoint: Changing directory to {project_path}. Out dir = {js_output_path}")
     os.chdir(project_path)
 
-    # Check if `node_modules` exists. If yes skip npm install
     if not os.path.exists(node_modules_path):
-
-        print(f"ark_breakpoint: node_modules directory not found at {node_modules_path}, running npm install")
-        try:
-            subprocess.check_call(["npm", "install"])
-        except subprocess.CalledProcessError as e:
-            print(f"Error: npm install failed with exit code {e.returncode}. Retry...")
-            print(e.stderr)
+        print(f"ERROR: node_modules directory not found at {node_modules_path}")
+        print("This should have been created by ark_breakpoint_npm_install action.")
+        print("Check that :ark_breakpoint_npm_install is in the deps of :run_ark_breakpoint_build")
+        sys.exit(1)
     else:
         print(f"ark_breakpoint: node_modules directory exists at {node_modules_path}")
 
@@ -63,7 +58,7 @@ def main(argv):
         subprocess.check_call(["npm", "run", script])
     except subprocess.CalledProcessError as e:
         print(f"Error: npm run {script} failed with exit code {e.returncode}.")
-        print("Error: State managemant build failed. See log output for failing .ts files")
+        print("Error: Ark breakpoint build failed.")
         sys.exit(e.returncode)
 
     source_folder = "../engine"
@@ -73,15 +68,12 @@ def main(argv):
         print(f"Error: Built file not found at {built_file}")
         sys.exit(1)
 
-    #Ensure the output directory exists
     if not os.path.exists(js_output_path):
         os.makedirs(js_output_path)
 
-    print(f"ark_breakpoint: Copying {built_file} to {output_file}")
-
     try:
         shutil.copy(built_file, output_file)
-        print(f"ark_breakpoint: File successfully copied to {output_file}")
+        print(f"ark_breakpoint: File successfully copyed to {output_file}")
     except Exception as e:
         print(f"Error: Failed to copy file: {e}")
         sys.exit(1)

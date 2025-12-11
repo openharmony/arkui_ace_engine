@@ -63,6 +63,7 @@ errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the no
 errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
+declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
 function getFrameNodeRawPtr(frameNode: FrameNode): number {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
@@ -84,6 +85,8 @@ class FrameNode extends Disposable {
   public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
+  protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
+  protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
     super();
     if (uiContext === undefined) {
@@ -195,7 +198,7 @@ class FrameNode extends Disposable {
     }
   }
   dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
@@ -209,10 +212,10 @@ class FrameNode extends Disposable {
     this._nativeRef = null;
     this.nodePtr_ = null;
   }
-  
+
   isDisposed(): boolean {
-    return super.isDisposed() && (this._nativeRef === undefined ||
-     this._nativeRef === null || this._nativeRef instanceof NativeWeakRef && this._nativeRef.invalid());
+    let node = this.getNodePtr();
+    return super.isDisposed() && (node === undefined || node === null);
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
@@ -582,6 +585,10 @@ class FrameNode extends Disposable {
     return getUINativeModule().frameNode.isAttached(this.getNodePtr());
   }
 
+  isOnMainTree(): boolean {
+    return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
+  }
+
   getInspectorInfo(): Object {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
@@ -735,22 +742,44 @@ class FrameNode extends Disposable {
   recycle(): void {
     this.triggerOnRecycle();
   }
-  addSupportedUIStates(uistates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
+  addSupportedUIStates(uiStates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates: number)=>{
-      statesChangeHandler(this, currentUIStates);
-    }, excludeInner);
+    this.statesChangeHandler_ = (currentUIStates: number)=>{
+      if (statesChangeHandler !== undefined && statesChangeHandler !== null) {
+        statesChangeHandler(this, currentUIStates);
+      }
+    }
+    let result = getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uiStates,
+      this.statesChangeHandler_, excludeInner);
+    if (result === true) {
+      this.supportedStates_ |= uiStates;
+    } else {
+      JSXNodeLogConsole.warn('add supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
   }
   removeSupportedUIStates(uiStates: number): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    let result = getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    if (result === true) {
+      this.supportedStates_ &= ~uiStates;
+      if (this.supportedStates_ === UIState.NORMAL) {
+        this.statesChangeHandler_ = undefined;
+      }
+    } else {
+      JSXNodeLogConsole.warn('remove supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
+  }
+  invalidateAttributes(): void {
+    if (this.getNodePtr()) {
+      getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
+    }
   }
   isTransferred(): boolean {
     return false;
   }
-  convertPoint(position, targetNode): Position {
+  convertPosition(position, targetNode): Position {
     if (targetNode === null) {
         throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
     }
@@ -770,7 +799,10 @@ class FrameNode extends Disposable {
     const offsetPosition = getUINativeModule().frameNode.convertPoint(
         this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
-    return { x: offsetPosition[0], y: offsetPosition[1] };
+    if (offsetPosition[0] === 0) {
+        throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
+    }
+    return { x: offsetPosition[1], y: offsetPosition[2] };
   }
   adoptChild(child: FrameNode): void{
     if (child === undefined || child === null) {
@@ -820,6 +852,12 @@ class FrameNode extends Disposable {
       throw { message: errorInfo, code: 100025 };
     }
   }
+   isInRenderState() :boolean {
+        if (this.getNodePtr()) {
+            return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+        }
+        return false;
+    }
 }
 
 class ImmutableFrameNode extends FrameNode {

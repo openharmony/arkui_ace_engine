@@ -47,7 +47,7 @@ class BuilderNodeCommonBase extends Disposable {
     return ret;
   }
   public dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
@@ -103,6 +103,8 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
   protected isFreeze: boolean;
+
+  // builderNode's parent, it may be view or builderNode
   public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
   private updateParams_: Object;
   private activeCount_: number;

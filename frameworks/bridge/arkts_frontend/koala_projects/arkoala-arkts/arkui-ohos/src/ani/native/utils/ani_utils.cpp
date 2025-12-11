@@ -208,6 +208,14 @@ bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
     return isUndefined;
 }
 
+bool AniUtils::IsUndefined(ani_env* env, ani_ref ref)
+{
+    CHECK_NULL_RETURN(env, true);
+    ani_boolean isUndefined = false;
+    ANI_CALL(env, Reference_IsUndefined(ref, &isUndefined), return true);
+    return isUndefined;
+}
+
 ani_object AniUtils::GetUndefined(ani_env* env)
 {
     CHECK_NULL_RETURN(env, nullptr);
@@ -228,7 +236,7 @@ std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::stri
     return result_string;
 }
 
-ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
+ani_object WrapBusinessError(ani_env* env, const char *msg)
 {
     ani_class cls {};
     ani_method method {};
@@ -256,8 +264,7 @@ ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
         ANI_OK) {
         return nullptr;
     }
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, method, &obj, dCode, aniMsg, undefRef)) != ANI_OK) {
+    if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
         return nullptr;
     }
     
@@ -268,14 +275,14 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
-    ani_object error = WrapBusinessError(env, msg, code);
+    ani_object error = WrapBusinessError(env, msg);
     if (error == nullptr) {
         return nullptr;
     }
@@ -365,6 +372,24 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
         return false;
     }
     result = static_cast<double>(aniResult);
+    return true;
+}
+
+bool AniUtils::GetOptionalInt(ani_env* env, ani_ref value, int32_t& result)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+    ani_int aniResult;
+    if (env->Object_CallMethodByName_Int(static_cast<ani_object>(value), "toInt", ":i", &aniResult) != ANI_OK) {
+        return false;
+    }
+    result = static_cast<int32_t>(aniResult);
     return true;
 }
 

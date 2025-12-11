@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+#  Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -59,6 +59,8 @@ FRAMEWORK_PAGE_ROUTER_EXCEPTION:
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
   PAGE_NAME: { type: STRING, desc: page name }
+  ABILITY_NAME: { type: STRING, desc: ability name }
+  PAGE_LOAD_COST: {type: STRING, arrsize: 5, desc: pages loading cost too long }
 
 COMPONENT_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: component exception }
@@ -234,7 +236,7 @@ SCROLLABLE_ERROR:
   NODE_TYPE: {type: STRING, desc: node type}
   ERROR_TYPE: {type: INT32, desc: error type}
   SUB_ERROR_TYPE: {type: STRING, desc: sub error type}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  BUNDLE_NAME: {type: STRING, desc: package name}
   TARGET_API_VERSION: {type: INT32, desc: target api version}
   VERSION_CODE: {type: INT32, desc: version code}
   VERSION_NAME: {type: STRING, desc: version name}
@@ -258,3 +260,10 @@ GENERAL_INTERACTION_ERROR:
   TOUCHEVENT_ID: {type: INT32, desc: touchEvent id}
   FINGER_ID: {type: INT32, desc: finger id}
   TAG: {type: STRING, desc: frame tag}
+
+UI_STATISTIC_EVENT:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: ui service statistic event}
+  EVENT_NAME: {type: STRING, desc: event name}
+  EVENT_COUNT: {type: INT32, arrsize: 100, desc: event count}
+  BUNDLE_NAME: {type: STRING, arrsize: 100, desc: bundle name}
+

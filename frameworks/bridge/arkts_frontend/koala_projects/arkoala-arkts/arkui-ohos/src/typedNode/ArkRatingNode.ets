@@ -18,6 +18,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { ArkRatingPeer, RatingOptions, RatingAttribute, OnRatingChangeCallback, StarStyleOptions,
     RatingConfiguration } from "../framework";
 import { ContentModifier } from "#handwritten";
+import { hookRatingContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -40,14 +41,14 @@ export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
         this.markDirty();
         return this;
     }
-    stars(value: number | undefined): this {
-        const value_casted = value as (number | undefined);
+    stars(value: int | undefined): this {
+        const value_casted = value as (int | undefined);
         this.getPeer()?.setStarsAttribute(value_casted);
         this.markDirty();
         return this;
     }
-    stepSize(value: number | undefined): this {
-        const value_casted = value as (number | undefined);
+    stepSize(value: double | undefined): this {
+        const value_casted = value as (double | undefined);
         this.getPeer()?.setStepSizeAttribute(value_casted);        
         this.markDirty();
         return this;
@@ -58,14 +59,15 @@ export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
         this.markDirty();
         return this;
     }
-    onChange(value: ((index: number) => void) | OnRatingChangeCallback | undefined): this {
-        const value_casted = value as (((index: number) => void) | OnRatingChangeCallback | undefined);
+    onChange(value: ((index: double) => void) | OnRatingChangeCallback | undefined): this {
+        const value_casted = value as (((index: double) => void) | OnRatingChangeCallback | undefined);
         this.getPeer()?.setOnChangeAttribute(value_casted);          
         this.markDirty();
         return this;
     }
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<RatingConfiguration> | undefined);
+        hookRatingContentModifier(this.getPeer(), value_casted);
         this.markDirty();
         return this;
     }

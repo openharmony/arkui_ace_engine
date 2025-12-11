@@ -83,6 +83,7 @@ public:
     void SetContentTransition(ContentTransitionType contentTransition) override;
     void SetAltError(const ImageSourceInfo& src) override;
     void SetAltPlaceholder(const ImageSourceInfo& src) override;
+    void SetAntiAlias(bool antiAlias) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -152,7 +153,7 @@ public:
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
-    static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
+    static void SetDrawableDescriptor(FrameNode* frameNode, void* newDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);
     static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
@@ -177,6 +178,8 @@ public:
     static void SetAltPlaceholderPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltPlaceholderResource(FrameNode* frameNode, void* resource);
     static ImageSourceInfo GetAltPlaceholder(FrameNode* frameNode);
+    static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
+    static bool GetAntiAlias(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

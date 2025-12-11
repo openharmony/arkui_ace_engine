@@ -133,7 +133,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> convValue = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(value->value, DimensionUnit::FP);
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
@@ -148,7 +148,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextTimerModelStatic::SetFontStyle(frameNode, style.value_or(DEFAULT_FONT_STYLE));
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_ResourceStr* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void SetFontFamilyImpl(Ark_NativePointer node,
 }
 // fix Opt_Callback_Number_Number_Void > Opt_Callback_Int64_Int64_Void this is time so int64 is required
 void SetOnTimerImpl(Ark_NativePointer node,
-                    const Opt_Callback_Number_Number_Void* value)
+                    const Opt_TimerCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -184,12 +184,10 @@ void SetOnTimerImpl(Ark_NativePointer node,
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
         int64_t utc, int64_t elapsedTime) {
-#ifdef WRONG_GEN
         PipelineContext::SetCallBackNode(node);
         auto utcResult = Converter::ArkValue<Ark_Int64>(utc);
         auto elapsedTimeResult = Converter::ArkValue<Ark_Int64>(elapsedTime);
         arkCallback.Invoke(utcResult, elapsedTimeResult);
-#endif
     };
     TextTimerModelNG::SetOnTimer(frameNode, std::move(onChange));
 }

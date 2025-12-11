@@ -299,6 +299,7 @@ public:
       value = malloc(length * sizeof(E));
       if (!value) {
         INTEROP_FATAL("Cannot allocate memory");
+        return;
       }
       interop_memset(value, length * sizeof(E), 0, length * sizeof(E));
       toClean.push_back(value);

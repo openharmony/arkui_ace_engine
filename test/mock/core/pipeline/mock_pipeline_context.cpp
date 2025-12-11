@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -157,12 +161,12 @@ MockPipelineContext::~MockPipelineContext() = default;
 
 void MockPipelineContext::SetUp()
 {
-    pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_ = AceType::MakeRefPtr<::testing::NiceMock<MockPipelineContext>>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
-    pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -182,6 +186,11 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
     return touchOptimizer_;
 }
 
+const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+{
+    return clickOptimizer_;
+}
+
 std::string PipelineContext::GetBundleName()
 {
     return "";
@@ -190,6 +199,11 @@ std::string PipelineContext::GetBundleName()
 std::string PipelineContext::GetModuleName()
 {
     return "";
+}
+
+const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
+{
+    return loadCompleteMgr_;
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -201,6 +215,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetDensity(double density)
+{
+    density_ = density;
 }
 
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
@@ -222,6 +241,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
 {
     g_isContainerCustomTitleVisible = visible;
 }
+
+void PipelineContext::GetComponentOverlayInspector(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
 
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
@@ -247,6 +271,9 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (!loadCompleteMgr_) {
+        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
 }
 
@@ -628,6 +655,14 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    for (const auto& animation : temp) {
+        animation();
+    }
+}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
@@ -1296,7 +1331,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<MockAccessibilityManager>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockAccessibilityManager>>();
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -1398,12 +1433,32 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
+void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (fontManager_) {
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
+    }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+
+RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
+{
+    return nullptr;
+}
 
 bool NG::PipelineContext::CheckThreadSafe()
 {
@@ -1509,6 +1564,21 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
+const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo()
+{
+    return nullptr;
+}
+
+std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+{
+    return "";
+}
+
+std::string NG::PipelineContext::GetCurrentPageName()
+{
+    return "";
+}
+
 void NG::PipelineContext::AddNeedReloadNodes(NG::UINode* node) {}
 
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
@@ -1554,23 +1624,14 @@ void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const R
 
 // WindowManager ===============================================================
 namespace OHOS::Ace {
-RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+bool WindowManager::GetPageViewportConfig(
+    const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+    const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig)
 {
-    if (getCurrentViewportConfigCallback_) {
-        return getCurrentViewportConfigCallback_();
+    if (getPageViewportConfigCallback_) {
+        return getPageViewportConfigCallback_(currentParams, currentConfig, targetParams, targetConfig);
     }
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
-    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
-{
-    if (getTargetViewportConfigCallback_) {
-        return getTargetViewportConfigCallback_(
-            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
-    }
-    return nullptr;
+    return false;
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================

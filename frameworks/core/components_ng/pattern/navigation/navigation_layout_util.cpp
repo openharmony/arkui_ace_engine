@@ -385,7 +385,7 @@ std::pair<bool, bool> NavigationLayoutUtil::CheckVerticalExtend(
     bool isCanBottomExtend = true;
     isCanBottomExtend &= ((opts.edges & LAYOUT_SAFE_AREA_EDGE_BOTTOM) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM));
     auto toolBarStyle = navBasePattern->GetToolBarStyle().value_or(BarStyle::STANDARD);
-    if (hostNode->IsToolBarVisible() && toolBarStyle != BarStyle::STACK) {
+    if (!(layoutProperty->GetHideToolBar().value_or(false) || toolBarStyle == BarStyle::STACK)) {
         isCanBottomExtend = false;
     }
     return std::make_pair(isCanTopExtend, isCanBottomExtend);

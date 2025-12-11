@@ -184,6 +184,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest002, TestSize.Level0)
     wrapLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
     OffsetF startPosition = OffsetF(ZERO, ZERO);
     OffsetF spaceBetweenContentsOnCrossAxis = OffsetF(RK356_WIDTH / 2.0f, ZERO);
     wrapLayoutAlgorithm->UpdateStartPositionByAlign(startPosition, 2.0f, spaceBetweenContentsOnCrossAxis, 2);
@@ -281,6 +282,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest003, TestSize.Level0)
     wrapLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
     OffsetF startPosition = OffsetF(ZERO, ZERO);
     OffsetF spaceBetweenContentsOnCrossAxis = OffsetF(RK356_WIDTH / 2.0f, ZERO);
     wrapLayoutAlgorithm->UpdateStartPositionByAlign(startPosition, 2.0f, spaceBetweenContentsOnCrossAxis, 2);
@@ -378,6 +380,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest004, TestSize.Level0)
     wrapLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
     OffsetF startPosition = OffsetF(ZERO, ZERO);
     OffsetF spaceBetweenContentsOnCrossAxis = OffsetF(RK356_WIDTH / 2.0f, ZERO);
     wrapLayoutAlgorithm->UpdateStartPositionByAlign(startPosition, 2.0f, spaceBetweenContentsOnCrossAxis, 2);

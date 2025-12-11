@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -51,6 +53,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
@@ -76,6 +79,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
@@ -1089,6 +1093,7 @@ bool PipelineBase::MaybeRelease()
 
 void PipelineBase::Destroy()
 {
+    GetStatisticEventReporter()->ForceReportStatisticEvents();
     CHECK_RUN_ON(UI);
     destroyed_ = true;
     ClearImageCache();
@@ -1192,6 +1197,18 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
+}
+
+void PipelineBase::SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback)
+{
+    frameMetricsCallBack_ = std::move(callback);
+}
+
+void PipelineBase::FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info)
+{
+    if (frameMetricsCallBack_) {
+        frameMetricsCallBack_(info);
     }
 }
 } // namespace OHOS::Ace

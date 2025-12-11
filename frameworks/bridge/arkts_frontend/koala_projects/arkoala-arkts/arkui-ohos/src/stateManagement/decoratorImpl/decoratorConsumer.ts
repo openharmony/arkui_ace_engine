@@ -18,6 +18,7 @@ import { IConsumerDecoratedVariable, IProviderDecoratedVariable, IVariableOwner 
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
     sourceProvider_: IProviderDecoratedVariable<T> | undefined;
@@ -25,30 +26,36 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
     constructor(owningView: IVariableOwner, varName: string, provideAlias: string, initValue: T) {
         super('@Consumer', owningView, varName);
         this.provideAlias_ = provideAlias;
-        this.sourceProvider_ = owningView.findProvider<T>(provideAlias);
+        this.sourceProvider_ = owningView.__findProvider__Internal<T>(provideAlias);
         if (this.sourceProvider_ === undefined) {
             this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         }
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${this.getTraceInfo()}`);
         if (this.sourceProvider_) {
-            const value = this.sourceProvider_!.get();
-            return value;
+            return this.sourceProvider_!.get();
         }
-        const value = this.backing_!.get(this.shouldAddRef());
+        const shouldAddRef = this.shouldAddRef()
+        const value = this.backing_!.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 
     set(newValue: T): void {
         if (this.sourceProvider_) {
             const value = this.sourceProvider_!.get();
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${value === newValue} ${this.setTraceInfo()}`);
             if (value !== newValue) {
                 this.sourceProvider_!.set(newValue);
             }
             return;
         }
         const value = this.backing_!.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }

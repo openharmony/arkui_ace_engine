@@ -21,6 +21,7 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -166,35 +167,37 @@ void TextTimerPattern::OnModifyDone()
         Pattern::OnModifyDone();
     }
 
-    if (!textNode_) {
-        textNode_ = GetTextNode();
+    FireBuilder();
+    if (!UseContentModifier()) {
+        if (!textNode_) {
+            textNode_ = GetTextNode();
+        }
+        CHECK_NULL_VOID(textNode_);
+        auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+        if (textLayoutProperty->GetPositionProperty()) {
+            textLayoutProperty->UpdateAlignment(
+                textLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+        } else {
+            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        }
+        auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
+        CHECK_NULL_VOID(textTimerProperty);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+        UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
+        auto textContext = textNode_->GetRenderContext();
+        CHECK_NULL_VOID(textContext);
+        textContext->SetClipToFrame(false);
+        textContext->UpdateClipEdge(false);
+        textNode_->MarkModifyDone();
     }
-    CHECK_NULL_VOID(textNode_);
-    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-    if (textLayoutProperty->GetPositionProperty()) {
-        textLayoutProperty->UpdateAlignment(
-            textLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    }
-    auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_VOID(textTimerProperty);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-    UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
-    auto textContext = textNode_->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
-    textContext->SetClipToFrame(false);
-    textContext->UpdateClipEdge(false);
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();
 
     InitTextTimerController();
     InitTimerDisplay();
-    textNode_->MarkModifyDone();
     RegisterVisibleAreaChangeCallback();
-    FireBuilder();
 }
 
 void TextTimerPattern::RegisterVisibleAreaChangeCallback()
@@ -355,11 +358,26 @@ void TextTimerPattern::ResetCount()
 
 void TextTimerPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        if (UseContentModifier()) {
+            host->RemoveChild(contentModifierNode_);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            contentModifierNode_ = nullptr;
+            CHECK_NE_VOID(host->GetChildren().empty(), true);
+            auto textId = GetTextId();
+            auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textId,
+                []() { return AceType::MakeRefPtr<TextPattern>(); });
+            CHECK_NULL_VOID(textNode);
+            textNode->MarkModifyDone();
+            textNode->MountToParent(host);
+            textNode_ = textNode;
+            Tick(0);
+        }
+        return;
+    }
+    textNode_.Reset();
     host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);

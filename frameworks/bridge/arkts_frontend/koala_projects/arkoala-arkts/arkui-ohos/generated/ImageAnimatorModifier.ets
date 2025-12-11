@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { AnimationStatus, FillMode } from "./component/enums"
 export class ImageAnimatorModifier extends CommonMethodModifier implements ImageAnimatorAttribute,AttributeModifier<ImageAnimatorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,7 +42,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _state_0_0value?: AnimationStatus | undefined
     _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _duration_0_0value?: number | undefined
+    _duration_0_0value?: int32 | undefined
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
     _fixedSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -48,7 +50,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _fillMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fillMode_0_0value?: FillMode | undefined
     _iterations_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _iterations_0_0value?: number | undefined
+    _iterations_0_0value?: int32 | undefined
     _monitorInvisibleArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _monitorInvisibleArea_0_0value?: boolean | undefined
     _onStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -62,6 +64,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImageAnimatorPeer;
         if (this._images_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -104,7 +107,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             switch (this._duration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDurationAttribute((this._duration_0_0value as number | undefined));
+                    peer.setDurationAttribute((this._duration_0_0value as int32 | undefined));
                     this._duration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -114,7 +117,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                 }
                 default: {
                     this._duration_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDurationAttribute((undefined as number | undefined));
+                    peer.setDurationAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -176,7 +179,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             switch (this._iterations_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIterationsAttribute((this._iterations_0_0value as number | undefined));
+                    peer.setIterationsAttribute((this._iterations_0_0value as int32 | undefined));
                     this._iterations_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -186,7 +189,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                 }
                 default: {
                     this._iterations_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIterationsAttribute((undefined as number | undefined));
+                    peer.setIterationsAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -301,6 +304,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     }
     mergeModifier(modifier: ImageAnimatorModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._images_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._images_0_flag) {
@@ -336,7 +340,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                     break;
                 }
                 default: {
-                    this.duration((undefined as number | undefined));
+                    this.duration((undefined as int32 | undefined));
                 }
             }
         }
@@ -388,7 +392,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                     break;
                 }
                 default: {
-                    this.iterations((undefined as number | undefined));
+                    this.iterations((undefined as int32 | undefined));
                 }
             }
         }
@@ -493,7 +497,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         }
         return this
     }
-    duration(value: number | undefined): this {
+    duration(value: int32 | undefined): this {
         if (((this._duration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._duration_0_0value) !== (value)))
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
@@ -537,7 +541,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         }
         return this
     }
-    iterations(value: number | undefined): this {
+    iterations(value: int32 | undefined): this {
         if (((this._iterations_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._iterations_0_0value) !== (value)))
         {
             this._iterations_0_flag = AttributeUpdaterFlag.UPDATE

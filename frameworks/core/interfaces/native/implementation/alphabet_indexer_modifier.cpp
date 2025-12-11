@@ -57,17 +57,17 @@ void AssignCast(std::optional<AlignStyle>& dst, const Ark_IndexerAlign& src)
 
 } // namespace Converter
 namespace {
-int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_Number_Bindable& value)
+int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_I32_Bindable& value)
 {
     int32_t result = 0;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Int32& src) {
             result = Converter::Convert<int32_t>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_I32& src) {
             result = Converter::Convert<int32_t>(src.value);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange)](const int32_t selected) {
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(selected));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(selected));
             };
             IndexerModelStatic::SetCreateChangeEvent(frameNode, std::move(onEvent));
         },
@@ -211,7 +211,7 @@ void SetPopupItemFontImpl(Ark_NativePointer node,
     }
 }
 void SetItemSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_String_Number* value)
+                     const Opt_Union_String_F64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -244,7 +244,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](
-                       const int32_t value) { arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value)); };
+                       const int32_t value) { arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value)); };
     IndexerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
 void SetOnRequestPopupDataImpl(Ark_NativePointer node,
@@ -258,14 +258,9 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {
-        auto arkValue = Converter::ArkValue<Ark_Number>(selected);
-        std::vector<std::string> result;
-        auto handler = [&result](const void* rawResultPtr) {
-            auto arkResultPtr = reinterpret_cast<const Array_String*>(rawResultPtr);
-            result = Converter::Convert<std::vector<std::string>>(*arkResultPtr);
-        };
-        CallbackKeeper::InvokeWithResultHandler<Array_String, Callback_Array_String_Void>(handler, callback, arkValue);
-        return result;
+        auto arkValue = Converter::ArkValue<Ark_Int32>(selected);
+        return callback.InvokeWithConvertResult<std::vector<std::string>, Array_String,
+            Callback_Array_String_Void>(arkValue);
     };
     IndexerModelStatic::SetOnRequestPopupData(frameNode, std::move(onEvent));
 }
@@ -280,11 +275,11 @@ void SetOnPopupSelectImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)](
-                       const int32_t value) { arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value)); };
+                       const int32_t value) { arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value)); };
     IndexerModelStatic::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Bindable* value)
+                     const Opt_Union_I32_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -316,7 +311,7 @@ void SetAutoCollapseImpl(Ark_NativePointer node,
     IndexerModelStatic::SetAutoCollapse(frameNode, convValue);
 }
 void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -328,7 +323,7 @@ void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
     IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius);
 }
 void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

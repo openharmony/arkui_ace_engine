@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookRatingContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRatingPeer, StarStyleOptions, OnRatingChangeCallback, RatingConfiguration, RatingAttribute } from "./component/rating"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RatingModifier extends CommonMethodModifier implements RatingAttribute,AttributeModifier<RatingAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,21 +37,24 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     applyDisabledAttribute(instance: RatingAttribute): void { }
     applySelectedAttribute(instance: RatingAttribute): void { }
     _stars_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stars_0_0value?: number | undefined
+    _stars_0_0value?: int32 | undefined
     _stepSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stepSize_0_0value?: number | undefined
+    _stepSize_0_0value?: double | undefined
     _starStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _starStyle_0_0value?: StarStyleOptions | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRatingChangeCallback | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<RatingConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRatingPeer;
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._stars_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStarsAttribute((this._stars_0_0value as number | undefined));
+                    peer.setStarsAttribute((this._stars_0_0value as int32 | undefined));
                     this._stars_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -59,7 +64,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
                 default: {
                     this._stars_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStarsAttribute((undefined as number | undefined));
+                    peer.setStarsAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -67,7 +72,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             switch (this._stepSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStepSizeAttribute((this._stepSize_0_0value as number | undefined));
+                    peer.setStepSizeAttribute((this._stepSize_0_0value as double | undefined));
                     this._stepSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -77,7 +82,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
                 default: {
                     this._stepSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStepSizeAttribute((undefined as number | undefined));
+                    peer.setStepSizeAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -117,9 +122,28 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookRatingContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<RatingConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookRatingContentModifier(peer, (undefined as ContentModifier<RatingConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RatingModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stars_0_flag) {
@@ -129,7 +153,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                     break;
                 }
                 default: {
-                    this.stars((undefined as number | undefined));
+                    this.stars((undefined as int32 | undefined));
                 }
             }
         }
@@ -142,7 +166,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                     break;
                 }
                 default: {
-                    this.stepSize((undefined as number | undefined));
+                    this.stepSize((undefined as double | undefined));
                 }
             }
         }
@@ -172,8 +196,21 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<RatingConfiguration> | undefined));
+                }
+            }
+        }
     }
-    stars(value: number | undefined): this {
+    stars(value: int32 | undefined): this {
         if (((this._stars_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stars_0_0value) !== (value)))
         {
             this._stars_0_flag = AttributeUpdaterFlag.UPDATE
@@ -184,7 +221,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         }
         return this
     }
-    stepSize(value: number | undefined): this {
+    stepSize(value: double | undefined): this {
         if (((this._stepSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stepSize_0_0value) !== (value)))
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -214,6 +251,17 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

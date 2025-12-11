@@ -63,6 +63,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -88,8 +89,6 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/checkbox/checkbox_theme_wrapper.h"
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
-#include "frameworks/core/components/text_clock/text_clock_theme.h"
-#include "core/components_ng/pattern/text_clock/text_clock_theme_wrapper.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
@@ -134,7 +133,6 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { ArcListItemTheme::TypeId(), &ThemeBuildFunc<ArcListItemTheme::Builder> },
     { ToastTheme::TypeId(), &ThemeBuildFunc<ToastTheme::Builder> },
     { TextTheme::TypeId(), &ThemeBuildFunc<TextTheme::Builder> },
-    { TextClockTheme::TypeId(), &ThemeBuildFunc<TextClockTheme::Builder> },
     { RatingTheme::TypeId(), &ThemeBuildFunc<RatingTheme::Builder> },
     { TextFieldTheme::TypeId(), &ThemeBuildFunc<TextFieldTheme::Builder> },
     { FocusAnimationTheme::TypeId(), &ThemeBuildFunc<FocusAnimationTheme::Builder> },
@@ -174,6 +172,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
     { BlurStyleTheme::TypeId(), &ThemeBuildFunc<BlurStyleTheme::Builder> },
     { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> },
+    { UiMaterialTheme::TypeId(), &ThemeBuildFunc<UiMaterialTheme::Builder> },
     { NG::ContainerModalTheme::TypeId(), &ThemeBuildFunc<NG::ContainerModalTheme::Builder> },
     { AgingAdapationDialogTheme::TypeId(), &ThemeBuildFunc<AgingAdapationDialogTheme::Builder> },
     { NG::ScrollableTheme::TypeId(), &ThemeBuildFunc<NG::ScrollableTheme::Builder> },
@@ -195,7 +194,6 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { SwitchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwitchThemeWrapper::WrapperBuilder> },
         { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
-        { TextClockTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextClockThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
         { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
@@ -218,7 +216,11 @@ std::unordered_map<ThemeType, Ace::Kit::BuildThemeWrapperFunc> TOKEN_THEME_WRAPP
 
 ThemeManagerImpl::ThemeManagerImpl()
 {
+#ifdef CROSS_PLATFORM
+    auto resAdapter = ResourceAdapter::CreateV2();
+#else
     auto resAdapter = ResourceAdapter::Create();
+#endif
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
@@ -229,27 +231,16 @@ ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
 
 void ThemeManagerImpl::RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func)
 {
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
         return;
     }
     THEME_BUILDERS_KIT.insert({ type, func });
 }
 
-std::string ThemeManagerImpl::GetThemesMapKey(ThemeType type) const
-{
-    auto colorMode = GetCurrentColorMode();
-    auto colorModeString = std::to_string(static_cast<int32_t>(colorMode));
-    auto typeString = std::to_string(type);
-    auto key = colorModeString + typeString;
-    return key;
-}
-
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
         return findIter->second;
     }
@@ -267,8 +258,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
     }
   
     auto theme = builderIter->second(themeConstants_);
-    auto key = GetThemesMapKey(type);
-    themes_.emplace(key, theme);
+    themes_.emplace(type, theme);
     return theme;
 }
 
@@ -278,7 +268,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
     if (builderIterKit == THEME_BUILDERS_KIT.end()) {
         return nullptr;
     }
-    auto key = GetThemesMapKey(type);
+
     if (auto pipeline = NG::PipelineContext::GetCurrentContext(); pipeline) {
         ColorMode localMode = pipeline->GetLocalColorMode();
         ColorMode systemMode = pipeline->GetColorMode();
@@ -296,12 +286,12 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
             ResourceManager::GetInstance().UpdateColorMode(
                 pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), localMode);
         }
-        themes_.emplace(key, theme);
+        themes_.emplace(type, theme);
         return theme;
     }
     
     auto theme = builderIterKit->second();
-    themes_.emplace(key, theme);
+    themes_.emplace(type, theme);
     return theme;
 }
 
@@ -414,8 +404,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
 
 Color ThemeManagerImpl::GetBackgroundColor() const
 {
-    auto key = GetThemesMapKey(AppTheme::TypeId());
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(AppTheme::TypeId());
     if (findIter != themes_.end()) {
         auto appTheme = AceType::DynamicCast<AppTheme>(findIter->second);
         if (appTheme) {
@@ -438,6 +427,15 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 }
 
 void ThemeManagerImpl::LoadResourceThemes()
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        LoadResourceThemesMultiThread();
+        return;
+    }
+    LoadResourceThemesInner();
+}
+
+void ThemeManagerImpl::LoadResourceThemesInner()
 {
     themes_.clear();
     themeWrappersLight_.clear();

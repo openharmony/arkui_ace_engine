@@ -39,6 +39,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -636,9 +637,17 @@ public:
     {
         return edgeHeight;
     };
-
+    void SetDragging(bool dragging)
+    {
+        isDragging = dragging;
+    }
+    bool IsDragging() override
+    {
+        return isDragging;
+    };
 private:
     float edgeHeight = 10.0;
+    bool isDragging = false;
 };
 
 class NWebTouchHandleStateBeginDummy : public OHOS::NWeb::NWebTouchHandleState {
@@ -680,9 +689,17 @@ public:
     {
         return edgeHeight;
     };
-
+    void SetDragging(bool dragging)
+    {
+        isDragging = dragging;
+    }
+    bool IsDragging() override
+    {
+        return isDragging;
+    };
 private:
     float edgeHeight = 10.0;
+    bool isDragging = false;
 };
 
 class WebSelectOverlayTest : public testing::Test {
@@ -2702,6 +2719,72 @@ HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSelectHandleReverse004
+ * @tc.desc: IsSelectHandleReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    startSelectionHandle->SetDragging(true);
+    endSelectionHandle->SetDragging(false);
+    overlay.startSelectionHandle_ = startSelectionHandle;
+    overlay.endSelectionHandle_ = endSelectionHandle;
+    overlay.selectOverlayDragging_ = true;
+    overlay.isCurrentStartHandleDragging_ = true;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), false);
+    overlay.isCurrentStartHandleDragging_ = false;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), true);
+#endif
+}
+
+/**
+ * @tc.name: IsSelectHandleReverse005
+ * @tc.desc: IsSelectHandleReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    startSelectionHandle->SetDragging(false);
+    endSelectionHandle->SetDragging(true);
+    overlay.startSelectionHandle_ = startSelectionHandle;
+    overlay.endSelectionHandle_ = endSelectionHandle;
+    overlay.selectOverlayDragging_ = true;
+    overlay.isCurrentStartHandleDragging_ = true;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), true);
+    overlay.isCurrentStartHandleDragging_ = false;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), false);
+#endif
+}
+
+/**
  * @tc.name: ChangeHandleHeight001
  * @tc.desc: IsSelectHandleReverse.
  * @tc.type: FUNC
@@ -3248,6 +3331,106 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptions_004, TestSize.Level1)
     OHOS::Ace::SetReturnStatus("");
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetMenuOptions_005
+ * @tc.desc: SetMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetMenuOptions_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("");
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    OHOS::Ace::SetReturnStatus("");
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_NONE;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    OHOS::Ace::SetReturnStatus("false");
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    OHOS::Ace::SetReturnStatus("true");
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, true);
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    OHOS::Ace::SetReturnStatus("");
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    OHOS::Ace::SetReturnStatus("true");
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    OHOS::Ace::SetReturnStatus("");
+#endif
+}
+
+/**
+ * @tc.name: SetMenuOptions_006
+ * @tc.desc: SetMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetMenuOptions_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("");
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    OHOS::Ace::SetReturnStatus("");
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT;
+    selectInfo.isSingleHandle = true;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    selectInfo.isSingleHandle = false;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
+    selectInfo.isSingleHandle = true;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
+    selectInfo.isSingleHandle = false;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    EXPECT_EQ(overlay.canShowAIMenu_, false);
+    EXPECT_EQ(selectInfo.menuInfo.showAIWrite, false);
+    OHOS::Ace::SetReturnStatus("");
 #endif
 }
 
@@ -5921,12 +6104,16 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest011, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
+
     ASSERT_NE(webPattern, nullptr);
     WebSelectOverlay overlay(webPattern);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+
     auto insertHandle = nullptr;
     auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
     ASSERT_NE(startSelectionHandle, nullptr);
@@ -5951,10 +6138,12 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTestSelectAll, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     EXPECT_NE(frameNode, nullptr);
+
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     WebSelectOverlay overlay(webPattern);
+
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
         std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
@@ -6158,6 +6347,43 @@ HWTEST_F(WebSelectOverlayTest, RunQuickMenu_005, TestSize.Level1)
     g_startSelectionHandle = nullptr;
     MockPipelineContext::TearDown();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RunQuickMenu_006
+ * @tc.desc: RunQuickMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, RunQuickMenu_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    WebSelectOverlay overlay(webPattern);
+    g_isLongPress = false;
+    g_isEnable = true;
+    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    overlay.isQuickMenuMouseTrigger_ = false;
+    bool result = overlay.RunQuickMenu(params, callback);
+    g_isLongPress = false;
+    g_isEnable = false;
+    g_insertHandle.reset();
+    g_insertHandle = nullptr;
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(result);
+#endif
 }
 
 /**
@@ -6659,6 +6885,69 @@ HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest002, TestSize.Level1)
     auto ret2 = NearEqual(menuOffset.GetY(), 100.0f - avoidFromText, NEW_EPSILON);
     MockPipelineContext::TearDown();
     EXPECT_TRUE(ret && ret1 && ret2);
+}
+
+/**
+ * @tc.name: WebMenuAvoidStrategy
+ * @tc.desc: Test WebMenuAvoidStrategy.(When not support SelectArea)
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest003, TestSize.Level1)
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    /**
+    * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+    */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        MockPipelineContext::TearDown();
+        ASSERT_NE(pipeline, nullptr);
+    }
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    /**
+    * @tc.steps: step. Get layoutWrapper and layoutAlgorithm.
+    * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
+    */
+    RefPtr<LayoutWrapperNode> layoutWrapper;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    InitLayoutWrapper(layoutWrapper, geometryNode, infoPtr);
+    /**
+    * @tc.steps: step3. set keyboardInset_.
+    */
+    InitSafeAreaManager(pipeline);
+    /**
+    * @tc.steps: step4. Test cases.
+    */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    infoPtr->firstHandle.paintRect = {0.0f, 0.0f, 0.0f, 1.0f};
+    infoPtr->secondHandle.paintRect = {100.0f, 299.0f, 0.0f, 1.0f};
+    infoPtr->isSingleHandle = false;
+    infoPtr->isNewAvoid = true;
+    infoPtr->selectArea = {0.0f, 0.0f, 0.0f, 1.0f};
+    OffsetF menuOffset = {0.0f, 300.0f};
+    RectF menuRect = {0.0f, 300.0f, 20.0f, 100.0f};
+    OffsetF windowOffset = {0.0f, 0.0f};
+    auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
+    geometryNode->SetFrameSize(SizeF(0.0f, 300.0f));
+    WebSelectOverlay overlay(webPattern);
+    auto ret = overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
+    auto ret1 = NearEqual(menuOffset.GetX(), 0.0f, NEW_EPSILON);
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(ret && ret1);
 }
 
 /**

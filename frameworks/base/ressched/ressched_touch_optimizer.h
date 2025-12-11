@@ -53,7 +53,7 @@ public:
     uint64_t FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp);
     void FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
         std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById);
-
+    void EndTpFlushVsyncPeriod();
 private:
     // RVS Dispatch funcs
     void RVSPointReset(const int32_t pointId, const int32_t info);
@@ -106,6 +106,7 @@ private:
     bool isTpFlushFrameDisplayPeriod_ = false;
     bool isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool vsyncFlushed_ = false;
+    bool rvsSignalEnable_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H

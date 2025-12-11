@@ -46,6 +46,9 @@ constexpr float DEFAULT_MIN_SIDEBAR_WIDTH = 240.0f;
 constexpr float DEFAULT_MAX_SIDEBAR_WIDTH = 280.0f;
 constexpr float DEFAULT_MIN_CONTENT_LENGTH = 360.0f;
 constexpr float DEFAULT_DIVIDER_WIDTH = 1.0f;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
 
 std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
 {
@@ -203,6 +206,10 @@ void SetControlButtonImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<LocalControlButtonStyle>(value);
     if (!convValue) {
+        SideBarContainerModelStatic::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH);
+        SideBarContainerModelStatic::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT);
+        SideBarContainerModelStatic::ResetControlButtonLeft(frameNode);
+        SideBarContainerModelStatic::SetControlButtonTop(frameNode, DEFAULT_CONTROL_BUTTON_TOP);
         SideBarContainerModelStatic::ResetControlButtonIconInfo(frameNode);
         return;
     }

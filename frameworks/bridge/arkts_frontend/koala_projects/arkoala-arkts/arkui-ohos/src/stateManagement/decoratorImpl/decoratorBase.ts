@@ -26,6 +26,7 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { WatchFunc } from './decoratorWatch';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
+import { ObserveSingleton } from '../base/observeSingleton';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
@@ -64,6 +65,18 @@ export class DecoratedVariableBase {
         this.decorator = decorator;
         this.owningComponent_ = owningComponent;
         this._varName = varName;
+    }
+
+    public getTraceInfo(): string {
+            return `get: ${this.varName} ${Type.of(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
+        }
+    
+    public setTraceInfo(): string {
+        return `set: ${this.varName} ${Type.of(this.owningComponent_)}`;
+    } 
+
+    public updateTraceInfo(): string {
+        return `update: ${this.varName} ${Type.of(this.owningComponent_)}`;
     }
 
     public shouldAddRef(): boolean {
@@ -166,7 +179,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
     }
     
     public isViewActive(): boolean {
-        return this.owningComponent_!.isViewActive();
+        return this.owningComponent_!.__isViewActive__Internal();
     }
 
     /* compiler BUG: change to protcted */

@@ -20,10 +20,12 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookLinearIndicatorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -108,6 +110,7 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setLinearIndicatorOptionsAttribute(count?: number, controller?: LinearIndicatorController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -226,6 +229,7 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
             const count_casted = count as (number | undefined)
             const controller_casted = controller as (LinearIndicatorController | undefined)
             this.getPeer()?.setLinearIndicatorOptionsAttribute(count_casted, controller_casted)
+            this.applyOptionsFinish('LinearIndicatorAttribute');
             return this
         }
         return this
@@ -255,12 +259,17 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLinearIndicatorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookLinearIndicatorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -71,6 +71,5 @@ group("capability_unittest") {
   deps = [
     ":html_convert_test",
     "feature_config:arkui_feature_param_manager_test",
-    "feature_config:parser_test",
   ]
 }

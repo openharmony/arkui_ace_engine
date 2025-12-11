@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -24,6 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, FillMode } from "./enums"
 import { AttributeModifier, extractors, hookImageAnimatorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -47,6 +49,7 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setImageAnimatorOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._ImageAnimatorInterface_setImageAnimatorOptions(this.peer.ptr)
     }
     setImagesAttribute(value: Array<ImageFrameInfo> | undefined): void {
@@ -77,12 +80,12 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAnimatorAttribute_setState(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDurationAttribute(value: number | undefined): void {
+    setDurationAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -125,12 +128,12 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAnimatorAttribute_setFillMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setIterationsAttribute(value: number | undefined): void {
+    setIterationsAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -212,11 +215,11 @@ export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
 }
 export interface ImageFrameInfo {
     src: string | Resource | image.PixelMap;
-    width?: number | string;
-    height?: number | string;
-    top?: number | string;
-    left?: number | string;
-    duration?: number;
+    width?: double | string;
+    height?: double | string;
+    top?: double | string;
+    left?: double | string;
+    duration?: int32;
 }
 export interface ImageAnimatorAttribute extends CommonMethod {
     setImageAnimatorOptions(): this {
@@ -228,7 +231,7 @@ export interface ImageAnimatorAttribute extends CommonMethod {
     state(value: AnimationStatus | undefined): this {
         throw new Error("Unimplemented method state")
     }
-    duration(value: number | undefined): this {
+    duration(value: int32 | undefined): this {
         throw new Error("Unimplemented method duration")
     }
     reverse(value: boolean | undefined): this {
@@ -240,7 +243,7 @@ export interface ImageAnimatorAttribute extends CommonMethod {
     fillMode(value: FillMode | undefined): this {
         throw new Error("Unimplemented method fillMode")
     }
-    iterations(value: number | undefined): this {
+    iterations(value: int32 | undefined): this {
         throw new Error("Unimplemented method iterations")
     }
     monitorInvisibleArea(value: boolean | undefined): this {
@@ -268,11 +271,11 @@ export interface ImageAnimatorAttribute extends CommonMethod {
 export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements ImageAnimatorAttribute {
     images_value?: Array<ImageFrameInfo> | undefined
     state_value?: AnimationStatus | undefined
-    duration_value?: number | undefined
+    duration_value?: int32 | undefined
     reverse_value?: boolean | undefined
     fixedSize_value?: boolean | undefined
     fillMode_value?: FillMode | undefined
-    iterations_value?: number | undefined
+    iterations_value?: int32 | undefined
     monitorInvisibleArea_value?: boolean | undefined
     onStart_value?: (() => void) | undefined
     onPause_value?: (() => void) | undefined
@@ -289,7 +292,7 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     state(value: AnimationStatus | undefined): this {
         return this
     }
-    duration(value: number | undefined): this {
+    duration(value: int32 | undefined): this {
         return this
     }
     reverse(value: boolean | undefined): this {
@@ -301,7 +304,7 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     fillMode(value: FillMode | undefined): this {
         return this
     }
-    iterations(value: number | undefined): this {
+    iterations(value: int32 | undefined): this {
         return this
     }
     monitorInvisibleArea(value: boolean | undefined): this {
@@ -337,6 +340,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
     public setImageAnimatorOptions(): this {
         if (this.checkPriority("setImageAnimatorOptions")) {
             this.getPeer()?.setImageAnimatorOptionsAttribute()
+            this.applyOptionsFinish('ImageAnimatorAttribute');
             return this
         }
         return this
@@ -357,9 +361,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    public duration(value: number | undefined): this {
+    public duration(value: int32 | undefined): this {
         if (this.checkPriority("duration")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDurationAttribute(value_casted)
             return this
         }
@@ -389,9 +393,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    public iterations(value: number | undefined): this {
+    public iterations(value: int32 | undefined): this {
         if (this.checkPriority("iterations")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setIterationsAttribute(value_casted)
             return this
         }
@@ -446,12 +450,17 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAnimatorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageAnimatorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -494,10 +503,10 @@ export class ImageFrameInfo_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            if (valueHolderForWidthTmpValue instanceof number) {
+            if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0)
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
@@ -510,10 +519,10 @@ export class ImageFrameInfo_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            if (valueHolderForHeightTmpValue instanceof number) {
+            if (valueHolderForHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx0)
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
@@ -526,10 +535,10 @@ export class ImageFrameInfo_serializer {
         if (valueHolderForTop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue  = valueHolderForTop!
-            if (valueHolderForTopTmpValue instanceof number) {
+            if (valueHolderForTopTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx0)
+                const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForTopTmpValueForIdx0)
             } else if (valueHolderForTopTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as string
@@ -542,10 +551,10 @@ export class ImageFrameInfo_serializer {
         if (valueHolderForLeft !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue  = valueHolderForLeft!
-            if (valueHolderForLeftTmpValue instanceof number) {
+            if (valueHolderForLeftTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForLeftTmpValueForIdx0  = valueHolderForLeftTmpValue as number
-                valueSerializer.writeNumber(valueHolderForLeftTmpValueForIdx0)
+                const valueHolderForLeftTmpValueForIdx0  = valueHolderForLeftTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForLeftTmpValueForIdx0)
             } else if (valueHolderForLeftTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeftTmpValueForIdx1  = valueHolderForLeftTmpValue as string
@@ -558,7 +567,7 @@ export class ImageFrameInfo_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -578,71 +587,71 @@ export class ImageFrameInfo_serializer {
         }
         const srcTmpResult : string | Resource | image.PixelMap = (srcTmpBuf as string | Resource | image.PixelMap)
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : number | string | undefined = undefined
+        let widthTmpBuf : double | string | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : number | string | undefined
+            let widthTmpBuf_ : double | string | undefined
             if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                widthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as number | string)
+            widthTmpBuf = (widthTmpBuf_ as double | string)
         }
-        const widthTmpResult : number | string | undefined = widthTmpBuf
+        const widthTmpResult : double | string | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | string | undefined = undefined
+        let heightTmpBuf : double | string | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : number | string | undefined
+            let heightTmpBuf_ : double | string | undefined
             if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                heightTmpBuf_ = valueDeserializer.readFloat64()
             } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
                 heightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBuf_ as number | string)
+            heightTmpBuf = (heightTmpBuf_ as double | string)
         }
-        const heightTmpResult : number | string | undefined = heightTmpBuf
+        const heightTmpResult : double | string | undefined = heightTmpBuf
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let topTmpBuf : number | string | undefined = undefined
+        let topTmpBuf : double | string | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const topTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let topTmpBuf_ : number | string | undefined
+            let topTmpBuf_ : double | string | undefined
             if (topTmpBuf_UnionSelector == (0).toChar()) {
-                topTmpBuf_ = (valueDeserializer.readNumber() as number)
+                topTmpBuf_ = valueDeserializer.readFloat64()
             } else if (topTmpBuf_UnionSelector == (1).toChar()) {
                 topTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for topTmpBuf_ has to be chosen through deserialisation.")
             }
-            topTmpBuf = (topTmpBuf_ as number | string)
+            topTmpBuf = (topTmpBuf_ as double | string)
         }
-        const topTmpResult : number | string | undefined = topTmpBuf
+        const topTmpResult : double | string | undefined = topTmpBuf
         const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let leftTmpBuf : number | string | undefined = undefined
+        let leftTmpBuf : double | string | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const leftTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let leftTmpBuf_ : number | string | undefined
+            let leftTmpBuf_ : double | string | undefined
             if (leftTmpBuf_UnionSelector == (0).toChar()) {
-                leftTmpBuf_ = (valueDeserializer.readNumber() as number)
+                leftTmpBuf_ = valueDeserializer.readFloat64()
             } else if (leftTmpBuf_UnionSelector == (1).toChar()) {
                 leftTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for leftTmpBuf_ has to be chosen through deserialisation.")
             }
-            leftTmpBuf = (leftTmpBuf_ as number | string)
+            leftTmpBuf = (leftTmpBuf_ as double | string)
         }
-        const leftTmpResult : number | string | undefined = leftTmpBuf
+        const leftTmpResult : double | string | undefined = leftTmpBuf
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         let value : ImageFrameInfo = ({src: srcTmpResult, width: widthTmpResult, height: heightTmpResult, top: topTmpResult, left: leftTmpResult, duration: durationTmpResult} as ImageFrameInfo)
         return value
     }

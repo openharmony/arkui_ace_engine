@@ -31,6 +31,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { AnimatorModifier } from "./../AnimatorModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class FrictionMotionInternal {
     public static fromPtr(ptr: KPointer): FrictionMotion {
         return new FrictionMotion(false, false, false, ptr)
@@ -450,6 +451,7 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         if (this.checkPriority("setAnimatorOptions")) {
             const value_casted = value as (string)
             this.getPeer()?.setAnimatorOptionsAttribute(value_casted)
+            this.applyOptionsFinish('AnimatorAttribute');
             return this
         }
         return this
@@ -567,12 +569,17 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         return this
     }
     public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookAnimatorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookAnimatorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

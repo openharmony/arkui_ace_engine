@@ -33,7 +33,7 @@ namespace router {
     }
 
     export interface RouterState {
-        index: number;
+        index: int;
         name: string;
         path: string;
         params: Object;

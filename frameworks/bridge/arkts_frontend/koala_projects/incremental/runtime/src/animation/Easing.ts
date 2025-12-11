@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { float64, uint32 } from "@koalaui/common"
-import { EasingSupport } from "./EasingSupport"
+import { float64, uint32, float64toInt32 } from '@koalaui/common'
+import { EasingSupport } from './EasingSupport'
 
 /**
  * Easing functions specify the rate of change of a parameter over time.
@@ -74,14 +74,22 @@ export class Easing {
      * @returns easing function that repeats the specified one several times
      */
     static repeated(easing: EasingCurve, count: uint32): EasingCurve {
-        if (count == 1) return easing
-        if (!Number.isInteger(count) || (count < 1)) throw new Error("unexpected iteration count: " + count)
+        if (count === 1) {
+            return easing
+        }
+        if (!Number.isInteger(count) || (count < 1)) {
+            throw new Error('unexpected iteration count: ' + count)
+        }
         return (value: float64) => {
-            if (value <= 0) return easing(0)
+            if (value <= 0) {
+                return easing(0)
+            }
             if (value < 1) {
                 value *= count
                 const index = Math.floor(value)
-                if (index < count) return easing(value - index)
+                if (index < count) {
+                    return easing(value - index)
+                }
             }
             return easing(1)
         }
@@ -92,14 +100,22 @@ export class Easing {
      * @returns easing function that applies specified functions one by one
      */
     static joined(...easing: EasingCurve[]): EasingCurve {
-        if (easing.length == 0) throw new Error("no easing functions to join")
-        if (easing.length == 1) return easing[0]
+        if (easing.length === 0) {
+            throw new Error('no easing functions to join')
+        }
+        if (easing.length === 1) {
+            return easing[0]
+        }
         return (value: float64) => {
-            if (value <= 0) return easing[0](0)
+            if (value <= 0) {
+                return easing[0](0)
+            }
             if (value < 1) {
                 value *= easing.length
                 const index = Math.floor(value)
-                if (index < easing.length) return easing[index as uint32](value - index)
+                if (index < easing.length) {
+                    return easing[float64toInt32(index)](value - index)
+                }
             }
             return easing[easing.length - 1](1)
         }
@@ -132,18 +148,20 @@ export class Easing {
      *                               displaying each stop for equal lengths of time
      * @see EasingStepJump
      */
-    static steps(stops: uint32, jump:EasingStepJump = EasingStepJump.None): EasingCurve {
-        if (stops == 1) {
+    static steps(stops: uint32, jump: EasingStepJump = EasingStepJump.None): EasingCurve {
+        if (stops === 1) {
             switch (jump) {
                 case EasingStepJump.Start: return (value: float64) => 1.0
                 case EasingStepJump.End: return (value: float64) => 0.0
                 case EasingStepJump.Both: return (value: float64) => 0.5
-                case EasingStepJump.None: throw new Error("easing with one stop must use jump other than EasingStepJump.None")
+                case EasingStepJump.None: throw new Error('easing with one stop must use jump other than EasingStepJump.None')
             }
         }
-        if (!Number.isInteger(stops) || stops <= 1) throw new Error("easing stops must be a positive integer, but is " + stops)
-        const delta = jump == EasingStepJump.None || jump == EasingStepJump.End ? 0 : 1
-        const count: uint32 = jump == EasingStepJump.None ? stops - 1 : jump == EasingStepJump.Both ? stops + 1 : stops
+        if (!Number.isInteger(stops) || stops <= 1) {
+            throw new Error('easing stops must be a positive integer, but is ' + stops)
+        }
+        const delta = jump === EasingStepJump.None || jump === EasingStepJump.End ? 0 : 1
+        const count: uint32 = jump === EasingStepJump.None ? stops - 1 : jump === EasingStepJump.Both ? stops + 1 : stops
         return (value: float64) => (value > 0 ? Math.min(stops - 1, Math.floor(stops * value)) + delta : delta) / count
     }
 

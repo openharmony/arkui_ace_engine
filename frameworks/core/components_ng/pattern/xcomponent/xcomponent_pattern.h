@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,9 @@ public:
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
     void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    void OnTextureRefresh(int32_t instanceId, int64_t textureId);
+#endif
     void NativeXComponentInit()
     {
         if (!isTypedNode_) {
@@ -394,6 +397,9 @@ protected:
     bool isCNode_ = false;
     bool useNodeHandleAccessibilityProvider_ = false;
     RefPtr<RenderSurface> renderSurface_;
+#ifdef RENDER_EXTRACT_SUPPORTED
+    WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
+#endif
     OffsetF localPosition_;
     OffsetF surfaceOffset_;
     SizeF drawSize_;
@@ -402,6 +408,7 @@ protected:
     void* nativeWindow_ = nullptr;
     bool hasReleasedSurface_ = false;
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
     bool isOnTree_ = false;
@@ -500,7 +507,6 @@ private:
     std::optional<std::string> soPath_;
     std::optional<uint64_t> screenId_;
 
-    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;

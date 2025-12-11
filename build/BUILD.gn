@@ -154,6 +154,13 @@ ohos_shared_library("libace_compatible") {
       boundary_sanitize = true
       debug = ace_sanitize_debug
     }
+    if (is_clang && target_cpu == "arm64") {
+      ldflags = [ 
+        "-Wl,--emit-relocs",
+        "-Wl,--no-relax", 
+        "-mno-fix-cortex-a53-843419" 
+      ]
+    }
     deps += [ "$ace_root/build:libace_static_ohos" ]
     deps += [ "$ace_root/adapter/ohos/services/etc:ace_engine_param" ]
     version_script = "libace.map"

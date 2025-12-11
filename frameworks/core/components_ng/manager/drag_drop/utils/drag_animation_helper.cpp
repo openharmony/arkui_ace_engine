@@ -723,7 +723,7 @@ bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     AddDragNodeCopy(manager, frameNode, gatherNode);
     MarkDirtyNode(gatherNode);
     
-    pipeline->FlushPipelineImmediately();
+    pipeline->FlushUITasks();
     manager->SetIsGatherWithMenu(false);
 
     //do gather animation before lifting
@@ -1005,6 +1005,7 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
     CHECK_NULL_VOID(renderContext);
     auto context = imageNode->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    context->OnShow();
     AnimationUtils::Animate(
         option,
         [renderContext, info = dragDropManager->GetDragPreviewInfo(), newOffset, overlayManager,

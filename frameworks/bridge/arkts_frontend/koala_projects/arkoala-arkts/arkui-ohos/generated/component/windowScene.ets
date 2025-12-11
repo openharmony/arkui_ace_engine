@@ -24,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookWindowSceneAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -101,6 +102,7 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setWindowSceneOptions")) {
             const persistentId_casted = persistentId as (number)
             this.getPeer()?.setWindowSceneOptionsAttribute(persistentId_casted)
+            this.applyOptionsFinish('WindowSceneAttribute');
             return this
         }
         return this
@@ -115,12 +117,17 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWindowSceneAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWindowSceneAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

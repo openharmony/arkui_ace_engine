@@ -137,7 +137,7 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_, listContentSize_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(
-        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, noDividerItems_);
 }
 
 void ListItemGroupPattern::SyncItemsToCachedItemPosition()
@@ -918,12 +918,12 @@ WeakPtr<FocusHub> ListItemGroupPattern::GetChildFocusNodeByIndex(int32_t tarInde
             CHECK_NULL_RETURN(parentNode, false);
             auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
             CHECK_NULL_RETURN(parentPattern, false);
-            if ((parentPattern->GetHeader() == childFrame && tarIndexInGroup == -1) ||
-                (parentPattern->GetFooter() == childFrame && tarIndexInGroup == parentPattern->GetTotalItemCount())) {
+            if ((parentPattern->GetHeaderNode() == childFrame && tarIndexInGroup == -1) ||
+                (parentPattern->GetFooterNode() == childFrame &&
+                 tarIndexInGroup == parentPattern->GetTotalItemCount())) {
                 target = childFocus;
                 return true;
             }
-
             return false;
         }
 
@@ -965,9 +965,9 @@ bool ListItemGroupPattern::GetCurrentFocusIndices(
     // If the current focus node is the Header or Footer of the ListItemGroup,
     // it is necessary to retrieve the index of the current focus node within the ListItemGroup.
     if (!curItemPattern) {
-        if (GetHeader() == curFrame) {
+        if (GetHeaderNode() == curFrame) {
             curIndexInGroup = -1;
-        } else if (GetFooter() == curFrame) {
+        } else if (GetFooterNode() == curFrame) {
             curIndexInGroup = GetTotalItemCount();
         } else {
             return false;
@@ -1046,7 +1046,7 @@ void ListItemGroupPattern::HandleForwardStep(
 {
     // Only for DetermineMultiLaneStep
     CHECK_NULL_VOID(curFrame);
-    moveStep = (GetHeader() == curFrame || GetFooter() == curFrame) ? 1 : lanes_;
+    moveStep = (GetHeaderNode() == curFrame || GetFooterNode() == curFrame) ? 1 : lanes_;
     nextIndex = nextIndex + moveStep;
     if (curIndexInGroup < GetTotalItemCount() && curIndexInGroup >= 0) {
         // Neither Header nor Footer. If it is the last row and the DOWN key is pressed,
@@ -1073,7 +1073,7 @@ void ListItemGroupPattern::HandleBackwardStep(
     CHECK_NULL_VOID(curFrame);
     // If the current focus is on the header, set moveStep = 1; if the current focus is on the footer,
     // set moveStep = -1;
-    moveStep = (GetHeader() == curFrame || GetFooter() == curFrame) ? -1 : -lanes_;
+    moveStep = (GetHeaderNode() == curFrame || GetFooterNode() == curFrame) ? -1 : -lanes_;
     nextIndex = curIndexInGroup + moveStep;
     if (curIndexInGroup >= 0 && curIndexInGroup < GetTotalItemCount()) {
         auto curRow = curIndexInGroup / lanes_;

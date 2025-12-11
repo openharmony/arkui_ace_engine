@@ -158,7 +158,6 @@ bool IsVisibleGone(const RefPtr<LayoutWrapper>& layoutWrapper)
 }
 
 const float HALF = 0.5f;
-
 } // namespace
 
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -1276,12 +1275,25 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float betweenSpace = 0.0f;
     CalculateSpace(remainSpace, frontSpace, betweenSpace);
     PlaceChildren(layoutWrapper, frontSpace, betweenSpace, paddingOffset);
-    HandleContentOverflow(layoutWrapper);
+    bool isContentOverflowWarning = ShouldDoOverflowWork();
+    OverflowCollector collector(false);
     for (auto&& child : children) {
         if (!child->IsOutOfLayout() && child->IsActive()) {
             child->Layout();
+            if (isContentOverflowWarning) {
+                collector.AccumulateFromWrapper(child);
+            }
         }
     }
+    if (IsContentOverflow(layoutWrapper, collector)) {
+        if (!isLinearLayoutFeature_) {
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in Flex container");
+        } else {
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in %{public}s container",
+                IsRowDirection() ? "Row" : "Column");
+        }
+    }
+    HandleContentOverflow(layoutWrapper);
     ApplyPatternOperation(layoutWrapper, FlexOperatorType::UPDATE_LAYOUT_RESULT, reinterpret_cast<uintptr_t>(this),
         { .frontSpace = frontSpace, .betweenSpace = betweenSpace });
 }
@@ -1350,7 +1362,8 @@ void FlexLayoutAlgorithm::SetCrossPos(
 }
 
 void FlexLayoutAlgorithm::PlaceChildren(
-    LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset)
+    LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace,
+    const OffsetF& paddingOffset)
 {
     float childMainPos = IsStartTopLeft(direction_, textDir_) ? frontSpace : mainAxisSize_ - frontSpace;
     float childCrossPos = 0.0f;

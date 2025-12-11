@@ -59,7 +59,16 @@ void ScrollablePaintMethod::UpdateOverlayFadingGradient()
                 : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
         }
     }
-    overlayRenderContext_->UpdateLinearGradient(gradient);
+    const auto& oldGradientOpt = overlayRenderContext_->GetLinearGradient();
+    if (oldGradientOpt.has_value() && gradient.GetColors().size() == oldGradientOpt.value().GetColors().size()) {
+        overlayRenderContext_->UpdateLinearGradient(gradient);
+        return;
+    }
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), &gradient]() {
+        auto paint = weak.Upgrade();
+        CHECK_NULL_VOID(paint);
+        paint->overlayRenderContext_->UpdateLinearGradient(gradient);
+    });
 }
 
 void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
@@ -74,14 +83,10 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         isFadingTop_ = isFadingBottom_;
         isFadingBottom_ = tempFadingValue;
     }
-    renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN_WITH_BACKGROUND);
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
-    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
-        auto paint = weak.Upgrade();
-        CHECK_NULL_VOID(paint);
-        paint->UpdateOverlayFadingGradient();
-    });
+    UpdateOverlayFadingGradient();
     if (!hasFadingEdge_ || (!isFadingTop_ && !isFadingBottom_)) {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
         renderContext->UpdateBackBlendMode(BlendMode::NONE);

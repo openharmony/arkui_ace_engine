@@ -131,6 +131,10 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate) {}
 
 void AceContainer::DestroyHeapProfiler() {}
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::ForceFullGC() {}
 void AceContainer::CheckAndSetFontFamily() {}
 void AceContainer::HotReload() {}
@@ -207,7 +211,8 @@ bool AceContainer::GetCurPointerEventSourceType(int32_t& sourceType)
 
 int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
@@ -303,4 +308,8 @@ void AceContainer::UpdateColorMode(uint32_t colorMode,
 void AceContainer::TriggerModuleSerializer() {}
 
 void AceContainer::SetIsFormRender(bool isFormRender) {}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url) {}
+
+void AceContainer::LoadCompleteManagerStopCollect() {}
 } // namespace OHOS::Ace::NG

@@ -85,6 +85,11 @@ void ButtonStaticTestNg::SetUpTestCase()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     buttonTheme->height_ = DEFAULT_HEIGTH;
 
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle style;
+    style.SetFontFamilies(FONT_FAMILY_VALUE);
+    textTheme->textStyle_ = style;
+
     std::unordered_map<ButtonStyleMode, Color> normalBgColorMap_ = { { ButtonStyleMode::EMPHASIZE, Color::RED },
         { ButtonStyleMode::NORMAL, Color::GRAY }, { ButtonStyleMode::TEXT, Color::BLUE } };
     std::unordered_map<ButtonStyleMode, Color> errorBgColorMap_ = { { ButtonStyleMode::EMPHASIZE, Color::WHITE },
@@ -98,7 +103,13 @@ void ButtonStaticTestNg::SetUpTestCase()
     buttonTheme->textColorByRoleMap_.insert(std::pair<ButtonRole, Color>(ButtonRole::ERROR, Color::RED));
 
     buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(::testing::Truly([](auto typeId) {
+        return typeId == AceType::TypeId<ButtonTheme>();
+    }))).WillRepeatedly(Return(buttonTheme));
+
+    EXPECT_CALL(*themeManager, GetTheme(::testing::Truly([](auto typeId) {
+        return typeId == AceType::TypeId<TextTheme>();
+    }))).WillRepeatedly(Return(textTheme));
 }
 
 void ButtonStaticTestNg::TearDownTestCase()
@@ -551,6 +562,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
     buttonParameters.fontWeight = std::make_optional(FontWeight::MEDIUM);
     buttonParameters.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
     buttonParameters.fontStyle = std::make_optional(Ace::FontStyle::NORMAL);
+    buttonParameters.textAlign = std::make_optional(Ace::TextAlign::CENTER);
     ButtonModelStatic::SetLabelStyle(frameNode, buttonParameters);
     /**
      * @tc.steps: step4. ButtonModelNG setLabelStyle.
@@ -566,6 +578,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(layoutProperty->GetTextAlignValue(), Ace::TextAlign::CENTER);
 }
 
 /**
@@ -674,5 +687,140 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg017, TestSize.Level1)
     maxFontScaleValue = std::make_optional(MAX_SCALE_VALUE);
     ButtonModelStatic::SetMaxFontScale(frameNode, maxFontScaleValue);
     EXPECT_EQ(layoutProperty->GetMaxFontScaleValue(), MAX_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg018
+ * @tc.desc: test button ResetButtonTextFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Create the first child node of the text node
+     */
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AIWriteAdapter::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    frameNode->AddChild(textNode, 0);
+    /**
+     * @tc.steps: step3. Add stageNode as another child node
+     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AIWriteAdapter::MakeRefPtr<StagePattern>());
+    frameNode->AddChild(stageNode);
+    /**
+     * @tc.steps: step4. test ResetButtonTextFontSize.
+     */
+    ButtonModelStatic::ResetButtonTextFontSize(frameNode);
+    auto retrievedTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    EXPECT_NE(retrievedTextNode, nullptr);
+    auto textLayoutProperty = retrievedTextNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg019
+ * @tc.desc: test button ResetFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. test ResetFontFamily.
+     */
+    ButtonModelStatic::ResetFontFamily(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    ASSERT_NE(textTheme, nullptr);
+    auto expectedFontFamilies = textTheme->GetTextStyle().GetFontFamilies();
+    EXPECT_EQ(layoutProperty->GetFontFamily(), expectedFontFamilies);
+    EXPECT_TRUE(layoutProperty->GetFontColorSetByUserValue());
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg020
+ * @tc.desc: test button ResetButtonFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. test ResetButtonFontColor.
+     */
+    ButtonModelStatic::ResetButtonFontColor(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    Color expectedColor = buttonTheme->GetTextStyle().GetTextColor();
+    EXPECT_EQ(layoutProperty->GetFontColor(), expectedColor);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColor(), expectedColor);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg021
+ * @tc.desc: test button ResetButtonFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create ButtonLayoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    frameNode->SetLayoutProperty(layoutProperty);
+    ASSERT_NE(frameNode->GetLayoutProperty<ButtonLayoutProperty>(), nullptr);
+    /**
+     * @tc.steps: step3. create TextLayoutProperty.
+     */
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameNode->SetLayoutProperty(textLayoutProperty);
+    ASSERT_NE(frameNode->GetLayoutProperty<TextLayoutProperty>(), nullptr);
+    /**
+     * @tc.steps: step4. test ResetButtonFontSize.
+     */
+    ButtonModelStatic::ResetButtonFontSize(frameNode);
+    auto buttonTheme = frameNode->GetContext()->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    Dimension expectedFontSize = buttonTheme->GetTextButtonFontSize();
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(0)), expectedFontSize);
 }
 } // namespace OHOS::Ace::NG

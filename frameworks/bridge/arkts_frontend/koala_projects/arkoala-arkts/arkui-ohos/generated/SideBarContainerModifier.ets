@@ -17,15 +17,19 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSideBarContainerPeer, ButtonStyle, SideBarPosition, SideBarContainerAttribute } from "./component/sidebar"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, DividerStyle } from "./component/common"
 import { Length, Dimension } from "./component/units"
 import { Resource } from "global.resource"
+import { PeerNode } from "./PeerNode"
 export class SideBarContainerModifier extends CommonMethodModifier implements SideBarContainerAttribute,AttributeModifier<SideBarContainerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -57,8 +61,10 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
     _divider_0_0value?: DividerStyle | null | undefined
     _minContentWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minContentWidth_0_0value?: Dimension | undefined
-    applyModifierPatch(peer: ArkSideBarContainerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
+        super.applyModifierPatch(node)
+        const peer = node as ArkSideBarContainerPeer;
         if (this._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._showSideBar_0_flag) {
@@ -260,6 +266,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
     }
     mergeModifier(modifier: SideBarContainerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._showSideBar_0_flag) {

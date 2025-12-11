@@ -2871,25 +2871,30 @@ double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int
     if (!focusAxisEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    switch (axis) {
-        case UI_FOCUS_AXIS_EVENT_ABS_X:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absXValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_Y:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absYValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_Z:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absZValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_RZ:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absRzValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_GAS:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absGasValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_BRAKE:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absBrakeValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_HAT0X:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absHat0XValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_HAT0Y:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absHat0YValue, ARKUI_ERROR_CODE_NO_ERROR);
-        default:
-            RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    static const std::unordered_map<int32_t, double ArkUIFocusAxisEvent::*> axisMapper = {
+        { UI_FOCUS_AXIS_EVENT_ABS_X, &ArkUIFocusAxisEvent::absXValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_Y, &ArkUIFocusAxisEvent::absYValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_Z, &ArkUIFocusAxisEvent::absZValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RZ, &ArkUIFocusAxisEvent::absRzValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_GAS, &ArkUIFocusAxisEvent::absGasValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_BRAKE, &ArkUIFocusAxisEvent::absBrakeValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT0X, &ArkUIFocusAxisEvent::absHat0XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT0Y, &ArkUIFocusAxisEvent::absHat0YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RX, &ArkUIFocusAxisEvent::absRxValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RY, &ArkUIFocusAxisEvent::absRyValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_THROTTLE, &ArkUIFocusAxisEvent::absThrottleValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RUDDER, &ArkUIFocusAxisEvent::absRudderValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_WHEEL, &ArkUIFocusAxisEvent::absWheelValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT1X, &ArkUIFocusAxisEvent::absHat1XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT1Y, &ArkUIFocusAxisEvent::absHat1YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT2X, &ArkUIFocusAxisEvent::absHat2XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT2Y, &ArkUIFocusAxisEvent::absHat2YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT3X, &ArkUIFocusAxisEvent::absHat3XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT3Y, &ArkUIFocusAxisEvent::absHat3YValue },
+    };
+    auto iter = axisMapper.find(axis);
+    if (iter != axisMapper.end()) {
+        RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->*(iter->second), ARKUI_ERROR_CODE_NO_ERROR);
     }
     RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
@@ -4079,6 +4084,172 @@ int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(
+    ArkUI_TouchTestInfo* info, ArkUI_TouchTestInfoItemArray* array, int32_t* size)
+{
+    if (!info || !array || !size) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
+    if (!touchTestInfo) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *array = reinterpret_cast<ArkUI_TouchTestInfoItemArray>(touchTestInfo->array);
+    *size = touchTestInfo->size;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetX(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->nodeX;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetY(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->nodeY;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetWindowX(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->windowX;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetWindowY(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->windowY;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetXRelativeToParent(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->parentNodeX;
+}
+
+float OH_ArkUI_TouchTestInfoItem_GetYRelativeToParent(const ArkUI_TouchTestInfoItem* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return 0.0f;
+    }
+    return touchTestInfoItem->parentNodeY;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildRect(const ArkUI_TouchTestInfoItem* info, ArkUI_Rect* childRect)
+{
+    if (!info || !childRect) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto rect = touchTestInfoItem->rect;
+    childRect->height = rect.height;
+    childRect->width = rect.width;
+    childRect->x = rect.x;
+    childRect->y = rect.y;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildId(
+    const ArkUI_TouchTestInfoItem* info, char* buffer, int32_t bufferSize)
+{
+    if (!info || !buffer || bufferSize <= 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
+    if (!touchTestInfoItem) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const std::string childId(touchTestInfoItem->id);
+    int32_t srcLength = static_cast<int32_t>(childId.length());
+    if (srcLength >= bufferSize) {
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
+    }
+    childId.copy(buffer, srcLength);
+    buffer[srcLength] = '\0';
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultStrategy(
+    ArkUI_TouchTestInfo* info, ArkUI_TouchTestStrategy strategy)
+{
+    if (!info) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
+    if (!touchTestInfo) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (static_cast<ArkUITouchTestStrategy>(strategy) < ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT ||
+        static_cast<ArkUITouchTestStrategy>(strategy) > ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_FORWARD) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    touchTestInfo->strategy = static_cast<ArkUITouchTestStrategy>(strategy);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* info, const char* id)
+{
+    if (!info || !id) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
+    if (!touchTestInfo) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    std::string srcId(id);
+    const size_t srcLen = srcId.length();
+    const size_t requiredSize = srcLen + 1;
+    if (touchTestInfo->resultId) {
+        delete[] touchTestInfo->resultId;
+        touchTestInfo->resultId = nullptr;
+    }
+    touchTestInfo->resultId = new (std::nothrow) char[requiredSize];
+    if (!touchTestInfo->resultId) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    srcId.copy(touchTestInfo->resultId, srcLen);
+    touchTestInfo->resultId[srcLen] = '\0';
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

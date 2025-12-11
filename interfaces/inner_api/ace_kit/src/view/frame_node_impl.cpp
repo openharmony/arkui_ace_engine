@@ -143,8 +143,32 @@ void FrameNodeImpl::Measure(const Kit::LayoutConstraintInfo& parentContraint)
     constraint->percentReference.SetWidth(parentContraint.percentReferWidth);
     //percentReferenceHeight
     constraint->percentReference.SetHeight(parentContraint.percentReferHeight);
+
+    if (parentContraint.parentIdealSizeWidth) {
+        constraint->parentIdealSize.SetWidth(parentContraint.parentIdealSizeWidth.value());
+    }
+    if (parentContraint.parentIdealSizeHeight) {
+        constraint->parentIdealSize.SetHeight(parentContraint.parentIdealSizeHeight.value());
+    }
+
     frameNode_->SetActive(true);
     frameNode_->Measure(constraint);
+}
+
+LayoutConstraintInfo FrameNodeImpl::GetLayoutConstraint() const
+{
+    LayoutConstraintInfo out;
+    CHECK_NULL_RETURN(frameNode_, out);
+    auto tmp = frameNode_->GetLayoutConstraint();
+    out.minWidth = tmp.minSize.Width();
+    out.maxWidth = tmp.maxSize.Width();
+    out.minHeight = tmp.minSize.Height();
+    out.maxHeight = tmp.maxSize.Height();
+    out.percentReferWidth = tmp.percentReference.Width();
+    out.percentReferHeight = tmp.percentReference.Height();
+    out.parentIdealSizeWidth = tmp.parentIdealSize.Width();
+    out.parentIdealSizeHeight = tmp.parentIdealSize.Height();
+    return out;
 }
 
 void FrameNodeImpl::Layout()
@@ -443,5 +467,11 @@ NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()
     CHECK_NULL_RETURN(frameNode_, offset);
     offset = frameNode_->GetParentGlobalOffsetDuringLayout();
     return offset;
+}
+
+ColorMode FrameNodeImpl::GetLocalColorMode() const
+{
+    CHECK_NULL_RETURN(frameNode_, ColorMode::COLOR_MODE_UNDEFINED);
+    return static_cast<ColorMode>(frameNode_->GetLocalColorMode());
 }
 } // namespace OHOS::Ace::Kit

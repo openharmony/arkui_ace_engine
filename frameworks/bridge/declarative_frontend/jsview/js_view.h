@@ -452,6 +452,14 @@ public:
     void JSGetDialogController(const JSCallbackInfo& info);
 
     bool JSAllowReusableV2Descendant();
+
+    void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
+
+    void SetLatestInstanceId(const int32_t instanceId);
+
+    JSRef<JSVal> GetJsContext();
+
+    int32_t GetLatestInstanceId() const;
 private:
     void MarkNeedUpdate() override;
 
@@ -488,6 +496,7 @@ private:
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
+    int32_t latestInstanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::Framework

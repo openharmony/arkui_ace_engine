@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRootSceneAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -79,17 +80,23 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements R
         if (this.checkPriority("setRootSceneOptions")) {
             const session_casted = session as (RootSceneSession)
             this.getPeer()?.setRootSceneOptionsAttribute(session_casted)
+            this.applyOptionsFinish('RootSceneAttribute');
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRootSceneAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRootSceneAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -138,8 +138,23 @@ public:
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
         json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
+        ToJsonValueMore(json, filter);
+    }
+
+    void ToJsonValueMore(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
         json->PutExtAttr("enableAutoSpacing", std::to_string(GetEnableAutoSpacing().value_or(false)).c_str(), filter);
         json->PutExtAttr("scrollBarColor", GetScrollBarColorValue((Color(0x66182431))).ColorToString().c_str(), filter);
+        json->PutExtAttr("compressLeadingPunctuation", std::to_string(
+            GetCompressLeadingPunctuation().value_or(false)).c_str(), filter);
+        json->PutExtAttr("textDirection",
+            StringUtils::ToString(GetTextDirection().value_or(TextDirection::INHERIT)).c_str(), filter);
+        json->PutExtAttr("includeFontPadding", std::to_string(
+            GetIncludeFontPadding().value_or(false)).c_str(), filter);
+        json->PutExtAttr("fallbackLineSpacing", std::to_string(
+            GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+        json->PutExtAttr("selectedDragPreviewStyle",
+            GetSelectedDragPreviewStyleValue(Color::WHITE).ColorToString().c_str(), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
@@ -182,6 +197,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE_SELF);
@@ -200,6 +216,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, NumberOfLines, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::u16string, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewText, PreviewText, PROPERTY_UPDATE_NORMAL);
 
@@ -274,6 +292,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StopBackPress, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IncludeFontPadding, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FallbackLineSpacing, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -320,6 +340,8 @@ protected:
         value->propModuleName_ = CloneModuleName();
         value->propStopBackPress_ = CloneStopBackPress();
         value->propEnableAutoSpacing_ = CloneEnableAutoSpacing();
+        value->propIncludeFontPadding_ = CloneIncludeFontPadding();
+        value->propFallbackLineSpacing_ = CloneFallbackLineSpacing();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

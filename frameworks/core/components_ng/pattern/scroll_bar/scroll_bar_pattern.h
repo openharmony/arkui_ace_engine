@@ -373,6 +373,7 @@ public:
     }
 
     void OnModifyDone() override;
+    bool Idle();
 
 private:
     bool ScrollPositionCallback(double offset, int32_t source, bool isMouseWheelScroll = false);
@@ -392,6 +393,10 @@ private:
     void HandleDragEnd(const GestureEvent& info);
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
+    void CalcFlingVelocity(float offset);
+    void RegisterScrollBarOverDragEventTask();
+    void DragEndOverScroll();
+    bool CanOverScrollWithDelta(double delta) const;
 
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -435,6 +440,11 @@ private:
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
     bool enableNestedSorll_ = false;
+    // over drag
+    uint64_t lastVsyncTime_ = 0;
+    float scrollBarFlingVelocity_ = 0.0f;
+    bool firstAtEdge_ = true;
+    bool isTouchScreen_ = false;
 };
 
 } // namespace OHOS::Ace::NG

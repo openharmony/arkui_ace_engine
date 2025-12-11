@@ -172,7 +172,7 @@ private:
     float GetTargetOffset();
     void ResetAnimation();
     void FireOnOffsetChange(float value);
-    void FireOnStepOffsetChange(float value);
+    void FireOnStepOffsetChange(float value, bool isDrag);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
@@ -202,6 +202,7 @@ private:
     float builderMeasureBaseHeight_ = 0.0f;
     Dimension refreshOffset_ = 64.0_vp;
     bool pullToRefresh_ = true;
+    bool pullUpToCancelRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<float> ratio_;

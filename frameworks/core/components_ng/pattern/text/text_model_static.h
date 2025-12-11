@@ -63,13 +63,16 @@ public:
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
-
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void ResetSelectionMenuOptions(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 };
 } // namespace OHOS::Ace::NG
 

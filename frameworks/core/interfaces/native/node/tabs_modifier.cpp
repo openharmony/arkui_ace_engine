@@ -162,6 +162,17 @@ void SetTabOnUnselected(ArkUINodeHandle node, void* callback)
         TabsModelNG::SetOnUnselected(frameNode, nullptr);
     }
 }
+void SetTabsOnContentDidScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onContentDidScroll = reinterpret_cast<std::function<void(int32_t, int32_t, float, float)>*>(callback);
+        TabsModelNG::SetOnContentDidScroll(frameNode, std::move(*onContentDidScroll));
+    } else {
+        TabsModelNG::SetOnContentDidScroll(frameNode, nullptr);
+    }
+}
 void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -406,6 +417,12 @@ void ResetTabOnUnselected(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetOnUnselected(frameNode, nullptr);
+}
+void ResetTabsOnContentDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnContentDidScroll(frameNode, nullptr);
 }
 void ResetBarBackgroundColor(ArkUINodeHandle node)
 {
@@ -837,6 +854,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setDividerColorByUser = SetDividerColorByUser,
         .setFadingEdge = SetFadingEdge,
         .setTabOnUnselected = SetTabOnUnselected,
+        .setTabsOnContentDidScroll = SetTabsOnContentDidScroll,
         .setBarBackgroundColor = SetBarBackgroundColor,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
         .setBarOverlap = SetBarOverlap,
@@ -858,6 +876,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetDivider = ResetDivider,
         .resetFadingEdge = ResetFadingEdge,
         .resetTabOnUnselected = ResetTabOnUnselected,
+        .resetTabsOnContentDidScroll = ResetTabsOnContentDidScroll,
         .resetBarBackgroundColor = ResetBarBackgroundColor,
         .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
         .resetBarOverlap = ResetBarOverlap,

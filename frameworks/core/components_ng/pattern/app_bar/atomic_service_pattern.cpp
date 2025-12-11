@@ -170,6 +170,27 @@ void AtomicServicePattern::AppBgColorCallBack()
     customAppBar->FireCustomCallback(ARKUI_APP_BG_COLOR, pipeline->GetAppBgColor().ColorToString());
 }
 
+void AtomicServicePattern::SetMenuBarVisibleCallBack(bool visible)
+{
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_MENU_BAR_VISIBLE, visible);
+}
+
+void AtomicServicePattern::ExtensionHostParamsCallBack()
+{
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    auto pipeline = atom->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto params = container->GetExtensionHostParams();
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_EXTENSION_HOST_PARAMS, params);
+}
+
 void AtomicServicePattern::UpdateLayoutMargin()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -227,6 +248,8 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
 void AtomicServicePattern::OnLanguageConfigurationUpdate()
 {
     AppInfoCallBack();
+    CHECK_NULL_VOID(customAppBarNodeNode_);
+    customAppBarNodeNode_->FireReloadFunction(true);
 }
 
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()

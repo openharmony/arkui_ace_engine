@@ -14,7 +14,7 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler, scheduleCallback } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
@@ -23,7 +23,7 @@ import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
 import { UserView, UserViewBuilder } from "./UserView"
 import { EntryPoint } from './component/customComponent';
-import { ClickEvent, ClickEventInternal } from "#generated"
+import { ClickEvent, ClickEventInternal, SystemOps } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
@@ -38,6 +38,7 @@ import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
+import { flushBuilderRootNode } from './BuilderNode'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -238,21 +239,25 @@ export class Application {
         router.runPage(routerOption, builder)
     }
 
-    private computeRoot(): PeerNode {
-        // let handle = ArkUINativeModule._SystemAPI_StartFrame()
-        let result: PeerNode
+    private trackFrame<T>(frame: () => T): T {
+        const handle = SystemOps.StartFrame()
         try {
-            result = this.rootState!.value
-            this.rootPointer = result.peer.ptr
+            return frame()
         } finally {
-            // ArkUINativeModule._SystemAPI_EndFrame(handle)
+            SystemOps.EndFrame(handle)
         }
-        return result
+    }
+
+    private computeRoot(): PeerNode {
+        const peerNode = this.rootState!.value
+        this.rootPointer = peerNode.peer.ptr
+        return peerNode
     }
 
     start(plugin: boolean): pointer {
         InteropNativeModule._NativeLog("ArkTS Application.start plugin: " + plugin)
         this.plugin = plugin
+        AceTrace.updateAttributeSetTraceEnabled()
         RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
         RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
@@ -267,8 +272,7 @@ export class Application {
             this.uiContext = uiContext;
             this.manager!.contextData = uiData;
             this.manager!.isDebugMode = uiContext.isDebugMode_;
-            let instanceId = uiContext.getInstanceId();
-            this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
+            this.manager!.setThreadChecker(() => UIContextUtil.checkCurrentThread());
             if (this.startUrl == "__INTEROP__") {
                 return nullptr
             }
@@ -281,20 +285,23 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            if (plugin) {
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
-                    const frozen = this.manager!.frozen
-                    this.manager!.frozen = true
-                    memoEntry<void>(context, 0, builder)
-                    this.manager!.frozen = frozen
-                })
-            } else {
-                Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
-            }
-            InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
-            root = this.rootState!.value
-            InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+            root = this.trackFrame(() => {
+                if (plugin) {
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
+                        const frozen = this.manager!.frozen
+                        this.manager!.frozen = true
+                        memoEntry<void>(context, 0, builder)
+                        this.manager!.frozen = frozen
+                    })
+                } else {
+                    Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
+                }
+                InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
+                root = this.rootState!.value
+                InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+                return root
+            })
         } catch (e) {
             if (e instanceof Error) {
                 InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} message: ${e.message}`);
@@ -323,7 +330,10 @@ export class Application {
         let result : boolean = false
         switch (type as MessageType) {
             case MessageType.DELETE_DETACHED_ROOT: {
-                result = destroyUiDetachedRoot(ptr, this.instanceId);
+                result = true
+                scheduleCallback(() => {
+                    destroyUiDetachedRoot(ptr, this.instanceId)
+                })
                 break
             }
             default: {
@@ -354,21 +364,22 @@ export class Application {
         if (!this.manager) {
             InteropNativeModule._NativeLog('Invalid manager')
         }
-        let uiContextRouter = this.uiContext!.getRouter();
-        let rootState = uiContextRouter.getStateRoot();
-        let preState = uiContextRouter.getPreState();
+        let rootState: ComputableState<IncrementalNode> | undefined = undefined;
+        let preState: ComputableState<IncrementalNode> | undefined = undefined;
         if (this.plugin) {
             rootState = this.rootState as ComputableState<IncrementalNode> | undefined;
-            preState = undefined;
+        } else {
+            let uiContextRouter = this.uiContext!.getRouter();
+            rootState = uiContextRouter.getStateRoot();
+            preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
-        this.uiContext!.flushCallback()
-        this.updateStates(this.manager!, rootState, preState);
+        this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
-            this.updateStates(this.manager!, rootState, preState);
+            this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
@@ -397,7 +408,7 @@ export class Application {
             detachedRoot.compute()
         }
         updateLazyItems()
-        // flushBuilderRootNode()
+        flushBuilderRootNode()
         this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.

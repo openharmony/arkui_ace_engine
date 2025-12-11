@@ -1091,7 +1091,7 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, c
                             ? intervalSize_.Value() * mainSize
                             : (pipeline ? pipeline->NormalizeToPx(intervalSize_) : intervalSize_.ConvertToPx());
     CHECK_NULL_VOID(GreatOrEqual(intervalSize, SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
-    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
+    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis()) + contentStartOffset_ + contentEndOffset_;
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
@@ -1140,7 +1140,7 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, c
 void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign)
 {
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
-    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
+    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis()) + contentStartOffset_ + contentEndOffset_;
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
@@ -1513,10 +1513,11 @@ bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
     auto fromScrollBar = snapAnimationOptions.fromScrollBar;
-    if (!fromScrollBar && scrollBar && scrollBar->IsDriving()) {
+    auto source = snapAnimationOptions.source;
+    if (source != SCROLL_FROM_BAR && scrollBar && scrollBar->IsDriving()) {
         return false;
     }
-    if (!fromScrollBar && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+    if (source != SCROLL_FROM_BAR && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
         return false;
     }
     auto predictSnapOffset = CalcPredictSnapOffset(snapAnimationOptions.snapDelta, snapAnimationOptions.dragDistance,

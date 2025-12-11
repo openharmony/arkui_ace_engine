@@ -86,20 +86,24 @@ public:
         env->DestroyLocalScope();
     }
 
-    void AniSerializer([[maybe_unused]] ani_env *env, ani_object& result)
+    bool AniSerializer([[maybe_unused]] ani_env *env, ani_object& result)
     {
         static const char *className = "@ohos.arkui.dragController.dragController.DragPreviewInner";
         ani_class cls;
         if (ANI_OK != env->FindClass(className, &cls)) {
             HILOGE("AceDrag, find DragPreviewInner calss fail");
-            return;
+            return false;
         }
         ani_method method;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) {
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &method)) {
             HILOGE("AceDrag, find constructor method failed.");
-            return;
+            return false;
         }
-        env->Object_New(cls, method, &result, reinterpret_cast<ani_long>(this));
+        if (ANI_OK != env->Object_New(cls, method, &result, reinterpret_cast<ani_long>(this))) {
+            HILOGE("AceDrag, create DragPreview failed.");
+            return false;
+        }
+        return true;
     }
 
 private:

@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 class ACE_FORCE_EXPORT WebModel {
 public:
@@ -113,6 +114,7 @@ public:
     virtual void SetOnDrop(std::function<void(const RefPtr<DragEvent>&, const std::string&)>&& onDropId) = 0;
     virtual void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) = 0;
     virtual void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
+    virtual void SetWindowNewExtEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
     virtual void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
@@ -181,11 +183,11 @@ public:
     virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
     virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void SetCopyOptionMode(CopyOptions mode) {};
@@ -235,6 +237,9 @@ public:
     virtual void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
+    virtual void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetEnableImageAnalyzer(bool isEnabled) {}
+    virtual void SetEnableAutoFill(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
@@ -242,6 +247,9 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
     virtual void SetBackToTop(bool isBackToTop) {};
     virtual void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) {};
+    virtual void SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
+    virtual void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
+    virtual void SetOnTextSelectionChange(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

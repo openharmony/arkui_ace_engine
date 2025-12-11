@@ -17,14 +17,16 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkRefreshPeer, RefreshStatus, RefreshAttribute } from "./component/refresh"
+import { ArkRefreshPeer, RefreshStatus, RefreshAttribute, RefreshOptions} from "./component/refresh"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RefreshModifier extends CommonMethodModifier implements RefreshAttribute,AttributeModifier<RefreshAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,18 +37,23 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     applyDisabledAttribute(instance: RefreshAttribute): void { }
     applySelectedAttribute(instance: RefreshAttribute): void { }
     _onStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setRefreshOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setRefreshOptions_0_0value?: RefreshOptions
     _onStateChange_0_0value?: ((state: RefreshStatus) => void) | undefined
     _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onRefreshing_0_0value?: (() => void) | undefined
     _refreshOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _refreshOffset_0_0value?: number | undefined
+    _refreshOffset_0_0value?: double | undefined
     _pullToRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullToRefresh_0_0value?: boolean | undefined
+    _pullUpToCancelRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pullUpToCancelRefresh_0_0value?: boolean | undefined
     _onOffsetChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onOffsetChange_0_0value?: ((value0: number) => void) | undefined
+    _onOffsetChange_0_0value?: ((value0: double) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pullDownRatio_0_0value?: number | undefined
+    _pullDownRatio_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRefreshPeer;
         if (this._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -64,6 +71,24 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 default: {
                     this._onStateChange_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnStateChangeAttribute((undefined as ((state: RefreshStatus) => void) | undefined));
+                }
+            }
+        }
+
+        if (this._setRefreshOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._setRefreshOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRefreshOptionsAttribute((this._setRefreshOptions_0_0value as RefreshOptions));
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.INITIAL;
                 }
             }
         }
@@ -89,7 +114,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             switch (this._refreshOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRefreshOffsetAttribute((this._refreshOffset_0_0value as number | undefined));
+                    peer.setRefreshOffsetAttribute((this._refreshOffset_0_0value as double | undefined));
                     this._refreshOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -99,7 +124,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._refreshOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRefreshOffsetAttribute((undefined as number | undefined));
+                    peer.setRefreshOffsetAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -121,11 +146,29 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (this._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPullUpToCancelRefreshAttribute((this._pullUpToCancelRefresh_0_0value as boolean | undefined));
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPullUpToCancelRefreshAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._onOffsetChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onOffsetChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnOffsetChangeAttribute((this._onOffsetChange_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnOffsetChangeAttribute((this._onOffsetChange_0_0value as ((value0: double) => void) | undefined));
                     this._onOffsetChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -135,7 +178,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._onOffsetChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnOffsetChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnOffsetChangeAttribute((undefined as ((value0: double) => void) | undefined));
                 }
             }
         }
@@ -143,7 +186,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             switch (this._pullDownRatio_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPullDownRatioAttribute((this._pullDownRatio_0_0value as number | undefined));
+                    peer.setPullDownRatioAttribute((this._pullDownRatio_0_0value as double | undefined));
                     this._pullDownRatio_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -153,13 +196,14 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this._pullDownRatio_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPullDownRatioAttribute((undefined as number | undefined));
+                    peer.setPullDownRatioAttribute((undefined as double | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: RefreshModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onStateChange_0_flag) {
@@ -186,6 +230,18 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (modifier._setRefreshOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._setRefreshOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setRefreshOptions(modifier._setRefreshOptions_0_0value!);
+                    break;
+                }
+                default: {
+                }
+            }
+        }
         if (modifier._refreshOffset_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._refreshOffset_0_flag) {
@@ -195,7 +251,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.refreshOffset((undefined as number | undefined));
+                    this.refreshOffset((undefined as double | undefined));
                 }
             }
         }
@@ -212,6 +268,19 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (modifier._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pullUpToCancelRefresh(modifier._pullUpToCancelRefresh_0_0value);
+                    break;
+                }
+                default: {
+                    this.pullUpToCancelRefresh((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._onOffsetChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onOffsetChange_0_flag) {
@@ -221,7 +290,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.onOffsetChange((undefined as ((value0: number) => void) | undefined));
+                    this.onOffsetChange((undefined as ((value0: double) => void) | undefined));
                 }
             }
         }
@@ -234,7 +303,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                     break;
                 }
                 default: {
-                    this.pullDownRatio((undefined as number | undefined));
+                    this.pullDownRatio((undefined as double | undefined));
                 }
             }
         }
@@ -261,7 +330,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    refreshOffset(value: number | undefined): this {
+    refreshOffset(value: double | undefined): this {
         if (((this._refreshOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._refreshOffset_0_0value) !== (value)))
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -283,7 +352,18 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    onOffsetChange(value: ((value0: number) => void) | undefined): this {
+    pullUpToCancelRefresh(value: boolean | undefined): this {
+        if (((this._pullUpToCancelRefresh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullUpToCancelRefresh_0_0value) !== (value)))
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pullUpToCancelRefresh_0_0value = value
+        } else
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onOffsetChange(value: ((value0: double) => void) | undefined): this {
         if (((this._onOffsetChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -294,7 +374,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
-    pullDownRatio(value: number | undefined): this {
+    pullDownRatio(value: double | undefined): this {
         if (((this._pullDownRatio_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullDownRatio_0_0value) !== (value)))
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.UPDATE
@@ -307,5 +387,18 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
+    }
+
+    setRefreshOptions(value: RefreshOptions): this {
+        if (((this._setRefreshOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._setRefreshOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._setRefreshOptions_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._setRefreshOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
 }

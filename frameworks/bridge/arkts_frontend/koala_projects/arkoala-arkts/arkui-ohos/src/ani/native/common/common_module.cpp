@@ -28,6 +28,7 @@
 
 #include "ani.h"
 #include "load.h"
+#include "securec.h"
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
@@ -35,6 +36,7 @@
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif
+#include "drag_and_drop/native_drag_drop_global.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -43,6 +45,7 @@ const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
+const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -68,10 +71,11 @@ CommonModuleCallbackAni::~CommonModuleCallbackAni()
     CHECK_NULL_VOID(func_);
     ani_env* env = nullptr;
     auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-        env->GlobalReference_Delete(func_);
+    if (attachCurrentThreadStatus == ANI_OK) {
         vm_->DetachCurrentThread();
     }
+    CHECK_NULL_VOID(env);
+    env->GlobalReference_Delete(func_);
 }
 
 void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
@@ -380,6 +384,27 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawForeGrou
     };
 }
 
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawOverlayFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+{
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawOverlay",
+            "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier)
 {
@@ -400,10 +425,12 @@ void SetDrawModifier(
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
     void* fnDrawForegroundFun = nullptr;
+    void* fnDrawOverlayFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawBehindFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawContentFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawFrontFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawForegroundFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawOverlayFun = nullptr;
     if (flag & FLAG_DRAW_BEHIND) {
         auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
@@ -420,6 +447,10 @@ void SetDrawModifier(
         auto fnDrawForegroundAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawForegroundFun = ConvertFnObjDrawForeGroundFun(vm, fnDrawForegroundAni, drawModifierRef);
     }
+    if (flag & FLAG_DRAW_OVERLAY) {
+        auto fnDrawOverlayAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
+        drawOverlayFun = ConvertFnObjDrawOverlayFun(vm, fnDrawOverlayAni, drawModifierRef);
+    }
     if (drawBehindFun != nullptr) {
         fnDrawBehindFun = &drawBehindFun;
     }
@@ -432,8 +463,11 @@ void SetDrawModifier(
     if (drawForegroundFun != nullptr) {
         fnDrawForegroundFun = &drawForegroundFun;
     }
+    if (drawOverlayFun != nullptr) {
+        fnDrawOverlayFun = &drawOverlayFun;
+    }
     modifier->getArkUIAniDrawModifier()->setDrawModifier(
-        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun);
+        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun, fnDrawOverlayFun);
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -974,6 +1008,37 @@ ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
     return nullptr;
 }
 
+ani_int getWindowId(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowId(instanceId);
+    if (ret.has_value()) {
+        return ret.value();
+    }
+    return -1;
+}
+
+ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowWidthBreakpoint();
+}
+
+ani_int getWindowHeightBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowHeightBreakpoint();
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1321,5 +1386,186 @@ void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int theme
         return;
     }
     modifier->getCommonAniModifier()->applyThemeScopeId(env, ptr, themeScopeId);
+}
+
+bool IsValidKey(const std::string& key)
+{
+    const std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    std::string lowerKey = key;
+    std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+    return std::find(validKeyCodes.begin(), validKeyCodes.end(), lowerKey) != validKeyCodes.end();
+}
+
+void ReleaseCharArray(char** arr, int32_t length)
+{
+    if (!arr) {
+        return;
+    }
+    for (int32_t i = 0; i < length; ++i) {
+        delete[] arr[i];
+    }
+    delete[] arr;
+}
+
+bool ConvertKeysToLowerStrings(ani_env* env, ani_array keys, char*** outKeys, int32_t* outLength)
+{
+    ani_size length = 0;
+    if (ANI_OK != env->Array_GetLength(keys, &length) || length <= 0) {
+        AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+
+    int32_t lengthInt = static_cast<int32_t>(length);
+    char** modifierKeys = new char* [lengthInt];
+
+    for (int32_t i = 0; i < lengthInt; ++i) {
+        bool isSuccess = true;
+        auto key = GetAniStringEnum(env, keys, static_cast<ani_int>(i), isSuccess);
+        if (!isSuccess || !IsValidKey(key)) {
+            ReleaseCharArray(modifierKeys, i);
+            AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+        std::string lowerKey = key;
+        std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+        size_t size = lowerKey.length() + 1;
+        modifierKeys[i] = new char[size];
+        if (strcpy_s(modifierKeys[i], size, lowerKey.c_str()) != 0) {
+            ReleaseCharArray(modifierKeys, i + 1);
+            AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+    }
+
+    *outKeys = modifierKeys;
+    *outLength = lengthInt;
+    return true;
+}
+
+bool CheckPressedKeysMatch(char** modifierKeys, int32_t modifierLength, char** pressedKeys, int32_t pressedLength)
+{
+    if (!pressedKeys || pressedLength <= 0) {
+        return false;
+    }
+
+    for (int32_t i = 0; i < modifierLength; ++i) {
+        std::string key(modifierKeys[i]);
+        bool found = false;
+        for (int32_t j = 0; j < pressedLength; ++j) {
+            if (pressedKeys[j] && key == pressedKeys[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ani_boolean GetBaseEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getBaseEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+ani_boolean GetDragEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getDragAniModifier()->getPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+ani_boolean GetKeyEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getKeyEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+void SetClickEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    auto result = modifier->getCommonAniModifier()->setClickEventPreventDefault(pointer);
+    if (!result) {
+        AniUtils::AniThrow(
+            env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
+    }
+}
+
+void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    auto result = modifier->getCommonAniModifier()->setTouchEventPreventDefault(pointer);
+    if (!result) {
+        AniUtils::AniThrow(
+            env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
+    }
 }
 } // namespace OHOS::Ace::Ani

@@ -307,8 +307,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level0)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    richEditorPattern->CalcMoveUpPos(lmSizeOffset);
-    EXPECT_EQ(lmSizeOffset, 0.0f);
+    EXPECT_EQ(richEditorPattern->CalcMoveUpPos(lmSizeOffset), 0);
 }
 
 /**

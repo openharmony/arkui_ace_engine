@@ -33,6 +33,7 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
@@ -1051,18 +1052,24 @@ HWTEST_F(MarqueeTestNg, MarqueeTest014, TestSize.Level1)
     marqueeModel.SetPlayerStatus(std::nullopt);
     EXPECT_FALSE(castMarqueePaintProperty->HasPlayerStatus());
 
+    // set scroll amount
     marqueeModel.SetScrollAmount(2.0);
     EXPECT_EQ(castMarqueePaintProperty->GetScrollAmount(), 2.0);
+    // set scroll amount to nullopt
     marqueeModel.SetScrollAmount(std::nullopt);
     EXPECT_FALSE(castMarqueePaintProperty->HasScrollAmount());
 
+    // set loop to 2
     marqueeModel.SetLoop(2);
     EXPECT_EQ(castMarqueePaintProperty->GetLoop(), 2);
+    // set loop to nullopt
     marqueeModel.SetLoop(std::nullopt);
     EXPECT_FALSE(castMarqueePaintProperty->HasLoop());
 
+    // set direction to LEFT
     marqueeModel.SetDirection(MarqueeDirection::LEFT);
     EXPECT_EQ(castMarqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
+    // set direction to nullopt
     marqueeModel.SetDirection(std::nullopt);
     EXPECT_FALSE(castMarqueePaintProperty->HasDirection());
     ViewStackProcessor::instance = nullptr;

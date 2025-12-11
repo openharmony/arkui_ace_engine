@@ -63,6 +63,20 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
     }
 }
 
+void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src)
+{
+    switch (src) {
+        case AutoCapitalizationMode::NONE: dst = ARK_AUTO_CAPITALIZATION_MODE_NONE; break;
+        case AutoCapitalizationMode::WORDS: dst = ARK_AUTO_CAPITALIZATION_MODE_WORDS; break;
+        case AutoCapitalizationMode::SENTENCES: dst = ARK_AUTO_CAPITALIZATION_MODE_SENTENCES; break;
+        case AutoCapitalizationMode::ALL_CHARACTERS: dst = ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>;
+            LOGE("Unexpected enum value in AutoCapitalizationMode: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
 {
     switch (src) {
@@ -250,17 +264,45 @@ void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src)
     }
 }
 
-void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src)
+void AssignArkValue(Ark_GestureControl_GestureType& dst, const GestureTypeName& src)
 {
     switch (src) {
-        case GestureTypeName::TAP_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE; break;
-        case GestureTypeName::LONG_PRESS_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE; break;
-        case GestureTypeName::PAN_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE; break;
-        case GestureTypeName::PINCH_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE; break;
-        case GestureTypeName::SWIPE_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE; break;
-        case GestureTypeName::ROTATION_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE; break;
-        case GestureTypeName::DRAG: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG; break;
-        case GestureTypeName::CLICK: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK; break;
+        case GestureTypeName::TAP_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE;
+            break;
+        case GestureTypeName::LONG_PRESS_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE;
+            break;
+        case GestureTypeName::PAN_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE;
+            break;
+        case GestureTypeName::PINCH_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE;
+            break;
+        case GestureTypeName::SWIPE_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE;
+            break;
+        case GestureTypeName::ROTATION_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE;
+            break;
+        case GestureTypeName::DRAG:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG;
+            break;
+        case GestureTypeName::CLICK:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK;
+            break;
+        case GestureTypeName::BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_BOX_SELECT_GESTURE;
+            break;
+        case GestureTypeName::WEBSCROLL:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_WEB_SCROLL_GESTURE;
+            break;
+        case GestureTypeName::TEXTFIELD_BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TEXT_FIELD_SELECT_GESTURE;
+            break;
+        case GestureTypeName::CONTEXT_MENU_HOVER:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CONTEXT_MENU_HOVER_GESTURE;
+            break;
         default:
             LOGE("Unexpected enum value in GestureTypeName: %{public}d", src);
             dst = static_cast<Ark_GestureControl_GestureType>(-1);
@@ -369,6 +411,18 @@ void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src)
     }
 }
 
+void AssignArkValue(Ark_TextDirection& dst, const TextDirection& src)
+{
+    switch (src) {
+        case TextDirection::LTR: dst = ARK_TEXT_DIRECTION_LTR; break;
+        case TextDirection::RTL: dst = ARK_TEXT_DIRECTION_RTL; break;
+        case TextDirection::INHERIT: dst = ARK_TEXT_DIRECTION_DEFAULT; break;
+        case TextDirection::AUTO: dst = ARK_TEXT_DIRECTION_AUTO; break;
+        default: dst = static_cast<Ark_TextDirection>(-1);
+            LOGE("Unexpected enum value in TextDirection: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
 {
     switch (src) {
@@ -419,6 +473,26 @@ void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
             dst = static_cast<Ark_MessageLevel>(-1);
             LOGE("Unexpected enum value in MessageLevel: %{public}d", src);
         }
+    }
+}
+
+void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src)
+{
+    switch (src) {
+        case ConsoleMessageSource::XML: dst = ARK_CONSOLE_MESSAGE_SOURCE_XML; break;
+        case ConsoleMessageSource::JAVASCRIPT: dst = ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT; break;
+        case ConsoleMessageSource::NETWORK: dst = ARK_CONSOLE_MESSAGE_SOURCE_NETWORK; break;
+        case ConsoleMessageSource::CONSOLE_API: dst = ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API; break;
+        case ConsoleMessageSource::STORAGE: dst = ARK_CONSOLE_MESSAGE_SOURCE_STORAGE; break;
+        case ConsoleMessageSource::RENDERING: dst = ARK_CONSOLE_MESSAGE_SOURCE_RENDERING; break;
+        case ConsoleMessageSource::SECURITY: dst = ARK_CONSOLE_MESSAGE_SOURCE_SECURITY; break;
+        case ConsoleMessageSource::OTHER: dst = ARK_CONSOLE_MESSAGE_SOURCE_OTHER; break;
+        case ConsoleMessageSource::DEPRECATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION; break;
+        case ConsoleMessageSource::WORKER: dst = ARK_CONSOLE_MESSAGE_SOURCE_WORKER; break;
+        case ConsoleMessageSource::VIOLATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION; break;
+        case ConsoleMessageSource::INTERVENTION: dst = ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION; break;
+        case ConsoleMessageSource::RECOMMENDATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION; break;
+        default: LOGE("Unexpected enum value in ConsoleMessageSource: %{public}d", src);
     }
 }
 
@@ -540,6 +614,19 @@ void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHa
             break;
     }
 }
+void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src){
+    switch (src) {
+        case PromptActionCommonState::UNINITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_UNINITIALIZED; break;
+        case PromptActionCommonState::INITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_INITIALIZED; break;
+        case PromptActionCommonState::APPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARING; break;
+        case PromptActionCommonState::APPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARED; break;
+        case PromptActionCommonState::DISAPPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARING; break;
+        case PromptActionCommonState::DISAPPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARED; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_promptAction_CommonState>;
+            LOGE("Unexpected enum value in PromptActionCommonState: %{public}d", src);
+    }
+}
 
 void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {
@@ -549,6 +636,9 @@ void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHan
             break;
         case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
             dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+            break;
+        case SecurityComponentHandleResult::CLICK_GRANT_CANCELED:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_CANCELED_BY_USER;
             break;
         default:
             dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
@@ -637,6 +727,7 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
         case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
         case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
         case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+        case V2::StickyStyle::BOTH: dst = ARK_STICKY_STYLE_BOTH; break;
         default: dst = static_cast<Ark_StickyStyle>(-1);
             LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
     }
@@ -702,8 +793,8 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
 void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
 {
     switch (src) {
-        case TextAlign::LEFT: dst = ARK_TEXT_ALIGN_START; break;
-        case TextAlign::RIGHT: dst = ARK_TEXT_ALIGN_END; break;
+        case TextAlign::LEFT: dst = ARK_TEXT_ALIGN_LEFT; break;
+        case TextAlign::RIGHT: dst = ARK_TEXT_ALIGN_RIGHT; break;
         case TextAlign::CENTER: dst = ARK_TEXT_ALIGN_CENTER; break;
         case TextAlign::JUSTIFY: dst = ARK_TEXT_ALIGN_JUSTIFY; break;
         case TextAlign::START: dst = ARK_TEXT_ALIGN_START; break;

@@ -286,13 +286,11 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnHandleMove001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = -1;
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
-    EXPECT_EQ(richEditorPattern->caretPosition_, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
-    richEditorPattern->caretPosition_ = -1;
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
-    EXPECT_EQ(richEditorPattern->caretPosition_, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -384,6 +382,26 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnBackPressed001, TestSize.Lev
 
     richEditorPattern->imeShown_ = true;
     EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged
+ * @tc.desc: Test OnWindowSizeChanged001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnWindowSizeChanged001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->OnWindowSizeChanged(100, 200, WindowSizeChangeReason::ROTATION);
+
+    auto context = richEditorNode_->GetContextRefPtr();
+    ASSERT_NE(context, nullptr);
+    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    EXPECT_EQ(textFieldManager->GetOptionalClickPosition(), std::nullopt);
 }
 
 } // namespace OHOS::Ace::NG

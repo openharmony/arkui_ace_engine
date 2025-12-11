@@ -25,6 +25,7 @@ namespace OHOS::Ace::Platform {
 namespace {
 
 constexpr int32_t ROTATION_DIVISOR = 64;
+constexpr int32_t DEFAULT_MOUSE_PROCESS_TOUCH_ID = 0;
 
 bool IsMMIMouseScrollBegin(const AxisEvent& event)
 {
@@ -329,6 +330,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+    touchPoint.processTime = std::chrono::high_resolution_clock::now();
     touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d eventId=%d", touchPoint.x,
@@ -449,6 +451,13 @@ bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerE
                 return false;
         }
         TouchEvent touchEvent = event.CreateTouchPoint();
+        touchEvent.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        touchEvent.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        for (auto& item : touchEvent.pointers) {
+            item.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+            item.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+            item.isPressed = (touchEvent.type == TouchType::DOWN) || (touchEvent.type == TouchType::MOVE);
+        }
         touchEvent.convertInfo.first = UIInputEventType::MOUSE;
         touchEvent.convertInfo.second = UIInputEventType::TOUCH;
         touchEvent.SetSourceType(SourceType::TOUCH);

@@ -28,6 +28,10 @@
 #include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension MAX_OVERLAY_MENU_WIDTH = 442.0_vp;
+constexpr Dimension OVERLAY_MENU_HORIZONTAL_GAP = 16.0_vp;
+}
 
 /**
  * DialogTheme defines color and styles of PopupComponent. PopupTheme should be built
@@ -65,6 +69,8 @@ public:
             theme->cutSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.cut");
             theme->copySymbolId_ = themeConstants->GetSymbolByName("sys.symbol.plus_square_on_square");
             theme->copyAllSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark_square_on_square");
+            theme->autoFillSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.list_bullet_square");
+            theme->passwordVaultSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.key_horizontal");
             theme->pasteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.plus_square_dashed_on_square");
             theme->cameraInputSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.auto_camera");
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
@@ -143,6 +149,9 @@ public:
             theme->copyLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_copy_label", "Copy");
             theme->pasteLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_paste_label", "Paste");
             theme->selectAllLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_select_all_label", "Select all");
+            theme->autoFillLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_auto_fill_label", "AutoFill");
+            theme->passwordVaultLabel_ =
+                pattern->GetAttr<std::string>("text_overlay_menu_password_vault_label", "PasswordVault");
             theme->translateLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_translate_label", "Translate");
             theme->shareLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_share_label", "Share");
             theme->searchLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_search_label", "Search");
@@ -150,6 +159,10 @@ public:
                 pattern->GetAttr<std::string>("text_overlay_menu_more_accessibility_text", "more");
             theme->backAccessibilityText_ =
                 pattern->GetAttr<std::string>("text_overlay_menu_back_accessibility_text", "back");
+            theme->maxOverlayMenuWidth_ =
+                pattern->GetAttr<Dimension>("text_overlay_menu_max_width", MAX_OVERLAY_MENU_WIDTH);
+            theme->overlayMenuHorizontalGap_ =
+                pattern->GetAttr<Dimension>("text_overlay_menu_horizontal_gap", OVERLAY_MENU_HORIZONTAL_GAP);
         }
         void ParseAIMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
@@ -404,7 +417,14 @@ public:
     {
         return copyAllSymbolId_;
     }
-
+    const uint32_t& GetAutoFillSymbolId() const
+    {
+        return autoFillSymbolId_;
+    }
+    const uint32_t& GetPasswordVaultSymbolId() const
+    {
+        return passwordVaultSymbolId_;
+    }
     const uint32_t& GetPasteSymbolId() const
     {
         return pasteSymbolId_;
@@ -468,6 +488,16 @@ public:
     const std::string& GetSelectAllLabel() const
     {
         return selectAllLabel_;
+    }
+
+    const std::string& GetAutoFillLabel() const
+    {
+        return autoFillLabel_;
+    }
+
+    const std::string& GetPasswordVaultLabel() const
+    {
+        return passwordVaultLabel_;
     }
 
     const std::string& GetTranslateLabel() const
@@ -598,6 +628,16 @@ public:
     {
         return previewMenuPadding_;
     }
+
+    Dimension GetMaxOverlayMenuWidth()
+    {
+        return maxOverlayMenuWidth_;
+    }
+
+    Dimension GetOverlayMenuHorizontalGap()
+    {
+        return overlayMenuHorizontalGap_;
+    }
 protected:
     TextOverlayTheme() = default;
     TextStyle menuButtonTextStyle_;
@@ -637,6 +677,8 @@ private:
     std::string copyLabel_;
     std::string pasteLabel_;
     std::string selectAllLabel_;
+    std::string autoFillLabel_;
+    std::string passwordVaultLabel_;
     std::string translateLabel_;
     std::string shareLabel_;
     std::string searchLabel_;
@@ -652,6 +694,8 @@ private:
     uint32_t cutSymbolId_ = 0;
     uint32_t copySymbolId_ = 0;
     uint32_t copyAllSymbolId_ = 0;
+    uint32_t autoFillSymbolId_ = 0;
+    uint32_t passwordVaultSymbolId_ = 0;
     uint32_t pasteSymbolId_ = 0;
     uint32_t cameraInputSymbolId_ = 0;
     uint32_t aiWriteSymbolId_ = 0;
@@ -669,6 +713,8 @@ private:
     Color aiMenuSymbolColor_;
     Dimension menuButtonRadius_;
     std::string askCelia_;
+    Dimension maxOverlayMenuWidth_ = MAX_OVERLAY_MENU_WIDTH;
+    Dimension overlayMenuHorizontalGap_ = OVERLAY_MENU_HORIZONTAL_GAP;
 };
 
 } // namespace OHOS::Ace

@@ -44,6 +44,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
 std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
+std::atomic<bool> SystemProperties::attributeSetTraceEnable_(false);
 std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
@@ -124,6 +125,7 @@ double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
+int32_t SystemProperties::pageLoadTimethreshold_ = 1000; // page load max timethreshold is 1000ms.
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -136,6 +138,7 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER
 bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
+bool SystemProperties::isOpenYuvDecode_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -298,6 +301,11 @@ bool SystemProperties::IsPCMode()
     return false;
 }
 
+bool SystemProperties::IsAutoFillSupport()
+{
+    return false;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return false;
@@ -446,6 +454,11 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 int32_t SystemProperties::GetTouchAccelarate()
 {
     return touchAccelarate_;
+}
+
+int32_t SystemProperties::GetPageLoadTimethreshold()
+{
+    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::GetContainerDeleteFlag()

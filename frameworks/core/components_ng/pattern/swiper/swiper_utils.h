@@ -18,10 +18,6 @@
 
 #include <optional>
 
-#include "base/geometry/axis.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/property/measure_utils.h"

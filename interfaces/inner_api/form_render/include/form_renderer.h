@@ -66,7 +66,7 @@ public:
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
     void SetVisibleChange(bool isVisible);
-    void UpdateFormSize(float width, float height, float borderWidth);
+    void UpdateFormSize(float width, float height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
 
 private:
@@ -78,6 +78,7 @@ private:
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RemoveFormDeathRecipient();
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
+    void SetUIContentProperty(const OHOS::AAFwk::Want &want);
 
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
@@ -99,6 +100,7 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
     sptr<IRemoteObject> proxy_;
+    AppExecFwk::Constants::FormLocation formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
 };
 
 /**

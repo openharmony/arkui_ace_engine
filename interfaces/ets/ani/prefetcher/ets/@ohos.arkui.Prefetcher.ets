@@ -1224,63 +1224,63 @@ class DataSourceObserver<T> implements DataChangeListener {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'reloaded',
-        totalCount: this.dataSource!.totalCount() as int,
+        totalCount: this.dataSource!.totalCount(),
       },
     ]);
   }
 
-  onDataAdded(index: number): void {
+  onDataAdded(index: int): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'added',
-        startIndex: index as int,
+        startIndex: index,
         count: 1,
       },
     ]);
   }
 
-  onDataAdd(index: number): void {
+  onDataAdd(index: int): void {
     this.onDataAdded(index);
   }
 
-  onDataMoved(from: number, to: number): void {
+  onDataMoved(from: int, to: int): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'swapped',
-        a: from as int,
-        b: to as int,
+        a: from,
+        b: to,
       },
     ]);
   }
 
-  onDataMove(from: number, to: number): void {
+  onDataMove(from: int, to: int): void {
     this.onDataMoved(from, to);
   }
 
-  onDataDeleted(index: number): void {
+  onDataDeleted(index: int): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'deleted',
-        startIndex: index as int,
+        startIndex: index,
         count: 1,
       },
     ]);
   }
 
-  onDataDelete(index: number): void {
+  onDataDelete(index: int): void {
     this.onDataDeleted(index);
   }
 
-  onDataChanged(index: number): void {
+  onDataChanged(index: int): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'updated',
-        index: index as int,
+        index: index,
       },
     ]);
   }
 
-  onDataChange(index: number): void {
+  onDataChange(index: int): void {
     this.onDataChanged(index);
   }
 
@@ -1293,8 +1293,8 @@ class DataSourceObserver<T> implements DataChangeListener {
           if (addCount === undefined || addCount > 0) {
             operations.push({
               kind: 'added',
-              startIndex: (operation as DataAddOperation).index as int,
-              count: (addCount ?? 1) as int,
+              startIndex: (operation as DataAddOperation).index,
+              count: (addCount ?? 1),
             });
           }
           break;
@@ -1303,35 +1303,35 @@ class DataSourceObserver<T> implements DataChangeListener {
           if (deleteCount === undefined || deleteCount > 0) {
             operations.push({
               kind: 'deleted',
-              startIndex: (operation as DataDeleteOperation).index as int,
-              count: (deleteCount ?? 1) as int,
+              startIndex: (operation as DataDeleteOperation).index,
+              count: (deleteCount ?? 1),
             });
           }
           break;
         case DataOperationType.CHANGE:
           operations.push({
             kind: 'updated',
-            index: (operation as DataChangeOperation).index as int,
+            index: (operation as DataChangeOperation).index,
           });
           break;
         case DataOperationType.RELOAD:
           operations.push({
             kind: 'reloaded',
-            totalCount: this.dataSource!.totalCount() as int,
+            totalCount: this.dataSource!.totalCount(),
           });
           break;
         case DataOperationType.EXCHANGE:
           operations.push({
             kind: 'swapped',
-            a: (operation as DataExchangeOperation).index.start as int,
-            b: (operation as DataExchangeOperation).index.end as int,
+            a: (operation as DataExchangeOperation).index.start,
+            b: (operation as DataExchangeOperation).index.end,
           });
           break;
         case DataOperationType.MOVE:
           operations.push({
             kind: 'moved',
-            from: (operation as DataMoveOperation).index.from as int,
-            to: (operation as DataMoveOperation).index.to as int,
+            from: (operation as DataMoveOperation).index.from,
+            to: (operation as DataMoveOperation).index.to,
           });
           break;
         default:

@@ -26,6 +26,9 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_date_picker_dialog.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace Converter {
@@ -68,13 +71,12 @@ std::optional<PickerTime> ProcessBindableTimeSelected(const Opt_Union_Date_Binda
     return result;
 }
 
-PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& options)
+bool ParseDates(const Ark_DatePickerDialogOptions& options, PickerDialogInfo& dialogInfo)
 {
-    PickerDialogInfo dialogInfo;
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, dialogInfo);
+    CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, dialogInfo);
+    CHECK_NULL_RETURN(pickerTheme, false);
     // parse start and end date
     auto parseStartDate = pickerTheme->GetDefaultStartDate();
     auto parseEndDate = pickerTheme->GetDefaultEndDate();
@@ -92,11 +94,27 @@ PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& op
     }
     dialogInfo.parseStartDate = parseStartDate;
     dialogInfo.parseEndDate = parseEndDate;
-    // parse selected date
-    if (auto selectedDate = ProcessBindableDateSelected(options.selected); selectedDate) {
+    // parse selected date and time
+    auto selectedDate = ProcessBindableDateSelected(options.selected);
+    auto selectedTime = ProcessBindableTimeSelected(options.selected);
+    if (selectedDate) {
         dialogInfo.isSelectedDate = true;
         dialogInfo.parseSelectedDate = selectedDate.value();
+        if (selectedTime) {
+            dialogInfo.pickerTime = selectedTime.value();
+        }
     }
+    return true;
+}
+
+PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& options)
+{
+    PickerDialogInfo dialogInfo;
+    auto datesParsed = ParseDates(options, dialogInfo);
+    if (!datesParsed) {
+        return dialogInfo;
+    }
+
     auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
     if (alignment) {
         dialogInfo.alignment = alignment.value();
@@ -174,9 +192,14 @@ DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions& option
     if (pickerMode) {
         settingData.mode = *pickerMode;
     }
+    settingData.isEnableHapticFeedback = true;
     auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
     if (enableHapticFeedback) {
         settingData.isEnableHapticFeedback = enableHapticFeedback.value();
+    }
+    auto canLoop = Converter::OptConvert<bool>(options.canLoop);
+    if (canLoop) {
+        settingData.canLoop = canLoop.value();
     }
     return settingData;
 }
@@ -286,10 +309,14 @@ void Show(const Ark_DatePickerDialogOptions* options)
     DatePickerType pickType = DATE;
     PickerDialogEvent datePickerDialogEvent = BuildPickerDialogEvents(*options);
     std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(*options);
+#ifndef ARKUI_CAPI_UNITTEST
     DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(dialogInfo, settingData,
         std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent), std::move(interEvents.changeEvent),
         std::move(interEvents.dateAcceptEvent), std::move(interEvents.dateChangeEvent), pickType, datePickerDialogEvent,
         buttonInfos);
+#else
+    MockDatePickerDialog::Show(dialogInfo, settingData);
+#endif
 }
 } // namespace DatePickerDialogExtender
 } // namespace OHOS::Ace::NG

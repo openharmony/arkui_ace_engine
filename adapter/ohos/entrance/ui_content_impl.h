@@ -97,7 +97,7 @@ public:
     void SetUIContentType(UIContentType uIContentType) override;
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-
+    static int32_t GetUIContentWindowID(int32_t instanceId);
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -321,6 +321,7 @@ public:
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
+    void SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) override;
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
@@ -430,11 +431,11 @@ public:
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
-    void AddKeyFrameCanvasNodeCallback(const std::function<
-        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+    void AddKeyFrameNodeCallback(const std::function<
+        void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
 
-    void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
+    void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode) override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
@@ -451,6 +452,8 @@ public:
         const std::function<void()>&& loadPageCallback, bool isColdStart) override;
     std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
+    int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo&,
+        const NavigateChangeInfo&)>&& callback) override;
     UIContentErrorCode InitializeWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
 
@@ -466,6 +469,9 @@ public:
 
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
+
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
 
 protected:
     void RunIntentPageIfNeeded();
@@ -567,9 +573,9 @@ protected:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
-    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+    std::function<void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
-    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
+    std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode> keyFrameNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;
     OHOS::Rosen::WindowSizeChangeReason cachedReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
@@ -582,7 +588,6 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
-    NG::WindowSizeBreakpoint lastBreakpoint_ = { WidthBreakpoint::UNDEFINED, HeightBreakpoint::HEIGHT_SM };
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange();

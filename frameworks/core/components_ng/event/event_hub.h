@@ -248,15 +248,16 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(
+    bool AddSupportedUIStateWithCallback(
         UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
-    void RemoveSupportedUIState(UIState state, bool isInner);
+    bool RemoveSupportedUIState(UIState state, bool isInner);
     bool GetUserSetStateStyle();
     void SetScrollingFeatureForbidden(bool isSetStateStyle);
     bool IsCurrentStateOn(UIState state);
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction);
     void ClearSingleKeyboardShortcut();
+    void ClearSingleKeyboardShortcutAll();
     std::vector<KeyboardShortcut>& GetKeyboardShortcut();
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
@@ -319,6 +320,16 @@ public:
         return !!ndkDrawCompletedCallback_;
     }
 
+    void SetCompensateOnSizeChangeEvent(bool compensateOnSizeChangeEvent)
+    {
+        compensateOnSizeChangeEvent_ = compensateOnSizeChangeEvent;
+    }
+
+    bool IsCompensateOnSizeChangeEvent() const
+    {
+        return compensateOnSizeChangeEvent_;
+    }
+
 protected:
     virtual void OnModifyDone() {}
     std::function<void()> onAppear_;
@@ -347,6 +358,7 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     bool disableDataPrefetch_ { false };
+    bool compensateOnSizeChangeEvent_ { false };
     std::vector<KeyboardShortcut> keyboardShortcut_;
     std::vector<int32_t> hasInnerAreaChangeUntriggered_;
 

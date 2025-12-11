@@ -21,9 +21,11 @@
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"

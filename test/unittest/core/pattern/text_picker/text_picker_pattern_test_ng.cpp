@@ -31,6 +31,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1071,6 +1072,36 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest017, TestSize.Level1)
     std::string nodeInfo = "";
     auto cancel = dialogTheme->GetCancelText();
     EXPECT_EQ(cancel, nodeInfo);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test TextPickerPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    DirtySwapConfig config;
+    auto isShowInDialog = textPickerPattern->GetIsShowInDialog();
+    textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->useButtonFocusArea_ = true;
+    EXPECT_FALSE(textPickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    textPickerPattern->SetIsShowInDialog(false);
+    textPickerPattern->useButtonFocusArea_ = true;
+    EXPECT_TRUE(textPickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    textPickerPattern->SetIsShowInDialog(isShowInDialog);
 }
 
 /**

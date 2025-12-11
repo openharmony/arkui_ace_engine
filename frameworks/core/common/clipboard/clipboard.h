@@ -32,6 +32,7 @@ public:
 
     virtual void SetData(
         const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) = 0;
+    virtual void GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode = false) = 0;
     virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) = 0;
     virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) = 0;
     virtual void GetPixelMapData(
@@ -54,7 +55,9 @@ public:
     virtual void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
         bool syncMode = false) = 0;
-
+    virtual void GetSpanStringData(
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+        bool syncMode = false) = 0;
 protected:
     explicit Clipboard(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}
     RefPtr<TaskExecutor> taskExecutor_;

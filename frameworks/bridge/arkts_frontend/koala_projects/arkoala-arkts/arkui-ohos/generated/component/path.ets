@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookPathAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -42,6 +44,7 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setPathOptionsAttribute(options?: PathOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -107,6 +110,7 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         if (this.checkPriority("setPathOptions")) {
             const options_casted = options as (PathOptions | undefined)
             this.getPeer()?.setPathOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PathAttribute');
             return this
         }
         return this
@@ -120,12 +124,17 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         return this
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPathAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPathAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

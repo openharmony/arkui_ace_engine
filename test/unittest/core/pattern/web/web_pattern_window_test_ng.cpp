@@ -1010,6 +1010,34 @@ HWTEST_F(WebPatternWindowTestNg, OnWindowHide001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWindowHide002
+ * @tc.desc: OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, OnWindowHide002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->offlineWebInited_ = true;
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+    webPattern->isWindowShow_ = true;
+    webPattern->OnWindowHide();
+    EXPECT_TRUE(webPattern->isWindowShow_);
+#endif
+}
+
+/**
  * @tc.name: CalculateTooltipOffset_001
  * @tc.desc: CalculateTooltipOffset
  * @tc.type: FUNC
@@ -1076,6 +1104,7 @@ HWTEST_F(WebPatternWindowTestNg, AdjustRotationRenderFitTest001, TestSize.Level1
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
@@ -1086,15 +1115,18 @@ HWTEST_F(WebPatternWindowTestNg, AdjustRotationRenderFitTest001, TestSize.Level1
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto type = WindowSizeChangeReason::UNDEFINED;
-    webPattern->AdjustRotationRenderFit(type);
-    type = WindowSizeChangeReason::MAXIMIZE;
+    webPattern->isAttachedToMainTree_ = false;
+    webPattern->isVisible_ = false;
     webPattern->AdjustRotationRenderFit(type);
     webPattern->isAttachedToMainTree_ = true;
-    webPattern->isVisible_ = false;
+    webPattern->isVisible_ = true;
+    type = WindowSizeChangeReason::MAXIMIZE;
+    webPattern->AdjustRotationRenderFit(type);
     type = WindowSizeChangeReason::ROTATION;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = false;
     webPattern->AdjustRotationRenderFit(type);
     webPattern->isVisible_ = true;
-    webPattern->delegate_ = nullptr;
     webPattern->AdjustRotationRenderFit(type);
     EXPECT_EQ(webPattern->rotationEndCallbackId_, 0);
 #endif

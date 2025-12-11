@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const OBSERVABLE_TARGET = "__proxy_observable_target__"
+const OBSERVABLE_TARGET = '__proxy_observable_target__'
 
 export function getObservableTarget(proxy: Object): Object {
     return getPropertyValue(OBSERVABLE_TARGET, proxy) ?? proxy
@@ -30,7 +30,7 @@ export function Observed(constructorFunction: Function) {
     constructorFunction.prototype[OBSERVED] = true
 }
 
-const OBSERVED = "__ObservedByArkUI__"
+const OBSERVED = '__ObservedByArkUI__'
 function isObserved(value: any): boolean {
     return value[OBSERVED] === true
 }
@@ -148,7 +148,7 @@ export class ObservableHandler implements Observable {
         if (count > 1) {
             parent.children.set(this, count - 1)
         }
-        else if (count == 1) {
+        else if (count === 1) {
             parent.children.delete(this)
             this.parents.delete(parent)
         }
@@ -223,9 +223,9 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
         const valueAsAny = (value as any)
         const handler = new ObservableHandler(parent)
         const setMethods = new Set([
-            "setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate",
-            "setUTCHours", "setUTCMinutes", "setUTCSeconds", "setUTCMilliseconds"
+            'setFullYear', 'setMonth', 'setDate', 'setHours', 'setMinutes', 'setSeconds',
+            'setMilliseconds', 'setTime', 'setUTCFullYear', 'setUTCMonth', 'setUTCDate',
+            'setUTCHours', 'setUTCMinutes', 'setUTCSeconds', 'setUTCMilliseconds'
         ])
         setMethods.forEach((method: string) => {
             const originalMethod = method + 'Original'
@@ -265,10 +265,10 @@ function proxyObject(value: any, observable: ObservableHandler) {
     ObservableHandler.installOn(value, observable)
     return new Proxy(value, {
         get(target, property, receiver) {
-            if (property == OBSERVABLE_TARGET) return target
+            if (property === OBSERVABLE_TARGET) return target
             const value: any = Reflect.get(target, property, receiver)
             ObservableHandler.find(target)?.onAccess()
-            return typeof value == "function"
+            return typeof value === 'function'
                 ? value.bind(target)
                 : value
         },
@@ -445,14 +445,14 @@ function proxyMapOrSet(value: any, observable: ObservableHandler) {
     ObservableHandler.installOn(value, observable)
     return new Proxy(value, {
         get(target, property, receiver) {
-            if (property == OBSERVABLE_TARGET) return target
-            if (property == 'size') {
+            if (property === OBSERVABLE_TARGET) return target
+            if (property === 'size') {
                 ObservableHandler.find(target)?.onAccess()
                 return target.size
             }
             const value: any = Reflect.get(target, property, receiver)
             ObservableHandler.find(target)?.onAccess()
-            return typeof value == "function"
+            return typeof value === 'function'
                 ? value.bind(target)
                 : value
         },

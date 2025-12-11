@@ -21,6 +21,7 @@ import { NavPathInfo, NavPathInfoInternal, NavPathStack, NavPathStackInternal, N
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -31,7 +32,8 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater, hookGetConfigInRouteMap } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder } from "./builder"
@@ -96,7 +98,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         return new NavDestinationContextInternal(ptr)
     }
     public getConfigInRouteMap(): RouteMapConfig | undefined {
-        return this.getConfigInRouteMap_serialize()
+        return hookGetConfigInRouteMap(this)
     }
     private getPathInfo(): NavPathInfo {
         return this.getPathInfo_serialize()
@@ -186,6 +188,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setNavDestinationOptionsAttribute(moduleInfo?: NavDestinationModuleInfo): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (moduleInfo !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -221,7 +224,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_setHideBackButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnShownAttribute(value: (() => void) | undefined): void {
+    setOnShownAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -233,7 +236,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_setOnShown(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnHiddenAttribute(value: (() => void) | undefined): void {
+    setOnHiddenAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -745,6 +748,12 @@ export enum NavDestinationActiveReason {
     OVERLAY = 4,
     APP_STATE = 5
 }
+
+export enum VisibilityChangeReason {
+    TRANSITION = 0,
+    CONTENT_COVER = 1,
+    APP_STATE = 2
+}
 export interface RouteMapConfig {
     name: string;
     pageSourceFile: string;
@@ -756,9 +765,9 @@ export interface NestedScrollInfo {
 }
 export interface NavDestinationTransition {
     onTransitionEnd?: (() => void);
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve;
-    delay?: number;
+    delay?: int32;
     event: (() => void);
 }
 export interface NavDestinationAttribute extends CommonMethod {
@@ -771,10 +780,10 @@ export interface NavDestinationAttribute extends CommonMethod {
     hideBackButton(value: boolean | undefined): this {
         throw new Error("Unimplemented method hideBackButton")
     }
-    onShown(value: (() => void) | undefined): this {
+    onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         throw new Error("Unimplemented method onShown")
     }
-    onHidden(value: (() => void) | undefined): this {
+    onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         throw new Error("Unimplemented method onHidden")
     }
     onBackPressed(value: (() => boolean) | undefined): this {
@@ -865,8 +874,8 @@ export interface NavDestinationAttribute extends CommonMethod {
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined
     hideBackButton_value?: boolean | undefined
-    onShown_value?: (() => void) | undefined
-    onHidden_value?: (() => void) | undefined
+    onShown_value?: ((value0: VisibilityChangeReason) => void) | undefined
+    onHidden_value?: ((value0: VisibilityChangeReason) => void) | undefined
     onBackPressed_value?: (() => boolean) | undefined
     onResult_value?: ((value0: Object | null | undefined) => void) | undefined
     mode_value?: NavDestinationMode | undefined
@@ -895,10 +904,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     hideBackButton(value: boolean | undefined): this {
         return this
     }
-    onShown(value: (() => void) | undefined): this {
+    onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         return this
     }
-    onHidden(value: (() => void) | undefined): this {
+    onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         return this
     }
     onBackPressed(value: (() => boolean) | undefined): this {
@@ -1003,6 +1012,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("setNavDestinationOptions")) {
             const moduleInfo_casted = moduleInfo as (NavDestinationModuleInfo | undefined)
             this.getPeer()?.setNavDestinationOptionsAttribute(moduleInfo_casted)
+            this.applyOptionsFinish('NavDestinationAttribute');
             return this
         }
         return this
@@ -1023,17 +1033,17 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    public onShown(value: (() => void) | undefined): this {
+    public onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (this.checkPriority("onShown")) {
-            const value_casted = value as ((() => void) | undefined)
+            const value_casted = value as (((value0: VisibilityChangeReason) => void) | undefined)
             this.getPeer()?.setOnShownAttribute(value_casted)
             return this
         }
         return this
     }
-    public onHidden(value: (() => void) | undefined): this {
+    public onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (this.checkPriority("onHidden")) {
-            const value_casted = value as ((() => void) | undefined)
+            const value_casted = value as (((value0: VisibilityChangeReason) => void) | undefined)
             this.getPeer()?.setOnHiddenAttribute(value_casted)
             return this
         }
@@ -1264,12 +1274,17 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookNavDestinationAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookNavDestinationAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -1322,7 +1337,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1338,7 +1353,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1365,11 +1380,11 @@ export class NavDestinationTransition_serializer {
         }
         const onTransitionEndTmpResult : (() => void) | undefined = onTransitionEndTmpBuf
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1377,11 +1392,11 @@ export class NavDestinationTransition_serializer {
         }
         const curveTmpResult : curves.Curve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -1511,10 +1526,10 @@ export class NavDestinationCustomTitle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
-            } else if (valueHolderForHeightForIdx1 instanceof number) {
+            } else if (valueHolderForHeightForIdx1 instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
-                valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
+                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as double
+                valueSerializer.writeFloat64(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
@@ -1542,17 +1557,17 @@ export class NavDestinationCustomTitle_serializer {
             heightTmpBuf = TitleHeight.fromValue(valueDeserializer.readInt32())
         } else if (heightTmpBufUnionSelector == (1).toChar()) {
             const heightTmpBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBufBufU : string | number | Resource | undefined
+            let heightTmpBufBufU : string | double | Resource | undefined
             if (heightTmpBufBufUUnionSelector == (0).toChar()) {
                 heightTmpBufBufU = (valueDeserializer.readString() as string)
             } else if (heightTmpBufBufUUnionSelector == (1).toChar()) {
-                heightTmpBufBufU = (valueDeserializer.readNumber() as number)
+                heightTmpBufBufU = valueDeserializer.readFloat64()
             } else if (heightTmpBufBufUUnionSelector == (2).toChar()) {
                 heightTmpBufBufU = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBufBufU has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBufBufU as string | number | Resource)
+            heightTmpBuf = (heightTmpBufBufU as string | double | Resource)
         } else {
             throw new Error("One of the branches for heightTmpBuf has to be chosen through deserialisation.")
         }

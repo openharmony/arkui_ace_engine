@@ -85,9 +85,6 @@
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
             ],
-            "@ohos/mediaquery": [
-                "@ohos.mediaquery.ets"
-            ],
             "@ohos/arkui/dragController": [
                 "@ohos.arkui.dragController.ets"
             ],
@@ -135,6 +132,9 @@
             ],
             "@ohos.arkui.ArcScrollBar": [
                 "./@ohos.arkui.ArcScrollBar.ets"
+            ],
+            "#arktheme": [
+                "./arkui/theme"
             ]
         }
     },

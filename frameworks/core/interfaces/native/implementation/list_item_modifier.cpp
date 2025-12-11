@@ -19,7 +19,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -135,8 +134,7 @@ namespace ListItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListItemModelStatic::CreateFrameNode(id, false, LazyBuild::IsLazyBuild());
-    LazyBuild::ResetLazyBuild();
+    auto frameNode = ListItemModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -197,10 +195,10 @@ void SetSwipeActionImpl(Ark_NativePointer node,
 
     using OnOffsetChangeType = std::function<void(int32_t)>;
     OnOffsetChangeType onOffsetChangeCallback;
-    auto arkOnOffsetChange = Converter::OptConvert<Callback_Number_Void>(optValue->onOffsetChange);
+    auto arkOnOffsetChange = Converter::OptConvert<Callback_F64_Void>(optValue->onOffsetChange);
     if (arkOnOffsetChange) {
         onOffsetChangeCallback = [arkCallback = CallbackHelper(*arkOnOffsetChange)](int32_t offset) {
-            auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
+            auto arkOffset = Converter::ArkValue<Ark_Float64>(offset);
             arkCallback.Invoke(arkOffset);
         };
     }

@@ -973,4 +973,34 @@ HWTEST_F(DragAnimationHelperTestNg, MountMenuNode001, TestSize.Level1)
     opacity = renderContext->GetOpacity().value();
     EXPECT_TRUE(opacity == 0.0f);
 }
+
+/**
+ * @tc.name: ShowGatherNodeAnimation
+ * @tc.desc: test ShowGatherNodeAnimation func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowGatherNodeAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init overlayManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    parentNode_->AttachContext(AceType::RawPtr(pipelineContext), true);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->hasGatherNode_ = false;
+    overlayManager->gatherNodeWeak_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call ShowGatherNodeAnimation func
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    ASSERT_EQ(DragAnimationHelper::ShowGatherNodeAnimation(itemNode), true);
+}
 } // namespace OHOS::Ace::NG

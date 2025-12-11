@@ -26,8 +26,7 @@ uint32_t DisplaySyncType2FrameRateType(UIObjectType displaySyncType)
         { UIObjectType::DISPLAYSYNC_ANIMATOR, ANIMATOR_DISPLAY_SYNC_FRAME_RATE_TYPE },
         { UIObjectType::DISPLAYSYNC_XCOMPONENT, XCOMPONENT_FRAME_RATE_TYPE },
     };
-    auto iter = convertMap.find(displaySyncType);
-    if (iter != convertMap.end()) {
+    if (auto iter = convertMap.find(displaySyncType); iter != convertMap.end()) {
         return iter->second;
     }
     return OTHER_DISPLAY_SYNC_FRAME_RATE_TYPE;

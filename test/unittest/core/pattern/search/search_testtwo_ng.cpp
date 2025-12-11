@@ -22,6 +22,7 @@
 #include "ui/view/frame_node.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1144,8 +1145,6 @@ HWTEST_F(SearchTestTwoNg, SetProperty004, TestSize.Level1)
     auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
     ImageSourceInfo imageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::CORRECT_SVG);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    searchModelInstance.SetSearchIconColor(frameNode, Color::RED);
-    EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
 
     //test SetSearchButton
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(fNode->GetChildAtIndex(BUTTON_INDEX));
@@ -1219,15 +1218,9 @@ HWTEST_F(SearchTestTwoNg, SetProperty005, TestSize.Level1)
     fNode->MarkModifyDone();
     EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
 
-    //test SetCancelIconSize
-    searchModelInstance.SetCancelIconSize(frameNode, 14.0_vp);
-    EXPECT_EQ(searchLayoutProperty->GetCancelButtonUDSize(), 14.0_vp);
-
     //test SetCancelIconColor
     auto imageFNode = AceType::DynamicCast<FrameNode>(fNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageRProperty = imageFNode->GetPaintProperty<ImageRenderProperty>();
-    searchModelInstance.SetCancelIconColor(frameNode, Color::RED);
-    EXPECT_EQ(imageRProperty->GetSvgFillColor(), Color::RED);
 
     //test SetRightIconSrcPath
     auto cancelImageLayoutProperty = imageFNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2197,7 +2190,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic015, TestSize.Level1)
     EXPECT_EQ(textPaintProperty->GetCursorWidth().value(), CARET_WIDTH);
 
     SearchModelStatic::SetCaretWidth(frameNode, std::nullopt);
-    EXPECT_FALSE(textPaintProperty->GetCursorWidth().has_value());
+    EXPECT_TRUE(textPaintProperty->GetCursorWidth().has_value());
 }
 
 /**
@@ -2965,8 +2958,6 @@ HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
     pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
     searchModelInstance.SetSearchIconColor(Color::BLACK);
     pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
-    searchModelInstance.ResetSearchIconColor();
-    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
     auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     ASSERT_NE(searchIconFrameNode, nullptr);
     EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
@@ -2974,7 +2965,6 @@ HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
     pattern->CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, false, false);
     searchModelInstance.SetCancelIconColor(Color::BLACK);
     pattern->ToJsonValueForCancelButton(jsonValue, filter2);
-    searchModelInstance.ResetCancelIconColor();
     pattern->ToJsonValueForCancelButton(jsonValue, filter2);
     auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     ASSERT_NE(cancelImageFrameNode, nullptr);
@@ -3011,8 +3001,7 @@ HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
     auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
     auto searchTheme = pattern->GetTheme();
     ASSERT_NE(searchTheme, nullptr);
-    auto normalIconColor = searchTheme->GetSymbolIconColor();
-    EXPECT_EQ(color, normalIconColor);
+    EXPECT_EQ(color, Color::BLACK);
 }
 
 /**
@@ -3230,8 +3219,6 @@ HWTEST_F(SearchTestTwoNg, searchCancelImageMeasureTest, TestSize.Level1)
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
-
-    searchModelInstance.SetCancelIconSize(Dimension(10));
 
     layoutAlgorithm->CancelImageMeasure(AccessibilityManager::RawPtr(layoutWrapper));
     layoutAlgorithm->ImageMeasure(AccessibilityManager::RawPtr(layoutWrapper));

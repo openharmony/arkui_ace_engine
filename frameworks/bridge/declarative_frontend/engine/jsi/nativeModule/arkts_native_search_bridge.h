@@ -63,6 +63,8 @@ public:
     static ArkUINativeModuleValue ResetHalfLeading(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSearchMinFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSearchMinFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSearchDividerColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSearchDividerColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSearchMaxFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSearchMaxFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -77,8 +79,6 @@ public:
     static ArkUINativeModuleValue ResetTextIndent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetSelectDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetSelectDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMaxLength(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMaxLength(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetType(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -131,12 +131,22 @@ public:
     static ArkUINativeModuleValue ResetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

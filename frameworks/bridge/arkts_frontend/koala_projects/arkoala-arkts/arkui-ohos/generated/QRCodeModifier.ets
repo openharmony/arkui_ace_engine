@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -28,6 +29,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttribute,AttributeModifier<QRCodeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,8 +44,9 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundColor_0_0value?: ResourceColor | undefined
     _contentOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentOpacity_0_0value?: number | Resource | undefined
+    _contentOpacity_0_0value?: double | Resource | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkQRCodePeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -86,7 +89,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             switch (this._contentOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentOpacityAttribute((this._contentOpacity_0_0value as number | Resource | undefined));
+                    peer.setContentOpacityAttribute((this._contentOpacity_0_0value as double | Resource | undefined));
                     this._contentOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -96,13 +99,14 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
                 }
                 default: {
                     this._contentOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentOpacityAttribute((undefined as number | Resource | undefined));
+                    peer.setContentOpacityAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: QRCodeModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._color_0_flag) {
@@ -138,7 +142,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
                     break;
                 }
                 default: {
-                    this.contentOpacity((undefined as number | Resource | undefined));
+                    this.contentOpacity((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -165,7 +169,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         }
         return this
     }
-    contentOpacity(value: number | Resource | undefined): this {
+    contentOpacity(value: double | Resource | undefined): this {
         if (((this._contentOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.UPDATE

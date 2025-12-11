@@ -385,6 +385,11 @@ public:
         return layoutTraceEnable_.load();
     }
 
+    static bool GetAttributeSetTraceEnabled()
+    {
+        return attributeSetTraceEnable_.load();
+    }
+
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
@@ -659,6 +664,8 @@ public:
 
     static bool IsPCMode();
 
+    static bool IsAutoFillSupport();
+
     static bool ConfigChangePerform();
 
     static void SetConfigChangePerform();
@@ -796,6 +803,7 @@ public:
 
     static int32_t GetDragDropFrameworkStatus();
     static int32_t GetTouchAccelarate();
+    static int32_t GetPageLoadTimethreshold();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -840,11 +848,17 @@ public:
         return prebuildInMultiFrameEnabled_;
     }
 
+    static bool IsOpenYuvDecode()
+    {
+        return isOpenYuvDecode_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> attributeSetTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool dynamicDetectionTraceEnable_;
@@ -938,6 +952,7 @@ private:
     static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
+    static int32_t pageLoadTimethreshold_;
     static bool pageTransitionFrzEnabled_;
     static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;
@@ -951,6 +966,8 @@ private:
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;
+    static bool isAutoFillSupport_;
+    static bool isOpenYuvDecode_;
 };
 
 } // namespace OHOS::Ace

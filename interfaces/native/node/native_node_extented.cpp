@@ -68,35 +68,6 @@ void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* constraint)
     return nullptr;
 }
 
-ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create()
-{
-    ArkUI_SelectedDataDetectorConfig* config = new ArkUI_SelectedDataDetectorConfig();
-    return config;
-}
-
-void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config)
-{
-    delete config;
-    config = nullptr;
-}
-
-void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
-{
-    CHECK_NULL_VOID(config);
-    config->types.clear();
-    for (uint32_t i = 0; i < length; ++i) {
-        config->types.push_back(types[i]);
-    }
-}
-
-int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
-{
-    CHECK_NULL_RETURN(config, 0);
-    return config->types.size();
-}
-
 ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(ArkUI_NodeCustomEvent* event)
 {
     CHECK_NULL_RETURN(event, nullptr);
@@ -1402,6 +1373,30 @@ int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_P
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create()
+{
+    ArkUI_SelectionOptions* options = new ArkUI_SelectionOptions;
+    options->menuPolicy = ArkUI_MenuPolicy::ARKUI_MENU_POLICY_DEFAULT;
+    return options;
+}
+
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options)
+{
+    delete options;
+}
+
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy)
+{
+    CHECK_NULL_VOID(options);
+    options->menuPolicy = menuPolicy;
+}
+
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options)
+{
+    CHECK_NULL_RETURN(options, ArkUI_MenuPolicy::ARKUI_MENU_POLICY_DEFAULT);
+    return options->menuPolicy;
+}
+
 ArkUI_ShowCounterConfig* OH_ArkUI_ShowCounterConfig_Create()
 {
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig { { 0, 0.0f }, { 0, 0.0f } };
@@ -1436,6 +1431,36 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounte
 {
     CHECK_NULL_RETURN(config, 0);
     return config->counterTextOverflowColor.value;
+}
+
+ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create()
+{
+    auto controller = new ArkUI_TextContentBaseController{};
+    return controller;
+}
+
+void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController* controller)
+{
+    delete controller;
+    controller = nullptr;
+}
+
+void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller)
+{
+    CHECK_NULL_VOID(controller);
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    switch (controller->textFieldType) {
+        case NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE:
+            fullImpl->getNodeModifiers()->getTextInputModifier()
+                ->textInputDeleteBackward(controller->node->uiNodeHandle);
+            break;
+        case NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()
+                ->textAreaDeleteBackward(controller->node->uiNodeHandle);
+            break;
+        default:
+            return;
+    }
 }
 
 void OH_ArkUI_TextLayoutManager_Dispose(ArkUI_TextLayoutManager* layoutManager)

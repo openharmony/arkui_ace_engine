@@ -39,6 +39,7 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
     ret.wordBreak = Converter::OptConvert<OHOS::Ace::WordBreak>(src.wordBreak);
     ret.textOverflow = Converter::OptConvert<OHOS::Ace::TextOverflow>(src.overflow);
     ret.textIndent = Converter::OptConvert<OHOS::Ace::Dimension>(src.textIndent);
+    ret.textDirection = Converter::OptConvert<OHOS::Ace::TextDirection>(src.textDirection);
     ret.paragraphSpacing = Converter::OptConvert<OHOS::Ace::Dimension>(src.paragraphSpacing);
     if (!ret.paragraphSpacing || ret.paragraphSpacing.value().Value() < 0) {
         ret.paragraphSpacing = Dimension(0.0, DimensionUnit::VP);
@@ -145,6 +146,14 @@ Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_Float64>(style.paragraphSpacing);
 }
+Opt_TextDirection GetTextDirectionImpl(Ark_ParagraphStyle peer)
+{
+    auto invalid = Converter::ArkValue<Opt_TextDirection>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    return Converter::ArkValue<Opt_TextDirection>(style.textDirection);
+}
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
 {
@@ -159,6 +168,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::GetWordBreakImpl,
         ParagraphStyleAccessor::GetLeadingMarginImpl,
         ParagraphStyleAccessor::GetParagraphSpacingImpl,
+        ParagraphStyleAccessor::GetTextDirectionImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

@@ -1353,4 +1353,54 @@ HWTEST_F(CalendarMonthTestNg, CalendarDialogLayoutAlgorithmTest002, TestSize.Lev
     calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
 }
+
+/**
+ * @tc.name: JudgeAreaTest003
+ * @tc.desc: Test JudgeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, JudgeAreaTest003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 600.0f));
+    frameNode->SetGeometryNode(geometryNode);
+
+    float length = 30;
+    float space = 1;
+
+    auto paintProperty = frameNode->GetPaintProperty<CalendarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateDayHeight(Dimension(length));
+    paintProperty->UpdateDayWidth(Dimension(length));
+    paintProperty->UpdateWeekHeight(Dimension(space));
+    paintProperty->UpdateWeekAndDayRowSpace(Dimension(space));
+    paintProperty->UpdateColSpace(Dimension(space));
+    paintProperty->UpdateDailySixRowSpace(Dimension(space));
+
+    CalendarDay calendarDay;
+    for (int i = START_LENTH; i < CALEND_MONTH_LENTH; i++) {
+        calendarMonthPattern->obtainedMonth_.days.push_back(calendarDay);
+    }
+
+    auto localLocation1 = Offset(0.0f, 0.0f);
+    auto ret1 = calendarMonthPattern->JudgeArea(localLocation1);
+    EXPECT_TRUE(ret1 < 0);
+
+    auto localLocation2 = Offset(30.0f, 50.0f);
+    auto ret2 = calendarMonthPattern->JudgeArea(localLocation2);
+    EXPECT_TRUE(ret2 >= 0);
+}
 } // namespace OHOS::Ace::NG

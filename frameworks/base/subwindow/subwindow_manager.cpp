@@ -29,6 +29,7 @@ std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
 const std::unordered_set<SubwindowType> NORMAL_SUBWINDOW_TYPE = { SubwindowType::TYPE_MENU,
     SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP };
+const std::unordered_set<std::string> DIALOG_AND_POPUP_TAG = { V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 {
@@ -249,7 +250,36 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowPreviewNG(bool isStartDraggingFromSubWindow)
+bool SubwindowManager::HasDialogOrPopup(int32_t containerId)
+{
+    auto aceContainer = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(aceContainer, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    for (const auto& node : rootNode->GetChildren()) {
+        if (auto search = DIALOG_AND_POPUP_TAG.find(node->GetTag()); search != DIALOG_AND_POPUP_TAG.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SubwindowManager::ShouldEnableDragEventForSubwindow(int32_t containerId, bool isRestartDrag)
+{
+    if (HasDialogOrPopup(containerId)) {
+        return true;
+    }
+    auto aceContainer = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(aceContainer, false);
+    if (isRestartDrag && (GetIsExpandDisplay() || !NEAR_ZERO(aceContainer->GetWindowScale() - 1.0f))) {
+        return true;
+    }
+    return false;
+}
+
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG(bool isStartDraggingFromSubWindow, bool isRestartDrag)
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
@@ -259,6 +289,10 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG(bool isStartDraggingFromSubWin
         CHECK_NULL_RETURN(subwindow->GetIsRosenWindowCreate(), nullptr);
         AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindow);
     }
+    bool isShouldEnableDragEventForSubwindow = ShouldEnableDragEventForSubwindow(containerId, isRestartDrag);
+    subwindow->SetReceiveDragEventEnabled(isShouldEnableDragEventForSubwindow);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subWindow is should enable drag event = %{public}d",
+        static_cast<int>(isShouldEnableDragEventForSubwindow));
     if (!subwindow->ShowPreviewNG(isStartDraggingFromSubWindow)) {
         return nullptr;
     }
@@ -279,6 +313,9 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId);
     CHECK_NULL_VOID(subwindow);
+    if (!HasDialogOrPopup(subwindow->GetChildContainerId())) {
+        subwindow->SetReceiveDragEventEnabled(false);
+    }
     subwindow->ShowMenuNG(menuNode, menuParam, targetNode, offset);
 }
 
@@ -296,6 +333,9 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId);
     CHECK_NULL_VOID(subwindow);
+    if (!HasDialogOrPopup(subwindow->GetChildContainerId())) {
+        subwindow->SetReceiveDragEventEnabled(false);
+    }
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
@@ -660,15 +700,14 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowByNodeId(int32_t instanceId,  Su
 }
 
 void SubwindowManager::ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
-    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange,
-    std::function<void(const float)>&& onWidthDidChange,
-    std::function<void(const float)>&& onTypeDidChange,
-    std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode)
+    std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,
+    std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+    std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+    const RefPtr<NG::FrameNode>& targetNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show sheet ng enter");
     auto containerId = Container::CurrentId();
@@ -1763,7 +1802,8 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchkey(int32_t instanceId, 
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return CheckSubwindowDisplayId(searchKey, result->second);
+        auto subwindow = result->second;
+        return CheckSubwindowDisplayId(searchKey, subwindow);
     }
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow by key in subwindowMap_, searchKey is %{public}s.",
         searchKey.ToString().c_str());

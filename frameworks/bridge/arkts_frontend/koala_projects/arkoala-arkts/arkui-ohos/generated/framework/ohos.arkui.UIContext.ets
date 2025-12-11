@@ -41,16 +41,16 @@ export class TargetInfo_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForIdForIdx0  = valueHolderForId as string
             valueSerializer.writeString(valueHolderForIdForIdx0)
-        } else if (valueHolderForId instanceof number) {
+        } else if (valueHolderForId instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForIdForIdx1  = valueHolderForId as number
-            valueSerializer.writeNumber(valueHolderForIdForIdx1)
+            const valueHolderForIdForIdx1  = valueHolderForId as int32
+            valueSerializer.writeInt32(valueHolderForIdForIdx1)
         }
         const valueHolderForComponentId  = value.componentId
         if (valueHolderForComponentId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForComponentIdTmpValue  = valueHolderForComponentId!
-            valueSerializer.writeNumber(valueHolderForComponentIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForComponentIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -58,21 +58,21 @@ export class TargetInfo_serializer {
     public static read(buffer: DeserializerBase): TargetInfo {
         let valueDeserializer : DeserializerBase = buffer
         const idTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let idTmpBuf : string | number | undefined
+        let idTmpBuf : string | int32 | undefined
         if (idTmpBufUnionSelector == (0).toChar()) {
             idTmpBuf = (valueDeserializer.readString() as string)
         } else if (idTmpBufUnionSelector == (1).toChar()) {
-            idTmpBuf = (valueDeserializer.readNumber() as number)
+            idTmpBuf = valueDeserializer.readInt32()
         } else {
             throw new Error("One of the branches for idTmpBuf has to be chosen through deserialisation.")
         }
-        const idTmpResult : string | number = (idTmpBuf as string | number)
+        const idTmpResult : string | int32 = (idTmpBuf as string | int32)
         const componentIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let componentIdTmpBuf : number | undefined = undefined
+        let componentIdTmpBuf : int32 | undefined = undefined
         if ((componentIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            componentIdTmpBuf = (valueDeserializer.readNumber() as number)
+            componentIdTmpBuf = valueDeserializer.readInt32()
         }
-        const componentIdTmpResult : number | undefined = componentIdTmpBuf
+        const componentIdTmpResult : int32 | undefined = componentIdTmpBuf
         let value : TargetInfo = ({id: idTmpResult, componentId: componentIdTmpResult} as TargetInfo)
         return value
     }

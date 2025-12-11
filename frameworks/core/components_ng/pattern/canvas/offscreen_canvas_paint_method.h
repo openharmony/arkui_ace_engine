@@ -34,8 +34,8 @@ public:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     std::string ToDataURL(const std::string& type, const double quality);
 
-    TransformParam GetTransform() const override;
-    LineDashParam GetLineDash() const override;
+    TransformParam GetTransform() const;
+    LineDashParam GetLineDash() const;
     void UpdateSize(int32_t width, int32_t height);
     void Reset();
     TextDirection GetSystemDirection() override;

@@ -1224,7 +1224,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionChildTreeTest, T
     EXPECT_EQ(property->GetChildWindowId(), 1);
     EXPECT_EQ(property->GetChildTreeId(), 1);
 
-    uiExtensionNode->accessibilityProperty_ = nullptr;
+    uiExtensionNode->GetOrCreateAccessibilityProperty() = nullptr;
     InvalidSessionWrapper(pattern);
     pattern->InitializeAccessibility();
     pattern->OnSetAccessibilityChildTree(1, 1);
@@ -1812,4 +1812,43 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, UpdateWant001, TestSize.Level1)
     pattern->UpdateWant(want);
     EXPECT_FALSE(pattern->needReNotifyForeground_);
 }
+
+/**
+ * @tc.name: InitializeTest002
+ * @tc.desc: Test pattern Initialize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, InitializeTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    pattern->Initialize();
+    
+    EXPECT_TRUE(pattern->hasInitialized_);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    ASSERT_NE(pattern->accessibilitySessionAdapter_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: TransferringCaller001
+ * @tc.desc: Test pattern TransferringCaller001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, TransferringCaller001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    pattern->SetIsTransferringCaller(true);
+    
+    EXPECT_TRUE(pattern->GetIsTransferringCaller());
+#endif
+}
+
 } //namespace OHOS::Ace::NG

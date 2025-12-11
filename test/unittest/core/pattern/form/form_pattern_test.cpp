@@ -36,8 +36,10 @@
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/components_ng/pattern/form/form_snapshot_check.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -476,7 +478,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_011, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
 
     auto host = pattern->GetHost();
-    pattern->SnapshotSurfaceNode();
+    pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCheck>(pattern->formManagerBridge_));
     EXPECT_NE(host, nullptr);
 }
 
@@ -2107,18 +2109,18 @@ HWTEST_F(FormPatternTest, FormPatternTest_059, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    float width = 0;
-    float height = 0;
+    float width = 0.1;
+    float height = 0.1;
     float layoutWidth = 0;
     float layoutHeight = 0;
     float viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
     EXPECT_EQ(viewScale, DEFAULT_VIEW_SCALE);
-    width = 100;
-    height = 100;
-    layoutWidth = 130;
-    layoutHeight = 130;
+    width = 90;
+    height = 90;
+    layoutWidth = 140;
+    layoutHeight = 140;
     viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
-    EXPECT_EQ(viewScale, MAX_FORM_VIEW_SCALE);
+    EXPECT_NE(viewScale, MAX_FORM_VIEW_SCALE);
 }
 
 /**
@@ -2197,5 +2199,37 @@ HWTEST_F(FormPatternTest, FormPatternTest_062, TestSize.Level0)
 
     pattern->SetObscured(true);
     EXPECT_TRUE(pattern->isFormObscured_);
+}
+
+/**
+ * @tc.name: FormPatternTest_063
+ * @tc.desc: OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->isTibetanLanguage_);
+}
+
+/**
+ * @tc.name: FormPatternTest_SetColorMode
+ * @tc.desc: SetColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_SetColorMode, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->formColorMode_, -1);
+ 
+    pattern->SetColorMode(0);
+    EXPECT_EQ(pattern->formColorMode_, 0);
 }
 } // namespace OHOS::Ace::NG

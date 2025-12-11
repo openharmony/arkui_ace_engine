@@ -688,6 +688,40 @@ HWTEST_F(RichEditorKeyboardTestNg, SupportAvoidanceTest, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorSetCustomKeyboardNode001
+ * @tc.desc: test RichEditorSetCustomKeyboardNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RichEditorSetCustomKeyboardNode001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = richEditorPattern->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    pipeline->SetTextFieldManager(textFieldManager);
+
+    /**
+     * @tc.steps: step2. init UINode and SetCustomKeyboardNodeId.
+     */
+    RefPtr<UINode> customNode;
+    richEditorPattern->SetCustomKeyboardNode(customNode);
+
+    bool result;
+    result = richEditorPattern->GetCustomKeyboardIsMatched(10);
+    EXPECT_EQ(result, false);
+
+    customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());
+    richEditorPattern->SetCustomKeyboardNode(customNode);
+    result = richEditorPattern->GetCustomKeyboardIsMatched(2002);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: RichEditorGetCrossOverHeight001
  * @tc.desc: test RichEditorGetCrossOverHeight
  * @tc.type: FUNC
@@ -710,4 +744,47 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorGetCrossOverHeight001, TestSize.Lev
     EXPECT_EQ(ret, 0);
 }
 
+/**
+ * @tc.name: SetRequestKeyboardOnFocus001
+ * @tc.desc: test RichEditorGetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, SetRequestKeyboardOnFocus001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetRequestKeyboardOnFocus(true);
+    EXPECT_TRUE(richEditorPattern->needToRequestKeyboardOnFocus_);
+
+    richEditorModel.SetRequestKeyboardOnFocus(false);
+    EXPECT_FALSE(richEditorPattern->needToRequestKeyboardOnFocus_);
+}
+
+/**
+ * @tc.name: SetRequestKeyboardOnFocus002
+ * @tc.desc: test RichEditorGetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, SetRequestKeyboardOnFocus002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetRequestKeyboardOnFocus(richEditorNode, true);
+    EXPECT_TRUE(richEditorPattern->needToRequestKeyboardOnFocus_);
+
+    richEditorModel.SetRequestKeyboardOnFocus(richEditorNode, false);
+    EXPECT_FALSE(richEditorPattern->needToRequestKeyboardOnFocus_);
+}
 }

@@ -75,8 +75,8 @@ export default namespace promptAction {
     export default interface ShowToastOptions
     {
         message: string | Resource;
-        duration?: number;
-        bottom?: string | number;
+        duration?: int;
+        bottom?: string | double;
         showMode?: ToastShowMode;
         alignment?: Alignment;
         offset?: Offset;
@@ -115,7 +115,7 @@ export default namespace promptAction {
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
     }
 
@@ -124,11 +124,11 @@ export default namespace promptAction {
     }
 
     export interface ShowDialogSuccessResponse {
-        index: number;
+        index: int;
     }
 
     class ShowDialogSuccessResponseInner implements ShowDialogSuccessResponse {
-        index: number = 0;
+        index: int = 0;
     }
 
     export type PromptActionSingleButton = [Button];
@@ -147,16 +147,20 @@ export default namespace promptAction {
         showInSubwindow?: boolean;
         isModal?: boolean;
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
     }
 
     export interface ActionMenuSuccessResponse {
-        index: number;
+        index: int;
     }
 
     class ActionMenuSuccessResponseInner implements ActionMenuSuccessResponse {
-        index: number = 0;
+        index: int = 0;
     }
 
     export interface BaseDialogOptions {
@@ -182,7 +186,7 @@ export default namespace promptAction {
         backgroundEffect?: BackgroundEffectOptions;
         keyboardAvoidDistance?: LengthMetrics;
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
         focusable?: boolean;
     }
@@ -210,7 +214,7 @@ export default namespace promptAction {
     export interface DialogBuilderOptions {
         builder?: long;
         destroyFunc?: ((ptr: long) => void);
-        builderWithId?: ((dialogId: number) => long);
+        builderWithId?: ((dialogId: int) => long);
     }
 
     class Cleaner {
@@ -252,6 +256,7 @@ export default namespace promptAction {
 
         native createPtr(): long;
         native close(): void;
+        native getState(): CommonState;
     }
 
     export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
@@ -274,9 +279,9 @@ export default namespace promptAction {
 
     export native function showToast(options: ShowToastOptions): void;
 
-    export native function openToast(options: ShowToastOptions): Promise<number>;
+    export native function openToast(options: ShowToastOptions): Promise<int>;
 
-    export native function closeToast(toastId: number): void;
+    export native function closeToast(toastId: int): void;
 
     export native function showDialog1(options: ShowDialogOptions,
         callback: AsyncCallback<ShowDialogSuccessResponse>, optionsInternal?: ShowDialogOptionsInternal): void;
@@ -293,19 +298,19 @@ export default namespace promptAction {
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
     export native function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
-        optionsInternal?: DialogOptionsInternal): Promise<number>;
+        optionsInternal?: DialogOptionsInternal): Promise<int>;
 
     export native function updateCustomDialog(content: long, options: BaseDialogOptions): Promise<void>;
 
     export native function closeCustomDialog1(content: long): Promise<void>;
 
-    export native function closeCustomDialog(dialogId: number): void;
+    export native function closeCustomDialog(dialogId: int): void;
 
     export native function openCustomDialogWithController(content: long, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
     export native function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
-        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
+        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<int>;
 
     export native function getTopOrder(): number | undefined;
     export native function getBottomOrder(): number | undefined;

@@ -1,21 +1,21 @@
 import { Position, SizeOptions, Length, ResourceColor } from 'arkui/framework'
 export interface ShapeSize {
 
-    width?: number | string;
+    width?: double | string;
 
-    height?: number | string;
+    height?: double | string;
 }
 
 export interface RectShapeOptions extends ShapeSize {
 
-    radius?: number | string | Array<number | string>;
+    radius?: double | string | Array<double | string>;
 }
 
 export interface RoundRectShapeOptions extends ShapeSize {
 
-    radiusWidth?: number | string;
+    radiusWidth?: double | string;
 
-    radiusHeight?: number | string;
+    radiusHeight?: double | string;
 }
 
 export interface PathShapeOptions {
@@ -23,57 +23,57 @@ export interface PathShapeOptions {
     commands?: string;
 }
 
-export declare class CommonShapeMethod<T> {
-    public offset(offset: Position): T;
-    public fill(color: ResourceColor): T;
-    public position(position: Position): T;
+export declare class CommonShapeMethod {
+    public offset(offset: Position): this;
+    public fill(color: ResourceColor): this;
+    public position(position: Position): this;
 }
 
-export declare class BaseShape<T> extends CommonShapeMethod<T> {
-    public width(width: Length): T;
-    public height(height: Length): T;
-    public size(size: SizeOptions): T;
+export declare class BaseShape extends CommonShapeMethod {
+    public width(width: Length): this;
+    public height(height: Length): this;
+    public size(size: SizeOptions): this;
 }
 
-export declare class RectShape extends BaseShape<RectShape> {
+export declare class RectShape extends BaseShape {
     public constructor(options?: RectShapeOptions | RoundRectShapeOptions);
-    public radiusWidth(rWidth: number | string): RectShape;
-    public radiusHeight(rHeight: number | string): RectShape;
-    public radius(radius: number | string | Array<number | string>): RectShape;
-    public width(width: Length): RectShape;
-    public height(width: Length): RectShape;
-    public size(width: Length): RectShape;
-    public offset(offset: Position): RectShape;
-    public fill(color: ResourceColor): RectShape;
-    public position(position: Position): RectShape;
+    public radiusWidth(rWidth: number | string): this;
+    public radiusHeight(rHeight: number | string): this;
+    public radius(radius: double | string | Array<double | string>): this;
+    public width(width: Length): this;
+    public height(width: Length): this;
+    public size(width: Length): this;
+    public offset(offset: Position): this;
+    public fill(color: ResourceColor): this;
+    public position(position: Position): this;
 }
 
-export declare class EllipseShape extends BaseShape<EllipseShape > {
+export declare class EllipseShape extends BaseShape {
 
     public constructor(options?: ShapeSize);
-    public width(width: Length): EllipseShape;
-    public height(width: Length): EllipseShape;
-    public size(width: Length): EllipseShape;
-    public offset(offset: Position): EllipseShape;
-    public fill(color: ResourceColor): EllipseShape;
-    public position(position: Position): EllipseShape;
+    public width(width: Length): this;
+    public height(width: Length): this;
+    public size(width: Length): this;
+    public offset(offset: Position): this;
+    public fill(color: ResourceColor): this;
+    public position(position: Position): this;
 }
 
-export declare class CircleShape extends BaseShape<CircleShape > {
+export declare class CircleShape extends BaseShape {
 
     public constructor(options?: ShapeSize);
-    public width(width: Length): CircleShape;
-    public height(width: Length): CircleShape;
-    public size(width: Length): CircleShape;
-    public offset(offset: Position): CircleShape;
-    public fill(color: ResourceColor): CircleShape;
-    public position(position: Position): CircleShape;
+    public width(width: Length): this;
+    public height(width: Length): this;
+    public size(width: Length): this;
+    public offset(offset: Position): this;
+    public fill(color: ResourceColor): this;
+    public position(position: Position): this;
 }
 
-export declare class PathShape extends CommonShapeMethod<PathShape> {
+export declare class PathShape extends CommonShapeMethod {
     public constructor(options?: PathShapeOptions);
-    public commands(commands: string): PathShape;
-    public offset(offset: Position): PathShape;
-    public fill(color: ResourceColor): PathShape;
-    public position(position: Position): PathShape;
+    public commands(commands: string): this;
+    public offset(offset: Position): this;
+    public fill(color: ResourceColor): this;
+    public position(position: Position): this;
 }

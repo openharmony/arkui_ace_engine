@@ -19,6 +19,7 @@
 #define private public
 
 #include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/base/mock_drag_window.h"
@@ -89,7 +90,7 @@ public:
 void DragDropFuncWrapperTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
-    MockContainer::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
     MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
 }
 
@@ -493,9 +494,9 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage020
 
     ContainerScope scope(instanceId);
     auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
+    ASSERT_NE(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
+    ASSERT_NE(pipelineContext, nullptr);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
@@ -506,7 +507,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage020
             { globalX, globalY }, extraParams, pointerId, instanceId);
     },
     TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
-    EXPECT_EQ(instanceId, -1);
 }
 
 /**

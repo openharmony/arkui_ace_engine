@@ -17,55 +17,55 @@ export default namespace componentUtils {
     loadLibrary("componentUtils_ani");
 
     export interface Size {
-        width: number
-        height: number
+        width: double
+        height: double
     }
 
     export interface Offset {
-        x: number
-        y: number
+        x: double
+        y: double
     }
 
     export interface TranslateResult {
-        x: number
-        y: number
-        z: number
+        x: double
+        y: double
+        z: double
     }
 
     export interface ScaleResult {
-        x: number
-        y: number
-        z: number
-        centerX: number
-        centerY: number
+        x: double
+        y: double
+        z: double
+        centerX: double
+        centerY: double
     }
 
     export interface RotateResult {
-        x: number
-        y: number
-        z: number
-        centerX: number
-        centerY: number
-        angle: number
+        x: double
+        y: double
+        z: double
+        centerX: double
+        centerY: double
+        angle: double
     }
 
     type Matrix4Result = [
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
     ];
 
     export interface ComponentInfo {
@@ -80,52 +80,86 @@ export default namespace componentUtils {
     }
 
     class SizeInner implements Size {
-        width: number = 0.0
-        height: number = 0.0
+        width: double;
+        height: double;
+        constructor(width: double, height: double) {
+            this.width = width;
+            this.height = height;
+        }
     }
 
     class OffsetInner implements Offset {
-        x: number = 0.0
-        y: number = 0.0
+        x: double;
+        y: double;
+        constructor(x: double, y: double) {
+            this.x = x;
+            this.y = y;
+        }
     }
 
     class TranslateResultInner implements TranslateResult {
-        x: number = 0.0
-        y: number = 0.0
-        z: number = 0.0
+        x: double;
+        y: double;
+        z: double;
+        constructor(x: double, y: double, z: double) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
     class ScaleResultInner implements ScaleResult {
-        x: number = 0.0
-        y: number = 0.0
-        z: number = 0.0
-        centerX: number = 0.0
-        centerY: number = 0.0
+        x: double;
+        y: double;
+        z: double;
+        centerX: double;
+        centerY: double;
+        constructor(x: double, y: double, z: double, centerX: double, centerY: double) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.centerX = centerX;
+            this.centerY = centerY;
+        }
     }
 
     class RotateResultInner implements RotateResult {
-        x: number = 0.0
-        y: number = 0.0
-        z: number = 0.0
-        centerX: number = 0.0
-        centerY: number = 0.0
-        angle: number = 0.0
+        x: double;
+        y: double;
+        z: double;
+        centerX: double;
+        centerY: double;
+        angle: double;
+        constructor(x: double, y: double, z: double, centerX: double, centerY: double, angle: double) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.centerX = centerX;
+            this.centerY = centerY;
+            this.angle = angle;
+        }
     }
 
     class ComponentInfoInner implements ComponentInfo {
-        size: Size = { width: 0.0, height: 0.0 };
-        localOffset: Offset  = { x: 0.0, y: 0.0 };
-        windowOffset: Offset = { x: 0.0, y: 0.0 };
-        screenOffset: Offset = { x: 0.0, y: 0.0 };
-        translate: TranslateResult = { x: 0.0, y: 0.0, z: 0.0 };
-        scale: ScaleResult = { x: 0.0, y: 0.0, z: 0.0, centerX:0.0, centerY:0.0 };
-        rotate: RotateResult = { x: 0.0, y: 0.0, z: 0.0, centerX:0.0, centerY:0.0, angle: 0.0 };
-        transform: Matrix4Result = [
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        ];
+        size: Size;
+        localOffset: Offset;
+        windowOffset: Offset;
+        screenOffset: Offset;
+        translate: TranslateResult;
+        scale: ScaleResult;
+        rotate: RotateResult;
+        transform: Matrix4Result;
+        constructor(size: Size, localOffset: Offset, windowOffset: Offset, screenOffset: Offset, translate: TranslateResult,
+            scale: ScaleResult, rotate: RotateResult, transform: Matrix4Result) {
+            this.size = size;
+            this.localOffset = localOffset;
+            this.windowOffset = windowOffset;
+            this.screenOffset = screenOffset;
+            this.translate = translate;
+            this.scale = scale;
+            this.rotate = rotate;
+            this.transform = transform;
+        }
     }
 
     export native function getRectangleById(id: string): ComponentInfo;

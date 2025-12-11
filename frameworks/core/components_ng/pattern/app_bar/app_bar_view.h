@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_style.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -55,12 +56,16 @@ public:
     void SetOnBackPressedConsumed();
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
+#ifndef PREVIEW
+    ModalUIExtensionCallbacks GetModalUIExtensionCallbacks(bool firstTry);
+#endif
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);
     static void RegistAppBarNodeBuilder(
         std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder);
     static int32_t AddRectChangeListener(
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
+    void SetMenuBarVisible(bool visible);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -72,6 +77,7 @@ private:
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
+    void FireExtensionHostParams();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     int32_t sessionId_ = 0;

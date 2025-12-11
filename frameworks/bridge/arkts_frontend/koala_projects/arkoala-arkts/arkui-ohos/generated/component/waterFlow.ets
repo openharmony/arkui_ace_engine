@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ConstraintSizeOptions_serializer, ConstraintSizeOptions, Length, Dimension, Padding, Padding_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
@@ -30,6 +31,7 @@ import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookWaterFlowAttributeModifier, AttributeUpdater, hookWaterFlowOptionsImpl } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -50,6 +52,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setWaterFlowOptionsAttribute(options?: WaterFlowOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -106,10 +109,10 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -130,10 +133,10 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -157,12 +160,12 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_setLayoutDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedCount0Attribute(value: number | undefined): void {
+    setCachedCount0Attribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -181,7 +184,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_setOnScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScrollIndexAttribute(value: ((first: number,last: number) => void) | undefined): void {
+    setOnScrollIndexAttribute(value: ((first: int32,last: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -217,12 +220,12 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_setOnDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedCount1Attribute(count: number | undefined, show: boolean | undefined): void {
+    setCachedCount1Attribute(count: int32 | undefined, show: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const countTmpValue  = count!
-            thisSerializer.writeNumber(countTmpValue)
+            thisSerializer.writeInt32(countTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -237,10 +240,10 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export type GetItemMainSizeByIndex = (index: number) => number;
+export type GetItemMainSizeByIndex = (index: int32) => double;
 export class SectionOptions {
-    itemsCount: number;
-    crossCount?: number | undefined;
+    itemsCount: int32;
+    crossCount?: int32 | undefined;
     onGetItemMainSizeByIndex?: GetItemMainSizeByIndex | undefined;
     columnsGap?: Dimension | undefined;
     rowsGap?: Dimension | undefined;
@@ -279,13 +282,13 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     layoutDirection(value: FlexDirection | undefined): this {
         throw new Error("Unimplemented method layoutDirection")
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error("Unimplemented method onScrollFrameBegin")
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onScrollIndex")
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
@@ -294,7 +297,7 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     onDidScroll(value: OnScrollCallback | undefined): this {
         throw new Error("Unimplemented method onDidScroll")
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
     attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -308,9 +311,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     columnsGap_value?: Length | undefined
     rowsGap_value?: Length | undefined
     layoutDirection_value?: FlexDirection | undefined
-    cachedCount_value?: number | undefined
+    cachedCount_value?: int32 | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
-    onScrollIndex_value?: ((first: number,last: number) => void) | undefined
+    onScrollIndex_value?: ((first: int32,last: int32) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     attributeModifier_value?: AttributeModifier<WaterFlowAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -335,13 +338,13 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     layoutDirection(value: FlexDirection | undefined): this {
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         return this
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         return this
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
@@ -350,7 +353,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -369,6 +372,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
             hookWaterFlowOptionsImpl(this, options);
+            this.applyOptionsFinish('WaterFlowAttribute');
             return this
         }
         return this
@@ -421,9 +425,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    public cachedCount(value: int32 | undefined): this {
         if (this.checkPriority("cachedCount")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             return this
         }
@@ -437,9 +441,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    public onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
-            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            const value_casted = value as (((first: int32,last: int32) => void) | undefined)
             this.getPeer()?.setOnScrollIndexAttribute(value_casted)
             return this
         }
@@ -461,9 +465,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+    public cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
-            const count_casted = count as (number | undefined)
+            const count_casted = count as (int32 | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             return this
@@ -471,12 +475,17 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWaterFlowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWaterFlowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -604,12 +613,12 @@ export class SectionOptions_serializer {
     public static write(buffer: SerializerBase, value: SectionOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForItemsCount  = value.itemsCount
-        valueSerializer.writeNumber(valueHolderForItemsCount)
+        valueSerializer.writeInt32(valueHolderForItemsCount)
         const valueHolderForCrossCount  = value.crossCount
         if (valueHolderForCrossCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCrossCountTmpValue  = valueHolderForCrossCount!
-            valueSerializer.writeNumber(valueHolderForCrossCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForCrossCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -692,33 +701,33 @@ export class SectionOptions_serializer {
     }
     public static read(buffer: DeserializerBase): SectionOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const itemsCountTmpResult : number = (valueDeserializer.readNumber() as number)
+        const itemsCountTmpResult : int32 = valueDeserializer.readInt32()
         const crossCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let crossCountTmpBuf : number | undefined = undefined
+        let crossCountTmpBuf : int32 | undefined = undefined
         if ((crossCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            crossCountTmpBuf = (valueDeserializer.readNumber() as number)
+            crossCountTmpBuf = valueDeserializer.readInt32()
         }
-        const crossCountTmpResult : number | undefined = crossCountTmpBuf
+        const crossCountTmpResult : int32 | undefined = crossCountTmpBuf
         const onGetItemMainSizeByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onGetItemMainSizeByIndexTmpBuf : GetItemMainSizeByIndex | undefined = undefined
         if ((onGetItemMainSizeByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onGetItemMainSizeByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetItemMainSizeByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetItemMainSizeByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetItemMainSizeByIndexTmpBuf = (index: number):number => {
+            onGetItemMainSizeByIndexTmpBuf = (index: int32):double => {
                 const onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetItemMainSizeByIndexTmpBuf_BufResource.resourceId);
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetItemMainSizeByIndexTmpBuf_BufCall);
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetItemMainSizeByIndexTmpBuf_BufCallSync);
-                onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writeNumber(index);
-                let onGetItemMainSizeByIndexTmpBuf_BufContinuationValue : number | undefined;
-                const onGetItemMainSizeByIndexTmpBuf_BufContinuationCallback : ((progress: number) => void) = (value: number):void => {
+                onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(index);
+                let onGetItemMainSizeByIndexTmpBuf_BufContinuationValue : double | undefined;
+                const onGetItemMainSizeByIndexTmpBuf_BufContinuationCallback : ((offset: double) => void) = (value: double):void => {
                 onGetItemMainSizeByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetItemMainSizeByIndexTmpBuf_BufContinuationCallback);
                 InteropNativeModule._CallCallbackSync(10, -2076995110, onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.length());
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.release();
-                return (onGetItemMainSizeByIndexTmpBuf_BufContinuationValue as number);
+                return onGetItemMainSizeByIndexTmpBuf_BufContinuationValue!.toDouble();
             }
         }
         const onGetItemMainSizeByIndexTmpResult : GetItemMainSizeByIndex | undefined = onGetItemMainSizeByIndexTmpBuf
@@ -727,11 +736,11 @@ export class SectionOptions_serializer {
         if ((columnsGapTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnsGapTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let columnsGapTmpBuf_ : string | number | Resource | undefined
-            if (columnsGapTmpBuf_UnionSelector == (0).toChar()) {
+            if (columnsGapTmpBuf_UnionSelector == (0).toByte()) {
                 columnsGapTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (columnsGapTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (columnsGapTmpBuf_UnionSelector == (1).toByte()) {
                 columnsGapTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (columnsGapTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (columnsGapTmpBuf_UnionSelector == (2).toByte()) {
                 columnsGapTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for columnsGapTmpBuf_ has to be chosen through deserialisation.")
@@ -744,11 +753,11 @@ export class SectionOptions_serializer {
         if ((rowsGapTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const rowsGapTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let rowsGapTmpBuf_ : string | number | Resource | undefined
-            if (rowsGapTmpBuf_UnionSelector == (0).toChar()) {
+            if (rowsGapTmpBuf_UnionSelector == (0).toByte()) {
                 rowsGapTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (rowsGapTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (rowsGapTmpBuf_UnionSelector == (1).toByte()) {
                 rowsGapTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (rowsGapTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (rowsGapTmpBuf_UnionSelector == (2).toByte()) {
                 rowsGapTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for rowsGapTmpBuf_ has to be chosen through deserialisation.")
@@ -761,16 +770,16 @@ export class SectionOptions_serializer {
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const marginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let marginTmpBuf_ : Padding | Dimension | undefined
-            if (marginTmpBuf_UnionSelector == (0).toChar()) {
+            if (marginTmpBuf_UnionSelector == (0).toByte()) {
                 marginTmpBuf_ = Padding_serializer.read(valueDeserializer)
-            } else if (marginTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (marginTmpBuf_UnionSelector == (1).toByte()) {
                 const marginTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let marginTmpBuf_BufU : string | number | Resource | undefined
-                if (marginTmpBuf_BufUUnionSelector == (0).toChar()) {
+                if (marginTmpBuf_BufUUnionSelector == (0).toByte()) {
                     marginTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (marginTmpBuf_BufUUnionSelector == (1).toChar()) {
+                } else if (marginTmpBuf_BufUUnionSelector == (1).toByte()) {
                     marginTmpBuf_BufU = (valueDeserializer.readNumber() as number)
-                } else if (marginTmpBuf_BufUUnionSelector == (2).toChar()) {
+                } else if (marginTmpBuf_BufUUnionSelector == (2).toByte()) {
                     marginTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
                 } else {
                     throw new Error("One of the branches for marginTmpBuf_BufU has to be chosen through deserialisation.")

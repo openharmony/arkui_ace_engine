@@ -38,6 +38,17 @@ struct FocusAxisEvent final : public NonPointerEvent {
     float absHat0YValue = 0.0f;
     float absBrakeValue = 0.0f;
     float absGasValue = 0.0f;
+    float absRxValue = 0.0f;
+    float absRyValue = 0.0f;
+    float absThrottleValue = 0.0f;
+    float absRudderValue = 0.0f;
+    float absWheelValue = 0.0f;
+    float absHat1XValue = 0.0f;
+    float absHat1YValue = 0.0f;
+    float absHat2XValue = 0.0f;
+    float absHat2YValue = 0.0f;
+    float absHat3XValue = 0.0f;
+    float absHat3YValue = 0.0f;
     ~FocusAxisEvent() = default;
     FocusAxisEvent()
     {
@@ -139,6 +150,72 @@ struct FocusAxisEvent final : public NonPointerEvent {
         this->absGasValue = absGasValue;
         return *this;
     }
+
+    FocusAxisEvent& SetAbsRxValue(float absRxValue)
+    {
+        this->absRxValue = absRxValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsRyValue(float absRyValue)
+    {
+        this->absRyValue = absRyValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsThrottleValue(float absThrottleValue)
+    {
+        this->absThrottleValue = absThrottleValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsRudderValue(float absRudderValue)
+    {
+        this->absRudderValue = absRudderValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsWheelValue(float absWheelValue)
+    {
+        this->absWheelValue = absWheelValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat1XValue(float absHat1XValue)
+    {
+        this->absHat1XValue = absHat1XValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat1YValue(float absHat1YValue)
+    {
+        this->absHat1YValue = absHat1YValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat2XValue(float absHat2XValue)
+    {
+        this->absHat2XValue = absHat2XValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat2YValue(float absHat2YValue)
+    {
+        this->absHat2YValue = absHat2YValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat3XValue(float absHat3XValue)
+    {
+        this->absHat3XValue = absHat3XValue;
+        return *this;
+    }
+
+    FocusAxisEvent& SetAbsHat3YValue(float absHat3YValue)
+    {
+        this->absHat3YValue = absHat3YValue;
+        return *this;
+    }
 };
 
 class ACE_EXPORT FocusAxisEventInfo : public BaseEventInfo {
@@ -155,6 +232,17 @@ public:
         absHat0YValue = event.absHat0YValue;
         absBrakeValue = event.absBrakeValue;
         absGasValue = event.absGasValue;
+        absRxValue = event.absRxValue;
+        absRyValue = event.absRyValue;
+        absThrottleValue = event.absThrottleValue;
+        absRudderValue = event.absRudderValue;
+        absWheelValue = event.absWheelValue;
+        absHat1XValue = event.absHat1XValue;
+        absHat1YValue = event.absHat1YValue;
+        absHat2XValue = event.absHat2XValue;
+        absHat2YValue = event.absHat2YValue;
+        absHat3XValue = event.absHat3XValue;
+        absHat3YValue = event.absHat3YValue;
         timeStamp_ = event.time;
         sourceTool_ = event.sourceTool;
         deviceType_ = event.sourceType;
@@ -204,6 +292,61 @@ public:
         return absGasValue;
     }
 
+    float GetAbsRxValue() const
+    {
+        return absRxValue;
+    }
+
+    float GetAbsRyValue() const
+    {
+        return absRyValue;
+    }
+
+    float GetAbsThrottleValue() const
+    {
+        return absThrottleValue;
+    }
+
+    float GetAbsRudderValue() const
+    {
+        return absRudderValue;
+    }
+
+    float GetAbsWheelValue() const
+    {
+        return absWheelValue;
+    }
+
+    float GetAbsHat1XValue() const
+    {
+        return absHat1XValue;
+    }
+
+    float GetAbsHat1YValue() const
+    {
+        return absHat1YValue;
+    }
+
+    float GetAbsHat2XValue() const
+    {
+        return absHat2XValue;
+    }
+
+    float GetAbsHat2YValue() const
+    {
+        return absHat2YValue;
+    }
+
+    float GetAbsHat3XValue() const
+    {
+        return absHat3XValue;
+    }
+
+    float GetAbsHat3YValue() const
+    {
+        return absHat3YValue;
+    }
+
 private:
     float absXValue = 0.0f;
     float absYValue = 0.0f;
@@ -213,6 +356,17 @@ private:
     float absHat0YValue = 0.0f;
     float absBrakeValue = 0.0f;
     float absGasValue = 0.0f;
+    float absRxValue = 0.0f;
+    float absRyValue = 0.0f;
+    float absThrottleValue = 0.0f;
+    float absRudderValue = 0.0f;
+    float absWheelValue = 0.0f;
+    float absHat1XValue = 0.0f;
+    float absHat1YValue = 0.0f;
+    float absHat2XValue = 0.0f;
+    float absHat2YValue = 0.0f;
+    float absHat3XValue = 0.0f;
+    float absHat3YValue = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

@@ -625,4 +625,147 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodesTest, TestSize.Level0)
     auto layoutAlgorithmWrapper = flexNode->GetLayoutAlgorithm();
     EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentWidth());
 }
+
+/**
+ * @tc.name: WrapAndFixTest001
+ * @tc.desc: test wrap layout algorithm use wrap and fix correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, WrapAndFixTest001, TestSize.Level0)
+{
+    RefPtr<FrameNode> flex, text;
+    auto flexColumn = CreateFlexRow([this, &flex, &text](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+        ViewAbstract::SetWidth(CalcLength(400));
+        ViewAbstract::SetHeight(CalcLength(400));
+        flex = CreateFlexWrapRow([this, &text, &flex](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+            ViewAbstract::SetFlexShrink(0.0f);
+            text = CreateText(u"text1", [this](TextModelNG model) {
+                ViewAbstract::SetFlexShrink(0.0f);
+                ViewAbstract::SetWidth(CalcLength(500));
+                ViewAbstract::SetHeight(CalcLength(300));
+            });
+        });
+    });
+
+    /* corresponding ets code:
+        Flex() {
+          Flex() {
+            Text("text1")
+            .width("500px")
+            .height("300px")
+        }
+        .width(LayoutPolicy.wrapContent)
+        .height(LayoutPolicy.wrapContent)
+        }
+        .width("400px")
+        .height("400px")
+    */
+
+    ASSERT_NE(flexColumn, nullptr);
+    CreateLayoutTask(flexColumn);
+
+    auto flexColumnGeometryNode = flexColumn->GetGeometryNode();
+    ASSERT_NE(flexColumnGeometryNode, nullptr);
+    auto flexColumnSize = flexColumnGeometryNode->GetFrameSize();
+    EXPECT_EQ(flexColumnSize, SizeF(400.0f, 400.0f));
+    
+    auto flexGeometryNode = flex->GetGeometryNode();
+    ASSERT_NE(flexGeometryNode, nullptr);
+    auto flexSize = flexGeometryNode->GetFrameSize();
+    EXPECT_EQ(flexSize, SizeF(400.0f, 300.0f)) << flexSize.ToString().c_str();
+
+    auto textGeometryNode = text->GetGeometryNode();
+    ASSERT_NE(textGeometryNode, nullptr);
+    auto textSize = textGeometryNode->GetFrameSize();
+    EXPECT_EQ(textSize, SizeF(500.0f, 300.0f));
+    auto textOffset = textGeometryNode->GetFrameOffset();
+    EXPECT_EQ(textOffset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: WrapAndFixTest003
+ * @tc.desc: test wrap layout algorithm use wrap and fix correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, WrapAndFixTest002, TestSize.Level0)
+{
+    RefPtr<FrameNode> flex, text;
+    auto flexColumn = CreateFlexRow([this, &flex, &text](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+        ViewAbstract::SetWidth(CalcLength(400));
+        ViewAbstract::SetHeight(CalcLength(400));
+        flex = CreateFlexWrapRow([this, &text, &flex](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+            ViewAbstract::SetFlexShrink(0.0f);
+            text = CreateText(u"text1", [this](TextModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(500));
+                ViewAbstract::SetHeight(CalcLength(300));
+            });
+        });
+    });
+
+    /* corresponding ets code:
+        Flex() {
+          Flex() {
+            Text("text1")
+            .width("500px")
+            .height("300px")
+        }
+        .flexShrink(0)
+        .width(LayoutPolicy.fixAtIdealSize)
+        .height(LayoutPolicy.fixAtIdealSize)
+        }
+        .width("400px")
+        .height("400px")
+    */
+
+    ASSERT_NE(flexColumn, nullptr);
+    CreateLayoutTask(flexColumn);
+
+    auto flexColumnGeometryNode = flexColumn->GetGeometryNode();
+    ASSERT_NE(flexColumnGeometryNode, nullptr);
+    auto flexColumnSize = flexColumnGeometryNode->GetFrameSize();
+    EXPECT_EQ(flexColumnSize, SizeF(400.0f, 400.0f));
+    
+    ASSERT_NE(flex, nullptr);
+    auto flexGeometryNode = flex->GetGeometryNode();
+    ASSERT_NE(flexGeometryNode, nullptr);
+    auto flexSize = flexGeometryNode->GetFrameSize();
+    EXPECT_EQ(flexSize, SizeF(500.0f, 300.0f)) << flexSize.ToString().c_str();
+
+    ASSERT_NE(text, nullptr);
+    auto textGeometryNode = text->GetGeometryNode();
+    ASSERT_NE(textGeometryNode, nullptr);
+    auto textSize = textGeometryNode->GetFrameSize();
+    EXPECT_EQ(textSize, SizeF(500.0f, 300.0f));
+    auto textOffset = textGeometryNode->GetFrameOffset();
+    EXPECT_EQ(textOffset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: FlexSpace001
+ * @tc.desc: test flex space
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexSpace001, TestSize.Level0)
+{
+    auto flexNode = CreateFlexRow([this](FlexModelNG model) { CreateText(u"text1", [this](TextModelNG model) {}); });
+    FlexModelNG model;
+    ASSERT_NE(flexNode, nullptr);
+    auto layoutProperty = flexNode->GetLayoutPropertyPtr<FlexLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetFlexMainSpace(AceType::RawPtr(flexNode)), 0.0);
+    EXPECT_EQ(model.GetFlexCrossSpace(AceType::RawPtr(flexNode)), 0.0);
+    auto space = CalcDimension(10.0, DimensionUnit::VP);
+    layoutProperty->UpdateSpace(space);
+    layoutProperty->UpdateCrossSpace(space);
+    EXPECT_EQ(model.GetFlexMainSpace(AceType::RawPtr(flexNode)), 10.0);
+    EXPECT_EQ(model.GetFlexCrossSpace(AceType::RawPtr(flexNode)), 10.0);
+}
 } // namespace OHOS::Ace::NG

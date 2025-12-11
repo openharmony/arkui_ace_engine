@@ -73,6 +73,7 @@ constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
 constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
+constexpr uint32_t DISPLAY_AREA_DELAY_TIME = 50;
 constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 constexpr char OCCLUSION_SCENE[] = "_occlusion";
 
@@ -401,6 +402,12 @@ bool UIExtensionPattern::CheckHostUiContentConstraint()
         AceType::DynamicCast<UIExtensionContainerHandler>(containerHandler);
     CHECK_NULL_RETURN(uIExtensionContainerHandler, true);
     UIContentType hostUIContentType = uIExtensionContainerHandler->GetHostUIContentType();
+    if (hostUIContentType == UIContentType::DYNAMIC_COMPONENT &&
+        uIExtensionContainerHandler->IsAllowCrossProcessNesting()) {
+        UIEXT_LOGI("Allow cross process nesting.");
+        return true;
+    }
+
     static std::set<UIContentType> dcNotSupportHostUIContentType = {
         UIContentType::ISOLATED_COMPONENT,
         UIContentType::DYNAMIC_COMPONENT
@@ -1945,8 +1952,13 @@ void UIExtensionPattern::DumpInfo()
     params.push_back(std::to_string(getpid()));
     std::vector<std::string> dumpInfo;
     sessionWrapper_->NotifyUieDump(params, dumpInfo);
-    for (std::string info : dumpInfo) {
-        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+    for (std::string& info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: "));
+        std::vector<std::string> lines;
+        StringUtils::SplitStr(info, "\n", lines, false);
+        for (auto& line : lines) {
+            DumpLog::GetInstance().AddDesc(line);
+        }
     }
 }
 
@@ -2204,13 +2216,40 @@ bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag f
 void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
-        DispatchDisplayArea();
+        DispatchDisplayAreaWithDelay(DISPLAY_AREA_DELAY_TIME);
     }
     if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
     TransferAccessibilityRectInfo();
 }
+
+void UIExtensionPattern::DispatchDisplayAreaWithDelay(uint32_t delayMs)
+{
+    dispatchDisplayAreaTaskTime_.currentTaskTime = GetCurrentTimestamp();
+    if (delayMs == 0 || dispatchDisplayAreaTaskTime_.lastTaskTime == 0 ||
+        (dispatchDisplayAreaTaskTime_.currentTaskTime - dispatchDisplayAreaTaskTime_.lastTaskTime
+            >= static_cast<int64_t>(delayMs))) {
+        DispatchDisplayArea();
+        dispatchDisplayAreaTaskTime_.lastTaskTime = GetCurrentTimestamp();
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto currentTime = GetCurrentTimestamp();
+    dispatchDisplayAreaTaskTime_.taskMutex.Cancel();
+    auto task = [weak = WeakClaim(this), currentTime] () {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->DispatchDisplayArea();
+        pattern->UpdateLastTime(currentTime);
+    };
+    dispatchDisplayAreaTaskTime_.taskMutex = SingleTaskExecutor::CancelableTask(std::move(task));
+    taskExecutor->PostDelayedTask(dispatchDisplayAreaTaskTime_.taskMutex, TaskExecutor::TaskType::UI,
+        delayMs, "DispatchDisplayAreaWithDelay");
+}
+
 
 AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
 {

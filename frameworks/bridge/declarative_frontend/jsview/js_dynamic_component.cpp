@@ -83,6 +83,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
+    auto allowCrossProcessNestingValue = dynamicComponentArg->GetProperty("allowCrossProcessNesting");
     auto backgroundTransparentValue = dynamicComponentArg->GetProperty("backgroundTransparent");
     if (!entryPointValue->IsString()) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
@@ -93,9 +94,16 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     if (backgroundTransparentValue->IsBoolean()) {
         backgroundTransparent = backgroundTransparentValue->ToBoolean();
     }
+    auto allowCrossProcessNesting = false;
+    if (allowCrossProcessNestingValue->IsBoolean()) {
+        allowCrossProcessNesting = allowCrossProcessNestingValue->ToBoolean();
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent allowCrossProcessNesting = %{public}d",
+            allowCrossProcessNesting);
+    }
     NG::UIExtensionConfig config;
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
     config.backgroundTransparent = backgroundTransparent;
+    config.allowCrossProcessNesting = allowCrossProcessNesting;
     NG::DynamicModelNG::GetInstance()->Create(config);
     ViewAbstractModel::GetInstance()->SetWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);

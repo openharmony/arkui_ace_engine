@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"

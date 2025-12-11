@@ -81,6 +81,10 @@ bool AceContainer::IsCrossAxisWindow()
     return false;
 }
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
 void AceContainer::DispatchExtensionDataToHostWindow(
@@ -94,4 +98,8 @@ void AceContainer::UpdateColorMode(uint32_t colorMode,
 void AceContainer::TriggerModuleSerializer() {}
 
 void AceContainer::SetIsFormRender(bool isFormRender) {}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url) {}
+
+void AceContainer::LoadCompleteManagerStopCollect() {}
 } // namespace OHOS::Ace::Platform

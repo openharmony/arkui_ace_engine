@@ -24,6 +24,7 @@
 #define protected public
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"

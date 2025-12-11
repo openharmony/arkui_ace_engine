@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, KPointer, MaterializedBase } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { ArkUIAniModule } from 'arkui.ani';
+import { TypeChecker, ArkUIGeneratedNativeModule } from '#components';
+import { Finalizable, KPointer, MaterializedBase } from '@koalaui/interop';
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common';
 
 export class WaterFlowSectionsInternal {
     public static fromPtr(ptr: KPointer): WaterFlowSections {
         return new WaterFlowSections(ptr)
     }
 }
+
 export interface SectionChangeInfo {
-    start: number;
-    deleteCount: number;
+    start: int32;
+    deleteCount: int32;
     sections?: Array<SectionOptions>;
 }
 
 export class WaterFlowSections implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined;
     public sectionArray: Array<SectionOptions> = [];
     public changeArray: Array<SectionChangeInfo> = [];
+    public waterFlowNodePtr?: KPointer = undefined;
 
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -42,21 +45,22 @@ export class WaterFlowSections implements MaterializedBase {
     constructor() {
         this(WaterFlowSections.construct())
     }
+
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._WaterFlowSections_getFinalizer()
+        const retval = ArkUIGeneratedNativeModule._WaterFlowSections_construct();
+        return retval;
     }
 
-    static isNonNegativeInt32(input: number) {
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._WaterFlowSections_getFinalizer();
+    }
+
+    static isNonNegativeInt32(input: int32): boolean {
         return Number.isSafeInteger(input) && input >= 0 && input <= 2147483647;
     }
 
-    static toArrayIndex(origin: number, limit: number) {
-        // origin is truncated to an integer
-        let result = Math.trunc(origin);
+    static toArrayIndex(origin: int32, limit: int32): int32 {
+        let result: int32 = Math.trunc(origin) as int32;
         if (result < 0) {
             // Negative index counts from the end of the sectionArray
             result += limit;
@@ -71,7 +75,7 @@ export class WaterFlowSections implements MaterializedBase {
     }
 
     public splice(start: int32, deleteCount?: int32, sections?: Array<SectionOptions>): boolean {
-        const oldLength: number = this.sectionArray.length;
+        const oldLength: int32 = this.sectionArray.length;
 
         // Handle parameters
         if (deleteCount === undefined && sections === undefined) {
@@ -94,14 +98,13 @@ export class WaterFlowSections implements MaterializedBase {
             }
         }
 
-        // Calculate actual start and deleteCount
-        const intStart: number = WaterFlowSections.toArrayIndex(start, oldLength);
-        let intDeleteCount: number = 0;
+        const intStart: int32 = WaterFlowSections.toArrayIndex(start, oldLength);
+        let intDeleteCount: int32 = 0;
 
         if (deleteCount === undefined && sections === undefined) {
             intDeleteCount = oldLength - intStart;
         } else if (deleteCount !== undefined) {
-            intDeleteCount = Math.trunc(deleteCount);
+            intDeleteCount = Math.trunc(deleteCount) as int32;
             if (intDeleteCount > oldLength - intStart) {
                 intDeleteCount = oldLength - intStart;
             }
@@ -109,12 +112,23 @@ export class WaterFlowSections implements MaterializedBase {
 
         intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
 
-        // Record the change
-        this.changeArray.push({
-            start: intStart,
-            deleteCount: intDeleteCount,
-            sections: sections,
-        });
+        if (this.waterFlowNodePtr) {
+            const changeInfo: SectionChangeInfo = {
+                start: intStart,
+                deleteCount: intDeleteCount,
+                sections: sections
+            };
+            ArkUIAniModule._UpdateWaterFlowSection(
+                this.waterFlowNodePtr!,
+                changeInfo
+            );
+        } else {
+            this.changeArray.push({
+                start: intStart,
+                deleteCount: intDeleteCount,
+                sections: sections
+            });
+        }
 
         return true;
     }
@@ -123,9 +137,23 @@ export class WaterFlowSections implements MaterializedBase {
         if (!WaterFlowSections.isNonNegativeInt32(section.itemsCount)) {
             return false;
         }
-        let oldLength: number = this.sectionArray.length;
+        const oldLength: int32 = this.sectionArray.length;
         this.sectionArray.push(section);
-        this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
+
+        if (this.waterFlowNodePtr) {
+            const changeInfo: SectionChangeInfo = {
+                start: oldLength,
+                deleteCount: 0,
+                sections: [section]
+            };
+            ArkUIAniModule._UpdateWaterFlowSection(
+                this.waterFlowNodePtr!,
+                changeInfo
+            );
+        } else {
+            this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
+        }
+
         return true;
     }
 
@@ -133,10 +161,24 @@ export class WaterFlowSections implements MaterializedBase {
         if (!WaterFlowSections.isNonNegativeInt32(section.itemsCount)) {
             return false;
         }
-        let oldLength: number = this.sectionArray.length;
+
+        const oldLength: int32 = this.sectionArray.length;
         this.sectionArray.splice(sectionIndex, 1, section);
-        let intStart: number = WaterFlowSections.toArrayIndex(sectionIndex, oldLength);
-        this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
+        const intStart: int32 = WaterFlowSections.toArrayIndex(sectionIndex, oldLength);
+        if (this.waterFlowNodePtr) {
+            const changeInfo: SectionChangeInfo = {
+                start: intStart,
+                deleteCount: 1,
+                sections: [section]
+            };
+            ArkUIAniModule._UpdateWaterFlowSection(
+                this.waterFlowNodePtr!,
+                changeInfo
+            );
+        } else {
+            this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
+        }
+
         return true;
     }
 

@@ -737,4 +737,108 @@ HWTEST_F(GridAttrTestTwoNg, GridModelNGTest008, TestSize.Level1)
     EXPECT_EQ(retOption->getSizeByIndex(0).rows, 1);
     EXPECT_EQ(retOption->getSizeByIndex(0).columns, 4);
 }
+
+/**
+ * @tc.name: SelectableTest
+ * @tc.desc: GridModelNG GetSelectableTest test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, SelectableTest, TestSize.Level1)
+{
+    auto node = GridItemModelNG::CreateFrameNode(-1);
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    GridItemModelNG::SetSelectable(frameNode, false);
+    EXPECT_EQ(GridItemModelNG::GetSelectable(frameNode), false);
+
+    GridItemModelNG::SetSelectable(frameNode, true);
+    EXPECT_EQ(GridItemModelNG::GetSelectable(frameNode), true);
+}
+
+/**
+ * @tc.name: EditableTest
+ * @tc.desc: GridModelNG GetEditable test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, EditableTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+
+    gridModel.SetEditable(node, false);
+    EXPECT_EQ(gridModel.GetEditable(node), false);
+
+    gridModel.SetEditable(node, true);
+    EXPECT_EQ(gridModel.GetEditable(node), true);
+
+    EXPECT_EQ(gridModel.GetEditable(nullptr), false);
+}
+
+/**
+ * @tc.name: MultiSelectableTest
+ * @tc.desc: GridModelNG GetMultiSelectable test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, MultiSelectableTest, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+
+    gridModel.SetMultiSelectable(node, false);
+    EXPECT_EQ(gridModel.GetMultiSelectable(node), false);
+
+    gridModel.SetMultiSelectable(node, true);
+    EXPECT_EQ(gridModel.GetMultiSelectable(node), true);
+
+    EXPECT_EQ(gridModel.GetMultiSelectable(nullptr), false);
+}
+
+/**
+ * @tc.name: SupportAnimationTest
+ * @tc.desc: GridModelNG GetMultiSelectable test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, GetSupportAnimation, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone();
+
+    auto node = AceType::RawPtr(frameNode_);
+    ASSERT_NE(node, nullptr);
+
+    gridModel.SetSupportAnimation(node, false);
+    EXPECT_EQ(gridModel.GetSupportAnimation(node), false);
+
+    gridModel.SetSupportAnimation(node, true);
+    EXPECT_EQ(gridModel.GetSupportAnimation(node), true);
+
+    EXPECT_EQ(gridModel.GetSupportAnimation(nullptr), false);
+}
+
+/*
+ * @tc.name: ResetLayoutPolicy
+ * @tc.desc: GridModelNG ResetLayoutPolicy test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, ResetLayoutPolicy, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    ViewAbstract::UpdateLayoutPolicyProperty(AceType::RawPtr(frameNode_), LayoutCalPolicy::MATCH_PARENT, false);
+    EXPECT_TRUE(layoutProperty_->GetLayoutPolicyProperty().value().IsHeightMatch());
+    gridModel.ReSetGridHeightLayoutPolicy();
+    EXPECT_TRUE(layoutProperty_->GetLayoutPolicyProperty().value().IsHeightNoMatch());
+    CreateDone();
+}
 } // namespace OHOS::Ace::NG

@@ -30,7 +30,7 @@ public:
 
     static TransparentNodeDetector& GetInstance();
     void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, const std::string& pageUrl,
-        uint8_t detectCount = MAX_DETECT_COUNT);
+        bool isNav = false, uint8_t detectCount = MAX_DETECT_COUNT);
 private:
     TransparentNodeDetector() = default;
     ~TransparentNodeDetector() = default;
@@ -38,6 +38,9 @@ private:
     const TransparentNodeDetector& operator = (const TransparentNodeDetector& instance) = delete;
 
     void DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window);
+
+private:
+    bool CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId, bool isNavigation);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_TRANSPARENT_NODE_DETECTOR_H

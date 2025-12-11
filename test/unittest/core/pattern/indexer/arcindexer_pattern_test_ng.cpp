@@ -25,6 +25,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "ui/properties/ui_material.h"
 
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"

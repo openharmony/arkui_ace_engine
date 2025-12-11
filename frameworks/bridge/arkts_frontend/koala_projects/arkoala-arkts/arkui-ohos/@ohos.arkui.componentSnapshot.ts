@@ -15,29 +15,41 @@
 
 import { AsyncCallback } from 'arkui/base';
 import { PixelMap } from "#external";
+import { DynamicRangeMode } from 'arkui/component/image';
+import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 
 export declare namespace componentSnapshot {
     export interface SnapshotRegion {
-        left: number;
-        right: number;
-        top: number;
-        bottom: number;
+        left: double;
+        right: double;
+        top: double;
+        bottom: double;
     }
     export interface LocalizedSnapshotRegion {
-        start: number;
-        end: number;
-        top: number;
-        bottom: number;
+        start: double;
+        end: double;
+        top: double;
+        bottom: double;
     }
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
+    export interface ColorModeOptions {
+        colorSpace?: colorSpaceManager.ColorSpace;
+        isAuto?: boolean;
+    }
+    export interface DynamicRangeModeOptions {
+        dynamicRangeMode?: DynamicRangeMode;
+        isAuto?: boolean;
+    }
     export interface SnapshotOptions {
-        scale?: number;
+        scale?: double;
         waitUntilRenderFinished?: boolean;
         region?: SnapshotRegionType;
+        colorMode?: ColorModeOptions;
+        dynamicRangeMode?: DynamicRangeModeOptions;
     }
     export function get(callbackId: string, callback: AsyncCallback<PixelMap>, options?: SnapshotOptions): void;
-    export function get(promiseId: string, options?: SnapshotOptions): Promise<PixelMap>;
-    export function getSync(value: string, options?: SnapshotOptions): PixelMap;
-    export function getWithUniqueId(uniqueIdValue: number, options?: SnapshotOptions): Promise<PixelMap>;
+    export function get(promiseId: string, options?: SnapshotOptions): Promise<PixelMap> | null;
+    export function getSync(value: string, options?: SnapshotOptions): PixelMap | null;
+    export function getWithUniqueId(uniqueIdValue: number, options?: SnapshotOptions): Promise<PixelMap> | null;
     export function getSyncWithUniqueId(uniqueIdValue: number, options?: SnapshotOptions): PixelMap;
 }

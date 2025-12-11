@@ -101,6 +101,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
   public __isBlockRecycleOrReuse__: boolean = false;
 
+  // view is switched to new instance by builderNode
+  protected __updatedInstanceId__?: number;
+
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
@@ -243,7 +246,15 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public allowReusableV2Descendant(): boolean {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
   }
-  
+
+  public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
+    return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
+  }
+
+  public __isV2__Internal(): boolean {
+    return this instanceof ViewV2;
+  }
+
   // globally unique id, this is different from compilerAssignedUniqueChildId!
   id__(): number {
     return this.id_;
@@ -395,6 +406,68 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public dumpReport(): void {
     stateMgmtConsole.warn(`Printing profiler information`);
     stateMgmtProfiler.report();
+  }
+
+  protected __latestInstanceId_value__: number = -1;
+
+  get __latestInstanceId__Internal(): number {
+    if (this.__latestInstanceId_value__ === -1) {
+      this.__latestInstanceId_value__ = this.getMainInstanceId();
+    }
+    return this.__latestInstanceId_value__;
+  }
+
+  set __latestInstanceId__Internal(newInstanceId: number) {
+    if (newInstanceId !== -1) {
+      this.__latestInstanceId_value__ = newInstanceId;
+    }
+  }
+
+  public __updateForEnvValue__Internal(newInstanceId?: number): void {
+    if (newInstanceId) {
+      stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} instance id ${this.__latestInstanceId__Internal} -> new InstanceId ${newInstanceId}`);
+      this.__latestInstanceId__Internal = newInstanceId;
+    }
+    stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} begin`);
+    let needUpdated: boolean = false;
+    // loop the [varName, key][]
+    this.__getEnvPropertyNameToKey__Internal()
+      .forEach(([varName, envKey]) => {
+        const updatedInstanceEnvValue = newInstanceId ?
+          EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
+          EnvV2.findEnvRecursively(envKey, this, this.__latestInstanceId__Internal);
+        const storeProp = ObserveV2.ENV_PREFIX + varName;
+        if (updatedInstanceEnvValue !== this[storeProp]) {
+          stateMgmtConsole.debug(`findAllEnvPropertiesInView ${this.debugInfo__()} @Env(${envKey}) ${varName} find EnvValue in parent, value is different, reset the local value`);
+          this[storeProp] = updatedInstanceEnvValue;
+          ObserveV2.getObserve().fireChange(this, varName);
+          needUpdated = true;
+        }
+      })
+    if (needUpdated) {
+      // update ui synchronously
+      stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} instance, there are envValue updated, update ui synchronously.`);
+      ObserveV2.getObserve().updateDirty2(true);
+    }
+    stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} end`);
+  }
+
+  protected __hasEnvValue__: boolean = false;
+
+  get __hasEnv__Internal(): boolean {
+    if (this[EnvV2.ENV_DECO_META]) {
+      this.__hasEnvValue__ = true;
+    }
+    return this.__hasEnvValue__;
+  }
+
+  public __getEnvPropertyNameToKey__Internal(): [string, keyof EnvTypeMap][] {
+    // there is no env in current view
+    const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
+    if (!meta || !(typeof meta === 'object')) {
+      return [];
+    }
+    return Object.entries(meta.varToKey);
   }
 
   /**

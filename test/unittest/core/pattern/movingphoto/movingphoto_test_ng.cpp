@@ -39,6 +39,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -101,6 +102,7 @@ void MovingphotoTestNg::SetUpTestSuite()
     g_testProperty.imageSrc = MOVINGPHOTO_IMAGE_SRC;
     g_testProperty.muted = MUTED_VALUE;
     g_testProperty.objectFit = MOVINGPHOTO_IMAGE_FIT;
+
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -157,6 +159,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest001, TestSize.Level1)
     auto frameNode = CreateMovingPhotoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    EXPECT_FALSE(frameNode->uiNodeGcEnable_);
 }
 
 /**
@@ -274,6 +277,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest004, TestSize.Level1)
 
     auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNodeTemp);
+
     auto movingPhotoPatternTemp = AceType::DynamicCast<MovingPhotoPattern>(frameNodeTemp->GetPattern());
     CHECK_NULL_VOID(movingPhotoPatternTemp);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
@@ -1127,8 +1131,10 @@ HWTEST_F(MovingphotoTestNg, StartUpdateImageAnalyzer001, TestSize.Level1)
     EXPECT_TRUE(frameNode);
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
+
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
 
@@ -1173,10 +1179,13 @@ HWTEST_F(MovingphotoTestNg, UpdateAnalyzerUIConfig001, TestSize.Level1)
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
     auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
+
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
+
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
 
@@ -1214,9 +1223,7 @@ HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-
     movingphotoPattern->RefreshMovingPhoto();
-
     EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
 }
 

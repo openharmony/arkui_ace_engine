@@ -79,7 +79,8 @@ function createDynamicUpdatableBuilder(
 
 function enableCompatibleObservedV2ForStatic(value: Object, 
   createFunc: Function, recordFunc: Function, updateFunc: Function): void {
-  value['__staticCompatibleFunc__'] = [createFunc, recordFunc, updateFunc]
+  const str = '__staticCompatibleFunc__';
+  value[str] = [createFunc, recordFunc, updateFunc];
 }
 
 function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
@@ -87,4 +88,26 @@ function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
   let addRef = (): void => { stateMeta.value }
   let fireChange = (): void => { stateMeta.value++ }
   return [addRef, fireChange]
+}
+
+function isDynamicBuilderProxy(value: Object): boolean {
+    const str = '__builder_param_get_target';
+    return !!(value && value[str]);
+}
+
+function getBuilderParamProxyEntries(value: Object): any[] {
+    const res: any[] = [];
+    if (isDynamicBuilderProxy(value)) {
+        const str = '__builder_param_get_target';
+        const raw = value[str];
+        if (raw instanceof Map) {
+            const entries = Array.from(raw.entries());
+            entries.forEach((entry)=>{
+                if(typeof entry[1] === 'function') {
+                    res.push([entry[0], entry[1]()]);
+                }
+            })
+        }
+    }
+    return res;
 }

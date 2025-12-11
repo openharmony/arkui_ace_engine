@@ -460,7 +460,10 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
+    includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
+    fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -507,6 +510,8 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     height(value: Length): this;
     strokeWidth(value: LengthMetrics): SearchAttribute;
     strokeColor(valeu: ResourceColor): SearchAttribute;
+    compressLeadingPunctuation(enable: boolean): SearchAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): SearchAttribute;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
@@ -759,6 +764,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     letterSpacing(value: number | string): TextAttribute;
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
     optimizeTrailingSpace(trim: boolean): TextAttribute;
+    compressLeadingPunctuation(enable: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -783,6 +789,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         colors: Array<[ ResourceColor, number ]>;
         repeating?: boolean;
     }): this;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -816,6 +823,8 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
     strokeColor(value: ResourceColor): TextAreaAttribute;
+    compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -868,6 +877,8 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
     strokeWidth(value: LengthMetrics): TextInputAttribute;
     strokeColor(value: ResourceColor): TextInputAttribute;
+    compressLeadingPunctuation(enable: boolean): TextInputAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1107,11 +1118,14 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
         options?: NavigationTitleOptions): this;
     menus(value: Array<NavigationMenuItem> | undefined): this;
     hideTitleBar(value: boolean): this;
-    onShown(callback: () => void): this;
-    onHidden(callback: () => void): this;
+    onShown(callback: (reason: VisibilityChangeReason) => void): this;
+    onHidden(callback: (reason: VisibilityChangeReason) => void): this;
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
+    bindToScrollable(scrollers: Array<Scroller>): this;
+    bindToNestedScrollable(scrollInfos: Array<NestedScrollInfo>): this;
+    backButtonIcon(value: any, text?: ResourceStr): this;
 }
 declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1165,7 +1179,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute;
     minContentWidth(value: Dimension): NavigationAttribute;
     mode(value: number): NavigationAttribute;
-    backButtonIcon(value: any): NavigationAttribute;
+    backButtonIcon(value: any, text?: ResourceStr): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
     title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
         options?: NavigationTitleOptions): NavigationAttribute;
@@ -1971,6 +1985,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     onUnselected(event: (index: number) => void): TabsAttribute;
+    onContentDidScroll(handler: OnTabsContentDidScrollCallback | undefined): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;

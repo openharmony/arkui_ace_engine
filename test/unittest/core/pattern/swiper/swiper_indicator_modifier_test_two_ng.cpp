@@ -1255,10 +1255,16 @@ HWTEST_F(SwiperIndicatorModifierTestTwoNg, UpdateContentProperty001, TestSize.Le
     modifier->targetContentProperty_.indicatorMargin = indicatorMargin;
     modifier->targetContentProperty_.longPointLeftCenterX = longPointLeftCenterX;
     modifier->targetContentProperty_.longPointRightCenterX = longPointRightCenterX;
+    modifier->targetContentProperty_.needForceCalc = true;
     contentProperty = modifier->UpdateContentProperty();
     EXPECT_EQ(contentProperty.itemHalfSizes, itemHalfSizes);
     EXPECT_EQ(contentProperty.indicatorMargin, indicatorMargin);
     EXPECT_EQ(contentProperty.longPointLeftCenterX, longPointLeftCenterX);
     EXPECT_EQ(contentProperty.longPointRightCenterX, longPointRightCenterX);
+    /**
+     * @tc.steps: step3. update targetContentProperty_ and check result.
+     */
+    modifier->CalCBackground(contentProperty);
+    EXPECT_EQ(modifier->targetContentProperty_.needForceCalc, false);
 }
 } // namespace OHOS::Ace::NG

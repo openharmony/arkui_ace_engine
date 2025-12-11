@@ -93,6 +93,7 @@ ohos_unittest("form_render_group_test") {
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/base/mock_ressched_click_optimizer.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
@@ -214,6 +215,7 @@ ohos_unittest("form_render_delegate_stub_test") {
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:appexecfwk_base",
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -246,6 +248,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_ressched_click_optimizer.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
@@ -311,6 +314,7 @@ ohos_unittest("form_render_delegate_impl_test") {
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:appexecfwk_base",
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",

@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { DotIndicator, DigitIndicator } from "./component/swiper"
 export class IndicatorComponentModifier extends CommonMethodModifier implements IndicatorComponentAttribute,AttributeModifier<IndicatorComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,9 +38,9 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
     applyDisabledAttribute(instance: IndicatorComponentAttribute): void { }
     applySelectedAttribute(instance: IndicatorComponentAttribute): void { }
     _initialIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _initialIndex_0_0value?: number | undefined
+    _initialIndex_0_0value?: int32 | undefined
     _count_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _count_0_0value?: number | undefined
+    _count_0_0value?: int32 | undefined
     _style_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _style_0_0value?: DotIndicator | DigitIndicator | undefined
     _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -46,15 +48,16 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
     _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _vertical_0_0value?: boolean | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value0: number) => void) | undefined
+    _onChange_0_0value?: ((value0: int32) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkIndicatorComponentPeer;
         if (this._initialIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._initialIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInitialIndexAttribute((this._initialIndex_0_0value as number | undefined));
+                    peer.setInitialIndexAttribute((this._initialIndex_0_0value as int32 | undefined));
                     this._initialIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -64,7 +67,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                 }
                 default: {
                     this._initialIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setInitialIndexAttribute((undefined as number | undefined));
+                    peer.setInitialIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -72,7 +75,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             switch (this._count_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCountAttribute((this._count_0_0value as number | undefined));
+                    peer.setCountAttribute((this._count_0_0value as int32 | undefined));
                     this._count_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -82,7 +85,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                 }
                 default: {
                     this._count_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCountAttribute((undefined as number | undefined));
+                    peer.setCountAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -144,7 +147,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: int32) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -154,13 +157,14 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: IndicatorComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._initialIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._initialIndex_0_flag) {
@@ -170,7 +174,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                     break;
                 }
                 default: {
-                    this.initialIndex((undefined as number | undefined));
+                    this.initialIndex((undefined as int32 | undefined));
                 }
             }
         }
@@ -183,7 +187,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                     break;
                 }
                 default: {
-                    this.count((undefined as number | undefined));
+                    this.count((undefined as int32 | undefined));
                 }
             }
         }
@@ -235,12 +239,12 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                    this.onChange((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
     }
-    initialIndex(value: number | undefined): this {
+    initialIndex(value: int32 | undefined): this {
         if (((this._initialIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._initialIndex_0_0value) !== (value)))
         {
             this._initialIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -251,7 +255,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         }
         return this
     }
-    count(value: number | undefined): this {
+    count(value: int32 | undefined): this {
         if (((this._count_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._count_0_0value) !== (value)))
         {
             this._count_0_flag = AttributeUpdaterFlag.UPDATE
@@ -295,7 +299,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         }
         return this
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE

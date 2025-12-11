@@ -22,6 +22,8 @@
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -767,7 +769,7 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
 {
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
-    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length, nullptr);
+    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length, nullptr, false);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -990,18 +992,20 @@ void SetPixelMap(ArkUINodeHandle node, void* drawableDescriptor)
     ImageModelNG::SetPixelMap(frameNode, drawableDescriptor);
 }
 
-void SetPixelMapArray(ArkUINodeHandle node, void* animatedDrawableDescriptor)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetPixelMapArray(frameNode, animatedDrawableDescriptor);
-}
-
 void SetResourceSrc(ArkUINodeHandle node, void* resource)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetResource(frameNode, resource);
+}
+
+void SetDrawableDescriptor(ArkUINodeHandle node, void* newDrawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto drawableDescriptor = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableDescriptor);
+    ImageModelNG::SetDrawableDescriptor(frameNode, drawableDescriptor);
 }
 
 void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
@@ -1361,6 +1365,27 @@ void setAltError(ArkUINodeHandle node, const char* src, const char* bundleName, 
     ImageModelNG::SetAltError(frameNode, ImageSourceInfo { src, bundleName, moduleName });
 }
 
+void SetAntiAlias(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAntiAlias(frameNode, value);
+}
+
+void ResetAntiAlias(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAntiAlias(frameNode, false);
+}
+
+int32_t GetAntiAlias(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ImageModelNG::GetAntiAlias(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -1455,8 +1480,8 @@ const ArkUIImageModifier* GetImageModifier()
         .getFitOriginalSize = GetFitOriginalSize,
         .getFillColor = GetFillColor,
         .setPixelMap = SetPixelMap,
-        .setPixelMapArray = SetPixelMapArray,
         .setResourceSrc = SetResourceSrc,
+        .setDrawableDescriptor = SetDrawableDescriptor,
         .enableAnalyzer = EnableAnalyzer,
         .resetEnableAnalyzer = ResetEnableAnalyzer,
         .setImagePrivacySensitive = SetImagePrivacySensitve,
@@ -1488,6 +1513,9 @@ const ArkUIImageModifier* GetImageModifier()
         .resetAltError = ResetAltError,
         .setAltPlaceholder = setAltPlaceholder,
         .setAltError = setAltError,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .getAntiAlias = GetAntiAlias,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1577,8 +1605,8 @@ const CJUIImageModifier* GetCJUIImageModifier()
         .getFitOriginalSize = GetFitOriginalSize,
         .getFillColor = GetFillColor,
         .setPixelMap = SetPixelMap,
-        .setPixelMapArray = SetPixelMapArray,
         .setResourceSrc = SetResourceSrc,
+        .setDrawableDescriptor = SetDrawableDescriptor,
         .enableAnalyzer = EnableAnalyzer,
         .resetEnableAnalyzer = ResetEnableAnalyzer,
         .setImagePrivacySensitive = SetImagePrivacySensitve,

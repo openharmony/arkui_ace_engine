@@ -656,12 +656,13 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest030, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     SelectMenuParam menuParam;
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     TextSpanType textSpanType = TextSpanType::TEXT;
+
     TextModelStatic::BindSelectionMenu(
         frameNode.GetRawPtr(), textSpanType, textResponseType, nullptr, menuParam);
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
@@ -677,11 +678,12 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest031, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+
     TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
 }
@@ -696,9 +698,9 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest032, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetHalfLeading(frameNode.GetRawPtr(), std::make_optional(true));
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
 }
@@ -713,9 +715,9 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest033, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetEnableHapticFeedback(frameNode.GetRawPtr(), std::make_optional(true));
     EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
 }
@@ -793,4 +795,83 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest037, TestSize.Level0)
     EXPECT_FALSE(layoutProperty->GetEllipsisMode().has_value());
 }
 
+/**
+ * @tc.name: TextModelStaticTest038
+ * @tc.desc: test SetIncludeFontPadding func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextModelStaticTest038, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: Set IncludeFontPadding Value to true.
+     * @tc.expected: GetIncludeFontPadding is true.
+     */
+    TextModelStatic::SetIncludeFontPadding(frameNode.GetRawPtr(), std::make_optional(true));
+    EXPECT_TRUE(layoutProperty->GetIncludeFontPadding().value());
+
+
+    /**
+     * @tc.steps: Set IncludeFontPadding Value to false.
+     * @tc.expected: GetIncludeFontPadding is false.
+     */
+    TextModelStatic::SetIncludeFontPadding(frameNode.GetRawPtr(), std::make_optional(false));
+    EXPECT_FALSE(layoutProperty->GetIncludeFontPadding().value());
+
+
+    /**
+     * @tc.steps: Set IncludeFontPadding Value to null.
+     * @tc.expected: GetIncludeFontPadding is false.
+     */
+    TextModelStatic::SetIncludeFontPadding(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetIncludeFontPadding().value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest039
+ * @tc.desc: test SetFallbackLineSpacing func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextModelStaticTest039, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: Set FallbackLineSpacing Value to true.
+     * @tc.expected: GetFallbackLineSpacing is true.
+     */
+    TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::make_optional(true));
+    EXPECT_TRUE(layoutProperty->GetFallbackLineSpacing().value());
+
+
+    /**
+     * @tc.steps: Set FallbackLineSpacing Value to false.
+     * @tc.expected: GetFallbackLineSpacing is false.
+     */
+    TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::make_optional(false));
+    EXPECT_FALSE(layoutProperty->GetFallbackLineSpacing().value());
+
+
+    /**
+     * @tc.steps: Set FallbackLineSpacing Value to null.
+     * @tc.expected: GetFallbackLineSpacing is false.
+     */
+    TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetFallbackLineSpacing().value());
+}
 } // namespace OHOS::Ace::NG

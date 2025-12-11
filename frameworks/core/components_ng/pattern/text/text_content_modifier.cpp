@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include <cstdint>
 #include <optional>
+#include "ui/common/layout/constants.h"
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
@@ -600,8 +601,10 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
             ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
                 Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
         }
+        Color c { animatableTextColor_->Get().GetValue() };
+        c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
         auto length = paragraph->GetParagraphText().length();
-        paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
+        paragraph->UpdateColor(0, length, c);
     }
 }
 
@@ -698,8 +701,10 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
+        const auto ph = textColor.GetPlaceholder();
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
         textColor = Color(animatableTextColor_->Get().GetValue());
+        textColor.SetPlaceholder(ph);
     }
 }
 
@@ -716,6 +721,7 @@ std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<L
     std::vector<Color> colors;
     for (auto color : colorList) {
         colors.emplace_back(Color(color.GetValue()));
+        colors.back().SetPlaceholder(color.GetPlaceholder());
     }
     return colors;
 }
@@ -1241,11 +1247,24 @@ TextDirection TextContentModifier::GetTextRaceDirection() const
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
-    auto direction = layoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::AUTO) {
-        direction = GetTextRaceDirectionByContent();
+    // 获取文本方向属性，默认为 INHERIT
+    auto textDirection = layoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    
+    // textDirection 优先级高于 layoutDirection
+    if (textDirection != TextDirection::INHERIT) {
+        if (textDirection == TextDirection::AUTO) {
+            // textDirection 为 AUTO 时，返回文本自身字符方向
+            return GetTextRaceDirectionByContent();
+        }
+        // 直接返回明确的文本方向（LTR 或 RTL）
+        return textDirection;
     }
-    return direction;
+    // textDirection 为 INHERIT 时，继承原有的 layoutDirection 逻辑
+    if (layoutDirection == TextDirection::AUTO) {
+        return GetTextRaceDirectionByContent();
+    }
+    return layoutDirection;
 }
 
 TextDirection TextContentModifier::GetTextRaceDirectionByContent() const
@@ -1280,14 +1299,59 @@ void TextContentModifier::SetRacePercentFloat(float value)
     racePercentFloat_->Set(value);
 }
 
-void TextContentModifier::ResetTextRacePercent()
+std::optional<double> TextContentModifier::CalcResetPercent()
 {
+    std::optional<double> resetPercent;
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, resetPercent);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, resetPercent);
+    if (pManager->GetParagraphs().size() == 0) {
+        return resetPercent;
+    }
+    auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_RETURN(paragraph, resetPercent);
+    float textWidth = paragraph->GetTextWidth();
+    auto textRectWidth = textPattern->GetTextRect().Width();
+
+    float RTLStartPercent = (textWidth - textRectWidth) / (textWidth + textRaceSpaceWidth_) * RACE_MOVE_PERCENT_MAX;
+    if (marqueeOption_.direction == MarqueeDirection::LEFT) {
+        RTLStartPercent -= RACE_MOVE_PERCENT_MAX;
+    }
+
+    resetPercent = RACE_MOVE_PERCENT_MAX *
+        (paintOffset_.GetX() - lastParagraph1StartPosition_.value()) / (textWidth + textRaceSpaceWidth_);
+
+    if (marqueeOption_.direction != MarqueeDirection::LEFT) {
+        resetPercent = RACE_MOVE_PERCENT_MAX - resetPercent.value();
+    }
+
+    auto thresholdPercent = GetTextRaceDirection() == TextDirection::LTR ?
+        RACE_MOVE_PERCENT_MAX : RACE_MOVE_PERCENT_MAX + RTLStartPercent;
+    auto minPercent = GetTextRaceDirection() == TextDirection::LTR ? RACE_MOVE_PERCENT_MIN : RTLStartPercent;
+
+    if (GreatOrEqual(resetPercent.value(), thresholdPercent)) {
+        resetPercent = minPercent;
+    } else if (LessOrEqual(resetPercent.value(), minPercent)) {
+        resetPercent = minPercent;
+    }
+
+    return resetPercent;
+}
+
+void TextContentModifier::ResetTextRacePercent(bool restart)
+{
+    std::optional<double> resetPercent;
+    if (marqueeOption_.updatePolicy == MarqueeUpdatePolicy::PRESERVE_POSITION &&
+        !restart && lastParagraph1StartPosition_.has_value()) {
+        resetPercent = CalcResetPercent();
+    }
     if (GetTextRaceDirection() == TextDirection::LTR) {
         // LTR start 0%
-        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), resetPercent]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
-            modifier->SetRacePercentFloat(RACE_MOVE_PERCENT_MIN);
+            modifier->SetRacePercentFloat(resetPercent.has_value() ? resetPercent.value() : RACE_MOVE_PERCENT_MIN);
         });
         marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + RACE_MOVE_PERCENT_MIN;
         return;
@@ -1313,10 +1377,10 @@ void TextContentModifier::ResetTextRacePercent()
             RACE_MOVE_PERCENT_MAX;
     }
     marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + racePercentFloat;
-    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), racePercentFloat]() {
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), racePercentFloat, resetPercent]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->SetRacePercentFloat(racePercentFloat);
+        modifier->SetRacePercentFloat(resetPercent.has_value() ? resetPercent.value() : racePercentFloat);
     });
 }
 
@@ -1385,10 +1449,15 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
     CHECK_NULL_RETURN(textPattern, false);
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, false);
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+
+    if (option.spacing.has_value()) {
+        textRaceSpaceWidth_ = option.spacing.value().ConvertToPx();
+    } else {
+        textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            textRaceSpaceWidth_ *= pipeline->GetDipScale();
+        }
     }
 
     auto duration =
@@ -1432,25 +1501,40 @@ void TextContentModifier::ResumeTextRace(bool bounce)
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
 
+    if (bounce || marqueeOption_.updatePolicy != MarqueeUpdatePolicy::PRESERVE_POSITION) {
+        ResetTextRacePercent(bounce);
+    }
+
+    auto duration = marqueeDuration_;
+    float racePercent = GetTextRacePercent();
+    float finalPercent = RACE_MOVE_PERCENT_MAX + racePercent;
+    if (marqueeOption_.updatePolicy == MarqueeUpdatePolicy::PRESERVE_POSITION) {
+        if (GetTextRaceDirection() == TextDirection::LTR) {
+            // racePercent 0% => 100%
+            duration = marqueeDuration_ / 100.0f * (RACE_MOVE_PERCENT_MAX - racePercent);
+            finalPercent = RACE_MOVE_PERCENT_MAX;
+            if (NearZero(duration)) {
+                duration = marqueeDuration_;
+            }
+        }
+    }
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(marqueeDuration_);
+    option.SetDuration(duration);
     option.SetDelay(bounce ? marqueeOption_.delay : 0);
     option.SetCurve(curve);
     option.SetIteration(1);
-    SetTextRaceAnimation(option);
+    SetTextRaceAnimation(option, finalPercent);
 }
 
-void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
+void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option, float finalPercent)
 {
     marqueeAnimationId_++;
-    ResetTextRacePercent();
     raceAnimation_ = AnimationUtils::StartAnimation(
-        option, [weak = AceType::WeakClaim(this)]() {
-             auto modifier = weak.Upgrade();
+        option, [weak = AceType::WeakClaim(this), finalPercent]() {
+            auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
-            float startPercent = modifier->GetTextRacePercent();
-            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
+            modifier->racePercentFloat_->Set(finalPercent);
         },
         [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
             auto modifier = weak.Upgrade();
@@ -1503,7 +1587,10 @@ void TextContentModifier::PauseTextRace()
     }
 
     SetMarqueeState(MarqueeState::STOPPED);
-    ResetTextRacePercent();
+
+    if (marqueeOption_.updatePolicy != MarqueeUpdatePolicy::PRESERVE_POSITION) {
+        ResetTextRacePercent();
+    }
 }
 
 bool TextContentModifier::AllowTextRace()
@@ -1572,6 +1659,8 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
     float textWidth = paragraphText->GetTextWidth();
     info.paragraph1StartPosition =
         paintOffset_.GetX() + (textWidth + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
+    lastParagraph1StartPosition_ = info.paragraph1StartPosition;
+    
     info.paragraph1EndPosition = info.paragraph1StartPosition + textWidth;
     info.paragraph2StartPosition = info.paragraph1EndPosition + textRaceSpaceWidth_;
     info.paragraph2EndPosition = info.paragraph2StartPosition + textWidth;

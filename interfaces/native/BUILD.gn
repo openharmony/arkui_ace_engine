@@ -97,6 +97,7 @@ ohos_shared_library("ace_ndk") {
     "node/swiper_option.cpp",
     "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",
+    "node/text_native_impl.cpp"
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
   deps = []

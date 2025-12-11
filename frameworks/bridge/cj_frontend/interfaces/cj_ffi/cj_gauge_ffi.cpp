@@ -172,6 +172,11 @@ void FfiOHOSAceFrameworkGaugeSetColorsV2(VectorUInt32Ptr gaugeColors, VectorFloa
     GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
 }
 
+void FfiOHOSAceFrameworkGaugeResetColors()
+{
+    GaugeModel::GetInstance()->ResetGradientColors();
+}
+
 void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle linearGradients, VectorUInt32Ptr weight)
 {
     NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;

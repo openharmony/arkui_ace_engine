@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { CustomTextDecoder } from "@koalaui/compat"
-import { int32 } from "@koalaui/compat"
+import { CustomTextDecoder } from '@koalaui/compat'
+import { int32 } from '@koalaui/compat'
 
 const K = [
     (0x5a827999 | 0) as int32,
@@ -68,8 +68,8 @@ export class SHA1Hash {
     }
 
     update(data: Int32Array | Float32Array | Uint32Array | Uint8Array): SHA1Hash {
-        if (data == null) {
-            throw new TypeError("SHA1Hash expected non-null data: ")
+        if (data === null) {
+            throw new TypeError('SHA1Hash expected non-null data: ')
         }
 
         let byteOffset: int32 = 0
@@ -102,7 +102,7 @@ export class SHA1Hash {
         let offset: int32 = 0
 
         // longer than 1 block
-        if ((blocks != 0) && !(byteOffset & 3) && !(this._size % inputBytes)) {
+        if ((blocks !== 0) && !(byteOffset & 3) && !(this._size % inputBytes)) {
             const block = new Int32Array(buffer!, byteOffset, blocks * inputWords)
             while (blocks--) {
                 this._int32(block, offset >> 2)
@@ -112,13 +112,13 @@ export class SHA1Hash {
         }
 
         // data: TypedArray | DataView
-        if ((BYTES_PER_ELEMENT != 1) && buffer != undefined) {
+        if ((BYTES_PER_ELEMENT !== 1) && buffer !== undefined) {
             const rest = new Uint8Array(buffer, byteOffset + offset, length - offset)
             return this._uint8(rest)
         }
 
         // no more bytes
-        if (offset == length) return this
+        if (offset === length) return this
 
         return this._uint8(new Uint8Array(buffer!), offset)
     }
@@ -266,7 +266,7 @@ export class SHA1Hash {
 
         this._int32(_word)
 
-        return (encoding === "hex") ? this._hex() : this._bin()
+        return (encoding === 'hex') ? this._hex() : this._bin()
     }
 
     private _hex(): string {
@@ -317,13 +317,13 @@ function isBE(): boolean {
     let a16 = new Uint16Array(1)
     a16[0] = 0xFEFF
     let a8 = new Uint8Array(a16.buffer)
-    return a8[0] == 0xFE // BOM
+    return a8[0] === 0xFE // BOM
 }
 
 
 function ft(s: int32, b: int32, c: int32, d: int32) {
-    if (s == 0) return (b & c) | ((~b) & d)
-    if (s == 2) return (b & c) | (b & d) | (c & d)
+    if (s === 0) return (b & c) | ((~b) & d)
+    if (s === 2) return (b & c) | (b & d) | (c & d)
     return b ^ c ^ d
 }
 

@@ -97,6 +97,10 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
+    if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+        CloseCustomKeyboard(true);
+    }
 
     isLastFocusUIExtension_ = curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG;
     lastFocusNodeId_ = curFocusNode->GetId();
@@ -221,6 +225,17 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
+void InputMethodManager::CloseCustomKeyboard(bool isUIExtension)
+{
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    CHECK_NULL_VOID(currentFocusNode);
+    auto pipeline = currentFocusNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
+    manager->CloseTextCustomKeyboard(currentFocusNode->GetId(), isUIExtension);
+}
+
 void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
 {
     ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
@@ -230,6 +245,7 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
+    CloseCustomKeyboard();
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
         return;
     }
@@ -250,6 +266,7 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
 
 void InputMethodManager::CloseKeyboardInPipelineDestroy()
 {
+    CloseCustomKeyboard();
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
@@ -279,13 +296,20 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 
 void InputMethodManager::HideKeyboardAcrossProcesses()
 {
+    CloseCustomKeyboard();
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
         return;
     }
-    inputMethod->RequestHideInput();
+    
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    CHECK_NULL_VOID(currentFocusNode);
+    auto pipeline = currentFocusNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto systemWindowId = pipeline->GetFocusWindowId();
+    inputMethod->RequestHideInput(systemWindowId);
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
 #endif
@@ -293,6 +317,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 
 void InputMethodManager::CloseKeyboardInProcess()
 {
+    CloseCustomKeyboard();
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {

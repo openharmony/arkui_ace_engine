@@ -938,4 +938,38 @@ bool NavigationTitleUtil::SetTitleAnimationElapsedTime(AnimationOption& option, 
     option.SetDelay(option.GetDelay() - elapsedTime);
     return true;
 }
+
+void NavigationTitleUtil::SetBackButtonText(const RefPtr<TitleBarNode>& titleBarNode, const std::string& text,
+                                            const std::string& key, const RefPtr<ResourceObject> resObj)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    NavigationTitleUtil::SetAccessibility(backButtonNode, text);
+
+    auto updateFunc = [key, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
+                          const RefPtr<ResourceObject>& resObj) {
+        auto titleBarNode = weak.Upgrade();
+        CHECK_NULL_VOID(titleBarNode);
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        std::string backButtonAccessibilityText = titleBarPattern->GetResCacheMapByKey(key);
+        if (backButtonAccessibilityText.empty()) {
+            ResourceParseUtils::ParseResString(resObj, backButtonAccessibilityText);
+            titleBarPattern->AddResCache(key, backButtonAccessibilityText);
+        }
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+        titleBarNode->MarkModifyDone();
+        titleBarNode->MarkDirtyNode();
+    };
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    if (resObj) {
+        titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
+}
 } // namespace OHOS::Ace::NG

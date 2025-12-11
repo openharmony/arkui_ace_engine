@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include <cstdint>
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
 
+#include "base/want/want_wrap.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
@@ -138,6 +138,16 @@ void AppBarView::BindJSContainer()
     pattern->AppInfoCallBack();
     pattern->AppScreenCallBack();
     pattern->AppBgColorCallBack();
+    FireExtensionHostParams();
+}
+
+void AppBarView::FireExtensionHostParams()
+{
+    auto atomicService = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atomicService);
+    auto atomicServicePattern = atomicService->GetPattern<NG::AtomicServicePattern>();
+    CHECK_NULL_VOID(atomicServicePattern);
+    atomicServicePattern->ExtensionHostParamsCallBack();
 }
 
 void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
@@ -383,6 +393,40 @@ void AppBarView::DestroyServicePanel()
     LOGI("ServicePanel release session:%{public}d", sessionId_);
 }
 
+#ifndef PREVIEW
+ModalUIExtensionCallbacks AppBarView::GetModalUIExtensionCallbacks(bool firstTry)
+{
+    ModalUIExtensionCallbacks callbacks;
+    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
+        auto bar = wp.Upgrade();
+        CHECK_NULL_VOID(bar);
+        bar->DestroyServicePanel();
+    };
+    callbacks.onError = [wp = WeakClaim(this), firstTry](
+                            int32_t code, const std::string& name, const std::string& message) {
+        auto bar = wp.Upgrade();
+        CHECK_NULL_VOID(bar);
+        bar->DestroyServicePanel();
+        if (firstTry) {
+            bar->CreateServicePanel(false);
+        }
+    };
+    callbacks.onReceive = [wp = WeakClaim(this)](const OHOS::AAFwk::WantParams& wantParams) {
+        auto appbar = wp.Upgrade();
+        CHECK_NULL_VOID(appbar);
+        auto atom = appbar->atomicService_.Upgrade();
+        CHECK_NULL_VOID(atom);
+        auto pattern = atom->GetPattern<AtomicServicePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto customAppBarNode = pattern->GetJSAppBarContainer();
+        CHECK_NULL_VOID(customAppBarNode);
+        auto wantParamsWrap = WantParamsWrap::CreateWantWrap(wantParams);
+        customAppBarNode->FireCustomCallback(ARKUI_APP_BAR_RECEIVE, wantParamsWrap->ToString());
+    };
+    return callbacks;
+}
+#endif
+
 void AppBarView::CreateServicePanel(
     const std::string& appGalleryBundleName, const std::string& abilityName, std::map<std::string, std::string>& params)
 {
@@ -398,15 +442,6 @@ void AppBarView::CreateServicePanel(
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    ModalUIExtensionCallbacks callbacks;
-    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
-        auto bar = wp.Upgrade();
-        bar->DestroyServicePanel();
-    };
-    callbacks.onError = [wp = WeakClaim(this)](int32_t code, const std::string& name, const std::string& message) {
-        auto bar = wp.Upgrade();
-        bar->DestroyServicePanel();
-    };
     auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
     wantWrap->SetWantParam(params);
     LOGI("ServicePanel request bundle: %{public}s, ability: %{public}s. "
@@ -414,7 +449,7 @@ void AppBarView::CreateServicePanel(
         appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
         params["module"].c_str());
     ModalUIExtensionConfig config;
-    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, config);
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, GetModalUIExtensionCallbacks(false), config);
 #endif
 }
 
@@ -432,19 +467,6 @@ void AppBarView::CreateServicePanel(bool firstTry)
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    ModalUIExtensionCallbacks callbacks;
-    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
-        auto bar = wp.Upgrade();
-        bar->DestroyServicePanel();
-    };
-    callbacks.onError = [wp = WeakClaim(this), firstTry](
-                            int32_t code, const std::string& name, const std::string& message) {
-        auto bar = wp.Upgrade();
-        bar->DestroyServicePanel();
-        if (firstTry) {
-            bar->CreateServicePanel(false);
-        }
-    };
     std::string abilityName;
     auto theme = pipeline->GetTheme<AppBarTheme>();
     if (theme) {
@@ -460,7 +482,7 @@ void AppBarView::CreateServicePanel(bool firstTry)
         appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
         params["module"].c_str());
     ModalUIExtensionConfig config;
-    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, config);
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, GetModalUIExtensionCallbacks(firstTry), config);
 #endif
 }
 
@@ -618,4 +640,14 @@ void AppBarView::RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelin
     CHECK_NULL_VOID(pattern);
     pattern->RemoveRectChangeListener(id);
 }
+
+void AppBarView::SetMenuBarVisible(bool visible)
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBarVisibleCallBack(visible);
+}
+
 } // namespace OHOS::Ace::NG

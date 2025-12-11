@@ -26,6 +26,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
@@ -198,9 +199,9 @@ HWTEST_F(PathPatternTestNg, SetCommands001, TestSize.Level1)
     EXPECT_EQ(pathPaintProperty->HasCommands(), false);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, PATH_CMD);
+    AddMockResourceData(ID_COMMANDS, PATH_CMD);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+        ID_COMMANDS, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
     pathModelNG.SetCommands(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_EQ(pathPaintProperty->HasCommands(), true);

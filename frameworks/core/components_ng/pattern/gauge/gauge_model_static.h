@@ -22,6 +22,10 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GaugeModelStatic {
 public:
+    using LinearGradientColorSteps = std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>>;
+
+    static constexpr auto ERROR_COLOR = Color(0xFFE84026);
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetValue(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMin(FrameNode* frameNode, const std::optional<float>& min);
@@ -30,7 +34,10 @@ public:
     static void SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static void ReSetDescription(FrameNode* frameNode);
     static void SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue);
+    static void SetGradientColors(FrameNode* frameNode, const std::vector<LinearGradientColorSteps>& colors,
+        const std::vector<float>& values, const GaugeType& type);
 };
 } // namespace OHOS::Ace::NG
 

@@ -187,4 +187,20 @@ FlexAlign ColumnModelNG::GetAlignItems(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LinearLayoutProperty, CrossAxisAlign, value, frameNode, value);
     return value;
 }
+
+double ColumnModelNG::GetSpace(FrameNode* frameNode)
+{
+    auto space = CalcDimension(0.0, DimensionUnit::VP);
+    CHECK_NULL_RETURN(frameNode, space.Value());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LinearLayoutProperty, Space, space, frameNode, space);
+    return space.Value();
+}
+
+bool ColumnModelNG::GetIsReverse(FrameNode* frameNode)
+{
+    bool isReverse = false;
+    CHECK_NULL_RETURN(frameNode, isReverse);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, IsReverse, isReverse, frameNode, isReverse);
+    return isReverse;
+}
 } // namespace OHOS::Ace::NG

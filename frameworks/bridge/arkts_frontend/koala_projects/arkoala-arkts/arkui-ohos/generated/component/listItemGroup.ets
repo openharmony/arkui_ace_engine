@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ListDividerOptions_serializer, ListDividerOptions } from "./list"
 import { ChildrenMainSize_serializer, ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
@@ -23,7 +24,8 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookListItemGroupAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookListItemGroupAttributeModifier, AttributeUpdater, hookListItemGroupChildrenMainSizeImpl } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -32,6 +34,7 @@ import { CustomBuilder } from "./builder"
 import { ComponentContent } from "arkui.ComponentContent"
 import { ListItemGroupModifier } from "./../ListItemGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -45,6 +48,7 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setListItemGroupOptionsAttribute(options?: ListItemGroupOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -90,7 +94,7 @@ export interface ListItemGroupOptions {
     headerComponent?: ComponentContent;
     footer?: CustomBuilder;
     footerComponent?: ComponentContent;
-    space?: number | string;
+    space?: double | string;
     style?: ListItemGroupStyle;
 }
 export interface ListItemGroupAttribute extends CommonMethod {
@@ -136,6 +140,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setListItemGroupOptions")) {
             const options_casted = options as (ListItemGroupOptions | undefined)
             this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ListItemGroupAttribute');
             return this
         }
         return this
@@ -151,18 +156,23 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.setChildrenMainSizeAttribute(value_casted)
+            hookListItemGroupChildrenMainSizeImpl(this, value);
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemGroupAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookListItemGroupAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -199,7 +209,7 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForHeaderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeaderComponentTmpValue  = valueHolderForHeaderComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForHeaderComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForHeaderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -215,7 +225,7 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForFooterComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFooterComponentTmpValue  = valueHolderForFooterComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForFooterComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForFooterComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -223,10 +233,10 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForSpace !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpaceTmpValue  = valueHolderForSpace!
-            if (valueHolderForSpaceTmpValue instanceof number) {
+            if (valueHolderForSpaceTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx0)
+                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx0)
             } else if (valueHolderForSpaceTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as string
@@ -266,7 +276,7 @@ export class ListItemGroupOptions_serializer {
         const headerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let headerComponentTmpBuf : ComponentContent | undefined = undefined
         if ((headerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            headerComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            headerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const headerComponentTmpResult : ComponentContent | undefined = headerComponentTmpBuf
         const footerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -289,24 +299,24 @@ export class ListItemGroupOptions_serializer {
         const footerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let footerComponentTmpBuf : ComponentContent | undefined = undefined
         if ((footerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            footerComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            footerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const footerComponentTmpResult : ComponentContent | undefined = footerComponentTmpBuf
         const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let spaceTmpBuf : number | string | undefined = undefined
+        let spaceTmpBuf : double | string | undefined = undefined
         if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const spaceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let spaceTmpBuf_ : number | string | undefined
-            if (spaceTmpBuf_UnionSelector == (0).toChar()) {
-                spaceTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (spaceTmpBuf_UnionSelector == (1).toChar()) {
+            let spaceTmpBuf_ : double | string | undefined
+            if (spaceTmpBuf_UnionSelector == (0).toByte()) {
+                spaceTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (spaceTmpBuf_UnionSelector == (1).toByte()) {
                 spaceTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for spaceTmpBuf_ has to be chosen through deserialisation.")
             }
-            spaceTmpBuf = (spaceTmpBuf_ as number | string)
+            spaceTmpBuf = (spaceTmpBuf_ as double | string)
         }
-        const spaceTmpResult : number | string | undefined = spaceTmpBuf
+        const spaceTmpResult : double | string | undefined = spaceTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let styleTmpBuf : ListItemGroupStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

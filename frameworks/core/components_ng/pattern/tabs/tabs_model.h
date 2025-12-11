@@ -140,6 +140,7 @@ public:
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
     virtual void SetOnUnselected(std::function<void(const BaseEventInfo*)>&& onUnselected) {}
+    virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) {}
     virtual void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) {}

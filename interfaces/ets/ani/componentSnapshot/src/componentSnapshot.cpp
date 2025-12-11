@@ -248,13 +248,6 @@ auto CreateCallbackFunc(ani_env* env, ani_object callback, ani_object& result)
 
 static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 {
-    ani_boolean isUndefined = true;
-    if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
-        return false;
-    }
-    if (isUndefined) {
-        return false;
-    }
     ani_class optionsClass;
     if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
@@ -279,7 +272,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
     }
     ani_double aniValue = 0.0;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "toDouble", ":d", &aniValue)) {
         return false;
     }
     if (OHOS::Ace::GreatNotEqual(aniValue, 0.0)) {
@@ -290,14 +283,6 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 
 static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, bool& value)
 {
-    ani_boolean isUndefined = true;
-    if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
-        return false;
-    }
-    if (isUndefined) {
-        return false;
-    }
-
     ani_class optionsClass;
     if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
@@ -322,7 +307,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
     ani_boolean aniValue;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "toBoolean", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);
@@ -423,11 +408,6 @@ static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::Sn
 
 static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
-    ani_boolean isUndefined = true;
-    env->Reference_IsUndefined(options, &isUndefined);
-    if (isUndefined) {
-        return false;
-    }
     ani_ref regionObject;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "region", &regionObject)) {
         snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::NO_REGION;
@@ -450,6 +430,139 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
     return true;
 }
 
+static bool ParseColorModeOptions(
+    ani_env* env, ani_object colorModeObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+{
+    ani_ref colorSpaceRef;
+    if (ANI_OK ==
+        env->Object_GetPropertyByName_Ref(static_cast<ani_object>(colorModeObject), "colorSpace", &colorSpaceRef)) {
+        ani_boolean isColorSpaceUndefined = true;
+        env->Reference_IsUndefined(colorSpaceRef, &isColorSpaceUndefined);
+        int32_t colorSpaceMode = OHOS::Ace::NG::DEFAULT_COLORSPACE_VALUE_SRGB;
+        if (!isColorSpaceUndefined) {
+            ani_int colorSpaceValue = 0;
+            if (ANI_OK == env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorSpaceRef), &colorSpaceValue)) {
+                colorSpaceMode = static_cast<int32_t>(colorSpaceValue);
+            }
+        }
+        snapShotOptions.colorSpaceModeOptions.colorSpaceMode =
+            static_cast<OHOS::Ace::NG::ColorSpaceMode>(colorSpaceMode);
+    }
+
+    ani_ref isAutoRef;
+    if (ANI_OK == env->Object_GetPropertyByName_Ref(static_cast<ani_object>(colorModeObject), "isAuto", &isAutoRef)) {
+        ani_boolean isIsAutoUndefined = true;
+        env->Reference_IsUndefined(isAutoRef, &isIsAutoUndefined);
+        bool isAuto = false;
+        if (!isIsAutoUndefined) {
+            ani_boolean isAutoValue = false;
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(
+                              static_cast<ani_object>(isAutoRef), "toBoolean", ":z", &isAutoValue)) {
+                isAuto = static_cast<bool>(isAutoValue);
+            }
+        }
+        snapShotOptions.colorSpaceModeOptions.isAuto = isAuto;
+    }
+
+    return true;
+}
+
+static bool GetOptionsColorMode(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+{
+    ani_ref colorModeRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "colorMode", &colorModeRef)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "The \"colorMode\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    ani_boolean isColorModeUndefined = true;
+    env->Reference_IsUndefined(colorModeRef, &isColorModeUndefined);
+    if (isColorModeUndefined) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"colorMode\" attribute is undefined.");
+        return false;
+    }
+
+    return ParseColorModeOptions(env, static_cast<ani_object>(colorModeRef), snapShotOptions);
+}
+
+static bool ParseDynamicRangeModeOptions(
+    ani_env* env, ani_object dynamicRangeModeObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+{
+    ani_ref dynamicRangeModeRef;
+    if (ANI_OK == env->Object_GetPropertyByName_Ref(
+                      static_cast<ani_object>(dynamicRangeModeObject), "dynamicRangeMode", &dynamicRangeModeRef)) {
+        ani_boolean isDynamicRangeModeUndefined = true;
+        env->Reference_IsUndefined(dynamicRangeModeRef, &isDynamicRangeModeUndefined);
+        int32_t dynamicRangeMode = OHOS::Ace::NG::DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+        if (!isDynamicRangeModeUndefined) {
+            ani_int dynamicRangeValue = 0;
+            if (ANI_OK ==
+                env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(dynamicRangeModeRef), &dynamicRangeValue)) {
+                dynamicRangeMode = static_cast<int32_t>(dynamicRangeValue);
+            }
+        }
+        snapShotOptions.dynamicRangeModeOptions.dynamicRangeMode =
+            static_cast<OHOS::Ace::NG::DynamicRange>(dynamicRangeMode);
+    }
+
+    ani_ref isAutoRef;
+    if (ANI_OK ==
+        env->Object_GetPropertyByName_Ref(static_cast<ani_object>(dynamicRangeModeObject), "isAuto", &isAutoRef)) {
+        ani_boolean isIsAutoUndefined = true;
+        env->Reference_IsUndefined(isAutoRef, &isIsAutoUndefined);
+        bool isAuto = false;
+        if (!isIsAutoUndefined) {
+            ani_boolean isAutoValue = false;
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(
+                              static_cast<ani_object>(isAutoRef), "toBoolean", ":z", &isAutoValue)) {
+                isAuto = static_cast<bool>(isAutoValue);
+            }
+        }
+        snapShotOptions.dynamicRangeModeOptions.isAuto = isAuto;
+    }
+
+    return true;
+}
+
+static bool GetOptionsDynamicRangeMode(
+    ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+{
+    ani_ref dynamicRangeModeRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeModeRef)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "The \"dynamicRangeMode\" attribute cannot be obtained from the parameter.");
+        return false;
+    }
+    ani_boolean isDynamicRangeModeUndefined = true;
+    env->Reference_IsUndefined(dynamicRangeModeRef, &isDynamicRangeModeUndefined);
+    if (isDynamicRangeModeUndefined) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"dynamicRangeMode\" attribute is undefined.");
+        return false;
+    }
+
+    return ParseDynamicRangeModeOptions(env, static_cast<ani_object>(dynamicRangeModeRef), snapShotOptions);
+}
+
+static bool GetOptions(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined = true;
+    if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+
+    GetOptionsScale(env, options, snapShotOptions.scale);
+    GetOptionsWaitUntilRenderFinished(env, options, snapShotOptions.waitUntilRenderFinished);
+    GetOptionsRegion(env, options, snapShotOptions);
+    GetOptionsColorMode(env, options, snapShotOptions);
+    GetOptionsDynamicRangeMode(env, options, snapShotOptions);
+
+    return true;
+}
+
 static void GetSnapshot(const std::string& componentId, OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     const OHOS::Ace::NG::SnapshotOptions& options)
 {
@@ -462,9 +575,7 @@ static void ANI_GetWithCallback([[maybe_unused]] ani_env* env,
     ani_string componentId, ani_object callbackObj, ani_object options)
 {
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
-    GetOptionsScale(env, options, snapshotOptions.scale);
-    GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
-    GetOptionsRegion(env, options, snapshotOptions);
+    GetOptions(env, options, snapshotOptions);
 
     ani_object result = {};
     auto componentIdStr = ANIUtils_ANIStringToStdString(env, componentId);
@@ -475,9 +586,7 @@ static void ANI_GetWithCallback([[maybe_unused]] ani_env* env,
 static ani_object ANI_GetWithPromise([[maybe_unused]] ani_env* env, ani_string componentId, ani_object options)
 {
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
-    GetOptionsScale(env, options, snapshotOptions.scale);
-    GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
-    GetOptionsRegion(env, options, snapshotOptions);
+    GetOptions(env, options, snapshotOptions);
 
     ani_object result = {};
     auto componentIdStr = ANIUtils_ANIStringToStdString(env, componentId);
@@ -498,9 +607,7 @@ std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshot(
 static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componentId, ani_object options)
 {
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
-    GetOptionsScale(env, options, snapshotOptions.scale);
-    GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
-    GetOptionsRegion(env, options, snapshotOptions);
+    GetOptions(env, options, snapshotOptions);
 
     auto componentIdStr = ANIUtils_ANIStringToStdString(env, componentId);
     auto pair = GetSyncSnapshot(componentIdStr, snapshotOptions);
@@ -524,6 +631,14 @@ static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componen
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
             AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
             break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot mode not supported!");
+            AniThrowError(env, pair.first, "ComponentSnapshot mode not supported!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot auto not supported!");
+            AniThrowError(env, pair.first, "ComponentSnapshot auto not supported!");
+            break;
         default:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unkonw error coed!");
             break;
@@ -543,9 +658,7 @@ static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_double 
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
-    GetOptionsScale(env, options, snapshotOptions.scale);
-    GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
-    GetOptionsRegion(env, options, snapshotOptions);
+    GetOptions(env, options, snapshotOptions);
 
     ani_object result = {};
     GetSnapshotByUniqueId(uniqueId, CreateCallbackFunc(env, nullptr, result), snapshotOptions);
@@ -565,9 +678,7 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_dou
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
-    GetOptionsScale(env, options, snapshotOptions.scale);
-    GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
-    GetOptionsRegion(env, options, snapshotOptions);
+    GetOptions(env, options, snapshotOptions);
 
     auto pair = GetSyncSnapshotByUniqueId(uniqueId, snapshotOptions);
 
@@ -588,6 +699,14 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_dou
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
             AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot mode not supported!");
+            AniThrowError(env, pair.first, "ComponentSnapshot mode not supported!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot auto not supported!");
+            AniThrowError(env, pair.first, "ComponentSnapshot auto not supported!");
             break;
     }
     return pixelMap;
@@ -614,12 +733,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions");
     std::string get_SignatureStr = get_SignatureBuilder.BuildSignatureDescriptor();
 
-    SignatureBuilder getWithPromise_SignatureBuilder {};
-    getWithPromise_SignatureBuilder
-        .AddClass("std.core.String")
-        .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions")
-        .SetReturnClass("std.core.Promise");
-    std::string getWithPromise_SignatureStr = getWithPromise_SignatureBuilder.BuildSignatureDescriptor();
+    std::string getWithPromise_SignatureStr =
+        "C{std.core.String}C{@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions}:"
+        "X{C{std.core.Null}C{std.core.Promise}}";
 
     std::array methods = {
         ani_native_function { "get", get_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithCallback) },

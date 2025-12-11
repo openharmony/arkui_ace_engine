@@ -111,6 +111,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
@@ -130,6 +131,7 @@ void SetOnDestroyImpl(Ark_NativePointer node,
     }
     auto onDestroy =
         [arkCallback = CallbackHelper(*optValue)](const std::string&) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
     };
     XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
@@ -180,10 +182,7 @@ void SetEnableTransparentLayerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        return;
-    }
-    XComponentModelNG::EnableTransparentLayer(frameNode, *convValue);
+    XComponentModelNG::EnableTransparentLayer(frameNode, convValue.value_or(false));
     #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier
@@ -196,6 +195,7 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentAttributeModifier::SetOnDestroyImpl,
         XComponentAttributeModifier::SetEnableAnalyzerImpl,
         XComponentAttributeModifier::SetEnableSecureImpl,
+        XComponentAttributeModifier::SetEnableTransparentLayerImpl,
         XComponentAttributeModifier::SetHdrBrightnessImpl,
     };
     return &ArkUIXComponentModifierImpl;

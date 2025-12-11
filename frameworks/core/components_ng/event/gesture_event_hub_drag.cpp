@@ -278,9 +278,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 
     // use menuPreview's size and offset for drag framework.
-    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
-        (DragAnimationHelper::ShouldSetOffsetForMenuDrag() ||
-            frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -950,7 +948,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         {
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
-            subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline != mainPipeline));
+            subWindow = SubwindowManager::GetInstance()->ShowPreviewNG(
+                (pipeline != mainPipeline), dragEventActuator_->GetRestartDrag());
         }
     }
     CHECK_NULL_VOID(overlayManager);
@@ -1649,8 +1648,7 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
         } else if ((data.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
                        data.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) ||
                    data.badgeNumber > 1) {
-            previewOffset = menuPreviewCenter - OffsetF(frameNodeSize_.Width(), frameNodeSize_.Height()) / 2.0f +
-                            data.dragMovePosition;
+            previewOffset = data.originPreviewRect.GetOffset();
         }
     }
     return previewOffset;

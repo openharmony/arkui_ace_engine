@@ -370,7 +370,7 @@ HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation002, TestSize.Level0)
 {
     CreateTextField();
 
-    // set autofillType not meet the animation conditions.
+    // set autofillType not meet the animation conditions
     AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
     std::u16string content = u"openharmony";
     pattern_->BeforeAutoFillAnimation(content, type);

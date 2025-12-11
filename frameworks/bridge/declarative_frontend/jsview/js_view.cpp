@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
@@ -1126,12 +1127,24 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+JSRef<JSVal> JSViewPartialUpdate::GetJsContext()
+{
+    ContainerScope scope(GetInstanceId());
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, JSRef<JSVal>());
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, JSRef<JSVal>());
+    auto context = frontend->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    return jsVal;
+}
+
 void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 {
     auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        auto jsContext = GetJsContext();
         obj->SetPropertyObject("context", jsContext);
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetProperty<std::string>("name", result->name);
@@ -1157,11 +1170,18 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(stack);
     JSRef<JSObject> navPathStackObj;
     if (stack->IsStaticStack()) {
-        // ArkTS1.2
+        // ArkTS static
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get static navPathStack");
-        navPathStackObj = JSNavPathStack::CreateNavPathStackObjFromStatic(AceType::Claim(pipeline), stack);
+        auto navigationStackExtend = JSNavigationStackExtend::GetOrCreateNavigationStackExtend(stack);
+        if (navigationStackExtend) {
+            auto navPathStackVal =
+                JsConverter::ConvertNapiValueToJsVal(navigationStackExtend->GetNavPathStackExtendObj());
+            if (navPathStackVal->IsObject()) {
+                navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+            }
+        }
     } else {
-        // ArkTS1.1
+        // ArkTS dynamic
         auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
         CHECK_NULL_VOID(jsStack);
         navPathStackObj = jsStack->GetDataSourceObj();
@@ -1312,6 +1332,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
@@ -1348,6 +1370,8 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     auto context = info.GetExecutionContext();
     instance->SetContext(context);
     instance->SetJSViewName(viewName);
+    const int32_t instanceId = instance->GetInstanceId();
+    instance->SetLatestInstanceId(instanceId);
 
     //  The JS object owns the C++ object:
     // make sure the C++ is not destroyed when RefPtr thisObj goes out of scope
@@ -1355,6 +1379,43 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     instance->IncRefCount();
 
     info.SetReturnValue(instance);
+}
+
+void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("NativeViewPartialUpdate JSRegisterUpdateInstanceForEnvFunc argument invalid");
+        return;
+    }
+ 
+    auto updateInstanceForEnvValue = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    CHECK_NULL_VOID(updateInstanceForEnvValue);
+    auto updateInstanceForEnvValueFunc = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
+        func = std::move(updateInstanceForEnvValue)](int32_t instanceId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->GetLatestInstanceId() == instanceId) {
+            return;
+        }
+        self->SetLatestInstanceId(instanceId);
+        JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
+        JSRef<JSVal> param[1] = { newInstanceId };
+        func->ExecuteJS(1, param);
+    };
+    ViewPartialUpdateModel::GetInstance()->RegisterUpdateInstanceForEnvFunc(viewNode_,
+        std::move(updateInstanceForEnvValueFunc));
+}
+
+void JSViewPartialUpdate::SetLatestInstanceId(const int32_t instanceId)
+{
+    latestInstanceId_ = instanceId;
+}
+
+int32_t JSViewPartialUpdate::GetLatestInstanceId() const
+{
+    return latestInstanceId_;
 }
 
 void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
@@ -1418,5 +1479,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     info.SetReturnValue(targetView);
     return;
 }
-
 } // namespace OHOS::Ace::Framework

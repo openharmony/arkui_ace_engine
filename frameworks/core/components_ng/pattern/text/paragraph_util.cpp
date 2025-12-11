@@ -18,6 +18,7 @@
 #include "text_layout_adapter.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -37,30 +38,41 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .paragraphSpacing = textStyle.GetParagraphSpacing(),
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .optimizeTrailingSpace = textStyle.GetOptimizeTrailingSpace(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .includeFontPadding = textStyle.GetIncludeFontPadding(),
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
         };
 }
 
-TextDirection ParagraphUtil::GetTextDirection(
-    const std::u16string& content, LayoutWrapper* layoutWrapper)
+TextDirection ParagraphUtil::GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper)
 {
     if (!layoutWrapper) {
         return GetTextDirectionByContent(content);
     }
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    auto textDirection = textLayoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
+    return GetTextOwnDirection(content, textLayoutProperty->GetLayoutDirection(), textDirection);
+}
 
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
+TextDirection ParagraphUtil::GetTextOwnDirection(
+    const std::u16string& content, TextDirection direction, TextDirection textDirection)
+{
+    if (textDirection == TextDirection::INHERIT) {
+        if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+            return direction;
+        }
+        return GetTextDirectionByContent(content);
+    } else if (textDirection == TextDirection::AUTO) {
+        return GetTextDirectionByContent(content);
+    } else {
+        return textDirection;
     }
-    return GetTextDirectionByContent(content);
 }
 
 TextDirection ParagraphUtil::GetTextDirectionByContent(const std::u16string& content)
 {
-    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
     for (const auto& charOfShowingText : content) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
             return TextDirection::LTR;
@@ -70,12 +82,15 @@ TextDirection ParagraphUtil::GetTextDirectionByContent(const std::u16string& con
             return TextDirection::RTL;
         }
     }
-    return textDirection;
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    return isRTL ? TextDirection::RTL : TextDirection::LTR;
 }
 
 void ParagraphUtil::GetSpanParagraphStyle(
-    LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle)
+    LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle,
+    const std::list<RefPtr<SpanItem>>& spanGroup)
 {
+    CHECK_NULL_VOID(spanItem);
     const auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_VOID(lineStyle);
     if (lineStyle->HasTextAlign()) {
@@ -117,7 +132,66 @@ void ParagraphUtil::GetSpanParagraphStyle(
     if (lineStyle->HasParagraphSpacing()) {
         pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
     }
-    pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
+    // spanGroup.empty()代表ConstructParagraphSpanGroup时调用，不用于实际布局，仅用于比较段落间是否一致
+    if (spanGroup.empty()) {
+        pStyle.direction = lineStyle->GetTextDirection().value_or(TextDirection::INHERIT);
+    } else {
+        pStyle.direction =
+            GetSpanTextDirection(layoutWrapper, spanItem->content, lineStyle->GetTextDirection(), spanGroup);
+    }
+}
+
+TextDirection ParagraphUtil::GetSpanTextDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
+    const std::optional<TextDirection>& spanTextDirection, const std::list<RefPtr<SpanItem>>& spanGroup)
+{
+    TextDirection spanDirection;
+    if (layoutWrapper) {
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_RETURN(textLayoutProperty, spanTextDirection.value_or(TextDirection::INHERIT));
+        spanDirection = spanTextDirection.value_or(textLayoutProperty->GetTextDirectionValue(TextDirection::INHERIT));
+    } else {
+        spanDirection = spanTextDirection.value_or(TextDirection::INHERIT);
+    }
+    return GetSpanParagraphDirection(layoutWrapper, spanContent, spanDirection, spanGroup);
+}
+
+TextDirection ParagraphUtil::GetSpanParagraphDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
+    TextDirection spanDirection, const std::list<RefPtr<SpanItem>>& spanGroup)
+{
+    if (spanDirection == TextDirection::INHERIT) {
+        return GetTextDirection(spanContent, layoutWrapper);
+    } else if (spanDirection == TextDirection::RTL || spanDirection == TextDirection::LTR) {
+        return spanDirection;
+    }
+
+    // direction is TextDirection::AUTO, flow content self
+    for (const auto& span : spanGroup) {
+        if (!span) {
+            continue;
+        }
+        auto content = span->content;
+        for (const auto& charOfShowingText : content) {
+            if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
+                return TextDirection::LTR;
+            } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
+                return TextDirection::RTL;
+            } else if (TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
+                return TextDirection::RTL;
+            }
+        }
+    }
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
+    CHECK_NULL_RETURN(layoutWrapper, textDirection);
+    // 文本内容是空时，优先返回LayoutDirection，未配置LayoutDirection则返回系统direciton
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, textDirection);
+    auto direction = textLayoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::RTL || direction == TextDirection::LTR) {
+        return direction;
+    } else {
+        return textDirection;
+    }
 }
 
 void ParagraphUtil::SetDrawableLeadingMargin(ParagraphStyle& pStyle, const std::unique_ptr<TextLineStyle>& lineStyle)
@@ -138,7 +212,13 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
     // split spans into groups by mew paragraph style
     auto it = spans.begin();
     ParagraphStyle pStyle;
-    GetSpanParagraphStyle(nullptr, (*it), pStyle);
+    std::list<RefPtr<SpanItem>> spanGroup;
+    auto span = *it;
+    GetSpanParagraphStyle(nullptr, span, pStyle, spanGroup);
+    TextDirection textDirection = pStyle.direction;
+    if (span && pStyle.direction == TextDirection::INHERIT) {
+        textDirection = GetTextDirectionByContent(span->content);
+    }
     while (it != spans.end()) {
         auto spanItem = *it;
         if (!spanItem) {
@@ -153,13 +233,16 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
             auto next = *(std::next(it));
             ParagraphStyle nextSpanParagraphStyle;
             if (next) {
-                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle);
+                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle, spanGroup);
             } else {
                 break;
             }
+            auto nextTextDirection = GetTextDirectionByContent(next->content);
             if (pStyle != nextSpanParagraphStyle ||
                 (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) || Positive(pStyle.indent.Value()) ||
-                pStyle.maxLines != UINT32_MAX || pStyle.drawableLeadingMargin.has_value()) {
+                pStyle.maxLines != UINT32_MAX || pStyle.drawableLeadingMargin.has_value() ||
+                ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
+                    nextTextDirection != textDirection)) {
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
@@ -167,6 +250,7 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
                 spanGroupVec.emplace_back(std::move(newGroup));
                 it = spans.begin();
                 pStyle = nextSpanParagraphStyle;
+                textDirection = nextTextDirection;
                 continue;
             }
         }

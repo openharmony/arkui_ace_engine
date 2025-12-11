@@ -31,13 +31,14 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
+#include "frameworks/base/image/image_color_filter.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
@@ -46,11 +47,6 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
-const std::vector<TextVerticalAlign> TEXT_VERTICAL_ALIGNS = {
-    TextVerticalAlign::BASELINE, TextVerticalAlign::BOTTOM, TextVerticalAlign::CENTER, TextVerticalAlign::TOP };
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
 const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
@@ -1042,9 +1038,9 @@ void JSImageAttachment::ParseJsImageSpanColorFilterAttribute(const JSRef<JSObjec
             imageStyle.drawingColorFilter = drawingColorFilter;
             return;
         }
-        JSColorFilter* colorFilter;
+        ImageColorFilter* colorFilter;
         if (!colorFilterObj->IsUndefined() && !colorFilterObj->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<JSColorFilter>();
+            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<ImageColorFilter>();
         } else {
             SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
             return;
@@ -1088,14 +1084,22 @@ void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj
         auto size = JSRef<JSObject>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetProperty("width");
         CalcDimension imageSpanWidth;
+        bool isWidthNotAuto = true;
+        if (width->IsString() && width->ToString() == "auto") {
+            isWidthNotAuto = false;
+        }
         if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
-            GreatOrEqual(imageSpanWidth.Value(), 0.0)) {
+            (GreatNotEqual(imageSpanWidth.Value(), 0.0) || (imageSpanWidth.Value() == 0.0 && isWidthNotAuto))) {
             imageSize.width = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetProperty("height");
         CalcDimension imageSpanHeight;
+        bool isHeightNotAuto = true;
+        if (height->IsString() && height->ToString() == "auto") {
+            isHeightNotAuto = false;
+        }
         if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
-            GreatOrEqual(imageSpanHeight.Value(), 0.0)) {
+            (GreatNotEqual(imageSpanHeight.Value(), 0.0) || (imageSpanHeight.Value() == 0.0 && isHeightNotAuto))) {
             imageSize.height = imageSpanHeight;
         }
         imageStyle.size = imageSize;
@@ -1604,6 +1608,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "leadingMarginSpan", &JSParagraphStyleSpan::GetLeadingMarginSpan, &JSParagraphStyleSpan::SetLeadingMarginSpan);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "paragraphSpacing", &JSParagraphStyleSpan::GetParagraphSpacing, &JSParagraphStyleSpan::SetParagraphSpacing);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "textDirection", &JSParagraphStyleSpan::GetTextDirection, &JSParagraphStyleSpan::SetTextDirection);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
@@ -1669,6 +1675,7 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const JSRef<J
     ParseJsLeadingMarginSpan(obj, paragraphStyle, args, paragraphSpan);
     ParseJsLeadingMargin(obj, paragraphStyle);
     ParseParagraphSpacing(obj, paragraphStyle);
+    ParseJsTextDirection(obj, paragraphStyle);
     return paragraphStyle;
 }
 
@@ -1975,6 +1982,23 @@ void JSParagraphStyleSpan::ParseParagraphSpacing(const JSRef<JSObject>& obj, Spa
     paragraphStyle.paragraphSpacing = size;
 }
 
+void JSParagraphStyleSpan::ParseJsTextDirection(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("textDirection")) {
+        return;
+    }
+    auto textDirectionObj = obj->GetProperty("textDirection");
+    TextDirection textDirection = TextDirection::INHERIT;
+    int32_t value = -1;
+    if (!textDirectionObj->IsNull() && textDirectionObj->IsNumber()) {
+        value = textDirectionObj->ToNumber<int32_t>();
+    }
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_DIRECTIONS.size())) {
+        textDirection = TEXT_DIRECTIONS[value];
+    }
+    paragraphStyle.textDirection = textDirection;
+}
+
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
     std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
 {
@@ -2125,6 +2149,16 @@ void JSParagraphStyleSpan::GetParagraphSpacing(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetParagraphSpacing(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetTextDirection(const JSCallbackInfo& info)
+{
+    auto textDirection = GetParagraphStyle().textDirection;
+    CHECK_EQUAL_VOID(textDirection.has_value(), false);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(textDirection.value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetTextDirection(const JSCallbackInfo& info) {}
 
 JSRef<JSObject>& JSParagraphStyleSpan::GetJsLeadingMarginSpanObject()
 {

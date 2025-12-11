@@ -1904,6 +1904,51 @@ ArkUINativeModuleValue RichEditorBridge::ResetKeyboardAppearance(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    bool supportAvoidance = false;
+    Local<JSValueRef> isSupportAvoidanceArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (isSupportAvoidanceArg->IsBoolean()) {
+        supportAvoidance = isSupportAvoidanceArg->ToBoolean(vm)->Value();
+    }
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    
+    if (info[1]->IsObject()) {
+        Framework::JSRef<Framework::JSObject> contentObject = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+        Framework::JSRef<Framework::JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            auto builderNodeObject = Framework::JSRef<Framework::JSObject>::Cast(builderNodeParam);
+            Framework::JSRef<Framework::JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                auto node = nodePtr(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+                nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboard(
+                    nativeNode, node, supportAvoidance);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
+    }
+    nodeModifiers->getRichEditorModifier()->resetRichEditorCustomKeyboard(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCustomKeyboard(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue RichEditorBridge::SetOnDidIMEInput(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2050,6 +2095,102 @@ ArkUINativeModuleValue RichEditorBridge::ResetEnableAutoSpacing(ArkUIRuntimeCall
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorEnableAutoSpacing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorCompressLeadingPunctuation(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorCompressLeadingPunctuation(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorCompressLeadingPunctuation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorIncludeFontPadding(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorIncludeFontPadding(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorIncludeFontPadding(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorFallbackLineSpacing(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorFallbackLineSpacing(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorFallbackLineSpacing(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

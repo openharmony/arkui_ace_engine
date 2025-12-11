@@ -27,12 +27,23 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 namespace {
 constexpr char EMPTY_PAGE_INFO[] = "NA";
+
+std::string GetPageUrl(const RefPtr<PagePattern>& pagePattern)
+{
+    auto pageInfo = pagePattern->GetPageInfo();
+    std::string url = "";
+    if (pageInfo) {
+        url = pageInfo->GetPageUrl();
+    }
+    return url;
+}
 
 void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
 {
@@ -67,6 +78,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+    context->GetLoadCompleteManager()->StartCollect(GetPageUrl(pagePattern));
     pagePattern->TriggerPageTransition(
         [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();

@@ -35,6 +35,7 @@ let ColoringStrategy;
   ColoringStrategy.INVERT = 'invert';
   ColoringStrategy.AVERAGE = 'average';
   ColoringStrategy.PRIMARY = 'primary';
+  ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 let TextInputStyle;
@@ -56,6 +57,8 @@ let TextAlign;
   TextAlign[TextAlign.End = 2] = 'End';
   TextAlign[TextAlign.Justify = 3] = 'Justify';
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
+  TextAlign[TextAlign.LEFT = 4] = 'LEFT';
+  TextAlign[TextAlign.RIGHT = 5] = 'RIGHT';
 })(TextAlign || (TextAlign = {}));
 
 let TextVerticalAlign;
@@ -461,6 +464,7 @@ let BlendApplyType;
 (function (BlendApplyType) {
   BlendApplyType[BlendApplyType.FAST = 0] = 'FAST';
   BlendApplyType[BlendApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
+  BlendApplyType[BlendApplyType.OFFSCREEN_WITH_BACKGROUND = 2] = 'OFFSCREEN_WITH_BACKGROUND';
 })(BlendApplyType || (BlendApplyType = {}));
 
 let TextOverflow;
@@ -1886,6 +1890,15 @@ let ContextMenuMediaType;
   ContextMenuMediaType[ContextMenuMediaType.Image = 1] = 'Image';
 })(ContextMenuMediaType || (ContextMenuMediaType = {}));
 
+let ContextMenuDataMediaType;
+(function (ContextMenuDataMediaType) {
+  ContextMenuDataMediaType[ContextMenuDataMediaType.None = 0] = 'None';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Image = 1] = 'Image';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Video = 2] = 'Video';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Audio = 3] = 'Audio';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Canvas = 4] = 'Canvas';
+})(ContextMenuDataMediaType || (ContextMenuDataMediaType = {}));
+
 let ContextMenuInputFieldType;
 (function (ContextMenuInputFieldType) {
   ContextMenuInputFieldType[ContextMenuInputFieldType.None = 0] = 'None';
@@ -1919,6 +1932,14 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD_COMPETITION = 1;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
+
+let ResponseRegionSupportedTool;
+(function (ResponseRegionSupportedTool) {
+  ResponseRegionSupportedTool.ALL = 0;
+  ResponseRegionSupportedTool.FINGER = 1;
+  ResponseRegionSupportedTool.PEN = 2;
+  ResponseRegionSupportedTool.MOUSE = 3;
+})(ResponseRegionSupportedTool || (ResponseRegionSupportedTool = {}));
 
 let EffectLayer;
 (function (EffectLayer) {
@@ -2063,6 +2084,10 @@ let GestureControl;
     GestureType[GestureType.ROTATION_GESTURE = 5] = 'ROTATION_GESTURE';
     GestureType[GestureType.DRAG = 6] = 'DRAG';
     GestureType[GestureType.CLICK = 7] = 'CLICK';
+    GestureType[GestureType.BOX_SELECT_GESTURE = 8] = 'BOX_SELECT_GESTURE';
+    GestureType[GestureType.WEB_SCROLL_GESTURE = 9] = 'WEB_SCROLL_GESTURE';
+    GestureType[GestureType.TEXT_FIELD_SELECT_GESTURE = 10] = 'TEXT_FIELD_SELECT_GESTURE';
+    GestureType[GestureType.CONTEXT_MENU_HOVER_GESTURE = 11] = 'CONTEXT_MENU_HOVER_GESTURE';
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
@@ -2424,6 +2449,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get autoFill() {
+    return new TextMenuItemId('OH_DEFAULT_AUTO_FILL');
+  }
+
   static get TRANSLATE() {
     return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
@@ -2581,7 +2610,6 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
-    this.preTopInfo = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2589,19 +2617,20 @@ class NavPathStack {
   setPathStack(pathStack, animated) {
     this.nativeStack?.setPathStack(this, pathStack, animated);
   }
-  updatePreTopInfo(preTopInfo) {
+  updatePreTopInfo() {
     if (this.pathArray.length === undefined || this.pathArray.length === 0) {
-        this.preTopInfo = undefined;
+        this.nativeStack.preTopInfo = undefined;
         return;
     }
-    this.preTopInfo = this.pathArray[this.pathArray.length - 1];
+    this.nativeStack.preTopInfo = this.pathArray[this.pathArray.length - 1];
   }
   isPushOperation() {
-    if (this.preTopInfo === undefined) {
+    const preTopInfo = this.nativeStack.preTopInfo;
+    if (preTopInfo === undefined) {
         return true;
     }
     return this.pathArray.findIndex((info)=>{ // If the top of the previous stack exists, the next stack operation is push.
-        return info === this.preTopInfo;
+        return info === preTopInfo;
     }) !== -1;
   }
   getJsIndexFromNativeIndex(index) {
@@ -3179,8 +3208,137 @@ class NavPathStack {
 
 globalThis.NavPathStack = NavPathStack;
 
-function registerNavStackOperation(pushPathCallback) {
-  InteropNavPathStackModule.pushPathStaticCallback = pushPathCallback;
+class InteropNavPathStackModule {
+  static pushPathCallback = undefined;
+  static pushDestinationCallback = undefined;
+  static pushPathByNameCallback = undefined;
+  static pushDestinationByNameCallback = undefined;
+  static replacePathCallback = undefined;
+  static replaceDestinationCallback = undefined;
+  static replacePathByNameCallback = undefined;
+  static removeByIndexesCallback = undefined;
+  static removeByNameCallback = undefined;
+  static removeByNavDestinationIdCallback = undefined;
+  static popCallback = undefined;
+  static popToNameCallback = undefined;
+  static popToIndexCallback = undefined;
+  static moveToTopCallback = undefined;
+  static moveIndexToTopCallback = undefined;
+  static clearCallback = undefined;
+  static getAllPathNameCallback = undefined;
+  static getParamByNameCallback = undefined;
+  static getIndexByNameCallback = undefined;
+  static getParentCallback = undefined; // not impl yet
+  static sizeCallback = undefined;
+  static disableAnimationCallback = undefined;
+  static setInterceptionCallback = undefined;
+  static getPathStackCallback = undefined;
+  static setPathStackCallback = undefined;
+  static getParamByIndexCallback = undefined;
+}
+
+function registeNavPushPathCallback(pushPathCallback) {
+  InteropNavPathStackModule.pushPathCallback = pushPathCallback;
+}
+
+function registeNavPushDestinationCallback(pushDestinationCallback) {
+  InteropNavPathStackModule.pushDestinationCallback = pushDestinationCallback;
+}
+
+function registeNavPushPathByNameCallback(pushPathByNameCallback) {
+  InteropNavPathStackModule.pushPathByNameCallback = pushPathByNameCallback;
+}
+
+function registeNavPushDestinationByNameCallback(pushDestinationByNameCallback) {
+  InteropNavPathStackModule.pushDestinationByNameCallback = pushDestinationByNameCallback;
+}
+
+function registeNavReplacePathCallback(replacePathCallback) {
+  InteropNavPathStackModule.replacePathCallback = replacePathCallback;
+}
+
+function registeNavReplaceDestinationCallback(replaceDestinationCallback) {
+  InteropNavPathStackModule.replaceDestinationCallback = replaceDestinationCallback;
+}
+
+function registeNavReplacePathByNameCallback(replacePathByNameCallback) {
+  InteropNavPathStackModule.replacePathByNameCallback = replacePathByNameCallback;
+}
+
+function registeNavRemoveByIndexesCallback(removeByIndexesCallback) {
+  InteropNavPathStackModule.removeByIndexesCallback = removeByIndexesCallback;
+}
+
+function registeNavRemoveByNameCallback(removeByNameCallback) {
+  InteropNavPathStackModule.removeByNameCallback = removeByNameCallback;
+}
+
+function registeNavRemoveByNavDestinationIdCallback(removeByNavDestinationIdCallback) {
+  InteropNavPathStackModule.removeByNavDestinationIdCallback = removeByNavDestinationIdCallback;
+}
+
+function registeNavPopCallback(popCallback) {
+  InteropNavPathStackModule.popCallback = popCallback;
+}
+
+function registeNavPopToNameCallback(popToNameCallback) {
+  InteropNavPathStackModule.popToNameCallback = popToNameCallback;
+}
+
+function registeNavPopToIndexCallback(popToIndexCallback) {
+  InteropNavPathStackModule.popToIndexCallback = popToIndexCallback;
+}
+
+function registeNavMoveToTopCallback(moveToTopCallback) {
+  InteropNavPathStackModule.moveToTopCallback = moveToTopCallback;
+}
+
+function registeNavMoveIndexToTopCallback(moveIndexToTopCallback) {
+  InteropNavPathStackModule.moveIndexToTopCallback = moveIndexToTopCallback;
+}
+
+function registeNavClearCallback(clearCallback) {
+  InteropNavPathStackModule.clearCallback = clearCallback;
+}
+
+function registeNavGetAllPathNameCallback(getAllPathNameCallback) {
+  InteropNavPathStackModule.getAllPathNameCallback = getAllPathNameCallback;
+}
+
+function registeNavGetParamByNameCallback(getParamByNameCallback) {
+  InteropNavPathStackModule.getParamByNameCallback = getParamByNameCallback;
+}
+
+function registeNavGetIndexByNameCallback(getIndexByNameCallback) {
+  InteropNavPathStackModule.getIndexByNameCallback = getIndexByNameCallback;
+}
+
+function registeNavGetParentCallback(getParentCallback) {
+  InteropNavPathStackModule.getParentCallback = getParentCallback;
+}
+
+function registeNavSizeCallback(sizeCallback) {
+  InteropNavPathStackModule.sizeCallback = sizeCallback;
+}
+
+function registeNavDisableAnimationCallback(disableAnimationCallback) {
+  InteropNavPathStackModule.disableAnimationCallback = disableAnimationCallback;
+}
+
+function registeNavSetInterceptionCallback(setInterceptionCallback) {
+  InteropNavPathStackModule.setInterceptionCallback = setInterceptionCallback;
+}
+
+function registeNavGetPathStackCallback(getPathStackCallback) {
+  InteropNavPathStackModule.getPathStackCallback = getPathStackCallback;
+}
+
+function registeNavSetPathStackCallback(setPathStackCallback) {
+  InteropNavPathStackModule.setPathStackCallback = setPathStackCallback;
+}
+
+function registeNavGetParamByIndexCallback(getParamByIndexCallback) {
+  InteropNavPathStackModule.getParamByIndexCallback = getParamByIndexCallback;
 }
 
 class NavPathStackExtent extends NavPathStack {
@@ -3188,146 +3346,331 @@ class NavPathStackExtent extends NavPathStack {
     super();
     this.staticStack = undefined;
   }
-
-  getPathStack() {
-    
-  }
-  setPathStack(pathStack, animated) {
-    
-  }
-  getJsIndexFromNativeIndex(index) {
-    
-  }
-  initNavPathIndex(pathName) {
-    
-  }
-  getAllPathIndex() {
-    
-  }
-  findInPopArray(name) {
-    
-  }
+  // for native use
   setNativeStack(stack) {
     this.staticStack = stack;
   }
-  getNativeStack() {
-    return this.nativeStack;
+  getPathStack() {
+    if (!InteropNavPathStackModule.getPathStackCallback) {
+      console.warn('AceNavigation', 'invalid static getPathStackCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    return JSON.parse(InteropNavPathStackModule.getPathStackCallback(this.staticStack));
   }
-  setParent(parent) {
-    
+  setPathStack(pathStack, animated) {
+    if (!InteropNavPathStackModule.setPathStackCallback) {
+      console.warn('AceNavigation', 'invalid static setPathStackCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.setPathStackCallback(this.staticStack, JSON.stringify(pathStack), animated);
   }
   getParent() {
-    
-  }
-  pushName(name, param) {
-    
-  }
-  push(info, animated) {
-    this.pushPath(info, animated);
+    if (!InteropNavPathStackModule.getParentCallback) {
+      console.warn('AceNavigation', 'invalid static getParentCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    // need copy construct and return new NavPathStackExtend
+    return JSON.parse(InteropNavPathStackModule.getParentCallback(this.staticStack));
   }
   pushPathByName(name, param, onPop, animated) {
-    
+    let realAnimated = animated;
+    if (typeof onPop === 'boolean') {
+      realAnimated = onPop;
+    }
+    if (!InteropNavPathStackModule.pushPathByNameCallback) {
+      console.warn('AceNavigation', 'invalid static pushPathByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushPathByNameCallback(this.staticStack, name, JSON.stringify(param), realAnimated);
   }
   pushDestinationByName(name, param, onPop, animated) {
-    
-  }
-  pushWithLaunchModeAndAnimated(info, launchMode, animated, createPromise) {
-    
+    let realAnimated = animated;
+    if (typeof onPop === 'boolean') {
+      realAnimated = onPop;
+    }
+    if (!InteropNavPathStackModule.pushDestinationByNameCallback) {
+      console.warn('AceNavigation', 'invalid static pushDestinationByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushDestinationByNameCallback(this.staticStack, name, JSON.stringify(param), realAnimated);
   }
   pushPath(info, optionParam) {
     if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
       return;
     }
-    if (InteropNavPathStackModule.pushPathStaticCallback && this.staticStack) {
-      InteropNavPathStackModule.pushPathStaticCallback(this.staticStack, info, animated);
+    if (!InteropNavPathStackModule.pushPathCallback) {
+      console.warn('AceNavigation', 'invalid static pushPathCallback');
+      return;
     }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushPathCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   pushDestination(info, optionParam) {
-    
-  }
-  doReplaceInner(info, optionParam, isReplaceDestination) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return undefined;
+    }
+    if (!InteropNavPathStackModule.pushDestinationCallback) {
+      console.warn('AceNavigation', 'invalid static pushDestinationCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.pushDestinationCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   replacePath(info, optionParam) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return;
+    }
+    if (!InteropNavPathStackModule.replacePathCallback) {
+      console.warn('AceNavigation', 'invalid static replacePathCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.replacePathCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   replaceDestination(info, navigationOptions) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return undefined;
+    }
+    if (!InteropNavPathStackModule.replaceDestinationCallback) {
+      console.warn('AceNavigation', 'invalid static replaceDestinationCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.replaceDestinationCallback(this.staticStack, JSON.stringify(info), navigationOptions);
   }
   replacePathByName(name, param, animated) {
-    
-  }
-  setIsReplace(value) {
-    
-  }
-  setAnimated(value) {
-    
+    if (!InteropNavPathStackModule.replacePathByNameCallback) {
+      console.warn('AceNavigation', 'invalid static replacePathByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.replacePathByNameCallback(this.staticStack, name, JSON.stringify(param), animated);
   }
   pop(result, animated) {
-    this.nativeStack?.pop(result, animated);
-  }
-  popTo(name, animated) {
-    
+    if (!InteropNavPathStackModule.popCallback) {
+      console.warn('AceNavigation', 'invalid static popCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.popCallback(this.staticStack, animated);
   }
   popToName(name, result, animated) {
-    
-  }
-  innerPopToIndex(index, result, animated, needFireOnResult) {
-    
+    if (!InteropNavPathStackModule.popToNameCallback) {
+      console.warn('AceNavigation', 'invalid static popToNameCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.popToNameCallback(this.staticStack, name, result, animated);
   }
   popToIndex(index, result, animated) {
-    
+    if (!InteropNavPathStackModule.popToIndexCallback) {
+      console.warn('AceNavigation', 'invalid static popToIndexCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.popToIndexCallback(this.staticStack, index, result, animated);
   }
   moveToTop(name, animated) {
-    
+    if (!InteropNavPathStackModule.moveToTopCallback) {
+      console.warn('AceNavigation', 'invalid static moveToTopCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.moveToTopCallback(this.staticStack, name, animated);
   }
   moveIndexToTop(index, animated) {
-    
+    if (!InteropNavPathStackModule.moveIndexToTopCallback) {
+      console.warn('AceNavigation', 'invalid static moveIndexToTopCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.moveIndexToTopCallback(this.staticStack, index, animated);
   }
   clear(animated) {
-    
+    if (!InteropNavPathStackModule.clearCallback) {
+      console.warn('AceNavigation', 'invalid static clearCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.clearCallback(this.staticStack, animated);
   }
   removeByIndexes(indexes) {
-    
+    if (!InteropNavPathStackModule.removeByIndexesCallback) {
+      console.warn('AceNavigation', 'invalid static removeByIndexesCallback');
+      return 0;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return 0;
+    }
+    return InteropNavPathStackModule.removeByIndexesCallback(this.staticStack, indexes);
   }
   removeByName(name) {
-    
+    if (!InteropNavPathStackModule.removeByNameCallback) {
+      console.warn('AceNavigation', 'invalid static removeByNameCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.removeByNameCallback(this.staticStack, name);
   }
   removeByNavDestinationId(navDestinationId) {
-    
-  }
-  removeIndex(index) {
-    
-  }
-  removeInvalidPage(index) {
-    
+    if (!InteropNavPathStackModule.removeByNavDestinationIdCallback) {
+      console.warn('AceNavigation', 'invalid static removeByNavDestinationIdCallback');
+      return false;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return false;
+    }
+    return InteropNavPathStackModule.removeByNavDestinationIdCallback(this.staticStack, navDestinationId);
   }
   getAllPathName() {
-    
+    // if need interop?
+    if (!InteropNavPathStackModule.getAllPathNameCallback) {
+      console.warn('AceNavigation', 'invalid static getAllPathNameCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    let staticResult = InteropNavPathStackModule.getAllPathNameCallback(this.staticStack);
+    return JSON.parse(staticResult);
   }
+  getSerializedParamByIndexInner(index) {
+    if (!InteropNavPathStackModule.getParamByIndexCallback) {
+      console.warn('AceNavigation', 'invalid static getParamByIndexCallback');
+      return '';
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return '';
+    }
+    return InteropNavPathStackModule.getParamByIndexCallback(this.staticStack, index);
+  }
+
   getParamByIndex(index) {
-    
+    let serializedParam = this.getSerializedParamByIndexInner(index);
+    if (serializedParam === '') {
+      return undefined;
+    }
+    return JSON.parse(serializedParam);
   }
   getParamByName(name) {
-    
+    if (!InteropNavPathStackModule.getParamByNameCallback) {
+      console.warn('AceNavigation', 'invalid static getParamByNameCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return JSON.parse(InteropNavPathStackModule.getParamByNameCallback(this.staticStack, name));
   }
   getIndexByName(name) {
-    
-  }
-  getNameByIndex(index) {
-    
-  }
-  getOnPopByIndex(index) {
-    
+    if (!InteropNavPathStackModule.getIndexByNameCallback) {
+      console.warn('AceNavigation', 'invalid static getIndexByNameCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    return JSON.parse(InteropNavPathStackModule.getIndexByNameCallback(this.staticStack, name));
   }
   size() {
-    
+    if (!InteropNavPathStackModule.sizeCallback) {
+      console.warn('AceNavigation', 'invalid static sizeCallback');
+      return 0;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return 0;
+    }
+    return InteropNavPathStackModule.sizeCallback(this.staticStack);
   }
   disableAnimation(disableAnimation) {
-    
+    if (!InteropNavPathStackModule.disableAnimationCallback) {
+      console.warn('AceNavigation', 'invalid static disableAnimationCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.disableAnimationCallback(this.staticStack, disableAnimation);
   }
   setInterception(interception) {
-    
+    // NOT-IMPL-YET
+    if (!InteropNavPathStackModule.setInterceptionCallback) {
+      console.warn('AceNavigation', 'invalid static setInterceptionCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.setInterceptionCallback(this.staticStack, interception);
   }
 }
 
@@ -3718,6 +4061,7 @@ let ListItemGroupArea;
 
 let DragResult;
 (function (DragResult) {
+  DragResult[DragResult.UNKNOWN = -1] = 'UNKNOWN';
   DragResult[DragResult.DRAG_SUCCESSFUL = 0] = 'DRAG_SUCCESSFUL';
   DragResult[DragResult.DRAG_FAILED = 1] = 'DRAG_FAILED';
   DragResult[DragResult.DRAG_CANCELED = 2] = 'DRAG_CANCELED';
@@ -4078,6 +4422,12 @@ let MarqueeStartPolicy;
   MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
 })(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
+let MarqueeUpdatePolicy;
+(function (MarqueeUpdatePolicy) {
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.PRESERVE_POSITION = 1] = 'PRESERVE_POSITION';
+})(MarqueeUpdatePolicy || (MarqueeUpdatePolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus.CREATE = 0;
@@ -4153,6 +4503,17 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.USER_DATA = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
+// ColorPlaceholder enum declaration synchronized with units.d.ts as a pure string enum.
+// Using a simple object literal avoids generating numeric reverse mappings.
+const ColorPlaceholder = {
+  NONE: 'NONE',
+  SURFACE: 'SURFACE',
+  SURFACE_CONTRAST: 'SURFACE_CONTRAST',
+  TEXT_CONTRAST: 'TEXT_CONTRAST',
+  ACCENT: 'ACCENT',
+  FOREGROUND: 'FOREGROUND',
+};
+
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
 }
@@ -4169,6 +4530,8 @@ let TextDirection;
 (function (TextDirection) {
   TextDirection[TextDirection.LTR = 0] = 'LTR';
   TextDirection[TextDirection.RTL = 1] = 'RTL';
+  TextDirection[TextDirection.DEFAULT = 2] = 'DEFAULT';
+  TextDirection[TextDirection.AUTO = 3] = 'AUTO';
 })(TextDirection || (TextDirection = {}));
 
 let FocusPriority;
@@ -4433,6 +4796,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+  AxisModel[AxisModel.ABS_RX = 8] = 'ABS_RX';
+  AxisModel[AxisModel.ABS_RY = 9] = 'ABS_RY';
+  AxisModel[AxisModel.ABS_THROTTLE = 10] = 'ABS_THROTTLE';
+  AxisModel[AxisModel.ABS_RUDDER = 11] = 'ABS_RUDDER';
+  AxisModel[AxisModel.ABS_WHEEL = 12] = 'ABS_WHEEL';
+  AxisModel[AxisModel.ABS_HAT1X = 13] = 'ABS_HAT1X';
+  AxisModel[AxisModel.ABS_HAT1Y = 14] = 'ABS_HAT1Y';
+  AxisModel[AxisModel.ABS_HAT2X = 15] = 'ABS_HAT2X';
+  AxisModel[AxisModel.ABS_HAT2Y = 16] = 'ABS_HAT2Y';
+  AxisModel[AxisModel.ABS_HAT3X = 17] = 'ABS_HAT3X';
+  AxisModel[AxisModel.ABS_HAT3Y = 18] = 'ABS_HAT3Y';
 })(AxisModel || (AxisModel = {}));
 
 let CrownSensitivity;
@@ -4634,6 +5008,12 @@ let NativeEmbedParamStatus;
   NativeEmbedParamStatus.DELETE = 2;
 })(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
 
+let DetectedBlankScreenReason;
+(function (DetectedBlankScreenReason) {
+  DetectedBlankScreenReason.NO_CONTENTFUL_NODES = 0;
+  DetectedBlankScreenReason.SUB_THRESHOLD_CONTENTFUL_NODES = 1;
+})(DetectedBlankScreenReason || (DetectedBlankScreenReason = {}));
+
 let WebRotateEffect;
 (function (WebRotateEffect) {
   WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
@@ -4650,4 +5030,31 @@ let PresetFillType;
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
+  SystemProperties.WINDOW_SIZE = 'system.window.size';
+  SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
+  SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
+  SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
 })(SystemProperties || (SystemProperties = {}));
+
+let PinVerifyResult;
+(function (PinVerifyResult) {
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_SUCCESS = 0] = 'PIN_VERIFICATION_SUCCESS';
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_FAILED = 1] = 'PIN_VERIFICATION_FAILED';
+})(PinVerifyResult || (PinVerifyResult = {}));
+
+let CredentialType;
+(function (CredentialType) {
+  CredentialType[CredentialType.CREDENTIAL_USER = 2] = 'CREDENTIAL_USER';
+  CredentialType[CredentialType.CREDENTIAL_APP = 3] = 'CREDENTIAL_APP';
+  CredentialType[CredentialType.CREDENTIAL_UKEY = 4] = 'CREDENTIAL_UKEY';
+})(CredentialType || (CredentialType = {}));
+
+let ResolveStrategy;
+(function (ResolveStrategy) {
+    ResolveStrategy[ResolveStrategy.CALLING_SCOPE = 0] = 'CALLING_SCOPE';
+    ResolveStrategy[ResolveStrategy.LAST_FOCUS = 1] = 'LAST_FOCUS';
+    ResolveStrategy[ResolveStrategy.MAX_INSTANCE_ID = 2] = 'MAX_INSTANCE_ID';
+    ResolveStrategy[ResolveStrategy.UNIQUE = 3] = 'UNIQUE';
+    ResolveStrategy[ResolveStrategy.LAST_FOREGROUND = 4] = 'LAST_FOREGROUND';
+    ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
+})(ResolveStrategy || (ResolveStrategy = {}));

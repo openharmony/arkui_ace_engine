@@ -30,8 +30,8 @@ export default namespace mediaquery {
         }
     }
     export interface MediaQueryListener {
-        on(type: string, callback: Callback<MediaQueryResult>): void;
-        off(type: string, callback?: Callback<MediaQueryResult>): void
+        onChange(callback: Callback<MediaQueryResult>): void;
+        offChange(callback?: Callback<MediaQueryResult>): void
     }
     class Mediaquery implements MediaQueryListener {
         private nativeSerializerResult:long = 0;
@@ -40,8 +40,8 @@ export default namespace mediaquery {
                 this.nativeSerializerResult = serializerResult;
             }
         }
-        public native on(type: string, callback: Callback<MediaQueryResult>): void;
-        public native off(type: string, callback?: Callback<MediaQueryResult>): void
+        public native onChange(callback: Callback<MediaQueryResult>): void;
+        public native offChange(callback?: Callback<MediaQueryResult>): void
     }
     export native function matchMediaSync(condition: string): MediaQueryListener;
 }

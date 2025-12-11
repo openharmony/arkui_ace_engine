@@ -18,23 +18,22 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
-#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/implementation/content_transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
-#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UNION_ONE = 1;
-constexpr int32_t UNION_TWO = 2;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr int32_t SELECTOR_INDEX = 3;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 } // namespace
 
 namespace Converter {
@@ -67,6 +66,10 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         case ARK_IMAGE_ROTATE_ORIENTATION_RIGHT: dst = ImageRotateOrientation::RIGHT; break;
         case ARK_IMAGE_ROTATE_ORIENTATION_DOWN: dst = ImageRotateOrientation::DOWN; break;
         case ARK_IMAGE_ROTATE_ORIENTATION_LEFT: dst = ImageRotateOrientation::LEFT; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_UP_MIRRORED: dst = ImageRotateOrientation::UP_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_RIGHT_MIRRORED: dst = ImageRotateOrientation::RIGHT_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_DOWN_MIRRORED: dst = ImageRotateOrientation::DOWN_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_LEFT_MIRRORED: dst = ImageRotateOrientation::LEFT_MIRRORED; break;
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
 }
@@ -103,36 +106,50 @@ void SetImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor *>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            // Note.
+            // This function should skip InitImage invocation if info's optional is empty.
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
     CHECK_NULL_VOID(imageAIOptions);
-    if (src->selector == UNION_TWO) {
-        auto drawable = src->value2;
-        CHECK_NULL_VOID(drawable);
-        ImageModelStatic::SetDrawableDescriptor(frameNode, drawable->data, drawable->type);
-        DrawableDescriptorPeer::Destroy(drawable);
-        return;
-    }
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        ImageModelStatic::SetSrc(frameNode, info);
-    } else {
-        ImageModelNG::ResetImageSrc(frameNode);
-    }
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void SetAltImpl(Ark_NativePointer node,
-                const Opt_Union_String_Resource_PixelMap* value)
+void SetAltImpl(Ark_NativePointer node, const Opt_Union_String_Resource_PixelMap_ImageAlt* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
-    if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
-        ImageModelStatic::SetAlt(frameNode, std::nullopt);
-        return;
+    if (value->tag != INTEROP_TAG_UNDEFINED && value->value.selector == SELECTOR_ID_3) {
+        auto imageAltPlaceholder = Converter::OptConvert<ImageSourceInfo>(value->value.value3.placeholder);
+        if (imageAltPlaceholder.has_value() &&
+            ImageSourceInfo::ResolveURIType(imageAltPlaceholder->GetSrc()) != SrcType::NETWORK) {
+            ImageModelStatic::SetAltPlaceholder(frameNode, imageAltPlaceholder);
+        }
+        auto imageAltError = Converter::OptConvert<ImageSourceInfo>(value->value.value3.error);
+        if (imageAltError.has_value()) {
+            ImageModelStatic::SetAltError(frameNode, imageAltError);
+        }
+    } else {
+        auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
+        if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
+            ImageModelStatic::SetAlt(frameNode, std::nullopt);
+            return;
+        }
+        ImageModelStatic::SetAlt(frameNode, info);
     }
-    ImageModelStatic::SetAlt(frameNode, info);
 }
 void SetMatchTextDirectionImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
@@ -182,14 +199,8 @@ void SetImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto peerOpt = Converter::GetOptPtr(value);
-    std::optional<Matrix4> matrix;
-    if (peerOpt.has_value()) {
-        auto* peer = peerOpt.value();
-        CHECK_NULL_VOID(peer);
-        matrix = peer->matrix;
-    }
-    ImageModelStatic::SetImageMatrix(frameNode, matrix);
+    auto matrixOpt = Converter::OptConvertPtr<Matrix4>(value);
+    ImageModelStatic::SetImageMatrix(frameNode, matrixOpt);
 }
 void SetObjectRepeatImpl(Ark_NativePointer node,
                          const Opt_ImageRepeat* value)
@@ -223,6 +234,14 @@ void SetDynamicRangeModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvertPtr<DynamicRangeMode>(value));
+}
+void SetHdrBrightnessImpl(Ark_NativePointer node,
+                          const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelStatic::SetHdrBrightness(
+        frameNode, Converter::OptConvertPtr<float>(value).value_or(DEFAULT_HDR_BRIGHTNESS));
 }
 void SetInterpolationImpl(Ark_NativePointer node,
                           const Opt_ImageInterpolation* value)
@@ -314,7 +333,7 @@ void SetPointLightImpl(Ark_NativePointer node,
 #endif
 }
 void SetEdgeAntialiasingImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -334,15 +353,15 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
         Ark_ImageCompleteEvent event;
-        event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
-        event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
-        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
-        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
-        event.loadingStatus = Converter::ArkValue<Ark_Number>(info.GetLoadingStatus());
-        event.contentOffsetX = Converter::ArkValue<Ark_Number>(info.GetContentOffsetX());
-        event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
-        event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
-        event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
+        event.width = Converter::ArkValue<Ark_Int32>(info.GetWidth());
+        event.height = Converter::ArkValue<Ark_Int32>(info.GetHeight());
+        event.componentWidth = Converter::ArkValue<Ark_Int32>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Int32>(info.GetComponentHeight());
+        event.loadingStatus = Converter::ArkValue<Ark_Int32>(info.GetLoadingStatus());
+        event.contentOffsetX = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetX());
+        event.contentOffsetY = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetY());
+        event.contentWidth = Converter::ArkValue<Ark_Int32>(info.GetContentWidth());
+        event.contentHeight = Converter::ArkValue<Ark_Int32>(info.GetContentHeight());
         auto optEvent = Converter::ArkValue<Opt_ImageCompleteEvent>(event);
         callback.Invoke(optEvent);
     };
@@ -447,7 +466,29 @@ void SetOrientationImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<ImageRotateOrientation>(value);
     ImageModelStatic::SetOrientation(frameNode, convValue);
 }
-} // ImageAttributeModifier
+void SetSupportSvg2Impl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (convValue) {
+        ImageModelStatic::SetSupportSvg2(frameNode, convValue.value());
+    } else {
+        ImageModelStatic::SetSupportSvg2(frameNode, false);
+    }
+}
+void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitionEffect* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (optValue.has_value()) {
+        auto* peer = optValue.value();
+        CHECK_NULL_VOID(peer);
+        ImageModelStatic::SetContentTransition(frameNode, peer->type_);
+    }
+}
+} // namespace ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
@@ -463,6 +504,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetAutoResizeImpl,
         ImageAttributeModifier::SetRenderModeImpl,
         ImageAttributeModifier::SetDynamicRangeModeImpl,
+        ImageAttributeModifier::SetHdrBrightnessImpl,
         ImageAttributeModifier::SetInterpolationImpl,
         ImageAttributeModifier::SetSourceSizeImpl,
         ImageAttributeModifier::SetSyncLoadImpl,
@@ -480,6 +522,8 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetPrivacySensitiveImpl,
         ImageAttributeModifier::SetEnhancedImageQualityImpl,
         ImageAttributeModifier::SetOrientationImpl,
+        ImageAttributeModifier::SetSupportSvg2Impl,
+        ImageAttributeModifier::SetContentTransitionImpl,
     };
     return &ArkUIImageModifierImpl;
 }

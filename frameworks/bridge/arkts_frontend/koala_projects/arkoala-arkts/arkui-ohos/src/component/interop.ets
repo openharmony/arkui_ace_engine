@@ -30,7 +30,8 @@ import {
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
-    OBSERVE
+    OBSERVE,
+    LocalStorage
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
@@ -52,6 +53,7 @@ import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
 import { StateManagerImpl } from '@koalaui/runtime';
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
+import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -69,15 +71,15 @@ export class CompatiblePeerNode extends PeerNode {
     private onActiveChange: (active: boolean, isReuse: boolean) => void = (active: boolean, isReuse: boolean): void => {
         this.setActive(active);
     };
-    public setStaticParent(parent: ExtendableComponent): void {
+    public setStaticParent(parent?: ExtendableComponent): void {
         this.staticParent = parent;
-        this.staticParent!.addActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent?.__addActiveChangeListenerForInterop__Internal(this.onActiveChange);
     }
     public setActive(active: boolean): void {
         this.view.invokeMethod('setActiveInternal', ESValue.wrap(active));
     }
     public dispose(): void {
-        this.staticParent!.removeActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent?.__removeActiveChangeListenerForInterop__Internal(this.onActiveChange);
         this.staticParent = undefined;
         super.dispose();
     }
@@ -102,12 +104,9 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
-        if (staticComponent === undefined) {
-            throw new Error('compatibleComponent error: non current ExtendableComponent');
-        }
         let current = (GlobalStateManager.instance as StateManagerImpl).current;
         (GlobalStateManager.instance as StateManagerImpl).current = undefined;
-        const viewInterop = createInteropView(staticComponent);
+        const viewInterop = staticComponent ? createInteropView(staticComponent) : ESValue.instantiateEmptyObject();
         const result = init(viewInterop);
         (GlobalStateManager.instance as StateManagerImpl).current = current;
         const dynamicComponent = result.component;
@@ -123,25 +122,13 @@ export function compatibleComponent(
     });
 }
 
-function getInstantiateImplMethod(param: ClassType): Method {
-    for (let methodIdx = 0; methodIdx < param.getMethodsNum(); ++methodIdx) {
-        const method = param.getMethod(methodIdx);
-        if (method.getName() === '_invokeImpl') {
-            return method;
-        }
-    }
-    throw new Error('cannot find method _invokeImpl');
-}
-
 export function compatibleStaticComponent<T extends BaseCustomComponent<T_Options>, T_Options>(
     factory: () => T,
     options?: () => T_Options,
     content?: () => void
 ): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        const instance = factory();
-        const method = getInstantiateImplMethod(Type.of(instance) as ClassType);
-        method.invoke(null, [__context(), __id(), undefined, factory, options, undefined, content]);
+        BaseCustomComponent._invokeImpl(undefined, factory, options, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -191,6 +178,7 @@ function openInterop(): void {
     }
     const openInterop = global.getProperty('openInterop');
     openInterop.invoke();
+    InteropState.getInstance().enable();
     registerCreateWatchFuncCallback();
     registerCreateStaticObservedCallback();
     registerCompatibleStaticComponentCallback();
@@ -201,12 +189,15 @@ function openInterop(): void {
     registertransferCompatibleDynamicBuilderCallback();
     registerCreateCompatibleStaticState();
     registerTransferCompatibleUpdatableBuilderCallback();
+    registerNavPathStackCallback();
+    registerLocalStorageSetProxy();
 }
 
 function closeInterop(): void {
     const global = ESValue.getGlobal();
     const closeInterop = global.getProperty('closeInterop');
     closeInterop.invoke();
+    InteropState.getInstance().disable();
 }
 
 
@@ -322,6 +313,9 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
 }
 
 export function isDynamicObject<T>(value: T): boolean {
+    if (!InteropState.getInstance().isEnabled()) {
+        return false;
+    }
     if (value instanceof ESValue) {
         return false;
     }
@@ -480,20 +474,30 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         const stateParam = instance.getProperty('arg1') as ESValue;
         const rawValue = param.unwrap()!;
         const global = ESValue.getGlobal();
+        const invokeObserveFireChange = global.getProperty('invokeObserveFireChange');
         if (isDynamicObject(rawValue)) {
-            let it = param.keys();
-            while (true) {
-                const result = it.next();
-                if (result.done) {
-                    break;
+            const isDynamicBuilderProxy = global.getProperty('isDynamicBuilderProxy').invoke(param).unwrap() as boolean;
+            if (isDynamicBuilderProxy) {
+                const getBuilderParamProxyEntries = global.getProperty('getBuilderParamProxyEntries');
+                const entries = getBuilderParamProxyEntries.invoke(param).unwrap()! as Array<Any>;
+                entries.forEach((entry)=>{
+                    entry = entry as Array<Any>;
+                    stateParam.setProperty(ESValue.wrap(entry[0]), ESValue.wrap(entry[1]));
+                    invokeObserveFireChange.invoke(stateParam, ESValue.wrap(entry[0]));
+                })
+            } else {
+                let it = param.keys();
+                while (true) {
+                    const result = it.next();
+                    if (result.done) {
+                        break;
+                    }
+                    stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
                 }
-                stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
             }
-        }
-        else {
+        } else {
             const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
             const keys = Object.keys(target);
-            const invokeObserveFireChange = global.getProperty('invokeObserveFireChange');
             if (rawValue instanceof IObservedObject) {
                 const PREFIX = '__backing_';
                 keys.forEach((key)=>{
@@ -503,8 +507,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                         invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
                     }
                 })
-            }
-            else {
+            } else {
                 keys.forEach((key)=>{
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
                     stateParam.setProperty(key, value);
@@ -643,6 +646,372 @@ function registertransferCompatibleDynamicBuilderCallback(): void {
     registerCallback.invoke(transferCompatibleDynamicBuilder);
 }
 
+// -------------------- code below for navigation interop --------------------
+function parseInfoFromJsonElement(infoElement: jsonx.JsonElement): NavPathInfo | undefined {
+    let name: string | undefined = infoElement.tryGetString('name');
+    if (name === undefined) {
+        return undefined;
+    }
+    let paramObj: Object | undefined = infoElement.tryGetElement('param');
+    let isEntry: boolean | undefined = infoElement.tryGetBoolean('isEntry');
+    return new NavPathInfo(name, paramObj, undefined, isEntry);
+} 
+
+function parseNumberArrayFromJson(jsonArray: string): Array<int32> {
+    let array = new Array<int32>();
+    let elementArray = JSON.parseJsonElement(jsonArray).tryAsArray();
+    if (elementArray === undefined) {
+        return array;
+    }
+    for (let index = 0; index < elementArray.length; index ++) {
+        let value = elementArray[index].tryAsInteger();
+        if (value) {
+            array.push(value.toInt());
+        }
+    }
+    return array;
+}
+
+function pushPathCallback(stack: KPointer, info: string, optionParam?: boolean | NavigationOptions): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    let navPathInfo = parseInfoFromJsonElement(JSON.parseJsonElement(info));
+    if (navPathInfo === undefined) {
+        return;
+    }
+    // for override
+    if (optionParam === undefined) {
+        navStack.pushPath(navPathInfo, true);
+    } else if (typeof optionParam === 'boolean') {
+        navStack.pushPath(navPathInfo, optionParam as boolean);
+    } else {
+        navStack.pushPath(navPathInfo, optionParam as NavigationOptions);
+    }
+}
+
+function pushDestinationCallback(stack: KPointer, info: string, optionParam?: boolean | NavigationOptions): Promise<void> {
+    let promise = new Promise<void>((resolve, reject) => {});
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return promise;
+    }
+    let navPathInfo = parseInfoFromJsonElement(JSON.parseJsonElement(info));
+    if (navPathInfo === undefined) {
+        return promise;
+    }
+    // for override
+    if (optionParam === undefined) {
+        promise = navStack.pushDestination(navPathInfo, true);
+    } else if (typeof optionParam === 'boolean') {
+        navStack.pushDestination(navPathInfo, optionParam as boolean);
+    } else {
+        navStack.pushDestination(navPathInfo, optionParam as NavigationOptions);
+    }
+    return promise;
+}
+
+function pushPathByNameCallback(stack: KPointer, name: string, param: string, animated?: boolean): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    let paramObj: Object = JSON.parseJsonElement(param) as Object;
+    navStack.pushPathByName(name, paramObj, animated);
+}
+
+function pushDestinationByNameCallback(stack: KPointer, name: string, param: string, animated?: boolean): Promise<void> {
+    let promise = new Promise<void>((resolve, reject) => {});
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return promise;
+    }
+    let paramObj: Object = JSON.parseJsonElement(param) as Object;
+    promise = navStack.pushDestinationByName(name, paramObj, animated);
+    return promise;
+}
+
+function replacePathCallback(stack: KPointer, info: string, optionParam?: boolean | NavigationOptions): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    let navPathInfo = parseInfoFromJsonElement(JSON.parseJsonElement(info));
+    if (navPathInfo === undefined) {
+        return;
+    }
+    // for override
+    if (optionParam === undefined) {
+        navStack.replacePath(navPathInfo, true);
+    } else if (typeof optionParam === 'boolean') {
+        navStack.replacePath(navPathInfo, optionParam as boolean);
+    } else {
+        navStack.replacePath(navPathInfo, optionParam as NavigationOptions);
+    }
+}
+
+function replaceDestinationCallback(stack: KPointer, info: string, optionParam?: NavigationOptions): Promise<void> {
+    let promise = new Promise<void>((resolve, reject) => {});
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return promise;
+    }
+    let navPathInfo = parseInfoFromJsonElement(JSON.parseJsonElement(info));
+    if (navPathInfo === undefined) {
+        return promise;
+    }
+    // no override
+    promise = navStack.replaceDestination(navPathInfo, optionParam);
+    return promise;
+}
+
+function replacePathByNameCallback(stack: KPointer, name: string, param: string, animated?: boolean): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    let paramObj: Object = JSON.parseJsonElement(param) as Object;
+    navStack.replacePathByName(name, paramObj, animated);
+}
+
+function removeByIndexesCallback(stack: KPointer, indexes: string): number {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return 0;
+    }
+    // return navStack.removeByIndexes(parseNumberArrayFromJson(indexes));
+    return -1;
+}
+
+function removeByNameCallback(stack: KPointer, name: string): number {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return -1;
+    }
+    return navStack.removeByName(name);
+}
+
+function removeByNavDestinationIdCallback(stack: KPointer, navDestinationId: string): boolean {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return false;
+    }
+    return navStack.removeByNavDestinationId(navDestinationId);
+}
+
+function popCallback(stack: KPointer, animated?: boolean): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return 'undefined';
+    }
+    return JSON.stringify(navStack.pop(animated));
+}
+
+function popToNameCallback(stack: KPointer, name: string): number {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return -1;
+    }
+    return navStack.popToName(name);
+}
+
+function popToIndexCallback(stack: KPointer, index: number): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    navStack.popToIndex(index.toInt());
+}
+
+function moveToTopCallback(stack: KPointer, name: string): number {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return -1;
+    }
+    return navStack.moveToTop(name);
+}
+
+function moveIndexToTopCallback(stack: KPointer, index: number): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    navStack.moveIndexToTop(index.toInt());
+}
+
+function clearCallback(stack: KPointer, animated?: boolean): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    navStack.clear(animated);
+}
+
+function getAllPathNameCallback(stack: KPointer): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return "[]";
+    }
+    return JSON.stringify(navStack.getAllPathName());
+}
+
+function getParamByIndexCallback(stack: KPointer, index: number): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return "[]";
+    }
+    return JSON.stringify(navStack.getParamByIndex(index.toInt()));
+}
+
+function getParamByNameCallback(stack: KPointer, name: string): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return "[]";
+    }
+    return JSON.stringify(navStack.getParamByName(name));
+}
+
+function getIndexByNameCallback(stack: KPointer, name: string): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return "[]";
+    }
+    return JSON.stringify(navStack.getIndexByName(name));
+}
+
+function getParentCallback(stack: KPointer): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return "undefined";
+    }
+    return JSON.stringify(navStack.getParent());
+}
+
+function sizeCallback(stack: KPointer): number {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return 0;
+    }
+    return navStack.size();
+}
+
+function disableAnimationCallback(stack: KPointer, disable: boolean): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    navStack.disableAnimation(disable);
+}
+
+function setInterceptionCallback(stack: KPointer, interception: NavigationInterception): void {
+    // not impl yet
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    navStack.setInterception(interception);
+}
+
+function getPathStackCallback(stack: KPointer): string {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return '[]';
+    }
+    return JSON.stringify(navStack.getPathStack());
+}
+
+function setPathStackCallback(stack: KPointer, pathStack: string, animated?: boolean): void {
+    let navStack = NavPathStackInternal.fromPtr(stack);
+    if (navStack === undefined) {
+        return;
+    }
+    // navStack.setPathStack()
+}
+
+function registerNavPathStackCallback(): void {
+    const global = ESValue.getGlobal();
+
+    const registeNavPushPathCallback = global.getProperty('registeNavPushPathCallback');
+    registeNavPushPathCallback.invoke(pushPathCallback);
+
+    const registeNavPushDestinationCallback = global.getProperty('registeNavPushDestinationCallback');
+    registeNavPushDestinationCallback.invoke(pushDestinationCallback);
+
+    const registeNavPushPathByNameCallback = global.getProperty('registeNavPushPathByNameCallback');
+    registeNavPushPathByNameCallback.invoke(pushPathByNameCallback);
+
+    const registeNavPushDestinationByNameCallback = global.getProperty('registeNavPushDestinationByNameCallback');
+    registeNavPushDestinationByNameCallback.invoke(pushDestinationByNameCallback);
+
+    const registeNavReplacePathCallback = global.getProperty('registeNavReplacePathCallback');
+    registeNavReplacePathCallback.invoke(replacePathCallback);
+
+    const registeNavReplaceDestinationCallback = global.getProperty('registeNavReplaceDestinationCallback');
+    registeNavReplaceDestinationCallback.invoke(replaceDestinationCallback);
+
+    const registeNavReplacePathByNameCallback = global.getProperty('registeNavReplacePathByNameCallback');
+    registeNavReplacePathByNameCallback.invoke(replacePathByNameCallback);
+
+    const registeNavRemoveByIndexesCallback = global.getProperty('registeNavRemoveByIndexesCallback');
+    registeNavRemoveByIndexesCallback.invoke(removeByIndexesCallback);
+
+    const registeNavRemoveByNameCallback = global.getProperty('registeNavRemoveByNameCallback');
+    registeNavRemoveByNameCallback.invoke(removeByNameCallback);
+
+    const registeNavRemoveByNavDestinationIdCallback = global.getProperty('registeNavRemoveByNavDestinationIdCallback');
+    registeNavRemoveByNavDestinationIdCallback.invoke(removeByNavDestinationIdCallback);
+
+    const registeNavPopCallback = global.getProperty('registeNavPopCallback');
+    registeNavPopCallback.invoke(popCallback);
+
+    const registeNavPopToNameCallback = global.getProperty('registeNavPopToNameCallback');
+    registeNavPopToNameCallback.invoke(popToNameCallback);
+
+    const registeNavPopToIndexCallback = global.getProperty('registeNavPopToIndexCallback');
+    registeNavPopToIndexCallback.invoke(popToIndexCallback);
+
+    const registeNavMoveToTopCallback = global.getProperty('registeNavMoveToTopCallback');
+    registeNavMoveToTopCallback.invoke(moveToTopCallback);
+
+    const registeNavMoveIndexToTopCallback = global.getProperty('registeNavMoveIndexToTopCallback');
+    registeNavMoveIndexToTopCallback.invoke(moveIndexToTopCallback);
+
+    const registeNavClearCallback = global.getProperty('registeNavClearCallback');
+    registeNavClearCallback.invoke(clearCallback);
+
+    const registeNavGetAllPathNameCallback = global.getProperty('registeNavGetAllPathNameCallback');
+    registeNavGetAllPathNameCallback.invoke(getAllPathNameCallback);
+
+    const registeNavGetParamByIndexCallback = global.getProperty('registeNavGetParamByIndexCallback');
+    registeNavGetParamByIndexCallback.invoke(getParamByIndexCallback);
+
+    const registeNavGetParamByNameCallback = global.getProperty('registeNavGetParamByNameCallback');
+    registeNavGetParamByNameCallback.invoke(getParamByNameCallback);
+
+    const registeNavGetIndexByNameCallback = global.getProperty('registeNavGetIndexByNameCallback');
+    registeNavGetIndexByNameCallback.invoke(getIndexByNameCallback);
+
+    const registeNavGetParentCallback = global.getProperty('registeNavGetParentCallback');
+    registeNavGetParentCallback.invoke(getParentCallback);
+
+    const registeNavSizeCallback = global.getProperty('registeNavSizeCallback');
+    registeNavSizeCallback.invoke(sizeCallback);
+
+    const registeNavDisableAnimationCallback = global.getProperty('registeNavDisableAnimationCallback');
+    registeNavDisableAnimationCallback.invoke(disableAnimationCallback);
+
+    const registeNavSetInterceptionCallback = global.getProperty('registeNavSetInterceptionCallback');
+    registeNavSetInterceptionCallback.invoke(setInterceptionCallback);
+
+    const registeNavGetPathStackCallback = global.getProperty('registeNavGetPathStackCallback');
+    registeNavGetPathStackCallback.invoke(getPathStackCallback);
+
+    const registeNavSetPathStackCallback = global.getProperty('registeNavSetPathStackCallback');
+    registeNavSetPathStackCallback.invoke(setPathStackCallback);
+}
+// -------------------- code above for navigation interop --------------------
+
 function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) => void):
 /** @memo */
 (...args: FixedArray<Any>) => void {
@@ -679,6 +1048,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedV
           uiUtils.makeV1Observed(value.invokeMethod("get").unwrap()) as T,
           false
         );
+        stateVar.setProxy(value);
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
@@ -773,4 +1143,38 @@ export function staticStateBindObservedObject<T>(
         ESValue.wrap(onPropertyChange),
         ESValue.wrap(onTrackPropertyRead),
         ESValue.wrap(onTrackPropertyChange)) as Object as T;
+}
+
+function registerLocalStorageSetProxy(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerLocalStorageSetProxy');
+    registerCallback.invoke(localStorageSetProxy);
+}
+
+function localStorageSetProxy(storage: LocalStorage, proxy: Object): void {
+    storage.setProxy(ESValue.wrap(proxy));
+}
+
+class InteropState {
+    private static instance: InteropState | undefined = undefined;
+    private _opened = false;
+
+    static getInstance(): InteropState {
+        if (!InteropState.instance) {
+            InteropState.instance = new InteropState();
+        }
+        return InteropState.instance!;
+    }
+
+    public enable() {
+        this._opened = true;
+    }
+
+    public disable() {
+        this._opened = false;
+    }
+
+    public isEnabled() {
+        return this._opened;
+    }
 }

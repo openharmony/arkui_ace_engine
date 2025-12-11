@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -23,6 +24,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -33,6 +35,7 @@ import { Length } from "./units"
 import { Resource } from "global.resource"
 import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
@@ -47,6 +50,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setListItemOptionsAttribute(value?: ListItemOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -139,7 +143,7 @@ export interface SwipeActionOptions {
     start?: CustomBuilder | SwipeActionItem;
     end?: CustomBuilder | SwipeActionItem;
     edgeEffect?: SwipeEdgeEffect;
-    onOffsetChange?: ((offset: number) => void);
+    onOffsetChange?: ((offset: double) => void);
 }
 export enum ListItemStyle {
     NONE = 0,
@@ -205,6 +209,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         if (this.checkPriority("setListItemOptions")) {
             const value_casted = value as (ListItemOptions | undefined)
             this.getPeer()?.setListItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ListItemAttribute');
             return this
         }
         return this
@@ -242,12 +247,17 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookListItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ListItemOptions_serializer {
@@ -289,7 +299,7 @@ export class SwipeActionItem_serializer {
         if (valueHolderForBuilderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBuilderComponentTmpValue  = valueHolderForBuilderComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForBuilderComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -301,10 +311,10 @@ export class SwipeActionItem_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx0  = valueHolderForActionAreaDistanceTmpValue as string
                 valueSerializer.writeString(valueHolderForActionAreaDistanceTmpValueForIdx0)
-            } else if (valueHolderForActionAreaDistanceTmpValue instanceof number) {
+            } else if (valueHolderForActionAreaDistanceTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForActionAreaDistanceTmpValueForIdx1)
+                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForActionAreaDistanceTmpValueForIdx1)
             } else if (valueHolderForActionAreaDistanceTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx2  = valueHolderForActionAreaDistanceTmpValue as Resource
@@ -368,24 +378,24 @@ export class SwipeActionItem_serializer {
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builderComponentTmpBuf : ComponentContent | undefined = undefined
         if ((builderComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            builderComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            builderComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const builderComponentTmpResult : ComponentContent | undefined = builderComponentTmpBuf
         const actionAreaDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let actionAreaDistanceTmpBuf : Length | undefined = undefined
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const actionAreaDistanceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let actionAreaDistanceTmpBuf_ : string | number | Resource | undefined
-            if (actionAreaDistanceTmpBuf_UnionSelector == (0).toChar()) {
+            let actionAreaDistanceTmpBuf_ : string | double | Resource | undefined
+            if (actionAreaDistanceTmpBuf_UnionSelector == (0).toByte()) {
                 actionAreaDistanceTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toChar()) {
-                actionAreaDistanceTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toByte()) {
+                actionAreaDistanceTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toByte()) {
                 actionAreaDistanceTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for actionAreaDistanceTmpBuf_ has to be chosen through deserialisation.")
             }
-            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | number | Resource)
+            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | double | Resource)
         }
         const actionAreaDistanceTmpResult : Length | undefined = actionAreaDistanceTmpBuf
         const onActionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -520,7 +530,7 @@ export class SwipeActionOptions_serializer {
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let startTmpBuf_ : CustomBuilder | SwipeActionItem | undefined
-            if (startTmpBuf_UnionSelector == (0).toChar()) {
+            if (startTmpBuf_UnionSelector == (0).toByte()) {
                 const startTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const startTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const startTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -533,7 +543,7 @@ export class SwipeActionOptions_serializer {
                     startTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
-            } else if (startTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (startTmpBuf_UnionSelector == (1).toByte()) {
                 startTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
@@ -546,7 +556,7 @@ export class SwipeActionOptions_serializer {
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let endTmpBuf_ : CustomBuilder | SwipeActionItem | undefined
-            if (endTmpBuf_UnionSelector == (0).toChar()) {
+            if (endTmpBuf_UnionSelector == (0).toByte()) {
                 const endTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const endTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const endTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -559,7 +569,7 @@ export class SwipeActionOptions_serializer {
                     endTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
-            } else if (endTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (endTmpBuf_UnionSelector == (1).toByte()) {
                 endTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
@@ -574,23 +584,23 @@ export class SwipeActionOptions_serializer {
         }
         const edgeEffectTmpResult : SwipeEdgeEffect | undefined = edgeEffectTmpBuf
         const onOffsetChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onOffsetChangeTmpBuf : ((offset: number) => void) | undefined = undefined
+        let onOffsetChangeTmpBuf : ((offset: double) => void) | undefined = undefined
         if ((onOffsetChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onOffsetChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onOffsetChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onOffsetChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onOffsetChangeTmpBuf = (offset: number):void => {
+            onOffsetChangeTmpBuf = (offset: double):void => {
                 const onOffsetChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onOffsetChangeTmpBuf_BufArgsSerializer.writeInt32(onOffsetChangeTmpBuf_BufResource.resourceId);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCall);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCallSync);
-                onOffsetChangeTmpBuf_BufArgsSerializer.writeNumber(offset);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
+                onOffsetChangeTmpBuf_BufArgsSerializer.writeFloat64(offset);
+                InteropNativeModule._CallCallbackSync(10, -949162837, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
                 onOffsetChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onOffsetChangeTmpResult : ((offset: number) => void) | undefined = onOffsetChangeTmpBuf
+        const onOffsetChangeTmpResult : ((offset: double) => void) | undefined = onOffsetChangeTmpBuf
         let value : SwipeActionOptions = ({start: startTmpResult, end: endTmpResult, edgeEffect: edgeEffectTmpResult, onOffsetChange: onOffsetChangeTmpResult} as SwipeActionOptions)
         return value
     }

@@ -55,6 +55,7 @@ const std::string AMPM = "amPm";
 void TimePickerColumnPattern::OnModifyDone()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto pipeline = GetContext();
@@ -63,44 +64,46 @@ void TimePickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
+    InitSelectorButtonProperties(theme);
     auto showCount = GetShowCount();
     InitOnKeyEvent(focusHub);
     InitMouseAndPressEvent();
     SetAccessibilityAction();
     if (optionProperties_.empty()) {
-        auto midIndex = showCount / 2;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
-        MeasureContext measureContext;
-        measureContext.textContent = MEASURE_SIZE_STRING;
-        uint32_t childIndex = 0;
-        PickerOptionProperty prop;
-        while (childIndex < showCount) {
-            if (childIndex == midIndex) { // selected
-                auto selectedOptionSize = theme->GetOptionStyle(true, false).GetFontSize();
-                measureContext.fontSize = selectedOptionSize;
-            } else if ((childIndex == (midIndex + 1)) || (childIndex == (midIndex - 1))) {
-                auto focusOptionSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-                measureContext.fontSize = focusOptionSize;
-            } else {
-                auto normalOptionSize = theme->GetOptionStyle(false, false).GetFontSize();
-                measureContext.fontSize = normalOptionSize;
-            }
-            if (childIndex == midIndex) {
-                prop.height = dividerSpacing_;
-            } else {
-                prop.height = gradientHeight_;
-            }
-            Size size = MeasureUtil::MeasureTextSize(measureContext);
-            prop.fontheight = size.Height();
-            optionProperties_.emplace_back(prop);
-            childIndex++;
-        }
+        UpdateOptionProperties(showCount, theme);
     }
     SetOptionShiftDistance();
     InitHapticController(host);
+}
+
+void TimePickerColumnPattern::UpdateOptionProperties(uint32_t showCount, const RefPtr<PickerTheme>& theme)
+{
+    auto midIndex = showCount / 2;
+    MeasureContext measureContext;
+    measureContext.textContent = MEASURE_SIZE_STRING;
+    uint32_t childIndex = 0;
+    PickerOptionProperty prop;
+    while (childIndex < showCount) {
+        if (childIndex == midIndex) { // selected
+            measureContext.fontSize = theme->GetOptionStyle(true, false).GetFontSize();
+            prop.height = dividerSpacing_;
+        } else if ((childIndex == (midIndex + 1)) || (childIndex == (midIndex - 1))) {
+            measureContext.fontSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+            prop.height = gradientHeight_;
+        } else {
+            measureContext.fontSize = theme->GetOptionStyle(false, false).GetFontSize();
+            prop.height = gradientHeight_;
+        }
+        Size size = MeasureUtil::MeasureTextSize(measureContext);
+        prop.fontheight = size.Height();
+        optionProperties_.emplace_back(prop);
+        childIndex++;
+    }
 }
 
 void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
@@ -673,5 +676,115 @@ std::string TimePickerColumnPattern::GetCurrentOption() const
         return timePickerRowPattern->GetOptionsValue(frameNode, index);
     }
     return "";
+}
+
+void TimePickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        buttonDefaultBgColor_ = pickerTheme->GetSelectorItemNormalBgColor();
+        buttonFocusBgColor_ = pickerTheme->GetSelectorItemFocusBgColor();
+        buttonDefaultBorderColor_ = pickerTheme->GetSelectorItemBorderColor();
+        buttonFocusBorderColor_ = pickerTheme->GetSelectorItemFocusBorderColor();
+        selectorTextFocusColor_ = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
+        hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+    }
+}
+
+const Color& TimePickerColumnPattern::GetButtonHoverColor() const
+{
+    return useButtonFocusArea_ && isFocusColumn_ ? buttonFocusBgColor_ : hoverColor_;
+}
+
+void TimePickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
+{
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
+    auto isFocusChanged = isFocusColumn_ != haveFocus;
+
+    if (isFocusChanged || isInitUpdate) {
+        isFocusColumn_ = haveFocus;
+        UpdateSelectorButtonProps(isFocusColumn_, needMarkDirty);
+    }
+    if (isFocusChanged) {
+        FlushCurrentOptions();
+    }
+    if (isInitUpdate) {
+        isFirstTimeUpdateButtonProps_ = false;
+    }
+}
+
+void TimePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    if (haveFocus) {
+        buttonBgColor_ = buttonFocusBgColor_;
+        borderWidth.SetBorderWidth(buttonFocusBorderWidth_);
+        borderColor.SetColor(buttonFocusBorderColor_);
+    } else {
+        buttonBgColor_ = buttonDefaultBgColor_;
+        borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
+        borderColor.SetColor(buttonDefaultBorderColor_);
+    }
+    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderColor(borderColor);
+    renderContext->UpdateBackgroundColor(buttonBgColor_);
+
+    if (needMarkDirty) {
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
+    }
+}
+
+void TimePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
+    PickerColumnPattern::UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
+}
+
+void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
+    PickerColumnPattern::UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
+}
+
+void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
+    PickerColumnPattern::UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
+}
+
+void TimePickerColumnPattern::UpdateTextAreaPadding(
+    const RefPtr<PickerTheme>& pickerTheme, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (useButtonFocusArea_) {
+        auto padding = pickerTheme->GetPickerTextPadding();
+        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding), CalcLength(0.0_vp),
+            CalcLength(0.0_vp) };
+        textLayoutProperty->UpdatePadding(defaultPadding);
+    }
 }
 } // namespace OHOS::Ace::NG

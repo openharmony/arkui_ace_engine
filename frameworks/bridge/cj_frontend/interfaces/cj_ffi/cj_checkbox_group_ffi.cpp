@@ -69,6 +69,11 @@ void FfiOHOSAceFrameworkCheckBoxGroupSetSelectedColor(uint32_t color)
     CheckBoxGroupModel::GetInstance()->SetSelectedColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkCheckBoxGroupResetSelectedColor()
+{
+    CheckBoxGroupModel::GetInstance()->ResetSelectedColor();
+}
+
 void FfiOHOSAceFrameworkCheckBoxGroupSetWidth(double width, uint32_t unit)
 {
     Dimension value(width, static_cast<DimensionUnit>(unit));

@@ -91,6 +91,15 @@ void SyncChildrenSizeOver(ArkUINodeHandle node)
     listChildrenMainSize->SyncChildrenSizeOver();
 }
 
+void ResetListChildrenMainSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto& nodeTag = frameNode->GetHostTag();
+    V2::LIST_ETS_TAG == nodeTag ? NG::ListModelStatic::ResetListChildrenMainSize(frameNode)
+                                : NG::ListItemGroupModelStatic::ResetListChildrenMainSize(frameNode);
+}
+
 const ArkUIAniListModifier* GetArkUIAniListModifier()
 {
     static const ArkUIAniListModifier impl = {
@@ -99,6 +108,7 @@ const ArkUIAniListModifier* GetArkUIAniListModifier()
         .notifyChange = OHOS::Ace::NG::NotifyChange,
         .resizeChildrenSize = OHOS::Ace::NG::ResizeChildrenSize,
         .syncChildrenSizeOver = OHOS::Ace::NG::SyncChildrenSizeOver,
+        .resetListChildrenMainSize = OHOS::Ace::NG::ResetListChildrenMainSize,
     };
     return &impl;
 }

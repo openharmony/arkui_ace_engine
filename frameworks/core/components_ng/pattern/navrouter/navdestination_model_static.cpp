@@ -17,6 +17,7 @@
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -195,6 +196,37 @@ void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationM
     navDestinationPattern->SetMenuOptions(opt);
 }
 
+void NavDestinationModelStatic::UpdateBindingWithScrollable(FrameNode* frameNode,
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
+}
+
+void NavDestinationModelStatic::SetScrollableProcessor(const RefPtr<FrameNode> frameNode,
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
 void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -292,7 +324,8 @@ void NavDestinationModelStatic::CreateImageButton(const RefPtr<NavDestinationGro
     backButtonNode->MarkModifyDone();
 }
 
-RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc)
+RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(
+    int32_t nodeId, const RefPtr<NavPathInfo>& navPathInfo, std::function<void()>&& deepRenderFunc)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
@@ -312,7 +345,6 @@ RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std
         return parent;
     };
     auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
-    auto navPathInfo = AceType::MakeRefPtr<NavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), ctx]() {
@@ -630,6 +662,20 @@ void NavDestinationModelStatic::SetHideBackButton(FrameNode* frameNode, bool hid
     navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
+void NavDestinationModelStatic::SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
+}
+
 void NavDestinationModelStatic::SetEnableStatusBar(
     FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar)
 {
@@ -665,6 +711,31 @@ void NavDestinationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Co
     CHECK_NULL_VOID(pattern);
     RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
     pattern->SetSystemBarStyle(style);
+}
+
+void NavDestinationModelStatic::SetOnNewParam(
+    FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onNewParamCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParamStatic(std::move(onNewParamCallback));
+}
+
+void NavDestinationModelStatic::SetOnPop(FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+{
+    if (!onPop) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto navPathInfo = context->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    onPop(navPathInfo);
 }
 
 void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)

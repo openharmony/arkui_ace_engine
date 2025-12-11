@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "ui/properties/ui_material.h"
 
 using namespace testing;
 using namespace testing::ext;

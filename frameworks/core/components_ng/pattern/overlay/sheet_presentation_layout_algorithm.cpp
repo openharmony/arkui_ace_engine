@@ -248,9 +248,24 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
             maxHeight = SheetInSplitWindow()
                 ? maxHeight : std::max(maxHeight, static_cast<float>(bigWindowMinHeight.ConvertToPx()));
+            bool isExistMinHightRestriction =
+                sheetStyle_.showInSubWindow.value_or(false)
+                && LessOrEqual(sheetHeight_, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow();
+
+            /* 1.If the height is less than zero, the actual effective height is the default height of 560vp.
+             *
+             * 2.If the following three conditions are met,
+             * the actual effective height will be updated to the minimum height of 320vp:
+             *     a. The showInSubWindow flag is set to true;
+             *     b. The current height is less than or equal to 320vp;
+             *     c. It is not in split-window mode.
+             *
+             * 3.If the current height exceeds the maximum height,
+             * the actual effective height is the maximum height.
+             */
             if (LessNotEqual(sheetHeight_, 0.0f)) {
                 sheetHeight_ = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            } else if (LessOrEqual(sheetHeight_, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow()) {
+            } else if (isExistMinHightRestriction) {
                 sheetHeight_ = bigWindowMinHeight.ConvertToPx();
             } else if (GreatOrEqual(sheetHeight_, maxHeight)) {
                 sheetHeight_ = maxHeight;

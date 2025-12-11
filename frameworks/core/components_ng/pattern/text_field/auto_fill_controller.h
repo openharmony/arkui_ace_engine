@@ -32,6 +32,8 @@ enum class AutoFillAnimationStatus { INIT, SHOW_ICON, TRANSLATION, HIDE_ICON };
 
 enum class AutoFillContentLengthMode { INVALID, SHORT, MEDIUM, LONG, EXTRA_LONG };
 
+enum class AutoFillInsertStatus { INIT, PENDING, INSERTING };
+
 class AutoFillController : public virtual AceType {
     DECLARE_ACE_TYPE(AutoFillController, AceType);
 
@@ -81,6 +83,26 @@ public:
         return animationTextRect_;
     }
 
+    void UpdateAutoFillInsertInfo(int32_t start, int32_t end, AutoFillInsertStatus status)
+    {
+        selectedStart_ = start;
+        selectedEnd_ = end;
+        insertStatus_ = status;
+    }
+    void GetAutoFillInsertStartEnd(int32_t& start, int32_t& end)
+    {
+        start = selectedStart_;
+        end = selectedEnd_;
+    }
+    void UpdateAutoFillInsertStatus(AutoFillInsertStatus status)
+    {
+        insertStatus_ = status;
+    }
+    AutoFillInsertStatus GetAutoFillInsertStatus()
+    {
+        return insertStatus_;
+    }
+
 private:
     void PlayAutoFillIconShowAnimation(const AutoFillContentLengthMode& mode);
     void PlayAutoFillDefaultCharAnimation(const AutoFillContentLengthMode& mode);
@@ -104,6 +126,10 @@ private:
     float autoFillFirstCharOffset_ = 0.0f;
     Color autoFillOriginTextColor_;
     RectF animationTextRect_;
+    // for MANUAL_REQUEST
+    int32_t selectedStart_;
+    int32_t selectedEnd_;
+    AutoFillInsertStatus insertStatus_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -19,7 +19,7 @@ import { WrappedArray } from './observeWrappedArray';
 import { WrappedDate } from './observeWrappedDate';
 import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
-import { ObserveWrappedBase } from './observeWrappedBase';
+import { ObserveWrappedBase, ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { Binding, MutableBinding } from '../utils';
 import { getRawObject, isDynamicObject } from '#generated';
 
@@ -225,6 +225,18 @@ export class UIUtilsImpl {
     }
     public makeBindingMutable<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
         return new MutableBinding<T>(getter, setter);
+    }
+
+    public builtinContainersAddRefAnyKey(value: Any): void {
+        if (value instanceof ObserveWrappedKeyedMeta) {
+            value.addRefAnyKey();
+        }
+    }
+
+    public builtinContainersAddRefLength(value: Any): void {
+        if (value instanceof ObserveWrappedKeyedMeta) {
+            value.addRefLength();
+        }
     }
 }
 

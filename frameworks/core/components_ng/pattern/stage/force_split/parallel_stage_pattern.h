@@ -45,7 +45,7 @@ public:
         return primaryPageNode_;
     }
 
-    bool GetIsSplit() const
+    bool GetIsSplit() override
     {
         return mode_ == PageMode::SPLIT;
     }

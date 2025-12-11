@@ -19,6 +19,7 @@
 #include "form_renderer_hilog.h"
 #include "form_event_report.h"
 #include "base/utils/utils.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace Ace {
@@ -54,8 +55,8 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
 {
     HILOG_WARN("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f,"
         " formViewScale = %{public}f. formJsInfo.formData.size = %{public}zu."
-        " formJsInfo.imageDataMap.size = %{public}zu.", width_, height_, borderWidth_, formViewScale_,
-        formJsInfo.formData.size(), formJsInfo.imageDataMap.size());
+        " formJsInfo.imageDataMap.size = %{public}zu, formId: %{public}" PRId64, width_, height_, borderWidth_,
+        formViewScale_, formJsInfo.formData.size(), formJsInfo.imageDataMap.size(), formJsInfo.formId);
     SetAllowUpdate(allowUpdate_);
     float uiWidth = width_ - borderWidth_ * DOUBLE;
     float uiHeight = height_ - borderWidth_ * DOUBLE;
@@ -82,19 +83,36 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     uiContent_->SetFormViewScale(uiWidth, uiHeight, formViewScale_);
 }
 
-void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
 {
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
     }
-    if (enableBlurBackground_) {
-        uiContent_->SetFormEnableBlurBackground(enableBlurBackground_);
+    if (enableBlurBackground_ || formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        uiContent_->SetFormEnableBlurBackground(true);
     }
-    uiContent_->RunFormPage();
+ 
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
-    if (!backgroundColor_.empty()) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
+        formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    } else if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
+ 
+    HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
+        "backgroundColor_:%{public}s",
+        static_cast<int32_t>(renderingMode_),
+        static_cast<int32_t>(enableBlurBackground_),
+        static_cast<int32_t>(formLocation_),
+        backgroundColor_.c_str());
+}
+
+void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want &want, const OHOS::AppExecFwk::FormJsInfo &formJsInfo)
+{
+    SetUIContentProperty(want);
+    uiContent_->RunFormPage();
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -122,15 +140,6 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
         uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
     }
 
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
-        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
-        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
-    }
     HILOG_INFO("ChangeSensitiveNodes: %{public}s", obscurationMode_ ? "true" : "false");
     uiContent_->ChangeSensitiveNodes(obscurationMode_);
     uiContent_->Foreground();
@@ -142,7 +151,7 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     RunFormPageInner(want, formJsInfo);
 }
 
-void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
 {
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
@@ -156,6 +165,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
+    formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
+        want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
 }
 
 int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -291,7 +302,7 @@ void FormRenderer::Destroy()
     HILOG_INFO("Destroy FormRenderer finish.");
 }
 
-void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
+void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, float formViewScale)
 {
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
@@ -299,16 +310,19 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
     }
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
-    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_)) {
+    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||
+        !NearEqual(formViewScale, formViewScale_)) {
         width_ = width;
         height_ = height;
         borderWidth_ = borderWidth;
+        formViewScale_ = formViewScale;
         uiContent_->SetFormWidth(resizedWidth);
         uiContent_->SetFormHeight(resizedHeight);
-        uiContent_->SetFormViewScale(resizedWidth, resizedHeight, formViewScale_);
+        uiContent_->SetFormViewScale(resizedWidth, resizedHeight, formViewScale);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        HILOG_WARN("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f,"
+            " formViewScale: %{public}f", width, height, formViewScale);
         if (!eventHandler) {
             HILOG_ERROR("eventHandler is null");
             return;
@@ -535,7 +549,15 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
         HILOG_ERROR("uiContent_ is null");
         return;
     }
+    if (!config) {
+        HILOG_ERROR("config is null");
+        return;
+    }
 
+    std::string colorModeValue = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        config->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    }
     uiContent_->UpdateConfiguration(config);
 }
 
@@ -567,7 +589,8 @@ int32_t FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppE
 void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_WARN("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
-        " formViewScale_ = %{public}f.", width_, height_, borderWidth_, formViewScale_);
+        " formViewScale_ = %{public}f, formId: %{public}" PRId64, width_, height_, borderWidth_, formViewScale_,
+        formJsInfo.formId);
     SetAllowUpdate(allowUpdate_);
     float width = width_ - borderWidth_ * DOUBLE;
     float height = height_ - borderWidth_ * DOUBLE;
@@ -578,7 +601,9 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         uiContent_->SetFormViewScale(width, height, formViewScale_);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
-        HILOG_WARN("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f,"
+            " formViewScale: %{public}f, formId: %{public}" PRId64, width, height, formViewScale_,
+            formJsInfo.formId);
     }
     auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (backgroundColor_ != backgroundColor) {

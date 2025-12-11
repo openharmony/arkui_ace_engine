@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -258,6 +259,7 @@ void CheckBoxGroupPattern::OnClick()
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
     updateFlag_ = true;
     UpdateState();
+    ReportChangeEvent(isSelected);
 }
 
 void CheckBoxGroupPattern::OnTouchDown()
@@ -894,5 +896,65 @@ void CheckBoxGroupPattern::SetCheckBoxStyle(const RefPtr<CheckBoxPaintProperty>&
         paintProperty->UpdateCheckBoxSelectedStyle(checkBoxGroupStyle);
         checkboxNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+std::optional<bool> CheckBoxGroupPattern::ParseSelectStatus(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return std::nullopt;
+    }
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "selectCheckBoxGroup") {
+        return std::nullopt;
+    }
+
+    if (!json->Contains("selectStatus") || !json->GetValue("selectStatus")->IsBool()) {
+        return std::nullopt;
+    }
+
+    return json->GetBool("selectStatus");
+}
+
+int32_t CheckBoxGroupPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, RET_FAILED);
+    auto status = paintProperty->GetSelectStatus();
+    bool currentStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    auto selectStatus = ParseSelectStatus(command);
+    CHECK_EQUAL_RETURN(selectStatus, std::nullopt, RET_FAILED);
+    if (status == CheckBoxGroupPaintProperty::SelectStatus::NONE ||
+        status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
+        CHECK_EQUAL_RETURN(selectStatus.value(), currentStatus, RET_SUCCESS);
+    }
+    SetUpdateFlag(true);
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_RETURN(eventHub, RET_FAILED);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selectStatus.value());
+    paintProperty->UpdateCheckBoxGroupSelect(selectStatus.value());
+    UpdateState();
+    ReportChangeEvent(selectStatus.value());
+
+    return RET_SUCCESS;
+}
+
+void CheckBoxGroupPattern::ReportChangeEvent(bool selectStatus)
+{
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("selectStatus", selectStatus);
+    params->Put("cmd", "selectCheckBoxGroup");
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", params);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    json->Put("nodeId", id);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString());
 }
 } // namespace OHOS::Ace::NG

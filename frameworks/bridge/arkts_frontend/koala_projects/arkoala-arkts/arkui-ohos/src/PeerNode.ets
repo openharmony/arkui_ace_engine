@@ -41,11 +41,14 @@ export class PeerNode extends IncrementalNode {
     protected static cursor: int32 = UNINITIALIZE_CURSOR
     private static staticLock = new Mutex()
     static nextId(): int32 {
+        PeerNode.staticLock.lock();
         if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
             PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
             PeerNode.currentId = PeerNode.cursor
         }
-        return PeerNode.currentId++;
+        let resId = PeerNode.currentId++;
+        PeerNode.staticLock.unlock();
+        return resId;
     }
     private id: int32
     private _onReuse?: (param?: RecordData) => void
@@ -54,7 +57,7 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-    private _disabledStateUpdates: MutableState<boolean> = GlobalStateManager.instance.mutableState<boolean>(false, true);
+    private _disabledStateUpdates: MutableState<boolean> | undefined = undefined
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -63,10 +66,16 @@ export class PeerNode extends IncrementalNode {
         return this._uiStateStyle;
     }
     override get disabledStateUpdates(): boolean {
-        return this._disabledStateUpdates.value
+        return this._disabledStateUpdates?.value ?? false
     }
+
     set disabledStateUpdates(disabled: boolean) {
-        this._disabledStateUpdates.value = disabled
+        const state = this._disabledStateUpdates
+        if (state) {
+            state.value = disabled
+        } else if (disabled) {
+            this._disabledStateUpdates = GlobalStateManager.instance.mutableState<boolean>(true, true)
+        }
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -88,7 +97,9 @@ export class PeerNode extends IncrementalNode {
         } else if (needRecurs) {
             this._onReuse?.(param);
             for (let child = this.firstChild; child; child = child!.nextSibling) {
-                if (child?.isKind(PeerNodeType)) {
+                if (child?.isKind(RootPeerType)) {
+                    (child as PeerNode)!.onReuse(false, param);
+                } else if (child?.isKind(PeerNodeType)) {
                     (child as PeerNode)!.onReuse(needRecurs, param);
                 }
             }
@@ -99,7 +110,9 @@ export class PeerNode extends IncrementalNode {
         this._onRecycle?.()
         if (needRecurs) {
             for (let child = this.firstChild; child; child = child!.nextSibling) {
-                if (child?.isKind(PeerNodeType)) {
+                if (child?.isKind(RootPeerType)) {
+                    (child as PeerNode)!.onRecycle(false);
+                } else if (child?.isKind(PeerNodeType)) {
                     (child as PeerNode)!.onRecycle(needRecurs);
                 }
             }
@@ -142,7 +155,7 @@ export class PeerNode extends IncrementalNode {
         ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
     }
 
-    setReusePoolSize(size: number, reuseKey: string): void {
+    setReusePoolSize(size: int32, reuseKey: string): void {
         if (size < 0) {
             return
         }
@@ -262,10 +275,12 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._onRecycle = undefined
         this._onReuse = undefined
+        this._disabledStateUpdates?.dispose()
+        this._disabledStateUpdates = undefined
         super.dispose()
     }
 
-    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+    public getOrCreateStateStyleMutable(curState: int32 = 15): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             return this._uiStateStyle!;
         }
@@ -274,7 +289,7 @@ export class PeerNode extends IncrementalNode {
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
                 this._uiStateStyle!.value = state
-            })
+            }, curState)
             return this._uiStateStyle!;
         }
     }
@@ -289,7 +304,7 @@ export function findPeerNode(node: IncrementalNode): PeerNode | undefined {
     return undefined
 }
 
-function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
+export function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
     if (forward) {
         for (let sibling = node.nextSibling; sibling; sibling = sibling!.nextSibling) {
             if (sibling!.isKind(PeerNodeType)) {

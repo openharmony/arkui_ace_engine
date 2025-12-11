@@ -558,4 +558,47 @@ HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg018, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_EQ(MultiThreadBuildManager::IsParallelScope(), true);
 }
+
+/**
+ * @tc.name: ThreadSafeNodeTestNg019
+ * @tc.desc: Test MultiThreadBuildManager::CheckTag not Crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create thread safe uinode
+     * @tc.expected: create success
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    MultiThreadBuildManager::SetIsParallelizeUI(true);
+    // MultiThreadBuildManager::CheckTag()
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::DATE_PICKER_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    // MultiThreadBuildManager::CheckTag()
+    auto frameNode2 =
+        FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(MultiThreadBuildManager::IsParallelScope(), true);
+}
+
+/**
+ * @tc.name: ThreadSafeNodeTestNg019
+ * @tc.desc: Test MultiThreadBuildManager::IsThreadSafeNodeScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set IsThreadSafeNodeScope = true
+     * @tc.expected: set success
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    EXPECT_EQ(MultiThreadBuildManager::IsThreadSafeNodeScope(), true);
+    /**
+     * @tc.steps: step2. set IsThreadSafeNodeScope = false
+     * @tc.expected: set success
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+    EXPECT_EQ(MultiThreadBuildManager::IsThreadSafeNodeScope(), false);
+}
 } // namespace OHOS::Ace::NG

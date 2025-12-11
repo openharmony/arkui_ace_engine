@@ -28,6 +28,11 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 
+int32_t OH_ArkUI_SnapshotOptions_SetColorMode(ArkUI_SnapshotOptions* snapshotOptions, int32_t colorSpace, bool isAuto);
+
+int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
+    ArkUI_SnapshotOptions* snapshotOptions, int32_t dynamicRangeMode, bool isAuto);
+
 int32_t OH_ArkUI_GetNodeSnapshot(
     ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions, OH_PixelmapNative** pixelmap);
 

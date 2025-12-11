@@ -47,6 +47,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportSearchEvent(result);
             break;
         }
+        case REPORT_TEXT_CHANGE_EVENT: {
+            std::string result = data.ReadString();
+            ReportTextChangeEvent(result);
+            break;
+        }
         case REPORT_INSPECTOR_VALUE: {
             std::string result = data.ReadString();
             int32_t partNum = data.ReadInt32();
@@ -89,7 +94,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         }
         case SEND_IMAGES: {
             std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> result;
-            int32_t size = data.ReadInt32();
+            int32_t size = 0;
+            if (!data.ReadInt32(size)) {
+                LOGW("SendShowingImage size read failed");
+                break;
+            }
             for (int32_t i = 0; i < size; i++) {
                 int32_t nodeId = data.ReadInt32();
                 auto pixelMap = std::shared_ptr<Media::PixelMap>(OHOS::Media::PixelMap::Unmarshalling(data));
@@ -135,6 +144,13 @@ void UiReportStub::ReportComponentChangeEvent(const std::string& data)
 {
     if (ComponentChangeEventCallback_ != nullptr) {
         ComponentChangeEventCallback_(data);
+    }
+}
+
+void UiReportStub::ReportTextChangeEvent(const std::string& data)
+{
+    if (textChangeEventCallback_ != nullptr) {
+        textChangeEventCallback_(data);
     }
 }
 
@@ -206,6 +222,11 @@ void UiReportStub::RegisterSearchEventCallback(const EventCallback& eventCallbac
     searchEventCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterTextChangeEventCallback(const EventCallback& eventCallback)
+{
+    textChangeEventCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
 {
     ComponentChangeEventCallback_ = std::move(eventCallback);
@@ -250,6 +271,11 @@ void UiReportStub::UnregisterClickEventCallback()
 void UiReportStub::UnregisterSearchEventCallback()
 {
     searchEventCallback_ = nullptr;
+}
+
+void UiReportStub::UnregisterTextChangeEventCallback()
+{
+    textChangeEventCallback_ = nullptr;
 }
 
 void UiReportStub::UnregisterRouterChangeEventCallback()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
  * @brief Defines the return value structure for the <b>onGetIrregularSizeByIndex</b> callback
  * in <b>Grid</b> layout options.
  *
- * @since 21
+ * @since 22
  */
 typedef struct {
     /** Number of rows occupied by the <b>GridItem</b> component. */
@@ -105,7 +105,7 @@ typedef struct {
 /**
  * @brief Defines the return value structure for the <b>onGetRectByIndex</b> callback in <b>Grid</b> layout options.
  *
- * @since 21
+ * @since 22
  */
 typedef struct {
     /** Starting row position of the <b>GridItem</b> component. */
@@ -314,6 +314,13 @@ typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
 typedef struct ArkUI_ShowCounterConfig ArkUI_ShowCounterConfig;
 
 /**
+ * @brief Defines the text content base controller.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextContentBaseController ArkUI_TextContentBaseController;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -368,13 +375,6 @@ typedef enum {
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
-
-/**
- * @brief Defines the selected text recognition configuration.
- *
- * @since 22
- */
-typedef struct ArkUI_SelectedDataDetectorConfig ArkUI_SelectedDataDetectorConfig;
 
 /**
  * @brief Enumerates the font styles.
@@ -440,6 +440,14 @@ typedef enum {
     ARKUI_TEXT_ALIGNMENT_END,
     /** Aligned with both margins. */
     ARKUI_TEXT_ALIGNMENT_JUSTIFY,
+    /** Aligned with left to right.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_LEFT_TO_RIGHT = 4,
+    /** Aligned with right to left.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_RIGHT_TO_LEFT = 5,
 } ArkUI_TextAlignment;
 
 /**
@@ -471,6 +479,22 @@ typedef enum {
     /** 底部对齐。 */
     ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
 } ArkUI_TextContentAlign;
+
+/**
+ * @brief Enumerates the text text direction.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The text direction is left to right. */
+    ARKUI_TEXT_DIRECTION_LTR = 0,
+    /** The text direction is right to left. */
+    ARKUI_TEXT_DIRECTION_RTL = 1,
+    /** The text direction follows the component layout. */
+    ARKUI_TEXT_DIRECTION_DEFAULT = 2,
+    /** The text direction follows the actual text. */
+    ARKUI_TEXT_DIRECTION_AUTO = 3,
+} ArkUI_TextDirection;
 
 /**
  * @brief Enumerates the types of the Enter key for a single-line text box.
@@ -2362,6 +2386,36 @@ typedef enum {
     ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
 } ArkUI_AnimationDirection;
 
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default effect. */
+    ARKUI_HOVER_EFFECT_AUTO = 0,
+    /** Zoom in and out effect. */
+    ARKUI_HOVER_EFFECT_SCALE,
+    /** Highlight effect. */
+    ARKUI_HOVER_EFFECT_HIGHLIGHT,
+    /** None effect. */
+    ARKUI_HOVER_EFFECT_NONE,
+} ArkUI_HoverEffect;
+
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default priority. */
+    ARKUI_FOCUS_PRIORITY_AUTO = 0,
+    /** Prior priority. */
+    ARKUI_FOCUS_PRIORITY_PRIOR = 2000,
+    /** Previous focus priority. */
+    ARKUI_FOCUS_PRIORITY_PREVIOUS = 3000,
+} ArkUI_FocusPriority;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/
@@ -2460,6 +2514,16 @@ typedef enum {
      * @since 15
      */
     ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
+    /**
+     * @error The provided color space or dynamic range mode is not supported.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED = 160003,
+    /**
+     * @error The isAuto parameter of the color space or dynamic range mode is set to true for offscreen node snapshot.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED = 160004,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
@@ -2801,6 +2865,20 @@ typedef enum {
 } ArkUI_PixelRoundCalcPolicy;
 
 /**
+ * @brief Menu pop-up strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Determine whether to pop up the menu according to the underlying default logic. */
+    ARKUI_MENU_POLICY_DEFAULT = 0,
+    /** Never pop up the menu. */
+    ARKUI_MENU_POLICY_HIDE = 1,
+    /** Always pop up the menu. */
+    ARKUI_MENU_POLICY_SHOW = 2,
+} ArkUI_MenuPolicy;
+
+/**
  * @brief Define the direction to expand the swipe action.
  *
  * @since 21
@@ -2839,6 +2917,22 @@ typedef enum {
 } ArkUI_ItemFillPolicy;
 
 /**
+ * @brief Define the event tool type that support response region settings.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** All source tool type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL = 0,
+    /** The Finger type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_FINGER = 1,
+    /** The pen type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_PEN = 2,
+    /** The mouse type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_MOUSE = 3,
+} ArkUI_ResponseRegionSupportedTool;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
@@ -2865,6 +2959,13 @@ typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArr
    * @since 19
    */
 typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
+
+/**
+  * @brief Defines the selection options.
+  *
+  * @since 23
+  */
+typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
 
 typedef struct {
     float x;
@@ -2894,7 +2995,7 @@ typedef struct {
 /**
  * @brief Enumerates the grid item alignment modes.
  *
- * @since 21
+ * @since 22
  */
 typedef enum {
     /** Use the default alignment mode of the grid. */
@@ -2906,7 +3007,7 @@ typedef enum {
 /**
  * @brief Enumerates styles of grid items.
  *
- * @since 21
+ * @since 22
  */
 typedef enum {
     /** No style. */
@@ -2914,6 +3015,77 @@ typedef enum {
     /** Hover or press style. */
     GRID_ITEM_STYLE_PLAIN = 1,
 } ArkUI_GridItemStyle;
+
+/**
+ * @brief Define the types for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default non-safe area of the system, including the status bar and navigation bar. */
+    ARKUI_LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1,
+} ArkUI_LayoutSafeAreaType;
+/**
+ * @brief Define the edges for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP = 1,
+    /** Bottom edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Start edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_START = 1 << 2,
+    /** End edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_END = 1 << 3,
+    /** Vertical edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP | ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+    /** Horizontal edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_START | ARKUI_LAYOUT_SAFE_AREA_EDGE_END,
+    /** All edges of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_ALL = ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL | ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+} ArkUI_LayoutSafeAreaEdge;
+
+/**
+ * @brief Enumerates the localizedAlignment modes.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top start. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_START = 0,
+    /** Top center. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP,
+    /** Top end. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_END,
+    /** Vertically centered start. */
+    ARKUI_LOCALIZED_ALIGNMENT_START,
+    /** Horizontally and vertically centered. */
+    ARKUI_LOCALIZED_ALIGNMENT_CENTER,
+    /** Vertically centered end. */
+    ARKUI_LOCALIZED_ALIGNMENT_END,
+    /** Bottom start. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_START,
+    /** Horizontally centered on the bottom. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM,
+    /** Bottom end. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_END,
+} ArkUI_LocalizedAlignment;
+/**
+ * @brief Enumerates the graphics rendering strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The current component and its child components will be drawn directly onto the screen canvas. */
+    ARKUI_RENDERSTRATEGY_FAST = 0,
+    /**
+    * The current component and its child components will first be drawn onto an off-screen canvas,
+    *     then undergo some graphic rendering operations, and finally be drawn onto the main canvas.
+    */
+    ARKUI_RENDERSTRATEGY_OFFSCREEN,
+} ArkUI_RenderStrategy;
 
 /**
  * @brief defines the measure info of the custom span.
@@ -3091,7 +3263,7 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
  * @brief Creates <b>Grid</b> layout options.
  *
  * @return <b>Grid</b> layout options created.
- * @since 21
+ * @since 22
  */
 ArkUI_GridLayoutOptions* OH_ArkUI_GridLayoutOptions_Create();
 
@@ -3099,7 +3271,7 @@ ArkUI_GridLayoutOptions* OH_ArkUI_GridLayoutOptions_Create();
  * @brief Disposes of <b>Grid</b> layout options.
  *
  * @param option <b>Grid</b> layout options.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option);
 
@@ -3114,7 +3286,7 @@ void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 21
+ * @since 22
  */
 int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(
     ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t size);
@@ -3134,7 +3306,7 @@ int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 21
+ * @since 22
  */
 int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(
     ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t* size);
@@ -3147,7 +3319,7 @@ int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(
  * @param callback Callback that returns the row and column span for the grid item at the specified index.
  *        itemIndex: grid item index, which must be within the range set by
  *        {@link OH_ArkUI_GridLayoutOptions_SetIrregularIndexes}.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback(
     ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemSize (*callback)(int32_t itemIndex, void* userData));
@@ -3161,7 +3333,7 @@ void OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback(
  * @param callback Callback that returns the starting row, starting column, row span,
  *        and column span for the grid item at the specified index.
  *        itemIndex: grid item index.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_RegisterGetRectByIndexCallback(
     ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemRect (*callback)(int32_t itemIndex, void* userData));
@@ -5325,6 +5497,44 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 
 /**
+ * @brief Defines the color mode used for current snapshot taking.
+ * By default, the system draws snapshot in sRGB mode. Therefore, snapshot for components with wide color display
+ * mode enabled will lose some effect. If you know the color space used in the component to be taken snapshot,
+ * you can specify the colorSpace parameter and set isAuto to false, for achieving the expected screenshot effect.
+ * But it is difficult to know which color space is used by the component to be taken. Therefore, in general,
+ * you can just set isAuto to true for letting the system to determine the color space to use based on the actual
+ * situation automaticly. When isAuto is set to true, value set by the colorSpace parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param colorSpace One specific color space which want to be used, you can refer the {@link ColorSpaceName} enum
+ *    in native_color_space_manager.h.
+ * @param isAuto Indicate that if the system should decide the color space automaticlly.
+ *    If set this to true, the one specificed by colorSpace parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetColorMode(ArkUI_SnapshotOptions* snapshotOptions, int32_t colorSpace, bool isAuto);
+
+/**
+ * @brief Defines the dynamic range mode used for current snapshot taking.
+ * By default, the system draws snapshot in STANDARD mode. You can set the dynamicRangeMode parameter
+ * and set isAuto to false, for using one specific dynamic range mode.
+ * Also you can just set isAuto to true for letting the system to determine the dynamic range mode automaticly.
+ * When isAuto is set to true, value set by the dynamicRangeMode parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param dynamicRangeMode One specific dynamic range mode defined in {@link ArkUI_DynamicRangeMode}.
+ * @param isAuto Indicate that if the system should decide the dynamic range mode automaticlly.
+ *    If set this to true, the one specificed by dynamicRangeMode parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
+    ArkUI_SnapshotOptions* snapshotOptions, int32_t dynamicRangeMode, bool isAuto);
+
+/**
  * @brief Create a cross-language option instance.
  *
  * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
@@ -5883,48 +6093,976 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig*
 uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config);
 
 /**
- * @brief Creates a configuration object for selected text recognition.
+ * @brief Create selection options.
  *
- * @return A pointer to the configuration object.
- * @since 22
+ * @return A pointer to the selection options object.
+ * @since 23
  */
-ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create();
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create();
 
 /**
- * @brief Disposes a configuration object for selected text recognition.
+ * @brief Dispose selection options object.
  *
- * @param config Pointer to the configuration object to be disposed.
- * @since 22
+ * @param options Pointer to the selection options object. to be disposed.
+ * @since 23
  */
-void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config);
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options);
+
+/**
+ * @brief Sets the menu policy for selection options.
+ *
+ * @param options Pointer to the selection options.
+ * @param menuPolicy The menu policy.
+ * @since 23
+ */
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(
+    ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy);
+
+/**
+ * @brief Gets the menu policy of selection options.
+ *
+ * @param options Pointer to the selection options object.
+ * @return Returns the menu policy.
+ * @since 23
+ */
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options);
+/**
+ * @brief Defines the text menu item for edit menu item.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextMenuItem ArkUI_TextMenuItem;
+/**
+ * @brief Create an object of the text edit menu item.
+ *
+ * @return A pointer to the ArkUI_TextMenuItem.
+ * @since 23
+ */
+ArkUI_TextMenuItem* OH_ArkUI_TextMenuItem_Create();
+
+/**
+ * @brief Dispose an object of the text edit menu options.
+ *
+ * @param textMenuItem Pointer to the ArkUI_TextMenuItem object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextMenuItem_Dispose(ArkUI_TextMenuItem* textMenuItem);
+
+/**
+ * @brief Set text menu item title.
+ *
+ * @param item The text menu item.
+ * @param content The name of the text menu item, which defaults to an empty string. The string will copy to framework.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const char* content);
+
+/**
+ * @brief Get text menu item title.
+ *
+ * @param item The text menu item object.
+ * @param buffer The buffer of the text menu content, memory space needs to be allocated by the developer.
+ * @param bufferSize The name of the text menu item, which defaults to an empty string;
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ *
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
+ *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetContent(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
+    int32_t* writeLength);
+
+/**
+ * @brief Set text menu item icon.
+ *
+ * @param item The text menu item.
+ * @param icon The text menu item icon resource, which defaults to an empty string. The string will copy to framework.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const char* icon);
+
+/**
+ * @brief Get text menu item icon.
+ *
+ * @param item The text menu item object
+ * @param buffer The buffer of the text menu content, memory space needs to be allocated by the developer.
+ * @param bufferSize The icon of the text menu item, which defaults to an empty string;
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ *
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
+ *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetIcon(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
+    int32_t* writeLength);
+
+/**
+ * @brief Set text menu item label info for keyboard shortcut.
+ *
+ * @param item The text menu item.
+ * @param labelInfo The text menu item shortcut displays, which defaults to an empty string.
+ *      The string will copy to framework.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, const char* labelInfo);
+
+/**
+ * @brief Get text menu item label info for keyboard shortcut..
+ *
+ * @param item The text menu item object
+ * @param buffer The buffer of the text menu content, memory space needs to be allocated by the developer.
+ * @param bufferSize The shortcuts of the text menu item, which defaults to an empty string;
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ *
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
+ *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetLabelInfo(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
+    int32_t* writeLength);
+
+/**
+ * @brief Set text menu item id.
+ *
+ * @param item The text menu item.
+ * @param id The text menu id.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetId(ArkUI_TextMenuItem* item, int32_t id);
+
+/**
+ * @brief Get text menu item id.
+ *
+ * @param item The text menu item object
+ * @param id The text menu item id;
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetId(const ArkUI_TextMenuItem* item, int32_t* id);
+
+/**
+ * @brief Defines text menu item array.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextMenuItemArray ArkUI_TextMenuItemArray;
+
+/**
+ * @brief Get the size of text menu items.
+ *
+ * @param items The text menu items.
+ * @param size The size of text menu items.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetSize(ArkUI_TextMenuItemArray* items, int32_t* size);
+
+/**
+ * @brief Get text menu item at index.
+ *
+ * @param items The text menu items.
+ * @param index The index of text menu items.
+ * @param item The text menu item at index of array.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetItem(ArkUI_TextMenuItemArray* items, int32_t index,
+    ArkUI_TextMenuItem** item);
+
+/**
+ * @brief Insert text menu item at index.
+ *
+ * @param items The text menu items.
+ * @param index The index of text menu items.
+ * @param item The text menu item at index of array. The item will copy by framework.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(ArkUI_TextMenuItemArray* items, ArkUI_TextMenuItem* item,
+    int32_t index);
+
+/**
+ * @brief Erase text menu item at index.
+ *
+ * @param items The text menu items.
+ * @param index The index of text menu items.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* items, int32_t index);
+
+/**
+ * @brief Clear all the items.
+ *
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Clear(ArkUI_TextMenuItemArray* items);
+
+/**
+ * @brief Enumerates the text menu item id.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Indicates the TextMenuItemId to copy and delete the currently selected text. */
+    ARKUI_TEXT_MENU_ITEM_ID_CUT = 0,
+
+    /**
+     * Indicates the TextMenuItemId to copy the currently selected text to the clipboard.
+     * since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_COPY = 1,
+
+    /**
+     * Indicates the TextMenuItemId to copy the current contents of the clipboard into the text view.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_PASTE = 2,
+
+    /**
+     * Indicates the TextMenuItemId to select all text in a text view.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_SELECT_ALL = 3,
+
+    /**
+     * Indicates the TextMenuItemId for collaboration service menu items.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_COLLABORATION_SERVICE = 4,
+
+    /**
+     * Indicates the TextMenuItemId to recognize the text in the picture and input it into the text view.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_CAMERA_INPUT = 5,
+
+    /**
+     * Indicates the TextMenuItemId to help with text creation by invoking large models.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_AI_WRITER = 6,
+
+    /**
+     * Indicates the TextMenuItemId to translate the selected content.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_TRANSLATE = 7,
+
+    /**
+     * Indicates the TextMenuItemId to search the selected content.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_SEARCH = 8,
+
+    /**
+     * Indicates the TextMenuItemId to share the selected content.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_SHARE = 9,
+
+    /**
+     * Indicates the TextMenuItemId to open url.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_URL = 10,
+
+    /**
+     * Indicates the TextMenuItemId to open email.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_EMAIL = 11,
+
+    /**
+     * Indicates the TextMenuItemId to call the phone number.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_PHONE_NUMBER = 12,
+
+    /**
+     * Indicates the TextMenuItemId to open map.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_ADDRESS = 13,
+
+    /**
+     * Indicates the TextMenuItemId to open calendar.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_DATA_TIME = 14,
+
+    /**
+     * Indicates the TextMenuItemId for asking AI.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_ASK_AI = 15,
+
+    /**
+     * Inclusive begin of app-reserved ID range.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_APP_RESERVED_BEGIN = 10000,
+    /**
+     * Inclusive end of app-reserved ID range.
+     *
+     * @since 23
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_APP_RESERVED_END = 20000,
+} ArkUI_TextMenuItemId;
+
+/**
+ * @brief Defines the text menu item for edit menu options.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextEditMenuOptions ArkUI_TextEditMenuOptions;
+/**
+ * @brief Create an object of the text edit menu options.
+ *
+ * @return A pointer to the ArkUI_TextEditMenuOptions.
+ * @since 23
+ */
+ArkUI_TextEditMenuOptions* OH_ArkUI_TextEditMenuOptions_Create();
+
+/**
+ * @brief Dispose an object of the text edit menu options.
+ *
+ * @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextEditMenuOptions_Dispose(ArkUI_TextEditMenuOptions* editMenuOptions);
+
+/**
+ * The text menu create callback function.
+ *
+ * @param items The framework creates and owns the array.
+ *     In callback: the developer can modify the array by calling {@link OH_ArkUI_TextMenuItemArray_Insert},
+ *     {@link OH_ArkUI_TextMenuItemArray_Erase}, or similar APIs.
+ *     The developer must not free the array instance.
+ * @param userData User defined data.
+ * @since 23
+ */
+typedef void (*ArkUI_TextCreateMenuCallback)(
+    ArkUI_TextMenuItemArray*    items,
+    void*                       userData
+);
+
+/**
+ * The text menu prepare callback function.
+ *
+ * @param items The framework creates and owns the array.
+ *     In callback: the developer can modify the array by calling {@link OH_ArkUI_TextMenuItemArray_Insert},
+ *     {@link OH_ArkUI_TextMenuItemArray_Erase}, or similar APIs.
+ *     The developer must not free the array instance.
+ * @param userData User defined data.
+ * @since 23
+ */
+typedef void (*ArkUI_TextPrepareMenuCallback)(
+    ArkUI_TextMenuItemArray*    items,
+    void*                       userData
+);
+
+/**
+ * The text menu item click callback function.
+ *
+ * @param item The menu item click.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param userData The user data.
+ * @return bool Return True, the event is consumed, false otherwise.
+ * @since 23
+ */
+typedef bool (*ArkUI_TextMenuItemClickCallback)(
+    const ArkUI_TextMenuItem*    item,
+    int32_t                      start,
+    int32_t                      end,
+    void*                        userData
+);
+
+/**
+* @brief Set the event to be called when text menu create.
+*
+* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+* @param userData The user data.
+* @param cb The prepare callback function.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback(
+    ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextCreateMenuCallback cb);
+/**
+* @brief Set the event to be called when menu prepare.
+*
+* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+* @param userData The user data.
+* @param cb The prepare callback function.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback(
+    ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextPrepareMenuCallback cb);
+
+/**
+* @brief Set the event to be called when menu item click.
+*
+* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+* @param userData The user data.
+* @param cb The menu item click callback function.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback(
+    ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextMenuItemClickCallback cb);
+
+/**
+ * @brief Defines the selection menu.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextSelectionMenuOptions ArkUI_TextSelectionMenuOptions;
+
+/**
+ * @brief Enumerates the text span type.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The span type only contains text. */
+    ARKUI_TEXT_SPAN_TYPE_TEXT = 0,
+    /** The span type only contains image. */
+    ARKUI_TEXT_SPAN_TYPE_IMAGE = 1,
+    /** The span type contains both text and image. */
+    ARKUI_TEXT_SPAN_TYPE_MIXED = 2,
+    /**
+     * When no other types are explicitly specified, this type will be matched.
+     * When this type is registered but TEXT, IMAGE, or MIXED types are not registered,
+     * this type will be triggered and displayed for those registered types.
+     */
+    ARKUI_TEXT_SPAN_TYPE_DEFAULT = 3,
+} ArkUI_TextSpanType;
+
+/**
+ * @brief Enumerates the text response type.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The response type of right click. */
+    ARKUI_TEXT_RESPONSE_TYPE_RIGHT_CLICK = 0,
+    /** The response type of long press. */
+    ARKUI_TEXT_RESPONSE_TYPE_LONG_PRESS = 1,
+    /** The response type of select by mouse. */
+    ARKUI_TEXT_RESPONSE_TYPE_SELECT = 2,
+    /**
+     * When no other types are explicitly specified, this type will be matched.
+     * When this type is registered but RIGHT_CLICK, LONG_PRESS, or SELECT types are not registered,
+     * this type will be triggered and displayed for right-click, long press, and mouse selection actions.
+     */
+    ARKUI_TEXT_RESPONSE_TYPE_DEFAULT = 3,
+} ArkUI_TextResponseType;
+
+/**
+ * @brief Enumerates the haptic feedback mode.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** No haptic feedback. */
+    ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED = 0,
+    /**Defines always haptic feedback. */
+    ARKUI_HAPTIC_FEEDBACK_MODE_ENABLED  = 1,
+    /** Defines automatically haptic feedback. */
+    ARKUI_HAPTIC_FEEDBACK_MODE_AUTO = 2,
+} ArkUI_HapticFeedbackMode;
+
+/**
+ * @brief Create an object of the text selection menu options.
+ *
+ * @return A pointer to the ArkUI_TextSelectionMenuOptions.
+ * @since 23
+ */
+ArkUI_TextSelectionMenuOptions* OH_ArkUI_TextSelectionMenuOptions_Create();
+
+/**
+ * @brief Dispose an object of the text selection menu options.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextSelectionMenuOptions_Dispose(ArkUI_TextSelectionMenuOptions* selectionMenuOptions);
 
 /**
  * @brief Sets the recognition types of a configuration object for selected text recognition.
  *
- * @param config Pointer to the configuration object to be modified.
- * @param types Array of entity types, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
- * @since 22
- */
-void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
-
-/**
- * @brief Gets the recognition types of a configuration object for selected text recognition.
- *
- * @param config Pointer to the configuration object.
- * @param types Array of entity types to take the result, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param textSpanType The span type of {@link ArkUI_TextSpanType}.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
- *         If an error code is returned, it may be due to a failure in parameter validation;
- *         the parameter must not be null.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetSpanType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_TextSpanType textSpanType);
+/**
+ * @brief Gets the span type select menu options.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param spanType the text span type {@link ArkUI_TextSpanType}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetSpanType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_TextSpanType* spanType);
+
+/**
+* @brief Set custom text menu node of text.
+*
+* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+* @param node The custom menu node.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetContentNode(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_NodeHandle node);
+/**
+* @brief Get custom text menu node of text.
+*
+* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+* @param node The custom menu node.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetContentNode(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_NodeHandle* node);
+
+/**
+ * @brief Sets the recognition types of a configuration object for selected text recognition.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param responseType The response type of {@link ArkUI_TextResponseType}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetResponseType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_TextResponseType responseType);
+/**
+ * @brief Gets the response type select menu options.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param responseType The text response type {@link ArkUI_TextResponseType}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
+    ArkUI_TextResponseType* responseType);
+
+/**
+ * @brief Sets the haptic feedback mode of a configuration object for selected text recognition.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param hapticFeedbackMode The haptic feedback mode of {@link ArkUI_HapticFeedbackMode}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode hapticFeedbackMode);
+/**
+ * @brief Gets the response type select menu options.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param mode The haptic feedback mode of {@link ArkUI_HapticFeedbackMode}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode(
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode* mode);
+
+/**
+* @brief Set the event to be called when selection menu show.
+*
+* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+* @param start The start offset of the selected content.
+* @param end The end offset of the selected content.
+* @param userData The user data.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback(
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
+    void (*callback)(int32_t start, int32_t end, void* userData));
+/**
+* @brief Set the event to be called when selection menu hide.
+*
+* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+* @param start The start offset of the selected content.
+* @param end The end offset of the selected content.
+* @param userData The user data.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
+    void (*callback)(int32_t start, int32_t end, void* userData));
+
+/**
+ * @brief Create an object of the text content base controller.
+ *
+ * @return A pointer to the controller object.
+ * @since 23
+ */
+ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create();
+
+/**
+ * @brief Dispose an object of the text content base controller.
+ *
+ * @param controller Pointer to the controller object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController* controller);
+
+/**
+ * @brief Delete the last character of the input field component.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller);
+
+/**
+ * @brief Scroll the input field component to make the specified content visible.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_ScrollToVisible(
+    ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
+
+/**    
+ * @brief Enumerates the MarqueeStartPolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Start marquee in any case. This is the default policy. */
+    ARKUI_MARQUEESTARTPOLICY_DEFAULT = 0,
+    /** Start marquee only when get focus. */
+    ARKUI_MARQUEESTARTPOLICY_ONFOCUS = 1
+} ArkUI_MarqueeStartPolicy;
+
+/**
+ * @brief Enumerates the MarqueeUpdatePolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Reset scroll position and restart scroll. */
+    ARKUI_MARQUEEUPDATEPOLICY_DEFAULT = 0,
+    /** Preserve scroll position, just change to new text. */
+    ARKUI_MARQUEEUPDATEPOLICY_PRESERVEPOSITION = 1
+} ArkUI_MarqueeUpdatePolicy;
+
+/**
+ * @brief Defines the marquee options of text.
+ *
  * @since 22
  */
-int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
+typedef struct ArkUI_TextMarqueeOptions ArkUI_TextMarqueeOptions;
+
+/**
+ * @brief Create a option object for marquee animation of text.
+ *
+ * @return A pointer to the option object.
+ * @since 23
+ */
+ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create();
+
+/**
+ * @brief Dispose a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_Dispose(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param start Flag of is need to start marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStart(ArkUI_TextMarqueeOptions* option, bool start);
+
+/**
+ * @brief Gets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param step The step size of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStep(ArkUI_TextMarqueeOptions* option, float step);
+
+/**
+ * @brief Gets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the step size of the marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetStep(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param spacing The spacing between two rounds of marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetSpacing(ArkUI_TextMarqueeOptions* option, float spacing);
+
+/**
+ * @brief Gets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the spacing between two rounds of marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetSpacing(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param loop The rounds of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetLoop(ArkUI_TextMarqueeOptions* option, int32_t loop);
+
+/**
+ * @brief Gets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the rounds of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetLoop(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fromStart The running direction of the marquee, true means running from start.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFromStart(ArkUI_TextMarqueeOptions* option, bool fromStart);
+
+/**
+ * @brief Gets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fromStart flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFromStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param delay The delay time between each round of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetDelay(ArkUI_TextMarqueeOptions* option, int32_t delay);
+
+/**
+ * @brief Gets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the delay time between each round of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetDelay(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fadeout The flag of whether the text is faded out.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFadeout(ArkUI_TextMarqueeOptions* option, bool fadeout);
+
+/**
+ * @brief Gets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fadeout flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFadeout(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The start policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStartPolicy(ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeStartPolicy startPolicy);
+
+/**
+ * @brief Gets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The update policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
+    ArkUI_MarqueeUpdatePolicy updatePolicy);
+
+/**
+ * @brief Gets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the update policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
 
 #ifdef __cplusplus
 };

@@ -39,6 +39,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -1056,10 +1057,11 @@ HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level1)
      */
     layoutAlgorithm->enableArrow_ = false;
     layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->realArrowHeight_, 0.0f);
+    // The arrow height need to be 1.0 when enableArrow_ is false.
+    EXPECT_EQ(layoutAlgorithm->realArrowHeight_, 1.0f);
     layoutAlgorithm->enableArrow_ = true;
     layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
-    EXPECT_NE(layoutAlgorithm->realArrowHeight_, 0.0f);
+    EXPECT_NE(layoutAlgorithm->realArrowHeight_, 1.0f);
 }
 
 /**

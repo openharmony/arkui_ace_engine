@@ -17,12 +17,13 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, extractors, hookImageOnError } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkImagePeer, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
+import { ArkImagePeer, ImageAlt, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CommonMethod, PointLightStyle } from "./component/common"
+import { CommonMethod, PointLightStyle, ContentTransitionEffect } from "./component/common"
 import { Resource } from "global.resource"
 import { default as image } from "@ohos.multimedia.image"
 import { ResourceColor, ColorFilter } from "./component/units"
@@ -36,6 +37,7 @@ import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class ImageModifier extends CommonMethodModifier implements ImageAttribute,AttributeModifier<ImageAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,7 +48,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     applyDisabledAttribute(instance: ImageAttribute): void { }
     applySelectedAttribute(instance: ImageAttribute): void { }
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alt_0_0value?: string | Resource | image.PixelMap | undefined
+    _alt_0_0value?: string | Resource | image.PixelMap | ImageAlt | undefined
     _matchTextDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _matchTextDirection_0_0value?: boolean | undefined
     _fitOriginalSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -65,6 +67,8 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _renderMode_0_0value?: ImageRenderMode | undefined
     _dynamicRangeMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dynamicRangeMode_0_0value?: DynamicRangeMode | undefined
+    _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hdrBrightness_0_0value?: double | undefined
     _interpolation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _interpolation_0_0value?: ImageInterpolation | undefined
     _sourceSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -80,7 +84,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pointLight_0_0value?: PointLightStyle | undefined
     _edgeAntialiasing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _edgeAntialiasing_0_0value?: number | undefined
+    _edgeAntialiasing_0_0value?: double | undefined
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: ImageOnCompleteCallback | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -99,14 +103,19 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _enhancedImageQuality_0_0value?: image.ResolutionQuality | undefined
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
+    _supportSvg2_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _supportSvg2_0_0value?: boolean | undefined
+    _contentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentTransition_0_0value?: ContentTransitionEffect | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImagePeer;
         if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alt_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAltAttribute((this._alt_0_0value as string | Resource | image.PixelMap | undefined));
+                    peer.setAltAttribute((this._alt_0_0value as string | Resource | image.PixelMap | ImageAlt | undefined));
                     this._alt_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -116,7 +125,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAltAttribute((undefined as string | Resource | image.PixelMap | undefined));
+                    peer.setAltAttribute((undefined as string | Resource | image.PixelMap | ImageAlt | undefined));
                 }
             }
         }
@@ -282,6 +291,24 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHdrBrightnessAttribute((this._hdrBrightness_0_0value as double | undefined));
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHdrBrightnessAttribute((undefined as double | undefined));
+                }
+            }
+        }
         if (this._interpolation_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._interpolation_0_flag) {
@@ -412,7 +439,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             switch (this._edgeAntialiasing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as double | undefined));
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -422,7 +449,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEdgeAntialiasingAttribute((undefined as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -448,7 +475,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             switch (this._onError_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as ImageErrorCallback | undefined));
+                    hookImageOnError(peer, (this._onError_0_0value as ImageErrorCallback | undefined));
                     this._onError_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -458,7 +485,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as ImageErrorCallback | undefined));
+                    hookImageOnError(peer, (undefined as ImageErrorCallback | undefined));
                 }
             }
         }
@@ -588,9 +615,46 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (this._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSupportSvg2Attribute((this._supportSvg2_0_0value as boolean | undefined));
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSupportSvg2Attribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentTransitionAttribute((this._contentTransition_0_0value as ContentTransitionEffect | undefined));
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentTransitionAttribute((undefined as ContentTransitionEffect | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ImageModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alt_0_flag) {
@@ -600,7 +664,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                     break;
                 }
                 default: {
-                    this.alt((undefined as string | Resource | image.PixelMap | undefined));
+                    this.alt((undefined as string | Resource | image.PixelMap | ImageAlt | undefined));
                 }
             }
         }
@@ -721,6 +785,19 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (modifier._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hdrBrightness(modifier._hdrBrightness_0_0value);
+                    break;
+                }
+                default: {
+                    this.hdrBrightness((undefined as double | undefined));
+                }
+            }
+        }
         if (modifier._interpolation_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._interpolation_0_flag) {
@@ -821,7 +898,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                     break;
                 }
                 default: {
-                    this.edgeAntialiasing((undefined as number | undefined));
+                    this.edgeAntialiasing((undefined as double | undefined));
                 }
             }
         }
@@ -942,8 +1019,34 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (modifier._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.supportSvg2(modifier._supportSvg2_0_0value);
+                    break;
+                }
+                default: {
+                    this.supportSvg2((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentTransition(modifier._contentTransition_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentTransition((undefined as ContentTransitionEffect | undefined));
+                }
+            }
+        }
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1053,6 +1156,17 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         }
         return this
     }
+    hdrBrightness(value: double | undefined): this {
+        if (((this._hdrBrightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hdrBrightness_0_0value) !== (value)))
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hdrBrightness_0_0value = value
+        } else
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     interpolation(value: ImageInterpolation | undefined): this {
         if (((this._interpolation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1130,7 +1244,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         }
         return this
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         if (((this._edgeAntialiasing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._edgeAntialiasing_0_0value) !== (value)))
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1237,6 +1351,28 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         } else
         {
             this._orientation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    supportSvg2(value: boolean | undefined): this {
+        if (((this._supportSvg2_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportSvg2_0_0value) !== (value)))
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.UPDATE
+            this._supportSvg2_0_0value = value
+        } else
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        if (((this._contentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentTransition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentTransition_0_0value = value
+        } else
+        {
+            this._contentTransition_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

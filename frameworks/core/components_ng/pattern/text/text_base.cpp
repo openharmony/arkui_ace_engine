@@ -167,9 +167,10 @@ void TextBase::SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect,
     }
 }
 
-TextAlign TextBase::CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction)
+TextAlign TextBase::CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction, TextDirection textDirection)
 {
-    if (direction == TextDirection::RTL) {
+    if ((direction == TextDirection::RTL && textDirection == TextDirection::INHERIT) ||
+        textDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::START) {
             return TextAlign::END;
         } else if (textAlign == TextAlign::END) {

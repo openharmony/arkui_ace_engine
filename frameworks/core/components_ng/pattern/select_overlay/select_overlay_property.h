@@ -138,6 +138,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_HANDLE_COLOR_FLAG = 1 << 7;
 inline constexpr SelectOverlayDirtyFlag DIRTY_AI_MENU_ITEM = 1 << 8;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ASK_CELIA = 1 << 9;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AI_DETECT = 1 << 10;
+inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AI_MENU = 1 << 11;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
@@ -159,11 +160,14 @@ inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_EMAIL_FLAG = 1 << 
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_ADDRESS_FLAG = 1 << 10;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_DATETIME_FLAG = 1 << 11;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_ASK_CELIA_FLAG = 1 << 12;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_AUTO_FILL_FLAG = 1 << 13;
 
 inline constexpr char OH_DEFAULT_CUT[] = "OH_DEFAULT_CUT";
 inline constexpr char OH_DEFAULT_COPY[] = "OH_DEFAULT_COPY";
 inline constexpr char OH_DEFAULT_PASTE[] = "OH_DEFAULT_PASTE";
 inline constexpr char OH_DEFAULT_SELECT_ALL[] = "OH_DEFAULT_SELECT_ALL";
+inline constexpr char OH_DEFAULT_AUTO_FILL[] = "OH_DEFAULT_AUTO_FILL";
+inline constexpr char OH_DEFAULT_PASSWORD_VAULT[] = "OH_DEFAULT_PASSWORD_VAULT";
 inline constexpr char OH_DEFAULT_TRANSLATE[] = "OH_DEFAULT_TRANSLATE";
 inline constexpr char OH_DEFAULT_SEARCH[] = "OH_DEFAULT_SEARCH";
 inline constexpr char OH_DEFAULT_SHARE[] = "OH_DEFAULT_SHARE";
@@ -184,6 +188,8 @@ enum class OptionMenuActionId {
     CUT,
     PASTE,
     SELECT_ALL,
+    AUTO_FILL,
+    PASSWORD_VAULT,
     TRANSLATE,
     SHARE,
     SEARCH,
@@ -204,6 +210,24 @@ enum class CloseReason {
     CLOSE_REASON_DRAG_FLOATING,
     CLOSE_REASON_WINDOW_SIZE_CHANGE,
     CLOSE_REASON_SELECT_ALL
+};
+enum class NativeMenuId : int32_t {
+    ID_CUT = 0,
+    ID_COPY = 1,
+    ID_PASTE = 2,
+    ID_SELECT_ALL = 3,
+    ID_COLLABORATION_SERVICE = 4,
+    ID_CAMERA_INPUT = 5,
+    ID_AI_WRITE = 6,
+    ID_TRANSLATE = 7,
+    ID_SEARCH = 8,
+    ID_SHARE = 9,
+    ID_AI_MENU_URL = 10,
+    ID_AI_MENU_EMAIL = 11,
+    ID_AI_MENU_PHONE = 12,
+    ID_AI_MENU_ADDRESS = 13,
+    ID_AI_MENU_DATETIME = 14,
+    ID_ASK_CELIA = 15
 };
 
 struct HoldSelectionInfo {
@@ -229,6 +253,7 @@ struct SelectMenuInfo {
     bool showCopy = true;
     bool showPaste = true;
     bool showCopyAll = true;
+    bool showAutoFill = false;
     bool showCut = true;
     bool showTranslate = false;
     bool showShare = false;
@@ -254,6 +279,7 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
+                 (showAutoFill == info.showAutoFill) &&
                  (showCut == info.showCut) && (showTranslate == info.showTranslate) &&
                  (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
@@ -271,6 +297,7 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showCopy);
         JSON_STRING_PUT_BOOL(jsonValue, showPaste);
         JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
+        JSON_STRING_PUT_BOOL(jsonValue, showAutoFill);
         JSON_STRING_PUT_BOOL(jsonValue, showCut);
         JSON_STRING_PUT_BOOL(jsonValue, showTranslate);
         JSON_STRING_PUT_BOOL(jsonValue, showSearch);
@@ -283,10 +310,16 @@ struct SelectMenuInfo {
     }
 };
 
+struct AutoFillSubMenuCallback {
+    std::function<void()> onPasswordVault;
+};
+
 struct SelectMenuCallback {
     std::function<void()> onCopy;
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
+    std::function<void()> onAutoFill;
+    AutoFillSubMenuCallback autoFillSubMenuCallback;
     std::function<void()> onCut;
     std::function<void()> onTranslate;
     std::function<void()> onSearch;
@@ -475,6 +508,7 @@ DEFINE_MENU_CHECK_METHOD(AIEmail);
 DEFINE_MENU_CHECK_METHOD(AIAddress);
 DEFINE_MENU_CHECK_METHOD(AIDatetime);
 DEFINE_MENU_CHECK_METHOD(AskCelia);
+DEFINE_MENU_CHECK_METHOD(AutoFill);
 } // namespace TextSystemMenu
 } // namespace OHOS::Ace::NG
 

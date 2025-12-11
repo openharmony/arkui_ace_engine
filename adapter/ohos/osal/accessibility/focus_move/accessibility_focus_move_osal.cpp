@@ -12,6 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_ng.h"
@@ -50,41 +51,46 @@ AceFocusMoveDetailCondition FocusStrategyOsal::GetAceCondition(
     return condition;
 }
 
-FocusMoveResult FocusStrategyOsal::HandleFocusMoveSearchResult(
+FocusMoveResultType FocusStrategyOsal::HandleFocusMoveSearchResult(
     const Accessibility::AccessibilityFocusMoveParam& param,
     const std::shared_ptr<FocusRulesCheckNode>& targetNode,
     AceFocusMoveResult result,
     Accessibility::AccessibilityElementInfo& info)
 {
-    FocusMoveResult finalResult = FocusMoveResult::SEARCH_FAIL;
+    FocusMoveResultType finalResult = FocusMoveResultType::SEARCH_FAIL;
     auto finalNode = targetNode;
     bool useFinalNode = true;
     if (result == AceFocusMoveResult::FIND_SUCCESS) {
-        finalResult = FocusMoveResult::SEARCH_SUCCESS;
+        finalResult = FocusMoveResultType::SEARCH_SUCCESS;
     } else if (result == AceFocusMoveResult::FIND_CHILDTREE) {
         finalResult = ((param.direction == FocusMoveDirection::BACKWARD)
             || (param.direction == FocusMoveDirection::FIND_LAST)) ?
-                FocusMoveResult::DOUBLE_CHECK_CHILD_PROPERTY_AND_GET_LAST
-                    : FocusMoveResult::DOUBLE_CHECK_CHILD_PROPERTY;
+                FocusMoveResultType::DOUBLE_CHECK_CHILD_PROPERTY_AND_GET_LAST
+                    : FocusMoveResultType::DOUBLE_CHECK_CHILD_PROPERTY;
     } else if ((result == AceFocusMoveResult::FIND_FAIL_IN_CHILDTREE)
         && (param.direction != FocusMoveDirection::FIND_LAST)) {
-            finalResult = FocusMoveResult::SEARCH_FAIL_IN_CHILDTREE;
+            finalResult = FocusMoveResultType::SEARCH_FAIL_IN_CHILDTREE;
             finalNode = ChangeToRoot();
     } else if (result == AceFocusMoveResult::FIND_EMBED_TARGET) {
-        finalResult = FocusMoveResult::SEARCH_NEXT;
+        finalResult = FocusMoveResultType::SEARCH_NEXT;
         if (!ChangeToEmbed(targetNode, info)) {
-            finalResult = FocusMoveResult::SEARCH_FAIL;
+            finalResult = FocusMoveResultType::SEARCH_FAIL;
         }
         useFinalNode = false;
     } else if (result == AceFocusMoveResult::FIND_FAIL_IN_SCROLL) {
-        finalResult = FocusMoveResult::SERACH_FAIL_IN_SCROLL;
+        finalResult = FocusMoveResultType::SEARCH_FAIL_IN_SCROLL;
+    } else if (result == AceFocusMoveResult::FIND_FAIL_LOST_NODE) {
+        finalResult = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
+    } else if (result == AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE) {
+        finalResult = FocusMoveResultType::SEARCH_FAIL;
     }
+
     if (useFinalNode && finalNode) {
         if (!UpdateElementInfo(finalNode, info)) {
-            finalResult = FocusMoveResult::SEARCH_FAIL;
+            finalResult = FocusMoveResultType::SEARCH_FAIL;
         }
     }
-    if (finalResult == FocusMoveResult::SEARCH_FAIL) {
+    if (finalResult == FocusMoveResultType::SEARCH_FAIL) {
         InvailidElementInfo(info);
     }
     return finalResult;
@@ -95,12 +101,23 @@ FocusMoveResult FocusStrategyOsal::ExecuteFocusMoveSearch(
     const Accessibility::AccessibilityFocusMoveParam& param,
     Accessibility::AccessibilityElementInfo& info)
 {
+    FocusMoveResult errorResult = {
+        .resultType = FocusMoveResultType::NOT_SUPPORT,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = false,
+    };
+
     InvailidElementInfo(info);
     auto accessibilityManager = accessibilityManager_.Upgrade();
-    CHECK_NULL_RETURN(accessibilityManager, FocusMoveResult::NOT_SUPPORT);
+    CHECK_NULL_RETURN(accessibilityManager, errorResult);
     AceFocusMoveDetailCondition condition = GetAceCondition(param);
     UpdateOriginNodeInfo(elementId); // get root node, update visible
     auto checkNode = GetCurrentCheckNode();
+    errorResult.resultType = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
+    errorResult.needTerminate = true;
+    CHECK_NULL_RETURN(checkNode, errorResult);
     UpdateNextFocus(checkNode);
     std::shared_ptr<FocusRulesCheckNode> targetNode;
     AccessibilityFocusStrategy strategy;
@@ -113,27 +130,48 @@ FocusMoveResult FocusStrategyOsal::ExecuteFocusMoveSearch(
         result = strategy.FindLastNodeWithoutCheck(condition, checkNode, targetNode);
     } else {
         InvailidElementInfo(info);
-        return FocusMoveResult::NOT_SUPPORT;
+        errorResult.resultType = FocusMoveResultType::NOT_SUPPORT;
+        return errorResult;
     }
-    return HandleFocusMoveSearchResult(param, targetNode, result, info);
+    FocusMoveResult finalResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = false,
+    };
+    finalResult.resultType = HandleFocusMoveSearchResult(param, targetNode, result, info);
+    return finalResult;
 }
 
-void FocusStrategyOsal::ProcessGetScrollAncestor(
+FocusMoveResult FocusStrategyOsal::ProcessGetScrollAncestor(
     const int64_t elementId,
     const Accessibility::AccessibilityFocusMoveParam& param,
     std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
+    FocusMoveResult errorResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = false,
+    };
     auto accessibilityManager = accessibilityManager_.Upgrade();
-    CHECK_NULL_VOID(accessibilityManager);
+    CHECK_NULL_RETURN(accessibilityManager, errorResult);
     UpdateOriginNodeInfo(elementId); // get root node, update visible
     auto checkNode = GetCurrentCheckNode();
+    errorResult.resultType = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
+    errorResult.needTerminate = true;
+    CHECK_NULL_RETURN(checkNode, errorResult);
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
     AccessibilityFocusStrategy strategy;
     AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     if (param.direction == FocusMoveDirection::GET_BACKWARD_SCROLL_ANCESTOR) {
         strategy.FindBackwardScrollAncestor(condition, checkNode, targetNodes);
-    } else {
+    } else if (param.direction == FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR) {
         strategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
+    } else {
+        strategy.FindAnyScrollAncestor(condition, checkNode, targetNodes);
     }
     for (auto& bastTarget : targetNodes) {
         Accessibility::AccessibilityElementInfo info;
@@ -142,6 +180,15 @@ void FocusStrategyOsal::ProcessGetScrollAncestor(
         }
         infos.emplace_back(info);
     }
+    FocusMoveResult finalResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = false,
+    };
+    finalResult.resultType = infos.empty() ? FocusMoveResultType::SEARCH_FAIL : FocusMoveResultType::SEARCH_SUCCESS;
+    return finalResult;
 }
 
 bool FocusStrategyOsal::IsProcessGetScrollAncestor(const Accessibility::AccessibilityFocusMoveParam& param)
@@ -159,53 +206,172 @@ bool FocusStrategyOsal::IsProcessGetScrollAncestor(const Accessibility::Accessib
     return result;
 }
 
+bool FocusStrategyOsal::IsProcessDetectFocusable(const Accessibility::AccessibilityFocusMoveParam& param)
+{
+    bool result = false;
+    switch (param.direction) {
+        case FocusMoveDirection::DETECT_FOCUSABLE_IN_FOCUS_MOVE:
+        case FocusMoveDirection::DETECT_FOCUSABLE_IN_HOVER:
+            result = true;
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+bool FocusStrategyOsal::CheckIsRootType(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isHit = false;
+    auto checkResult = client->CheckNodeIsSpecificType(
+        checkNode, Accessibility::ReadableSpecificType::ROOT_TYPE, isHit);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isHit;
+}
+
+bool FocusStrategyOsal::CheckIsReadable(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isReadable = false;
+    auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isReadable;
+}
+
+bool FocusStrategyOsal::CheckIsReadableRulesEnable()
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isScreenReaderRulesEnabled = false;
+    auto result = client->IsScreenReaderRulesEnabled(isScreenReaderRulesEnabled);
+    CHECK_NE_RETURN(result, Accessibility::RET_OK, false);
+    return isScreenReaderRulesEnabled;
+}
+
+bool FocusStrategyOsal::NeedChangeToReadableNodeThroughAncestor(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode)
+{
+    auto result = CheckIsReadableRulesEnable();
+    CHECK_NE_RETURN(result, true, false);
+    CHECK_NULL_RETURN(checkNode, false);
+    auto targetCheckNode = checkNode;
+    while (targetCheckNode) {
+        if (CheckIsRootType(targetCheckNode)) {
+            break;
+        }
+        if (CheckIsReadable(targetCheckNode)) {
+            targetNode = targetCheckNode;
+            return true;
+        }
+        targetCheckNode = targetCheckNode->GetAceParent();
+    }
+    return true;
+}
+
 void JsAccessibilityManager::DetectElementInfoFocusableThroughAncestor(
-    const Accessibility::AccessibilityElementInfo &info,
-    const int64_t parentId, const int32_t requestId,
+    const Accessibility::AccessibilityElementInfo& info,
+    const Accessibility::AccessibilityFocusMoveParam param, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback &callback, const int32_t windowId)
 {
     auto jsAccessibilityManager = AceType::Claim(this);
     auto mainContext = context_.Upgrade();
     auto context = GetPipelineByWindowId(windowId);
     FocusStrategyOsalNG strategy(jsAccessibilityManager, context, mainContext);
-    Accessibility::AccessibilityElementInfo targetInfo;
-    auto result = strategy.DetectElementInfoFocusableThroughAncestor(info, parentId, targetInfo);
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(result, requestId, targetInfo);
+    std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+    auto result = strategy.DetectElementInfoFocusableThroughAncestor(info, param, targetInfos, windowId);
+    HILOG_INFO_FOCUS("detect result %{public}d requestId %{public}d nowLevelBelongTreeId %{public}d \
+        parentWindowId %{public}d changeToNewInfo %{public}d needTerminate %{public}d",
+        result.resultType, requestId, result.nowLevelBelongTreeId,
+        result.parentWindowId, result.changeToNewInfo, result.needTerminate);
+    callback.SetFocusMoveSearchWithConditionResult(targetInfos, result, requestId);
+}
+
+void JsAccessibilityManager::FocusMoveSearchWithConditionForNode(
+    const AccessibilityElementInfo& info, const Accessibility::AccessibilityFocusMoveParam param,
+    const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId)
+{
+    FocusMoveResult errorResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = true,
+    };
+    auto elementId = info.GetAccessibilityId();
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+    if (FocusStrategyOsal::IsProcessGetScrollAncestor(param)) {
+        ProcessGetScrollAncestorNode(splitElementId, param, requestId, callback);
+        return;
+    }
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    if (FocusStrategyOsal::IsProcessDetectFocusable(param)) {
+        nodeInfo.SetValidElement(false);
+        infos.emplace_back(nodeInfo);
+        callback.SetFocusMoveSearchWithConditionResult(infos, errorResult, requestId);
+        return;
+    }
+    FocusMoveSearchAccessibilityNodeWithCondition(splitElementId, param, requestId, callback);
 }
 
 void JsAccessibilityManager::FocusMoveSearchWithCondition(
-    const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+    const AccessibilityElementInfo& info, const Accessibility::AccessibilityFocusMoveParam param,
     const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId)
 {
+    FocusMoveResult errorResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = true,
+    };
     Accessibility::AccessibilityElementInfo nodeInfo;
     std::list<Accessibility::AccessibilityElementInfo> infos;
     auto context = GetPipelineByWindowId(windowId);
     if (!context) {
         nodeInfo.SetValidElement(false);
         infos.emplace_back(nodeInfo);
-        callback.SetFocusMoveSearchWithConditionResult(infos, FocusMoveResult::SEARCH_FAIL, requestId);
+        callback.SetFocusMoveSearchWithConditionResult(infos, errorResult, requestId);
         return;
     }
+    auto elementId = info.GetAccessibilityId();
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         if (FocusStrategyOsal::IsProcessGetScrollAncestor(param)) {
-            ProcessGetScrollAncestor(elementId, param, context, requestId, callback);
+            if (param.detectParent) {
+                splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+                splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+                AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+                    param.parentId, splitElementId, splitTreeId);
+            }
+            ProcessGetScrollAncestor(splitElementId, param, context, requestId, callback);
             return;
         }
-        auto result = FocusMoveSearchWithConditionNG(elementId, param, context, nodeInfo);
+
+        if (FocusStrategyOsal::IsProcessDetectFocusable(param)) {
+            DetectElementInfoFocusableThroughAncestor(info, param, requestId, callback, windowId);
+            return;
+        }
+        auto result = FocusMoveSearchWithConditionNG(splitElementId, param, context, nodeInfo);
         infos.emplace_back(nodeInfo);
         HILOG_INFO_FOCUS("focus move search result id %{public}" PRId64 ", "
             "ret %{public}d requestID %{public}d",
-            nodeInfo.GetAccessibilityId(), result, requestId);
+            nodeInfo.GetAccessibilityId(), result.resultType, requestId);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
 
-    if (FocusStrategyOsal::IsProcessGetScrollAncestor(param)) {
-        ProcessGetScrollAncestorNode(elementId, param, requestId, callback);
-        return;
-    }
-    FocusMoveSearchAccessibilityNodeWithCondition(elementId, param, requestId, callback);
+    FocusMoveSearchWithConditionForNode(info, param, requestId, callback, windowId);
 }
 
 void JsAccessibilityManager::FocusMoveSearchAccessibilityNodeWithCondition(
@@ -240,16 +406,9 @@ void JsAccessibilityManager::ProcessGetScrollAncestor(
     auto mainContext = context_.Upgrade();
     FocusStrategyOsalNG strategy(jsAccessibilityManager, context, mainContext);
     std::list<Accessibility::AccessibilityElementInfo> infos;
-    strategy.ProcessGetScrollAncestor(elementId, param, infos);
-    auto result = FocusMoveResult::SEARCH_SUCCESS;
-    if (infos.empty()) {
-        Accessibility::AccessibilityElementInfo info;
-        info.SetValidElement(false);
-        infos.emplace_back(info);
-        result = FocusMoveResult::SEARCH_FAIL;
-    }
+    auto result = strategy.ProcessGetScrollAncestor(elementId, param, infos);
     HILOG_INFO_FOCUS("focus move search get scroll result  %{public}d requestID %{public}d",
-        result, requestId);
+        result.resultType, requestId);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
@@ -260,14 +419,7 @@ void JsAccessibilityManager::ProcessGetScrollAncestorNode(
     auto jsAccessibilityManager = AceType::Claim(this);
     FocusStrategyOsalNode strategy(jsAccessibilityManager);
     std::list<Accessibility::AccessibilityElementInfo> infos;
-    strategy.ProcessGetScrollAncestor(elementId, param, infos);
-    auto result = FocusMoveResult::SEARCH_SUCCESS;
-    if (infos.empty()) {
-        Accessibility::AccessibilityElementInfo info;
-        info.SetValidElement(false);
-        infos.emplace_back(info);
-        result = FocusMoveResult::SEARCH_FAIL;
-    }
+    auto result = strategy.ProcessGetScrollAncestor(elementId, param, infos);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
@@ -307,6 +459,9 @@ bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode
     CHECK_EQUAL_RETURN(accessibilityManager->GetTreeId(), 0, true);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(ngPipeline, true);
+    auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, true);
+    CHECK_EQUAL_RETURN(container->IsSubWindow(), true, true);
     readableNode = ngPipeline->GetRootElement();
     return true;
 }

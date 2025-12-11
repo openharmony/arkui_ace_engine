@@ -21,6 +21,7 @@ import { ButtonAttribute, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, 
     FontWeight } from "../framework";
 import { Resource } from "global.resource";
 import { ContentModifier } from "#handwritten";
+import { hookButtonContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
     constructParam(...params: Object[]): this {
         if (params.length > 2) {
@@ -111,8 +112,8 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
         this.markDirty();
         return this;
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
-        const value_casted = value as (number | FontWeight | string | undefined);
+    fontWeight(value: int | FontWeight | string | undefined): this {
+        const value_casted = value as (int | FontWeight | string | undefined);
         this.getPeer()?.setFontWeightAttribute(value_casted);
         this.markDirty();
         return this;
@@ -130,6 +131,7 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
         return this;
     }
     contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        hookButtonContentModifier(this.getPeer(), value);
         this.markDirty();
         return this;
     }

@@ -76,4 +76,16 @@ void FontManager::UpdateHybridRenderNodes() {}
 void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const {}
 void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content) {}
 void FontManager::StartAbilityOnCalendar(const std::map<std::string, std::string>& params) const {}
+void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
+{
+    if (std::find(std::begin(fontNames_), std::end(fontNames_), familyName) == std::end(fontNames_)) {
+        fontNames_.emplace_back(familyName);
+    }
+}
+
+void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    fontList = fontNames_;
+}
 } // namespace OHOS::Ace

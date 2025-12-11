@@ -63,6 +63,7 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -132,6 +133,28 @@ std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS:
     });
     res = res + "]";
     return res;
+}
+
+void BuildSystemBarProperties(Rosen::SystemBarProperty statusBar, Rosen::SystemBarProperty navIndicator,
+    const PageViewportConfigParams& params, std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    if (params.enableStatusBar.has_value()) {
+        statusBar.enable_ = params.enableStatusBar.value();
+        statusBar.enableAnimation_ = params.statusBarAnimation.value_or(false);
+        SetSystemBarPropertyEnableFlag(statusBar);
+        properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, statusBar);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "build systemBarProperties with enableStatusBar:%{public}d, statusBarAnimation:%{public}d",
+            params.enableStatusBar.value(), params.statusBarAnimation.value_or(false));
+    }
+    if (params.enableNavIndicator.has_value()) {
+        navIndicator.enable_ = params.enableNavIndicator.value();
+        SetSystemBarPropertyEnableFlag(navIndicator);
+        properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, navIndicator);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "build systemBarProperties with enableNavIndicator:%{public}d",
+            params.enableNavIndicator.value());
+    }
 }
 
 class WindowOrientationChangeListener : public OHOS::Rosen::IWindowOrientationChangeListener {
@@ -452,7 +475,9 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
     taskExecutor_ = taskExecutorImpl;
     // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ ||
+        type_ == FrontendType::ARK_TS || type_ == FrontendType::DYNAMIC_HYBRID_STATIC ||
+        type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         GetSettings().useUIAsJSThread = true;
     } else {
         taskExecutorImpl->InitJsThread();
@@ -1394,21 +1419,26 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
+    auto&& densityChangeCallback = [id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density, id]() {
-            context->OnSurfaceDensityChanged(density);
-            if (context->IsNeedReloadDensity()) {
-                auto container = Container::GetContainer(id);
-                CHECK_NULL_VOID(container);
-                auto aceContainer = DynamicCast<AceContainer>(container);
-                CHECK_NULL_VOID(aceContainer);
-                aceContainer->NotifyDensityUpdate(density);
-                context->SetIsNeedReloadDensity(false);
+        auto container = Container::GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto callback = [container, density]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->OnSurfaceDensityChanged(density);
+                if (pipelineContext->IsNeedReloadDensity()) {
+                    auto aceContainer = DynamicCast<AceContainer>(container);
+                    CHECK_NULL_VOID(aceContainer);
+                    aceContainer->NotifyDensityUpdate(density);
+                    pipelineContext->SetIsNeedReloadDensity(false);
+                }
             }
         };
-        auto taskExecutor = context->GetTaskExecutor();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
@@ -1633,12 +1663,16 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-
+    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content, params);
+        auto result = front->RunPageByNamedRouter(content, params);
+        container->LoadCompleteManagerStopCollect();
+        return result;
     }
 
-    return front->RunPage(content, params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1649,7 +1683,10 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    return front->RunPage(content, params);
+    container->LoadCompleteManagerStartCollect(params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 bool AceContainer::RunDynamicPage(
@@ -1688,9 +1725,10 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
-          onFinish_(onFinish)
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), triggerType_(triggerType),
+          isNative_(isNative), onFinish_(onFinish)
     {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
@@ -1708,19 +1746,20 @@ public:
             auto node = node_.Upgrade();
             CHECK_NULL_VOID(node);
             taskExecutor->PostTask(
-                [viewDataWrap, node, autoFillType = autoFillType_]() {
+                [viewDataWrap, node, autoFillType = autoFillType_, triggerType = triggerType_]() {
                     if (node) {
-                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType);
+                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType, triggerType);
                     }
                 },
                 TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");
             return;
         }
-
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
         taskExecutor->PostTask(
-            [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
+            [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {
-                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap);
+                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap, triggerType, node);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestSuccess");
@@ -1889,6 +1928,7 @@ private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+    AceAutoFillTriggerType triggerType_ = AceAutoFillTriggerType::AUTO_REQUEST;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
@@ -1972,6 +2012,11 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode>& node, RefPt
                 metadataObject->Put("username", autoFillUserName.c_str());
                 nodeInfoWrap->SetMetadata(metadataObject->ToString());
                 viewDataWrap->SetUserSelected(true);
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_PASSWORD) {
+                auto jsonValue = JsonUtil::Create(true);
+                jsonValue->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(jsonValue->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
         pattern->SetAutoFillUserName("");
@@ -2048,7 +2093,8 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
 
 int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -2064,7 +2110,8 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, triggerType, isNative,
+        onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -2088,6 +2135,7 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    autoFillRequest.autoFillTriggerType = static_cast<AbilityRuntime::AutoFill::AutoFillTriggerType>(triggerType);
     AbilityRuntime::AutoFill::AutoFillResult result;
     auto resultCode =
         AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);
@@ -2394,6 +2442,13 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
         return true;
     }
     return false;
+}
+
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
 }
 
 void AceContainer::TriggerGarbageCollection()
@@ -3126,19 +3181,12 @@ void AceContainer::InitWindowCallback()
             CHECK_NULL_RETURN(window, false);
             return AceContainer::SetSystemBarEnabled(window, type, enable, needAnimation);
         });
-    windowManager->SetGetCurrentViewportConfigCallback(
-        [weakContainer = WeakClaim(this)]() -> RefPtr<PageViewportConfig> {
+    windowManager->SetGetPageViewportConfigCallback([weakContainer = WeakClaim(this)](
+        const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+        const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig) -> bool {
             auto container = weakContainer.Upgrade();
-            CHECK_NULL_RETURN(container, nullptr);
-            return container->GetCurrentViewportConfig();
-        });
-    windowManager->SetGetTargetViewportConfigCallback([weakContainer = WeakClaim(this)](
-        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) -> RefPtr<PageViewportConfig> {
-            auto container = weakContainer.Upgrade();
-            CHECK_NULL_RETURN(container, nullptr);
-            return container->GetTargetViewportConfig(
-                orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+            CHECK_NULL_RETURN(container, false);
+            return container->GetPageViewportConfig(currentParams, currentConfig, targetParams, targetConfig);
         });
     windowManager->SetIsSetOrientationNeededCallback(
         [window = uiWindow_](std::optional<Orientation> orientation) -> bool {
@@ -3476,6 +3524,10 @@ void AceContainer::ProcessColorModeUpdate(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     configurationChange.colorModeUpdate = true;
+    if (!SystemProperties::ConfigChangePerform() || !configurationChange.OnlyColorModeChange()) {
+        // clear cache of ark theme instances when configuration updates
+        NG::TokenThemeStorage::GetInstance()->CacheClear();
+    }
     if (parsedConfig.colorMode == "dark") {
         SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);
@@ -3664,7 +3716,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(
@@ -4721,9 +4773,16 @@ void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
 
 void AceContainer::SetIsFocusActive(bool isFocusActive)
 {
-    auto pipelineContext = DynamicCast<NG::PipelineContext>(GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetIsFocusActive(isFocusActive);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this), isFocusActive]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetIsFocusActive(isFocusActive);
+    },
+    TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 bool AceContainer::CloseWindow(int32_t instanceId)
@@ -4828,15 +4887,12 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
     avoidInfoMgr->SetBuildAvoidInfoCallback(std::move(buildCallback));
 }
 
-RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
+void AceContainer::PrintCachedCurrentViewportConfig() const
 {
-    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
-    CHECK_NULL_RETURN(config, nullptr);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(context, nullptr);
+    CHECK_NULL_VOID(context);
     auto mgr = context->GetSafeAreaManager();
-    CHECK_NULL_RETURN(mgr, nullptr);
-    config->SetPipelineContext(WeakPtr(context));
+    CHECK_NULL_VOID(mgr);
 
     ViewportConfig viewportConfig;
     // the position is not needed, set it to (0, 0)
@@ -4848,7 +4904,6 @@ RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
         displayOri, width, height);
     viewportConfig.SetSize(width, height);
     viewportConfig.SetOrientation(displayOri);
-    config->SetViewportConfig(viewportConfig);
 
     AvoidAreaInfo avoidAreas;
     auto insets = mgr->GetSystemSafeArea();
@@ -4864,64 +4919,69 @@ RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
         "current TYPE_NAVIGATION_INDICATOR safeArea:%{public}s", insets.ToString().c_str());
     auto navArea = ConvertAvoidArea(insets, width, height);
     avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, navArea);
-    config->SetAvoidAreas(avoidAreas);
 
-    return config;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Current[Self], ViewportConfig: %{public}s, SafeAreas:%{public}s",
+        viewportConfig.ToString().c_str(), StringifyAvoidAreas(avoidAreas).c_str());
 }
 
-RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(
-    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const
+bool AceContainer::GetPageViewportConfig(
+    const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+    const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig) const
 {
-    CHECK_NULL_RETURN(uiWindow_, nullptr);
-    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
-    CHECK_NULL_RETURN(config, nullptr);
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto target = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(target, false);
+    auto current = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(current, false);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(context, nullptr);
-    config->SetPipelineContext(WeakPtr(context));
+    CHECK_NULL_RETURN(context, false);
+    target->SetPipelineContext(WeakPtr(context));
+    current->SetPipelineContext(WeakPtr(context));
 
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
-    if (enableStatusBar.has_value()) {
-        auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
-        property.enable_ = enableStatusBar.value();
-        property.enableAnimation_ = statusBarAnimation.value_or(false);
-        SetSystemBarPropertyEnableFlag(property);
-        properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, property);
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "GetTargetViewportInfo with enableStatusBar:%{public}d, statusBarAnimation:%{public}d",
-            enableStatusBar.value(), statusBarAnimation.value_or(false));
-    }
-    if (enableNavIndicator.has_value()) {
-        auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-        property.enable_ = enableNavIndicator.value();
-        SetSystemBarPropertyEnableFlag(property);
-        properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property);
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "GetTargetViewportInfo with enableNavIndicator:%{public}d",
-            enableNavIndicator.value());
-    }
+    auto statusBar = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navIndicator = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
+    BuildSystemBarProperties(statusBar, navIndicator, currentParams, currentProperties);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
+    BuildSystemBarProperties(statusBar, navIndicator, targetParams, targetProperties);
+
     Rosen::Orientation ori = Rosen::Orientation::INVALID;
-    if (orientation.has_value()) {
-        ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+    if (targetParams.orientation.has_value()) {
+        ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(targetParams.orientation.value()));
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "GetTargetViewportInfo with orientation:%{public}d", static_cast<int32_t>(ori));
+            "GetPageViewportConfig with orientation:%{public}d", static_cast<int32_t>(ori));
     }
 
-    ViewportConfig viewportConfig;
-    AvoidAreaInfo avoidAreas;
+    Rosen::ViewportConfigAndAvoidArea targetInfo;
+    Rosen::ViewportConfigAndAvoidArea currentInfo;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get targetConfigInfo with ori:%{public}d", static_cast<int32_t>(ori));
-    auto ret = uiWindow_->GetTargetOrientationConfigInfo(ori, properties, viewportConfig, avoidAreas);
+    auto ret = uiWindow_->GetTargetOrientationConfigInfo(
+        ori, targetProperties, currentProperties, targetInfo, currentInfo);
     if (Rosen::WMError::WM_OK != ret) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to get targetOrientationInfo from window, error:%{public}d",
             static_cast<int32_t>(ret));
-        return nullptr;
+        return false;
+    }
+    if (!targetInfo.config || !currentInfo.config) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "Failed to get targetOrientationInfo, invalid targetConfig or currentConfig");
+        return false;
     }
 
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ViewportConfig: %{public}s, SafeAreas:%{public}s",
-        viewportConfig.ToString().c_str(), StringifyAvoidAreas(avoidAreas).c_str());
-    config->SetViewportConfig(viewportConfig);
-    config->SetAvoidAreas(avoidAreas);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Target, ViewportConfig: %{public}s, SafeAreas:%{public}s",
+        targetInfo.config->ToString().c_str(), StringifyAvoidAreas(targetInfo.avoidAreas).c_str());
+    target->SetViewportConfig(*targetInfo.config);
+    target->SetAvoidAreas(targetInfo.avoidAreas);
 
-    return config;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Current, ViewportConfig: %{public}s, SafeAreas:%{public}s",
+        currentInfo.config->ToString().c_str(), StringifyAvoidAreas(currentInfo.avoidAreas).c_str());
+    current->SetViewportConfig(*currentInfo.config);
+    current->SetAvoidAreas(currentInfo.avoidAreas);
+    PrintCachedCurrentViewportConfig();
+    targetConfig = target;
+    currentConfig = current;
+
+    return true;
 }
 
 void AceContainer::RegisterOrientationChangeListener()
@@ -5033,5 +5093,19 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     if (subFrontend_) {
         subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
     }
+}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+}
+
+void AceContainer::LoadCompleteManagerStopCollect()
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StopCollect();
 }
 } // namespace OHOS::Ace::Platform

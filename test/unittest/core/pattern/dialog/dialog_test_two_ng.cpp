@@ -27,6 +27,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"

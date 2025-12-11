@@ -44,8 +44,6 @@ public:
         value->propSearchButtonFontSize_ = CloneSearchButtonFontSize();
         value->propFontFeature_ = CloneFontFeature();
         value->propBackgroundColor_ = CloneBackgroundColor();
-        value->propSearchIconColor_ = CloneSearchIconColor();
-        value->propCancelIconColor_ = CloneCancelIconColor();
         return value;
     }
 
@@ -60,8 +58,6 @@ public:
         ResetSearchButtonFontSize();
         ResetFontFeature();
         ResetBackgroundColor();
-        ResetSearchIconColor();
-        ResetCancelIconColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -102,11 +98,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButtonFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchIconColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelIconColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UserMargin, MarginProperty, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchIconColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelIconColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
 
 private:
     std::function<void(WeakPtr<NG::FrameNode>)> searchIconSymbol_;

@@ -86,6 +86,7 @@ public:
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 {
+    optimizer_->rvsSignalEnable_ = true;
     optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
     optimizer_->SetSlideAccepted(true);
     EXPECT_TRUE(optimizer_->slideAccepted_);
@@ -777,6 +778,58 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
     // Check that no RVS data was added
     EXPECT_TRUE(optimizer_->dptHistoryPointX_.find(1) == optimizer_->dptHistoryPointX_.end());
     EXPECT_TRUE(optimizer_->dptHistoryPointY_.find(1) == optimizer_->dptHistoryPointY_.end());
+}
+
+/**
+ * @tc.name: DispatchPointSelect003
+ * @tc.desc: test rvsSignalEnable_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect003, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    
+    TouchEvent resamplePoint;
+    resamplePoint.id = 1;
+    resamplePoint.type = TouchType::MOVE;
+    resamplePoint.x = 150;
+    resamplePoint.y = 250;
+    resamplePoint.sourceTool = SourceTool::FINGER;
+    
+    TouchEvent resultPoint;
+    
+    optimizer_->rvsEnable_ = true;
+    optimizer_->rvsSignalEnable_ = false;
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
+    optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
+    EXPECT_EQ(resultPoint.x, touchEvent.x);
+
+    optimizer_->rvsEnable_ = false;
+    optimizer_->rvsSignalEnable_ = false;
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
+    optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
+    EXPECT_EQ(resultPoint.x, touchEvent.x);
+
+    optimizer_->rvsEnable_ = false;
+    optimizer_->rvsSignalEnable_ = true;
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
+    optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
+    EXPECT_EQ(resultPoint.x, touchEvent.x);
+
+    optimizer_->rvsEnable_ = true;
+    optimizer_->rvsSignalEnable_ = true;
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
+    optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
+    EXPECT_EQ(resultPoint.x, touchEvent.x);
 }
 
 /**

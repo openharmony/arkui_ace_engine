@@ -40,7 +40,7 @@ struct DialogPropsForUpdate {
     Opt_VoidCallback cancel;
     Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses cornerRadius;
     Opt_Boolean enableHoverMode;
-    Opt_Number gridCount;
+    Opt_Int32 gridCount;
     Opt_Dimension height;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean isModal;
@@ -60,7 +60,7 @@ struct DialogPropsForUpdate {
     Opt_TransitionEffect transition;
     Opt_Dimension width;
     Opt_LevelMode levelMode;
-    Opt_Number levelUniqueId;
+    Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
 };
@@ -544,7 +544,8 @@ void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
     OHOS::Ace::NG::AlertDialogModelNG model;
     model.SetShowDialog(dialogProps);
 }
-void ShowImpl(const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* value)
+void ShowImpl(
+    const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* value)
 {
     using DialogParamsVariant = std::variant<
         Ark_AlertDialogParamWithConfirm,

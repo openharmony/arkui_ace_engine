@@ -21,6 +21,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Ace::NG {
 class MockPipelineContext : public PipelineContext {
@@ -35,6 +36,7 @@ public:
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
+    void SetDensity(double density);
     void SetInstanceId(int32_t instanceId);
     void SetContainerModalButtonsRect(bool hasModalButtonsRect);
     void SetContainerCustomTitleVisible(bool visible);
@@ -46,11 +48,17 @@ public:
     MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
     MOCK_METHOD(float, GetFontScale, ());
     MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));
+    MOCK_METHOD(bool, RequestFocus, (const std::string&, bool), (override));
 
     bool GetIsDeclarative() const override
     {
         return isDeclarative_;
     }
+
+    virtual void SetTaskExecutor(const RefPtr<TaskExecutor> &taskExecutor)
+    {
+        PipelineBase::taskExecutor_ = taskExecutor;
+    };
 
     static RefPtr<MockPipelineContext> pipeline_;
     bool IsWindowFocused() const
@@ -107,6 +115,21 @@ public:
     }
 
     std::string GetCurrentPageNameCallback()
+    {
+        return "";
+    }
+
+    const RefPtr<NG::PageInfo> GetLastPageInfo()
+    {
+        return nullptr;
+    }
+
+    std::string GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+    {
+        return "";
+    }
+
+    std::string GetCurrentPageName()
     {
         return "";
     }

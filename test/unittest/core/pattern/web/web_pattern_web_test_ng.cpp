@@ -32,6 +32,8 @@
 #undef protected
 #include "nweb.h"
 #include "nweb_handler.h"
+#include "ui/properties/ui_material.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -1347,30 +1349,6 @@ HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     webPattern->delegate_ = nullptr;
     webPattern->OnForceEnableZoomUpdate(value);
-#endif
-}
-
-/**
- * @tc.name: OnStatusBarClick
- * @tc.desc: OnStatusBarClick.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnStatusBarClick, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->isBackToTopRunning_ = true;
-    webPattern->OnStatusBarClick();
-    EXPECT_TRUE(!webPattern->isBackToTopRunning_);
 #endif
 }
 } // namespace OHOS::Ace::NG

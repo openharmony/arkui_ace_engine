@@ -31,23 +31,6 @@ class TextInputSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextInputSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textInputSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().textInput.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textInput.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class TextInputStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1534,6 +1517,59 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().textInput.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textInput.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
   constructor(value: (client: IMEClient) => void) {
     super(value);
@@ -1545,6 +1581,23 @@ class TextInputOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClien
     } else {
       getUINativeModule().textInput.setOnWillAttachIME(node, this.value);
     }
+  }
+}
+
+class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('textInputSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().textInput.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+    }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
 
@@ -1562,10 +1615,6 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
   setText(value: ResourceStr): TextInputAttribute {
@@ -2020,6 +2069,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
     return this;
   }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputIncludeFontPaddingModifier.identity, TextInputIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputFallbackLineSpacingModifier.identity, TextInputFallbackLineSpacingModifier, value);
+    return this;
+  }
   onSecurityStateChange(callback: Callback<boolean>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
       TextInputOnSecurityStateChangeModifier, callback);
@@ -2028,6 +2085,13 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   onWillAttachIME(callback: Callback<IMEClient>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnWillAttachIMEModifier.identity,
       TextInputOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectedDragPreviewStyleModifier.identity,
+        TextInputSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }

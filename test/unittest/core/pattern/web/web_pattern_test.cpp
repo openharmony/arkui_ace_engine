@@ -409,6 +409,29 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWindowShowTest012
+ * @tc.desc: Test OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnWindowShowTest012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->OnModifyDone();
+    g_webPattern->isWindowShow_ = false;
+    g_webPattern->isVisible_ = true;
+    g_webPattern->componentVisibility_ = VisibleType::VISIBLE;
+    g_webPattern->offlineWebInited_ = true;
+    auto host = g_webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+    int webId = g_webPattern->GetWebId();
+    OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, true);
+    g_webPattern->OnWindowShow();
+    EXPECT_FALSE(g_webPattern->isWindowShow_);
+#endif
+}
+
+/**
  * @tc.name: MenuAvoidKeyboard
  * @tc.desc: Test MenuAvoidKeyboard.
  * @tc.type: FUNC
@@ -705,6 +728,52 @@ HWTEST_F(WebPatternTest, HandleMouseToTouchEvent, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     result = g_webPattern->HandleMouseToTouchEvent(0.0, false, info);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnClippedSelectionBoundsChanged
+ * @tc.desc: Test OnClippedSelectionBoundsChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnClippedSelectionBoundsChanged, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->webSelectOverlay_ = nullptr;
+    webPattern->OnClippedSelectionBoundsChanged(1, 2, 3, 4);
+    webPattern->webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(webPattern);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->OnClippedSelectionBoundsChanged(1, 2, 3, 4);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Left(), 1);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Top(), 2);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Width(), 3);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Height(), 4);
+}
+
+/**
+ * @tc.name: CleanupWebPatternResource
+ * @tc.desc: Test CleanupWebPatternResource
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, CleanupWebPatternResource, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    g_webPattern->offlineWebInited_ = true;
+    int32_t webId = 1;
+    g_webPattern->CleanupWebPatternResource(webId);
+    EXPECT_TRUE(g_webPattern->offlineWebInited_);
+    MockPipelineContext::TearDown();
 }
 
 } // namespace OHOS::Ace::NG

@@ -116,6 +116,8 @@ public:
         std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
         std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseResponseRegionTool(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ResponseRegionSupportedTool& toolType);
     static bool ParseJsLengthMetrics(
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
@@ -385,6 +387,7 @@ public:
         const std::string& resName, const std::string& bundleName, const std::string& moduleName, int32_t& resId);
     static bool HasGetter(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, int32_t propertyIndex);
     static int32_t GetStringFormatStartIndex(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
+    static std::string GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

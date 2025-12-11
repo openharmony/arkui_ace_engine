@@ -68,6 +68,13 @@ public:
     {
         return false;
     }
+
+    void* WrapDownloadInfoToNapiValue(void* env, const ImageErrorInfo& errorInfo) override
+    {
+        return nullptr;
+    }
+
+    void RemoveUrlCache(const std::string& /* url */) override {}
 };
 
 DownloadManager* DownloadManager::GetInstance()

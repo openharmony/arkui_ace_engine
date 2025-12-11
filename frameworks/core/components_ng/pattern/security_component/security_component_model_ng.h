@@ -53,8 +53,11 @@ public:
     static void SetIconBorderRadius(const std::optional<Dimension>& topLeft,
         const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
         const std::optional<Dimension>& bottomRight);
+    static void SetIconBorderRadius(FrameNode* frameNode, const std::optional<BorderRadiusProperty>& value);
     static void SetIcon(const ImageSourceInfo& value);
+    static void SetIcon(FrameNode* frameNode, const std::optional<ImageSourceInfo>& value);
     static void SetText(const std::string& value);
+    static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<NG::CalcSize>& value);
     static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
@@ -68,8 +71,10 @@ public:
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetStateEffect(const bool& value);
+    static void SetStateEffect(FrameNode* frameNode, const bool& value);
     static void SetTipPosition(const TipPosition& value);
     static void SetUserCancelEvent(const bool& value);
+    static void SetUserCancelEvent(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetFontColor(const Color& value);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
@@ -111,7 +116,6 @@ public:
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
-    static void SetFocusBox();
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

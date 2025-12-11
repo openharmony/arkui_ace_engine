@@ -613,11 +613,15 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_024, TestSize.Level1)
     EXPECT_EQ(1.0, requestWant.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f));
     EXPECT_EQ(1.0, requestWant.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f));
     EXPECT_EQ(1.0, requestWant.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
-    group->UpdateFormSizeOfFormRequests(2.0, 2.0, 2.0f);
+    float width = 2.0;
+    float height = 2.0;
+    float borderWidth = 2.0f;
+    float formViewScale = 1.0f;
+    group->UpdateFormSizeOfFormRequests(width, height, borderWidth, formViewScale);
     auto requestWant2 = group->GetAllRendererFormRequests().begin()->want;
-    EXPECT_EQ(2.0, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f));
-    EXPECT_EQ(2.0, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f));
-    EXPECT_EQ(2.0, requestWant2.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
+    EXPECT_EQ(width, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f));
+    EXPECT_EQ(height, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f));
+    EXPECT_EQ(borderWidth, requestWant2.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
     GTEST_LOG_(INFO) << "FormRenderGroupTest_024 end";
 }
 

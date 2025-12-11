@@ -391,7 +391,7 @@ void JSCalendarPicker::JsBorderRadius(const JSCallbackInfo& info)
     if (ParseJsDimensionVpNG(jsValue, value) || jsValue->IsObject()) {
         JSViewAbstract::JsBorderRadius(info);
     } else {
-        SetCornerApplyType(info);
+        SetRenderStrategy(info);
         CalendarPickerModel::GetInstance()->ClearBorderRadius();
     }
 }

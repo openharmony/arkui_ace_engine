@@ -118,6 +118,8 @@ struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeFadeout, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStartPolicy, MarqueeStartPolicy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeUpdatePolicy, MarqueeUpdatePolicy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeSpacing, CalcDimension);
 };
 
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
@@ -177,11 +179,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LineThicknessScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
         FontForegroudGradiantColor, FontForegroudGradiantColor, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, IsOnlyBetweenLines, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
@@ -209,6 +213,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeFadeout, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeUpdatePolicy, MarqueeUpdatePolicy, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeSpacing, CalcDimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
@@ -222,6 +230,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinimumLineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaximumLineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(IncludeFontPadding, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(FallbackLineSpacing, bool, PROPERTY_UPDATE_MEASURE);
 
 public:
     void UpdateContent(const std::string& value)
@@ -255,6 +265,8 @@ public:
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
 
     TextDecoration GetTextDecorationFirst() const
     {

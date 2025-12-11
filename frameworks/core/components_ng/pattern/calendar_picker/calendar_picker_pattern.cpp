@@ -217,7 +217,12 @@ void CalendarPickerPattern::UpdateEdgeAlign()
     }
 
     layoutProperty->UpdateDialogAlignType(rtlAlignType);
-    layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(rtlX), offset_.GetY()));
+
+    if (std::isfinite(offset_.GetX().ConvertToPx()) && std::isfinite(offset_.GetY().ConvertToPx())) {
+        layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(rtlX), offset_.GetY()));
+    } else {
+        layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(), Dimension()));
+    }
 }
 
 bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(

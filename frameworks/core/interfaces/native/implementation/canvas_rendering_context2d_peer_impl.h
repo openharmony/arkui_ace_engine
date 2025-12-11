@@ -28,7 +28,7 @@ public:
         ON_DETACH,
         UNKNOWN
     };
-    using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
+    using CanvasCallbackList = std::list<std::pair<int32_t, CallbackHelper<VoidCallback>>>;
     using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
     CanvasRenderingContext2DPeerImpl();
     ~CanvasRenderingContext2DPeerImpl() override = default;
@@ -41,17 +41,27 @@ public:
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();
-    void On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
-    void Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    void On(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
+    void Off(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
     int32_t GetCanvasId();
+    void SetAttachCallbackId(int32_t attachCallbackId)
+    {
+        attachCallbackId_ = attachCallbackId;
+    }
+    void SetDetachCallbackId(int32_t detachCallbackId)
+    {
+        detachCallbackId_ = detachCallbackId;
+    }
 
 private:
-    CanvasCallbackList::const_iterator FindCallbackInList(const CanvasCallbackList& callbackFuncPairList,
-    const CallbackHelper<Callback_Void>& callback) const;
-    void DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback, const CanvasCallbackType& type);
-    void AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    CanvasCallbackList::const_iterator FindCallbackInList(
+        const CanvasCallbackList& callbackFuncPairList, int32_t callbackId) const;
+    void DeleteCallbackFromList(const CallbackHelper<VoidCallback>& callback, const CanvasCallbackType& type);
+    void AddCallbackToList(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
 
     bool isImageAnalyzing_ = false;
+    int32_t attachCallbackId_ = -1;
+    int32_t detachCallbackId_ = -1;
     ImageAnalyzerConfig config_;
     CanvasCallbackList attachCallback_;
     CanvasCallbackList detachCallback_;

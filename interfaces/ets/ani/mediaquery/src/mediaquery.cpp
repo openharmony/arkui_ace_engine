@@ -224,14 +224,13 @@ public:
         });
     }
 
-    static void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-        ani_string type, ani_object callback)
+    static void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object callback)
     {
         ani_size nr_refs = 16;
         if (ANI_OK != env->CreateLocalScope(nr_refs)) {
             return;
         }
-        size_t argc = ParseArgs(env, object, type, callback);
+        size_t argc = ParseArgs(env, object, callback);
         if (argc != TWO_ARGS) {
             env->DestroyLocalScope();
             TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "mediaquery argc == TWO_ARGS");
@@ -263,10 +262,9 @@ public:
         env->DestroyLocalScope();
     }
 
-    static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-        ani_string type, ani_object callback)
+    static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object callback)
     {
-        size_t argc = ParseArgs(env, object, type, callback);
+        size_t argc = ParseArgs(env, object, callback);
         MediaQueryListener* listener = GetListener(env, object);
         if (!listener || argc == 0) {
             return;
@@ -384,13 +382,8 @@ private:
         return content;
     }
 
-    static size_t ParseArgs([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-        ani_string type, ani_object callback)
+    static size_t ParseArgs([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object callback)
     {
-        auto typeStr = ANIUtils_ANIStringToStdString(env, type);
-        if (typeStr != "change") {
-            return 0;
-        }
         ani_boolean isUndefinedResponse;
         env->Reference_IsUndefined(callback, &isUndefinedResponse);
         if (isUndefinedResponse) {
@@ -413,17 +406,17 @@ std::map<OHOS::Ace::WeakPtr<OHOS::Ace::ArktsFrontend>, std::set<MediaQueryListen
     MediaQueryListener::listenerSets_;
 std::mutex MediaQueryListener::mutex_;
 
-void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string type, ani_object callback)
+void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object callback)
 {
-    MediaQueryListener::On(env, object, type, callback);
+    MediaQueryListener::On(env, object, callback);
 #if defined(PREVIEW)
     MediaQueryListener::IdlCallback(AceType::RawPtr(arktsFrontend));
 #endif
 }
 
-void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string type, ani_object callback)
+void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_object callback)
 {
-    MediaQueryListener::Off(env, object, type, callback);
+    MediaQueryListener::Off(env, object, callback);
 }
 
 static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, ani_string condition)
@@ -484,8 +477,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methodsListener = {
-        ani_native_function {"on", nullptr, reinterpret_cast<void *>(On)},
-        ani_native_function {"off", nullptr, reinterpret_cast<void *>(Off)},
+        ani_native_function {"onChange", nullptr, reinterpret_cast<void *>(On)},
+        ani_native_function {"offChange", nullptr, reinterpret_cast<void *>(Off)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methodsListener.data(), methodsListener.size())) {

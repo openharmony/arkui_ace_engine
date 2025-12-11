@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -25,6 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Visibility } from "./enums"
 import { VoidCallback } from "./units"
 import { AttributeModifier, extractors, hookFormComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -46,6 +48,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFormComponentOptionsAttribute(value: FormInfo): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         FormInfo_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._FormComponentInterface_setFormComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -341,6 +344,7 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setFormComponentOptions")) {
             const value_casted = value as (FormInfo)
             this.getPeer()?.setFormComponentOptionsAttribute(value_casted)
+            this.applyOptionsFinish('FormComponentAttribute');
             return this
         }
         return this
@@ -434,12 +438,17 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFormComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFormComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

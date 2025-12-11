@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
-    constexpr int32_t DEFAULT_ALLOWABLE_MOVEMENT = 15;
+    constexpr double DEFAULT_ALLOWABLE_MOVEMENT = 15.0;
     constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 }
 ArkUIGesture* createPanGesture(
@@ -816,7 +816,7 @@ void setGestureInterrupterToNodeWithUserData(
     auto onGestureRecognizerJudgeBegin =
         [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+            const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         auto node = weak.Upgrade();
         CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
@@ -831,21 +831,20 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
         interruptInfo.customUserData = userData;
-        interruptInfo.userData = gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
-        auto count = static_cast<int32_t>(others.size());
-        ArkUIGestureRecognizer** othersRecognizer = nullptr;
-        if (count > 0) {
-            othersRecognizer = new ArkUIGestureRecognizer* [count];
-        }
-        int32_t index = 0;
+        std::vector<ArkUIGestureRecognizer*> othersRecognizers;
         for (const auto& item : others) {
-            othersRecognizer[index] = NodeModifier::CreateGestureRecognizer(item);
-            index++;
+            if (item.Invalid()) {
+                continue;
+            }
+            auto recognizer = NodeModifier::CreateGestureRecognizer(item.Upgrade());
+            if (recognizer) {
+                othersRecognizers.push_back(recognizer);
+            }
         }
-        interruptInfo.responseLinkRecognizer = othersRecognizer;
-        interruptInfo.count = count;
+        interruptInfo.responseLinkRecognizer = othersRecognizers.empty() ? nullptr : othersRecognizers.data();
+        interruptInfo.count = static_cast<int32_t>(othersRecognizers.size());
         ArkUI_UIInputEvent inputEvent { ConvertInputEventTypeToArkuiUIInputEventType(info->GetRawInputEventType()),
             C_TOUCH_EVENT_ID, &rawInputEvent };
         inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -854,7 +853,6 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.gestureEvent = &arkUIGestureEvent;
         auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
-        delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);
         return static_cast<GestureJudgeResult>(result);
     };
@@ -915,16 +913,18 @@ ArkUI_Int32 setGestureRecognizerLimitFingerCount(ArkUIGesture* gesture, bool lim
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 setLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t allowableMovement)
+ArkUI_Int32 setLongPressGestureAllowableMovement(ArkUIGesture* gesture, double allowableMovement)
 {
     auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
     CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
-    longPressGesture->SetAllowableMovement(allowableMovement <= 0 ? DEFAULT_ALLOWABLE_MOVEMENT : allowableMovement);
+    longPressGesture->SetAllowableMovement(
+        LessOrEqual(allowableMovement, 0.0) ? DEFAULT_ALLOWABLE_MOVEMENT : allowableMovement);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 getLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t* allowableMovement)
+ArkUI_Int32 getLongPressGestureAllowableMovement(ArkUIGesture* gesture, double* allowableMovement)
 {
+    CHECK_NULL_RETURN(allowableMovement, ERROR_CODE_PARAM_INVALID);
     auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
     CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
     *allowableMovement = longPressGesture->GetAllowableMovement();
@@ -1459,6 +1459,26 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     if (ret) {
         ret->rawPointerEvent = &inputEvent;
     }
+}
+
+std::shared_ptr<ArkUITouchTestInfoItem> CreateTouchTestInfoItem(const TouchTestInfo& info)
+{
+    auto touchTestInfo = std::make_shared<ArkUITouchTestInfoItem>();
+    CHECK_NULL_RETURN(touchTestInfo, nullptr);
+    touchTestInfo->nodeX = info.subCmpPoint.GetX();
+    touchTestInfo->nodeY = info.subCmpPoint.GetY();
+    touchTestInfo->windowX = info.windowPoint.GetX();
+    touchTestInfo->windowY = info.windowPoint.GetY();
+    touchTestInfo->parentNodeX = info.currentCmpPoint.GetX();
+    touchTestInfo->parentNodeY = info.currentCmpPoint.GetY();
+    ArkUIRect rect;
+    rect.x = info.subRect.GetX();
+    rect.y = info.subRect.GetY();
+    rect.width = info.subRect.Width();
+    rect.height = info.subRect.Height();
+    touchTestInfo->rect = rect;
+    touchTestInfo->id = info.id.c_str();
+    return touchTestInfo;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

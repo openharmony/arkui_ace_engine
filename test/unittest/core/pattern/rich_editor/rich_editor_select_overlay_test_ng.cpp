@@ -1464,4 +1464,141 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level0)
     richEditorPattern->selectOverlay_->ToggleMenu();
     EXPECT_TRUE(richEditorPattern->selectOverlay_->isShowMenu_);
 }
+/**
+ * @tc.name: SetSelectDetectEnable001
+ * @tc.desc: Test SetSelectDetectEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSelectDetectEnable(false);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabled_);
+
+    richEditorModel.SetSelectDetectEnable(true);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
+}
+
+/**
+ * @tc.name: SetSelectDetectEnable
+ * @tc.desc: Test SetSelectDetectEnable002
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, true);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, false);
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabled_);
+}
+
+/**
+ * @tc.name: GetSelectDetectEnable
+ * @tc.desc: Test GetSelectDetectEnable001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectDetectEnable001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, true);
+
+    EXPECT_TRUE(richEditorModel.GetSelectDetectEnable(richEditorNode));
+}
+
+/**
+ * @tc.name: ResetSelectDetectEnable001
+ * @tc.desc: Test ResetSelectDetectEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ResetSelectDetectEnable001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.ResetSelectDetectEnable();
+
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
+}
+
+/**
+ * @tc.name: ResetSelectDetectEnable002
+ * @tc.desc: Test ResetSelectDetectEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ResetSelectDetectEnable002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.ResetSelectDetectEnable(richEditorNode);
+
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
+}
+
+/**
+ * @tc.name: GetIsMidScene001
+ * @tc.desc: Test GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, GetIsMidScene001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto ret = richEditorPattern->GetIsMidScene();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsHandlesShow001
+ * @tc.desc: Test IsHandlesShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, IsHandlesShow001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto ret = richEditorPattern->IsHandlesShow();
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG

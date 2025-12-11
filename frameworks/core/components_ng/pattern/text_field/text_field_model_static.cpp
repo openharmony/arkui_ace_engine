@@ -161,7 +161,8 @@ void TextFieldModelStatic::SetTextOverflow(FrameNode* frameNode, const std::opti
     if (valueOpt) {
         TextFieldModelNG::SetTextOverflow(frameNode, valueOpt.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextFieldLayoutProperty, TextOverflow, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -793,6 +794,11 @@ void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::op
     TextFieldModelNG::SetSelectAllValue(frameNode, isSelectAllValue.value_or(false));
 }
 
+void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
 void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -804,11 +810,14 @@ void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
     CHECK_NULL_VOID(theme);
 
     CalcDimension iconSize = theme->GetCancelIconSize();
-    Color color = theme->GetCancelButtonIconColor();
     std::string srcStr = "";
 
     TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
-    TextFieldModelNG::SetCancelIconColor(frameNode, color);
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Color());
+    }
     TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
 }
 
@@ -910,6 +919,25 @@ void TextFieldModelStatic::SetCustomKeyboard(FrameNode* frameNode, const std::fu
         textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
         textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
     }
+}
+
+void TextFieldModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetIncludeFontPadding(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

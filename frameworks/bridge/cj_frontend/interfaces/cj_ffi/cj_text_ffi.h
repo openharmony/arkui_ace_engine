@@ -55,7 +55,7 @@ class ACE_EXPORT NativeLayoutManager: public OHOS::FFI::FFIData {
     DECL_TYPE(NativeLayoutManager, OHOS::FFI::FFIData)
 
 public:
-    
+
     NativeLayoutManager();
 
     void SetLayoutManager(const RefPtr<NG::LayoutInfoInterface>& layout)
@@ -96,8 +96,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextCreateWithController(const char* content, 
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextResetFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetFontColor(uint32_t textColor);
+CJ_EXPORT void FfiOHOSAceFrameworkTextResetFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetTextOverflow(int32_t overflow);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetTextOverflowNew(int32_t overflow);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetMaxLines(int32_t maxLines);
@@ -108,7 +110,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextSetFontFamily(const char* fontFamily);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetDecoration(int32_t typeValue, uint32_t colorValue);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetDecorationNew(int32_t typeValue, uint32_t colorValue, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetMinFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextResetMinFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetMaxFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextResetMaxFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetTextCase(int32_t textCase);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetBaselineOffset(double baseLine, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextOnClick(void (*callback)(CJClickInfo clickInfo));

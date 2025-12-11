@@ -27,6 +27,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -62,7 +63,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 
 RefPtr<PopupTheme> GetPopupTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -219,6 +220,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     }
     auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    popupProp->UpdateIsModal(param->IsBlockEvent());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     popupPaintProp->UpdateIsTips(param->IsTips());
     popupPaintProp->UpdateShowAtAnchor(param->GetAnchorType());
@@ -422,6 +424,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetTargetSpace().has_value()) {
         layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
     }
+    layoutProps->UpdateIsModal(param->IsBlockEvent());
     auto popupPaintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
     popupPaintProps->UpdateUseCustom(param->IsUseCustom());
     popupPaintProps->UpdateEnableArrow(param->EnableArrow());

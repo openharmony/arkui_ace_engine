@@ -2463,10 +2463,19 @@ std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<Promp
 {
     auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef]() {
         if (builderRef) {
+            napi_handle_scope scope = nullptr;
+            auto status = napi_open_handle_scope(env, &scope);
+            if ((status != napi_ok) || (scope == nullptr)) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG,
+                    "customBuilder of the PromptDialogAttr failed to open the scope of the handle.");
+                napi_delete_reference(env, builderRef);
+                return;
+            }
             napi_value builderFunc = nullptr;
             napi_get_reference_value(env, builderRef, &builderFunc);
             napi_call_function(env, nullptr, builderFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, builderRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     return builder;
@@ -2477,12 +2486,21 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
 {
     auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef](const int32_t dialogId) {
         if (builderRef) {
+            napi_handle_scope scope = nullptr;
+            auto status = napi_open_handle_scope(env, &scope);
+            if ((status != napi_ok) || (scope == nullptr)) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG,
+                    "customBuilderWithId of the PromptDialogAttr failed to open the scope of the handle.");
+                napi_delete_reference(env, builderRef);
+                return;
+            }
             napi_value builderFunc = nullptr;
             napi_get_reference_value(env, builderRef, &builderFunc);
             napi_value dialogIdArg = nullptr;
             napi_create_int32(env, dialogId, &dialogIdArg);
             napi_call_function(env, nullptr, builderFunc, 1, &dialogIdArg, nullptr);
             napi_delete_reference(env, builderRef);
+            napi_close_handle_scope(env, scope);
         }
     };
     return builder;

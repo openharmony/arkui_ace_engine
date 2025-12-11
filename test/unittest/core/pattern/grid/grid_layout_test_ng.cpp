@@ -23,13 +23,35 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
-class GridLayoutTestNg : public GridTestNg {};
+class GridLayoutTestNg : public GridTestNg {
+public:
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatNode(int32_t childCount = 0);
+};
+
+RefPtr<RepeatVirtualScroll2Node> GridLayoutTestNg::CreateRepeatNode(int32_t childCount)
+{
+    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
+        return std::make_pair(2, 0);
+    };
+    std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
+    std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
+        [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
+    std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
+    std::function<void()> onPurge = []() {};
+    std::function<void()> onUpdateDirty = []() {};
+    RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
+        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    node->arrLen_ = childCount;
+    node->totalCount_ = childCount;
+    return node;
+}
 
 /**
  * @tc.name: AdaptiveLayout001
@@ -764,5 +786,159 @@ HWTEST_F(GridLayoutTestNg, GridLayoutInfo002, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.endIndex_, 1);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
+}
+
+/**
+ * @tc.name: ItemFillPolicy001
+ * @tc.desc: Test specify the number of columns on grid for different responsive breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemFillPolicy001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();;
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_DEFAULT and set width to 300.
+     * @tc.expected: The number of columns should be two.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300));
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_DEFAULT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step2. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step3. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3.
+     * @tc.expected: The number of columns should be one.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: ItemFillPolicy002
+ * @tc.desc: Test specify the number of columns on grid for different responsive breakpoints and widths
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemFillPolicy002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();;
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3 and set width to 800.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step2. Set width to 1000.
+     * @tc.expected: The number of columns should be three.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step3. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5 and set width to 800.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step4. Set width to 1000.
+     * @tc.expected: The number of columns should be five.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step5. Set ItemFillPolicy to BREAKPOINT_DEFAULT and set width to 800.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_DEFAULT);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step6. Set width to 1000.
+     * @tc.expected: The number of columns should be five.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: GridLazyEmptyBranchTest001
+ * @tc.desc: Test when grid get empty child from LazyForEach
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLazyEmptyBranchTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
+    auto wrapper0 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper0, nullptr);
+
+
+    model.SetSupportLazyLoadingEmptyBranch(true);
+    auto layoutProperty = frameNode_->GetLayoutProperty<GridLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper1, nullptr);
+
+    auto repeatNode = CreateRepeatNode(1);
+    frameNode_->AddChild(repeatNode);
+    auto wrapper2 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_NE(wrapper2, nullptr);
 }
 } // namespace OHOS::Ace::NG

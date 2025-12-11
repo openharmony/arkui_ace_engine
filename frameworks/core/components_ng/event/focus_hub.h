@@ -834,6 +834,11 @@ public:
         return isGroup_;
     }
 
+    bool GetArrowKeyStepOut() const
+    {
+        return arrowKeyStepOut_;
+    }
+
     bool GetIsFocusScope() const
     {
         return isFocusScope_;
@@ -987,6 +992,8 @@ private:
     bool IsArrowKeyStepOut(FocusStep moveStep);
 
     bool IsLastWeakNodeFocused() const;
+
+    void OnPaintFocusState(bool isFocus);
 
     std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;

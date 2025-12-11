@@ -1,0 +1,535 @@
+[
+    {
+        "file": "adapter/preview/osal/system_properties_multi_thread.cpp",
+        "normal_file": "adapter/preview/osal/system_properties.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/pipeline/base/element_register_multi_thread.cpp",
+        "normal_file": "frameworks/core/pipeline/base/element_register.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/components_ng/render/render_context_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/render/render_context.cpp",
+        "mapping": {
+            "RenderContext::RequestNextFrame": "RenderContext::RequestNextFrameMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "mapping": {
+            "RosenRenderContext::NotifyHostTransformUpdated": "RosenRenderContext::NotifyHostTransformUpdatedMultiThread",
+            "RosenRenderContext::SetFrontBlurFilter": "RosenRenderContext::SetFrontBlurFilterMultiThread",
+            "RosenRenderContext::SetPositionToRSNode": "RosenRenderContext::SetPositionToRSNodeMultiThread",
+            "RosenRenderContext::AnimateHoverEffectScale": "RosenRenderContext::AnimateHoverEffectScaleMultiThread",
+            "RosenRenderContext::AnimateHoverEffectBoard": "RosenRenderContext::AnimateHoverEffectBoardMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
+        "mapping": {
+            "SideBarContainerPattern::OnAttachToFrameNode": "SideBarContainerPattern::OnAttachToFrameNodeMultiThread",
+            "SideBarContainerPattern::OnAttachToMainTree": "SideBarContainerPattern::OnAttachToMainTreeMultiThread",
+            "SideBarContainerPattern::OnDetachFromFrameNode": "SideBarContainerPattern::OnDetachFromFrameNodeMultiThread",
+            "SideBarContainerPattern::OnDetachFromMainTree": "SideBarContainerPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/tabs/tab_bar_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/tabs/tab_bar_pattern.cpp",
+        "mapping": {
+            "TabBarPattern::OnAttachToFrameNode": "TabBarPattern::OnAttachToFrameNodeMultiThread",
+            "TabBarPattern::OnAttachToMainTree": "TabBarPattern::OnAttachToMainTreeMultiThread",
+            "TabBarPattern::OnDetachFromFrameNode": "TabBarPattern::OnDetachFromFrameNodeMultiThread",
+            "TabBarPattern::OnDetachFromMainTree": "TabBarPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text_picker/textpicker_column_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text_picker/textpicker_column_pattern.cpp",
+        "mapping": {
+            "TextPickerColumnPattern::OnAttachToMainTree": "TextPickerColumnPattern::OnAttachToMainTreeMultiThread",
+            "TextPickerColumnPattern::OnDetachFromMainTree": "TextPickerColumnPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text_picker/textpicker_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text_picker/textpicker_pattern.cpp",
+        "mapping": {
+            "TextPickerPattern::OnThemeScopeUpdate": "TextPickerPattern::OnThemeScopeUpdateMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.cpp",
+        "mapping": {
+            "LoadingProgressPattern::OnAttachToMainTree": "LoadingProgressPattern::OnAttachToMainTreeMultiThread",
+            "LoadingProgressPattern::OnDetachFromMainTree": "LoadingProgressPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
+        "mapping": {
+            "WaterFlowModelNG::SetScrollToIndex": "WaterFlowModelNG::SetScrollToIndexMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/data_panel/data_panel_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/data_panel/data_panel_pattern.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text_clock/text_clock_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
+        "mapping": {
+            "TextClockPattern::OnAttachToMainTree": "TextClockPattern::OnAttachToMainTreeMultiThread",
+            "TextClockPattern::OnDetachFromMainTree": "TextClockPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/swiper/swiper_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
+        "mapping": {
+            "SwiperPattern::OnAttachToFrameNode": "SwiperPattern::OnAttachToFrameNodeMultiThread",
+            "SwiperPattern::OnDetachFromFrameNode": "SwiperPattern::OnDetachFromFrameNodeMultiThread",
+            "SwiperPattern::OnAttachToMainTree": "SwiperPattern::OnAttachToMainTreeMultiThread",
+            "SwiperPattern::OnDetachFromMainTree": "SwiperPattern::OnDetachFromMainTreeMultiThread",
+            "SwiperPattern::ChangeIndex": "SwiperPattern::ChangeIndexMultiThread",
+            "SwiperPattern::SetCachedCount": "SwiperPattern::SetCachedCountMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/radio/radio_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/radio/radio_pattern.cpp",
+        "mapping": {
+            "RadioPattern::OnDetachFromFrameNode": "RadioPattern::OnDetachFromFrameNodeMultiThread",
+            "RadioPattern::OnDetachFromMainTree": "RadioPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/scroll/scroll_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
+        "mapping": {
+            "ScrollModelNG::CreateFrameNode": "ScrollModelNG::CreateFrameNodeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+        "mapping": {
+            "NavDestinationPattern::OnAttachToFrameNode": "NavDestinationPattern::OnAttachToFrameNodeMultiThread",
+            "NavDestinationPattern::OnDetachFromFrameNode": "NavDestinationPattern::OnDetachFromFrameNodeMultiThread",
+            "NavDestinationPattern::OnAttachToMainTree": "NavDestinationPattern::OnAttachToMainTreeMultiThread",
+            "NavDestinationPattern::OnDetachFromMainTree": "NavDestinationPattern::OnDetachFromMainTreeMultiThread",
+            "NavDestinationPattern::SetSystemBarStyle": "NavDestinationPattern::SetSystemBarStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/progress/progress_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/progress/progress_pattern.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/picker/datepicker_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/picker/datepicker_pattern.cpp",
+        "mapping": {
+            "DatePickerPattern::OnThemeScopeUpdate": "DatePickerPattern::OnThemeScopeUpdateMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",
+        "mapping": {
+            "CheckBoxGroupPattern::OnDetachFromFrameNode": "CheckBoxGroupPattern::OnDetachFromFrameNodeMultiThread",
+            "CheckBoxGroupPattern::OnAttachToMainTree": "CheckBoxGroupPattern::OnAttachToMainTreeMultiThread",
+            "CheckBoxGroupPattern::OnDetachFromMainTree": "CheckBoxGroupPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/refresh/refresh_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
+        "mapping": {
+            "RefreshPattern::OnAttachToFrameNode": "RefreshPattern::OnAttachToFrameNodeMultiThread",
+            "RefreshPattern::OnAttachToMainTree": "RefreshPattern::OnAttachToMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/refresh/refresh_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
+        "mapping": {
+            "RefreshModelNG::SetCustomBuilder": "RefreshModelNG::SetCustomBuilderMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/checkbox/checkbox_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/checkbox/checkbox_pattern.cpp",
+        "mapping": {
+            "CheckBoxPattern::OnAttachToFrameNode": "CheckBoxPattern::OnAttachToFrameNodeMultiThread",
+            "CheckBoxPattern::OnAttachToMainTree": "CheckBoxPattern::OnAttachToMainTreeMultiThread",
+            "CheckBoxPattern::OnDetachFromFrameNode": "CheckBoxPattern::OnDetachFromFrameNodeMultiThread",
+            "CheckBoxPattern::OnDetachFromMainTree": "CheckBoxPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/navigation/tool_bar_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/navigation/tool_bar_pattern.cpp",
+        "mapping": {
+            "NavToolbarPattern::UpdateBackgroundStyle": "NavToolbarPattern::UpdateBackgroundStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/navigation/navigation_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp",
+        "mapping": {
+            "NavigationPattern::OnAttachToFrameNode": "NavigationPattern::OnAttachToFrameNodeMultiThread",
+            "NavigationPattern::OnDetachFromFrameNode": "NavigationPattern::OnDetachFromFrameNodeMultiThread",
+            "NavigationPattern::OnAttachToMainTree": "NavigationPattern::OnAttachToMainTreeMultiThread",
+            "NavigationPattern::OnDetachFromMainTree": "NavigationPattern::OnDetachFromMainTreeMultiThread",
+            "NavigationPattern::SetSystemBarStyle": "NavigationPattern::SetSystemBarStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/navigation/title_bar_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
+        "mapping": {
+            "TitleBarPattern::OnAttachToFrameNode": "TitleBarPattern::OnAttachToFrameNodeMultiThread",
+            "TitleBarPattern::OnDetachFromFrameNode": "TitleBarPattern::OnDetachFromFrameNodeMultiThread",
+            "TitleBarPattern::OnAttachToMainTree": "TitleBarPattern::OnAttachToMainTreeMultiThread",
+            "TitleBarPattern::OnDetachFromMainTree": "TitleBarPattern::OnDetachFromMainTreeMultiThread",
+            "TitleBarPattern::UpdateBackgroundStyle": "TitleBarPattern::UpdateBackgroundStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/navigation/nav_bar_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
+        "mapping": {
+            "NavBarPattern::OnAttachToFrameNode": "NavBarPattern::OnAttachToFrameNodeMultiThread",
+            "NavBarPattern::OnAttachToMainTree": "NavBarPattern::OnAttachToMainTreeMultiThread",
+            "NavBarPattern::OnDetachFromFrameNode": "NavBarPattern::OnDetachFromFrameNodeMultiThread",
+            "NavBarPattern::OnDetachFromMainTree": "NavBarPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/slider/slider_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/slider/slider_pattern.cpp",
+        "mapping": {
+            "SliderPattern::UpdateValue": "SliderPattern::UpdateValueMultiThread",
+            "SliderPattern::OnAttachToFrameNode": "SliderPattern::OnAttachToFrameNodeMultiThread",
+            "SliderPattern::OnAttachToMainTree": "SliderPattern::OnAttachToMainTreeMultiThread",
+            "SliderPattern::OnDetachFromFrameNode": "SliderPattern::OnDetachFromFrameNodeMultiThread",
+            "SliderPattern::OnDetachFromMainTree": "SliderPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_pattern.cpp",
+        "mapping": {
+            "GridRowLayoutPattern::OnAttachToFrameNode": "GridRowLayoutPattern::OnAttachToFrameNodeMultiThread",
+            "GridRowLayoutPattern::OnDetachFromFrameNode": "GridRowLayoutPattern::OnDetachFromFrameNodeMultiThread",
+            "GridRowLayoutPattern::OnAttachToMainTree": "GridRowLayoutPattern::OnAttachToMainTreeMultiThread",
+            "GridRowLayoutPattern::OnDetachFromMainTree": "GridRowLayoutPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/marquee/marquee_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
+        "mapping": {
+            "MarqueePattern::OnAttachToMainTree": "MarqueePattern::OnAttachToMainTreeMultiThread",
+            "MarqueePattern::OnDetachFromMainTree": "MarqueePattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern.cpp",
+        "mapping": {
+            "PickerColumnPattern::OnAttachToMainTree": "PickerColumnPattern::OnAttachToMainTreeMultiThread",
+            "PickerColumnPattern::OnDetachFromMainTree": "PickerColumnPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/bubble/bubble_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
+        "mapping": {
+            "BubblePattern::OnAttachToFrameNode": "BubblePattern::OnAttachToFrameNodeMultiThread",
+            "BubblePattern::OnDetachFromFrameNode": "BubblePattern::OnDetachFromFrameNodeMultiThread",
+            "BubblePattern::OnAttachToMainTree": "BubblePattern::OnAttachToMainTreeMultiThread",
+            "BubblePattern::OnDetachFromMainTree": "BubblePattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/image/image_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "mapping": {
+            "ImagePattern::OnAttachToMainTree": "ImagePattern::OnAttachToMainTreeMultiThread",
+            "ImagePattern::OnDetachFromMainTree": "ImagePattern::OnDetachFromMainTreeMultiThread",
+            "ImagePattern::RegisterVisibleAreaChange": "ImagePattern::RegisterVisibleAreaChangeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/search/search_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/search/search_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/search/search_model_ng.cpp",
+        "mapping": {
+            "SearchModelNG::CreateTextField": "SearchModelNG::CreateTextFieldMultiThread",
+            "SearchModelNG::TextFieldUpdateContext": "SearchModelNG::TextFieldUpdateContextMultiThread",
+            "SearchModelNG::CreateDivider": "SearchModelNG::CreateDividerMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/dialog/dialog_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp",
+        "mapping": {
+            "DialogPattern::OnAttachToFrameNode": "DialogPattern::OnAttachToFrameNodeMultiThread",
+            "DialogPattern::OnDetachFromFrameNode": "DialogPattern::OnDetachFromFrameNodeMultiThread",
+            "DialogPattern::OnAttachToMainTree": "DialogPattern::OnAttachToMainTreeMultiThread",
+            "DialogPattern::OnDetachFromMainTree": "DialogPattern::OnDetachFromMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/time_picker/timepicker_row_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/time_picker/timepicker_row_pattern.cpp",
+        "mapping": {
+            "TimePickerRowPattern::OnThemeScopeUpdate": "TimePickerRowPattern::OnThemeScopeUpdateMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text_field/text_field_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+        "mapping": {
+            "TextFieldPattern::OnAttachToFrameNode": "TextFieldPattern::OnAttachToFrameNodeMultiThread",
+            "TextFieldPattern::OnDetachFromFrameNode": "TextFieldPattern::OnDetachFromFrameNodeMultiThread",
+            "TextFieldPattern::OnAttachToMainTree": "TextFieldPattern::OnAttachToMainTreeMultiThread",
+            "TextFieldPattern::OnDetachFromMainTree": "TextFieldPattern::OnDetachFromMainTreeMultiThread",
+            "TextFieldPattern::HandleSetSelection": "TextFieldPattern::HandleSetSelectionMultiThread",
+            "TextFieldPattern::InitSurfaceChangedCallback": "TextFieldPattern::InitSurfaceChangedCallbackMultiThread",
+            "TextFieldPattern::InitSurfacePositionChangedCallback": "TextFieldPattern::InitSurfacePositionChangedCallbackMultiThread",
+            "TextFieldPattern::SetCaretPosition": "TextFieldPattern::SetCaretPositionMultiThread",
+            "TextFieldPattern::SetSelectionFlag": "TextFieldPattern::SetSelectionFlagMultiThread",
+            "TextFieldPattern::StopEditing": "TextFieldPattern::StopEditingMultiThread",
+            "TextFieldPattern::RegisterWindowFocusChangeCallback": "TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThread",
+            "TextFieldPattern::SetPreviewTextOperation": "TextFieldPattern::SetPreviewTextOperationMultiThread",
+            "TextFieldPattern::FinishTextPreviewOperation": "TextFieldPattern::FinishTextPreviewOperationMultiThread",
+            "TextFieldPattern::SetShowKeyBoardOnFocus": "TextFieldPattern::SetShowKeyBoardOnFocusMultiThread",
+            "TextFieldPattern::GetFocusPattern": "TextFieldPattern::GetFocusPatternMultiThread",
+            "TextFieldPattern::SetCustomKeyboardWithNode": "TextFieldPattern::SetCustomKeyboardWithNodeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text_field/text_field_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+        "mapping": {
+            "TextFieldModelNG::ProcessDefaultStyleAndBehaviors": "TextFieldModelNG::ProcessDefaultStyleAndBehaviorsMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/security_component/security_component_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/security_component/security_component_pattern.cpp",
+        "mapping": {
+            "SecurityComponentPattern::OnAttachToMainTree": "SecurityComponentPattern::OnAttachToMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/list/list_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/list/list_model_ng.cpp",
+        "mapping": {
+            "ListModelNG::SetScrollToIndex": "ListModelNG::SetScrollToIndexMultiThread",
+            "ListModelNG::ScrollToItemInGroup": "ListModelNG::ScrollToItemInGroupMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/list/list_position_controller_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
+        "mapping": {
+            "ListPositionController::JumpToItemInGroup": "ListPositionController::JumpToItemInGroupMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/list/list_item_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/list/list_item_pattern.cpp",
+        "mapping": {
+            "ListItemPattern::OnAttachToFrameNode": "ListItemPattern::OnAttachToFrameNodeMultiThread",
+            "ListItemPattern::OnAttachToMainTree": "ListItemPattern::OnAttachToMainTreeMultiThread",
+            "ListItemPattern::CloseSwipeAction": "ListItemPattern::CloseSwipeActionMultiThread",
+            "ListItemPattern::SetListItemStyle": "ListItemPattern::SetListItemStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/list/list_item_group_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/list/list_item_group_pattern.cpp",
+        "mapping": {
+            "ListItemGroupPattern::OnAttachToFrameNode": "ListItemGroupPattern::OnAttachToFrameNodeMultiThread",
+            "ListItemGroupPattern::OnAttachToMainTree": "ListItemGroupPattern::OnAttachToMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
+        "mapping": {
+            "MenuWrapperPattern::OnAttachToFrameNode": "MenuWrapperPattern::OnAttachToFrameNodeMultiThread",
+            "MenuWrapperPattern::OnAttachToMainTree": "MenuWrapperPattern::OnAttachToMainTreeMultiThread",
+            "MenuWrapperPattern::OnDetachFromMainTree": "MenuWrapperPattern::OnDetachFromMainTreeMultiThread",
+            "MenuWrapperPattern::SetMenuTransitionEffect": "MenuWrapperPattern::SetMenuTransitionEffectMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/menu/menu_item/menu_item_model_static_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/menu/menu_item/menu_item_model_static.cpp",
+        "mapping": {
+            "MenuItemModelStatic::AddRowChild": "MenuItemModelStatic::AddRowChildMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/gauge/gauge_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+        "mapping": {
+            "ScrollablePattern::OnDetachFromFrameNode": "ScrollablePattern::OnDetachFromFrameNodeMultiThread",
+            "ScrollablePattern::OnAttachToFrameNode": "ScrollablePattern::OnAttachToFrameNodeMultiThread",
+            "ScrollablePattern::OnDetachFromMainTree": "ScrollablePattern::OnDetachFromMainTreeMultiThread",
+            "ScrollablePattern::OnAttachToMainTree": "ScrollablePattern::OnAttachToMainTreeMultiThread",
+            "ScrollablePattern::ScrollPage": "ScrollablePattern::ScrollPageMultiThread",
+            "ScrollablePattern::SetFriction": "ScrollablePattern::SetFrictionMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/scrollable/scrollable_controller_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/scrollable/scrollable_controller.cpp",
+        "mapping": {
+            "ScrollableController::AnimateTo": "ScrollableController::AnimateToMultiThread",
+            "ScrollableController::ScrollToEdge": "ScrollableController::ScrollToEdgeMultiThread",
+            "ScrollableController::ScrollBy": "ScrollableController::ScrollByMultiThread",
+            "ScrollableController::Fling": "ScrollableController::FlingMultiThread",
+            "ScrollableController::ScrollToIndex": "ScrollableController::ScrollToIndexMultiThread",
+            "ScrollableController::ScrollPage": "ScrollableController::ScrollPageMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp",
+        "mapping": {
+            "ScrollableModelNG::SetBackToTop": "ScrollableModelNG::SetBackToTopMultiThread",
+            "ScrollableModelNG::ResetBackToTop": "ScrollableModelNG::ResetBackToTopMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/text/text_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "mapping": {
+            "TextPattern::OnAttachToFrameNode": "TextPattern::OnAttachToFrameNodeMultiThread",
+            "TextPattern::OnDetachFromFrameNode": "TextPattern::OnDetachFromFrameNodeMultiThread",
+            "TextPattern::OnAttachToMainTree": "TextPattern::OnAttachToMainTreeMultiThread",
+            "TextPattern::OnDetachFromMainTree": "TextPattern::OnDetachFromMainTreeMultiThread",
+            "TextPattern::SetTextDetectEnable": "TextPattern::SetTextDetectEnableMultiThread",
+            "TextPattern::SetTextDetectConfig": "TextPattern::SetTextDetectConfigMultiThread",
+            "TextPattern::SetStyledString": "TextPattern::SetStyledStringMultiThread",
+            "TextPattern::SetExternalSpanItem": "TextPattern::SetExternalSpanItemMultiThread",
+            "TextPattern::CloseSelectOverlay": "TextPattern::CloseSelectOverlayMultiThread",
+            "TextPattern::SetTextSelection": "TextPattern::SetTextSelectionMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/select/select_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/select/select_pattern.cpp",
+        "mapping": {
+            "SelectPattern::OnAttachToFrameNode": "SelectPattern::OnAttachToFrameNodeMultiThread",
+            "SelectPattern::OnAttachToMainTree": "SelectPattern::OnAttachToMainTreeMultiThread",
+            "SelectPattern::ResetParams": "SelectPattern::ResetParamsMultiThread",
+            "SelectPattern::ResetOptionProps": "SelectPattern::ResetOptionPropsMultiThread",
+            "SelectPattern::SetFontSize": "SelectPattern::SetFontSizeMultiThread",
+            "SelectPattern::SetFontColor": "SelectPattern::SetFontColorMultiThread",
+            "SelectPattern::SetFontWeight": "SelectPattern::SetFontWeightMultiThread",
+            "SelectPattern::SetOptionFontSize": "SelectPattern::SetOptionFontSizeMultiThread",
+            "SelectPattern::SetFontFamily": "SelectPattern::SetFontFamilyMultiThread",
+            "SelectPattern::SetItalicFontStyle": "SelectPattern::SetItalicFontStyleMultiThread",
+            "SelectPattern::ResetFontColor": "SelectPattern::ResetFontColorMultiThread",
+            "SelectPattern::SetValue": "SelectPattern::SetValueMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/select/select_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/select/select_model_ng.cpp",
+        "mapping": {
+            "SelectModelNG::InitSelect": "SelectModelNG::InitSelectMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/image_animator/image_animator_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
+        "mapping": {
+            "ImageAnimatorPattern::OnAttachToFrameNode": "ImageAnimatorPattern::OnAttachToFrameNodeMultiThread",
+            "ImageAnimatorPattern::OnAttachToMainTree": "ImageAnimatorPattern::OnAttachToMainTreeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/grid/grid_item_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/grid/grid_item_model_ng.cpp",
+        "mapping": {
+            "GridItemModelNG::CreateFrameNode": "GridItemModelNG::CreateFrameNodeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/grid/grid_item_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/grid/grid_item_pattern.cpp",
+        "mapping": {
+            "GridItemPattern::OnAttachToFrameNode": "GridItemPattern::OnAttachToFrameNodeMultiThread",
+            "GridItemPattern::OnAttachToMainTree": "GridItemPattern::OnAttachToMainTreeMultiThread",
+            "GridItemPattern::UpdateGridItemStyle": "GridItemPattern::UpdateGridItemStyleMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/components_ng/base/frame_node_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/base/frame_node.cpp",
+        "mapping": {
+            "FrameNode::MarkModifyDone": "FrameNode::MarkModifyDoneMultiThread",
+            "FrameNode::MarkDirtyNode": "FrameNode::MarkDirtyNodeMultiThread",
+            "FrameNode::RebuildRenderContextTree": "FrameNode::RebuildRenderContextTreeMultiThread",
+            "FrameNode::MarkNeedRender": "FrameNode::MarkNeedRenderMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/interfaces/native/node/node_api_multi_thread.cpp",
+        "normal_file": "frameworks/core/interfaces/native/node/node_api.cpp",
+        "mapping": {}
+    },
+    {
+        "file": "frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp",
+        "normal_file": "frameworks/core/interfaces/native/node/frame_node_modifier.cpp",
+        "mapping": {
+            "ClearChildrenInFrameNode": "ClearChildrenInFrameNodeMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/interfaces/native/node/view_model_multi_thread.cpp",
+        "normal_file": "frameworks/core/interfaces/native/node/view_model.cpp",
+        "mapping": {
+            "RemoveChild": "RemoveChildMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/interfaces/native/node/node_common_modifier_multi_thread.cpp",
+        "normal_file": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "mapping": {
+            "SetGeometryTransition": "SetGeometryTransitionMultiThread",
+            "ResetGeometryTransition": "ResetGeometryTransitionMultiThread"
+        }
+    },
+    {
+        "file": "frameworks/core/interfaces/native/node/node_loading_progress_modifier_multi_thread.cpp",
+        "normal_file": "frameworks/core/interfaces/native/node/node_loading_progress_modifier.cpp",
+        "mapping": {
+            "ResetLoadingProgressColor": "ResetLoadingProgressColorMultiThread"
+        }
+    }
+]

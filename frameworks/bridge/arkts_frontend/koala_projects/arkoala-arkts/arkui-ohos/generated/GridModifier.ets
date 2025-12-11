@@ -23,6 +23,7 @@ import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute } from "./component/grid"
@@ -32,6 +33,7 @@ import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
 export class GridModifier extends CommonMethodModifier implements GridAttribute,AttributeModifier<GridAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -50,27 +52,27 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _rowsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rowsGap_0_0value?: Length | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarWidth_0_0value?: number | string | undefined
+    _scrollBarWidth_0_0value?: double | string | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | number | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _onScrollBarUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollBarUpdate_0_0value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
+    _onScrollBarUpdate_0_0value?: ((index: int32,offset: double) => ComputedBarAttribute) | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollIndex_0_0value?: ((first: number,last: number) => void) | undefined
+    _onScrollIndex_0_0value?: ((first: int32,last: int32) => void) | undefined
     _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_0_0value?: number | undefined
+    _cachedCount_0_0value?: int32 | undefined
     _editMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _editMode_0_0value?: boolean | undefined
     _multiSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _multiSelectable_0_0value?: boolean | undefined
     _maxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxCount_0_0value?: number | undefined
+    _maxCount_0_0value?: int32 | undefined
     _minCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minCount_0_0value?: number | undefined
+    _minCount_0_0value?: int32 | undefined
     _cellLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cellLength_0_0value?: number | undefined
+    _cellLength_0_0value?: double | undefined
     _layoutDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _layoutDirection_0_0value?: GridDirection | undefined
     _supportAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -80,17 +82,17 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _onItemDragEnter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onItemDragEnter_0_0value?: ((event: ItemDragInfo) => void) | undefined
     _onItemDragMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
+    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
     _onItemDragLeave_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
+    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined
     _onItemDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nestedScroll_0_0value?: NestedScrollOptions | undefined
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _friction_0_0value?: number | Resource | undefined
+    _friction_0_0value?: double | Resource | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: GridItemAlignment | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -100,7 +102,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDidScroll_0_0value?: OnScrollCallback | undefined
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_0value?: int32 | undefined
     _cachedCount_1_1value?: boolean | undefined
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
@@ -125,6 +127,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGridPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -203,7 +206,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._scrollBarWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as double | string | undefined));
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -213,7 +216,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarWidthAttribute((undefined as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -221,7 +224,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -231,7 +234,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -257,7 +260,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._onScrollBarUpdate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScrollBarUpdateAttribute((this._onScrollBarUpdate_0_0value as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                    peer.setOnScrollBarUpdateAttribute((this._onScrollBarUpdate_0_0value as ((index: int32,offset: double) => ComputedBarAttribute) | undefined));
                     this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -267,7 +270,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScrollBarUpdateAttribute((undefined as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                    peer.setOnScrollBarUpdateAttribute((undefined as ((index: int32,offset: double) => ComputedBarAttribute) | undefined));
                 }
             }
         }
@@ -275,7 +278,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._onScrollIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((first: number,last: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((first: int32,last: int32) => void) | undefined));
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -285,7 +288,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScrollIndexAttribute((undefined as ((first: number,last: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
@@ -293,7 +296,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._cachedCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as int32 | undefined));
                     this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -303,7 +306,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                    peer.setCachedCount0Attribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -347,7 +350,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._maxCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxCountAttribute((this._maxCount_0_0value as number | undefined));
+                    peer.setMaxCountAttribute((this._maxCount_0_0value as int32 | undefined));
                     this._maxCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -357,7 +360,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._maxCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxCountAttribute((undefined as number | undefined));
+                    peer.setMaxCountAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -365,7 +368,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._minCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinCountAttribute((this._minCount_0_0value as number | undefined));
+                    peer.setMinCountAttribute((this._minCount_0_0value as int32 | undefined));
                     this._minCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -375,7 +378,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._minCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinCountAttribute((undefined as number | undefined));
+                    peer.setMinCountAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -383,7 +386,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._cellLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCellLengthAttribute((this._cellLength_0_0value as number | undefined));
+                    peer.setCellLengthAttribute((this._cellLength_0_0value as double | undefined));
                     this._cellLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -393,7 +396,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._cellLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCellLengthAttribute((undefined as number | undefined));
+                    peer.setCellLengthAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -473,7 +476,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._onItemDragMove_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                     this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -483,7 +486,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._onItemDragMove_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -491,7 +494,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._onItemDragLeave_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                     this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -501,7 +504,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._onItemDragLeave_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -509,7 +512,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._onItemDrop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                     this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -519,7 +522,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._onItemDrop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                 }
             }
         }
@@ -563,7 +566,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._friction_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFrictionAttribute((this._friction_0_0value as number | Resource | undefined));
+                    peer.setFrictionAttribute((this._friction_0_0value as double | Resource | undefined));
                     this._friction_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -573,7 +576,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFrictionAttribute((undefined as number | Resource | undefined));
+                    peer.setFrictionAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -653,7 +656,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._cachedCount_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | undefined), (this._cachedCount_1_1value as boolean | undefined));
                     this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -663,7 +666,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                    peer.setCachedCount1Attribute((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -850,6 +853,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     }
     mergeModifier(modifier: GridModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._columnsTemplate_0_flag) {
@@ -911,7 +915,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarWidth((undefined as number | string | undefined));
+                    this.scrollBarWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -924,7 +928,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | number | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -950,7 +954,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.onScrollBarUpdate((undefined as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                    this.onScrollBarUpdate((undefined as ((index: int32,offset: double) => ComputedBarAttribute) | undefined));
                 }
             }
         }
@@ -963,7 +967,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.onScrollIndex((undefined as ((first: number,last: number) => void) | undefined));
+                    this.onScrollIndex((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
@@ -976,7 +980,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined));
+                    this.cachedCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -1015,7 +1019,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.maxCount((undefined as number | undefined));
+                    this.maxCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -1028,7 +1032,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.minCount((undefined as number | undefined));
+                    this.minCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -1041,7 +1045,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.cellLength((undefined as number | undefined));
+                    this.cellLength((undefined as double | undefined));
                 }
             }
         }
@@ -1106,7 +1110,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDragMove((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    this.onItemDragMove((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -1119,7 +1123,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDragLeave((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    this.onItemDragLeave((undefined as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -1132,7 +1136,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDrop((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    this.onItemDrop((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                 }
             }
         }
@@ -1171,7 +1175,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.friction((undefined as number | Resource | undefined));
+                    this.friction((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1236,7 +1240,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                    this.cachedCount((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -1415,7 +1419,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1426,7 +1430,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1448,7 +1452,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
         if (((this._onScrollBarUpdate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1459,7 +1463,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1470,7 +1474,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1503,7 +1507,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    maxCount(value: number | undefined): this {
+    maxCount(value: int32 | undefined): this {
         if (((this._maxCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxCount_0_0value) !== (value)))
         {
             this._maxCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1514,7 +1518,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    minCount(value: number | undefined): this {
+    minCount(value: int32 | undefined): this {
         if (((this._minCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minCount_0_0value) !== (value)))
         {
             this._minCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1525,7 +1529,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    cellLength(value: number | undefined): this {
+    cellLength(value: double | undefined): this {
         if (((this._cellLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cellLength_0_0value) !== (value)))
         {
             this._cellLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1580,7 +1584,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
         if (((this._onItemDragMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1591,7 +1595,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
         if (((this._onItemDragLeave_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1602,7 +1606,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
         if (((this._onItemDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1635,7 +1639,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1690,7 +1694,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -23,6 +24,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ContentModifier, AttributeModifier, hookRadioContentModifier, hookRadioAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -47,6 +49,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRadioOptionsAttribute(options: RadioOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         RadioOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._RadioInterface_setRadioOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -176,6 +179,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         if (this.checkPriority("setRadioOptions")) {
             const options_casted = options as (RadioOptions)
             this.getPeer()?.setRadioOptionsAttribute(options_casted)
+            this.applyOptionsFinish('RadioAttribute');
             return this
         }
         return this
@@ -211,12 +215,17 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRadioAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRadioAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -341,10 +350,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCheckedBackgroundColorTmpValueForIdx1)
+                const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx2  = valueHolderForCheckedBackgroundColorTmpValue as string
@@ -365,10 +374,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof number) {
+            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUncheckedBorderColorTmpValueForIdx1)
+                const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx1)
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx2  = valueHolderForUncheckedBorderColorTmpValue as string
@@ -389,10 +398,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForIndicatorColorTmpValue instanceof number) {
+            } else if (valueHolderForIndicatorColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForIndicatorColorTmpValueForIdx1)
+                const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx1)
             } else if (valueHolderForIndicatorColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx2  = valueHolderForIndicatorColorTmpValue as string
@@ -412,11 +421,11 @@ export class RadioStyle_serializer {
         let checkedBackgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((checkedBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const checkedBackgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let checkedBackgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let checkedBackgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (checkedBackgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 checkedBackgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (checkedBackgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                checkedBackgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                checkedBackgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (checkedBackgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 checkedBackgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (checkedBackgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -424,18 +433,18 @@ export class RadioStyle_serializer {
             } else {
                 throw new Error("One of the branches for checkedBackgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            checkedBackgroundColorTmpBuf = (checkedBackgroundColorTmpBuf_ as Color | number | string | Resource)
+            checkedBackgroundColorTmpBuf = (checkedBackgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const checkedBackgroundColorTmpResult : ResourceColor | undefined = checkedBackgroundColorTmpBuf
         const uncheckedBorderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let uncheckedBorderColorTmpBuf : ResourceColor | undefined = undefined
         if ((uncheckedBorderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const uncheckedBorderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let uncheckedBorderColorTmpBuf_ : Color | number | string | Resource | undefined
+            let uncheckedBorderColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (uncheckedBorderColorTmpBuf_UnionSelector == (0).toChar()) {
                 uncheckedBorderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (uncheckedBorderColorTmpBuf_UnionSelector == (1).toChar()) {
-                uncheckedBorderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                uncheckedBorderColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (uncheckedBorderColorTmpBuf_UnionSelector == (2).toChar()) {
                 uncheckedBorderColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (uncheckedBorderColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -443,18 +452,18 @@ export class RadioStyle_serializer {
             } else {
                 throw new Error("One of the branches for uncheckedBorderColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            uncheckedBorderColorTmpBuf = (uncheckedBorderColorTmpBuf_ as Color | number | string | Resource)
+            uncheckedBorderColorTmpBuf = (uncheckedBorderColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const uncheckedBorderColorTmpResult : ResourceColor | undefined = uncheckedBorderColorTmpBuf
         const indicatorColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorColorTmpBuf : ResourceColor | undefined = undefined
         if ((indicatorColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const indicatorColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let indicatorColorTmpBuf_ : Color | number | string | Resource | undefined
+            let indicatorColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (indicatorColorTmpBuf_UnionSelector == (0).toChar()) {
                 indicatorColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (indicatorColorTmpBuf_UnionSelector == (1).toChar()) {
-                indicatorColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                indicatorColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (indicatorColorTmpBuf_UnionSelector == (2).toChar()) {
                 indicatorColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (indicatorColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -462,7 +471,7 @@ export class RadioStyle_serializer {
             } else {
                 throw new Error("One of the branches for indicatorColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            indicatorColorTmpBuf = (indicatorColorTmpBuf_ as Color | number | string | Resource)
+            indicatorColorTmpBuf = (indicatorColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const indicatorColorTmpResult : ResourceColor | undefined = indicatorColorTmpBuf
         let value : RadioStyle = ({checkedBackgroundColor: checkedBackgroundColorTmpResult, uncheckedBorderColor: uncheckedBorderColorTmpResult, indicatorColor: indicatorColorTmpResult} as RadioStyle)

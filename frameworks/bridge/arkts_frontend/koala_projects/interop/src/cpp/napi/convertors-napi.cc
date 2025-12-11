@@ -318,7 +318,8 @@ const std::vector<std::pair<std::string, napi_type_t>>& Exports::getMethods(cons
 //
 // Callback dispatcher
 //
-// Improve: Should we get rid of explicit Node_* declrations and hide the naming convention behind the macro definitions?
+// Improve: Should we get rid of explicit Node_* declrations \
+    and hide the naming convention behind the macro definitions?
 
 static napi_ref g_koalaNapiCallbackDispatcher = nullptr;
 

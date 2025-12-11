@@ -797,7 +797,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo)
 {
     OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, formSurfaceInfo.width,
-        formSurfaceInfo.height, formSurfaceInfo.borderWidth);
+        formSurfaceInfo.height, formSurfaceInfo.borderWidth, formSurfaceInfo.formViewScale);
     UpdateFormSizeWantCache(formSurfaceInfo.width, formSurfaceInfo.height, formSurfaceInfo.formViewScale,
         formSurfaceInfo.borderWidth);
     auto formRendererDispatcher = GetFormRendererDispatcher();
@@ -1002,6 +1002,13 @@ void FormManagerDelegate::SetObscured(bool isObscured)
     auto formRendererDispatcher = GetFormRendererDispatcher();
     CHECK_NULL_VOID(formRendererDispatcher);
     formRendererDispatcher->SetObscured(isObscured);
+}
+
+void FormManagerDelegate::SetColorMode(int32_t colorMode)
+{
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->SetColorMode(colorMode);
 }
 
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
@@ -1226,6 +1233,7 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_COLOR_MODE_KEY, info.colorMode);
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();
@@ -1328,6 +1336,24 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
     formMajorInfo.formName = formName;
     formMajorInfo.dimension = dimension;
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(formMajorInfo, isDisablePolicy);
+}
+
+void FormManagerDelegate::ProcessCheckForm()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessCheckForm formId:%{public}" PRId64, runningCardId_);
+    auto form = formPattern_.Upgrade();
+    if (!form) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formPattern_ is null");
+        return;
+    }
+    form->ProcessCheckForm();
+}
+
+void FormManagerDelegate::SendNonTransparencyRatio(int32_t ratio)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "SendNonTransparencyRatio ratio:%{public}d formId:%{public}" PRId64, ratio,
+        runningCardId_);
+    OHOS::AppExecFwk::FormMgr::GetInstance().SendNonTransparencyRatio(runningCardId_, ratio);
 }
 #endif
 } // namespace OHOS::Ace

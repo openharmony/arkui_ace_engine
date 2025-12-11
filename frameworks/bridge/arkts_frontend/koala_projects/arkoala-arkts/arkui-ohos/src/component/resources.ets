@@ -72,7 +72,9 @@ export class ArkResource implements Resource {
     }
     get id(): long {
         if (this._id == -1) {
-            this._id = SystemOps.getResourceId(this.bundleName, this.moduleName, [this.params![0] as string]);
+            this._id = SystemOps.getResourceId(this.bundleName, this.moduleName, [
+                (this.params![0] as string).replace(re, 'app'),
+            ]);
             if (this.id > -1 && this.params!.length > 0) {
                 this.params!.shift();
             }
@@ -116,13 +118,13 @@ export function _r(bundleName: string, moduleName: string, name: string, ...para
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
     return new ArkResource(0, 30000, bundleName, moduleName, name);
 }
-export function _r(id: number, type: number, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
+export function _r(id: long, type: long, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
     if (id === -1) {
         return new ArkResource(null, bundleName, moduleName, ...params);
     }
     return new ArkResource(id as long, type as int32, bundleName, moduleName, ...params);
 }
-export function _rawfile(id: number, type: number, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
+export function _rawfile(id: long, type: long, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
     const name: string = params[0] as string;
     return _rawfile(bundleName, moduleName, name);
 }

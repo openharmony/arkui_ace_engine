@@ -941,4 +941,63 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg021, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetReverse().value(), IS_REVERSE);
     EXPECT_EQ(layoutProperty->GetReverse().value(), IS_REVERSE);
 }
+
+/**
+ * @tc.name: SliderStaticTestNg022
+ * @tc.desc: test Slider ResetShowTips && ResetShowSteps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test ResetShowTips && ResetShowSteps .
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    SliderModelStatic::ResetShowTips(frameNode);
+    SliderModelStatic::ResetShowSteps(frameNode);
+    EXPECT_FALSE(paintProperty->GetShowSteps());
+    EXPECT_FALSE(paintProperty->GetShowTips());
+}
+
+/**
+ * @tc.name: ResetTrackBackgroundColorTest001
+ * @tc.desc: Test Slider ResetTrackBackgroundColor
+ * Decrease Slider BackgroundColor to theme color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, ResetTrackBackgroundColorTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    Color testColor = Color::RED;
+    sliderTheme->trackBgColor_ = testColor;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderModelStatic::ResetTrackBackgroundColor(AceType::RawPtr(frameNode));
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto gradientOpt = paintProperty->GetTrackBackgroundColor();
+    ASSERT_TRUE(gradientOpt.has_value());
+    Gradient expectedGradient = SliderModelNG::CreateSolidGradient(testColor);
+    EXPECT_EQ(gradientOpt.value(), expectedGradient);
+    EXPECT_TRUE(paintProperty->GetTrackBackgroundIsResourceColor());
+}
 } // namespace OHOS::Ace::NG

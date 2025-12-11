@@ -20,11 +20,13 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ErrorCallback, BusinessError, RecordData } from "@ohos.base"
 import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as Want } from "@ohos.app.ability.Want"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -32,6 +34,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ComponentContent } from "arkui.ComponentContent"
 import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export interface UIExtensionProxy {
     send(data: Record<string, RecordData>): void
     sendSync(data: Record<string, RecordData>): Record<string, RecordData>
@@ -70,37 +73,37 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         const data_casted = data as (Record<string, RecordData>)
         return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
     }
-    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offAsyncReceiverRegisterAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offSyncReceiverRegisterSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    onAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+        this.onAsyncReceiverRegisterAsyncReceiverRegister(callback_)
     }
-    onSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+        this.onSyncReceiverRegisterSyncReceiverRegister(callback_)
     }
-    offAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+        this.offAsyncReceiverRegisterAsyncReceiverRegister(callback_)
     }
-    offSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+        this.offSyncReceiverRegisterSyncReceiverRegister(callback_)
     }
     send_serialize(data: Map<string, RecordData>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -297,6 +300,7 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
             const want_casted = want as (Want)
             const options_casted = options as (UIExtensionOptions | undefined)
             this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
+            this.applyOptionsFinish('UIExtensionComponentAttribute');
             return this
         }
         return this
@@ -342,12 +346,17 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return this
     }
     public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookUIExtensionComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookUIExtensionComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -395,7 +404,7 @@ export class UIExtensionOptions_serializer {
         if (valueHolderForPlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
-            valueSerializer.holdAndWriteObject(valueHolderForPlaceholderTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -408,7 +417,7 @@ export class UIExtensionOptions_serializer {
                 const valueHolderForAreaChangePlaceholderTmpValueKeyVar = pair[0]
                 const valueHolderForAreaChangePlaceholderTmpValueValueVar = pair[1]
                 valueSerializer.writeString(valueHolderForAreaChangePlaceholderTmpValueKeyVar)
-                valueSerializer.holdAndWriteObject(valueHolderForAreaChangePlaceholderTmpValueValueVar)
+                ComponentContent_serializer.write(valueSerializer, valueHolderForAreaChangePlaceholderTmpValueValueVar)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)

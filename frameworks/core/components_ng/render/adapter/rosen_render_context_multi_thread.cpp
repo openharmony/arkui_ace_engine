@@ -160,4 +160,27 @@ void RosenRenderContext::AnimateHoverEffectBoardMultiThread(bool isHovered)
         renderContext->AnimateHoverEffectBoard(isHovered);
     });
 }
+
+void RosenRenderContext::OnZIndexUpdateMultiThread(const RefPtr<FrameNode>& parent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto weak = WeakClaim(AceType::RawPtr(parent));
+    auto task = [weak]() {
+        auto parent = weak.Upgrade();
+        CHECK_NULL_VOID(parent);
+        parent->RebuildRenderContextTree();
+    };
+    host->PostAfterAttachMainTreeTask([weak, taskCallback = std::move(task)]() {
+        auto parent = weak.Upgrade();
+        CHECK_NULL_VOID(parent);
+        auto pipeline = parent->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline->IsLayouting()) {
+            pipeline->AddAfterLayoutTask(std::move(taskCallback));
+            return;
+        }
+        taskCallback();
+    });
+}
 }

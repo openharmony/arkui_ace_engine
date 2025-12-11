@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/line_pattern.h"

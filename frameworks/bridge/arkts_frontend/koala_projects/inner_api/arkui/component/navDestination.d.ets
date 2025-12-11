@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { memo_stable } from '@koalaui.runtime.annotations';
+import { memo_stable } from '@koalaui/runtime/annotations';
 import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { ComponentBase } from 'arkui/ComponentBase';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
@@ -54,10 +54,15 @@ import image from '@ohos.multimedia.image';
 type PixelMap = image.PixelMap;
 type SystemBarStyle = window.SystemBarStyle;
 
+export interface NavDestinationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+}
+
 export declare class ArkNavDestinationPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkNavDestinationPeer;
-    public setNavDestinationOptionsAttribute(): void;
+    public setNavDestinationOptionsAttribute(moduleInfo?: NavDestinationModuleInfo): void;
     public hideTitleBar0Attribute(value: boolean | undefined): void;
     public hideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void;
     public hideBackButtonAttribute(value: boolean | undefined): void;
@@ -216,7 +221,7 @@ export declare class ArkNavDestinationStyle extends ArkCommonMethodStyle impleme
 @memo_stable() export declare class ArkNavDestinationComponent extends ArkCommonMethodComponent
         implements NavDestinationAttribute {
     public getPeer(): ArkNavDestinationPeer;
-    public setNavDestinationOptions(): this;
+    public setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
     public hideBackButton(value: boolean | undefined): this;
     public onShown(value: (() => void) | undefined): this;

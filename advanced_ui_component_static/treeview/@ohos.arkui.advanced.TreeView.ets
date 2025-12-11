@@ -1,0 +1,5612 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import {
+  Resource, ResourceColor, FontWeight, ResourceStr, SymbolGlyphModifier, ShadowOptions, Component, Builder, Padding,
+  LocalizedPadding, LocalizedMargin, EditableTextOnChangeCallback, Callback, UIContext, Row, Text, SymbolGlyph,
+  SymbolEffectStrategy, SymbolEffect, Image, ImageFit, TextOverflow, TouchEvent, TouchType, List, LazyForEach, ListItem,
+  DragItemInfo, Alignment, DragEvent, IDataSource, DataChangeListener, Visibility, GestureModifier, ClassCastError,
+  CustomDialogController, UIGestureEvent, LongPressGestureHandler, Margin, ShadowStyle, Stack, Column, Divider,
+  LineCapStyle, TextInput, EnterKeyType, Blank, FlexAlign, ResponseType, MouseEvent, MouseButton, Placement, Area,
+  HoverEvent, CustomPopupOptions, CommonMethod, BorderStyle, Type, OnSubmitCallback, OnDragEventCallback, $r,
+  BuilderParam, Color
+} from '@ohos.arkui.component';
+
+import {
+  State, AppStorage, Observed, StorageProp, Watch, StorageLink, Provide, Consume, ObjectLink
+} from '@ohos.arkui.stateManagement'
+
+import hilog from '@ohos.hilog';
+import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
+import common from '@ohos.app.ability.common';
+import resourceManager from '@ohos.resourceManager';
+import accessibility from '@ohos.accessibility'
+import { UIContext, Context } from "@ohos.arkui.UIContext";
+
+const IMAGE_NODE_HEIGHT: number = 24;
+const IMAGE_NODE_WIDTH: number = 24;
+const ITEM_WIDTH: number = 0;
+const ITEM_HEIGHT: number = 48;
+const ITEM_HEIGHT_INPUT: number = 32;
+const BORDER_WIDTH_HAS: number = 2;
+const BORDER_WIDTH_NONE: number = 0;
+const NODE_HEIGHT: number = 48;
+const LIST_ITEM_HEIGHT_NONE: number = 0;
+const LIST_ITEM_HEIGHT: number = 48;
+const SHADOW_OFFSETY: number = 10;
+const FLAG_NUMBER: number = 2;
+const DRAG_OPACITY: number = 0.4;
+const DRAG_OPACITY_NONE: number = 1;
+const MIN_FONT_SCALE: number = 1;
+const MAX_FONT_SCALE: number = 2;
+const FLAG_LINE_HEIGHT: string = '1.0vp';
+const X_OFF_SET: string = '0vp';
+const Y_OFF_SET: string = '2.75vp';
+const Y_BOTTOM_OFF_SET: string = '-1.25vp';
+const Y_BASE_PLATE_OFF_SET: string = '1.5vp';
+const COLOR_IMAGE_EDIT: string = '#FFFFFF';
+const COLOR_IMAGE_ROW: string = '#00000000';
+const COLOR_SELECT: string = '#1A0A59F7';
+const SHADOW_COLOR: string = '#00001E';
+const GRAG_POP_UP_HEIGHT: string = '48';
+const FLOOR_MIN_WIDTH: string = '128vp';
+const FLOOR_MAX_WIDTH: string = '208vp';
+const TEXT_MIN_WIDTH: string = '80vp';
+const TEXT_MAX_WIDTH: string = '160vp';
+const MIN_WIDTH: string = '112vp';
+const MAX_WIDTH: string = '192vp';
+const TRANS_COLOR: string = '#00FFFFFF';
+const DELAY_TIME: int = 100;
+const LEVEL_MARGIN: number = 12;
+const MARGIN_OFFSET: number = 8;
+const TAG: string = 'TreeView';
+const LOG_CODE: int = 0x3900;
+const ENTER_EXIT_DURATION: int = 2000;
+const ACCESSIBILITY_REFOCUS_DELAY_TIME: int = 300;
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+const MAX_SYMBOL_FONT_SCALE: number = 1.3;
+const MIN_SYMBOL_FONT_SCALE: number = 1;
+const ARROW_DOWN: Resource = $r('sys.symbol.chevron_down');
+const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
+const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_right');
+const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_right');
+
+enum Event {
+  TOUCH_DOWN = 0,
+  TOUCH_UP = 1,
+  HOVER = 3,
+  HOVER_OVER = 4,
+  FOCUS = 5,
+  BLUR = 6,
+  MOUSE_BUTTON_RIGHT = 7,
+  DRAG = 8,
+}
+
+enum MenuOperation {
+  ADD_NODE = 0,
+  REMOVE_NODE = 1,
+  MODIFY_NODE = 2,
+  COMMIT_NODE = 3,
+}
+
+enum PopUpType {
+  HINTS = 0,
+  WARNINGS = 1,
+}
+
+enum InputError {
+  INVALID_ERROR = 0,
+  LENGTH_ERROR = 1,
+  NONE = 2,
+}
+
+enum Flag {
+  DOWN_FLAG = 0,
+  UP_FLAG = 1,
+  NONE = 2,
+}
+
+export enum NodeStatus {
+  EXPAND = 0,
+  COLLAPSE,
+}
+
+export enum InteractionStatus {
+  NORMAL = 0,
+  SELECTED,
+  EDIT,
+  FINISH_EDIT,
+  DRAG_INSERT,
+  FINISH_DRAG_INSERT,
+}
+
+enum CollapseImageType {
+  ARROW_DOWN = 0,
+  ARROW_RIGHT,
+  ARROW_DOWN_WHITE,
+  ARROW_RIGHT_WHITE,
+}
+
+enum AccessibilityNodeType {
+  TEXT = 0,
+  PLACE = 1,
+  LIFT = 2,
+}
+
+interface ChildNodeInfo {
+  isHasChildNode: boolean;
+  childNum: int;
+  allChildNum: int;
+}
+
+interface NodeItemView {
+  imageNode?: ImageNode;
+  inputText: InputText;
+  mainTitleNode: MainTitleNode;
+  imageCollapse?: CollapseImageNode;
+  fontColor?: ResourceColor;
+}
+
+interface Status {
+  normal: ResourceColor;
+  hover: ResourceColor;
+  press: ResourceColor;
+  selected: ResourceColor;
+  highLight?: ResourceColor;
+}
+
+interface NodeBorder {
+  borderWidth: Resource | number;
+  borderColor: ResourceColor;
+  borderRadius: Resource;
+}
+
+interface PopUpInfo {
+  popUpIsShow: boolean;
+  popUpEnableArrow: boolean;
+  popUpColor?: ResourceColor;
+  popUpText?: string | Resource;
+  popUpTextColor?: ResourceColor;
+}
+
+interface BorderWidth {
+  has: Resource | number;
+  none: Resource | number;
+}
+
+interface TextSetting {
+  fontColor: ResourceColor;
+  fontSize: Resource;
+  fontWeight: FontWeight;
+}
+
+interface NodeInfoView {
+  itemId?: number;
+  itemIcon?: ResourceStr;
+  itemTitle?: ResourceStr;
+  isFolder?: boolean;
+}
+
+interface FloorConstraintSize {
+  minWidth: string;
+  maxWidth: string;
+}
+
+interface TextConstraintSize {
+  minWidth1: string;
+  maxWidth1: string;
+  minWidth2: string;
+  maxWidth2: string;
+}
+
+interface TreeViewPadding {
+  left: Resource;
+  right: Resource;
+}
+
+interface ItemPadding {
+  left: LengthMetrics;
+  right: LengthMetrics;
+  top: LengthMetrics;
+  bottom: LengthMetrics;
+}
+
+interface DragPopup {
+  floorConstraintSize: FloorConstraintSize;
+  textConstraintSize: TextConstraintSize;
+  padding: TreeViewPadding;
+  backgroundColor: ResourceColor;
+  height: string;
+  shadow: ShadowOptions;
+  borderRadius: Resource;
+  fontColor: ResourceColor;
+  fontSize: Resource;
+  fontWeight: FontWeight;
+  imageOpacity: Resource;
+}
+
+interface DragNodeParam {
+  parentId: number,
+  currentId: number,
+  data: NodeParam,
+}
+
+interface FlagLine {
+  flagLineHeight: string;
+  flagLineColor: Resource;
+  xOffset: string;
+  yTopOffset: string;
+  yBottomOffset: string;
+  yBasePlateOffset: string;
+}
+
+interface SubTitleStyle {
+  normalFontColor: ResourceColor;
+  highLightFontColor: ResourceColor;
+  fontSize: Resource;
+  fontWeight: FontWeight;
+  margin: TreeViewPadding;
+}
+
+interface NodeItemViewFactory {
+  createNode(): NodeItemView;
+
+  createNodeByNodeParam(nodeParam: NodeParam): NodeItemView;
+}
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
+
+class TreeViewNodeItemFactory implements NodeItemViewFactory {
+  private static instance: TreeViewNodeItemFactory = new TreeViewNodeItemFactory();
+
+  private constructor() {
+  }
+
+  /**
+   * TreeViewNodeItemFactory singleton function
+   *
+   * @returns TreeViewNodeItemFactory
+   */
+  public static getInstance(): TreeViewNodeItemFactory {
+    if (!TreeViewNodeItemFactory.instance) {
+      TreeViewNodeItemFactory.instance = new TreeViewNodeItemFactory();
+    }
+    return TreeViewNodeItemFactory.instance as TreeViewNodeItemFactory;
+  }
+
+  /**
+   * TreeViewNodeItemFactory create default node
+   *
+   * @returns NodeItemView
+   */
+  public createNode(): NodeItemView {
+    return {
+      imageNode: undefined,
+      inputText: new InputText(),
+      mainTitleNode: new MainTitleNode(''),
+      imageCollapse: undefined,
+      fontColor: undefined,
+    } as NodeItemView;
+  }
+
+  /**
+   * TreeViewNodeItemFactory create node by node parameter
+   *
+   * @param nodeParam node parameter
+   * @returns NodeItemView
+   */
+  public createNodeByNodeParam(nodeParam: NodeParam): NodeItemView {
+    let nodeItemView: NodeItemView = this.createNode() as NodeItemView;
+    if (nodeParam.icon) {
+      nodeItemView.imageNode = undefined;
+      let imageNode: ImageNode = new ImageNode(
+        $r('sys.media.ohos_ic_normal_white_grid_folder') as ResourceStr,
+        undefined,
+        $r('sys.float.ohos_id_alpha_content_fourth') as Resource,
+        IMAGE_NODE_HEIGHT as number,
+        IMAGE_NODE_WIDTH as number,
+        nodeParam.selectedIcon as Resource,
+        nodeParam.symbolSelectedIconStyle as (SymbolGlyphModifier | undefined),
+        nodeParam.editIcon as Resource,
+        nodeParam.symbolEditIconStyle as (SymbolGlyphModifier | undefined),
+      );
+      nodeItemView.imageNode = imageNode;
+    }
+    if (nodeParam.primaryTitle) {
+      nodeItemView.mainTitleNode = new MainTitleNode(nodeParam.primaryTitle as String | Resource);
+    }
+    return nodeItemView;
+  }
+}
+
+let emptyNodeInfo: NodeParam = {
+  isFolder: true,
+  icon: '',
+  symbolIconStyle: undefined,
+  selectedIcon: '',
+  symbolSelectedIconStyle: undefined,
+  editIcon: '',
+  symbolEditIconStyle: undefined,
+  container: () => {
+  },
+  secondaryTitle: '',
+  primaryTitle: '',
+  parentNodeId: -1,
+  currentNodeId: -1,
+}
+
+class TreeViewTheme {
+  private static instance: TreeViewTheme = new TreeViewTheme();
+  public itemSelectedBgColor: ResourceColor = '#1A0A59F7';
+  public primaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_primary');
+  public secondaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_secondary');
+  public primaryTitleActiveFontColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary_activated');
+  public itemPressedBgColor: ResourceColor = $r('sys.color.ohos_id_color_click_effect');
+  public itemHoverBgColor: ResourceColor = $r('sys.color.ohos_id_color_hover');
+  public borderFocusedColor: ResourceColor = $r('sys.color.ohos_id_color_focused_outline');
+  public leftIconColor: ResourceColor = $r('sys.color.icon_secondary');
+  public leftIconActiveColor: ResourceColor = $r('sys.color.icon_secondary');
+  public arrowIconColor: ResourceColor = $r('sys.color.icon_tertiary');
+
+  private constructor() {
+
+  }
+
+  /**
+   * TreeViewTheme singleton function
+   *
+   * @returns TreeViewNodeItemFactory
+   */
+  public static getInstance(): TreeViewTheme {
+    if (!TreeViewTheme.instance) {
+      TreeViewTheme.instance = new TreeViewTheme();
+    }
+    return TreeViewTheme.instance as TreeViewTheme;
+  }
+}
+
+@Observed
+export class NodeInfo {
+  public imageSource: ResourceStr | undefined = '';
+  public symbolSource: SymbolGlyphModifier | undefined = undefined;
+  private nodeHeight: Resource | number = 0;
+  private nodeItemView: NodeItemView;
+  private nodeLeftPadding: number;
+  private nodeColor: ResourceColor = '';
+  private nodeIsShow: boolean;
+  private status: Status;
+  private nodeBorder: NodeBorder;
+  private popUpInfo: PopUpInfo;
+  private listItemHeight: number;
+  private isShowTitle: boolean;
+  private isShowInputText: boolean;
+  private isSelected: boolean;
+  public readonly borderWidth: BorderWidth =
+    { has: BORDER_WIDTH_HAS/* 2vp */, none: BORDER_WIDTH_NONE/* 0vp */ }
+  /* parameter of the drag event.*/
+  private nodeParam: NodeParam = {} as NodeParam;
+  private node: NodeItem = new NodeItem(emptyNodeInfo);
+  private canShowFlagLine: boolean = false;
+  private isOverBorder: boolean = false;
+  private canShowBottomFlagLine: boolean = false;
+  private isHighLight: boolean = false;
+  private flagLineLeftMargin: number;
+  private isModify: boolean = false;
+  private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  public fontColor: ResourceColor = '';
+
+  constructor(node: NodeItem, nodeParam: NodeParam) {
+    this.node = node;
+    this.nodeParam = nodeParam;
+    this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(nodeParam);
+    this.popUpInfo = {
+      popUpIsShow: false,
+      popUpEnableArrow: false,
+      popUpColor: undefined,
+      popUpText: '',
+      popUpTextColor: undefined,
+    };
+
+    this.nodeHeight = NODE_HEIGHT;
+    this.nodeLeftPadding = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET; // calculate left padding
+    this.nodeColor = $r('sys.color.ohos_id_color_background');
+    this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
+    this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
+    this.isShowTitle = true;
+    this.isShowInputText = false;
+    this.isSelected = false;
+    this.status = {
+      normal: $r('sys.color.ohos_id_color_background_transparent'),
+      hover: this.treeViewTheme.itemHoverBgColor,
+      press: this.treeViewTheme.itemPressedBgColor,
+      selected: this.treeViewTheme.itemSelectedBgColor,
+      highLight: $r('sys.color.ohos_id_color_activated')
+    };
+
+    this.nodeBorder = {
+      borderWidth: BORDER_WIDTH_NONE,
+      borderColor: this.treeViewTheme.borderFocusedColor,
+      borderRadius: $r('sys.float.ohos_id_corner_radius_clicked')
+    };
+    this.flagLineLeftMargin = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
+  }
+
+  /**
+   * NodeInfo add collapse image
+   *
+   * @param isHasChildNode whether node has child node
+   */
+  addImageCollapse(isHasChildNode: boolean): void {
+    if (isHasChildNode) {
+      this.nodeItemView.imageCollapse =
+        CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT);
+    } else {
+      this.nodeItemView.imageCollapse = undefined;
+    }
+  }
+
+  /**
+   * NodeInfo add expand image
+   *
+   * @param isHasChildNode whether node has child node
+   */
+  addImageExpand(isHasChildNode: boolean): void {
+    if (isHasChildNode) {
+      this.nodeItemView.imageCollapse =
+        CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+    } else {
+      this.nodeItemView.imageCollapse = undefined;
+    }
+  }
+
+  setFontColor(color: ResourceColor): void {
+    this.fontColor = color
+  }
+
+  getFontColor(): ResourceColor {
+    return this.fontColor;
+  }
+
+  getPopUpInfo(): PopUpInfo {
+    return this.popUpInfo;
+  }
+
+  setPopUpIsShow(isShow: boolean): void {
+    this.popUpInfo.popUpIsShow = isShow;
+  }
+
+  setPopUpEnableArrow(popUpEnableArrow: boolean): void {
+    this.popUpInfo.popUpEnableArrow = popUpEnableArrow;
+  }
+
+  setPopUpColor(color: ResourceColor): void {
+    this.popUpInfo.popUpColor = color;
+  }
+
+  setPopUpText(text: string | Resource | undefined): void {
+    this.popUpInfo.popUpText = text;
+  }
+
+  setPopUpTextColor(popUpTextColor: ResourceColor): void {
+    this.popUpInfo.popUpTextColor = popUpTextColor;
+  }
+
+  getIsShowTitle(): boolean {
+    return this.isShowTitle;
+  }
+
+  getIsShowInputText(): boolean {
+    return this.isShowInputText;
+  }
+
+  setTitleAndInputTextStatus(isModify: boolean): void {
+    if (isModify) {
+      this.isShowTitle = false;
+      this.isShowInputText = true;
+    } else {
+      this.isShowTitle = true;
+      this.isShowInputText = false;
+    }
+  }
+
+  handleImageCollapseAfterAddNode(isAddImageCollapse: boolean): void {
+    // listTree this node already has ImageCollapse.
+    if (isAddImageCollapse) {
+      this.nodeItemView.imageCollapse =
+        CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+    } else {
+      this.nodeItemView.imageCollapse = undefined;
+    }
+  }
+
+  setNodeColor(nodeColor: ResourceColor | undefined): void {
+    if (nodeColor === undefined) {
+      return;
+    }
+    this.nodeColor = nodeColor;
+  }
+
+  getNodeColor(): ResourceColor {
+    return this.nodeColor;
+  }
+
+  setListItemHeight(listItemHeight: number): void {
+    this.listItemHeight = listItemHeight;
+  }
+
+  getListItemHeight(): number {
+    return this.listItemHeight;
+  }
+
+  getNodeCurrentNodeId(): int {
+    return this.node.currentNodeId;
+  }
+
+  getNodeParentNodeId(): int {
+    return this.node.parentNodeId;
+  }
+
+  getNodeLeftPadding(): number {
+    return this.nodeLeftPadding;
+  }
+
+  getNodeHeight(): Resource | number {
+    return this.nodeHeight;
+  }
+
+  setNodeIsShow(nodeIsShow: boolean): void {
+    this.nodeIsShow = nodeIsShow;
+  }
+
+  getNodeIsShow(): boolean {
+    return this.nodeIsShow;
+  }
+
+  getNodeItem(): NodeItemView {
+    return this.nodeItemView;
+  }
+
+  getNodeStatus(): Status {
+    return this.status;
+  }
+
+  getNodeBorder(): NodeBorder {
+    return this.nodeBorder;
+  }
+
+  setNodeBorder(isClearFocusStatus: boolean): void {
+    this.nodeBorder.borderWidth = isClearFocusStatus ? this.borderWidth.has : this.borderWidth.none;
+  }
+
+  getChildNodeInfo(): ChildNodeInfo {
+    return this.node.childNodeInfo;
+  }
+
+  getMenu(): () => void {
+    if (this.nodeParam.container !== undefined) {
+      return this.nodeParam.container as () => void
+    } else {
+      return () => {
+      };
+    }
+  }
+
+  setIsSelected(isSelected: boolean): void {
+    this.isSelected = isSelected;
+  }
+
+  getIsSelected(): boolean {
+    return this.isSelected;
+  }
+
+  /* To gain the information while to alter node. */
+  getNodeInfoData(): NodeParam {
+    return this.nodeParam;
+  }
+
+  /* To gain the tree Node(NodeItem) while to alter node. */
+  public getNodeInfoNode(): NodeItem {
+    return this.node;
+  }
+
+  public getIsFolder(): boolean | undefined {
+    return this.nodeParam.isFolder;
+  }
+
+  public setCanShowFlagLine(canShowFlagLine: boolean): void {
+    this.canShowFlagLine = canShowFlagLine;
+  }
+
+  public getCanShowFlagLine(): boolean {
+    return this.canShowFlagLine;
+  }
+
+  public setFlagLineLeftMargin(currentNodeLevel: number | undefined): void {
+    if (currentNodeLevel === undefined) {
+      return;
+    }
+    this.flagLineLeftMargin = currentNodeLevel * LEVEL_MARGIN + MARGIN_OFFSET; // calculate
+  }
+
+  public getFlagLineLeftMargin(): number {
+    return this.flagLineLeftMargin;
+  }
+
+  public getNodeLevel(): number {
+    return this.node.nodeLevel;
+  }
+
+  public setIsOverBorder(isOverBorder: boolean): void {
+    this.isOverBorder = isOverBorder;
+  }
+
+  public getIsOverBorder(): boolean {
+    return this.isOverBorder;
+  }
+
+  public setCanShowBottomFlagLine(canShowBottomFlagLine: boolean): void {
+    this.canShowBottomFlagLine = canShowBottomFlagLine;
+  }
+
+  public getCanShowBottomFlagLine(): boolean {
+    return this.canShowBottomFlagLine;
+  }
+
+  public setIsHighLight(isHighLight: boolean): void {
+    this.isHighLight = isHighLight;
+  }
+
+  public getIsHighLight(): boolean {
+    return this.isHighLight;
+  }
+
+  public setIsModify(isModify: boolean): void {
+    this.isModify = isModify;
+  }
+
+  public getIsModify(): boolean {
+    return this.isModify;
+  }
+}
+
+/**
+ * Control style of operation element.
+ * @enum { TreeListenType }
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Control style of operation element.
+ * @enum { TreeListenType }
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export enum TreeListenType {
+  /**
+   * register listener after a node is clicked.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * register listener after a node is clicked.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  NODE_CLICK = 'NodeClick',
+
+  /**
+   * register listener after a node is add.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * register listener after a node is add.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  NODE_ADD = 'NodeAdd',
+
+  /**
+   * register listener after a node is deleted.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * register listener after a node is deleted.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  NODE_DELETE = 'NodeDelete',
+
+  /**
+   * register listener after a node is modified.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * register listener after a node is modified.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  NODE_MODIFY = 'NodeModify',
+
+  /**
+   * register listener after a node is moved.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * register listener after a node is moved.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  NODE_MOVE = 'NodeMove',
+}
+
+/**
+ * Declare class TreeListener.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Declare class TreeListener.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export class TreeListener {
+  public _events: Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null> =
+    new Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null>();
+  public _once_events: Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null> =
+    new Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null>();
+
+  constructor() {
+  }
+
+  /**
+   * Event registration and processing.
+   *
+   * The event will not be destroyed after being processed.
+   *
+   * @param { type } event Registered Events.
+   * @param callback.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Event registration and processing.
+   *
+   * The event will not be destroyed after being processed.
+   *
+   * @param { type } event Registered Events.
+   * @param callback.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public on(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
+    this._events.set(type, callback)
+  }
+
+  /**
+   * Event registration and processing.
+   *
+   * After the event is processed once, it will be destroyed.
+   *
+   * @param { type } event Registered Events.
+   * @param callback.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Event registration and processing.
+   *
+   * After the event is processed once, it will be destroyed.
+   *
+   * @param { type } event Registered Events.
+   * @param callback.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public once(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
+    if (this._once_events.get(type)) {
+      this.off(type, callback);
+    } else {
+      this._once_events.set(type, callback)
+    }
+  }
+
+  /**
+   * Destroy event.
+   *
+   * @param type Registered Events.
+   * @param callback Event callback.
+   * @since 10
+   */
+  public off(type: TreeListenType, callback: ((callbackParam: CallbackParam) => void) | undefined): void {
+    this._events.delete(type);
+  }
+
+  /**
+   * Triggers all callbacks of an event with parameters.
+   *
+   * @param event Registered Events.
+   * @param argument Parameters returned by the callback event.
+   * @since 10
+   */
+  public emit(event: TreeListenType, argument: CallbackParam) {
+    if (this._events.get(event)) {
+      const callback: ((callbackParam: CallbackParam) => void) | undefined =
+        this._events.get(event) as ((callbackParam: CallbackParam) => void) | undefined;
+      try {
+        callback?.(argument);
+      } catch (e) {
+        throw new Error('on function callbacks error.');
+      }
+    } else if (this._once_events.get(event)) {
+      const callback: ((callbackParam: CallbackParam) => void) | undefined =
+        this._once_events.get(event) as ((callbackParam: CallbackParam) => void) | undefined;
+      try {
+        callback?.(argument);
+      } catch (e) {
+        throw new Error('once function callbacks error.');
+      }
+    }
+  }
+}
+
+/**
+ * Declare class TreeListenerManager.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Declare class TreeListenerManager.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export class TreeListenerManager {
+  public static readonly APP_KEY_EVENT_BUS = 'app_key_event_bus';
+  private appEventBus: TreeListener;
+
+  private constructor() {
+    this.appEventBus = new TreeListener();
+  }
+
+  /**
+   * Get instance of treeListenerManager.
+   * @return treeListenerManager instance.
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Get instance of treeListenerManager.
+   * @return treeListenerManager instance.
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  static getInstance(): TreeListenerManager {
+    if (AppStorage.get<TreeListenerManager>('app_key_event_bus') === undefined) {
+      AppStorage.setOrCreate('app_key_event_bus', new TreeListenerManager())
+    }
+    return AppStorage.get<TreeListenerManager>('app_key_event_bus') as TreeListenerManager;
+  }
+
+  /**
+   * Get treeListener.
+   * @return treeListener object
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Get treeListener.
+   * @return treeListener object
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public getTreeListener(): TreeListener {
+    return this.appEventBus;
+  }
+}
+
+class SelectedIndexInterface {
+  selectedIndex: number
+}
+
+class InsertIndexInterface {
+  insertIndex: number
+}
+
+/**
+ * Declare TreeView Component
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+@Component
+export struct TreeView {
+  /**
+   * Node data source of TreeView
+   * @type TreeController
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Node data source of TreeView
+   * @type TreeController
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  treeController: TreeController = new TreeController();
+  @State nodeList: Array<NodeInfo> = new Array<NodeInfo>();
+  listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
+  @State item: NodeInfo[] | null = null;
+  @State touchCount: number = 0;
+  @State dropSelectedIndex: number = 0;
+  @State viewLastIndex: number = -1;
+  @State followingSystemFontScale: boolean = false;
+  @State maxAppFontScale: number = 1;
+  @State listItemBgColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State allParentNode: Array<number> = new Array<number>();
+  @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  @Provide clickButtonFlag: boolean = true;
+  @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
+  @Provide isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
+
+  @Builder
+  NullBuilder() {
+  };
+
+  @BuilderParam private listTreeViewMenu: () => void = this.NullBuilder;
+  private readonly MAX_CN_LENGTH: number = 254;
+  private readonly MAX_EN_LENGTH: number = 255;
+  private readonly INITIAL_INVALID_VALUE: number = -1;
+  private readonly MAX_TOUCH_DOWN_COUNT: number = 0;
+  private isMultiPress: boolean = false;
+  private touchDownCount: number = this.INITIAL_INVALID_VALUE;
+  private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
+  private readonly itemPadding: ItemPadding = {
+    left: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_start')),
+    right: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_end')),
+    top: LengthMetrics.resource($r('sys.float.ohos_id_text_margin_vertical')),
+    bottom: LengthMetrics.resource($r('sys.float.ohos_id_text_margin_vertical')),
+  } as ItemPadding;
+  private readonly textInputPadding: ItemPadding =
+    {
+      left: LengthMetrics.resource($r('sys.float.padding_level0')),
+      right: LengthMetrics.resource($r('sys.float.padding_level0')),
+      top: LengthMetrics.resource($r('sys.float.padding_level0')),
+      bottom: LengthMetrics.resource($r('sys.float.padding_level0')),
+    } as ItemPadding;
+
+  onWillApplyTheme(theme: Theme) {
+    this.treeViewTheme.itemSelectedBgColor = theme.colors.interactiveSelect;
+    this.treeViewTheme.itemPressedBgColor = theme.colors.interactivePressed;
+    this.treeViewTheme.itemHoverBgColor = theme.colors.interactiveHover;
+    this.treeViewTheme.primaryTitleFontColor = theme.colors.fontPrimary;
+    this.treeViewTheme.secondaryTitleFontColor = theme.colors.fontSecondary;
+    this.treeViewTheme.primaryTitleActiveFontColor = theme.colors.interactiveActive;
+    this.treeViewTheme.borderFocusedColor = theme.colors.interactiveFocus;
+    this.treeViewTheme.leftIconColor = theme.colors.iconSecondary;
+    this.treeViewTheme.leftIconActiveColor = theme.colors.interactiveActive;
+    this.treeViewTheme.arrowIconColor = theme.colors.iconPrimary;
+    this.treeController.treeViewTheme = this.treeViewTheme;
+  }
+
+  aboutToAppear(): void {
+    if (this.treeController !== null) {
+      this.listNodeDataSource = this.treeController.getListNodeDataSource();
+      this.nodeList = this.treeController.getListNodeDataSource().listNode;
+      this.item = this.treeController.getListNodeDataSource().listNode;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxAppFontScale = uiContent.getMaxFontScale();
+
+    accessibility.onScreenReaderStateChange((state: boolean) => {
+      this.isAccessibilityEnabled = state;
+    })
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = 1;
+    const context = this.getUIContext().getHostContext();
+    if (uiContent.getHostContext()) {
+      systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    }
+    if (!this.followingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = 1;
+    if (uiContent.getHostContext()) {
+      systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    }
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
+  }
+
+  @Builder
+  popupForShowTitle(text: undefined | ResourceStr, backgroundColor: undefined | ResourceColor,
+    fontColor: undefined | ResourceColor) {
+    Row() {
+      Text(text)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontWeight('regular')
+        .fontColor(fontColor)
+        .minFontScale(MIN_FONT_SCALE)
+        .maxFontScale(this.decideFontScale())
+    }
+    .backgroundColor(backgroundColor)
+    .border({ radius: $r('sys.float.ohos_id_elements_margin_horizontal_l') })
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.ohos_id_elements_margin_horizontal_l')),
+      end: LengthMetrics.resource($r('sys.float.ohos_id_elements_margin_horizontal_l')),
+      top: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_middle')),
+      bottom: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_middle')),
+    } as LocalizedPadding)
+  }
+
+  @Builder
+  builder() {
+    this.listTreeViewMenu()
+  }
+
+  /* Set the popup of dragging node. */
+  @Builder
+  draggingPopup(item: NodeInfo) {
+    Row() {
+      if (item.getNodeItem().imageNode) {
+        Row() {
+          if (item.getNodeItem().imageNode?.symbolNormalSource) {
+            SymbolGlyph()
+              .attributeModifier(item.getNodeItem().imageNode?.symbolNormalSource)
+              .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
+              .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+          } else {
+            if (Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)) {
+              SymbolGlyph(item.getNodeItem().imageNode?.normalSource as Resource)
+                .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
+                .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+            } else {
+              Image(item.getNodeItem().imageNode?.normalSource as Resource)
+                .objectFit(ImageFit.Contain)
+                .height(item.getNodeItem().imageNode?.itemHeight)
+                .width(item.getNodeItem().imageNode?.itemWidth)
+                .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+                .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT ||
+                  item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+            }
+          }
+        }
+        .backgroundColor(COLOR_IMAGE_ROW)
+        .margin({
+          end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin as Resource)
+        } as LocalizedMargin)
+
+        .height(item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
+        .width(item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
+      }
+
+      Row() {
+        if (item.getNodeItem().mainTitleNode && item.getIsShowTitle()) {
+          Text(item.getNodeItem().mainTitleNode?.title)
+            .maxLines(1)
+            .minFontScale(MIN_FONT_SCALE)
+            .maxFontScale(this.decideFontScale())
+            .fontSize(item.getNodeItem().mainTitleNode?.size)
+            .fontColor(this.listNodeDataSource.getDragPopupPara().fontColor)
+            .fontWeight(this.listNodeDataSource.getDragPopupPara().fontWeight)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+      }
+      .constraintSize({
+        minWidth: item.getNodeItem().imageNode ?
+          this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth1 :
+          this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth2,
+        maxWidth: item.getNodeItem().imageNode ?
+          this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
+          this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2,
+      })
+    }
+    .id(`treeView_node_lift${item.getNodeCurrentNodeId()}`)
+    .constraintSize({
+      minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
+      maxWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.maxWidth,
+    })
+    .height(this.listNodeDataSource.getDragPopupPara().height)
+    .backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor)
+    .padding({
+      start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
+      end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right),
+    } as LocalizedPadding)
+    .shadow(this.listNodeDataSource.getDragPopupPara().shadow as ShadowOptions)
+    .borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius) // need to doubleCheck.
+  }
+
+  clearLastIndexColor(): void {
+    if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
+      return;
+    }
+    this.setImageSources(this.viewLastIndex, InteractionStatus.NORMAL);
+    this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
+    this.nodeList[this.viewLastIndex.toInt()].setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
+    this.nodeList[this.viewLastIndex.toInt()].fontColor = this.treeViewTheme.primaryTitleFontColor;
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].fontColor = this.treeViewTheme.primaryTitleFontColor;
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].setIsSelected(false);
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].imageSource =
+      this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+        .imageNode?.source;
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].symbolSource =
+      this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+        .imageNode?.symbolSource;
+  }
+
+  setImageSources(index: number, interactionStatus: InteractionStatus): void {
+    let nodeInfo: NodeInfo = this.nodeList[index.toInt()];
+    nodeInfo.setIsSelected(interactionStatus === InteractionStatus.SELECTED ||
+      interactionStatus === InteractionStatus.EDIT || interactionStatus === InteractionStatus.FINISH_EDIT);
+    if (nodeInfo.getNodeItem().mainTitleNode !== null && interactionStatus !== InteractionStatus.DRAG_INSERT &&
+      interactionStatus !== InteractionStatus.FINISH_DRAG_INSERT) {
+      nodeInfo.getNodeItem().mainTitleNode?.setMainTitleSelected(interactionStatus === InteractionStatus.SELECTED ||
+        interactionStatus === InteractionStatus.FINISH_EDIT);
+    }
+    if (nodeInfo.getNodeItem().imageNode !== null) {
+      nodeInfo.getNodeItem().imageNode?.setImageSource(interactionStatus);
+    }
+  }
+
+  private touchInner(itemInner: NodeInfo, event: TouchEvent) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (event.type === TouchType.Down) {
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+    }
+    if (event.type === TouchType.Up) {
+      this.listNodeDataSource.listNode[index.toInt()].setIsSelected(true);
+      this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+      if (this.listNodeDataSource.listNode[index.toInt()].getNodeItem()
+        .imageNode !== null) {
+        this.listNodeDataSource.listNode[index.toInt()].imageSource = this.listNodeDataSource.listNode[index.toInt()]
+          .getNodeItem()
+          .imageNode?.source;
+        this.listNodeDataSource.listNode[index.toInt()].symbolSource = this.listNodeDataSource.listNode[index.toInt()]
+          .getNodeItem()
+          .imageNode?.symbolSource;
+      }
+
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+      this.viewLastIndex = index;
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
+  public sendAccessibility(textAnnouncedForAccessibility: string): void {
+    const context = this.getUIContext().getHostContext();
+    let bundleName: string = 'defaultBundle';
+    if (context) {
+      bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    }
+    let eventInfo = new accessibility.EventInfo(
+      'announceForAccessibility', // 表示主动播报的事件。
+      bundleName as string, // 目标应用名；不可缺省。
+      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+    );
+    eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
+    accessibility.sendAccessibilityEvent(eventInfo);
+  }
+
+  private clickInner(itemInner: NodeInfo) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.listNodeDataSource.listNode[index.toInt()].setIsSelected(true);
+    this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+    if (this.listNodeDataSource.listNode[index.toInt()].getNodeItem()
+      .imageNode !== null) {
+      this.listNodeDataSource.listNode[index.toInt()].imageSource = this.listNodeDataSource.listNode[index.toInt()]
+        .getNodeItem()
+        .imageNode?.source;
+      this.listNodeDataSource.listNode[index.toInt()].symbolSource = this.listNodeDataSource.listNode[index.toInt()]
+        .getNodeItem()
+        .imageNode?.symbolSource;
+    }
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.viewLastIndex = index;
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
+  build() {
+    List() {
+      LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo) => {
+        ListItem() {
+          Row() {
+            TreeViewInner({
+              item: itemInner,
+              listNodeDataSource: this.listNodeDataSource,
+              index: this.listNodeDataSource.findIndex(Number(itemInner.getNodeCurrentNodeId() + '')),
+              listTreeViewMenu: this.builder,
+              callBackClick: (): void => this.clickInner(itemInner),
+            })
+          }
+          .onTouch(this.isAccessibilityEnabled ? undefined : (event: TouchEvent) => {
+            this.touchInner(itemInner, event);
+          })
+        }
+        .width('100%')
+        .height(itemInner?.getListItemHeight())
+        .padding({
+          start: this.itemPadding.left,
+          end: this.itemPadding.right
+        } as LocalizedPadding)
+        .align(Alignment.Start)
+        .onDragStart((event: DragEvent, extraParams?: string) => {
+          this.accessibilityNodeType = AccessibilityNodeType.LIFT;
+          if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
+            hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
+            return () => {
+            };
+          }
+          let currentNodeIndex: number;
+          let selectedIndexInterface: SelectedIndexInterface = new SelectedIndexInterface();
+          if (extraParams != null) {
+            const params = JSON.parse<SelectedIndexInterface>(extraParams.toString(), Type.of(selectedIndexInterface));
+            if (params != null) {
+              this.dropSelectedIndex = params.selectedIndex as number;
+              currentNodeIndex = params.selectedIndex as number;
+            }
+          }
+          let currentNodeInfo: NodeInfo = this.listNodeDataSource.getData(currentNodeIndex as int) as NodeInfo;
+          let currentItemNodeId: number = Number(itemInner.getNodeCurrentNodeId() + '');
+          /* handle the situation of drag error, currentNodeIndex is not found in onDragStart. */
+          if (currentNodeIndex >= this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
+            hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found in onDragStart');
+            return () => {
+            };
+          }
+          this.listNodeDataSource.setIsInnerDrag(true);
+          this.listNodeDataSource.setIsDrag(true);
+          this.listNodeDataSource.setCurrentNodeInfo(currentNodeInfo);
+          this.listNodeDataSource.setDraggingCurrentNodeId(currentNodeInfo?.getNodeCurrentNodeId());
+          this.listNodeDataSource.setDraggingParentNodeId(currentNodeInfo?.getNodeParentNodeId());
+          /* set the opacity of the dragging node. */
+          let draggingNodeOpacity: number = DRAG_OPACITY;
+          this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
+          this.listNodeDataSource.notifyDataChange(currentNodeIndex);
+
+          /**
+           * handle the situation of drag is too fast,it attribute a fault to OH.
+           * OH has Solved on real machine.
+           */
+          if (currentItemNodeId !== currentNodeInfo?.getNodeCurrentNodeId()) {
+            hilog.error(LOG_CODE, TAG, 'drag is too fast, it attribute a fault to OH');
+            this.listNodeDataSource.setIsDrag(false);
+            return () => {
+            };
+          }
+          let primaryTitle = currentNodeInfo.getNodeInfoData()?.primaryTitle === undefined ? '' :
+            currentNodeInfo.getNodeInfoData()?.primaryTitle;
+          let secondaryTitle = currentNodeInfo.getNodeInfoData()?.secondaryTitle === undefined ? '' :
+            currentNodeInfo.getNodeInfoData()?.secondaryTitle;
+          let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
+          let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
+          let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
+          this.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
+            title));
+          let allParentNode: number[] = [];
+          for (let i: int = 0; i < this.listNodeDataSource.listNode.length; i++) {
+            if (this.listNodeDataSource.listNode[i].getNodeParentNodeId() === -1) {
+              allParentNode.push(this.listNodeDataSource.listNode[i].getNodeCurrentNodeId());
+            }
+          }
+          this.allParentNode = allParentNode;
+          let bundleName: string | undefined = 'defaultBundle';
+          let context = this.getUIContext().getHostContext()
+          if (context) {
+            bundleName =
+              (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+          }
+          let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
+          eventInfo.customId = `treeView_node_lift${currentItemNodeId}`
+          try {
+            await accessibility.sendAccessibilityEvent(eventInfo);
+            setTimeout(() => {
+              this.accessibilityNodeType = AccessibilityNodeType.TEXT;
+            }, ENTER_EXIT_DURATION)
+          } catch (error) {
+          }
+          return () => {
+            this.draggingPopup(currentNodeInfo)
+          };
+
+        })
+      }, (item: NodeInfo) => JSON.stringify(item))
+    }
+
+    /* Move the dragged node. */
+    .onDragMove((event: DragEvent, extraParams?: string) => {
+      if (this.isMultiPress) {
+        hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
+        return;
+      }
+      let nodeHeight: number = LIST_ITEM_HEIGHT;
+      /* flag the position of the focus on the node. */
+      let flag: Flag = Math.floor(
+        event.getWindowY() /
+          (nodeHeight / FLAG_NUMBER)) %
+        FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
+
+      /* Record the node position to which the dragged node moves. */
+      let index: number;
+      let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
+      if (extraParams != null) {
+        let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
+        if (params != null) {
+          index = params.insertIndex;
+        }
+      }
+      /* Handle the situation where the focus(index) exceeds the list area. */
+      let isOverBorder: boolean = false;
+      if (index >= this.listNodeDataSource.totalCount()) {
+        flag = Flag.DOWN_FLAG;
+        index = this.listNodeDataSource.totalCount() - 1;
+        this.listNodeDataSource.getData(index as int)?.setIsOverBorder(true);
+        isOverBorder = true;
+      } else {
+        this.listNodeDataSource.getData(index as int)?.setIsOverBorder(false);
+      }
+      let currentNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(index as int);
+      let currentNodeId: int | undefined = currentNodeInfo?.getNodeCurrentNodeId();
+
+      /**
+       * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId";
+       * do not perform some functions.
+       */
+      if (index !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
+        let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(currentNodeId);
+        if (isParentNodeOfInsertNode) {
+          this.listNodeDataSource.setPassIndex(index);
+          if (currentNodeId !== undefined) {
+            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(
+              this.listNodeDataSource.findIndex(currentNodeId));
+          }
+          this.listNodeDataSource.setFlag(Flag.NONE);
+          return;
+        }
+      }
+      this.listNodeDataSource.setLastPassIndex(index);
+      /* Set the visibility of the flag line. */
+      this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder, this.allParentNode);
+      /* Automatically HighLight one second delay and expand after two second delay. */
+      if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId() as int) {
+        this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
+          currentNodeId, index);
+      }
+    })
+
+    /* DragEvent Enter. */
+    .onDragEnter((event: DragEvent, extraParams?: string) => {
+      if (this.listNodeDataSource.getIsInnerDrag()) {
+        this.listNodeDataSource.setIsDrag(true);
+        /* set the opacity of the dragging node. */
+        let draggingNodeOpacity: number = DRAG_OPACITY;
+        this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
+      }
+    })
+
+    /* DragEvent Leave. */
+    .onDragLeave((event: DragEvent, extraParams?: string) => {
+      this.listNodeDataSource.hideLastLine();
+      this.listNodeDataSource.clearLastTimeoutHighLight();
+      this.listNodeDataSource.clearLastTimeoutExpand();
+      let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
+      this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
+      this.listNodeDataSource.setIsDrag(false);
+      this.listNodeDataSource.notifyDataReload();
+    })
+    /* DragEvent Drop. */
+    .onDrop((event: DragEvent, extraParams?: string) => {
+      this.accessibilityNodeType = AccessibilityNodeType.PLACE;
+      this.listNodeDataSource.clearLastTimeoutExpand();
+      let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
+      this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
+      let insertNodeIndex: number;
+      let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
+      if (extraParams != null) {
+        let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
+        if (params != null) {
+          insertNodeIndex = params.insertIndex
+        }
+      }
+      let currentNodeIndex: number = this.dropSelectedIndex;
+      if (currentNodeIndex - 1 > this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
+        hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
+        this.listNodeDataSource.setIsDrag(false);
+        return;
+      }
+      if (insertNodeIndex === this.listNodeDataSource.totalCount()) {
+        hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
+        insertNodeIndex -= 1;
+      }
+      let insertNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(insertNodeIndex as int);
+      if (insertNodeInfo === undefined) {
+        return;
+      }
+      let insertNodeCurrentNodeId: number = insertNodeInfo.getNodeCurrentNodeId();
+      /* outer node is move in. */
+      if (!this.listNodeDataSource.getIsDrag() || !this.listNodeDataSource.getIsInnerDrag()) {
+        this.listNodeDataSource.clearLastTimeoutHighLight();
+        this.listNodeDataSource.setIsInnerDrag(false);
+        this.listNodeDataSource.hideLastLine();
+        this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
+        this.listNodeDataSource.refreshSubtitle(insertNodeCurrentNodeId);
+        this.listNodeDataSource.notifyDataReload();
+        return;
+      }
+      let currentNodeInfo: NodeInfo | null = this.listNodeDataSource.getCurrentNodeInfo();
+      let insertNodeParentNodeId: number = insertNodeInfo.getNodeParentNodeId() as int;
+      let draggingCurrentNodeId: number = this.listNodeDataSource.getDraggingCurrentNodeId() as int;
+      let draggingParentNodeId: number = this.listNodeDataSource.getDraggingParentNodeId() as int;
+      /**
+       * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId".
+       * drag is fail.
+       */
+      let isParentNodeOfInsertNode: boolean =
+        this.listNodeDataSource.getIsParentOfInsertNode(insertNodeCurrentNodeId as int);
+      if (isParentNodeOfInsertNode) {
+        this.listNodeDataSource.clearLastTimeoutHighLight();
+        this.listNodeDataSource.setIsInnerDrag(false);
+        this.listNodeDataSource.hideLastLine();
+        this.listNodeDataSource.notifyDataChange(insertNodeIndex);
+        this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
+        this.listNodeDataSource.setIsDrag(false);
+
+        /* set the position of focus. */
+        let currentFocusIndex: number = this.listNodeDataSource.findIndex(draggingCurrentNodeId);
+        this.listNodeDataSource.setClickIndex(currentFocusIndex);
+        this.listNodeDataSource.handleEvent(Event.DRAG, currentFocusIndex);
+        return;
+      }
+      /* Collapse drag node. */
+      if (this.listNodeDataSource.getExpandAndCollapseInfo(draggingCurrentNodeId) === NodeStatus.EXPAND) {
+        this.listNodeDataSource.expandAndCollapseNode(
+          this.listNodeDataSource.findIndex(draggingCurrentNodeId));
+      }
+      let flag: boolean = false;
+      /* Expand insert node. */
+      if (this.listNodeDataSource.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.COLLAPSE) {
+        let currentIndex: number = this.listNodeDataSource.findIndex(insertNodeCurrentNodeId);
+        if (this.listNodeDataSource.listNode[currentIndex.toInt()].getIsHighLight()) {
+          this.listNodeDataSource.expandAndCollapseNode(currentIndex);
+        }
+        flag = true;
+      }
+      /* alter dragNode. */
+      this.listNodeDataSource.setLastDelayHighLightId();
+
+      if (currentNodeInfo !== null && draggingCurrentNodeId !== insertNodeCurrentNodeId) {
+        this.listNodeDataSource.alterDragNode(insertNodeParentNodeId, insertNodeCurrentNodeId,
+          draggingParentNodeId, draggingCurrentNodeId, currentNodeInfo);
+        this.listNodeDataSource.hideLastLine();
+      } else {
+        /*the position of dragNode is equal with the position of insertNode. */
+        this.listNodeDataSource.hideLastLine();
+        this.listNodeDataSource.setLastPassId(draggingCurrentNodeId);
+        this.listNodeDataSource.hideLastLine();
+      }
+      let lastDelayHighLightIndex: number =
+        this.listNodeDataSource.findIndex(this.listNodeDataSource.getLastDelayHighLightId());
+      this.listNodeDataSource.setLastDelayHighLightIndex(lastDelayHighLightIndex);
+      this.listNodeDataSource.clearLastTimeoutHighLight();
+      this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
+      this.listNodeDataSource.setIsDrag(false);
+      /* set the position of focus. */
+      let currentFocusIndex: number = this.listNodeDataSource.findIndex(draggingCurrentNodeId);
+      this.listNodeDataSource.setClickIndex(currentFocusIndex);
+      this.listNodeDataSource.handleEvent(Event.DRAG, currentFocusIndex);
+      /* innerDrag is over. */
+      this.listNodeDataSource.setIsInnerDrag(false);
+      this.listNodeDataSource.notifyDataReload();
+      this.listNodeDataSource.listNode[currentFocusIndex.toInt()].fontColor =
+        this.treeViewTheme.primaryTitleActiveFontColor;
+      if (this.viewLastIndex !== -1 && currentNodeIndex !== this.viewLastIndex) {
+        this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+          .mainTitleNode?.setMainTitleSelected(false);
+        this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+          .mainTitleNode?.setMainTitleHighLight(false);
+      }
+      this.listNodeDataSource.lastIndex = this.viewLastIndex;
+      if (this.listNodeDataSource.listNode[this.viewLastIndex.toInt()]) {
+        if (this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+          .imageNode !== null) {
+          this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+            .imageNode?.setImageSource(InteractionStatus.NORMAL);
+          this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].imageSource =
+            this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+              .imageNode?.source;
+          this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].symbolSource =
+            this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].getNodeItem()
+              .imageNode?.symbolSource;
+        }
+      }
+      if (this.listNodeDataSource.listNode[this.viewLastIndex.toInt()]) {
+        this.listNodeDataSource.listNode[this.viewLastIndex.toInt()]
+          .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+      }
+      this.listNodeDataSource.lastIndex = currentFocusIndex;
+      let parentNodeId: int | undefined = currentNodeInfo?.getNodeParentNodeId();
+      this.listNodeDataSource.judgeImageCollapse(parentNodeId as int);
+      const context = this.getUIContext().getHostContext();
+      let bundleName: string | undefined = 'defaultBundle';
+      if (context) {
+        bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName;
+      }
+      /*accessibilityRead regain focus. */
+      let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
+      eventInfo.customId = `treeView_node${draggingCurrentNodeId}`
+      try {
+        await accessibility.sendAccessibilityEvent(eventInfo);
+        setTimeout(() => {
+          this.accessibilityNodeType = AccessibilityNodeType.TEXT;
+        }, ENTER_EXIT_DURATION);
+        console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`)
+      } catch (error) {
+        console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(error)}`)
+      }
+    });
+  }
+}
+
+/**
+ * Declare CallbackParam
+ * @type CallbackParam
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Declare CallbackParam
+ * @type CallbackParam
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export interface CallbackParam {
+  /**
+   * Get the currentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Get the currentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  currentNodeId: int,
+
+  /**
+   * Get the parentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Get the parentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  parentNodeId?: int,
+
+  /**
+   * Get the childIndex.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Get the childIndex.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  childIndex?: int,
+}
+
+/**
+ * Declare NodeParam
+ * @typedef NodeParam
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Declare NodeParam
+ * @typedef NodeParam
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export interface NodeParam {
+  /**
+   * Set the parentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set the parentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  parentNodeId?: int,
+
+  /**
+   * Set currentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set currentNodeId.
+   * @type { number }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  currentNodeId?: int,
+
+  /**
+   * Set catalog whether is floder.
+   * @type { boolean }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set catalog whether is floder.
+   * @type { boolean }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  isFolder?: boolean,
+
+  /**
+   * Set the icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set the icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  icon?: ResourceStr,
+
+  /**
+   * Set the symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolIconStyle?: SymbolGlyphModifier;
+
+  /**
+   * Set selected icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set selected icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  selectedIcon?: ResourceStr,
+
+  /**
+   * Set selected symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolSelectedIconStyle?: SymbolGlyphModifier;
+
+  /**
+   * Set edit icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set edit icon resource.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  editIcon?: ResourceStr,
+
+  /**
+   * Set edit symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolEditIconStyle?: SymbolGlyphModifier;
+
+  /**
+   * Set primary title content.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set primary title content.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  primaryTitle?: ResourceStr,
+
+  /**
+   * Set secondary title content.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set secondary title content.
+   * @type { ResourceStr }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  secondaryTitle?: ResourceStr,
+
+  /**
+   * Set subcomponent binded on tree item.
+   * @type { () => void }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Set subcomponent binded on tree item.
+   * @type { () => void }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  container?: () => void,
+}
+
+/**
+ * Declare TreeController.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 10
+ */
+/**
+ * Declare TreeController.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @atomicservice
+ * @since 11
+ */
+export class TreeController {
+  public readonly ROOT_NODE_ID: number = -1;
+  private listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
+  private initBuild: boolean = true;
+  public treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  private nodeIdList: int[] = [];
+
+  public getListNodeDataSource(): ListNodeDataSource {
+    return this.listNodeDataSource;
+  }
+
+  public getClickNodeChildrenInfo(): NodeInfoView[] {
+    let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
+    return this.listNodeDataSource.getClickNodeChildrenInfo(clickNodeId);
+  }
+
+  public getChildrenId(): number[] {
+    let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
+    return this.listNodeDataSource.getClickChildId(clickNodeId);
+  }
+
+  /**
+   * Delete a node.
+   * Register an ON_ITEM_DELETE callback through the EventBus mechanism to obtain the IDs of all deleted nodes.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Delete a node.
+   * Register an ON_ITEM_DELETE callback through the EventBus mechanism to obtain the IDs of all deleted nodes.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public removeNode(): void {
+    let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
+    if (clickNodeId < 0) {
+      return;
+    }
+    let parentNodeId: number = this.listNodeDataSource.findParentNodeId(clickNodeId);
+    let removeNodeIdList: number[] = this.listNodeDataSource.removeNode(clickNodeId, parentNodeId);
+    this.listNodeDataSource.refreshData(
+      MenuOperation.REMOVE_NODE,
+      parentNodeId,
+      removeNodeIdList
+    );
+    this.nodeIdList.splice(this.nodeIdList.indexOf(Double.toInt(clickNodeId)), 1);
+    this.listNodeDataSource.lastIndex = -1;
+  }
+
+  /**
+   * Modify the node name.
+   * Register an ON_ITEM_MODIFY callback to obtain the ID, parent node ID, and node name of the modified node.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Modify the node name.
+   * Register an ON_ITEM_MODIFY callback to obtain the ID, parent node ID, and node name of the modified node.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public modifyNode(): void {
+    let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
+    this.listNodeDataSource.setItemVisibilityOnEdit(clickNodeId, MenuOperation.MODIFY_NODE);
+  }
+
+  /**
+   * add new node
+   *
+   * @param initBuild whether is in initialization process
+   */
+  public add(initBuild: boolean): void {
+    let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
+    if (clickNodeId === this.listNodeDataSource.ROOT_NODE_ID || !this.listNodeDataSource.getIsFolder(clickNodeId)) {
+      return;
+    }
+    let newNodeParam: NodeParam = this.listNodeDataSource.getNewNodeParam(clickNodeId);
+    this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1].toInt() + 1);
+    let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1].toInt();
+    let addNodeResult: boolean = this.listNodeDataSource.addNode(clickNodeId as int, newNodeId as int,
+      {
+        isFolder: newNodeParam.isFolder,
+        icon: newNodeParam.icon,
+        symbolIconStyle: newNodeParam.symbolIconStyle,
+        selectedIcon: newNodeParam.selectedIcon,
+        symbolSelectedIconStyle: newNodeParam.symbolSelectedIconStyle,
+        editIcon: newNodeParam.editIcon,
+        symbolEditIconStyle: newNodeParam.symbolEditIconStyle,
+        primaryTitle: '新建文件夹',
+        container: newNodeParam.container,
+        secondaryTitle: newNodeParam.secondaryTitle as ResourceStr,
+      } as NodeParam, initBuild);
+    if (!addNodeResult) {
+      return;
+    }
+    this.listNodeDataSource.refreshData(
+      MenuOperation.ADD_NODE,
+      clickNodeId,
+      [newNodeId],
+    );
+    this.listNodeDataSource.setPopUpInfo(
+      PopUpType.WARNINGS,
+      InputError.NONE,
+      false,
+      this.listNodeDataSource.getLastIndex()
+    );
+    this.listNodeDataSource.setItemVisibilityOnEdit(
+      this.listNodeDataSource.getLastIndex(),
+      MenuOperation.COMMIT_NODE
+    );
+    this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex().toInt()].setFontColor(
+      this.treeViewTheme.primaryTitleFontColor);
+    let newNodeIndex: number = this.listNodeDataSource.findIndex(newNodeId);
+    this.listNodeDataSource.setClickIndex(newNodeIndex);
+    this.listNodeDataSource.handleEvent(Event.TOUCH_UP, newNodeIndex);
+  }
+
+  /**
+   * Initialize the interface of the tree view. This interface is used to generate ListNodeDataSource data.
+   * addNode is only designed for initialization. It can only be invoked during initialization.
+   *
+   * A maximum of 50 directory levels can be added.
+   *
+   * @param nodeParam Configuration information of the newly added node.
+   *
+   * For details, see the comment description of NodeParam.
+   * @return ListTreeNode Tree view component proxy class.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * Initialize the interface of the tree view. This interface is used to generate ListNodeDataSource data.
+   * addNode is only designed for initialization. It can only be invoked during initialization.
+   *
+   * A maximum of 50 directory levels can be added.
+   *
+   * @param nodeParam Configuration information of the newly added node.
+   *
+   * For details, see the comment description of NodeParam.
+   * @return ListTreeNode Tree view component proxy class.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public addNode(nodeParam?: NodeParam): TreeController {
+    if (nodeParam === undefined) {
+      this.add(this.initBuild);
+      return this;
+    } else {
+      for (let i: int = 0; i < this.nodeIdList.length; i++) {
+        if (nodeParam.currentNodeId === this.nodeIdList[i]) {
+          throw new Error('ListTreeNode[addNode]: ' +
+            'The parameters of the new node cannot contain the same currentNodeId.');
+          return this;
+        }
+      }
+      let addNodeResult: boolean = false;
+      let primaryTitle: string | null = "";
+      if (nodeParam.primaryTitle !== undefined) {
+        if (typeof nodeParam.primaryTitle === 'string') {
+          primaryTitle = nodeParam.primaryTitle as string;
+        } else {
+          let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+          if (uiContent) {
+            primaryTitle =
+              (uiContent as common.UIAbilityContext).resourceManager.getStringSync((nodeParam.primaryTitle as Resource).id as Long)
+          }
+        }
+      }
+      if (primaryTitle !== undefined &&
+        !this.listNodeDataSource.checkMainTitleIsValid(primaryTitle as string)) {
+        throw new Error('ListTreeNode[addNode]: ' +
+          'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
+        return this;
+      }
+      if (primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
+        throw new Error('ListTreeNode[addNode]: ' +
+          'The icon|symbolIconStyle and directory name cannot be empty at the same time.');
+        return this;
+      }
+      if (nodeParam.currentNodeId === this.ROOT_NODE_ID || nodeParam.currentNodeId === null) {
+        throw new Error('ListTreeNode[addNode]: currentNodeId can not be -1 or null.');
+        return this;
+      }
+      if (nodeParam.currentNodeId !== undefined) {
+        this.nodeIdList.push(nodeParam.currentNodeId as int);
+      }
+      if (nodeParam.parentNodeId !== undefined) {
+        if (nodeParam.currentNodeId !== undefined) {
+          addNodeResult =
+            this.listNodeDataSource.addNode(nodeParam.parentNodeId as int, nodeParam.currentNodeId as int,
+              nodeParam as NodeParam, this.initBuild);
+        }
+      }
+      if (!addNodeResult) {
+        return this;
+      }
+      if (!this.initBuild && nodeParam.parentNodeId !== undefined) {
+        let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1].toInt();
+        this.listNodeDataSource.refreshData(
+          MenuOperation.ADD_NODE as MenuOperation,
+          nodeParam.parentNodeId as int,
+          [newNodeId] as Array<Double>
+        );
+      }
+      return this;
+    }
+  }
+
+  /**
+   * this interface is called when a secondaryTitle needs to be updated.
+   *
+   * @Param parentId ID of the parent node.
+   * @Param parentSubTitle secondaryTitle of parent node.
+   * @Param currentSubTitle secondaryTitle of current node.
+   *
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * this interface is called when a secondaryTitle needs to be updated.
+   *
+   * @Param parentId ID of the parent node.
+   * @Param parentSubTitle secondaryTitle of parent node.
+   * @Param currentSubTitle secondaryTitle of current node.
+   *
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public refreshNode(parentId: int, parentSubTitle: ResourceStr, CurrentSubtitle: ResourceStr): void {
+    this.listNodeDataSource.setNodeSubtitlePara(parentId, parentSubTitle, CurrentSubtitle);
+  }
+
+  /**
+   * After the initialization is complete by calling the addNode interface,
+   * call this interface to complete initialization.
+   *
+   * This interface must be called when you finish initializing the ListTreeView by addNode.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 10
+   */
+  /**
+   * After the initialization is complete by calling the addNode interface,
+   * call this interface to complete initialization.
+   *
+   * This interface must be called when you finish initializing the ListTreeView by addNode.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 11
+   */
+  public buildDone(): void {
+    this.listNodeDataSource.initSection();
+    this.listNodeDataSource.delayInit();
+    this.listNodeDataSource.updateAllChildNum();
+    delaySortNodeIdList(this.nodeIdList);
+    this.initBuild = false;
+  }
+}
+
+class BasicDataSource implements IDataSource<NodeInfo> {
+  private listeners: DataChangeListener[] = []
+
+  public totalCount(): int {
+    return 0;
+  }
+
+  public getData(index: int): NodeInfo {
+    return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+  }
+
+  registerDataChangeListener(listener: DataChangeListener): void {
+    if (this.listeners.indexOf(listener) < 0) {
+      this.listeners.push(listener);
+    }
+  }
+
+  unregisterDataChangeListener(listener: DataChangeListener): void {
+    const pos: int = this.listeners.indexOf(listener);
+    if (pos >= 0) {
+      this.listeners.splice(pos, 1);
+    }
+  }
+
+  notifyDataReload(): void {
+    this.listeners.forEach(listener => {
+      listener.onDataReloaded();
+    })
+  }
+
+  notifyDataAdd(index: int): void {
+    this.listeners.forEach(listener => {
+      listener.onDataAdd(index);
+    })
+  }
+
+  notifyDataChange(index: number | undefined): void {
+    if (index === undefined) {
+      return;
+    }
+    this.listeners.forEach(listener => {
+      listener.onDataChange(index as int);
+    })
+  }
+
+  notifyDataDelete(index: number): void {
+    this.listeners.forEach(listener => {
+      listener.onDataDelete(index as int);
+    })
+  }
+
+  notifyDataMove(from: number, to: number): void {
+    this.listeners.forEach(listener => {
+      listener.onDataMove(from as int, to as int);
+    })
+  }
+}
+
+/**
+ * delay update all parentnodes childNum
+ *
+ * @param isAdd whether addNode or delete node
+ * @param count node count
+ * @param nodeIdNodeItemMap nodeId and nodeItem relation map
+ * @param updateNodeIdList nodeId list whose childNum need update
+ */
+function delayUpdateParentChildNum(isAdd: boolean, count: int,
+  nodeIdNodeItemMap: Map<number, NodeItem>, updateNodeIdList: Array<number>): void {
+  let taskId: number = 0;
+  taskId = setTimeout(() => {
+    updateNodeIdList.forEach((parentNodeId) => {
+      updateParentChildNumHandler(parentNodeId, nodeIdNodeItemMap, isAdd, count);
+    });
+    clearTimeout(Double.toInt(taskId));
+  }, DELAY_TIME);
+}
+
+/**
+ * delay update all parentnodes child number handler
+ *
+ * @param parentNodeId parent node id
+ * @param nodeIdNodeItemMap nodeId and nodeItem relation map
+ * @param isAdd whether addNode or delete node
+ * @param count node count
+ */
+function updateParentChildNumHandler(parentNodeId: number, nodeIdNodeItemMap: Map<number, NodeItem>,
+  isAdd: boolean, count: int) {
+  let tmpParentNodeId: number = parentNodeId;
+  while (tmpParentNodeId >= 0) {
+    if (nodeIdNodeItemMap.has(tmpParentNodeId)) {
+      let parent: NodeItem = nodeIdNodeItemMap.get(tmpParentNodeId) as NodeItem;
+      parent.getChildNodeInfo().allChildNum =
+        isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
+      tmpParentNodeId = parent.parentNodeId;
+    } else {
+      hilog.error(LOG_CODE, TAG, 'updateParentChildNumHandler: parent node not found');
+      break;
+    }
+  }
+}
+
+/**
+ * delay sort nodeId list
+ *
+ * @param nodeIdList nodeId list
+ */
+function delaySortNodeIdList(nodeIdList: Array<int>): void {
+  let taskId: int = 0;
+  taskId = setTimeout(() => {
+    nodeIdList.sort((a, b) => a - b);
+    clearTimeout(taskId);
+  }, DELAY_TIME);
+}
+
+export class ListNodeDataSource extends BasicDataSource {
+  public readonly ROOT_NODE_ID: number = -1;
+  public _root: NodeItem = new NodeItem(emptyNodeInfo);
+  private readonly maxNodeLevel: number = 50;
+  private readonly MAX_CN_LENGTH: number = 254;
+  private readonly MAX_EN_LENGTH: number = 255;
+  private readonly INITIAL_INVALID_VALUE: number = -1;
+  public listNode: NodeInfo[] = [];
+  public loadedListNode: NodeInfo[] = [];
+  public nodeIdNodeItemMap: Map<number, NodeItem> = new Map<number, NodeItem>();
+  public nodeIdNodeParamMap: Map<number, NodeParam> = new Map<number, NodeParam>();
+  public lastIndex: number = -1; // record the last focused node.
+  public thisIndex: number = -1; // records clicked nodes in the current period.
+  private modifyNodeIndex: number = -1; // records the nodes edited in the current period.
+  public modifyNodeId: number = -1;
+  private currentOperation?: MenuOperation;
+  private expandAndCollapseInfo: Map<number, NodeStatus> = new Map<number, NodeStatus>();
+  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>();
+  public nodeIdAndNodeIndexMap: Map<number, number> = new Map<number, number>();
+  private isTouchDown: boolean = false;
+  private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
+  /* parameter of the drag event. */
+  private isInnerDrag: boolean = false; // Judge whether it is an internal drag event.
+  // It is used to handle events(For example, prevent press events) during global drag.
+  private isDrag: boolean = false;
+  private draggingCurrentNodeId: number = this.INITIAL_INVALID_VALUE; // Record the current ID of the dragged node.
+  private draggingParentNodeId: number = this.INITIAL_INVALID_VALUE; // Record the parent ID of the dragged node.
+  private currentNodeInfo: NodeInfo | null = null; // To solve the problem of currentIndex missed in onDrop event.
+  private listItemOpacity: number = 1; // It is used to set the opacity of the node when dragged.
+  private lastPassIndex: number = this.INITIAL_INVALID_VALUE; // record the last passing node index in drag.
+  private lastPassId?: int = this.INITIAL_INVALID_VALUE as int; // record the last passing node Id in drag.
+  private thisPassIndex: number = this.INITIAL_INVALID_VALUE; // record the current passing node in drag.
+  // record last passing node in delay expand event.
+  private lastDelayExpandIndex: number = this.INITIAL_INVALID_VALUE;
+  private timeoutExpandId: number = this.INITIAL_INVALID_VALUE;
+  private lastTimeoutExpandId: number = this.INITIAL_INVALID_VALUE;
+  private clearTimeoutExpandId: number = this.INITIAL_INVALID_VALUE;
+  private timeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
+  private lastTimeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
+  private clearTimeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
+  // record last passing node in HighLight event.
+  private lastDelayHighLightIndex: number = this.INITIAL_INVALID_VALUE;
+  //record last passing node Id in HighLight event.
+  private lastDelayHighLightId: number = this.INITIAL_INVALID_VALUE;
+  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>();
+  private flag: Flag = Flag.NONE;
+  private selectedParentNodeId: number = this.INITIAL_INVALID_VALUE;
+  private selectedParentNodeSubtitle: ResourceStr = '';
+  private insertNodeSubtitle: ResourceStr = '';
+  private currentFocusNodeId: number = this.INITIAL_INVALID_VALUE;
+  private lastFocusNodeId: number = this.INITIAL_INVALID_VALUE;
+  private addFocusNodeId: number = this.INITIAL_INVALID_VALUE;
+  private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  public updateNodeIdList: number[] = [];
+  public readonly FLAG_LINE: FlagLine = {
+    flagLineHeight: FLAG_LINE_HEIGHT,
+    flagLineColor: $r('sys.color.ohos_id_color_emphasize'),
+    xOffset: X_OFF_SET,
+    yTopOffset: Y_OFF_SET,
+    yBottomOffset: Y_BOTTOM_OFF_SET,
+    yBasePlateOffset: Y_BASE_PLATE_OFF_SET,
+  }
+  private readonly DRAG_POPUP: DragPopup = {
+    floorConstraintSize: { minWidth: FLOOR_MIN_WIDTH, maxWidth: FLOOR_MAX_WIDTH },
+    textConstraintSize: {
+      minWidth1: TEXT_MIN_WIDTH,
+      maxWidth1: TEXT_MAX_WIDTH,
+      minWidth2: MIN_WIDTH,
+      maxWidth2: MAX_WIDTH,
+    },
+    padding: { left: $r('sys.float.padding_level4'), right: $r('sys.float.padding_level4') },
+    backgroundColor: COLOR_IMAGE_EDIT,
+    height: GRAG_POP_UP_HEIGHT,
+    shadow: {
+      radius: $r('sys.float.ohos_id_default_shadow_m'),
+      color: SHADOW_COLOR,
+      offsetX: 0,
+      offsetY: SHADOW_OFFSETY,
+    } as ShadowOptions,
+    borderRadius: $r('sys.float.ohos_id_corner_radius_default_s'),
+    fontColor: this.treeViewTheme.primaryTitleFontColor,
+    fontSize: $r('sys.float.ohos_id_text_size_body1'),
+    fontWeight: FontWeight.Regular,
+    imageOpacity: $r('sys.float.ohos_id_alpha_content_fourth')
+  };
+  private readonly subTitle: SubTitleStyle = {
+    normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
+    highLightFontColor: $r('sys.color.ohos_id_color_primary_contrary'),
+    fontSize: $r('sys.float.ohos_id_text_size_body2'),
+    fontWeight: FontWeight.Regular,
+    margin: { left: $r('sys.float.padding_level2'), right: $r('sys.float.padding_level12') }
+  }
+
+  constructor() {
+    super();
+    this._root.nodeLevel = -1;
+    this.nodeIdNodeItemMap.set(-1, this._root);
+    this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
+  }
+
+  private checkIndex(index: number): boolean {
+    if (index < 0 || index >= this.listNode.length) {
+      hilog.error(LOG_CODE, TAG, 'check index fail');
+      return false;
+    }
+    return true;
+  }
+
+  public changeNodeColor(index: number, color: ResourceColor | undefined): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    this.listNode[index.toInt()].setNodeColor(color);
+    this.listNode[index.toInt()].setNodeBorder(false);
+  }
+
+  private getNodeColor(index: number): ResourceColor {
+    return this.listNode[index.toInt()].getNodeColor();
+  }
+
+  private handleFocusEffect(index: number, isClearFocusStatus: boolean): void {
+    if (this.listNode[index.toInt()].getNodeIsShow()) {
+      this.listNode[index.toInt()].setNodeBorder(isClearFocusStatus);
+    }
+  }
+
+  public setImageSource(index: number, interactionStatus: InteractionStatus): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+    nodeInfo.setIsSelected(interactionStatus === InteractionStatus.SELECTED ||
+      interactionStatus === InteractionStatus.EDIT || interactionStatus === InteractionStatus.FINISH_EDIT);
+    if (nodeInfo.getNodeItem().mainTitleNode !== null && interactionStatus !== InteractionStatus.DRAG_INSERT &&
+      interactionStatus !== InteractionStatus.FINISH_DRAG_INSERT) {
+      nodeInfo.getNodeItem().mainTitleNode?.setMainTitleSelected(interactionStatus === InteractionStatus.SELECTED ||
+        interactionStatus === InteractionStatus.FINISH_EDIT);
+    }
+    if (nodeInfo.getNodeItem().imageNode !== null) {
+      nodeInfo.getNodeItem().imageNode?.setImageSource(interactionStatus);
+    }
+  }
+
+  private setImageCollapseSource(index: number, interactionStatus: InteractionStatus): void {
+    let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+    if (nodeInfo.getNodeItem().imageCollapse !== undefined) {
+      nodeInfo.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(interactionStatus,
+        this.expandAndCollapseInfo.get(nodeInfo.getNodeCurrentNodeId()), nodeInfo.getNodeItem().imageCollapse?.type);
+    }
+  }
+
+  public clearLastIndexStatus(): void {
+    if (!this.checkIndex(this.lastIndex)) {
+      return;
+    }
+    this.setImageSource(this.lastIndex, InteractionStatus.NORMAL);
+    this.changeNodeColor(this.lastIndex, this.listNode[this.lastIndex.toInt()].getNodeStatus()
+      .normal);
+    this.handleFocusEffect(this.lastIndex, false);
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex.toInt()].getNodeCurrentNodeId()));
+  }
+
+  private loadedListNodeFunction(): void {
+    let index: number = 0;
+    this.loadedNodeIdAndIndexMap.clear();
+    this.nodeIdAndNodeIndexMap.clear();
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    for (let i: int = 0; i < this.listNode.length; i++) {
+      this.nodeIdAndNodeIndexMap.set(this.listNode[i].getNodeCurrentNodeId(), i);
+      if (this.listNode[i].getNodeIsShow()) {
+        this.loadedNodeIdAndIndexMap.set(this.listNode[i].getNodeCurrentNodeId(), index++);
+        this.loadedListNode.push(this.listNode[i]);
+      }
+    }
+  }
+
+  private changeNodeStatus(clickIndex: number): void {
+    if (clickIndex >= this.listNode.length) {
+      hilog.error(LOG_CODE, TAG, 'changeNodeStatus clickIndex error.');
+      return;
+    }
+    let thisIndex: number = clickIndex;
+    let nodeId: number = this.listNode[clickIndex.toInt()].getNodeCurrentNodeId();
+    if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.EXPAND) {
+      this.expandAndCollapseInfo.set(nodeId, NodeStatus.COLLAPSE);
+      this.listNode[thisIndex.toInt()].getNodeItem()
+        .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+        this.listNode[thisIndex.toInt()].getNodeItem().imageCollapse?.isCollapse);
+    } else if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.COLLAPSE) {
+      this.expandAndCollapseInfo.set(nodeId, NodeStatus.EXPAND);
+      this.listNode[thisIndex.toInt()].getNodeItem()
+        .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+        this.listNode[thisIndex.toInt()].getNodeItem().imageCollapse?.isCollapse);
+    }
+  }
+
+  private handleExpandAndCollapse(clickIndex: number, isRefreshList: boolean): void {
+    if (clickIndex >= this.listNode.length) {
+      hilog.error(LOG_CODE, TAG, 'handleExpandAndCollapse clickIndex error.');
+      return;
+    }
+    let thisIndex: int = clickIndex.toInt();
+    let nodeId: number = this.listNode[thisIndex.toInt()].getNodeCurrentNodeId();
+    if (!this.expandAndCollapseInfo.has(nodeId)) {
+      return;
+    }
+
+    let rootNodeStatus: NodeStatus | undefined = this.expandAndCollapseInfo.get(nodeId);
+    if (this.listNode[thisIndex.toInt()].getChildNodeInfo().isHasChildNode && rootNodeStatus === NodeStatus.COLLAPSE) {
+      for (let i: int = 0; i < this.listNode[thisIndex.toInt()].getChildNodeInfo().allChildNum; i++) {
+        if (this.listNode[thisIndex + 1 + i] === undefined) {
+          return;
+        }
+        this.listNode[(thisIndex + 1 + i).toInt()].setNodeIsShow(false);
+        this.listNode[(thisIndex + 1 + i).toInt()].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
+      }
+      this.loadedListNodeFunction();
+      this.notifyDataReload();
+      return;
+    }
+    let childNum: int[] | null = new Array<int>(this.listNode[thisIndex.toInt()].getChildNodeInfo().childNum);
+    childNum[0] = thisIndex + 1;
+    let index: int = 1;
+    while (index < this.listNode[thisIndex].getChildNodeInfo().childNum) {
+      childNum[index] =
+        childNum[index - 1] + this.listNode[childNum[(index - 1)]].getChildNodeInfo().allChildNum + 1;
+      index++;
+    }
+    if (rootNodeStatus === NodeStatus.EXPAND) {
+      for (let i: int = 0; i < childNum.length; i++) {
+        if (this.listNode[childNum[i].toInt()] === undefined) {
+          return;
+        }
+        this.listNode[childNum[i].toInt()].setNodeIsShow(true);
+        this.listNode[childNum[i].toInt()].setListItemHeight(LIST_ITEM_HEIGHT);
+        let nodeId: number = this.listNode[childNum[i].toInt()].getNodeCurrentNodeId();
+        if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.EXPAND) {
+          this.handleExpandAndCollapse(childNum[i], false);
+        }
+      }
+    }
+    childNum = null;
+    if (isRefreshList) {
+      this.loadedListNodeFunction();
+      this.notifyDataReload();
+    }
+  }
+
+  /**
+   * update all parentNodes childNum
+   */
+  public updateAllChildNum(): void {
+    delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, this.updateNodeIdList);
+  }
+
+  private resetData(listNode: Array<NodeInfo>): void {
+    listNode.splice(0, listNode.length);
+    this.loadedNodeIdAndIndexMap.clear();
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    this.nodeIdAndNodeIndexMap.clear();
+    this.nodeIdAndSubtitleMap.clear();
+  }
+
+  private initHandler(listNode: Array<NodeInfo>, startLevel: number, endLevel?: number): void {
+    let index: number = 0;
+    let listIndex: number = 0;
+    this.resetData(listNode);
+    try {
+      this.traverseSectionNodeDF((node: NodeItem): boolean => {
+        if (node.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(node.getCurrentNodeId())) {
+          let nodeInfo: NodeInfo =
+            new NodeInfo(node, this.nodeIdNodeParamMap.get(node.getCurrentNodeId()) as NodeParam);
+          nodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+          listNode.push(nodeInfo);
+          this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
+          index = this.nodeDFHandler(nodeInfo, index);
+        }
+        return false;
+      }, this._root, startLevel, endLevel);
+    } catch (err) {
+      hilog.error(LOG_CODE, TAG, 'traverseSectionNodeDF function callbacks error.');
+      this.resetData(listNode);
+    }
+  }
+
+  private nodeDFHandler(nodeInfo: NodeInfo, index: number): number {
+    if (nodeInfo.getChildNodeInfo().isHasChildNode) {
+      this.expandAndCollapseInfo.set(nodeInfo.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
+    }
+    if (nodeInfo.getNodeIsShow()) {
+      this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
+      this.loadedListNode.push(nodeInfo);
+    }
+    if (nodeInfo.getIsFolder()) {
+      if (nodeInfo.getNodeInfoData().secondaryTitle !== undefined) {
+        this.nodeIdAndSubtitleMap.set(
+          nodeInfo.getNodeCurrentNodeId(),
+          nodeInfo.getNodeInfoData().secondaryTitle as ResourceStr
+        );
+      } else {
+        this.nodeIdAndSubtitleMap.set(nodeInfo.getNodeCurrentNodeId(), '');
+      }
+    }
+    return index;
+  }
+
+  /**
+   * update delay init all nodes
+   */
+  public delayInit(): void {
+    let timeId: number = 0;
+    timeId = setTimeout(() => {
+      let listNode: NodeInfo[] = [];
+      this.initHandler(listNode, 0);
+      this.listNode.splice(0, this.listNode.length);
+      this.listNode.push(...listNode);
+      this.listNode.forEach((value, index) => {
+        this.notifyDataDelete(index);
+        this.notifyDataAdd(index as int);
+      });
+      clearTimeout(Double.toInt(timeId));
+    }, DELAY_TIME);
+  }
+
+  /**
+   * update delay init some nodes
+   */
+  public initSection(): void {
+    this.initHandler(this.listNode, 0, 1);
+  }
+
+  public setClickIndex(index: number): void {
+    this.thisIndex = index;
+  }
+
+  public getClickNodeId(): number {
+    if (!this.checkIndex(this.thisIndex)) {
+      return -1;
+    }
+    return this.listNode[this.thisIndex.toInt()].getNodeCurrentNodeId();
+  }
+
+  public expandAndCollapseNode(clickIndex: number): void {
+    this.changeNodeStatus(clickIndex);
+    this.handleExpandAndCollapse(clickIndex, true);
+  }
+
+  public getIsTouchDown(): boolean {
+    return this.isTouchDown;
+  }
+
+  public getLastIndex(): number {
+    return this.lastIndex;
+  }
+
+  public findIndex(currentNodeId: number): number {
+    let thisIndex: number = -1;
+    if (this.nodeIdAndNodeIndexMap.has(currentNodeId)) {
+      thisIndex = this.nodeIdAndNodeIndexMap.get(currentNodeId) as number;
+    }
+    return thisIndex;
+  }
+
+  public handleEventDrag(index: number): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    this.setImageSource(index, InteractionStatus.NORMAL);
+    this.changeNodeColor(index, this.listNode[index.toInt()].getNodeStatus().normal);
+    this.handleFocusEffect(index, false);
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[index.toInt()].getNodeCurrentNodeId()));
+  }
+
+  public handleEvent(event: Event, index: number): void {
+    /* Return while the event is dragging event. */
+    if (this.isDrag) {
+      return;
+    }
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    if (event === Event.TOUCH_DOWN || event === Event.TOUCH_UP || event === Event.MOUSE_BUTTON_RIGHT) {
+      if (index !== this.lastIndex) {
+        this.clearLastIndexStatus();
+      }
+    }
+    this.eventHandler(index, event);
+  }
+
+  private eventHandler(index: number, event: Event): void {
+    let lazyForEachIndex: number =
+      this.loadedNodeIdAndIndexMap.get(this.listNode[index.toInt()].getNodeCurrentNodeId()) as number;
+    switch (event) {
+      case Event.TOUCH_DOWN:
+        this.isTouchDown = true;
+        this.changeNodeColor(index, this.listNode[index.toInt()].getNodeStatus().press);
+        this.notifyDataChange(lazyForEachIndex);
+        break;
+      case Event.TOUCH_UP: {
+        this.touchUpHandler(index, lazyForEachIndex);
+        break;
+      }
+      case Event.HOVER:
+        if (this.getNodeColor(index) !== this.listNode[index.toInt()].getNodeStatus().selected) {
+          this.changeNodeColor(index, this.listNode[index.toInt()].getNodeStatus().hover);
+          this.notifyDataChange(lazyForEachIndex);
+        }
+        break;
+      case Event.HOVER_OVER:
+        if (this.getNodeColor(index) !== this.listNode[index.toInt()].getNodeStatus().selected) {
+          this.changeNodeColor(index, this.listNode[index.toInt()].getNodeStatus().normal);
+          this.notifyDataChange(lazyForEachIndex);
+        }
+        break;
+      case Event.FOCUS:
+        this.handleFocusEffect(index, true);
+        this.notifyDataChange(lazyForEachIndex);
+        break;
+      case Event.BLUR:
+        this.handleFocusEffect(index, false);
+        this.notifyDataChange(lazyForEachIndex);
+        break;
+      case Event.MOUSE_BUTTON_RIGHT:
+        this.lastIndex = index;
+        this.finishEditing();
+        break;
+      case Event.DRAG:
+        this.isTouchDown = false;
+        let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+        this.setImageSource(index, InteractionStatus.SELECTED);
+        this.lastIndex = index;
+        this.changeNodeColor(index, nodeInfo.getNodeStatus().selected);
+        this.notifyDataChange(lazyForEachIndex);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private touchUpHandler(index: number, lazyForEachIndex: number): void {
+    if (this.isInnerDrag) {
+      this.isInnerDrag = false;
+    }
+    this.isTouchDown = false;
+    let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+    this.setImageSource(index, InteractionStatus.SELECTED);
+    nodeInfo.setFontColor(this.treeViewTheme.primaryTitleFontColor);
+    this.lastIndex = index;
+    this.changeNodeColor(index, nodeInfo.getNodeStatus().selected);
+    this.notifyDataChange(lazyForEachIndex);
+  }
+
+  private notificationNodeInfo(addNodeId: number, operation: MenuOperation | undefined): void {
+    if (operation === MenuOperation.MODIFY_NODE) {
+      let modifyNodeInfo: NodeInfo = this.listNode[this.modifyNodeIndex.toInt()];
+      let backParamModify: CallbackParam = {
+        currentNodeId: modifyNodeInfo!.getNodeCurrentNodeId() as int,
+        parentNodeId: modifyNodeInfo?.getNodeParentNodeId(),
+      };
+      this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
+    } else if (operation === MenuOperation.ADD_NODE) {
+      let addNodeInfo: NodeInfo = this.listNode[addNodeId.toInt()];
+      if (addNodeInfo === undefined) {
+        return;
+      }
+      let icon: ResourceStr | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
+        addNodeInfo.getNodeItem().imageNode?.source : undefined;
+      let selectedIcon: ResourceStr | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
+        addNodeInfo.getNodeItem().imageNode?.selectedSource : undefined;
+      let editIcon: ResourceStr | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
+        addNodeInfo.getNodeItem().imageNode?.editSource : undefined;
+      let callbackParam: CallbackParam = {
+        currentNodeId: addNodeInfo!.getNodeCurrentNodeId() as int,
+        parentNodeId: addNodeInfo?.getNodeParentNodeId(),
+      };
+      this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
+    }
+  }
+
+  public finishEditing(): void {
+    if (this.modifyNodeIndex !== -1) {
+      this.setImageSource(this.modifyNodeIndex, InteractionStatus.FINISH_EDIT);
+      this.setImageCollapseSource(this.modifyNodeIndex, InteractionStatus.FINISH_EDIT);
+      this.listNode[this.modifyNodeIndex.toInt()].setIsModify(false);
+      this.listNode[this.modifyNodeIndex.toInt()].setTitleAndInputTextStatus(false);
+      this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
+      this.notifyDataChange(this.modifyNodeIndex);
+    }
+  }
+
+  public setItemVisibilityOnEdit(nodeId: number, operation: MenuOperation): void {
+    let index: number = -1;
+    if (nodeId === -1) {
+      return;
+    }
+    if (operation === MenuOperation.MODIFY_NODE) {
+      for (let i: int = 0; i < this.listNode.length; i++) { // nodeId to find index
+        if (this.listNode[i]?.getNodeCurrentNodeId() === nodeId) {
+          index = i;
+          break;
+        }
+      }
+      let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+      if (nodeInfo === undefined) {
+        return;
+      }
+      nodeInfo.setIsModify(true);
+      if (nodeInfo.getNodeItem().mainTitleNode === null) {
+        return; // no title
+      }
+      this.currentOperation = MenuOperation.MODIFY_NODE;
+      nodeInfo.setTitleAndInputTextStatus(true);
+      this.setImageSource(index, InteractionStatus.EDIT);
+      this.setImageCollapseSource(index, InteractionStatus.EDIT);
+      this.modifyNodeIndex = index;
+      if (nodeInfo.getNodeItem().inputText) {
+        if (nodeInfo.getNodeItem().imageCollapse !== null) {
+          nodeInfo.getNodeItem().inputText.rightMargin =
+            $r('sys.float.ohos_id_text_paragraph_margin_xs');
+        } else {
+          nodeInfo.getNodeItem().inputText.rightMargin =
+            $r('sys.float.ohos_id_elements_margin_horizontal_m');
+        }
+      }
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeId));
+    }
+    index = nodeId;
+    if (operation === MenuOperation.COMMIT_NODE) {
+      let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+      if (nodeInfo === undefined) {
+        return;
+      }
+      nodeInfo.setTitleAndInputTextStatus(false);
+      nodeInfo.setIsModify(false);
+      this.setImageSource(index, InteractionStatus.FINISH_EDIT);
+      this.setImageCollapseSource(index, InteractionStatus.FINISH_EDIT);
+      this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeInfo!.getNodeCurrentNodeId()));
+    }
+  }
+
+  public setPopUpInfo(popUpType: PopUpType, inputError: InputError, isShow: boolean, index: number): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    let nodeInfo: NodeInfo = this.listNode[index.toInt()];
+    if (nodeInfo === undefined) {
+      return;
+    }
+    nodeInfo.setPopUpIsShow(isShow);
+    // this.listNode index to lazyForEach index.
+    let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()) as number;
+    if (!isShow) {
+      this.notifyDataChange(lazyForEachIndex);
+      return;
+    }
+    if (popUpType === PopUpType.HINTS) {
+      if (nodeInfo.getNodeItem().mainTitleNode !== null) {
+        nodeInfo.setPopUpText(nodeInfo.getNodeItem().mainTitleNode?.title);
+      } else {
+        nodeInfo.setPopUpText('');
+        nodeInfo.setPopUpIsShow(false);
+      }
+      nodeInfo.setPopUpEnableArrow(false);
+      nodeInfo.setPopUpColor($r('sys.color.ohos_id_color_background'));
+      nodeInfo.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
+    } else if (popUpType === PopUpType.WARNINGS) {
+      if (nodeInfo.getNodeItem().inputText !== null) {
+        if (inputError === InputError.INVALID_ERROR) {
+          nodeInfo.setPopUpText('invalid error');
+        } else if (inputError === InputError.LENGTH_ERROR) {
+          nodeInfo.setPopUpText('length error');
+        }
+        nodeInfo.setPopUpEnableArrow(true);
+        nodeInfo.setPopUpColor($r('sys.color.ohos_id_color_help_tip_bg'));
+        nodeInfo.setPopUpTextColor($r('sys.color.ohos_id_color_text_hint_contrary'));
+      }
+    }
+    this.notifyDataChange(lazyForEachIndex);
+  }
+
+  public setShowPopUpTimeout(timeout: number, index: number): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    if (this.listNode[index.toInt()].getNodeItem().mainTitleNode !== null) {
+      this.listNode[index.toInt()].getNodeItem()
+        .mainTitleNode
+        .popUpTimeout = timeout;
+    }
+    let lazyForEachIndex: number =
+      this.loadedNodeIdAndIndexMap.get(this.listNode[index.toInt()].getNodeCurrentNodeId()) as number;
+    this.notifyDataChange(lazyForEachIndex);
+  }
+
+  public setMainTitleNameOnEdit(index: number, text: string): void {
+    this.modifyNodeIndex = index;
+    if (this.listNode[index.toInt()].getNodeItem().mainTitleNode !== null) {
+      this.listNode[index.toInt()].getNodeItem()
+        .mainTitleNode
+        .title = text;
+    }
+  }
+
+  public totalCount(): int {
+    return this.loadedNodeIdAndIndexMap.size;
+  }
+
+  public getData(index: int): NodeInfo {
+    if (index < 0 || index >= this.loadedListNode.length) {
+      return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    }
+    return this.loadedListNode[index.toInt()];
+  }
+
+  public getDataNumber(index: number): NodeInfo {
+    if (index < 0 || index >= this.loadedListNode.length) {
+      return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    }
+    return this.loadedListNode[index.toInt()];
+  }
+
+  public addData(index: number, data: NodeInfo): void {
+    if (!this.checkIndex(index)) {
+      return;
+    }
+    this.listNode.splice(index as int, 0, data);
+    this.nodeIdAndNodeIndexMap.set(data.getNodeCurrentNodeId(), index);
+    this.loadedListNodeFunction();
+    this.notifyDataAdd(index as int);
+  }
+
+  public pushData(data: NodeInfo): void {
+    this.listNode.push(data);
+    this.nodeIdAndNodeIndexMap.set(data.getNodeCurrentNodeId(), this.listNode.length);
+    this.loadedListNodeFunction();
+    this.notifyDataAdd(this.listNode.length - 1);
+  }
+
+  public setIsInnerDrag(isInnerDrag: boolean): void {
+    this.isInnerDrag = isInnerDrag;
+  }
+
+  public getIsInnerDrag(): boolean {
+    return this.isInnerDrag;
+  }
+
+  public setIsDrag(isDrag: boolean): void {
+    this.isDrag = isDrag;
+  }
+
+  public getIsDrag(): boolean {
+    return this.isDrag;
+  }
+
+  public setCurrentNodeInfo(currentNodeInfo: NodeInfo | undefined): void {
+    if (currentNodeInfo === undefined) {
+      return;
+    }
+    this.currentNodeInfo = currentNodeInfo;
+  }
+
+  public getCurrentNodeInfo(): NodeInfo | null {
+    return this.currentNodeInfo;
+  }
+
+  public setDraggingParentNodeId(draggingParentNodeId: int | undefined): void {
+    if (draggingParentNodeId === undefined) {
+      return;
+    }
+    this.draggingParentNodeId = draggingParentNodeId;
+  }
+
+  public getDraggingParentNodeId(): number {
+    return this.draggingParentNodeId;
+  }
+
+  public getDraggingCurrentNodeId(): number {
+    return this.draggingCurrentNodeId;
+  }
+
+  public setDraggingCurrentNodeId(draggingCurrentNodeId: int | undefined): void {
+    if (draggingCurrentNodeId === undefined) {
+      return;
+    }
+    this.draggingCurrentNodeId = draggingCurrentNodeId as int;
+  }
+
+  public setListItemOpacity(listItemOpacity: number): void {
+    this.listItemOpacity = listItemOpacity;
+  }
+
+  public getListItemOpacity(item: NodeInfo): number {
+    return item.getNodeCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
+  }
+
+  public getDragPopupPara(): DragPopup {
+    return this.DRAG_POPUP;
+  }
+
+  public setLastPassIndex(lastPassIndex: number): void {
+    this.lastPassIndex = lastPassIndex;
+  }
+
+  public getLastPassIndex(): number {
+    return this.lastPassIndex;
+  }
+
+  public getIsParentOfInsertNode(insertNodeId: int | undefined): boolean {
+    if (this.currentNodeInfo === null || insertNodeId === undefined) {
+      return false;
+    }
+    let selectedNodeItem: NodeItem = this.currentNodeInfo?.getNodeInfoNode() as NodeItem;
+    let parentId: number = selectedNodeItem.currentNodeId;
+    let insertParentId: int | undefined = this.nodeIdNodeItemMap.get(insertNodeId as number)?.parentNodeId;
+    while (insertParentId !== undefined && insertParentId !== -1) {
+      if (parentId === insertParentId) {
+        return true;
+      } else {
+        insertParentId = this.nodeIdNodeItemMap.get(insertParentId as number)?.parentNodeId;
+      }
+    }
+    return false;
+  }
+
+  public setPassIndex(thisPassIndex: number): void {
+    this.thisPassIndex = thisPassIndex;
+  }
+
+  public getPassIndex(): number {
+    return this.thisPassIndex;
+  }
+
+  public clearTimeOutAboutDelayHighLightAndExpand(currentIndex: number): void {
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
+      let index: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
+      this.listNode.forEach((value) => {
+        if (value.getNodeCurrentNodeId() === this.lastPassId) {
+          value.setCanShowFlagLine(false);
+          return;
+        }
+      })
+      this.notifyDataChange(index);
+    }
+
+    if ((this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
+      this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
+      clearTimeout(Double.toInt(this.lastTimeoutHighLightId));
+      if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
+        this.clearHighLight(this.lastDelayHighLightIndex);
+        let index: number = this.loadedNodeIdAndIndexMap
+          .get(this.listNode[this.lastDelayHighLightIndex.toInt()].getNodeCurrentNodeId()) as number;
+        this.notifyDataChange(index);
+      }
+      this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
+    }
+    this.lastTimeoutHighLightId = this.timeoutHighLightId;
+    this.lastDelayHighLightIndex = currentIndex;
+
+    if ((this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
+      this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
+      clearTimeout(Double.toInt(this.lastTimeoutExpandId));
+      this.clearTimeoutExpandId = this.lastTimeoutExpandId;
+    }
+    this.lastTimeoutExpandId = this.timeoutExpandId;
+    this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
+  }
+
+  public clearHighLight(currentIndex: number): void {
+    if (!this.checkIndex(currentIndex)) {
+      return;
+    }
+    this.changeNodeColor(currentIndex, this.listNode[currentIndex.toInt()].getNodeStatus().normal);
+    this.changeNodeHighLightColor(currentIndex, false);
+    this.setImageSource(currentIndex, InteractionStatus.FINISH_DRAG_INSERT);
+    this.setImageCollapseSource(currentIndex, InteractionStatus.FINISH_DRAG_INSERT);
+    this.listNode[currentIndex.toInt()].setIsHighLight(false);
+  }
+
+  private changeNodeHighLightColor(index: number, isHighLight: boolean): void {
+    if (this.listNode[index.toInt()].getNodeItem().mainTitleNode && this.listNode[index.toInt()].getIsShowTitle()) {
+      this.listNode[index.toInt()].getNodeItem().mainTitleNode?.setMainTitleHighLight(isHighLight);
+    }
+  }
+
+  getAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
+    let accessibleTitleList: string[] = [];
+    while (insertNodeCurrentNodeId !== -1) {
+      if (insertNodeCurrentNodeId === undefined) {
+        return '';
+      }
+      let insertNodeParentNodeId: number = this.findParentNodeId(insertNodeCurrentNodeId);
+      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+      if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+        return '';
+      }
+      let primaryTitle =
+        this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle =
+        this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().secondaryTitle;
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+      insertNodeCurrentNodeId = nodeItem.currentNodeId;
+    }
+    return accessibleTitleList.join(',');
+  }
+
+  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
+    if (insertNodeCurrentNodeId === undefined) {
+      return '';
+    }
+    let insertNodeParentNodeId: number = this.findParentNodeId(insertNodeCurrentNodeId);
+    if (insertNodeParentNodeId === -1) {
+      let accessibleTitleList: string[] = [];
+      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
+      if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+        return '';
+      }
+      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle =
+        this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().secondaryTitle;
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+      return accessibleTitleList.join(',');
+    } else {
+      let accessibleTitleList: string[] = [];
+      let currentNodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
+      if (currentNodeItem === undefined || insertNodeParentNodeId === undefined) {
+        return '';
+      }
+      let primaryTitle =
+        this.getNodeInfoByNodeItem(currentNodeItem as NodeItem).getNodeInfoData()?.primaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(currentNodeItem as NodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle =
+        this.getNodeInfoByNodeItem(currentNodeItem as NodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(currentNodeItem as NodeItem).getNodeInfoData().secondaryTitle;
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+      while (insertNodeCurrentNodeId !== -1) {
+        if (insertNodeCurrentNodeId === undefined) {
+          return '';
+        }
+        let insertNodeParentNodeId: number = this.findParentNodeId(insertNodeCurrentNodeId);
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+        if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+          return '';
+        }
+        let primaryTitle =
+          this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.primaryTitle === undefined
+            ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().primaryTitle;
+        let secondaryTitle =
+          this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData()?.secondaryTitle === undefined
+            ? '' : this.getNodeInfoByNodeItem(nodeItem as NodeItem).getNodeInfoData().secondaryTitle;
+        let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+        let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+        accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+        insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      }
+      return accessibleTitleList.join(',');
+    }
+  }
+
+  getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: int | undefined,
+    insertNodeId: int | undefined): void {
+    this.getAccessibleTitle(insertNodeId as int)
+    if (insertNodeCurrentNodeId === undefined || insertNodeId === undefined) {
+      return;
+    }
+    let parentId: number = this.findParentNodeId(insertNodeId);
+    let currentPlaceNode: number | undefined = allParentNode.indexOf(insertNodeId) + 2;
+    let childrenInfo: NodeInfoView[] = this.getClickNodeChildrenInfo(parentId);
+    let childrenItemId: (number | undefined)[] =
+      childrenInfo.map((item: NodeInfoView): number | undefined => item.itemId);
+    let insertNodePosition: number = childrenItemId.indexOf(insertNodeId) + 2;
+    if (parentId === -1 && this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.COLLAPSE ||
+      parentId === -1 && this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === undefined) {
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_parent', currentPlaceNode));
+    } else if (this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.EXPAND) {
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+        this.getAccessibleTitle(insertNodeId), 1));
+    } else if (parentId !== -1) {
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+        this.getAccessibleTitle(insertNodeId), insertNodePosition));
+    }
+  }
+
+  public getStringByName(resName: string, ...args: Array<string | number>): string {
+    if (resName) {
+      try {
+        return resourceManager.getSysResourceManager().getStringByNameSync(resName, ...args);
+      } catch (error) {
+        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+      }
+    }
+    return '';
+  }
+
+  public sendAccessibility(textAnnouncedForAccessibility: string): void {
+    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+    let bundleName: string = 'defaultBundle';
+    if (uiContent) {
+      bundleName = (uiContent as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    }
+    let eventInfo = new accessibility.EventInfo(
+      'announceForAccessibility', // 表示主动播报的事件。
+      bundleName, // 目标应用名；不可缺省。
+      'common',// 表示没有特定操作，用于主动聚焦、主动播报等场景。
+    );
+    eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
+    accessibility.sendAccessibilityEvent(eventInfo);
+  }
+
+  public getAccessibleTitleText(resource: ResourceStr | undefined): string {
+    let resourceString: string = '';
+    try {
+      if (typeof resource === 'string') {
+        resourceString = resource as string;
+      } else {
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        if (uiContent) {
+          resourceString =
+            (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)
+        }
+      }
+    } catch (err) {
+      let code: undefined | int = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
+      hilog.error(0x3900, 'Ace', `treeView getAccessibleTitleText error,code: ${code},message:${message}`);
+    }
+    return resourceString;
+  }
+
+  public setVisibility(flag: Flag, index: number, isOverBorder: boolean, allParentNode: number[]): void {
+    let isChanged: boolean = (this.thisPassIndex !== index || this.flag !== flag) ? true : false;
+    this.thisPassIndex = index;
+    if ((isChanged || isOverBorder) && this.isInnerDrag) {
+      this.flag = flag;
+      let currentNodeId: int | undefined = this.getData(index as int)?.getNodeCurrentNodeId();
+      let currentNodeLevel: number | undefined = this.getData(index as int)?.getNodeLevel();
+      if (currentNodeId !== undefined) {
+        currentNodeLevel = (this.expandAndCollapseInfo.get(Number(currentNodeId + "")) === NodeStatus.EXPAND &&
+          this.flag === Flag.DOWN_FLAG) ? (currentNodeLevel ? currentNodeLevel + 1 : undefined) : currentNodeLevel;
+        if (this.lastPassId !== this.INITIAL_INVALID_VALUE as int &&
+        this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ""))) {
+          let lastIndex: number = this.loadedNodeIdAndIndexMap.get(Number(this.lastPassId + "")) as number;
+          this.listNode.forEach((value) => {
+            if (value.getNodeCurrentNodeId() === this.lastPassId) {
+              value.setCanShowFlagLine(false);
+            }
+          })
+          this.notifyDataChange(lastIndex);
+        }
+        let insertNodeUpNodeId: int | undefined = this.getData(Double.toInt(index) - 1)?.getNodeCurrentNodeId();
+        let insertNodeDownNodeId: int | undefined = this.getData(Double.toInt(index) + 2)?.getNodeCurrentNodeId();
+        let insertNodeCurrentNodeId: int | undefined = this.getData(Double.toInt(index) + 1)?.getNodeCurrentNodeId();
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as int);
+        if (this.flag === Flag.DOWN_FLAG && index < this.totalCount() - 1) {
+          this.getData(index as int)?.setCanShowFlagLine(false);
+          this.getData(index as int + 1)?.setCanShowFlagLine(true);
+          this.getData(index as int)?.setCanShowBottomFlagLine(false);
+          this.getData(index as int + 1)?.setFlagLineLeftMargin(currentNodeLevel);
+          this.notifyDataChange(index);
+          this.notifyDataChange(index + 1);
+          this.lastPassId = this.getData(index as int + 1)?.getNodeCurrentNodeId();
+          let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as int);
+          if (!nodeItem?.childNodeInfo.isHasChildNode) {
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
+          } else {
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeDownNodeId);
+          }
+        } else if (this.flag === Flag.UP_FLAG && index < this.totalCount() - 1) {
+          this.getData(Double.toInt(index))?.setCanShowFlagLine(true);
+          this.getData(Double.toInt(index) + 1)?.setCanShowFlagLine(false);
+          this.getData(Double.toInt(index))?.setCanShowBottomFlagLine(false);
+          this.getData(Double.toInt(index))?.setFlagLineLeftMargin(currentNodeLevel);
+          this.notifyDataChange(index);
+          this.notifyDataChange(index + 1);
+          this.lastPassId = this.getData(Double.toInt(index))?.getNodeCurrentNodeId();
+          if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId !== -1) {
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
+          } else if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId === -1) {
+            this.getDraggingAccessible(allParentNode, insertNodeUpNodeId, insertNodeCurrentNodeId);
+          }
+        } else if (index >= this.totalCount() - 1) {
+          if (this.flag === Flag.DOWN_FLAG) {
+            this.getData(Double.toInt(index))?.setCanShowFlagLine(false);
+            this.getData(Double.toInt(index))?.setCanShowBottomFlagLine(true);
+          } else {
+            this.getData(Double.toInt(index))?.setCanShowFlagLine(true);
+            this.getData(Double.toInt(index))?.setCanShowBottomFlagLine(false);
+          }
+          this.getData(Double.toInt(index))?.setFlagLineLeftMargin(currentNodeLevel);
+          this.notifyDataChange(index);
+          this.lastPassId = this.getData(Double.toInt(index))?.getNodeCurrentNodeId();
+        }
+
+
+      }
+    }
+  }
+
+  public delayHighLightAndExpandNode(currentIndex: number, currentNodeId: number, showIndex: number): void {
+    let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
+    let isOverBorder: boolean | undefined = this.getData(Double.toInt(showIndex))?.getIsOverBorder();
+    let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
+    if (isOverBorder) {
+      this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
+    } else {
+      this.lastDelayExpandIndex = currentIndex;
+    }
+    if (isOverBorder || isChangIndex) {
+      /* highLight node time-out. */
+      let canDelayHighLight: boolean | undefined = !isOverBorder && (!this.isInnerDrag ||
+        (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE && this.isInnerDrag) ||
+        (!this.expandAndCollapseInfo.has(currentNodeId) && this.listNode[currentIndex.toInt()].getIsFolder()));
+      if (canDelayHighLight) {
+        /* set hoverState color before highLight. */
+        this.changeNodeColor(currentIndex, this.listNode[currentIndex.toInt()].getNodeStatus().hover);
+        this.notifyDataChange(showIndex);
+
+        let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
+        this.timeoutHighLightId = setTimeout(() => {
+          this.delayHighLight(currentIndex);
+          this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+            this.getPlaceAccessibleTitle(currentNodeId), 1))
+        }, Double.toInt(delayHighLightTime));
+      }
+      if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
+        this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
+        clearTimeout(Double.toInt(this.lastTimeoutHighLightId));
+        if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
+          this.clearHighLight(this.lastDelayHighLightIndex);
+          this.notifyDataReload();
+        }
+        this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
+      }
+      this.lastTimeoutHighLightId = this.timeoutHighLightId;
+      this.lastDelayHighLightIndex = currentIndex;
+      /* alter flagLine and expand node time-out. */
+      if (!isOverBorder && this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE) {
+        let firstChildNodeId: number | undefined =
+          this.getData(Double.toInt(showIndex))?.getNodeInfoNode().children[0]?.currentNodeId as int;
+        let delayAlterFlagLineAndExpandNodeTime: number = 2000; // ms
+        this.timeoutExpandId = setTimeout(() => {
+          this.clearHighLight(this.lastDelayHighLightIndex);
+          if (firstChildNodeId !== undefined) {
+            this.alterFlagLineAndExpandNode(currentIndex, firstChildNodeId);
+          }
+        }, Double.toInt(delayAlterFlagLineAndExpandNodeTime));
+      }
+      if (isOverBorder || (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
+        this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
+        clearTimeout(Double.toInt(this.lastTimeoutExpandId));
+        this.clearTimeoutExpandId = this.lastTimeoutExpandId;
+      }
+      this.lastTimeoutExpandId = this.timeoutExpandId;
+    }
+  }
+
+  public delayHighLight(currentIndex: number): void {
+    this.listNode.forEach((value) => {
+      if (value.getNodeCurrentNodeId() === this.lastPassId) {
+        value.setCanShowFlagLine(false);
+        value.setCanShowBottomFlagLine(false);
+        return;
+      }
+    })
+    this.changeNodeColor(currentIndex, this.listNode[currentIndex.toInt()].getNodeStatus().highLight);
+    this.listNode[currentIndex.toInt()].setIsHighLight(true);
+    this.changeNodeHighLightColor(currentIndex, true);
+    this.setImageSource(currentIndex, InteractionStatus.DRAG_INSERT);
+    this.setImageCollapseSource(currentIndex, InteractionStatus.DRAG_INSERT);
+    this.notifyDataReload();
+  }
+
+  public alterFlagLineAndExpandNode(currentIndex: number, firstChildNodeId: number): void {
+    this.listNode.forEach((value) => {
+      if (value.getNodeCurrentNodeId() === this.lastPassId) {
+        value.setCanShowFlagLine(false);
+        value.setCanShowBottomFlagLine(false);
+      }
+    })
+    this.listNode.forEach((value) => {
+      if (this.isInnerDrag && value.getNodeCurrentNodeId() === firstChildNodeId) {
+        value.setCanShowFlagLine(true);
+      }
+    })
+    this.changeNodeStatus(currentIndex);
+    this.handleExpandAndCollapse(currentIndex, true);
+    this.lastPassId = firstChildNodeId as int;
+  }
+
+  public hideLastLine(): void {
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE as int &&
+    this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ''))) {
+      this.listNode.forEach((value) => {
+        if (value.getNodeCurrentNodeId() === this.lastPassId) {
+          value.setCanShowFlagLine(false);
+          value.setCanShowBottomFlagLine(false);
+          return;
+        }
+      })
+      let index: number = this.loadedNodeIdAndIndexMap.get(Number(this.lastPassId + '')) as number;
+      this.notifyDataChange(index);
+    }
+  }
+
+  public clearLastTimeoutHighLight(): void {
+    if (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
+      this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId) {
+      clearTimeout(Double.toInt(this.lastTimeoutHighLightId));
+      if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
+        this.clearHighLight(this.lastDelayHighLightIndex);
+      }
+    }
+  }
+
+  public clearLastTimeoutExpand(): void {
+    if (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
+      this.clearTimeoutExpandId !== this.lastTimeoutExpandId) {
+      clearTimeout(Double.toInt(this.lastTimeoutExpandId));
+    }
+  }
+
+  public getSubtitle(currentNodeId: number): string | undefined {
+    if (this.nodeIdAndSubtitleMap.has(currentNodeId)) {
+      if (typeof this.nodeIdAndSubtitleMap.get(currentNodeId) === 'number') {
+        return this.nodeIdAndSubtitleMap.get(currentNodeId)?.toString();
+      } else {
+        let title: string = '';
+        if (this.nodeIdAndSubtitleMap.get(currentNodeId) !== undefined) {
+          if (typeof this.nodeIdAndSubtitleMap.get(currentNodeId) === 'string') {
+            return this.nodeIdAndSubtitleMap.get(currentNodeId) as string;
+          } else {
+            let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+            if (uiContent) {
+              title =
+                (uiContent as common.UIAbilityContext).resourceManager
+                  .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+            }
+          }
+        }
+        return title;
+      }
+    } else {
+      return '';
+    }
+  }
+
+  public hasSubtitle(currentNodeId: number): boolean {
+    return this.nodeIdAndSubtitleMap.has(currentNodeId);
+  }
+
+  public initialParameterAboutDelayHighLightAndExpandIndex(): void {
+    this.lastDelayHighLightIndex = this.INITIAL_INVALID_VALUE;
+    this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
+    this.lastPassIndex = this.INITIAL_INVALID_VALUE;
+    this.draggingCurrentNodeId = this.INITIAL_INVALID_VALUE;
+    this.flag = Flag.NONE;
+  }
+
+  public refreshSubtitle(insertNodeCurrentNodeId: number): void {
+    this.nodeIdAndSubtitleMap.set(this.selectedParentNodeId, this.selectedParentNodeSubtitle);
+    this.nodeIdAndSubtitleMap.set(insertNodeCurrentNodeId, this.insertNodeSubtitle);
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.selectedParentNodeId));
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(insertNodeCurrentNodeId));
+  }
+
+  public setNodeSubtitlePara(
+    selectedParentNodeId: number,
+    selectedParentNodeSubtitle: ResourceStr,
+    insertNodeSubtitle: ResourceStr): void {
+    this.selectedParentNodeId = selectedParentNodeId;
+    this.selectedParentNodeSubtitle = selectedParentNodeSubtitle;
+    this.insertNodeSubtitle = insertNodeSubtitle;
+  }
+
+  public getInsertNodeSubtitle(): ResourceStr {
+    return this.insertNodeSubtitle;
+  }
+
+  public getExpandAndCollapseInfo(currentNodeId: number): NodeStatus | undefined {
+    return this.expandAndCollapseInfo.get(currentNodeId);
+  }
+
+  public getLastDelayHighLightId(): number {
+    return this.lastDelayHighLightId;
+  }
+
+  public setLastDelayHighLightId(): void {
+    this.listNode.forEach((value, index) => {
+      if (index === this.lastDelayHighLightIndex) {
+        this.lastDelayHighLightId = value.getNodeCurrentNodeId();
+      }
+    })
+  }
+
+  public setLastPassId(lastPassId: number): void {
+    this.lastPassId = lastPassId as int;
+  }
+
+  public setLastDelayHighLightIndex(lastDelayHighLightIndex: number): void {
+    this.lastDelayHighLightIndex = lastDelayHighLightIndex;
+  }
+
+  /**
+   * Alter the current node location to a needful position.
+   * 1.Create an array named 'dragNodeParam' to store dragging node information.
+   * 2.Delete the dragging node from the tree.
+   * 3.Add the dragging node to the tree.
+   */
+  public alterDragNode(rearParentNodeId: number, rearCurrentNodeId: number,
+    dragParentNodeId: number, dragCurrentNodeId: number, frontNodeInfoItem: NodeInfo): void {
+    let dragNodeParam: DragNodeParam[] = [];
+    let parentNodeId: int = rearParentNodeId as int;
+    let currentNodeId: number = dragCurrentNodeId;
+    let nodeParam: NodeParam = frontNodeInfoItem.getNodeInfoData();
+    let nodeInfo: NodeInfo | null = null;
+    let nodeInfoNode: NodeItem = frontNodeInfoItem.getNodeInfoNode();
+    let isHighLight: boolean = false;
+    let insertChildIndex: number = this.INITIAL_INVALID_VALUE;
+    let currentChildIndex: number = this.INITIAL_INVALID_VALUE;
+    let isDownFlag: boolean = this.flag === Flag.DOWN_FLAG ? true : false;
+
+    currentChildIndex = this.getChildIndex(dragParentNodeId, dragCurrentNodeId);
+    insertChildIndex = this.getChildIndex(rearParentNodeId, rearCurrentNodeId) + 1;
+    if (rearParentNodeId !== dragParentNodeId) {
+      insertChildIndex = isDownFlag ? insertChildIndex + 1 : insertChildIndex;
+    } else {
+      if (insertChildIndex > currentChildIndex) {
+        insertChildIndex = isDownFlag ? insertChildIndex : insertChildIndex - 1;
+      } else {
+        insertChildIndex = isDownFlag ? insertChildIndex + 1 : insertChildIndex;
+      }
+    }
+    for (let i: int = 0; i < this.listNode.length; i++) {
+      if (this.listNode[i].getNodeCurrentNodeId() === rearCurrentNodeId) {
+        isHighLight = this.listNode[i].getIsHighLight();
+        if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.EXPAND) {
+          parentNodeId = rearCurrentNodeId as int;
+          insertChildIndex = 0;
+        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
+        NodeStatus.EXPAND &&
+          this.listNode[i].getCanShowFlagLine() === false) {
+          parentNodeId = rearCurrentNodeId as int;
+          insertChildIndex = 0;
+        } else if (isHighLight) {
+          parentNodeId = rearCurrentNodeId as int;
+          insertChildIndex = 0;
+        }
+        break;
+      }
+    }
+
+    let callbackParam: CallbackParam = {
+      currentNodeId: currentNodeId as int,
+      parentNodeId: parentNodeId,
+      childIndex: insertChildIndex as int,
+    }
+    /* export inner drag node Id. */
+    this.appEventBus.emit(TreeListenType.NODE_MOVE, callbackParam);
+
+    /* To store dragging node information by the array named 'dragNodeParam'. */
+    dragNodeParam.push({ parentId: parentNodeId, currentId: currentNodeId, data: nodeParam });
+    let callback: (node: NodeItem, listNode: NodeInfo[]) => boolean =
+      (node: NodeItem, listNode: NodeInfo[]): boolean => {
+        if (node) {
+          parentNodeId = node.parentNodeId;
+          currentNodeId = node.currentNodeId;
+          for (let i: int = 0; i < listNode.length; i++) {
+            if (listNode[i].getNodeCurrentNodeId() === currentNodeId) {
+              nodeInfo = listNode[i];
+              break;
+            }
+          }
+          if (nodeInfo === null) {
+            return false;
+          }
+          let nodeParam: NodeParam = nodeInfo!.getNodeInfoData();
+          if (parentNodeId !== dragParentNodeId) {
+            dragNodeParam.push({ parentId: parentNodeId, currentId: currentNodeId, data: nodeParam });
+          }
+          return false;
+        }
+        return false;
+      }
+    this.dragTraverseNodeDF(callback, nodeInfoNode, this.listNode);
+
+    /* Delete the dragging node from the tree. */
+    let removeNodeIdList: number[] = this.removeNode(dragCurrentNodeId, dragParentNodeId);
+    if (removeNodeIdList.length === 0) {
+      return;
+    }
+
+    /**
+     * Add the dragging node to the tree
+     * 1.The first dragging node is added singly, because it needs to distinguish the position to insert
+     *
+     * Add first node.
+     */
+    let insertCurrentNodeId: number = rearCurrentNodeId;
+    let isAfter: boolean = isDownFlag;
+    if (this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.EXPAND) {
+      isAfter = false;
+      this.listNode.forEach((value) => {
+        if (value.getNodeCurrentNodeId() === rearCurrentNodeId && value.getCanShowFlagLine() === false) {
+          if (value.getNodeInfoNode().children.length) {
+            insertCurrentNodeId = value.getNodeInfoNode().children[0].currentNodeId;
+          } else {
+            insertCurrentNodeId = this.INITIAL_INVALID_VALUE;
+          }
+        }
+      })
+    } else if (!this.expandAndCollapseInfo.get(rearCurrentNodeId) && isHighLight) {
+      this.expandAndCollapseInfo.set(rearCurrentNodeId, NodeStatus.EXPAND);
+    }
+
+    let addDragNodeResult: boolean =
+      this.addDragNode(dragNodeParam[0].parentId as int, dragNodeParam[0].currentId, insertCurrentNodeId,
+        isAfter, dragNodeParam[0].data);
+
+    if (!addDragNodeResult) {
+      return;
+    }
+    /* Add remaining node. */
+    for (let j: int = 1; j < dragNodeParam.length; j++) {
+      let addNodeResult: boolean =
+        this.addNode(dragNodeParam[j].parentId as int, dragNodeParam[j].currentId as int, dragNodeParam[j].data, false);
+      if (!addNodeResult) {
+        return;
+      }
+    }
+
+    /* Update node data and reload the array named 'listNode'. */
+    for (let i: int = 0; i < this.listNode.length; i++) {
+      if (this.listNode[i].getNodeCurrentNodeId() === dragParentNodeId) {
+        if (this.listNode[i].getNodeItem().imageCollapse === null) {
+          this.listNode[i].handleImageCollapseAfterAddNode(false);
+          this.expandAndCollapseInfo.delete(dragParentNodeId);
+          break;
+        }
+      }
+    }
+    let tmp: NodeInfo[] = [...this.listNode];
+    this.reloadListNode(tmp);
+  }
+
+  /**
+   * Reload the array named 'listNode'
+   * @param tmp
+   */
+  public reloadListNode(tmp: NodeInfo[]): void {
+    let index: number = 0;
+    let listIndex: number = 0;
+    this.listNode.splice(0, this.listNode.length);
+    this.loadedNodeIdAndIndexMap.clear();
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    this.traverseNodeDF((node: NodeItem): boolean => {
+      let currentNodeId: number = node.currentNodeId;
+      if (currentNodeId >= 0) {
+        if (this.nodeIdNodeParamMap.has(currentNodeId)) {
+          let nodeInfo: NodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(currentNodeId) as NodeParam);
+          nodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+          this.listNode.push(nodeInfo);
+          this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
+          if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.EXPAND) {
+            nodeInfo.getNodeItem()
+              .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+              nodeInfo.getNodeItem().imageCollapse?.isCollapse);
+          } else if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE) {
+            nodeInfo.getNodeItem()
+              .imageCollapse = CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+              nodeInfo.getNodeItem().imageCollapse?.isCollapse);
+          }
+
+          for (let i: int = 0; i < tmp.length; i++) {
+            if (tmp[i].getNodeCurrentNodeId() === nodeInfo.getNodeCurrentNodeId()) {
+              nodeInfo.setNodeIsShow(tmp[i].getNodeIsShow());
+              nodeInfo.setListItemHeight(tmp[i].getListItemHeight());
+              if (nodeInfo.getNodeItem().mainTitleNode && nodeInfo.getIsShowTitle()) {
+                if(tmp[i].getNodeItem().mainTitleNode?.title !== undefined){
+                  if (typeof tmp[i].getNodeItem().mainTitleNode?.title === 'string') {
+                    nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
+                  } else {
+                    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+                    if (uiContent) {
+                      nodeInfo.getNodeItem().mainTitleNode.title =
+                        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                    }
+                  }
+                }
+              }
+              break;
+            }
+          }
+          if (nodeInfo.getNodeIsShow()) {
+            this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
+            this.loadedListNode.push(nodeInfo);
+          }
+        }
+      }
+      return false;
+    });
+  }
+
+  public getFlagLine(): FlagLine {
+    return this.FLAG_LINE;
+  }
+
+  public getVisibility(nodeInfo: NodeInfo): Visibility {
+    let lastShowIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()) as number - 1;
+    if (lastShowIndex > this.INITIAL_INVALID_VALUE) {
+      let lastNodeInfo: NodeInfo | undefined = this.getData(lastShowIndex as int);
+      return (nodeInfo.getCanShowFlagLine() === true && !nodeInfo.getIsHighLight() && !lastNodeInfo?.getIsHighLight()) ?
+        Visibility.Visible : Visibility.Hidden;
+    } else {
+      return (nodeInfo.getCanShowFlagLine() === true && !nodeInfo.getIsHighLight()) ?
+        Visibility.Visible : Visibility.Hidden;
+    }
+  }
+
+  public getSubTitlePara(): SubTitleStyle {
+    return this.subTitle;
+  }
+
+  public getIsFolder(nodeId: number): boolean | undefined {
+    if (this.loadedNodeIdAndIndexMap.has(nodeId)) {
+      return this.getDataNumber(this.loadedNodeIdAndIndexMap.get(nodeId) as number)?.getIsFolder();
+    }
+    return false;
+  }
+
+  public getSubTitleFontColor(isHighLight: boolean): ResourceColor {
+    return isHighLight ? this.subTitle.highLightFontColor : this.treeViewTheme.secondaryTitleFontColor;
+  }
+
+  private getChildIndex(rearParentNodeId: number, rearCurrentNodeId: number): number {
+    let insertChildIndex: number = this.INITIAL_INVALID_VALUE;
+    if (this.nodeIdNodeItemMap.has(rearParentNodeId)) {
+      let node: NodeItem = this.nodeIdNodeItemMap.get(rearParentNodeId) as NodeItem;
+      if (node.getCurrentNodeId() === rearParentNodeId) {
+        node.children.forEach((value, index) => {
+          if (value.getCurrentNodeId() === rearCurrentNodeId) {
+            insertChildIndex = index;
+            return;
+          }
+        })
+      }
+    }
+    return insertChildIndex;
+  }
+
+  public setCurrentFocusNodeId(focusNodeId: number): void {
+    this.currentFocusNodeId = focusNodeId;
+  }
+
+  public getCurrentFocusNodeId(): number {
+    return this.currentFocusNodeId;
+  }
+
+  public setLastFocusNodeId(focusNodeId: number): void {
+    this.lastFocusNodeId = focusNodeId;
+  }
+
+  public getLastFocusNodeId(): number {
+    return this.lastFocusNodeId;
+  }
+
+  public getAddFocusNodeId(): number {
+    return this.addFocusNodeId;
+  }
+
+  public setFlag(flag: Flag): void {
+    this.flag = flag;
+  }
+
+  private traverseNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root): void {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem | undefined = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      found = callback(currentNode) === true;
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        if(stack.length > 0 ){
+          currentNode = stack.shift() as NodeItem;
+        } else {
+          currentNode = undefined
+        }
+      }
+    }
+  }
+
+  private traverseSectionNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root,
+    startLevel?: number, endLevel?: number): void {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    let isPassNode: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem | undefined = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      try {
+        if (startLevel !== undefined && currentNode.nodeLevel < startLevel) {
+          isPassNode = true;
+        }
+        if (endLevel !== undefined && currentNode.nodeLevel > endLevel) {
+          isPassNode = true;
+        }
+        if (!isPassNode) {
+          found = callback(currentNode);
+        }
+      } catch (err) {
+        throw new Error('traverseSectionNodeDF function callbacks error');
+      }
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        currentNode = stack.shift();
+        isPassNode = false;
+      }
+    }
+  }
+
+  private updateParentChildNum(parentNode: NodeItem, isAdd: boolean, count: int): void {
+    let parentNodeId: number = parentNode.parentNodeId;
+    while (parentNodeId >= 0) {
+      if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+        let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+        parent.getChildNodeInfo().allChildNum =
+          isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
+        parentNodeId = parent.parentNodeId;
+      } else {
+        hilog.error(LOG_CODE, TAG, 'updateParentChildNum: parent node not found.');
+        break;
+      }
+    }
+  }
+
+  /**
+   * find parent node id
+   *
+   * @param currentNodeId current node id
+   * @returns parent node id
+   */
+  public findParentNodeId(currentNodeId: number): number {
+    let current: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(currentNodeId)) {
+      current = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
+    }
+    return current.parentNodeId;
+  }
+
+  private refreshRemoveNodeData(removeNodeIdList: number[], parentNodeInfo: NodeInfo): void {
+    let deleteIndexList: number[] = [];
+    if (removeNodeIdList.length === 0) {
+      return;
+    }
+    let startIndex: number | undefined = undefined;
+    for (let i: int = 0; i < removeNodeIdList.length; i++) {
+      if (this.loadedNodeIdAndIndexMap.has(removeNodeIdList[i])) {
+        let loadedIndex: number = this.loadedNodeIdAndIndexMap.get(removeNodeIdList[i]) as number;
+        deleteIndexList.push(loadedIndex);
+      }
+      if (startIndex === undefined && this.nodeIdAndNodeIndexMap.has(removeNodeIdList[i])) {
+        startIndex = this.nodeIdAndNodeIndexMap.get(removeNodeIdList[i]);
+      }
+      if (startIndex !== undefined) {
+        let deleteNode: NodeInfo[] | null = this.listNode.splice(startIndex as int, 1);
+        deleteNode = null;
+      }
+      if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
+        this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
+      }
+    }
+    deleteIndexList.forEach((value) => {
+      this.notifyDataDelete(value); // notifyDataDelete do not  update data.
+      this.notifyDataChange(value); // call notifyDataChange to update data.
+    })
+    if (parentNodeInfo.getNodeItem().imageCollapse === null) {
+      if (this.nodeIdAndNodeIndexMap.has(parentNodeInfo.getNodeCurrentNodeId())) {
+        let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()) as number;
+        this.listNode[parentIndex.toInt()]?.handleImageCollapseAfterAddNode(false);
+      }
+      // delete deleteNode parentNode expandAndCollapseInfo.
+      this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
+    }
+    let callbackParam: CallbackParam = {
+      currentNodeId: parentNodeInfo.getNodeCurrentNodeId() as int,
+      parentNodeId: parentNodeInfo.getNodeParentNodeId() as int,
+    };
+    this.loadedListNodeFunction();
+    this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
+  }
+
+  private refreshAddNodeData(addNodeIdList: number[]): void {
+    let addNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(addNodeIdList[0])) {
+      let node: NodeItem = this.nodeIdNodeItemMap.get(addNodeIdList[0]) as NodeItem;
+      if (this.nodeIdNodeParamMap.has(addNodeIdList[0])) {
+        addNodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(addNodeIdList[0]) as NodeParam);
+      }
+      addNodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+    }
+    addNodeInfo.setIsModify(true);
+
+    let index: int = 0;
+    for (let i: int = 0; i < this.listNode.length; i++) {
+      if (this.listNode[i].getNodeCurrentNodeId() === addNodeInfo.getNodeParentNodeId()) {
+        index = i;
+        if (this.listNode[i].getNodeItem().imageCollapse === null) {
+          this.listNode[i].handleImageCollapseAfterAddNode(true);
+          this.notifyDataChange(index);
+        } else if (this.expandAndCollapseInfo.get(this.listNode[i].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
+          this.changeNodeStatus(index);
+        }
+        this.listNode.splice(i + 1, 0, addNodeInfo);
+        this.listNode[(i + 1).toInt()].setTitleAndInputTextStatus(true);
+        this.listNode[(i + 1).toInt()].setNodeIsShow(true);
+        this.listNode[(i + 1).toInt()].setListItemHeight(LIST_ITEM_HEIGHT);
+        this.nodeIdAndNodeIndexMap.set(addNodeIdList[0], i + 1);
+        this.setImageSource(i + 1, InteractionStatus.EDIT);
+        this.currentOperation = MenuOperation.ADD_NODE;
+        this.notifyDataAdd(i + 1);
+        this.notificationNodeInfo(i + 1, this.currentOperation);
+        break;
+      }
+    }
+    this.modifyNodeIndex = index + 1;
+    this.setClickIndex(index);
+    this.lastIndex = index;
+    this.expandAndCollapseInfo.set(addNodeInfo.getNodeParentNodeId(), NodeStatus.EXPAND);
+    this.handleExpandAndCollapse(index, true);
+  }
+
+  public refreshData(operation: MenuOperation, parentNodeId: number, changeNodeIdList: number[]): void {
+    let parentNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parentNode: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      parentNodeInfo = new NodeInfo(parentNode, this.nodeIdNodeParamMap.get(parentNodeId) as NodeParam);
+      parentNodeInfo.addImageCollapse(parentNode.getChildNodeInfo().isHasChildNode);
+    }
+
+    if (operation === MenuOperation.REMOVE_NODE) {
+      this.nodeIdAndSubtitleMap.set(parentNodeId, this.selectedParentNodeSubtitle);
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeId));
+      this.refreshRemoveNodeData(changeNodeIdList, parentNodeInfo);
+    }
+
+    if (operation === MenuOperation.ADD_NODE) {
+      this.addFocusNodeId = changeNodeIdList[0];
+      this.nodeIdAndSubtitleMap.set(this.getClickNodeId(), this.selectedParentNodeSubtitle);
+      this.nodeIdAndSubtitleMap.set(changeNodeIdList[0], this.insertNodeSubtitle);
+      this.refreshAddNodeData(changeNodeIdList);
+    }
+  }
+
+  /**
+   * remove node
+   *
+   * @param currentNodeId current node id
+   * @param parentNodeId  parent node id
+   * @returns node id list which is removed
+   */
+  public removeNode(currentNodeId: number, parentNodeId: number): number[] {
+    if (this.nodeIdNodeItemMap.has(parentNodeId) && this.nodeIdNodeItemMap.has(currentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let current: NodeItem = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
+      let removeNodeIdList: number[] = [];
+      let index: number = current.indexOfParent;
+      let deleteNodeAllChildNum: int = 0;
+      if (index < 0) {
+        hilog.error(LOG_CODE, TAG, 'node does not exist.');
+        return [];
+      } else {
+        deleteNodeAllChildNum = parent.children[index.toInt()].getChildNodeInfo().allChildNum + 1;
+        parent.children[index.toInt()]
+        this.freeNodeMemory(parent.children[index.toInt()], removeNodeIdList);
+        for (let i: number = index; i < parent.children.length; i++) {
+          parent.children[i.toInt()].indexOfParent -= 1;
+        }
+        let node: NodeItem[] | null = parent.children.splice(index as int, 1);
+        node = null;
+        this.judgeImageCollapse(parentNodeId as int);
+      }
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
+      let updateNodeIdList: number[] = [];
+      updateNodeIdList.push(parent.parentNodeId);
+      delayUpdateParentChildNum(false, deleteNodeAllChildNum, this.nodeIdNodeItemMap, updateNodeIdList);
+      return removeNodeIdList;
+    } else {
+      hilog.error(LOG_CODE, TAG, 'parent does not exist.');
+      return [];
+    }
+  }
+
+  /**
+   * add nodeItem in params
+   *
+   * @param parentNodeId parent node id
+   * @param currentNodeId current node id
+   * @param data  node param
+   * @param initBuild whether in initialization process
+   */
+  public addNode(parentNodeId: int, currentNodeId: int, data: NodeParam, initBuild: boolean): boolean {
+    if (this._root === null) {
+      this._root = new NodeItem(emptyNodeInfo);
+      this._root.nodeLevel = -1;
+      this.nodeIdNodeItemMap.set(-1, this._root);
+      this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
+    }
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let currentNode: NodeItem = new NodeItem(data);
+      if (parent.nodeLevel > this.maxNodeLevel) {
+        hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+        return false;
+      }
+      currentNode.nodeLevel = parent.nodeLevel + 1;
+      currentNode.parentNodeId = parentNodeId;
+      currentNode.currentNodeId = currentNodeId;
+      currentNode.indexOfParent = parent.children.length;
+      data.parentNodeId = parentNodeId;
+      data.currentNodeId = currentNodeId;
+      if (data.symbolIconStyle && !data.icon) {
+        data.icon = 'symbolUsed';
+      }
+      parent.children.push(currentNode);
+      parent.getChildNodeInfo().isHasChildNode = true;
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum += 1;
+      this.judgeImageCollapse(parentNodeId);
+      if (initBuild) {
+        this.updateNodeIdList.push(parent.parentNodeId);
+      } else {
+        let updateNodeIdList: number[] = [];
+        updateNodeIdList.push(parent.parentNodeId);
+        delayUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, updateNodeIdList);
+      }
+      this.nodeIdNodeParamMap.set(currentNodeId, data);
+      this.nodeIdNodeItemMap.set(currentNodeId, currentNode);
+      return true;
+    } else {
+      hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: Parent node not found.');
+      return false;
+    }
+  }
+
+  public judgeImageCollapse(parentNodeId: int | undefined): void {
+    if (parentNodeId === undefined) {
+      return;
+    }
+
+    let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+
+    let parentIndex: number = 0;
+    if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
+      parentIndex = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
+    }
+
+    if (parent.children.length > 0) {
+      if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
+        this.listNode[parentIndex.toInt()]?.addImageExpand(true);
+      }
+    } else {
+      this.listNode[parentIndex.toInt()]?.addImageExpand(false);
+    }
+  }
+
+  private freeNodeMemory(rootNode: NodeItem, removeNodeIdList: number[]): void {
+    let deleteNode: NodeItem[] = [];
+    let callback = (node: NodeItem): boolean => {
+      deleteNode.push(node);
+      return false;
+    };
+
+    this.traverseNodeDF(callback, rootNode);
+    deleteNode.forEach((value: NodeItem) => {
+      removeNodeIdList.push(value.getCurrentNodeId());
+      this.nodeIdNodeItemMap.delete(value.getCurrentNodeId());
+      this.nodeIdNodeParamMap.delete(value.getCurrentNodeId());
+      value = new NodeItem(emptyNodeInfo);
+    })
+  }
+
+  public getNodeInfoByNodeItem(nodeItem: NodeItem): NodeInfo {
+    if (nodeItem?.currentNodeId === undefined) {
+      hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: currentId is undefined');
+      return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    }
+    if (!this.nodeIdAndNodeIndexMap.has(nodeItem.currentNodeId)) {
+      hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
+      return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    }
+    let index: number = this.nodeIdAndNodeIndexMap.get(nodeItem.currentNodeId) as number;
+    return this.listNode[index.toInt()];
+  }
+
+  /**
+   * get node param by node id
+   * @param nodeId node id
+   * @returns node param
+   */
+  public getNewNodeParam(nodeId: number): NodeParam {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    let newNodeParam: NodeParam = emptyNodeInfo;
+    if (parent) {
+      let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent);
+      if (parent.children.length === 0) {
+        if (nodeInfo.getNodeItem().imageNode !== undefined) {
+          let newNodeParamInterFace = {
+            isFolder: true,
+            icon: nodeInfo.getNodeItem().imageNode?.normalSource,
+            symbolIconStyle: nodeInfo.getNodeItem().imageNode?.symbolNormalSource,
+            selectedIcon: nodeInfo.getNodeItem().imageNode?.selectedSource,
+            symbolSelectedIconStyle: nodeInfo.getNodeItem().imageNode?.symbolSelectedSource,
+            editIcon: nodeInfo.getNodeItem().imageNode?.editSource,
+            symbolEditIconStyle: nodeInfo.getNodeItem().imageNode?.symbolEditSource,
+            container: nodeInfo.getMenu(),
+            secondaryTitle: '',
+            primaryTitle: '',
+            parentNodeId: -1,
+            currentNodeId: -1,
+          } as NodeParam
+          newNodeParam = newNodeParamInterFace;
+        } else {
+          let container: () => void = nodeInfo.getNodeInfoData().container ? nodeInfo.getMenu() : () => {
+          }
+          let newNodeParamInterFace = {
+            isFolder: true,
+            icon: undefined,
+            symbolIconStyle: undefined,
+            selectedIcon: undefined,
+            symbolSelectedIconStyle: undefined,
+            editIcon: undefined,
+            symbolEditIconStyle: undefined,
+            container: container,
+            secondaryTitle: '',
+            primaryTitle: '',
+            parentNodeId: -1,
+            currentNodeId: -1,
+          } as NodeParam
+          newNodeParam = newNodeParamInterFace
+        }
+      } else if (parent.children.length > 0) {
+        let childNodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[0]);
+        if (nodeInfo.getNodeItem().imageNode !== null && nodeInfo.getNodeItem().imageNode) {
+          let icon: ResourceStr | undefined = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.normalSource : undefined
+          let symbolIconStyle: SymbolGlyphModifier | undefined = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.symbolNormalSource : undefined
+          let selectedIcon: ResourceStr | undefined = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.selectedSource : undefined
+          let symbolSelectedIconStyle: SymbolGlyphModifier | undefined =
+            (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+              childNodeInfo.getNodeItem().imageNode?.symbolSelectedSource : undefined
+          let editIcon: ResourceStr | undefined = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.editSource : undefined
+          let symbolEditIconStyle: SymbolGlyphModifier | undefined =
+            (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+              childNodeInfo.getNodeItem().imageNode?.symbolEditSource : undefined
+          let container: () => void = childNodeInfo.getMenu();
+          let newNodeParamInterFace = {
+            isFolder: true,
+            icon: icon,
+            symbolIconStyle: symbolIconStyle,
+            selectedIcon: selectedIcon,
+            symbolSelectedIconStyle: symbolSelectedIconStyle,
+            editIcon: editIcon,
+            symbolEditIconStyle: symbolEditIconStyle,
+            container: container,
+            secondaryTitle: '',
+            primaryTitle: '',
+            parentNodeId: -1,
+            currentNodeId: -1,
+          } as NodeParam
+          newNodeParam = newNodeParamInterFace
+        } else {
+          let container: () => void = childNodeInfo.getMenu()
+          let newNodeParamInterFace = {
+            isFolder: true,
+            icon: undefined,
+            symbolIconStyle: undefined,
+            selectedIcon: undefined,
+            symbolSelectedIconStyle: undefined,
+            editIcon: undefined,
+            symbolEditIconStyle: undefined,
+            container: container,
+            secondaryTitle: '',
+            primaryTitle: '',
+            parentNodeId: -1,
+            currentNodeId: -1,
+          } as NodeParam
+          newNodeParam = newNodeParamInterFace
+        }
+      }
+    }
+    return newNodeParam;
+  }
+
+  /**
+   * get child node ids by node id
+   *
+   * @param nodeId node id
+   * @returns child node ids
+   */
+  public getClickChildId(nodeId: number): number[] {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    if (parent) {
+      if (parent.children.length === 0) {
+        return [];
+      } else if (parent.children.length > 0) {
+        let childrenNodeInfo: number[] = [];
+        for (let i: int = 0; i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i] = 0;
+        }
+        for (let i: int = 0;
+          i < (parent.children?.length ?? 0) &&
+            i < (childrenNodeInfo?.length ?? 0); i++) {
+          childrenNodeInfo[i] = parent.children[i].currentNodeId;
+        }
+        return childrenNodeInfo;
+      }
+    }
+    return [];
+  }
+
+  /**
+   * get child nodeInfo views by node id
+   *
+   * @param nodeId node id
+   * @returns child nodeInfo views
+   */
+  public getClickNodeChildrenInfo(nodeId: number): NodeInfoView[] {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    if (parent) {
+      if (parent.children.length === 0) {
+        return [];
+      } else if (parent.children.length > 0) {
+        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length);
+        for (let i: int = 0; i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i] = {};
+        }
+        for (let i: int = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
+          let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[i]);
+          if (nodeInfo.getNodeItem().imageNode) {
+            childrenNodeInfo[i].itemIcon = nodeInfo.getNodeItem().imageNode?.source;
+          }
+          if (nodeInfo.getNodeItem().mainTitleNode) {
+            childrenNodeInfo[i].itemTitle = nodeInfo.getNodeItem().mainTitleNode?.title;
+          }
+          childrenNodeInfo[i].isFolder = nodeInfo.getIsFolder();
+        }
+        return childrenNodeInfo;
+      }
+    }
+    return [];
+  }
+
+  /**
+   * check main title is valid
+   *
+   * @param title main title
+   * @returns check result
+   */
+  public checkMainTitleIsValid(title: string): boolean {
+    if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
+      return false;
+    }
+    if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
+      (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_EN_LENGTH)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * DFS: Depth first traversal in drag event.
+   *
+   * @param callback dfs callback fuction
+   */
+  public dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
+    root: NodeItem, listNode: NodeInfo[]): void {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem | undefined = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      found = callback(currentNode, listNode) === true;
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        if (stack.length > 0) {
+          currentNode = stack.shift() as NodeItem;
+        } else {
+          currentNode = undefined
+        }
+      }
+    }
+  }
+
+  private updateChildIndexOfParent(insertIndex: number, parent: NodeItem): void {
+    for (let i: number = insertIndex; i < parent.children.length; i++) {
+      parent.children[i.toInt()].indexOfParent += 1;
+    }
+  }
+
+  /**
+   * Add the first dragging node in dragging nodes
+   * 1.the first dragging node needs to distinguish the position to insert
+   */
+  private addDragNode(parentNodeId: int,
+    currentNodeId: number,
+    insertCurrentNodeId: number,
+    isAfter: boolean,
+    data: NodeParam): boolean {
+
+    if (this._root === null) {
+      this._root = new NodeItem(emptyNodeInfo);
+      this._root.nodeLevel = this.INITIAL_INVALID_VALUE;
+    }
+
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let currentNode: NodeItem = new NodeItem(data);
+      if (parent.nodeLevel > this.maxNodeLevel) {
+        hilog.error(LOG_CODE, TAG, 'addDragNode: The level of the tree view cannot exceed 50.');
+        return false;
+      }
+      currentNode.nodeLevel = parent.nodeLevel + 1;
+      currentNode.parentNodeId = parentNodeId;
+      currentNode.currentNodeId = currentNodeId as int;
+      data.parentNodeId = parentNodeId;
+      data.currentNodeId = currentNodeId as int;
+      let insertIndex: number = this.INITIAL_INVALID_VALUE;
+      if (parent.children.length) {
+        for (let i: int = 0; i < parent.children.length; i++) {
+          if (parent.children[i].getCurrentNodeId() === insertCurrentNodeId) {
+            insertIndex = i;
+            break;
+          }
+        }
+        if (isAfter) {
+          currentNode.indexOfParent = insertIndex + 1;
+          this.updateChildIndexOfParent(currentNode.indexOfParent, parent);
+          parent.children.splice(insertIndex as int + 1, 0, currentNode);
+        } else {
+          currentNode.indexOfParent = insertIndex < 0 ? parent.children.length + insertIndex : insertIndex;
+          this.updateChildIndexOfParent(currentNode.indexOfParent, parent);
+          parent.children.splice(insertIndex as int, 0, currentNode);
+        }
+      } else {
+        currentNode.indexOfParent = parent.children.length;
+        parent.children.push(currentNode);
+      }
+      parent.getChildNodeInfo().isHasChildNode = true;
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum += 1;
+      this.updateParentChildNum(parent, true, 1);
+      this.nodeIdNodeItemMap.set(currentNodeId, currentNode);
+      this.nodeIdNodeParamMap.set(currentNodeId, data);
+      return true;
+    } else {
+      hilog.error(LOG_CODE, TAG, 'addDragNode: Parent node not found.');
+      return false;
+    }
+  }
+}
+
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
+
+@Component
+export struct TreeViewInner {
+  @ObjectLink item: NodeInfo;
+  url: Resource = $r('sys.media.ohos_ic_normal_white_grid_folder');
+  listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
+  @State columnWidth: number = 0;
+  @State isFocused: boolean = false;
+  @State index: number = -1;
+  @State lastIndex: number = -1;
+  @State count: number = 0;
+  @State followingSystemFontScale: boolean = false;
+  @State maxAppFontScale: number = 1;
+  @Consume treeViewTheme: TreeViewTheme;
+  @Consume clickButtonFlag: boolean;
+  @Consume accessibilityNodeType: AccessibilityNodeType;
+  @Consume isAccessibilityEnabled: boolean;
+
+  @Builder
+  defaultMenu() {
+
+  }
+
+  @BuilderParam private listTreeViewMenu: () => void = this.defaultMenu;
+  callBackClick: () => void = () => {
+
+  }
+  private readonly MAX_CN_LENGTH: number = 254;
+  private readonly MAX_EN_LENGTH: number = 255;
+  private readonly INITIAL_INVALID_VALUE: number = -1;
+  private readonly MAX_TOUCH_DOWN_COUNT: number = 0;
+  private isMultiPress: boolean = false;
+  private touchDownCount: number = this.INITIAL_INVALID_VALUE;
+  private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
+  private readonly itemPadding: ItemPadding = {
+    left: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_start')),
+    right: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_end')),
+    top: LengthMetrics.resource($r('sys.float.ohos_id_text_margin_vertical')),
+    bottom: LengthMetrics.resource($r('sys.float.padding_level0')),
+  } as ItemPadding;
+  private readonly textInputPadding: ItemPadding = {
+    left: LengthMetrics.resource($r('sys.float.padding_level0')),
+    right: LengthMetrics.resource($r('sys.float.padding_level0')),
+    top: LengthMetrics.resource($r('sys.float.padding_level0')),
+    bottom: LengthMetrics.resource($r('sys.float.padding_level0')),
+  } as ItemPadding;
+  private inputFontSize: number =
+    this.getUIContext().px2vp(resourceManager.getSysResourceManager().getDoubleByName('ohos_id_text_size_body1'));
+
+  aboutToAppear(): void {
+    if (this.item.getNodeItem().imageNode) {
+      this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+      this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
+    this.maxAppFontScale = uiContent.getMaxFontScale();
+
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = 1;
+    if (uiContent.getHostContext()) {
+      systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    }
+    if (!this.followingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+
+    let systemFontScale: number = 1;
+    if (uiContent.getHostContext()) {
+      systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    }
+
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
+  }
+
+  getInputTextMaxFontSize() {
+    let inputTextMaxFontSize = this.decideFontScale() * this.inputFontSize + 'vp';
+    return inputTextMaxFontSize;
+  }
+
+  getLeftIconColor(): ResourceColor {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
+      return $r('sys.color.icon_on_primary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.leftIconActiveColor;
+    } else {
+      return this.treeViewTheme.leftIconColor;
+    }
+  }
+
+  getPrimaryTextColor(): ResourceColor {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
+      return $r('sys.color.ohos_id_color_primary_contrary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.primaryTitleActiveFontColor;
+    } else {
+      return this.treeViewTheme.primaryTitleFontColor;
+    }
+  }
+
+  private checkInvalidPattern(title: string): boolean {
+    return new RegExp('/[\\\/:*?"<>|]/').test(title);
+  }
+
+  private checkIsAllCN(title: string): boolean {
+    return new RegExp('/^[\u4e00-\u9fa5]+$/').test(title);
+  }
+
+  private getAccessibilityReadText(currentNodeId: number): string {
+    let nodeItem = this.listNodeDataSource.nodeIdNodeItemMap.get(currentNodeId);
+    if (nodeItem === undefined || currentNodeId === undefined) {
+      return '';
+    }
+    let nodeInfo = this.listNodeDataSource.getNodeInfoByNodeItem(nodeItem);
+    let primaryTitle = nodeInfo?.getNodeInfoData()?.primaryTitle === undefined
+      ? '' : nodeInfo?.getNodeInfoData()?.primaryTitle;
+    let secondaryTitle = nodeInfo?.getNodeInfoData()?.secondaryTitle === undefined
+      ? '' : nodeInfo?.getNodeInfoData()?.secondaryTitle;
+    let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
+    let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
+    let title: string | undefined = `${primaryTitleText}, ${secondaryTitleText}`;
+    let parentId: number = this.listNodeDataSource.findParentNodeId(currentNodeId);
+    let parentNode: Array<number> = new Array<number>();
+    let insertRootNodePosition: number = 0;
+    let childrenInfo: Array<NodeInfoView> = this.listNodeDataSource.getClickNodeChildrenInfo(parentId);
+    let childrenItemId: (number | undefined)[] =
+      childrenInfo.map((item: NodeInfoView): number | undefined => item.itemId);
+    let insertNodePosition: number = childrenItemId.indexOf(currentNodeId) + 1;
+    let accessibleTitle: string | undefined = this.listNodeDataSource.getAccessibleTitle(currentNodeId);
+    if (accessibleTitle === undefined) {
+      return ' ';
+    }
+
+    if (this.accessibilityNodeType === AccessibilityNodeType.PLACE) {
+      if (this.listNodeDataSource.findParentNodeId(currentNodeId) === -1) {
+        for (let i: int = 0; i < this.listNodeDataSource.listNode.length; i++) {
+          if (this.listNodeDataSource.listNode[i].getNodeParentNodeId() === -1) {
+            parentNode.push(this.listNodeDataSource.listNode[i].getNodeCurrentNodeId());
+          }
+        }
+        insertRootNodePosition = parentNode.indexOf(currentNodeId) + 1;
+        return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_parent',
+          insertRootNodePosition);
+      } else {
+        return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', accessibleTitle,
+          insertNodePosition);
+      }
+    } else if (this.accessibilityNodeType === AccessibilityNodeType.LIFT) {
+      return title;
+    } else {
+      return title;
+    }
+    return ' ';
+  }
+
+  private getAccessibilityDescription(): string {
+    if (this.accessibilityNodeType === AccessibilityNodeType.TEXT) {
+      return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
+    } else {
+      return ' ';
+    }
+  }
+
+  private getAccessibilityReadButtonText(isFolded: boolean): string {
+    if (this.clickButtonFlag === false) {
+      return this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT
+        ? this.listNodeDataSource.getStringByName('treeview_accessibility_folded_node')
+        : this.listNodeDataSource.getStringByName('treeview_accessibility_expanded_node');
+    } else {
+      return isFolded
+        ? this.listNodeDataSource.getStringByName('treeview_accessibility_expand_node')
+        : this.listNodeDataSource.getStringByName('treeview_accessibility_fold_node');
+    }
+  }
+
+  private getAccessibilityReadButtonDescription(): string {
+    if (this.clickButtonFlag === false) {
+      return ' ';
+    } else {
+      return this.listNodeDataSource.getStringByName('treeview_accessibility_implement_node');
+    }
+  }
+
+  private onTouchNode(event: TouchEvent) {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId() as int;
+    if (event.type === TouchType.Down) {
+      this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
+    } else if (event.type === TouchType.Up) {
+      if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+        this.item.setNodeColor(COLOR_SELECT);
+      } else {
+        this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+      }
+      if (this.item.getNodeItem().imageNode !== null) {
+        this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+        this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+        this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+        this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+      }
+
+      this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+      let callParam: CallbackParam = { currentNodeId: currentId as int };
+      this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+      this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+        ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+          `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index as int;
+    this.count--;
+  }
+
+  private onClickNode() {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId();
+
+    if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+      this.item.setNodeColor(COLOR_SELECT);
+    } else {
+      this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+    }
+    if (this.item.getNodeItem().imageNode !== null) {
+      this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+      this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+      this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+      this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+    }
+
+    this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+    let callParam: CallbackParam = { currentNodeId: currentId as int };
+    this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+    this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+      ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+        `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index;
+    this.count--;
+  }
+
+  private accessibilityRefocus() {
+    this.clickButtonFlag = false;
+    const context = this.getUIContext().getHostContext();
+    let bundleName: string = 'defaultBundle';
+    if (context) {
+      bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    }
+
+    let eventInfo = new accessibility.EventInfo(
+      'requestFocusForAccessibility',
+      bundleName as string,
+      'common'
+    )
+    accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+      setTimeout(() => {
+        this.clickButtonFlag = true;
+      }, ENTER_EXIT_DURATION)
+    })
+  }
+
+  @Builder
+  popupForShowTitle(text: ResourceStr | undefined, backgroundColor: undefined | ResourceColor,
+    fontColor: undefined | ResourceColor) {
+    Row() {
+      Text(text)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontWeight('regular')
+        .fontColor(fontColor)
+        .minFontScale(MIN_FONT_SCALE)
+        .maxFontScale(this.decideFontScale())
+    }
+    .backgroundColor(backgroundColor)
+    .border({ radius: $r('sys.float.ohos_id_elements_margin_horizontal_l') })
+    .padding({
+      top: $r('sys.float.ohos_id_card_margin_middle'),
+      right: $r('sys.float.ohos_id_elements_margin_horizontal_l'),
+      bottom: $r('sys.float.ohos_id_card_margin_middle'),
+      left: $r('sys.float.ohos_id_elements_margin_horizontal_l'),
+    } as Padding)
+  }
+
+  onChangeCallback: EditableTextOnChangeCallback | undefined = (value: string) => {
+    let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+    let res: string = '';
+    let isInvalidError: boolean = false;
+    let isLengthError: boolean = false;
+    if (this.checkInvalidPattern(value)) {
+      for (let i: int = 0; i < value.length; i++) {
+        if (!this.checkInvalidPattern(value[i])) {
+          res += value[i];
+        }
+      }
+      isInvalidError = true;
+      this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
+        InputError.INVALID_ERROR, true, thisIndex);
+    } else {
+      res = value;
+      isInvalidError = false;
+    }
+    if ((this.checkIsAllCN(res) && res.length > this.MAX_CN_LENGTH) ||
+      (!this.checkIsAllCN(res) && res.length > this.MAX_EN_LENGTH)) {
+      res = this.checkIsAllCN(res) ?
+        res.substr(0, this.MAX_CN_LENGTH) : res.substr(0, this.MAX_EN_LENGTH);
+      isLengthError = true;
+      this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
+        InputError.LENGTH_ERROR, true, thisIndex);
+    } else {
+      isLengthError = false;
+    }
+    if (!isLengthError && !isInvalidError) {
+      this.listNodeDataSource.setMainTitleNameOnEdit(thisIndex, res);
+    }
+  }
+
+  @Builder
+  builder() {
+    if (this.listTreeViewMenu) {
+      this.listTreeViewMenu()
+    }
+  }
+
+  @Builder
+  popupBuilder() {
+    this.popupForShowTitle(this.item.getPopUpInfo().popUpText,
+      this.item.getPopUpInfo().popUpColor,
+      this.item.getPopUpInfo().popUpTextColor)
+  }
+
+  propColor(item: NodeInfo): undefined | Color | String | Resource | Long {
+    if (item.getPopUpInfo().popUpColor === undefined) {
+      return undefined;
+    } else {
+      return item.getPopUpInfo().popUpColor as Resource
+    }
+  }
+
+  build() {
+    if (this.item.getNodeIsShow()) {
+      Stack() {
+        Column() {
+          Stack({ alignContent: Alignment.Bottom }) {
+            Divider()
+              .height(this.listNodeDataSource.getFlagLine().flagLineHeight)
+              .color(this.listNodeDataSource.getFlagLine().flagLineColor)
+              .visibility(this.listNodeDataSource.getVisibility(this.item))
+              .lineCap(LineCapStyle.Round)
+              .margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) } as LocalizedMargin)
+              .focusable(true)
+
+            Row() {
+              Row() {
+                if (this.item.getNodeItem().imageNode) {
+                  Row() {
+                    if (this.item.symbolSource) {
+                      SymbolGlyph()
+                        .fontColor([this.getLeftIconColor()])
+                        .attributeModifier(this.item.symbolSource)
+                        .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                        this.decideSymbolFontScale(true)}vp`)
+                        .effectStrategy(SymbolEffectStrategy.NONE)
+                        .symbolEffect(new SymbolEffect(), false)
+                        .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                          this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                        .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                    } else {
+                      if (Util.isSymbolResource(this.item.imageSource)) {
+                        SymbolGlyph(this.item.imageSource as Resource)
+                          .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                          this.decideSymbolFontScale(true)}vp`)
+                          .fontColor([this.getLeftIconColor()])
+                          .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                            this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                          .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                      } else {
+                        Image((this.item?.imageSource ?? '') as ResourceStr)
+                          .objectFit(ImageFit.Contain)
+                          .height(this.item.getNodeItem().imageNode?.itemHeight)
+                          .width(this.item.getNodeItem().imageNode?.itemWidth)
+                          .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                            this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                          .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                          .fillColor(this.getLeftIconColor())
+                          .matchTextDirection((this.item.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+                      }
+                    }
+                  }
+                  .focusable(true)
+                  .backgroundColor(COLOR_IMAGE_ROW)
+                  .margin({
+                    end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
+                      .imageNode?.itemRightMargin as Resource)
+                  } as LocalizedMargin)
+                  .height(this.item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
+                  .width(this.item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
+                }
+
+                Row() {
+                  if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
+                    Text(this.item.getNodeItem().mainTitleNode?.title)
+                      .minFontScale(MIN_FONT_SCALE)
+                      .maxFontScale(this.decideFontScale())
+                      .maxLines(1)// max line
+                      .fontSize(this.item.getNodeItem().mainTitleNode?.size)
+                      .fontColor(this.getPrimaryTextColor())
+                      .margin({
+                        end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
+                          .mainTitleNode?.itemRightMargin as Resource)
+                      } as LocalizedMargin)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      .fontWeight(this.item.getNodeItem().mainTitleNode?.weight)
+                      .focusable(true)
+                  }
+
+                  if (this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
+                  this.item.getIsShowInputText()) {
+                    Row() {
+                      TextInput({ text: this.item.getNodeItem().mainTitleNode?.title })
+                        .height(this.item.getNodeItem().inputText?.itemHeight)
+                        .fontSize(this.getInputTextMaxFontSize())
+                        .fontColor(this.item.getNodeItem().inputText?.color)
+                        .borderRadius(this.item.getNodeItem().inputText?.borderRadius)
+                        .backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
+                        .enterKeyType(EnterKeyType.Done)
+                        .focusable(true)
+                        .padding({
+                          start: this.textInputPadding.left,
+                          end: this.textInputPadding.right,
+                          top: this.textInputPadding.top,
+                          bottom: this.textInputPadding.bottom,
+                        } as LocalizedPadding)
+                        .onChange(this.onChangeCallback)
+                        .onSubmit((enterKey: EnterKeyType) => {
+                          let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+                          this.listNodeDataSource.setPopUpInfo(
+                            PopUpType.WARNINGS,
+                            InputError.NONE,
+                            false,
+                            thisIndex
+                          );
+                          this.listNodeDataSource.setItemVisibilityOnEdit(thisIndex, MenuOperation.COMMIT_NODE);
+                        } as OnSubmitCallback)
+                    }.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
+                    .borderRadius(this.item.getNodeItem().inputText?.borderRadius)
+                    .margin({
+                      end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
+                        .inputText?.itemRightMargin as Resource)
+                    } as LocalizedMargin)
+                  }
+                  Blank()
+                }
+                .layoutWeight(1)
+                .focusable(true)
+
+                if (this.listNodeDataSource.hasSubtitle(this.item.getNodeCurrentNodeId())) {
+                  Row() {
+                    Text(this.listNodeDataSource.getSubtitle(this.item.getNodeCurrentNodeId()))
+                      .minFontScale(MIN_FONT_SCALE)
+                      .maxFontScale(this.decideFontScale())
+                      .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
+                      .fontColor(this.item.getIsHighLight() || this.item.getIsModify() ?
+                        $r('sys.color.ohos_id_color_primary_contrary') : this.treeViewTheme.secondaryTitleFontColor)
+                      .fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight)
+                  }
+                  .focusable(true)
+                  .margin({
+                    start: LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.left),
+                    end: this.item.getNodeItem().imageCollapse ?
+                      LengthMetrics.resource($r('sys.float.padding_level0')) :
+                      LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.right)
+                  } as LocalizedMargin)
+                }
+              }
+              .height(LIST_ITEM_HEIGHT)
+              .layoutWeight(1)
+              .focusable(true)
+              .accessibilityGroup(true)
+              .id(`treeView_node${this.item.getNodeCurrentNodeId()}`)
+              .accessibilityText(this.getAccessibilityReadText(this.item.getNodeCurrentNodeId()))
+              .accessibilityDescription(this.getAccessibilityDescription())
+              .onClick(this.isAccessibilityEnabled ? () => {
+                this.onClickNode();
+                this.callBackClick();
+              } : undefined)
+
+              if (this.item.getNodeItem().imageCollapse) {
+                Row() {
+                  SymbolGlyph(this.item.getNodeItem().imageCollapse?.collapseSource as Resource)
+                    .fontSize(`${this.item.getNodeItem().imageCollapse?.itemHeight as number *
+                    this.decideSymbolFontScale(true)}vp`)
+                    .fontColor([this.item.getNodeItem().imageCollapse?.isCollapse ?
+                      this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT])
+                    .opacity(!this.item.getIsHighLight() ?
+                      this.item.getNodeItem().imageCollapse?.opacity :
+                      this.item.getNodeItem().imageCollapse?.noOpacity)
+                    .focusable(true)
+                }
+                .focusable(true)
+                .justifyContent(FlexAlign.Center)
+                .height(this.item.getNodeItem().imageCollapse?.itemHeight as number *
+                this.decideSymbolFontScale(true))
+                .width(this.item.getNodeItem().imageCollapse?.itemWidth as number * this.decideSymbolFontScale(true))
+                .onClick(() => {
+                  this.listNodeDataSource.expandAndCollapseNode(
+                    this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
+                  this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
+                  setTimeout(() => {
+                    this.accessibilityRefocus();
+                  }, ACCESSIBILITY_REFOCUS_DELAY_TIME)
+                } as () => void)
+                .id(`treeView_button${this.item.getNodeCurrentNodeId()}`)
+
+                .accessibilityText(this.getAccessibilityReadButtonText(this.item.getNodeItem()
+                  .imageCollapse?.collapseSource === ARROW_RIGHT))
+                .accessibilityDescription(this.getAccessibilityReadButtonDescription())
+              }
+            }
+            .focusable(true)
+            .width('100%')
+            .height(this.item.getNodeHeight())
+            .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
+
+            // .bindContextMenu(this.builder, ResponseType.RightClick)
+          }.focusable(true)
+        }
+        .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
+        .onHover((isHover: boolean, event?: HoverEvent) => {
+          if (isHover) {
+            this.item.setNodeColor(this.treeViewTheme.itemHoverBgColor)
+          } else {
+            this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
+          }
+        })
+        .onTouch(this.isAccessibilityEnabled ? undefined : (event: TouchEvent) => {
+          this.onTouchNode(event);
+        })
+        /* backgroundColor when editing and in other states. */
+        .backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
+        this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText?.editColor : this.item.getNodeColor())
+        .border({
+          width: this.item.getNodeBorder().borderWidth,
+          color: this.item.getNodeBorder().borderColor,
+          radius: this.item.getNodeBorder().borderRadius,
+        })
+        .height(LIST_ITEM_HEIGHT)
+        .focusable(true)
+        .onMouse((event: MouseEvent) => {
+          let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
+          if (event.button === MouseButton.Right) {
+            this.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT,
+              this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
+            this.listTreeViewMenu = this.item.getMenu();
+            this.listNodeDataSource.setClickIndex(thisIndex);
+            clearTimeout(Double.toInt(this.item.getNodeItem().mainTitleNode?.popUpTimeout ?? 0.0));
+          }
+          event.stopPropagation();
+        })
+        .padding({ top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) } as LocalizedPadding)
+        // .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
+        //   builder: this.popupBuilder,
+        //   placement: Placement.BottomLeft,
+        //   popupColor: this.propColor(this.item),
+        //   autoCancel: true,
+        //   enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
+        // } as CustomPopupOptions)
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          let columnWidthNum: number = Number.parseInt(newValue.width.toString());
+          this.columnWidth = columnWidthNum;
+        })
+      }
+      .stateStyles({
+        focused: (instance: CommonMethod): void => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: FLAG_NUMBER,
+            color: this.treeViewTheme.borderFocusedColor,
+            style: BorderStyle.Solid,
+          });
+        },
+        normal: (instance: CommonMethod): void => {
+          instance.border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0,
+          });
+        }
+      })
+    }
+  }
+}
+
+export class NodeItem {
+  public childNodeInfo: ChildNodeInfo;
+  public nodeLevel: number;
+  public children: NodeItem[];
+  public indexOfParent: number;
+  public parentNodeId: int;
+  public currentNodeId: int;
+  public isFolder?: boolean;
+
+  constructor(nodeParam: NodeParam) {
+    this.currentNodeId = nodeParam.currentNodeId ?? -1;
+    this.parentNodeId = nodeParam.parentNodeId ?? -1;
+    this.isFolder = nodeParam.isFolder;
+    this.nodeLevel = -1;
+    this.indexOfParent = -1;
+    this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
+    this.children = [];
+  }
+
+  getChildNodeInfo(): ChildNodeInfo {
+    return this.childNodeInfo;
+  }
+
+  getCurrentNodeId(): number {
+    return this.currentNodeId;
+  }
+
+  getIsFolder(): boolean | undefined {
+    return this.isFolder;
+  }
+}
+
+class NodeBaseInfo {
+  public rightMargin: Resource | number = -1;
+  private width: number = -1;
+  private height: number = -1;
+
+  constructor() {
+  }
+
+  set itemWidth(width: number) {
+    this.width = width;
+  }
+
+  get itemWidth(): number {
+    return this.width;
+  }
+
+  set itemHeight(height: number) {
+    this.height = height;
+  }
+
+  get itemHeight(): number {
+    return this.height;
+  }
+
+  set itemRightMargin(rightMargin: Resource | number) {
+    this.rightMargin = rightMargin;
+  }
+
+  get itemRightMargin(): Resource | number {
+    return this.rightMargin;
+  }
+}
+
+export class CollapseImageNode extends NodeBaseInfo {
+  private imageSource: ResourceStr | undefined;
+  private symbolIconSource: SymbolGlyphModifier | undefined;
+  private imageOpacity: Resource;
+  private imageCollapseSource: ResourceStr | undefined;
+  private symbolIconCollapseSource: SymbolGlyphModifier | undefined;
+  private isImageCollapse: boolean;
+  private collapseImageType: CollapseImageType;
+
+  constructor(
+    imageSource: ResourceStr | undefined,
+    symbolSource: SymbolGlyphModifier | undefined,
+    imageOpacity: Resource,
+    itemWidth: number,
+    itemHeight: number,
+    itemRightMargin: Resource | number,
+    isImageCollapse: boolean,
+    collapseImageType: CollapseImageType
+  ) {
+    super();
+    this.rightMargin = $r('sys.float.ohos_id_elements_margin_horizontal_m');
+    this.imageSource = imageSource;
+    this.symbolIconSource = symbolSource;
+    this.rightMargin = itemRightMargin;
+    this.imageOpacity = imageOpacity;
+    this.itemWidth = itemWidth;
+    this.itemHeight = itemHeight;
+    this.imageCollapseSource = imageSource;
+    this.symbolIconCollapseSource = symbolSource;
+    this.isImageCollapse = isImageCollapse;
+    this.collapseImageType = collapseImageType;
+  }
+
+  get source(): ResourceStr | undefined {
+    return this.imageSource;
+  }
+
+  get symbolSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSource;
+  }
+
+  get opacity(): Resource {
+    return this.imageOpacity;
+  }
+
+  get noOpacity(): number {
+    return 1;
+  }
+
+  get collapseSource(): ResourceStr | undefined {
+    return this.imageCollapseSource;
+  }
+
+  get symbolCollapseSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconCollapseSource;
+  }
+
+  get isCollapse(): boolean {
+    return this.isImageCollapse;
+  }
+
+  get type(): CollapseImageType {
+    return this.collapseImageType;
+  }
+}
+
+class CollapseImageNodeFactory {
+  private static instance: CollapseImageNodeFactory | undefined = undefined;
+
+  private constructor() {
+  }
+
+  /**
+   * CollapseImageNodeFactory singleton function
+   *
+   * @returns CollapseImageNodeFactory
+   */
+  public static getInstance(): CollapseImageNodeFactory {
+    if (!CollapseImageNodeFactory.instance) {
+      CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
+    }
+    return CollapseImageNodeFactory.instance as CollapseImageNodeFactory;
+  }
+
+  /**
+   * create collapse image node by type
+   *
+   * @param type collapse image type
+   * @returns collapse image node
+   */
+  public createCollapseImageNodeByType(type: CollapseImageType): CollapseImageNode {
+    let imageSource: Resource;
+    switch (type) {
+      case CollapseImageType.ARROW_RIGHT_WHITE:
+        imageSource = ARROW_RIGHT_WITHE;
+        break;
+      case CollapseImageType.ARROW_RIGHT:
+        imageSource = ARROW_RIGHT;
+        break;
+      case CollapseImageType.ARROW_DOWN_WHITE:
+        imageSource = ARROW_DOWN_WITHE;
+        break;
+      default:
+        imageSource = ARROW_DOWN;
+    }
+    return new CollapseImageNode(
+      imageSource,
+      undefined,
+      $r('sys.float.ohos_id_alpha_content_tertiary'),
+      IMAGE_NODE_HEIGHT,
+      IMAGE_NODE_WIDTH,
+      $r('sys.float.ohos_id_text_paragraph_margin_xs'),
+      (type === CollapseImageType.ARROW_RIGHT_WHITE || type === CollapseImageType.ARROW_DOWN_WHITE) ? false : true,
+      type
+    );
+  }
+}
+
+class CollapseImageNodeFlyweightFactory {
+  private static nodeMap: Map<CollapseImageType, CollapseImageNode> = new Map<CollapseImageType, CollapseImageNode>();
+
+  /**
+   * get collapse image node by type
+   *
+   * @param type collapse image node type
+   * @returns collapse image node
+   */
+  static getCollapseImageNodeByType(type: CollapseImageType): CollapseImageNode {
+    let node: CollapseImageNode | undefined = CollapseImageNodeFlyweightFactory.nodeMap.get(type);
+    if (node === undefined) {
+      node = CollapseImageNodeFactory.getInstance().createCollapseImageNodeByType(type);
+      CollapseImageNodeFlyweightFactory.nodeMap.set(type, node);
+    }
+    return node;
+  }
+
+  /**
+   * get collapse image node by interactionStatus and nodeStatus
+   *
+   * @param interactionStatus interaction status
+   * @param nodeStatus node status
+   * @param defaultType default collapse image type
+   * @returns collapse image node
+   */
+  static getCollapseImageNode(interactionStatus: InteractionStatus, nodeStatus: NodeStatus | undefined,
+    defaultType?: CollapseImageType): CollapseImageNode | undefined {
+    if (defaultType === undefined) {
+      return undefined;
+    }
+    if (interactionStatus == InteractionStatus.EDIT ||
+      interactionStatus === InteractionStatus.DRAG_INSERT) {
+      if (nodeStatus === NodeStatus.COLLAPSE) {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT_WHITE);
+      } else {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN_WHITE);
+      }
+    } else if (interactionStatus === InteractionStatus.FINISH_EDIT ||
+      interactionStatus === InteractionStatus.FINISH_DRAG_INSERT) {
+      if (nodeStatus === NodeStatus.COLLAPSE) {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT);
+      } else {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+      }
+    }
+    return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+  }
+
+  /**
+   * change collapse image node source
+   *
+   * @param nodeStatus node status
+   * @param isImageCollapse whether collapse image or white collapse image
+   * @returns collapse image node
+   */
+  static changeImageCollapseSource(nodeStatus: NodeStatus, isImageCollapse?: boolean): CollapseImageNode | undefined {
+    if (isImageCollapse === undefined) {
+      return undefined;
+    }
+    if (!isImageCollapse) {
+      if (nodeStatus === NodeStatus.COLLAPSE) {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT_WHITE)
+      } else {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN_WHITE)
+      }
+    } else {
+      if (nodeStatus === NodeStatus.COLLAPSE) {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT)
+      } else {
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN)
+      }
+    }
+    return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+  }
+}
+
+export class ImageNode extends NodeBaseInfo {
+  private imageSource: ResourceStr | undefined;
+  private symbolIconSource: SymbolGlyphModifier | undefined;
+  private imageNormalSource: ResourceStr | undefined;
+  private symbolIconNormalSource: SymbolGlyphModifier | undefined;
+  private imageSelectedSource: ResourceStr | undefined;
+  private symbolIconSelectedSource: SymbolGlyphModifier | undefined;
+  private imageEditSource: ResourceStr | undefined;
+  private symbolIconEditSource: SymbolGlyphModifier | undefined;
+  private imageOpacity: Resource;
+  private currentInteractionStatus: InteractionStatus;
+  private imageCollapseSource: ResourceStr | undefined;
+  private imageCollapseDownSource: ResourceStr | undefined;
+  private isImageCollapse: boolean;
+  private imageCollapseRightSource: ResourceStr | undefined;
+
+  constructor(
+    imageSource: ResourceStr | undefined,
+    symbolSource: SymbolGlyphModifier | undefined,
+    imageOpacity: Resource,
+    itemWidth: number,
+    itemHeight: number,
+    itemSelectedIcon?: ResourceStr,
+    symbolSelectedIcon?: SymbolGlyphModifier | undefined,
+    itemEditIcon?: ResourceStr,
+    symbolEditIcon?: SymbolGlyphModifier | undefined,
+  ) {
+    super();
+    this.rightMargin = $r('sys.float.ohos_id_elements_margin_horizontal_m');
+    this.imageSource = imageSource;
+    this.symbolIconSource = symbolSource;
+    this.imageNormalSource = imageSource;
+    this.symbolIconNormalSource = symbolSource;
+    if (itemSelectedIcon !== undefined) {
+      this.imageSelectedSource = itemSelectedIcon;
+    } else {
+      this.imageSelectedSource = this.imageNormalSource;
+    }
+    this.symbolIconSelectedSource = symbolSelectedIcon;
+    if (itemEditIcon !== undefined) {
+      this.imageEditSource = itemEditIcon;
+    } else {
+      this.imageEditSource = this.imageNormalSource;
+    }
+    this.symbolIconEditSource = symbolEditIcon;
+    this.imageOpacity = imageOpacity;
+    this.itemWidth = itemWidth;
+    this.itemHeight = itemHeight;
+    this.imageCollapseSource = imageSource;
+    this.imageCollapseDownSource = ARROW_DOWN;
+    this.imageCollapseRightSource = ARROW_RIGHT;
+    this.isImageCollapse = true;
+    this.currentInteractionStatus = InteractionStatus.NORMAL;
+  }
+
+  get source(): ResourceStr | undefined {
+    return this.imageSource;
+  }
+
+  get symbolSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSource;
+  }
+
+  get normalSource(): ResourceStr | undefined {
+    return this.imageNormalSource;
+  }
+
+  get symbolNormalSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconNormalSource;
+  }
+
+  get selectedSource(): ResourceStr | undefined {
+    return this.imageSelectedSource;
+  }
+
+  get symbolSelectedSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSelectedSource;
+  }
+
+  get editSource(): ResourceStr | undefined {
+    return this.imageEditSource;
+  }
+
+  get symbolEditSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconEditSource;
+  }
+
+  get opacity(): Resource {
+    return this.imageOpacity;
+  }
+
+  get noOpacity(): number {
+    return 1;
+  }
+
+  get collapseSource(): ResourceStr | undefined {
+    return this.imageCollapseSource;
+  }
+
+  get isCollapse(): boolean {
+    return this.isImageCollapse;
+  }
+
+  changeImageCollapseSource(nodeStatus: NodeStatus): void {
+    if (nodeStatus === NodeStatus.EXPAND) {
+      this.imageCollapseSource = this.imageCollapseDownSource;
+    } else if (nodeStatus === NodeStatus.COLLAPSE) {
+      this.imageCollapseSource = this.imageCollapseRightSource;
+    }
+  }
+
+  setImageCollapseSource(interactionStatus: InteractionStatus, nodeStatus: NodeStatus | undefined): void {
+    if (interactionStatus === InteractionStatus.EDIT || interactionStatus === InteractionStatus.DRAG_INSERT) {
+      this.imageCollapseDownSource = ARROW_DOWN_WITHE;
+      this.imageCollapseRightSource = ARROW_RIGHT_WITHE;
+      this.isImageCollapse = false;
+    } else if (interactionStatus === InteractionStatus.FINISH_EDIT ||
+      interactionStatus === InteractionStatus.FINISH_DRAG_INSERT) {
+      this.imageCollapseDownSource = ARROW_DOWN
+      this.imageCollapseRightSource = ARROW_RIGHT
+      this.isImageCollapse = true;
+    }
+    this.imageCollapseSource = (nodeStatus === NodeStatus.COLLAPSE) ?
+      this.imageCollapseRightSource : this.imageCollapseDownSource;
+  }
+
+  setImageSource(interactionStatus: InteractionStatus): void {
+    switch (interactionStatus) {
+      case InteractionStatus.NORMAL:
+        this.imageSource = this.imageNormalSource;
+        this.symbolIconSource = this.symbolIconNormalSource;
+        this.currentInteractionStatus = interactionStatus;
+        break;
+      case InteractionStatus.SELECTED:
+        if (this.currentInteractionStatus !== InteractionStatus.EDIT) {
+          this.imageSource = this.imageSelectedSource;
+          this.symbolIconSource = this.symbolIconSelectedSource;
+          this.currentInteractionStatus = interactionStatus;
+        }
+        break;
+      case InteractionStatus.EDIT:
+        this.imageSource = this.imageEditSource;
+        this.symbolIconSource = this.symbolIconEditSource;
+        this.currentInteractionStatus = interactionStatus;
+        break;
+      case InteractionStatus.FINISH_EDIT:
+        this.imageSource = this.imageSelectedSource;
+        this.symbolIconSource = this.symbolIconSelectedSource;
+        this.currentInteractionStatus = interactionStatus;
+        break;
+      case InteractionStatus.DRAG_INSERT:
+        this.imageSource = this.imageEditSource;
+        this.symbolIconSource = this.symbolIconEditSource;
+        this.currentInteractionStatus = interactionStatus;
+        break;
+      case InteractionStatus.FINISH_DRAG_INSERT:
+        this.imageSource = this.imageNormalSource;
+        this.symbolIconSource = this.symbolIconNormalSource;
+        this.currentInteractionStatus = interactionStatus;
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+class MainTitleNode extends NodeBaseInfo {
+  private mainTitleName: ResourceStr;
+  public mainTitleSetting: TextSetting;
+  private showPopUpTimeout: number;
+  private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+
+  constructor(mainTitleName: ResourceStr) {
+    super();
+    this.mainTitleName = mainTitleName;
+    this.itemWidth = ITEM_WIDTH;
+    this.itemHeight = ITEM_HEIGHT;
+    this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
+    this.mainTitleSetting = {
+      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontSize: $r('sys.float.ohos_id_text_size_body1'),
+      fontWeight: FontWeight.Normal,
+    };
+    this.showPopUpTimeout = 0;
+  }
+
+  setMainTitleSelected(isSelected: boolean): void {
+    if (isSelected) {
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+        fontSize: $r('sys.float.ohos_id_text_size_body1'),
+        fontWeight: FontWeight.Regular,
+      };
+    } else {
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleFontColor,
+        fontSize: $r('sys.float.ohos_id_text_size_body1'),
+        fontWeight: FontWeight.Normal,
+      };
+    }
+  }
+
+  set title(text: ResourceStr) {
+    this.mainTitleName = text;
+  }
+
+  get title(): ResourceStr {
+    return this.mainTitleName;
+  }
+
+  set popUpTimeout(showPopUpTimeout: number) {
+    this.showPopUpTimeout = showPopUpTimeout;
+  }
+
+  get popUpTimeout(): number {
+    return this.showPopUpTimeout;
+  }
+
+  get color(): ResourceColor {
+    return this.mainTitleSetting.fontColor;
+  }
+
+  get size(): Resource {
+    return this.mainTitleSetting.fontSize;
+  }
+
+  get weight(): FontWeight {
+    return this.mainTitleSetting.fontWeight;
+  }
+
+  setMainTitleHighLight(isHighLight: boolean): void {
+    if (isHighLight) {
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+        fontSize: $r('sys.float.ohos_id_text_size_body1'),
+        fontWeight: FontWeight.Regular,
+      };
+    } else {
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleFontColor,
+        fontSize: $r('sys.float.ohos_id_text_size_body1'),
+        fontWeight: FontWeight.Normal,
+      };
+    }
+  }
+}
+
+export class InputText extends NodeBaseInfo {
+  private inputTextSetting: TextSetting;
+  private status?: Status = undefined;
+  private statusColor: Resource = $r('sys.color.ohos_id_color_background');
+  private editItemColor: Resource = $r('sys.color.ohos_id_color_emphasize');
+  private radius: Resource = $r('sys.float.ohos_id_corner_radius_default_xs');
+  private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+
+  constructor() {
+    super();
+    this.itemWidth = ITEM_WIDTH;
+    this.itemHeight = ITEM_HEIGHT_INPUT;
+    this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
+    this.inputTextSetting = {
+      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontSize: $r('sys.float.ohos_id_text_size_body1'),
+      fontWeight: FontWeight.Normal,
+    };
+  }
+
+  get color(): ResourceColor {
+    return this.inputTextSetting.fontColor;
+  }
+
+  get size(): Resource {
+    return this.inputTextSetting.fontSize;
+  }
+
+  get weight(): FontWeight {
+    return this.inputTextSetting.fontWeight;
+  }
+
+  get borderRadius(): Resource {
+    return this.radius;
+  }
+
+  get backgroundColor(): Resource {
+    return this.statusColor;
+  }
+
+  get editColor(): Resource {
+    return this.editItemColor;
+  }
+
+  get textInputStatusColor(): Status | undefined {
+    return this.status;
+  }
+}
+
+/**
+ * get LengthMetrics
+ *
+ * @param Resource | number type
+ * @returns LengthMetrics
+ */
+function getLengthMetricsByResourceOrNumber(resourceOrNumber: Resource | number): LengthMetrics {
+  if (!resourceOrNumber) {
+    return LengthMetrics.vp(0);
+  } else if (typeof resourceOrNumber === 'number') {
+    return LengthMetrics.vp(resourceOrNumber as Double);
+  } else {
+    return LengthMetrics.resource(resourceOrNumber as Resource);
+  }
+}

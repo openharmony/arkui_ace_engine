@@ -67,6 +67,7 @@ enum class BlendApplyType : int16_t {
 
     OFFSCREEN,   // Apply blending by drawing the content onto an offscreen buffer and blend it when drawing it
                  // back to the screen
+    OFFSCREEN_WITH_BACKGROUND,
     MAX
 };
 } // namespace OHOS::Ace

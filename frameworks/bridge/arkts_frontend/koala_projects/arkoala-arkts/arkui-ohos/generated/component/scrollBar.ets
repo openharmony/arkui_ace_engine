@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -44,6 +46,7 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setScrollBarOptionsAttribute(value: ScrollBarOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ScrollBarOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._ScrollBarInterface_setScrollBarOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -109,6 +112,7 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         if (this.checkPriority("setScrollBarOptions")) {
             const value_casted = value as (ScrollBarOptions)
             this.getPeer()?.setScrollBarOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ScrollBarAttribute');
             return this
         }
         return this
@@ -122,12 +126,17 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollBarAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookScrollBarAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -67,7 +67,7 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
 void SetInitialIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -76,7 +76,7 @@ void SetInitialIndexImpl(Ark_NativePointer node,
     IndicatorModelStatic::SetInitialIndex(frameNode, aceVal);
 }
 void SetCountImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -133,24 +133,19 @@ void SetVerticalImpl(Ark_NativePointer node,
     IndicatorModelStatic::SetDirection(frameNode, convValue ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Void* value)
+                     const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(frameNode);
-    if (auto optCallback = Converter::OptConvertPtr<Callback_Number_Void>(value); optCallback) {
-        auto onChange = [arkCallback = CallbackHelper(*optCallback), node = targetNode](const BaseEventInfo* info) {
-            const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-            if (!swiperInfo) {
-                return;
-            }
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
-        };
-        IndicatorModelStatic::SetOnChange(frameNode, std::move(onChange));
-    } else {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         IndicatorModelStatic::SetOnChange(frameNode, nullptr);
+        return;
     }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(index));
+    };
+    IndicatorModelStatic::SetOnChange(frameNode, onEvent);
 }
 } // IndicatorComponentAttributeModifier
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()

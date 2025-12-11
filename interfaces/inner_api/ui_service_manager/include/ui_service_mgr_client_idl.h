@@ -23,6 +23,7 @@
 #include "iu_i_service_mgr_new.h"
 #include "iremote_object.h"
 #include "ui_service_mgr_errors.h"
+#include "ui_service_statistic_event.h"
 #include "wm_common.h"
 
 #include "base/utils/macros.h"
@@ -56,6 +57,8 @@ public:
     ErrCode CancelDialog(int32_t id);
 
     ErrCode UpdateDialog(int32_t id, const std::string& data);
+
+    ErrCode ReportStatisticEvents(const AppInfoParcel& appInfo, const std::vector<StatisticEventInfoParcel>& events);
 
 private:
     /**

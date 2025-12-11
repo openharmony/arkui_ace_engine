@@ -32,7 +32,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto padding = gridLayoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
 
-    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto firstChildWrapper = GetGridItem(layoutWrapper, 0);
     CHECK_NULL_VOID(firstChildWrapper);
     auto layoutConstraint = gridLayoutProperty->CreateChildConstraint();
     firstChildWrapper->Measure(layoutConstraint);
@@ -90,7 +90,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure children.
     for (int32_t index = 0; index < displayCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto childWrapper = GetGridItem(layoutWrapper, index);
         if (!childWrapper) {
             continue;
         }
@@ -111,7 +111,7 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     int32_t total = layoutWrapper->GetTotalChildCount();
     for (int32_t index = 0; index < total; ++index) {
         if (index < displayCount_) {
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            auto childWrapper = GetGridItem(layoutWrapper, index);
             if (!childWrapper) {
                 continue;
             }
@@ -136,7 +136,7 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIdex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+            auto wrapper = GetGridItem(layoutWrapper, itemIdex);
             if (!wrapper) {
                 continue;
             }

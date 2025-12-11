@@ -32,7 +32,7 @@ export namespace dragController {
     }
 
     export interface AnimationOptions {
-        duration?: number;
+        duration?: int;
         curve?: Curve | ICurve;
     }
 
@@ -88,7 +88,7 @@ export namespace dragController {
     }
     
     export interface DragInfo {
-        pointerId: number;
+        pointerId: int;
         data?: UnifiedData;
         extraParams?: string;
         touchPoint?: TouchPoint;
@@ -139,9 +139,9 @@ export namespace dragController {
     }
 
     export interface DragAction {
-        startDrag(): Promise<void>;
-        on(type: string, callback: Callback<DragAndDropInfo>): void;
-        off(type: string, callback?: Callback<DragAndDropInfo>): void;
+        startDrag(): Promise<void> | null;
+        onStatusChange(callback: Callback<DragAndDropInfo>): void;
+        offStatusChange(callback?: Callback<DragAndDropInfo>): void;
     }
 
     export class DragActionInner implements DragAction {
@@ -151,15 +151,15 @@ export namespace dragController {
             this.dragAction = result;
             this.registerCleaner(this.dragAction)
         }
-        public startDrag(): Promise<void> {
+        public startDrag(): Promise<void> | null {
             let promise = ArkUIAniModule._DragController_startDrag(this.dragAction);
             return promise;
         }
-        public on(type: string, callback: Callback<DragAndDropInfo>) {
-            ArkUIAniModule._DragController_on(type, callback, this.dragAction);
+        public onStatusChange(callback: Callback<DragAndDropInfo>) {
+            ArkUIAniModule._DragController_on(callback, this.dragAction);
         }
-        public off(type: string, callback?: Callback<DragAndDropInfo>) {
-            ArkUIAniModule._DragController_off(type, callback, this.dragAction);
+        public offStatusChange(callback?: Callback<DragAndDropInfo>) {
+            ArkUIAniModule._DragController_off(callback, this.dragAction);
         }
         registerCleaner(ptr: KPointer): void {
             this.cleaner = new Cleaner("DragAction", ptr);

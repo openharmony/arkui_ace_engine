@@ -775,12 +775,17 @@ RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     auto hasSubMenu = menuWrapperPattern->HasStackSubMenu();
-    auto buildFunc = GetSubBuilder();
-    if (!buildFunc || isSubMenuShowed_ || IsEmbedded() ||
+    if (isSubMenuShowed_ || IsEmbedded() ||
         (expandingMode_ == SubMenuExpandingMode::STACK && hasSubMenu)) {
         return nullptr;
     }
+    auto subSelectMenuBuilderFunc = GetSubSelectMenuBuilder();
+    if (subSelectMenuBuilderFunc) {
+        return subSelectMenuBuilderFunc();
+    }
 
+    auto buildFunc = GetSubBuilder();
+    CHECK_NULL_RETURN(buildFunc, nullptr);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     return NG::ViewStackProcessor::GetInstance()->Finish();
@@ -1338,7 +1343,8 @@ bool MenuItemPattern::OnClick()
         pattern->SetChange();
     }
     menuPattern->SetLastSelectedItem(host);
-    if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
+    if ((GetSubBuilder() != nullptr || GetSubSelectMenuBuilder() != nullptr) &&
+        (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu(ShowSubMenuType::CLICK);
@@ -1502,7 +1508,7 @@ void MenuItemPattern::OnHover(bool isHover)
 
 void MenuItemPattern::PostHoverSubMenuTask()
 {
-    if (GetSubBuilder() == nullptr) {
+    if (GetSubBuilder() == nullptr && GetSubSelectMenuBuilder() == nullptr) {
         return;
     }
     if (showTask_) {
@@ -1791,7 +1797,8 @@ void MenuItemPattern::InitLongPressEvent()
         CHECK_NULL_VOID(menuWrapperPattern);
         auto topLevelMenuPattern = itemPattern->GetMenuPattern(true);
         CHECK_NULL_VOID(topLevelMenuPattern);
-        if (itemPattern && itemPattern->GetSubBuilder() != nullptr &&
+        if (itemPattern && (itemPattern->GetSubBuilder() != nullptr ||
+            itemPattern->GetSubSelectMenuBuilder() != nullptr) &&
             menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE &&
             !(topLevelMenuPattern->IsSelectOverlayCustomMenu())) {
             itemPattern->ShowSubMenu(ShowSubMenuType::LONG_PRESS);
@@ -2073,7 +2080,8 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
         return true;
     } else {
         auto canExpand =
-            GetSubBuilder() != nullptr && menuPattern && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
+            (GetSubBuilder() != nullptr || GetSubSelectMenuBuilder() != nullptr) && menuPattern &&
+            !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
             (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
         if (canExpand) {
             return true;
@@ -2091,8 +2099,8 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
 
 void MenuItemPattern::AddClickableArea()
 {
-    if (expandingMode_ == SubMenuExpandingMode::EMBEDDED && GetSubBuilder() != nullptr && !IsEmbedded() &&
-        !clickableArea_) {
+    if (expandingMode_ == SubMenuExpandingMode::EMBEDDED &&
+        (GetSubBuilder() != nullptr || GetSubSelectMenuBuilder() != nullptr) && !IsEmbedded() && !clickableArea_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
@@ -2552,7 +2560,7 @@ void MenuItemPattern::SetAccessibilityAction()
             CHECK_NULL_VOID(context);
             pattern->MarkIsSelected(pattern->IsSelected());
             context->OnMouseSelectUpdate(pattern->IsSelected(), ITEM_FILL_COLOR, ITEM_FILL_COLOR);
-            if (pattern->GetSubBuilder() != nullptr) {
+            if (pattern->GetSubBuilder() != nullptr || pattern->GetSubSelectMenuBuilder() != nullptr) {
                 pattern->ShowSubMenu(ShowSubMenuType::ACTION);
                 return;
             }
@@ -2594,7 +2602,7 @@ bool MenuItemPattern::IsSelectOverlayMenu()
         return false;
     }
     return topLevelMenuPattern->IsSelectOverlayExtensionMenu() || topLevelMenuPattern->IsSelectOverlayCustomMenu() ||
-           topLevelMenuPattern->IsSelectOverlaySubMenu();
+           topLevelMenuPattern->IsSelectOverlaySubMenu() || topLevelMenuPattern->IsSelectOverlayRightClickMenu();
 }
 
 void MenuItemPattern::ParseMenuRadius(MenuParam& param)

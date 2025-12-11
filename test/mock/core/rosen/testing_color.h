@@ -40,6 +40,10 @@ struct TestingColor4f {
     scalar alphaF_ = 0;
 };
 
+enum TestingColorPlaceholder : uint8_t {
+    NONE = 0
+};
+
 class TestingColor {
 public:
     typedef float scalar;
@@ -64,6 +68,7 @@ public:
         : red_((rgba >> SIXTEEN) & COLOR_DEFAULT), green_((rgba >> EIGHT) & COLOR_DEFAULT),
           blue_((rgba >> ZERO) & COLOR_DEFAULT), alpha_(rgba >> TWENTY_FOUR)
     {}
+    TestingColor(TestingColorPlaceholder ph) {}
     virtual ~TestingColor() = default;
 
     bool operator==(const TestingColor& rhs) const

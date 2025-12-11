@@ -66,6 +66,7 @@ struct ImagePaintConfig {
     std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     RefPtr<DrawingLattice> resizableLattice_ = nullptr;
     Matrix4 imageMatrix_;
+    bool antiAlias_ = false;
 };
 
 // CanvasImage is interface for drawing image.

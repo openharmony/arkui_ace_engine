@@ -27,7 +27,9 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
-import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater, hookSetVideoOptions, hookVideoAnalyzerConfig } from "#handwritten"
+import { ErrorCallback } from "@ohos.base"
+import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater, hookSetVideoOptions, hookVideoAnalyzerConfig, hookVideoOnError } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { ColorMetrics } from "arkui.Graphics"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -82,22 +84,16 @@ export class VideoController implements MaterializedBase {
         this.exitFullscreen_serialize()
         return
     }
-    public setCurrentTimeDefault(value: double): void {
+    public setCurrentTime(value: double, seekMode?: SeekMode): void {
         const value_casted = value as (double)
-        this.setCurrentTimeDefault_serialize(value_casted)
-        return
-    }
-    public setCurrentTimeWithMode(value: double, seekMode: SeekMode): void {
-        const value_casted = value as (double)
-        const seekMode_casted = seekMode as (SeekMode)
-        this.setCurrentTimeWithMode_serialize(value_casted, seekMode_casted)
+        const seekMode_casted = seekMode as (SeekMode | undefined)
+        this.setCurrentTime_serialize(value_casted, seekMode_casted)
         return
     }
     public reset(): void {
         this.reset_serialize()
         return
     }
-    overload setCurrentTime { setCurrentTimeDefault, setCurrentTimeWithMode }
     start_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_start(this.peer!.ptr)
     }
@@ -113,11 +109,17 @@ export class VideoController implements MaterializedBase {
     exitFullscreen_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_exitFullscreen(this.peer!.ptr)
     }
-    setCurrentTimeDefault_serialize(value: double): void {
-        ArkUIGeneratedNativeModule._VideoController_setCurrentTimeDefault(this.peer!.ptr, value)
-    }
-    setCurrentTimeWithMode_serialize(value: double, seekMode: SeekMode): void {
-        ArkUIGeneratedNativeModule._VideoController_setCurrentTimeWithMode(this.peer!.ptr, value, seekMode.valueOf())
+    setCurrentTime_serialize(value: double, seekMode?: SeekMode): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (seekMode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const seekModeTmpValue  = (seekMode as SeekMode)
+            thisSerializer.writeInt32(seekModeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._VideoController_setCurrentTime(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     reset_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_reset(this.peer!.ptr)
@@ -297,12 +299,20 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setOnUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnErrorAttribute(value: (() => void) | undefined): void {
+    setOnErrorAttribute(value: VoidCallback | ErrorCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
+            if (valueTmpValue instanceof VoidCallback) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as VoidCallback
+                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ErrorCallback) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ErrorCallback
+                thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -455,7 +465,7 @@ export interface VideoAttribute extends CommonMethod {
     onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
         throw new Error("Unimplemented method onUpdate")
     }
-    onError(value: (() => void) | undefined): this {
+    onError(value: VoidCallback | ErrorCallback | undefined): this {
         throw new Error("Unimplemented method onError")
     }
     onStop(value: VoidCallback | undefined): this {
@@ -491,7 +501,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     onSeeking_value?: ((value0: PlaybackInfo) => void) | undefined
     onSeeked_value?: ((value0: PlaybackInfo) => void) | undefined
     onUpdate_value?: ((value0: PlaybackInfo) => void) | undefined
-    onError_value?: (() => void) | undefined
+    onError_value?: VoidCallback | ErrorCallback | undefined
     onStop_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
     analyzerConfig_value?: ImageAnalyzerConfig | undefined
@@ -540,7 +550,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
         return this
     }
-    onError(value: (() => void) | undefined): this {
+    onError(value: VoidCallback | ErrorCallback | undefined): this {
         return this
     }
     onStop(value: VoidCallback | undefined): this {
@@ -575,6 +585,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
             hookSetVideoOptions(this, value)
             const value_casted = value as (VideoOptions)
             this.getPeer()?.setVideoOptionsAttribute(value_casted)
+            this.applyOptionsFinish('VideoAttribute');
             return this
         }
         return this
@@ -683,11 +694,9 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         }
         return this
     }
-    public onError(value: (() => void) | undefined): this {
+    public onError(value: VoidCallback | ErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
-            const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.setOnErrorAttribute(value_casted)
-            return this
+            hookVideoOnError(this, value);
         }
         return this
     }
@@ -730,12 +739,17 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookVideoAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookVideoAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

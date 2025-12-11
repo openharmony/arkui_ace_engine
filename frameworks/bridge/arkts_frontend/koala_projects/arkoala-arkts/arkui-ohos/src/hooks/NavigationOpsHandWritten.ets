@@ -16,7 +16,8 @@
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer } from "../component/navigation"
-import { NavExtender } from "../component/idlize"
+import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
+import { NavExtender, ArkComponentRootPeer } from "../component/idlize"
 import { int32 } from "@koalaui/common"
 import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PeerNode } from "../PeerNode"
@@ -59,15 +60,16 @@ export class NavigationOpsHandWritten {
         if (pathInfos_type != RuntimeType.UNDEFINED) {
             info = pathInfos!
         }
-        
+        NavExtender.setUpdateStackCallback(info, () => {
+            addPartialUpdate(() => {
+                InteropNativeModule._NativeLog(`AceNavigation: trigger navigation stack sync in js`);
+                NavExtender.syncStack(info)
+            }, __context, (isBefore: boolean) => {})
+        })
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (pathInfos !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const pathInfosTmpValue  = pathInfos!
-            NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+        thisSerializer.writeInt8(RuntimeType.OBJECT)
+        const pathInfosTmpValue  = info
+        NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
         if (moduleInfo !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const moduleInfoTmpValue  = moduleInfo!
@@ -78,68 +80,55 @@ export class NavigationOpsHandWritten {
         let peerPtr = component.getPeer().peer.ptr
         ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions(peerPtr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-
-        if (pathInfos != undefined) {
-            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const currentExtendableComponent = ExtendableComponent.current;
-            const updater: (name: string, param: object|null|undefined)=>PeerNode =
-            (name: string, param: object|null|undefined) => {
-                return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
-                    setNeedCreate(true)
-                    const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-                    const lastExtendableComponent = ExtendableComponent.current;
-                    ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-                    ExtendableComponent.current = currentExtendableComponent;
-                    component._navDestination(name, param);
-                    setNeedCreate(false)
-                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                    ExtendableComponent.current = lastExtendableComponent;
-                })
-            }
-            NavExtender.setCreateNavDestinationCallback(pathInfos!, (index: int32): KPointer => {
-                let names: Array<string> = pathInfos!.getAllPathName()
-                if (index < 0 || index >= names.length) {
-                    InteropNativeModule._NativeLog(`AceNavigation: Invalid index:${index} names.length:${names.length}`);
-                    return 0;
-                }
-                let param = pathInfos!.getParamByIndex(index)
-                let name = names[index];
-                InteropNativeModule._NativeLog(`AceNavigation: create new node: name: ${name}, index: ${index} from router map`);
-                let node = NavigationRouterMap.CreateNavDestinationFromRouterMap(name, param);
-                if (!node) {
-                    InteropNativeModule._NativeLog(`AceNavigation: failed to create NavDestination from router map`);
-                    return 0;
-                }
-                return node.peer.ptr;
-            })
-            const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
-            NavExtender.setUpdateStackCallback(pathInfos!, () => {
-                addPartialUpdate(() => {
-                    if (!component.isNeedSync()) {
-                        return
-                    }
-                    InteropNativeModule._NativeLog("AceNavigation: sync navigation stack")
-                    component.updateNeedSync(false)
-                    let size: int32 = pathInfos!.size() as int32
-                    InteropNativeModule._NativeLog("AceNavigation: path stack size: " + size)
-                    let names: Array<string> = pathInfos!.getAllPathName()
-                    for (let index: int32 = 0; index < size; index++) {
-                        if (NavExtender.checkNeedCreate(peerPtr, index)) {
-                            InteropNativeModule._NativeLog("AceNavigation: create new node: " + index + ", name: " + names[index])
-                            let param = pathInfos!.getParamByIndex(index)
-                            let node = value_casted(names[index], param)
-                            NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)
-                        }
-                    }
-                    NavExtender.syncStack(pathInfos!)
-                }, __context, (isBefore: boolean) => {})
-                component.updateNeedSync(true)
-            })
-        }
     }
     static hookSetNavDestinationImpl(component: ArkNavigationComponent, value: PageMapBuilder | undefined) {
-        if (value !== undefined) {
-            component.updateNavDestination(value);
+        if (value === undefined) {
+            return
         }
+        NavExtender.setNavDestinationBuilderCallback(component.getPeer().peer.ptr, (name: string, param?: Object) => {
+            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            const currentExtendableComponent = ExtendableComponent.current;
+            const peer = createUiDetachedRoot(() => {
+                return ArkComponentRootPeer.create(undefined);
+            },
+            () => {
+                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                const lastExtendableComponent = ExtendableComponent.current;
+                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+                ExtendableComponent.current = currentExtendableComponent;
+                /** @memo */
+                let builder: (name: string, param: Object | undefined | null) => void = value!;
+                builder(name, param)
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
+            });
+            return peer.peer.ptr;
+        });
+    }
+    static hookGetRouteConfigImpl(context: NavDestinationContextInternal): RouteMapConfig | undefined {
+        let info: Array<string> = NavExtender.getRouteMapInConfig(context.getPeer()!.ptr);
+        if (info.length === 0) {
+            return undefined;
+        }
+        let config: RouteMapConfig = {
+            name: info[0],
+            pageSourceFile: info[1],
+            data: {}
+        };
+        const dataIndex = 2;
+        if (info.length <= dataIndex) {
+            return config;
+        }
+        let jsonStr: JSONValue = JSONParser.parse(info[dataIndex]);
+        if (jsonStr instanceof JSONObject) {
+            let keys: Array<JSONString> = jsonStr.keys_;
+            let values: Array<JSONValue> = jsonStr.values;
+            let result: Record<string, string> = new Record<string, string>();
+            for (let i: int = 0; i < keys.length; i++) {
+                result[keys[i].value] = (values[i] as JSONString).value;
+            }
+            config.data = result;
+        }
+        return config;
     }
 }

@@ -48,6 +48,7 @@ struct NativeDataPanelShadow {
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelCreate(VectorDoubleHandle values, double max, int32_t panelType);
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelSetCloseEffect(bool isCloseEffect);
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelSetValueColors(VectorStringPtr vecContent);
+CJ_EXPORT void FfiOHOSAceFrameworkDataPanelResetValueColors();
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelSetTrackBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelSetStrokeWidth(double strokeWidth, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkDataPanelSetTrackShadow(NativeDataPanelShadow nativeDataPanelShadow);

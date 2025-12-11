@@ -25,19 +25,22 @@ class RichEditorParagraph : public TxtParagraph {
     DECLARE_ACE_TYPE(RichEditorParagraph, TxtParagraph);
 
 public:
-    RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
-        : TxtParagraph(paraStyle, fontCollection) {}
+    RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection,
+        bool isSingleLineMode) : TxtParagraph(paraStyle, fontCollection), isSingleLineMode_(isSingleLineMode) {}
 
     Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest) override;
     void Layout(float width) override;
     void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
     float GetHeight() override;
     size_t GetLineCount() override;
+    void AddText(const std::u16string& text) override;
+    bool IsSingleLineMode() override;
 
 private:
     float height_ = 0.0f;
     size_t lineCount_ = 0;
     float layoutWidth_ = 0.0f;
+    bool isSingleLineMode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorParagraph);
 };

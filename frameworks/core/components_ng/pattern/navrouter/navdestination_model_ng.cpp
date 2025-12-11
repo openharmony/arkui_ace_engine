@@ -1784,6 +1784,19 @@ void NavDestinationModelNG::UpdateBindingWithScrollable(
     callback(processor);
 }
 
+void NavDestinationModelNG::UpdateBindingWithScrollable(FrameNode* frameNode,
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
+}
+
 void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
 {
     if (!onPop) {
@@ -2061,5 +2074,16 @@ void NavDestinationModelNG::SetTitleAnimationElapsedTime(FrameNode* frameNode, i
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetTitleAnimationElapsedTime(elapsedTime);
+}
+
+void NavDestinationModelNG::SetBackButtonTextResource(FrameNode* frameNode, const std::string& text,
+                                                      const RefPtr<ResourceObject>& resObj)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    NavigationTitleUtil::SetBackButtonText(titleBarNode, text,
+        "navDestination.backButtonIcon.accessibilityText", resObj);
 }
 } // namespace OHOS::Ace::NG

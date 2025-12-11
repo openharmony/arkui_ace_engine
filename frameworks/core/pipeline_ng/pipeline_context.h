@@ -76,6 +76,7 @@ namespace OHOS::Rosen {
 }
 
 namespace OHOS::Ace {
+    class ResSchedClickOptimizer;
     class ResSchedTouchOptimizer;
 }
 
@@ -87,6 +88,8 @@ using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uin
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 class NodeRenderStatusMonitor;
 class MagnifierController;
+class LoadCompleteManager;
+class PageInfo;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -196,6 +199,12 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     std::string GetCurrentPageNameCallback();
+
+    const RefPtr<PageInfo> GetLastPageInfo();
+
+    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);
+
+    std::string GetCurrentPageName();
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
@@ -840,7 +849,8 @@ public:
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
     bool CheckOverlayFocus();
-    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
+    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap,
+        AceAutoFillTriggerType triggerType, RefPtr<FrameNode> requestNode);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
         const std::string& fillContent = "", bool isPopup = false);
 
@@ -947,6 +957,10 @@ public:
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
     void SetVsyncListener(VsyncCallbackFun vsync);
+    VsyncCallbackFun GetVsyncListener()
+    {
+        return vsyncListener_;
+    }
 
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
@@ -1006,6 +1020,8 @@ public:
     {
         return toolbarManager_;
     }
+
+    const std::shared_ptr<LoadCompleteManager>& GetLoadCompleteManager() const;
 
     void ChangeSensitiveNodes(bool flag) override
     {
@@ -1125,7 +1141,18 @@ public:
         isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
+    void GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>& root, std::shared_ptr<JsonValue>& overlayContent,
+        std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& overlayArray) const;
+
+    bool IsTagInOverlay(const std::string& tag) const;
+
+    void GetComponentOverlayInspector(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const override;
+
+    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const override;
+
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
+
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
@@ -1304,6 +1331,7 @@ public:
     }
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
+    const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1457,8 +1485,7 @@ private:
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
-    void RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
-    void RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
+    void RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
@@ -1667,7 +1694,9 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+    std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
+    std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
 };
 
 /**

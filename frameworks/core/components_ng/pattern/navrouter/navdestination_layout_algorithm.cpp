@@ -369,8 +369,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     MeasureOverlay(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
 
-    MeasureAdaptiveLayoutChildren(
-        layoutWrapper, size, transferedTitleBarHeight, transferedToolBarHeight + transferedToolBarDividerHeight);
+    MeasureAdaptiveLayoutChildren(layoutWrapper, contentChildSize, transferedTitleBarHeight,
+        transferedToolBarHeight + transferedToolBarDividerHeight);
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -431,16 +431,6 @@ void NavDestinationLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
         (opts.edges & LAYOUT_SAFE_AREA_EDGE_HORIZONTAL) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM);
     if (!isVerticalCanExtend.first && !isVerticalCanExtend.second && !isHorizontalExtend) {
         return;
-    }
-
-    ExpandEdges sae = hostNode->GetAccumulatedSafeAreaExpand(true, opts);
-    if (!isVerticalCanExtend.first) {
-        realSize.MinusHeight(titleBarHeight);
-        realSize.MinusHeight(sae.top.value_or(0.0f));
-    }
-    if (!isVerticalCanExtend.second) {
-        realSize.MinusHeight(toolBarHeight);
-        realSize.MinusHeight(sae.bottom.value_or(0.0f));
     }
 
     auto childConstraint = navDestinationLayoutPropety->CreateChildConstraint();

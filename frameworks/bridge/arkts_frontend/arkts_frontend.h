@@ -82,6 +82,7 @@ public:
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context) override;
+
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
 
     UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;

@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 constexpr float PROGRESS_MAX_VALUE = 100.f;
 constexpr float PROGRESS_DEFAULT_STROKE_WIDTH = 4.0f;
+constexpr int32_t PROGRESS_MIN_SCALE_COUNT = 2;
 struct ProgressOptions {
     double value = 0;
     double total = PROGRESS_MAX_VALUE;
@@ -40,9 +41,11 @@ auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& o
         Converter::OptConvert<bool>(options.enableScanEffect));
     // strokeRadius
     auto strokeRadius = Converter::OptConvert<Dimension>(options.strokeRadius);
-    Validator::ValidatePositive(strokeRadius);
+    Validator::ValidateNonNegative(strokeRadius);
     Validator::ValidateNonPercent(strokeRadius);
     ProgressModelStatic::SetStrokeRadius(frameNode, strokeRadius);
+    // enableSmoothEffect
+    ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
 };
 
 auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& options) {
@@ -57,24 +60,29 @@ auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& optio
     ProgressModelStatic::SetRingSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
     // status
     ProgressModelStatic::SetProgressStatus(frameNode, Converter::OptConvert<ProgressStatus>(options.status));
+    // enableSmoothEffect
+    ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
 };
 
 auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions& options) {
     // borderWidth
     auto borderWidth = Converter::OptConvert<Dimension>(options.borderWidth);
-    Validator::ValidatePositive(borderWidth);
+    Validator::ValidateNonNegative(borderWidth);
     Validator::ValidateNonPercent(borderWidth);
     ProgressModelStatic::SetBorderWidth(frameNode, borderWidth);
     // borderColor
     ProgressModelStatic::SetBorderColor(frameNode, Converter::OptConvert<Color>(options.borderColor));
+    // borderRadius
+    auto borderRadius = Converter::OptConvert<Dimension>(options.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    ProgressModelStatic::SetBorderRadius(frameNode, borderRadius);
     // enableScanEffect
     ProgressModelStatic::SetSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
     // showDefaultPercentage
     ProgressModelStatic::SetShowText(frameNode, Converter::OptConvert<bool>(options.showDefaultPercentage));
     // content
-#ifdef WRONG_GEN
     ProgressModelStatic::SetText(frameNode, Converter::OptConvert<std::string>(options.content));
-#endif
     // fontColor
     ProgressModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(options.fontColor));
     // font
@@ -90,6 +98,8 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
         ProgressModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
         ProgressModelStatic::SetFontFamily(frameNode, std::nullopt);
     }
+    // enableSmoothEffect
+    ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
 };
 
 auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOptions& options) {
@@ -100,7 +110,7 @@ auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOption
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
     // scaleCount
     auto scaleCount = Converter::OptConvert<int32_t>(options.scaleCount);
-    Validator::ValidateGreatOrEqual(scaleCount, 1);
+    Validator::ValidateGreatOrEqual(scaleCount, PROGRESS_MIN_SCALE_COUNT);
     ProgressModelStatic::SetScaleCount(frameNode, scaleCount);
     // scaleWidth
     auto scaleWidth = Converter::OptConvert<Dimension>(options.scaleWidth);
@@ -139,9 +149,7 @@ auto g_setUndefinedStyle = [](FrameNode* frameNode) {
     // showDefaultPercentage
     ProgressModelStatic::SetShowText(frameNode, std::nullopt);
     // content
-#ifdef WRONG_GEN
     ProgressModelStatic::SetText(frameNode, std::nullopt);
-#endif
     // fontColor
     ProgressModelStatic::SetFontColor(frameNode, std::nullopt);
     // font
@@ -244,9 +252,7 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
     } else if (LessOrEqual(value, 0)) {
         value = 0;
     }
-    ProgressModelNG::SetTotal(frameNode, total);
-    ProgressModelNG::SetValue(frameNode, value);
-    ProgressModelNG::SetType(frameNode, convValue.type);
+    ProgressModelStatic::Initialize(frameNode, 0.0, value, 0.0, total, convValue.type);
 }
 } // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {

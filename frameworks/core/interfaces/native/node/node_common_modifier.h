@@ -29,6 +29,7 @@ void SetOnDetach(ArkUINodeHandle node, void* extraParam);
 void SetOnFocus(ArkUINodeHandle node, void* extraParam);
 void SetOnBlur(ArkUINodeHandle node, void* extraParam);
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam);
+void SetOnSizeChange(ArkUINodeHandle node, void* extraParam);
 void SetOnClick(ArkUINodeHandle node, void* extraParam);
 void SetOnTextSpanLongPress(ArkUINodeHandle node, void* extraParam);
 void SetOnTouch(ArkUINodeHandle node, void* extraParam);
@@ -43,6 +44,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam);
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam);
 void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam);
+void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam);
 
 
 void ResetOnAppear(ArkUINodeHandle node);
@@ -52,6 +54,7 @@ void ResetOnDetach(ArkUINodeHandle node);
 void ResetOnFocus(ArkUINodeHandle node);
 void ResetOnBlur(ArkUINodeHandle node);
 void ResetOnAreaChange(ArkUINodeHandle node);
+void ResetOnSizeChange(ArkUINodeHandle node);
 void ResetOnVisibleAreaChange(ArkUINodeHandle node);
 void ResetOnClick(ArkUINodeHandle node);
 void ResetOnTextSpanLongPress(ArkUINodeHandle node);
@@ -65,5 +68,6 @@ void ResetOnKeyEvent(ArkUINodeHandle node);
 void ResetOnKeyPreIme(ArkUINodeHandle node);
 void ResetOnFocusAxisEvent(ArkUINodeHandle node);
 void ResetOnCoastingAxisEvent(ArkUINodeHandle node);
+void ResetOnChildTouchTest(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_COMMON_MODIFIER_H

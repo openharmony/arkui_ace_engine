@@ -36,6 +36,7 @@ typedef enum {
     C_CLICK_EVENT_ID = 7, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_HOVER_EVENT_ID = 8, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
     C_COASTING_AXIS_EVENT_ID = 9, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
+    C_CHILD_TOUCH_TEST_ID = 10, // defined in ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h
 } ArkUIEventTypeId;
 
 struct ArkUI_UIInputEvent {

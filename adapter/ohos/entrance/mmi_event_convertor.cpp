@@ -49,6 +49,9 @@ TouchType ConvertTouchEventType(int32_t originAction)
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_MOVE, TouchType::LEVITATE_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_IN_WINDOW, TouchType::LEVITATE_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_OUT_WINDOW, TouchType::LEVITATE_OUT_WINDOW },
     };
     auto typeIter = actionMap.find(originAction);
     if (typeIter == actionMap.end()) {
@@ -147,6 +150,11 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     return inputTime;
 }
 
+inline float NonZeroOrInteger(const double& value, const int32_t& integer)
+{
+    return NearZero(value) ? integer : static_cast<float>(value);
+}
+
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType,
     bool useHighPrecision)
 {
@@ -155,18 +163,25 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        touchPoint.x = NearZero(pointerItem.GetWindowXPos()) ? pointerItem.GetWindowX()
-                                                             : static_cast<float>(pointerItem.GetWindowXPos());
-        touchPoint.y = NearZero(pointerItem.GetWindowYPos()) ? pointerItem.GetWindowY()
-                                                             : static_cast<float>(pointerItem.GetWindowYPos());
-        touchPoint.screenX = NearZero(pointerItem.GetDisplayXPos()) ? pointerItem.GetDisplayX()
-                                                                    : static_cast<float>(pointerItem.GetDisplayXPos());
-        touchPoint.screenY = NearZero(pointerItem.GetDisplayYPos()) ? pointerItem.GetDisplayY()
-                                                                    : static_cast<float>(pointerItem.GetDisplayYPos());
+    bool useHighPrecisionTouch = useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    if (pointerItem.GetPredictExist()) {
+        // Predict is for window X/Y coordinates only.
+        // In effect in game scenario only, display coords mismatch do not matter.
+        touchPoint.x = pointerItem.GetWindowXPredict();
+        touchPoint.y = pointerItem.GetWindowYPredict();
     } else {
-        touchPoint.x = pointerItem.GetWindowX();
-        touchPoint.y = pointerItem.GetWindowY();
+        if (useHighPrecisionTouch) {
+            touchPoint.x = NonZeroOrInteger(pointerItem.GetWindowXPos(), pointerItem.GetWindowX());
+            touchPoint.y = NonZeroOrInteger(pointerItem.GetWindowYPos(), pointerItem.GetWindowY());
+        } else {
+            touchPoint.x = pointerItem.GetWindowX();
+            touchPoint.y = pointerItem.GetWindowY();
+        }
+    }
+    if (useHighPrecisionTouch) {
+        touchPoint.screenX = NonZeroOrInteger(pointerItem.GetDisplayXPos(), pointerItem.GetDisplayX());
+        touchPoint.screenY = NonZeroOrInteger(pointerItem.GetDisplayYPos(), pointerItem.GetDisplayY());
+    } else {
         touchPoint.screenX = pointerItem.GetDisplayX();
         touchPoint.screenY = pointerItem.GetDisplayY();
     }
@@ -558,6 +573,19 @@ void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, C
     event.SetPointerEvent(pointerEvent);
 }
 
+void ValidateAxes(uint32_t& axes, AxisEvent& event)
+{
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.verticalAxis))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::VERTICAL_AXIS)))
+                : static_cast<uint32_t>(-1);
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.horizontalAxis))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::HORIZONTAL_AXIS)))
+                : static_cast<uint32_t>(-1);
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.pinchAxisScale))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::PINCH_AXIS)))
+                : static_cast<uint32_t>(-1);
+}
+
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -606,6 +634,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
                 ? (1 << static_cast<uint32_t>(AxisType::HORIZONTAL_AXIS)): 0;
     axes |= pointerEvent->HasAxis(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH)
                 ? (1 << static_cast<uint32_t>(AxisType::PINCH_AXIS)): 0;
+    ValidateAxes(axes, event);
     event.axes = axes;
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
@@ -801,6 +830,17 @@ void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEven
     event.absHat0YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT0Y);
     event.absBrakeValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_BRAKE);
     event.absGasValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_GAS);
+    event.absRxValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RX);
+    event.absRyValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RY);
+    event.absThrottleValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_THROTTLE);
+    event.absRudderValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RUDDER);
+    event.absWheelValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_WHEEL);
+    event.absHat1XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT1X);
+    event.absHat1YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT1Y);
+    event.absHat2XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT2X);
+    event.absHat2YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT2Y);
+    event.absHat3XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3X);
+    event.absHat3YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3Y);
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetNonPointerAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();

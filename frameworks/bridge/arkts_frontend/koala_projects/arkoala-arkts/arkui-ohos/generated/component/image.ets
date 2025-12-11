@@ -20,6 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Resource_serializer } from "./../framework/resource"
 import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
@@ -28,11 +29,12 @@ import { ColorMetrics_serializer } from "./../Graphics"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { ColorFilter_serializer, ResourceColor, ColorFilter, ResourceStr, EdgeWidths, EdgeWidths_serializer } from "./units"
 import { drawing_ColorFilter_serializer, drawing_Lattice_serializer } from "./../framework/ohos.graphics.drawing"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { PointLightStyle_serializer, ContentTransitionEffect_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ContentTransitionEffect, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookImageSetImageOptions, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater, hookImageOnError } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
 import { ColorMetrics } from "arkui.Graphics"
@@ -91,7 +93,8 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
+    setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toByte())
@@ -117,6 +120,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8((3).toByte())
             const srcForIdx3  = src as ImageContent
             thisSerializer.writeInt32(srcForIdx3.valueOf())
+        } else if (src === undefined) {
+            thisSerializer.writeInt8((3).toByte())
+            const srcForIdx3  = ImageContent.EMPTY
+            thisSerializer.writeInt32(srcForIdx3.valueOf())
         }
         if (imageAIOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -128,7 +135,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAltAttribute(value: string | Resource | image.PixelMap | undefined): void {
+    setAltAttribute(value: string | Resource | image.PixelMap | ImageAlt | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -145,7 +152,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            }
+            } else if (valueTmpValue instanceof ImageAlt) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as ImageAlt
+                ImageAlt_serializer.write(thisSerializer, valueTmpValueForIdx3)
+             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -188,10 +199,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -288,6 +299,18 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setDynamicRangeMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setHdrBrightnessAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setHdrBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInterpolationAttribute(value: ImageInterpolation | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -380,12 +403,12 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setEdgeAntialiasingAttribute(value: number | undefined): void {
+    setEdgeAntialiasingAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -500,6 +523,30 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setOrientation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSupportSvg2Attribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setSupportSvg2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentTransitionAttribute(value: ContentTransitionEffect | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ContentTransitionEffect_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type DrawingColorFilter = drawing.ColorFilter;
 export type ResolutionQuality = image.ResolutionQuality;
@@ -541,25 +588,29 @@ export enum ImageRotateOrientation {
     LEFT_MIRRORED = 8
 }
 export interface ImageCompleteEvent {
-    width: number;
-    height: number;
-    componentWidth: number;
-    componentHeight: number;
-    loadingStatus: number;
-    contentWidth: number;
-    contentHeight: number;
-    contentOffsetX: number;
-    contentOffsetY: number;
+    width: int32;
+    height: int32;
+    componentWidth: int32;
+    componentHeight: int32;
+    loadingStatus: int32;
+    contentWidth: int32;
+    contentHeight: int32;
+    contentOffsetX: int32;
+    contentOffsetY: int32;
 }
 export interface ImageSourceSize {
-    width: number;
-    height: number;
+    width: double;
+    height: double;
+}
+export interface ImageAlt {
+    placeholder?: ResourceStr | image.PixelMap;
+    error?: ResourceStr | image.PixelMap;
 }
 export interface ImageAttribute extends CommonMethod {
-    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         throw new Error("Unimplemented method setImageOptions")
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         throw new Error("Unimplemented method alt")
     }
     matchTextDirection(value: boolean | undefined): this {
@@ -589,6 +640,9 @@ export interface ImageAttribute extends CommonMethod {
     dynamicRangeMode(value: DynamicRangeMode | undefined): this {
         throw new Error("Unimplemented method dynamicRangeMode")
     }
+    hdrBrightness(value: double | undefined): this {
+        throw new Error("Unimplemented method hdrBrightness")
+    }
     interpolation(value: ImageInterpolation | undefined): this {
         throw new Error("Unimplemented method interpolation")
     }
@@ -608,7 +662,7 @@ export interface ImageAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this {
         throw new Error("Unimplemented method pointLight")
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         throw new Error("Unimplemented method edgeAntialiasing")
     }
     onComplete(value: ImageOnCompleteCallback | undefined): this {
@@ -638,12 +692,18 @@ export interface ImageAttribute extends CommonMethod {
     orientation(value: ImageRotateOrientation | undefined): this {
         throw new Error("Unimplemented method orientation")
     }
+    supportSvg2(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportSvg2")
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        throw new Error("Unimplemented method contentTransition")
+    }
     attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribute {
-    alt_value?: string | Resource | image.PixelMap | undefined
+    alt_value?: string | Resource | image.PixelMap | ImageAlt | undefined
     matchTextDirection_value?: boolean | undefined
     fitOriginalSize_value?: boolean | undefined
     fillColor_value?: ResourceColor | ColorContent | ColorMetrics | undefined
@@ -653,6 +713,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     autoResize_value?: boolean | undefined
     renderMode_value?: ImageRenderMode | undefined
     dynamicRangeMode_value?: DynamicRangeMode | undefined
+    hdrBrightness_value?: double | undefined
     interpolation_value?: ImageInterpolation | undefined
     sourceSize_value?: ImageSourceSize | undefined
     syncLoad_value?: boolean | undefined
@@ -660,7 +721,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     copyOption_value?: CopyOptions | undefined
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
-    edgeAntialiasing_value?: number | undefined
+    edgeAntialiasing_value?: double | undefined
     onComplete_value?: ImageOnCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     onFinish_value?: (() => void) | undefined
@@ -670,11 +731,13 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     privacySensitive_value?: boolean | undefined
     enhancedImageQuality_value?: image.ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
+    supportSvg2_value?: boolean | undefined
+    contentTransition_value?: ContentTransitionEffect | undefined
     attributeModifier_value?: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined
-    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         return this
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         return this
     }
     matchTextDirection(value: boolean | undefined): this {
@@ -704,6 +767,9 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     dynamicRangeMode(value: DynamicRangeMode | undefined): this {
         return this
     }
+    hdrBrightness(value: double | undefined): this {
+        return this
+    }
     interpolation(value: ImageInterpolation | undefined): this {
         return this
     }
@@ -725,7 +791,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     pointLight(value: PointLightStyle | undefined): this {
         return this
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         return this
     }
     onComplete(value: ImageOnCompleteCallback | undefined): this {
@@ -755,6 +821,12 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     orientation(value: ImageRotateOrientation | undefined): this {
         return this
     }
+    supportSvg2(value: boolean | undefined): this {
+        return this
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        return this
+    }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -762,8 +834,8 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
 export type ImageErrorCallback = (error: ImageError) => void;
 export type ImageOnCompleteCallback = (loadEvent?: ImageCompleteEvent) => void;
 export interface ImageError {
-    componentWidth: number;
-    componentHeight: number;
+    componentWidth: int32;
+    componentHeight: int32;
     message: string;
     error?: BusinessError;
 }
@@ -779,16 +851,19 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return (this.peer as ArkImagePeer)
     }
-    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            hookImageSetImageOptions(this, src, imageAIOptions)
+            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
+            const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
+            this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
+            this.applyOptionsFinish('ImageAttribute');
             return this
         }
         return this
     }
-    public alt(value: string | Resource | image.PixelMap | undefined): this {
+    public alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         if (this.checkPriority("alt")) {
-            const value_casted = value as (string | Resource | image.PixelMap | undefined)
+            const value_casted = value as (string | Resource | image.PixelMap | ImageAlt | undefined)
             this.getPeer()?.setAltAttribute(value_casted)
             return this
         }
@@ -866,6 +941,14 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
+    public hdrBrightness(value: double | undefined): this {
+        if (this.checkPriority("hdrBrightness")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setHdrBrightnessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public interpolation(value: ImageInterpolation | undefined): this {
         if (this.checkPriority("interpolation")) {
             const value_casted = value as (ImageInterpolation | undefined)
@@ -922,9 +1005,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public edgeAntialiasing(value: number | undefined): this {
+    public edgeAntialiasing(value: double | undefined): this {
         if (this.checkPriority("edgeAntialiasing")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setEdgeAntialiasingAttribute(value_casted)
             return this
         }
@@ -940,8 +1023,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public onError(value: ImageErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
-            const value_casted = value as (ImageErrorCallback | undefined)
-            this.getPeer()?.setOnErrorAttribute(value_casted)
+            hookImageOnError(this, value)
             return this
         }
         return this
@@ -1002,13 +1084,34 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
+    public supportSvg2(value: boolean | undefined): this {
+        if (this.checkPriority("supportSvg2")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSupportSvg2Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentTransition(value: ContentTransitionEffect | undefined): this {
+        if (this.checkPriority("contentTransition")) {
+            const value_casted = value as (ContentTransitionEffect | undefined)
+            this.getPeer()?.setContentTransitionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -1041,56 +1144,162 @@ export class ColorContent_serializer {
         return ColorContentInternal.fromPtr(ptr)
     }
 }
-export class ImageCompleteEvent_serializer {
-    public static write(buffer: SerializerBase, value: ImageCompleteEvent): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
-        const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
-        const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
-        const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
-        const valueHolderForLoadingStatus  = value.loadingStatus
-        valueSerializer.writeNumber(valueHolderForLoadingStatus)
-        const valueHolderForContentWidth  = value.contentWidth
-        valueSerializer.writeNumber(valueHolderForContentWidth)
-        const valueHolderForContentHeight  = value.contentHeight
-        valueSerializer.writeNumber(valueHolderForContentHeight)
-        const valueHolderForContentOffsetX  = value.contentOffsetX
-        valueSerializer.writeNumber(valueHolderForContentOffsetX)
-        const valueHolderForContentOffsetY  = value.contentOffsetY
-        valueSerializer.writeNumber(valueHolderForContentOffsetY)
-    }
-    public static read(buffer: DeserializerBase): ImageCompleteEvent {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const loadingStatusTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetYTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
-        return value
-    }
-}
 export class ImageSourceSize_serializer {
     public static write(buffer: SerializerBase, value: ImageSourceSize): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): ImageSourceSize {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : ImageSourceSize = ({width: widthTmpResult, height: heightTmpResult} as ImageSourceSize)
+        return value
+    }
+}
+export class ImageCompleteEvent_serializer {
+    public static write(buffer: SerializerBase, value: ImageCompleteEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeInt32(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeInt32(valueHolderForHeight)
+        const valueHolderForComponentWidth  = value.componentWidth
+        valueSerializer.writeInt32(valueHolderForComponentWidth)
+        const valueHolderForComponentHeight  = value.componentHeight
+        valueSerializer.writeInt32(valueHolderForComponentHeight)
+        const valueHolderForLoadingStatus  = value.loadingStatus
+        valueSerializer.writeInt32(valueHolderForLoadingStatus)
+        const valueHolderForContentWidth  = value.contentWidth
+        valueSerializer.writeInt32(valueHolderForContentWidth)
+        const valueHolderForContentHeight  = value.contentHeight
+        valueSerializer.writeInt32(valueHolderForContentHeight)
+        const valueHolderForContentOffsetX  = value.contentOffsetX
+        valueSerializer.writeInt32(valueHolderForContentOffsetX)
+        const valueHolderForContentOffsetY  = value.contentOffsetY
+        valueSerializer.writeInt32(valueHolderForContentOffsetY)
+    }
+    public static read(buffer: DeserializerBase): ImageCompleteEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const widthTmpResult : int32 = valueDeserializer.readInt32()
+        const heightTmpResult : int32 = valueDeserializer.readInt32()
+        const componentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const componentHeightTmpResult : int32 = valueDeserializer.readInt32()
+        const loadingStatusTmpResult : int32 = valueDeserializer.readInt32()
+        const contentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const contentHeightTmpResult : int32 = valueDeserializer.readInt32()
+        const contentOffsetXTmpResult : int32 = valueDeserializer.readInt32()
+        const contentOffsetYTmpResult : int32 = valueDeserializer.readInt32()
+        let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
+        return value
+    }
+}
+export class ImageAlt_serializer {
+    public static write(buffer: SerializerBase, value: ImageAlt): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPlaceholder  = value.placeholder
+        if (valueHolderForPlaceholder !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
+            if (valueHolderForPlaceholderTmpValue instanceof ResourceStr) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForPlaceholderTmpValueForIdx0  = valueHolderForPlaceholderTmpValue as ResourceStr
+                if (valueHolderForPlaceholderTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForPlaceholderTmpValueForIdx0ForIdx0  = valueHolderForPlaceholderTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForPlaceholderTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForPlaceholderTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForPlaceholderTmpValueForIdx0ForIdx1  = valueHolderForPlaceholderTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx0ForIdx1)
+                }
+            } else if (valueHolderForPlaceholderTmpValue instanceof image.PixelMap) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForPlaceholderTmpValueForIdx1  = valueHolderForPlaceholderTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForError  = value.error
+        if (valueHolderForError !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForErrorTmpValue  = valueHolderForError!
+            if (valueHolderForErrorTmpValue instanceof ResourceStr) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as ResourceStr
+                if (valueHolderForErrorTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForErrorTmpValueForIdx0ForIdx0  = valueHolderForErrorTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForErrorTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForErrorTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForErrorTmpValueForIdx0ForIdx1  = valueHolderForErrorTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForErrorTmpValueForIdx0ForIdx1)
+                }
+            } else if (valueHolderForErrorTmpValue instanceof image.PixelMap) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForErrorTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImageAlt {
+        let valueDeserializer : DeserializerBase = buffer
+        const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placeholderTmpBuf : ResourceStr | image.PixelMap | undefined = undefined
+        if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const placeholderTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let placeholderTmpBuf_ : ResourceStr | image.PixelMap | undefined
+            if (placeholderTmpBuf_UnionSelector == (0).toChar()) {
+                const placeholderTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let placeholderTmpBuf_BufU : string | Resource | undefined
+                if (placeholderTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    placeholderTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (placeholderTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    placeholderTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for placeholderTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                placeholderTmpBuf_ = (placeholderTmpBuf_BufU as string | Resource)
+            } else if (placeholderTmpBuf_UnionSelector == (1).toChar()) {
+                placeholderTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else {
+                throw new Error("One of the branches for placeholderTmpBuf_ has to be chosen through deserialisation.")
+            }
+            placeholderTmpBuf = (placeholderTmpBuf_ as ResourceStr | image.PixelMap)
+        }
+        const placeholderTmpResult : ResourceStr | image.PixelMap | undefined = placeholderTmpBuf
+        const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let errorTmpBuf : ResourceStr | image.PixelMap | undefined = undefined
+        if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let errorTmpBuf_ : ResourceStr | image.PixelMap | undefined
+            if (errorTmpBuf_UnionSelector == (0).toChar()) {
+                const errorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let errorTmpBuf_BufU : string | Resource | undefined
+                if (errorTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    errorTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (errorTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    errorTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for errorTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                errorTmpBuf_ = (errorTmpBuf_BufU as string | Resource)
+            } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
+                errorTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else {
+                throw new Error("One of the branches for errorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            errorTmpBuf = (errorTmpBuf_ as ResourceStr | image.PixelMap)
+        }
+        const errorTmpResult : ResourceStr | image.PixelMap | undefined = errorTmpBuf
+        let value : ImageAlt = ({placeholder: placeholderTmpResult, error: errorTmpResult} as ImageAlt)
         return value
     }
 }
@@ -1098,9 +1307,9 @@ export class ImageError_serializer {
     public static write(buffer: SerializerBase, value: ImageError): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        valueSerializer.writeInt32(valueHolderForComponentWidth)
         const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        valueSerializer.writeInt32(valueHolderForComponentHeight)
         const valueHolderForMessage  = value.message
         valueSerializer.writeString(valueHolderForMessage)
         const valueHolderForError  = value.error
@@ -1114,8 +1323,8 @@ export class ImageError_serializer {
     }
     public static read(buffer: DeserializerBase): ImageError {
         let valueDeserializer : DeserializerBase = buffer
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const componentHeightTmpResult : int32 = valueDeserializer.readInt32()
         const messageTmpResult : string = (valueDeserializer.readString() as string)
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : BusinessError | undefined = undefined

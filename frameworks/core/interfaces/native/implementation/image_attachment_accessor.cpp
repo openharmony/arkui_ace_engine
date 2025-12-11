@@ -19,12 +19,17 @@
 #include "core/components/image/image_component.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
+#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+}
 namespace GeneratedModifier {
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
 } // namespace GeneratedModifier
@@ -56,8 +61,8 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
     }
 #endif
     auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle).value_or(ImageSpanAttribute());
-    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
-    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit);
+    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign).value_or(VerticalAlign::BOTTOM);
+    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit).value_or(ImageFit::COVER);
     imageStyle.size = OptConvert<ImageSpanSize>(value.size);
     std::optional<Ark_ColorFilterType> colorFilter = GetOpt(value.colorFilter);
     if (colorFilter) {
@@ -68,11 +73,16 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
-                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            [&imageStyle](const Ark_drawing_ColorFilter& colorStrategy) {
+                CHECK_NULL_VOID(colorStrategy);
+                imageStyle.drawingColorFilter = colorStrategy->drawingColorFilter;
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
             },
             []() {
             });
+    } else {
+        imageStyle.colorFilterMatrix = DEFAULT_COLORFILTER_MATRIX;
+        imageStyle.drawingColorFilter = std::nullopt;
     }
     imageOptions.imageAttribute = imageStyle;
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
@@ -89,8 +99,8 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
         imageOptions.image = resourceStrOpt->content;
     }
     auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle).value_or(ImageSpanAttribute());
-    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
-    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit);
+    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign).value_or(VerticalAlign::BOTTOM);
+    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit).value_or(ImageFit::COVER);
     imageStyle.size = OptConvert<ImageSpanSize>(value.size);
     std::optional<Ark_ColorFilterType> colorFilter = GetOpt(value.colorFilter);
     if (colorFilter) {
@@ -101,11 +111,16 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
                     imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
                 }
             },
-            [](const Ark_drawing_ColorFilter& colorStrategy) {
-                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            [&imageStyle](const Ark_drawing_ColorFilter& colorStrategy) {
+                CHECK_NULL_VOID(colorStrategy);
+                imageStyle.drawingColorFilter = colorStrategy->drawingColorFilter;
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
             },
             []() {
             });
+    } else {
+        imageStyle.colorFilterMatrix = DEFAULT_COLORFILTER_MATRIX;
+        imageStyle.drawingColorFilter = std::nullopt;
     }
     imageOptions.imageAttribute = imageStyle;
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
@@ -201,8 +216,8 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         peer->span->GetImageAttribute()->drawingColorFilter, empty);
     if (peer->span->GetImageAttribute()->colorFilterMatrix) {
         auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
-        ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
-        auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
+        ArkArrayHolder<Array_Float64> colorFilterHolder(colorFilter);
+        auto arrayNumber = ArkValue<Array_Float64>(colorFilterHolder.ArkValue());
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->construct(&arrayNumber);
         return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {

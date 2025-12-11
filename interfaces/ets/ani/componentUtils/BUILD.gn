@@ -24,6 +24,7 @@ ohos_shared_library("componentUtils_ani") {
   external_deps = [
     "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"

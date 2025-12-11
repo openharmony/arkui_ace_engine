@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -33,6 +34,7 @@ import { LengthMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
 export class TextAreaModifier extends CommonMethodModifier implements TextAreaAttribute,AttributeModifier<TextAreaAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -156,6 +158,12 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _compressLeadingPunctuation_0_0value?: boolean | undefined
+    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _includeFontPadding_0_0value?: boolean | undefined
+    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fallbackLineSpacing_0_0value?: boolean | undefined
     _inputFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _inputFilter_0_0value?: ResourceStr | undefined
     _inputFilter_0_1value?: ((value: string) => void) | undefined
@@ -166,6 +174,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextAreaPeer;
         if (this._placeholderColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -1194,6 +1203,60 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._inputFilter_0_flag) {
@@ -1216,7 +1279,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._showCounter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined | undefined));
+                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined));
                     this._showCounter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1226,7 +1289,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._showCounter_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShowCounterAttribute((undefined as boolean | undefined), (undefined as InputCounterOptions | undefined | undefined));
+                    peer.setShowCounterAttribute((undefined as boolean | undefined), (undefined as InputCounterOptions | undefined));
                 }
             }
         }
@@ -1251,6 +1314,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     }
     mergeModifier(modifier: TextAreaModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._placeholderColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._placeholderColor_0_flag) {
@@ -1992,6 +2056,45 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._inputFilter_0_flag) {
@@ -2014,7 +2117,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.showCounter((undefined as boolean | undefined), (undefined as InputCounterOptions | undefined | undefined));
+                    this.showCounter((undefined as boolean | undefined), (undefined as InputCounterOptions | undefined));
                 }
             }
         }
@@ -2656,6 +2759,39 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._compressLeadingPunctuation_0_0value = value
+        } else
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
+            this._includeFontPadding_0_0value = value
+        } else
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fallbackLineSpacing_0_0value = value
+        } else
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -14,7 +14,7 @@
  */
 
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from 'arkui/component/common';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { ComponentBase } from 'arkui/ComponentBase';
 import { Alignment } from 'arkui.component.enums';
 import { StackModifier } from 'arkui.StackModifier';
 import { PointLightStyle, AttributeModifier } from 'arkui.component.common';
@@ -24,7 +24,7 @@ type int32 = int;
 
 export declare class ArkStackPeer extends ArkCommonMethodPeer {
     _attributeSet?:StackModifier;
-    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0);
+    constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0);
 
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkStackPeer;
 

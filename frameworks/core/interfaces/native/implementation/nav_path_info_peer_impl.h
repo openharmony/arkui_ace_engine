@@ -19,6 +19,8 @@
 #include "navigation_context.h"
 
 struct NavPathInfoPeer {
+    NavPathInfoPeer() = default;
+    explicit NavPathInfoPeer(OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo dataInfo) : data(dataInfo) {}
     OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo data;
 };
 

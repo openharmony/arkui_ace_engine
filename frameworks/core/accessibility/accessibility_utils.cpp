@@ -16,7 +16,7 @@
 #define AVERAGE_BASE 2
 
 #include "core/accessibility/accessibility_utils.h"
-#include "core/components/common/layout/constants.h"
+#include "ui/accessibility/accessibility_constants.h"
 #include "frameworks/core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {

@@ -17,18 +17,21 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookSliderContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute } from "./component/slider"
+import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions, ColorMetricsLinearGradient } from "./component/slider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./component/units"
 import { Color, CrownSensitivity } from "./component/enums"
 import { Resource } from "global.resource"
 import { LinearGradient } from "./component/dataPanel"
+import { ComponentContent } from "arkui.ComponentContent"
 export class SliderModifier extends CommonMethodModifier implements SliderAttribute,AttributeModifier<SliderAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,7 +42,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     applyDisabledAttribute(instance: SliderAttribute): void { }
     applySelectedAttribute(instance: SliderAttribute): void { }
     _blockColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _blockColor_0_0value?: ResourceColor | undefined
+    _blockColor_0_0value?: ResourceColor | LinearGradient | undefined
     _trackColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackColor_0_0value?: ResourceColor | LinearGradient | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -49,7 +52,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _trackThickness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackThickness_0_0value?: Length | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value: number,mode: SliderChangeMode) => void) | undefined
+    _onChange_0_0value?: ((value: double,mode: SliderChangeMode) => void) | undefined
     _blockBorderColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _blockBorderColor_0_0value?: ResourceColor | undefined
     _blockBorderWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -69,24 +72,38 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _sliderInteractionMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _sliderInteractionMode_0_0value?: SliderInteraction | undefined
     _minResponsiveDistance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minResponsiveDistance_0_0value?: number | undefined
+    _minResponsiveDistance_0_0value?: double | undefined
     _slideRange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _slideRange_0_0value?: SlideRange | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _trackColorMetrics_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _trackColorMetrics_0_0value?: ColorMetricsLinearGradient | undefined
+    _showSteps_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showSteps_1_0value?: boolean | undefined
+    _showSteps_1_1value?: SliderShowStepOptions | undefined
+    _prefix_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _prefix_0_0value?: ComponentContent | undefined
+    _prefix_0_1value?: SliderPrefixOptions | undefined
+    _suffix_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _suffix_0_0value?: ComponentContent | undefined
+    _suffix_0_1value?: SliderSuffixOptions | undefined
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<SliderConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSliderPeer;
         if (this._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._blockColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBlockColorAttribute((this._blockColor_0_0value as ResourceColor | undefined));
+                    peer.setBlockColorAttribute((this._blockColor_0_0value as ResourceColor | LinearGradient | undefined));
                     this._blockColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -96,7 +113,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._blockColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBlockColorAttribute((undefined as ResourceColor | undefined));
+                    peer.setBlockColorAttribute((undefined as ResourceColor | LinearGradient | undefined));
                 }
             }
         }
@@ -140,7 +157,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._showSteps_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowStepsAttribute((this._showSteps_0_0value as boolean | undefined));
+                    peer.setShowSteps0Attribute((this._showSteps_0_0value as boolean | undefined));
                     this._showSteps_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -150,7 +167,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._showSteps_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShowStepsAttribute((undefined as boolean | undefined));
+                    peer.setShowSteps0Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -176,7 +193,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value: double,mode: SliderChangeMode) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -186,7 +203,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((value: double,mode: SliderChangeMode) => void) | undefined));
                 }
             }
         }
@@ -356,7 +373,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             switch (this._minResponsiveDistance_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinResponsiveDistanceAttribute((this._minResponsiveDistance_0_0value as number | undefined));
+                    peer.setMinResponsiveDistanceAttribute((this._minResponsiveDistance_0_0value as double | undefined));
                     this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -366,7 +383,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinResponsiveDistanceAttribute((undefined as number | undefined));
+                    peer.setMinResponsiveDistanceAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -424,6 +441,78 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (this._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTrackColorMetricsAttribute((this._trackColorMetrics_0_0value as ColorMetricsLinearGradient | undefined));
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTrackColorMetricsAttribute((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
+        if (this._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showSteps_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowSteps1Attribute((this._showSteps_1_0value as boolean | undefined), (this._showSteps_1_1value as SliderShowStepOptions | undefined | undefined));
+                    this._showSteps_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showSteps_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showSteps_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowSteps1Attribute((undefined as boolean | undefined), (undefined as SliderShowStepOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._prefix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._prefix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSliderSetPrefixMethod(peer, (this._prefix_0_0value as ComponentContent | undefined), (this._prefix_0_1value as SliderPrefixOptions | undefined | undefined));
+                    this._prefix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._prefix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._prefix_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSliderSetPrefixMethod(peer, (undefined as ComponentContent | undefined), (undefined as SliderPrefixOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._suffix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._suffix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSliderSetSuffixMethod(peer, (this._suffix_0_0value as ComponentContent | undefined), (this._suffix_0_1value as SliderSuffixOptions | undefined | undefined));
+                    this._suffix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._suffix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._suffix_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSliderSetSuffixMethod(peer, (undefined as ComponentContent | undefined), (undefined as SliderSuffixOptions | undefined | undefined));
+                }
+            }
+        }
         if (this._showTips_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._showTips_0_flag) {
@@ -442,9 +531,28 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSliderContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<SliderConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSliderContentModifier(peer, (undefined as ContentModifier<SliderConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SliderModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._blockColor_0_flag) {
@@ -454,7 +562,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                     break;
                 }
                 default: {
-                    this.blockColor((undefined as ResourceColor | undefined));
+                    this.blockColor((undefined as ResourceColor | LinearGradient | undefined));
                 }
             }
         }
@@ -519,7 +627,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value: number,mode: SliderChangeMode) => void) | undefined));
+                    this.onChange((undefined as ((value: double,mode: SliderChangeMode) => void) | undefined));
                 }
             }
         }
@@ -649,7 +757,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                     break;
                 }
                 default: {
-                    this.minResponsiveDistance((undefined as number | undefined));
+                    this.minResponsiveDistance((undefined as double | undefined));
                 }
             }
         }
@@ -692,6 +800,58 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (modifier._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.trackColorMetrics(modifier._trackColorMetrics_0_0value);
+                    break;
+                }
+                default: {
+                    this.trackColorMetrics((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
+        if (modifier._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showSteps_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showSteps(modifier._showSteps_1_0value, modifier._showSteps_1_1value);
+                    break;
+                }
+                default: {
+                    this.showSteps((undefined as boolean | undefined), (undefined as SliderShowStepOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._prefix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._prefix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.prefix(modifier._prefix_0_0value, modifier._prefix_0_1value);
+                    break;
+                }
+                default: {
+                    this.prefix((undefined as ComponentContent | undefined), (undefined as SliderPrefixOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._suffix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._suffix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.suffix(modifier._suffix_0_0value, modifier._suffix_0_1value);
+                    break;
+                }
+                default: {
+                    this.suffix((undefined as ComponentContent | undefined), (undefined as SliderSuffixOptions | undefined | undefined));
+                }
+            }
+        }
         if (modifier._showTips_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._showTips_0_flag) {
@@ -705,8 +865,21 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<SliderConfiguration> | undefined));
+                }
+            }
+        }
     }
-    blockColor(value: ResourceColor | undefined): this {
+    blockColor(value: ResourceColor | LinearGradient | undefined): this {
         if (((this._blockColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._blockColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -761,7 +934,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
         return this
     }
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    onChange(value: ((value: double,mode: SliderChangeMode) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -871,7 +1044,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
         return this
     }
-    minResponsiveDistance(value: number | undefined): this {
+    minResponsiveDistance(value: double | undefined): this {
         if (((this._minResponsiveDistance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minResponsiveDistance_0_0value) !== (value)))
         {
             this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.UPDATE
@@ -915,6 +1088,42 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
         return this
     }
+    showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
+        if (((this._showSteps_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showSteps_1_0value) !== (value)) || (true))
+        {
+            this._showSteps_1_flag = AttributeUpdaterFlag.UPDATE
+            this._showSteps_1_0value = value
+            this._showSteps_1_1value = options
+        } else
+        {
+            this._showSteps_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions): this {
+        if (((this._prefix_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._prefix_0_flag = AttributeUpdaterFlag.UPDATE
+            this._prefix_0_0value = content
+            this._prefix_0_1value = options
+        } else
+        {
+            this._prefix_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions): this {
+        if (((this._suffix_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._suffix_0_flag = AttributeUpdaterFlag.UPDATE
+            this._suffix_0_0value = content
+            this._suffix_0_1value = options
+        } else
+        {
+            this._suffix_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     showTips(value: boolean | undefined, content?: ResourceStr): this {
         if (((this._showTips_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showTips_0_0value) !== (value)) || (true))
         {
@@ -924,6 +1133,28 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         } else
         {
             this._showTips_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
+        if (((this._trackColorMetrics_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._trackColorMetrics_0_0value) !== (value)))
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.UPDATE
+            this._trackColorMetrics_0_0value = value
+        } else
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

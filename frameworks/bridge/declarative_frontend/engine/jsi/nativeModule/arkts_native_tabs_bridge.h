@@ -28,6 +28,7 @@ public:
     static ArkUINativeModuleValue SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabOnUnselected(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBarBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBarBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -51,6 +52,7 @@ public:
     static ArkUINativeModuleValue ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabOnUnselected(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBarBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBarBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);

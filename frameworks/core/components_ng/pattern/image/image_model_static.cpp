@@ -28,18 +28,11 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/drawable/animated_drawable_descriptor.h"
-#include "core/drawable/layered_drawable_descriptor.h"
-#include "core/drawable/pixel_map_drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 
-namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t LAYERED_TYPE = 1;
-constexpr int32_t ANIMATED_TYPE = 2;
-constexpr int32_t PIXELMAP_TYPE = 3;
-} // namespace
 
+namespace OHOS::Ace::NG {
 void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
 {
     CHECK_NULL_VOID(frameNode);
@@ -159,6 +152,41 @@ void ImageModelStatic::SetAlt(FrameNode* frameNode, const std::optional<ImageSou
     }
 }
 
+void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        if (ImageSourceInfo::ResolveURIType(src.value().GetSrc()) == SrcType::NETWORK) {
+            ImageSourceInfo defaultSrcInfo("");
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, defaultSrcInfo, frameNode);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, frameNode);
+    }
+}
+
+void ImageModelStatic::SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, frameNode);
+    }
+}
+
+void ImageModelStatic::SetSupportSvg2(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportSvg2(enable);
+}
+
+void ImageModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
+}
+
 void ImageModelStatic::SetImageInterpolation(
     FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
@@ -197,84 +225,37 @@ void ImageModelStatic::SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
-void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, void* drawable, int type)
+void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawableAddr)
 {
     CHECK_NULL_VOID(frameNode);
-    if (type == LAYERED_TYPE) {
-        // layered
-        auto layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(drawable);
-        CHECK_NULL_VOID(layeredDrawable);
-        auto pixelMap = layeredDrawable->GetPixelMap();
+    CHECK_NULL_VOID(drawableAddr);
+    auto drawableType = drawableAddr->GetDrawableType();
+    if (drawableType != DrawableType::ANIMATED) {
+        auto pixelMap = drawableAddr->GetPixelMap();
         SetPixelMap(frameNode, pixelMap);
-    } else if (type == ANIMATED_TYPE) {
-        // animated
-        auto animatedDrawable = reinterpret_cast<AnimatedDrawableDescriptor*>(drawable);
-        CHECK_NULL_VOID(animatedDrawable);
-        auto pixelMaps = animatedDrawable->GetPixelMapList();
-        auto duration = animatedDrawable->GetTotalDuration();
-        auto iterations = animatedDrawable->GetIterations();
-        SetPixelMapList(frameNode, pixelMaps, duration, iterations);
-    } else if (type == PIXELMAP_TYPE) {
-        // pixelmap
-        auto pixelmapDrawable = reinterpret_cast<PixelMapDrawableDescriptor*>(drawable);
-        CHECK_NULL_VOID(pixelmapDrawable);
-        auto pixelMap = pixelmapDrawable->GetPixelMap();
-        SetPixelMap(frameNode, pixelMap);
+    } else {
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        pattern->UpdateDrawableDescriptor(drawable);
     }
-}
-
-void ImageModelStatic::SetPixelMapList(
-    FrameNode* frameNode, const std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iteration)
-{
-    // std::vector<ImageProperties> imageList;
-    // for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
-    //     ImageProperties image;
-    //     image.pixelMap = pixelMaps[i];
-    //     imageList.push_back(image);
-    // }
-    // if (frameNode->GetChildren().empty()) {
-    //     auto imageNode = FrameNode::CreateFrameNode(
-    //         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    //     CHECK_NULL_VOID(imageNode);
-    //     auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-    //     CHECK_NULL_VOID(imageLayoutProperty);
-    //     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    //     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-    //     frameNode->AddChild(imageNode);
-    // }
-    // auto pattern = frameNode->GetPattern<ImagePattern>();
-    // CHECK_NULL_VOID(pattern);
-    // if (!pattern->GetIsAnimation()) {
-    //     auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-    //     CHECK_NULL_VOID(castImageLayoutProperty);
-    //     castImageLayoutProperty->Reset();
-    //     auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
-    //     CHECK_NULL_VOID(castImageRenderProperty);
-    //     castImageRenderProperty->Reset();
-    //     pattern->ResetImageAndAlt();
-    //     pattern->ResetImageProperties();
-    // }
-    // auto pipeline = frameNode->GetContext();
-    // CHECK_NULL_VOID(pipeline);
-    // auto draggable = pipeline->GetDraggable<ImageTheme>();
-    // if (draggable && !frameNode->IsDraggable()) {
-    //     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    //     CHECK_NULL_VOID(gestureHub);
-    //     gestureHub->InitDragDropEvent();
-    // }
-    // pattern->SetSrcUndefined(false);
-    // pattern->StopAnimation();
-    // pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    // pattern->SetImages(std::move(imageList));
-    // pattern->SetDuration(duration);
-    // pattern->SetIteration(iteration);
-    // pattern->StartAnimation();
 }
 
 void ImageModelStatic::SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
+}
+
+void ImageModelStatic::SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (hdrBrightness) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, *hdrBrightness, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP

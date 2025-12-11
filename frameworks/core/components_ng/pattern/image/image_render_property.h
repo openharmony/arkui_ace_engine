@@ -44,6 +44,7 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HdrBrightness, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ContentTransition, ContentTransitionType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AntiAlias, bool);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         /* no fixed attr below, just return */
@@ -76,6 +77,7 @@ struct ImagePaintStyle {
             CONTENTTRANSITIONVALUE[static_cast<int32_t>(
                 propContentTransition.value_or(ContentTransitionType::IDENTITY))],
             filter);
+        json->PutExtAttr("antiAlias", propAntiAlias.value_or(false) ? "true" : "false", filter);
     }
 };
 
@@ -129,6 +131,7 @@ public:
         ImagePaintStyle, ImageResizableSlice, ImageResizableSlice, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ImagePaintStyle, ContentTransition, ContentTransitionType, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, AntiAlias, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);

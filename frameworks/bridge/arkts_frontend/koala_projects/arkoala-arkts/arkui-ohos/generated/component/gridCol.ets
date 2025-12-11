@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookGridColAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -42,6 +44,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGridColOptionsAttribute(option?: GridColOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (option !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -53,15 +56,15 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridColInterface_setGridColOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSpanAttribute(value: number | GridColColumnOption | undefined): void {
+    setSpanAttribute(value: int32 | GridColColumnOption | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
@@ -73,15 +76,15 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridColAttribute_setSpan(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setGridColOffsetAttribute(value: number | GridColColumnOption | undefined): void {
+    setGridColOffsetAttribute(value: int32 | GridColColumnOption | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
@@ -93,15 +96,15 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridColAttribute_setGridColOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOrderAttribute(value: number | GridColColumnOption | undefined): void {
+    setOrderAttribute(value: int32 | GridColColumnOption | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
@@ -115,29 +118,29 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
     }
 }
 export interface GridColColumnOption {
-    xs?: number;
-    sm?: number;
-    md?: number;
-    lg?: number;
-    xl?: number;
-    xxl?: number;
+    xs?: int32;
+    sm?: int32;
+    md?: int32;
+    lg?: int32;
+    xl?: int32;
+    xxl?: int32;
 }
 export interface GridColOptions {
-    span?: number | GridColColumnOption;
-    offset?: number | GridColColumnOption;
-    order?: number | GridColColumnOption;
+    span?: int32 | GridColColumnOption;
+    offset?: int32 | GridColColumnOption;
+    order?: int32 | GridColColumnOption;
 }
 export interface GridColAttribute extends CommonMethod {
     setGridColOptions(option?: GridColOptions): this {
         throw new Error("Unimplemented method setGridColOptions")
     }
-    span(value: number | GridColColumnOption | undefined): this {
+    span(value: int32 | GridColColumnOption | undefined): this {
         throw new Error("Unimplemented method span")
     }
-    gridColOffset(value: number | GridColColumnOption | undefined): this {
+    gridColOffset(value: int32 | GridColColumnOption | undefined): this {
         throw new Error("Unimplemented method gridColOffset")
     }
-    order(value: number | GridColColumnOption | undefined): this {
+    order(value: int32 | GridColColumnOption | undefined): this {
         throw new Error("Unimplemented method order")
     }
     attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -145,20 +148,20 @@ export interface GridColAttribute extends CommonMethod {
     }
 }
 export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttribute {
-    span_value?: number | GridColColumnOption | undefined
-    gridColOffset_value?: number | GridColColumnOption | undefined
-    order_value?: number | GridColColumnOption | undefined
+    span_value?: int32 | GridColColumnOption | undefined
+    gridColOffset_value?: int32 | GridColColumnOption | undefined
+    order_value?: int32 | GridColColumnOption | undefined
     attributeModifier_value?: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined
     setGridColOptions(option?: GridColOptions): this {
         return this
     }
-    span(value: number | GridColColumnOption | undefined): this {
+    span(value: int32 | GridColColumnOption | undefined): this {
         return this
     }
-    gridColOffset(value: number | GridColColumnOption | undefined): this {
+    gridColOffset(value: int32 | GridColColumnOption | undefined): this {
         return this
     }
-    order(value: number | GridColColumnOption | undefined): this {
+    order(value: int32 | GridColColumnOption | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -177,41 +180,47 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         if (this.checkPriority("setGridColOptions")) {
             const option_casted = option as (GridColOptions | undefined)
             this.getPeer()?.setGridColOptionsAttribute(option_casted)
+            this.applyOptionsFinish('GridColAttribute');
             return this
         }
         return this
     }
-    public span(value: number | GridColColumnOption | undefined): this {
+    public span(value: int32 | GridColColumnOption | undefined): this {
         if (this.checkPriority("span")) {
-            const value_casted = value as (number | GridColColumnOption | undefined)
+            const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setSpanAttribute(value_casted)
             return this
         }
         return this
     }
-    public gridColOffset(value: number | GridColColumnOption | undefined): this {
+    public gridColOffset(value: int32 | GridColColumnOption | undefined): this {
         if (this.checkPriority("gridColOffset")) {
-            const value_casted = value as (number | GridColColumnOption | undefined)
+            const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setGridColOffsetAttribute(value_casted)
             return this
         }
         return this
     }
-    public order(value: number | GridColColumnOption | undefined): this {
+    public order(value: int32 | GridColColumnOption | undefined): this {
         if (this.checkPriority("order")) {
-            const value_casted = value as (number | GridColColumnOption | undefined)
+            const value_casted = value as (int32 | GridColColumnOption | undefined)
             this.getPeer()?.setOrderAttribute(value_casted)
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridColAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGridColAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -240,7 +249,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForXs !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXsTmpValue  = valueHolderForXs!
-            valueSerializer.writeNumber(valueHolderForXsTmpValue)
+            valueSerializer.writeInt32(valueHolderForXsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -248,7 +257,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForSm !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSmTmpValue  = valueHolderForSm!
-            valueSerializer.writeNumber(valueHolderForSmTmpValue)
+            valueSerializer.writeInt32(valueHolderForSmTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -256,7 +265,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForMd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMdTmpValue  = valueHolderForMd!
-            valueSerializer.writeNumber(valueHolderForMdTmpValue)
+            valueSerializer.writeInt32(valueHolderForMdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -264,7 +273,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForLg !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLgTmpValue  = valueHolderForLg!
-            valueSerializer.writeNumber(valueHolderForLgTmpValue)
+            valueSerializer.writeInt32(valueHolderForLgTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -272,7 +281,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForXl !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXlTmpValue  = valueHolderForXl!
-            valueSerializer.writeNumber(valueHolderForXlTmpValue)
+            valueSerializer.writeInt32(valueHolderForXlTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -280,7 +289,7 @@ export class GridColColumnOption_serializer {
         if (valueHolderForXxl !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXxlTmpValue  = valueHolderForXxl!
-            valueSerializer.writeNumber(valueHolderForXxlTmpValue)
+            valueSerializer.writeInt32(valueHolderForXxlTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -288,41 +297,41 @@ export class GridColColumnOption_serializer {
     public static read(buffer: DeserializerBase): GridColColumnOption {
         let valueDeserializer : DeserializerBase = buffer
         const xsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xsTmpBuf : number | undefined = undefined
+        let xsTmpBuf : int32 | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xsTmpBuf = (valueDeserializer.readNumber() as number)
+            xsTmpBuf = valueDeserializer.readInt32()
         }
-        const xsTmpResult : number | undefined = xsTmpBuf
+        const xsTmpResult : int32 | undefined = xsTmpBuf
         const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let smTmpBuf : number | undefined = undefined
+        let smTmpBuf : int32 | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            smTmpBuf = (valueDeserializer.readNumber() as number)
+            smTmpBuf = valueDeserializer.readInt32()
         }
-        const smTmpResult : number | undefined = smTmpBuf
+        const smTmpResult : int32 | undefined = smTmpBuf
         const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mdTmpBuf : number | undefined = undefined
+        let mdTmpBuf : int32 | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mdTmpBuf = (valueDeserializer.readNumber() as number)
+            mdTmpBuf = valueDeserializer.readInt32()
         }
-        const mdTmpResult : number | undefined = mdTmpBuf
+        const mdTmpResult : int32 | undefined = mdTmpBuf
         const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lgTmpBuf : number | undefined = undefined
+        let lgTmpBuf : int32 | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lgTmpBuf = (valueDeserializer.readNumber() as number)
+            lgTmpBuf = valueDeserializer.readInt32()
         }
-        const lgTmpResult : number | undefined = lgTmpBuf
+        const lgTmpResult : int32 | undefined = lgTmpBuf
         const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xlTmpBuf : number | undefined = undefined
+        let xlTmpBuf : int32 | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xlTmpBuf = (valueDeserializer.readNumber() as number)
+            xlTmpBuf = valueDeserializer.readInt32()
         }
-        const xlTmpResult : number | undefined = xlTmpBuf
+        const xlTmpResult : int32 | undefined = xlTmpBuf
         const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xxlTmpBuf : number | undefined = undefined
+        let xxlTmpBuf : int32 | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xxlTmpBuf = (valueDeserializer.readNumber() as number)
+            xxlTmpBuf = valueDeserializer.readInt32()
         }
-        const xxlTmpResult : number | undefined = xxlTmpBuf
+        const xxlTmpResult : int32 | undefined = xxlTmpBuf
         let value : GridColColumnOption = ({xs: xsTmpResult, sm: smTmpResult, md: mdTmpResult, lg: lgTmpResult, xl: xlTmpResult, xxl: xxlTmpResult} as GridColColumnOption)
         return value
     }
@@ -334,10 +343,10 @@ export class GridColOptions_serializer {
         if (valueHolderForSpan !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpanTmpValue  = valueHolderForSpan!
-            if (valueHolderForSpanTmpValue instanceof number) {
+            if (valueHolderForSpanTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSpanTmpValueForIdx0  = valueHolderForSpanTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSpanTmpValueForIdx0)
+                const valueHolderForSpanTmpValueForIdx0  = valueHolderForSpanTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSpanTmpValueForIdx0)
             } else if (valueHolderForSpanTmpValue instanceof GridColColumnOption) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpanTmpValueForIdx1  = valueHolderForSpanTmpValue as GridColColumnOption
@@ -350,10 +359,10 @@ export class GridColOptions_serializer {
         if (valueHolderForOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetTmpValue  = valueHolderForOffset!
-            if (valueHolderForOffsetTmpValue instanceof number) {
+            if (valueHolderForOffsetTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetTmpValueForIdx0)
+                const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForOffsetTmpValueForIdx0)
             } else if (valueHolderForOffsetTmpValue instanceof GridColColumnOption) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as GridColColumnOption
@@ -366,10 +375,10 @@ export class GridColOptions_serializer {
         if (valueHolderForOrder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOrderTmpValue  = valueHolderForOrder!
-            if (valueHolderForOrderTmpValue instanceof number) {
+            if (valueHolderForOrderTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOrderTmpValueForIdx0  = valueHolderForOrderTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOrderTmpValueForIdx0)
+                const valueHolderForOrderTmpValueForIdx0  = valueHolderForOrderTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForOrderTmpValueForIdx0)
             } else if (valueHolderForOrderTmpValue instanceof GridColColumnOption) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOrderTmpValueForIdx1  = valueHolderForOrderTmpValue as GridColColumnOption
@@ -382,50 +391,50 @@ export class GridColOptions_serializer {
     public static read(buffer: DeserializerBase): GridColOptions {
         let valueDeserializer : DeserializerBase = buffer
         const spanTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let spanTmpBuf : number | GridColColumnOption | undefined = undefined
+        let spanTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((spanTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const spanTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let spanTmpBuf_ : number | GridColColumnOption | undefined
+            let spanTmpBuf_ : int32 | GridColColumnOption | undefined
             if (spanTmpBuf_UnionSelector == (0).toChar()) {
-                spanTmpBuf_ = (valueDeserializer.readNumber() as number)
+                spanTmpBuf_ = valueDeserializer.readInt32()
             } else if (spanTmpBuf_UnionSelector == (1).toChar()) {
                 spanTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for spanTmpBuf_ has to be chosen through deserialisation.")
             }
-            spanTmpBuf = (spanTmpBuf_ as number | GridColColumnOption)
+            spanTmpBuf = (spanTmpBuf_ as int32 | GridColColumnOption)
         }
-        const spanTmpResult : number | GridColColumnOption | undefined = spanTmpBuf
+        const spanTmpResult : int32 | GridColColumnOption | undefined = spanTmpBuf
         const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetTmpBuf : number | GridColColumnOption | undefined = undefined
+        let offsetTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetTmpBuf_ : number | GridColColumnOption | undefined
+            let offsetTmpBuf_ : int32 | GridColColumnOption | undefined
             if (offsetTmpBuf_UnionSelector == (0).toChar()) {
-                offsetTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetTmpBuf_ = valueDeserializer.readInt32()
             } else if (offsetTmpBuf_UnionSelector == (1).toChar()) {
                 offsetTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetTmpBuf = (offsetTmpBuf_ as number | GridColColumnOption)
+            offsetTmpBuf = (offsetTmpBuf_ as int32 | GridColColumnOption)
         }
-        const offsetTmpResult : number | GridColColumnOption | undefined = offsetTmpBuf
+        const offsetTmpResult : int32 | GridColColumnOption | undefined = offsetTmpBuf
         const orderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let orderTmpBuf : number | GridColColumnOption | undefined = undefined
+        let orderTmpBuf : int32 | GridColColumnOption | undefined = undefined
         if ((orderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const orderTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let orderTmpBuf_ : number | GridColColumnOption | undefined
+            let orderTmpBuf_ : int32 | GridColColumnOption | undefined
             if (orderTmpBuf_UnionSelector == (0).toChar()) {
-                orderTmpBuf_ = (valueDeserializer.readNumber() as number)
+                orderTmpBuf_ = valueDeserializer.readInt32()
             } else if (orderTmpBuf_UnionSelector == (1).toChar()) {
                 orderTmpBuf_ = GridColColumnOption_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for orderTmpBuf_ has to be chosen through deserialisation.")
             }
-            orderTmpBuf = (orderTmpBuf_ as number | GridColColumnOption)
+            orderTmpBuf = (orderTmpBuf_ as int32 | GridColColumnOption)
         }
-        const orderTmpResult : number | GridColColumnOption | undefined = orderTmpBuf
+        const orderTmpResult : int32 | GridColColumnOption | undefined = orderTmpBuf
         let value : GridColOptions = ({span: spanTmpResult, offset: offsetTmpResult, order: orderTmpResult} as GridColOptions)
         return value
     }

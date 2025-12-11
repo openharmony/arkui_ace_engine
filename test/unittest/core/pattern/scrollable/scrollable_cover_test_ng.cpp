@@ -1151,33 +1151,6 @@ HWTEST_F(ScrollableCoverTestNg, UnRegister2DragDropManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollPage001
- * @tc.desc: Test the behaviour of the ScrollPage method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a scrollable and init parameters
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    auto propertyCallback = [](float offset) {};
-    scrollable->springOffsetProperty_ =
-        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
-    scrollable->state_ = Scrollable::AnimationState::SPRING;
-    scrollPn->scrollAbort_ = false;
-    ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
-    scrollPn->scrollableEvent_->scrollable_ = scrollable;
-    /**
-     * @tc.steps: step2. Test ScrollPage
-     * @tc.expected: Verify the scrollAbort_ status
-     */
-    scrollPn->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(scrollPn->scrollAbort_);
-}
-
-/**
  * @tc.name: Fling001
  * @tc.desc: Test the behaviour of the Fling method
  * @tc.type: FUNC
@@ -1468,6 +1441,27 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate001, TestSize.Level1)
     scrollable->HandleDragUpdate(info);
     EXPECT_TRUE(scrollable->isDragUpdateStop_);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: HandleDragUpdate002
+ * @tc.desc: Test HandleDragUpdate method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.SetMainDelta(0.4);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(scrollable->lastMainDelta_, 0.4);
+    EXPECT_EQ(scrollable->prevRemainDelta_, 0.4);
+
+    info.SetMainDelta(0.4);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(scrollable->prevRemainDelta_ - 0.2 < 0.01, true);
 }
 
 /**

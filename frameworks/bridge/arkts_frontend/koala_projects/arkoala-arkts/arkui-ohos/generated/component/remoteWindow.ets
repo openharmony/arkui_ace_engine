@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRemoteWindowAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -42,6 +44,7 @@ export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRemoteWindowOptionsAttribute(target: WindowAnimationTarget): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         WindowAnimationTarget_serializer.write(thisSerializer, target)
         ArkUIGeneratedNativeModule._RemoteWindowInterface_setRemoteWindowOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -90,17 +93,23 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         if (this.checkPriority("setRemoteWindowOptions")) {
             const target_casted = target as (WindowAnimationTarget)
             this.getPeer()?.setRemoteWindowOptionsAttribute(target_casted)
+            this.applyOptionsFinish('RemoteWindowAttribute');
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRemoteWindowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRemoteWindowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

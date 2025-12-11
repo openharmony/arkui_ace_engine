@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/extension_handler.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -140,7 +141,11 @@ void ExtensionHandler::OnDraw(DrawingContext& context)
 
 void ExtensionHandler::OnOverlayDraw(DrawingContext& context)
 {
-    InnerOverlayDraw(context);
+    if (drawModifier_ && drawModifier_->drawOverlayFunc) {
+        drawModifier_->drawOverlayFunc(context);
+    } else {
+        InnerOverlayDraw(context);
+    }
 }
 
 void ExtensionHandler::InvalidateRender()
@@ -171,6 +176,14 @@ void ExtensionHandler::ForegroundRender()
         node_->MarkNeedRenderOnly();
     }
     needRender_ = true;
+}
+
+bool ExtensionHandler::NeedRender() const
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        return needRender_ ;
+    }
+    return drawModifier_ || needRender_ ;
 }
 
 } // namespace OHOS::Ace::NG

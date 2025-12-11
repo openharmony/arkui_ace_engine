@@ -44,8 +44,8 @@ export enum SlideEffect {
 }
 export interface PageTransitionOptions {
     type?: RouteType;
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
+    delay?: int32;
 }
-export type PageTransitionCallback = (type: RouteType, progress: number) => void;
+export type PageTransitionCallback = (type: RouteType, progress: double) => void;

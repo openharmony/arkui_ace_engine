@@ -32,6 +32,7 @@ template("ace_core_interfaces_native_node") {
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",
+      "node/atomic_service_modifier.cpp",
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
@@ -168,7 +169,10 @@ template("ace_core_interfaces_native_node") {
         "ani/list_ani_modifier.cpp",
         "ani/node_adapter_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
+        "ani/paste_button_ani_modifier.cpp",
         "ani/rich_editor_ani_modifier.cpp",
+        "ani/save_button_ani_modifier.cpp",
+        "ani/security_component_ani_method.cpp",
         "ani/shape_ani_modifier.cpp",
         "ani/stateMgmt_ani_modifier.cpp",
         "ani/styled_string_ani_modifier.cpp",
@@ -176,12 +180,16 @@ template("ace_core_interfaces_native_node") {
         "ani/trace_ani_modifier.cpp",
         "ani/uinode_ani_modifier.cpp",
         "ani/video_ani_modifier.cpp",
+        "ani/visual_effect_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
         "ani/parallelize_ui_ani_modifier.cpp",
       ]
+
+      sources += [ "drawable/drawable_modifier.cpp" ]
+
       if (build_ohos_sdk) {
         sources -= [
           "ani/ani_theme.cpp",
@@ -193,8 +201,12 @@ template("ace_core_interfaces_native_node") {
           "ani/list_ani_modifier.cpp",
           "ani/node_adapter_ani_modifier.cpp",
           "ani/node_ani_modifier.cpp",
+          "ani/paste_button_ani_modifier.cpp",
+          "ani/save_button_ani_modifier.cpp",
+          "ani/security_component_ani_method.cpp",
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
+          "ani/image_ani_modifier.cpp",
         ]
       }
 
@@ -223,6 +235,7 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/web_modifier.cpp" ]
     }
     if (is_arkui_x) {
+      sources += [ "drawable/drawable_modifier.cpp" ]
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
         "//third_party/bounds_checking_function:libsec_static",

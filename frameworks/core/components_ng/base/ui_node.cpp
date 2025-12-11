@@ -21,10 +21,12 @@
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
@@ -32,10 +34,12 @@ namespace OHOS::Ace::NG {
 std::atomic<int64_t> currentAccessibilityId_ = 0;
 const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
+std::atomic_int32_t UINode::count_;
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
+    ++count_;
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         isThreadSafeNode_ = true;
         isFree_ = true;
@@ -69,6 +73,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
 
 UINode::~UINode()
 {
+    --count_;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -125,6 +130,11 @@ bool UINode::MaybeRelease()
     return !executor->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyUINode");
 }
 
+std::string UINode::ToString() const
+{
+    return tag_ + "," + std::to_string(nodeId_) + "," + std::to_string(accessibilityId_);
+}
+
 void UINode::RegisterReleaseFunc(bool enableRegister)
 {
     uiNodeGcEnable_ = enableRegister;
@@ -132,6 +142,16 @@ void UINode::RegisterReleaseFunc(bool enableRegister)
 
 void UINode::OnDelete()
 {
+    if (onMainTree_) {
+        if (context_) {
+            context_->RemoveAttachedNode(this);
+        }
+        onMainTree_ = false;
+        if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
+            nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+        }
+    }
+
     disappearingChildren_.clear();
     children_.clear();
 }
@@ -475,6 +495,15 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     AfterMountToParent();
 }
 
+int32_t UINode::GetHostPageId() const
+{
+    if (tag_ == V2::PAGE_ETS_TAG) {
+        return hostPageId_;
+    }
+    auto parent = GetParent();
+    return parent ? parent->GetHostPageId() : hostPageId_;
+}
+
 void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(parent);
@@ -628,6 +657,9 @@ void UINode::AllowForceDark(bool forceDarkAllowed)
         context_->AddNeedReloadNodes(this);
     }
     for (const auto& child : GetChildren()) {
+        if (!child) {
+            continue;
+        }
         child->AllowForceDark(forceDarkAllowed);
     }
 }
@@ -682,6 +714,23 @@ void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addD
     child->SetActive(true);
 }
 
+void UINode::UpdateBuilderNodeColorMode(const RefPtr<UINode>& child)
+{
+    if (!SystemProperties::ConfigChangePerform() || !context_ ||
+        (child->nodeStatus_ != NodeStatus::BUILDER_NODE_ON_MAINTREE && !child->isCNode_ &&
+        !child->IsArkTsFrameNode())) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+    if (child->CheckIsDarkMode() != colorMode) {
+        context_->SetIsSystemColorChange(true);
+        SetRerenderable(true);
+        SetMeasureAnyway(true);
+        SetShouldClearCache(true);
+        NotifyColorModeChange(colorMode);
+    }
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
@@ -715,18 +764,6 @@ void UINode::DoAddChild(
     }
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
-    // Forced update colormode when builderNode attach to main tree.
-    if (SystemProperties::ConfigChangePerform() && child->nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE &&
-        context_) {
-        auto colorMode = static_cast<int32_t>(context_->GetColorMode());
-        if (child->CheckIsDarkMode() != colorMode) {
-            context_->SetIsSystemColorChange(true);
-            SetRerenderable(true);
-            SetMeasureAnyway(true);
-            SetShouldClearCache(true);
-            NotifyColorModeChange(colorMode);
-        }
-    }
     UpdateForceDarkAllowedNode(child);
 }
 
@@ -913,6 +950,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
+    // Forced update colormode when builderNode attach to main tree.
+    UpdateBuilderNodeColorMode(Claim(this));
     isRemoving_ = false;
     if (isThreadSafeNode_) {
         isFree_ = false;
@@ -1218,7 +1257,51 @@ bool UINode::NeedRequestAutoSave()
     return false;
 }
 
-void UINode::DumpTree(int32_t depth, bool hasJson)
+void UINode::DumpMoreBasicInfo()
+{
+    if (auto parent = GetParent()) {
+        DumpLog::GetInstance().AddDesc("Parent: " + parent->ToString());
+    }
+    DumpLog::GetInstance().AddDesc("TypeName: " + std::string(GetTypeName()));
+    DumpLog::GetInstance().AddDesc("RefCount: " + std::to_string(RefCount()));
+    DumpLog::GetInstance().AddDesc("HostRootId: " + std::to_string(hostRootId_));
+    DumpLog::GetInstance().AddDesc("HostPageId: " + std::to_string(hostPageId_));
+    DumpLog::GetInstance().AddDesc("RootNodeId: " + std::to_string(rootNodeId_));
+    DumpLog::GetInstance().AddDesc("IsRoot: " + std::to_string(isRoot_));
+    DumpLog::GetInstance().AddDesc("IsOnMainTree: " + std::to_string(onMainTree_));
+    DumpLog::GetInstance().AddDesc("IsThreadSafeNode: " + std::to_string(isThreadSafeNode_));
+    DumpLog::GetInstance().AddDesc("IsFree: " + std::to_string(isFree_));
+    DumpLog::GetInstance().AddDesc("IsCNode: " + std::to_string(isCNode_));
+    DumpLog::GetInstance().AddDesc("IsArkTsFrameNode: " + std::to_string(isArkTsFrameNode_));
+    DumpLog::GetInstance().AddDesc("IsRootBuilderNode: " + std::to_string(isRootBuilderNode_));
+    DumpLog::GetInstance().AddDesc("IsArkTsRenderNode: " + std::to_string(isArkTsRenderNode_));
+    DumpLog::GetInstance().AddDesc("IsBuildByJS: " + std::to_string(isBuildByJS_));
+    DumpLog::GetInstance().AddDesc("IsStaticNode: " + std::to_string(isStaticNode_));
+    DumpLog::GetInstance().AddDesc("IsGcEnable: " + std::to_string(uiNodeGcEnable_));
+    DumpLog::GetInstance().AddDesc("VisibleOrActive: " + std::to_string(CheckVisibleOrActive()));
+    DumpLog::GetInstance().AddDesc("IsFrameNode: " + std::to_string(InstanceOf<FrameNode>(this)));
+}
+
+void UINode::DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc)
+{
+    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
+    DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth_)));
+    DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
+    DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+    if (IsDisappearing()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+    }
+    if (!desc.empty()) {
+        DumpLog::GetInstance().AddDesc("Description: " + desc);
+    }
+    if (DumpLog::GetInstance().IsDumpAllNodes()) {
+        DumpLog::GetInstance().AddDesc("DumpDepth: " + std::to_string(depth));
+        DumpMoreBasicInfo();
+    }
+}
+
+void UINode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
 {
     if (hasJson) {
         std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
@@ -1239,36 +1322,33 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
         DumpLog::GetInstance().Append(prefix + jsonstr);
     } else {
         if (DumpLog::GetInstance().GetDumpFile()) {
-            DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth_)));
-            DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
-            DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
-            if (IsDisappearing()) {
-                DumpLog::GetInstance().AddDesc(
-                    std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
-            }
+            DumpBasicInfo(depth, hasJson, desc);
             DumpInfo();
-            DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+            const std::string& name = DumpLog::GetInstance().IsDumpAllNodes() ? ToString() : GetTag();
+            DumpLog::GetInstance().Append(depth, name, static_cast<int32_t>(GetChildren().size()));
         }
     }
-    if (!CheckVisibleOrActive()) {
+    if (!CheckVisibleOrActive() && !DumpLog::GetInstance().IsDumpAllNodes()) {
+        return;
+    }
+    if (DumpLog::GetInstance().IsDumpAllNodes() && desc == "BrokenChildren") {
         return;
     }
     if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
         for (const auto& item : GetChildrenForInspector(true)) {
             CHECK_NULL_CONTINUE(item);
-            item->DumpTree(depth + 1, hasJson);
+            item->DumpTree(depth + 1, hasJson, "ChildrenForInspector");
         }
     }
     for (const auto& item : GetChildren()) {
-        item->DumpTree(depth + 1, hasJson);
+        item->DumpTree(depth + 1, hasJson, item->GetParent() != Claim(this) ? "BrokenChildren" : "Children");
     }
     for (const auto& [item, index, branch] : disappearingChildren_) {
-        item->DumpTree(depth + 1, hasJson);
+        item->DumpTree(depth + 1, hasJson, "DisappearingChildren");
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
-        frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
+        frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson, "OverlayNode");
     }
 }
 
@@ -1771,6 +1851,9 @@ void UINode::NotifyColorModeChange(uint32_t colorMode)
         }
     }
     for (const auto& child : GetChildren()) {
+        if (!child) {
+            continue;
+        }
         child->SetShouldClearCache(CheckShouldClearCache());
         child->SetRerenderable(GetRerenderable());
         child->SetMeasureAnyway(CheckMeasureAnyway());

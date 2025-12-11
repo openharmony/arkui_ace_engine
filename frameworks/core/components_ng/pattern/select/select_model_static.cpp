@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select/select_model_static.h"
-
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 namespace OHOS::Ace::NG {
@@ -392,6 +392,46 @@ void SelectModelStatic::SetMenuOutline(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuOutline(menuParam.value_or(MenuParam()));
 }
+
+void SelectModelStatic::SetDefaultMenuParam(FrameNode* frameNode, NG::MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    NG::BorderWidthProperty outlineWidth;
+    outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+    menuParam.outlineWidth = outlineWidth;
+    NG::BorderColorProperty outlineColor;
+    outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+    menuParam.outlineColor = outlineColor;
+}
+
+void SelectModelStatic::SetShowInSubWindow(FrameNode* frameNode, const std::optional<bool>& isShowInSubWindow)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!isShowInSubWindow.has_value()) {
+        pattern->ResetShowInSubWindow();
+        return;
+    }
+    pattern->SetShowInSubWindow(isShowInSubWindow.value());
+}
+
+void SelectModelStatic::SetShowDefaultSelectedIcon(FrameNode* frameNode, const std::optional<bool>& show)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!show.has_value()) {
+        pattern->ResetShowDefaultSelectedIcon();
+        return;
+    }
+    pattern->SetShowDefaultSelectedIcon(show.value());
+}
+
 void SelectModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);

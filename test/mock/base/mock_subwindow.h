@@ -120,15 +120,15 @@ public:
     MOCK_METHOD1(IsSameDisplayWithParentWindow, bool(bool useInitializedId));
     MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange,
-        std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange,
-        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) {
+        std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,
+        std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        const RefPtr<NG::FrameNode>& targetNode)
+        {
             return;
         }
     int32_t ShowBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
@@ -166,6 +166,8 @@ public:
     MOCK_METHOD2(ShowActionMenuStatic, void(DialogProperties& dialogProps,
         std::function<void(int32_t, int32_t)>&& callback));
     MOCK_METHOD2(OpenCustomDialogStatic, void(DialogProperties &dialogProps, std::function<void(int32_t)> &&callback));
+    bool SetReceiveDragEventEnabled(bool enabled) override;
+    bool GetIsReceiveDragEventEnabled() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

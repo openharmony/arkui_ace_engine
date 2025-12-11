@@ -20,6 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ComponentBase } from "./../ComponentBase"
@@ -28,6 +29,7 @@ import { ResourceColor, Length, ResourceStr } from "./units"
 import { Color, FontStyle, FontWeight } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookTextTimerContentModifier, hookTextTimerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -91,6 +93,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTextTimerOptionsAttribute(options?: TextTimerOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -123,10 +126,10 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -151,10 +154,10 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -178,15 +181,15 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextTimerAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | ResourceStr | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -230,7 +233,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextTimerAttribute_setFontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTimerAttribute(value: ((utc: number,elapsedTime: number) => void) | undefined): void {
+    setOnTimerAttribute(value: TimerCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -268,16 +271,17 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TextTimerConfiguration extends CommonConfiguration<TextTimerConfiguration> {
-    count: number;
+    count: int64;
     isCountDown: boolean;
     started: boolean;
-    elapsedTime: number;
+    elapsedTime: int64;
 }
 export interface TextTimerOptions {
     isCountDown?: boolean;
-    count?: number;
+    count?: int64;
     controller?: TextTimerController;
 }
+export type TimerCallback = (utc: int64, elapsedTime: int64) => void;
 export interface TextTimerAttribute extends CommonMethod {
     setTextTimerOptions(options?: TextTimerOptions): this {
         throw new Error("Unimplemented method setTextTimerOptions")
@@ -294,13 +298,13 @@ export interface TextTimerAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontFamily")
     }
-    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    onTimer(value: TimerCallback | undefined): this {
         throw new Error("Unimplemented method onTimer")
     }
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
@@ -318,9 +322,9 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | ResourceStr | undefined
+    fontWeight_value?: int32 | FontWeight | ResourceStr | undefined
     fontFamily_value?: ResourceStr | undefined
-    onTimer_value?: ((utc: number,elapsedTime: number) => void) | undefined
+    onTimer_value?: TimerCallback | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
     contentModifier_value?: ContentModifier<TextTimerConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -339,13 +343,13 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         return this
     }
     fontFamily(value: ResourceStr | undefined): this {
         return this
     }
-    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    onTimer(value: TimerCallback | undefined): this {
         return this
     }
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
@@ -370,6 +374,7 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         if (this.checkPriority("setTextTimerOptions")) {
             const options_casted = options as (TextTimerOptions | undefined)
             this.getPeer()?.setTextTimerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('TextTimerAttribute');
             return this
         }
         return this
@@ -406,9 +411,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | ResourceStr | undefined)
+            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -422,9 +427,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    public onTimer(value: TimerCallback | undefined): this {
         if (this.checkPriority("onTimer")) {
-            const value_casted = value as (((utc: number,elapsedTime: number) => void) | undefined)
+            const value_casted = value as (TimerCallback | undefined)
             this.getPeer()?.setOnTimerAttribute(value_casted)
             return this
         }
@@ -445,12 +450,17 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextTimerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextTimerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -480,22 +490,22 @@ export class TextTimerConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForCount  = value.count
-        valueSerializer.writeNumber(valueHolderForCount)
+        valueSerializer.writeInt64(valueHolderForCount)
         const valueHolderForIsCountDown  = value.isCountDown
         valueSerializer.writeBoolean(valueHolderForIsCountDown)
         const valueHolderForStarted  = value.started
         valueSerializer.writeBoolean(valueHolderForStarted)
         const valueHolderForElapsedTime  = value.elapsedTime
-        valueSerializer.writeNumber(valueHolderForElapsedTime)
+        valueSerializer.writeInt64(valueHolderForElapsedTime)
     }
     public static read(buffer: DeserializerBase): TextTimerConfiguration {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<TextTimerConfiguration> = (valueDeserializer.readObject() as ContentModifier<TextTimerConfiguration>)
-        const countTmpResult : number = (valueDeserializer.readNumber() as number)
+        const countTmpResult : int64 = valueDeserializer.readInt64()
         const isCountDownTmpResult : boolean = valueDeserializer.readBoolean()
         const startedTmpResult : boolean = valueDeserializer.readBoolean()
-        const elapsedTimeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const elapsedTimeTmpResult : int64 = valueDeserializer.readInt64()
         let value : TextTimerConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, count: countTmpResult, isCountDown: isCountDownTmpResult, started: startedTmpResult, elapsedTime: elapsedTimeTmpResult} as TextTimerConfiguration)
         return value
     }
@@ -526,7 +536,7 @@ export class TextTimerOptions_serializer {
         if (valueHolderForCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCountTmpValue  = valueHolderForCount!
-            valueSerializer.writeNumber(valueHolderForCountTmpValue)
+            valueSerializer.writeInt64(valueHolderForCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -548,11 +558,11 @@ export class TextTimerOptions_serializer {
         }
         const isCountDownTmpResult : boolean | undefined = isCountDownTmpBuf
         const countTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let countTmpBuf : number | undefined = undefined
+        let countTmpBuf : int64 | undefined = undefined
         if ((countTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            countTmpBuf = (valueDeserializer.readNumber() as number)
+            countTmpBuf = valueDeserializer.readInt64()
         }
-        const countTmpResult : number | undefined = countTmpBuf
+        const countTmpResult : int64 | undefined = countTmpBuf
         const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controllerTmpBuf : TextTimerController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -19,6 +19,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -150,7 +151,7 @@ void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
 }
 
 namespace {
-float DimensionToFloat(const CalcDimension& value, float selfLength)
+double DimensionToFloat(const CalcDimension& value, float selfLength)
 {
     return value.Unit() == DimensionUnit::PERCENT ? -value.Value() * selfLength : -value.ConvertToPx();
 }
@@ -181,13 +182,13 @@ namespace {
  * @param alwaysEnabled true if effect should still apply when content length is smaller than viewport.
  * @return adjusted offset
  */
-float AdjustOffsetInFreeMode(
-    float offset, float scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge, bool alwaysEnabled)
+double AdjustOffsetInFreeMode(
+    double offset, double scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge, bool alwaysEnabled)
 {
     if (!alwaysEnabled && NonPositive(scrollableDistance)) {
         effect = EdgeEffect::NONE;
     }
-    const float minOffset = std::min(-scrollableDistance, 0.0f); // Max scroll to end
+    const double minOffset = std::min(-scrollableDistance, 0.0); // Max scroll to end
     if (Positive(offset)) {                                      // over-scroll at start
         if (effect != EdgeEffect::SPRING || appliedEdge == EffectEdge::END) {
             offset = 0.0f;
@@ -242,15 +243,13 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         currentOffset_ =
             AdjustOffsetInFreeMode(currentOffset_, scrollableDistance_, effect, scroll->GetEffectEdge(), alwaysEnabled);
     } else if (UnableOverScroll(layoutWrapper)) {
-        if (scrollableDistance_ > 0.0f) {
-            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        if (scrollableDistance_ > 0.0) {
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
         } else {
-            currentOffset_ = Positive(currentOffset_)
-                                 ? 0.0f
-                                 : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+            currentOffset_ = Positive(currentOffset_) ? 0.0 : std::clamp(currentOffset_, 0.0, -scrollableDistance_);
         }
     } else if (LessNotEqual(scrollableDistance_, lastScrollableDistance)) {
-        if (GreatOrEqual(scrollableDistance_, 0.f) && LessOrEqual(-currentOffset_, lastScrollableDistance) &&
+        if (GreatOrEqual(scrollableDistance_, 0.0) && LessOrEqual(-currentOffset_, lastScrollableDistance) &&
             GreatNotEqual(-currentOffset_, scrollableDistance_)) {
             currentOffset_ = -scrollableDistance_;
         }
@@ -392,7 +391,7 @@ void ScrollLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper, float
     auto offset = contentMainSize + globalOffset.GetY() - caretPos - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     if (LessOrEqual(offset, 0.0)) {
         // negative offset to scroll down
-        currentOffset_ += static_cast<float>(offset);
+        currentOffset_ += offset;
         TAG_LOGI(AceLogTag::ACE_SCROLL, "update offset on virtual keyboard height change, %{public}f", offset);
     }
 }

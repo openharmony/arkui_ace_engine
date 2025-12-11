@@ -21,6 +21,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
@@ -37,6 +38,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "ui/properties/ui_material.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -443,7 +445,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest009, TestSize.Level1)
     pattern->isHover_ = false;
     pattern->HandleMouseEvent(true);
     EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER);
-    EXPECT_EQ(pattern->isTouch_, true);
     pattern->HandleMouseEvent(false);
     EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
 }

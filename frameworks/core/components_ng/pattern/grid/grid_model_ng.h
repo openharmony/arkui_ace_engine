@@ -39,6 +39,7 @@ public:
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
     void SetGridHeight(const Dimension& value) override;
+    void ReSetGridHeightLayoutPolicy() override;
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
@@ -80,6 +81,7 @@ public:
     void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetSupportLazyLoadingEmptyBranch(bool supportLazyLoadingEmptyBranch) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -104,8 +106,11 @@ public:
     static void SetMinCount(FrameNode* frameNode, int32_t minCount);
     static void SetCellLength(FrameNode* frameNode, int32_t cellLength);
     static void SetEditable(FrameNode* frameNode, bool editMode);
+    static bool GetEditable(FrameNode* frameNode);
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
+    static bool GetMultiSelectable(FrameNode* frameNode);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
+    static bool GetSupportAnimation(FrameNode* frameNode);
     static EdgeEffect GetEdgeEffect(FrameNode* frameNode);
     static bool GetAlwaysEnabled(FrameNode* frameNode);
     static EffectEdge GetEffectEdge(FrameNode* frameNode);
@@ -163,6 +168,9 @@ public:
     static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy);
     static void ResetItemFillPolicy(FrameNode* frameNode);
     static int32_t GetItemFillPolicy(FrameNode* frameNode);
+    static void SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc&& value);
+    static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool supportLazyLoadingEmptyBranch);
+    static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

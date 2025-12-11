@@ -144,6 +144,7 @@
 #endif
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "screen_session_manager_client.h"
 #include "pointer_event.h"
 
@@ -162,10 +163,10 @@ const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 const std::string ACTION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
 const std::string ABILITYNAME_CALENDAR = "MainAbility";
 const std::string ACTION_PARAM = "action";
+const std::string UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
-constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
@@ -440,6 +441,11 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
     static auto tmp = pipeline->GetCurrentExtraInfo();
     std::replace(tmp.begin(), tmp.end(), '\\', '/');
     return tmp.data();
+}
+
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instanceId)
+{
+    return UIContentImpl::GetUIContentWindowID(instanceId);
 }
 
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
@@ -2107,7 +2113,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
     SetDeviceProperties();
     // init xml config for performance feature
-    FeatureParamManager::GetInstance().Init(bundleName_);
+    FeatureParamManager::GetInstance().Init(bundleName_, metaData);
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
     });
@@ -2347,6 +2353,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
+        auto hostWantParams = hostWindowInfo_.hostWantParams;
+        if (hostWantParams) {
+            auto extensionParams = hostWantParams->GetParams().GetWantParams(UIEXTENSION_CONFIG_MENUBAR);
+            container->SetExtensionHostParams(extensionParams.ToString());
+        }
         container->SetSharePanelCallback(
             [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();
@@ -3321,15 +3332,15 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
 }
 
-void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
-    void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
+    void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameCanvasNodeCallback");
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameNodeCallback");
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode)
+void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3343,20 +3354,20 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
         CHECK_NULL_VOID(window_);
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        CHECK_NULL_VOID(canvasNode);
-        canvasNode->SetRSUIContext(surfaceNode->GetRSUIContext());
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "canvasNode %{public}" PRIu64 "",
-            surfaceNode->GetId(), canvasNode->GetId());
-        surfaceNode->AddChild(canvasNode, -1);
+        CHECK_NULL_VOID(keyFrameNode);
+        keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
+            surfaceNode->GetId(), keyFrameNode->GetId());
+        surfaceNode->AddChild(keyFrameNode, -1);
     }
 #endif
 #endif
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
     auto rootElement = context->GetRootElement();
     CHECK_NULL_VOID(rootElement);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
-    rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
+    rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
 void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
@@ -3458,11 +3469,11 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
-    rosenRenderContext->CreateCanvasNode();
-    canvasNode_ = rosenRenderContext->GetCanvasNode();
-    if (addNodeCallback_ && canvasNode_) {
+    rosenRenderContext->CreateKeyFrameNode();
+    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
+    if (addNodeCallback_ && keyFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-        addNodeCallback_(canvasNode_, rsTransaction);
+        addNodeCallback_(keyFrameNode_, rsTransaction);
     }
     CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
@@ -3494,7 +3505,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
             if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetCanvasNode()) {
+                if (rosenRenderContext->GetKeyFrameNode()) {
                     rosenRenderContext->SetReDraggingFlag(true);
                 }
                 rosenRenderContext->SetIsDraggingFlag(true);
@@ -3503,9 +3514,10 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             rosenRenderContext->SetIsDraggingFlag(false);
+            rosenRenderContext->SetReDraggingFlag(false);
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
-            animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
+            animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
                 config.GetKeyFrameConfig().animationDelay_,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
@@ -3632,9 +3644,6 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     const RefPtr<Platform::AceContainer>& container)
 {
     CHECK_NULL_VOID(info);
-    if (reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-        return;
-    }
     auto rect = info->rect_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetKeyboardInfo(pipelineContext, keyboardRect.Height());
@@ -3656,24 +3665,32 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
 
 void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
 {
-    WidthLayoutBreakPoint layoutWidthBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
-    HeightLayoutBreakPoint layoutHeightBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
-    double density = PipelineBase::GetCurrentDensity();
     auto container = Platform::AceContainer::GetContainer(GetInstanceId());
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_VOID(window);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
 
-    NG::WindowSizeBreakpoint breakpoint;
-    breakpoint.widthBreakpoint = window->GetWidthBreakpoint(layoutWidthBreakpoints);
-    breakpoint.heightBreakpoint = window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
 
-    if (breakpoint.widthBreakpoint != lastBreakpoint_.widthBreakpoint ||
-        breakpoint.heightBreakpoint != lastBreakpoint_.heightBreakpoint) {
-        NG::UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(GetInstanceId(), breakpoint);
-        lastBreakpoint_ = breakpoint;
+    auto task = [instanceId = GetInstanceId()]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+
+        WidthLayoutBreakPoint layoutWidthBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+        HeightLayoutBreakPoint layoutHeightBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto window = pipelineContext->GetWindow();
+        CHECK_NULL_VOID(window);
+
+        window->NotifyBreakpointChangeIfNeeded(instanceId, layoutWidthBreakpoints, layoutHeightBreakpoints);
+    };
+
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIProcessWindowSizeLayoutBreakPointChange");
     }
 }
 
@@ -3853,19 +3870,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
         taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
             pipelineContext, info, container] {
-                if (avoidAreas.empty() && !info) {
-                    return;
-                }
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-                if (pipelineContext) {
-                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
+                if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
                     KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
                 }
-            },
-            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid", PriorityType::VIP);
         return;
     }
 
@@ -3934,7 +3946,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
-        if (pipelineContext) {
+        if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
         }
@@ -3961,9 +3973,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             viewportConfigMgr_->CancelUselessTaskLocked();
             viewportConfigMgr_->CancelAllPromiseTaskLocked();
         }
-    } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
+    } else if (rsTransaction != nullptr) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
-        // When avoidAreas need updating, the task shouldn't be cancelled.
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container, taskId,
             "ArkUIPromiseViewportConfig");
     } else {
@@ -4038,6 +4049,9 @@ void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
     CHECK_NULL_VOID(taskExecutor);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
+    if (window_) {
+        pipeline->SetIsLayoutFullScreen(window_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    }
     taskExecutor->PostTask(
         [weak = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
             auto pipeline = weak.Upgrade();
@@ -4494,9 +4508,7 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((formViewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : formViewScale);
-
+    float viewScale = LessOrEqual(formViewScale, 0.0f) ? DEFAULT_VIEW_SCALE : formViewScale;
     auto density = SystemProperties::GetResolution() / viewScale;
     TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
     pipelineContext->OnSurfaceDensityChanged(density);
@@ -5317,6 +5329,14 @@ int32_t UIContentImpl::GetContainerModalTitleHeight()
     return pipeline->GetContainerModalTitleHeight();
 }
 
+void UIContentImpl::SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback)
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFrameMetricsCallBack(std::move(callback));
+}
+
 bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
 {
     NG::RectF floatContainerModal;
@@ -6019,6 +6039,18 @@ void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestina
     navigationManager->RestoreNavDestinationInfo(navDestinationInfo, isColdStart);
 }
 
+int32_t UIContentImpl::RegisterNavigateChangeCallback(
+    const std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, -1);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, -1);
+    return navigationManager->RegisterNavigateChangeCallback(std::move(callback));
+}
+
 void UIContentImpl::RunIntentPageIfNeeded()
 {
     if (!intentInfoSerialized_.empty()) {
@@ -6116,6 +6148,41 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
+UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return errorCode;
+    }
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, name, storageWrapper, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return errorCode;
+    }
+    AddWatchSystemParameter();
+
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", true);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, errorCode);
+    container->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errorCode);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+    return errorCode;
+}
+
 void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](
@@ -6134,5 +6201,17 @@ void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskEx
         return result;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
+}
+
+int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, -1);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, -1);
+    auto windowId = pipelineContext->GetFocusWindowId();
+    LOGI(
+        "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
+    return static_cast<int32_t>(windowId);
 }
 } // namespace OHOS::Ace

@@ -539,6 +539,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionBlur(CJMotionBlurOptions 
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLayoutWeight(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorder(CJBorder params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderWidth(double width, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetBorderWidth();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderRadius(double radius, int32_t unit);
@@ -594,6 +595,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateY(double translateValu
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransition();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn));
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetTransition();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDirection(int32_t dirValue);
@@ -604,6 +606,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption op
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAspectRatio(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetAspectRatio();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDisplayPriority(int32_t value);
 
 struct CJMotionPathOptions {
@@ -663,8 +666,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineRadiuses(CJOutlineRadius params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetFlexBasis();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexShrink(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetFlexShrink();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlignSelf(int32_t alignValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetZIndex(int32_t zIndex);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetVisibility(int32_t visibility);
@@ -739,6 +744,8 @@ struct RadialGradientParam {
     bool repeating;
 };
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractRadialGradient(RadialGradientParam radialGradientParam);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetRadialGradient(RadialGradientParam radialGradientParam,
+    bool needResetCenter, bool needResetRadius);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractRenderFit(int32_t fitMode);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInspectorKey(const char* key);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetId(const char* id);

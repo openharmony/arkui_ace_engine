@@ -2,6 +2,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { TextClockAttribute, ShadowOptions, FontStyle, FontWeight, ResourceColor, ResourceStr, Length,
     ArkTextClockComponent, TextClockOptions, TextClockConfiguration } from "../framework";
 import { ContentModifier } from "#handwritten"
+import { int32, int64 } from "@koalaui/common"
 import { default as intl } from "@ohos.intl"
 
 export class ArkTextClockNode extends ArkBaseNode implements TextClockAttribute {
@@ -16,12 +17,12 @@ export class ArkTextClockNode extends ArkBaseNode implements TextClockAttribute 
         this.markDirty()
         return this
     }
-    public format(value: string | undefined): this {
+    public format(value: ResourceStr | undefined): this {
         this.component.format(value)
         this.markDirty()
         return this
     }
-    public onDateChange(value: ((index: number) => void) | undefined): this {
+    public onDateChange(value: ((index: int64) => void) | undefined): this {
         this.component.onDateChange(value)
         this.markDirty()
         return this
@@ -41,7 +42,7 @@ export class ArkTextClockNode extends ArkBaseNode implements TextClockAttribute 
         this.markDirty()
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         this.component.fontWeight(value)
         this.markDirty()
         return this

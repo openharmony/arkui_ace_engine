@@ -20,7 +20,6 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 
 namespace OHOS::Ace::Ani {
 ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object pixelMapObj)
@@ -49,18 +48,14 @@ ani_long ExtractorsToDrawingCanvasPtr(ani_env* env, [[maybe_unused]]ani_object a
     auto* canvasAni = reinterpret_cast<Rosen::Drawing::AniCanvas*>(nativeObj);
     CHECK_NULL_RETURN(canvasAni, {});
     auto rsCanvas = canvasAni->GetCanvas();
-    CHECK_NULL_RETURN(rsCanvas, {});
-    drawing_CanvasPeer* drawingCanvasPeer = new drawing_CanvasPeer(std::shared_ptr<Rosen::Drawing::Canvas>(rsCanvas));
-    return reinterpret_cast<ani_long>(drawingCanvasPeer);
+    return reinterpret_cast<ani_long>(rsCanvas);
 }
 
 ani_object ExtractorsFromDrawingCanvasPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long drawingCanvasPtr)
 {
-    auto* drawingCanvasPeer = reinterpret_cast<drawing_CanvasPeer*>(drawingCanvasPtr);
-    CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
-    auto rsCanvas = drawingCanvasPeer->GetCanvas();
+    auto rsCanvas = reinterpret_cast<OHOS::Rosen::Drawing::Canvas*>(drawingCanvasPtr);
     CHECK_NULL_RETURN(rsCanvas, nullptr);
-    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, rsCanvas.get());
+    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, rsCanvas);
 }
 
 } // namespace OHOS::Ace::Ani

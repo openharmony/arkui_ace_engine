@@ -15,33 +15,33 @@
 
 #include "image_source_ohos.h"
 
-
 #include "media_errors.h"
 #include "pixel_map_ohos.h"
 
 namespace OHOS::Ace {
 namespace {
-void InitDecodeOptions(Media::DecodeOptions& options, const std::pair<int32_t, int32_t>& size,
-    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
+void InitDecodeOptions(
+    Media::DecodeOptions& options, const std::pair<int32_t, int32_t>& size, const PixelMapConfig& config)
 {
     options.preferDma = true;
     // only hdr image need to decoder in hdr mode
-    if (isHdrDecoderNeed) {
+    if (config.isHdrDecoderNeed) {
         options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
     }
-    if (photoDecodeFormat == PixelFormat::NV21) {
+    if (config.photoDecodeFormat == PixelFormat::NV21) {
         options.photoDesiredPixelFormat = Media::PixelFormat::NV21;
-    } else if (photoDecodeFormat == PixelFormat::RGBA_8888) {
+    } else if (config.photoDecodeFormat == PixelFormat::RGBA_8888) {
         options.photoDesiredPixelFormat = Media::PixelFormat::RGBA_8888;
-    } else if (photoDecodeFormat == PixelFormat::RGBA_1010102) {
+    } else if (config.photoDecodeFormat == PixelFormat::RGBA_1010102) {
         options.photoDesiredPixelFormat = Media::PixelFormat::RGBA_1010102;
-    } else if (photoDecodeFormat == PixelFormat::YCBCR_P010) {
+    } else if (config.photoDecodeFormat == PixelFormat::YCBCR_P010) {
         options.photoDesiredPixelFormat = Media::PixelFormat::YCBCR_P010;
-    } else if (photoDecodeFormat == PixelFormat::YCRCB_P010) {
+    } else if (config.photoDecodeFormat == PixelFormat::YCRCB_P010) {
         options.photoDesiredPixelFormat = Media::PixelFormat::YCRCB_P010;
     }
+    options.desiredPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(config.desiredDecodeFormat);
     // Pass imageQuality to imageFramework
-    options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
+    options.resolutionQuality = static_cast<Media::ResolutionQuality>(config.imageQuality);
     if (size.first > 0 && size.second > 0) {
         options.desiredSize = { size.first, size.second };
     }
@@ -128,8 +128,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
     uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig)
 {
     Media::DecodeOptions options;
-    InitDecodeOptions(
-        options, size, pixelMapConfig.imageQuality, pixelMapConfig.isHdrDecoderNeed, pixelMapConfig.photoDecodeFormat);
+    InitDecodeOptions(options, size, pixelMapConfig);
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
     if (errorCode != Media::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
@@ -216,5 +215,10 @@ std::string ImageSourceOhos::GetEncodedFormat()
         return "";
     }
     return sourceInfo.encodedFormat;
+}
+
+bool ImageSourceOhos::IsHeifWithoutAlpha()
+{
+    return imageSource_->IsHeifWithoutAlpha();
 }
 } // namespace OHOS::Ace

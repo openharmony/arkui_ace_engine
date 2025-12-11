@@ -61,6 +61,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -544,6 +545,7 @@ void SelectPattern::CreateSelectedCallback()
         auto newSelected = pattern->options_[index]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(newSelected);
         auto value = newSelected->GetText();
+        pattern->ReportOnSelectEvent(index, value);
         auto onSelect = hub->GetSelectEvent();
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d", index);
         if (onSelect) {
@@ -2000,8 +2002,7 @@ void SelectPattern::OnColorConfigurationUpdate()
     auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
 
-    auto pattern = host->GetPattern<SelectPattern>();
-    auto menuNode = pattern->GetMenuNode();
+    auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -2016,6 +2017,7 @@ void SelectPattern::OnColorConfigurationUpdate()
         }
     }
 
+    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
@@ -2028,7 +2030,6 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
     SetColorByUser(host, selectTheme);
 }
@@ -2081,14 +2082,13 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SelectPattern::UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode)
+void SelectPattern::UpdateMenuChildColorConfiguration(
+    const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = AceType::DynamicCast<NG::FrameNode>(menuNode->GetChildAtIndex(0));
+    auto scrollNode = menuNode->GetFirstChild();
     CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(scrollPattern);
-    scrollPattern->OnColorConfigurationUpdate();
+    scrollNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -2259,6 +2259,94 @@ void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackBlurStyle(blurStyle);
+}
+
+bool SelectPattern::ParseCommand(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json, false);
+    auto jsonUtil = SelectJsonUtil::FromJson(json);
+    if (!jsonUtil.index.has_value()) {
+        return false;
+    }
+    targetIndex = jsonUtil.index.value();
+    return true;
+}
+
+void SelectPattern::ShowOptions(int32_t index)
+{
+    UpdateSelectedProps(index);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false) &&
+        NG::ViewAbstractModelNG::CheckSkipMenuShow(host)) {
+        // skip menu show when expand display is true and show in sub window is true
+        return;
+    }
+    ShowSelectMenu();
+}
+
+int32_t SelectPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "received command:%{public}s", command.c_str());
+    int32_t targetIndex = -1;
+    if (!ParseCommand(command, targetIndex)) {
+        return RET_FAILED;
+    }
+
+    if (!IsValidIndex(targetIndex)) {
+        return RET_FAILED;
+    }
+
+    SetSelected(targetIndex);
+    ShowOptions(targetIndex);
+    UpdateText(targetIndex);
+    std::string value = "";
+    GetSelectedValue(targetIndex, value);
+    ReportOnSelectEvent(targetIndex, value);
+    return RET_SUCCESS;
+}
+
+bool SelectPattern::IsValidIndex(int32_t index)
+{
+    if (index == selected_) {
+        return false;
+    }
+    if (index >= static_cast<int32_t>(options_.size()) || index < 0) {
+        return false;
+    }
+    return true;
+}
+
+void SelectPattern::GetSelectedValue(int32_t index, std::string& value)
+{
+    CHECK_NULL_VOID(options_[index]);
+    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(newSelected);
+    value = newSelected->GetText();
+}
+
+bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    CHECK_NULL_RETURN(nodeId, false);
+    SelectJsonUtil util;
+    util.index = index;
+    util.value = value;
+    auto result = SelectJsonUtil::ToJson(util);
+    CHECK_NULL_RETURN(result, false);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire onSelect event:%{public}s, nodeId:%{public}d",
+        result->ToString().c_str(), nodeId);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result));
+    return true;
 }
 
 void SelectPattern::ResetParams()

@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
+#include "base/image/image_color_filter.h"
 #include "base/image/image_defines.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -74,6 +75,7 @@ public:
     static void JsSetDraggable(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void JsAntiAlias(const JSCallbackInfo& info);
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo& info);
@@ -83,6 +85,8 @@ public:
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
     static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
+    static void ConstructorCallback(const JSCallbackInfo& info);
+    static void DestructorCallback(ImageColorFilter* obj);
     static bool ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType);
     static void SetContentTransition(const JSCallbackInfo& info);
     static bool IsImageAltObject(JSRef<JSVal> val);
@@ -98,29 +102,6 @@ protected:
     static void SetAutoResize(bool autoResize);
     static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
     static void ParseImageAIOptions(const JSCallbackInfo& info);
-};
-
-class JSColorFilter : public AceType {
-    DECLARE_ACE_TYPE(JSColorFilter, AceType);
-
-public:
-    JSColorFilter() = default;
-    ~JSColorFilter() override = default;
-    static void ConstructorCallback(const JSCallbackInfo& info);
-    static void DestructorCallback(JSColorFilter* obj);
-
-    void SetColorFilterMatrix(const std::vector<float>&& matrix)
-    {
-        colorfiltermatrix_ = std::move(matrix);
-    }
-
-    const std::vector<float>& GetColorFilterMatrix() const
-    {
-        return colorfiltermatrix_;
-    }
-
-private:
-    std::vector<float> colorfiltermatrix_;
 };
 
 } // namespace OHOS::Ace::Framework

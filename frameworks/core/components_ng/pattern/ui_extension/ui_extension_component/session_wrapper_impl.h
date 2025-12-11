@@ -111,6 +111,7 @@ public:
 
     void NotifyHostWindowMode(int32_t mode) override;
     void ReDispatchWantParams() override;
+    void UpdateConfigParamByContainerHandler(AAFwk::WantParams& configParam);
 
 private:
     int32_t GetFrameNodeId() const;
@@ -140,6 +141,7 @@ private:
         uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data);
     void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
+    void UpdateMenuBarWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr, AAFwk::WantParams& wantParam);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;

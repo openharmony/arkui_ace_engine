@@ -18,6 +18,8 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
@@ -1004,10 +1006,6 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
     auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-
-    searchModelInstance.SetCancelIconSize(14.0_vp);
-    EXPECT_EQ(searchLayoutProperty->GetCancelButtonUDSize(), 14.0_vp);
-
     searchModelInstance.SetCancelIconColor(Color::RED);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
     searchModelInstance.SetRightIconSrcPath("/common/icon.png");
@@ -1445,7 +1443,6 @@ HWTEST_F(SearchTestNg, Create005, TestSize.Level1)
     OHOS::Ace::NG::SearchModelNG::SetSearchButtonFontColor(frameNode, Color::BLUE);
     OHOS::Ace::NG::SearchModelNG::SetSearchButtonFontSize(frameNode, Dimension());
     OHOS::Ace::NG::SearchModelNG::SetSearchButton(frameNode, "SEARCH");
-    OHOS::Ace::NG::SearchModelNG::SetSearchIconColor(frameNode, Color::BLUE);
     OHOS::Ace::NG::SearchModelNG::SetSearchSrcPath(frameNode, "");
     OHOS::Ace::NG::SearchModelNG::SetSearchIconSize(frameNode, Dimension());
     OHOS::Ace::NG::SearchModelNG::SetPlaceholder(frameNode, "");
@@ -1591,6 +1588,34 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: SetDividerColor001
+ * @tc.desc: Set Separator Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetDividerColor001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    searchModelInstance.SetDividerColor(Color::BLUE);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerColorSetByUser = layoutProperty->GetDividerColorSetByUser().value_or(false);
+    EXPECT_EQ(dividerColorSetByUser, true);
+
+    /*
+     * Get dividerNode. DIVIDER_INDEX is 5.
+     * Set DividerColor and DividerColorByUser, get two value and check.
+     */
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(5));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    EXPECT_EQ(dividerRenderProperty->GetDividerColor(), Color::BLUE);
 }
 
 /**
@@ -2604,9 +2629,6 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
 
     EXPECT_TRUE(marginProperty->top);
     EXPECT_TRUE(marginProperty->bottom);
-
-    searchPattern->UpdateSearchSymbol();
-    searchPattern->UpdateSearchSymbol();
 }
 
 /**
@@ -2700,5 +2722,121 @@ HWTEST_F(SearchTestNg, HandleNotifyChildAction, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     notifyFunc(textFieldFrameNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_TRUE(userClicked);
+}
+
+/**
+ * @tc.name: OnIconColorConfigrationUpdate001
+ * @tc.desc: check OnIconColorConfigrationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, OnIconColorConfigrationUpdate001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    searchModelInstance.Create(u"", u"", "");
+    auto searchNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(iconFrameNode, nullptr);
+
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelIconFrameNode, nullptr);
+
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    auto cancelSymbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(cancelSymbolLayoutProperty, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(searchNode->GetPattern());
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    cancelSymbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    auto theme = searchPattern->GetTheme();
+    searchPattern->OnIconColorConfigrationUpdate(theme);
+    std::vector<Color> colors = { Color::RED };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorListValue({}), colors);
+    EXPECT_EQ(cancelSymbolLayoutProperty->GetSymbolColorListValue({}), colors);
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    symbolLayoutProperty->UpdateTextColorFlagByUser(true);
+    cancelSymbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    cancelSymbolLayoutProperty->UpdateTextColorFlagByUser(true);
+    searchPattern->OnIconColorConfigrationUpdate(theme);
+    colors = { Color::BLUE };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList().value(), colors);
+    EXPECT_EQ(cancelSymbolLayoutProperty->GetSymbolColorListValue({}), colors);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnIconColorConfigrationUpdate002
+ * @tc.desc: check OnIconColorConfigrationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, OnIconColorConfigrationUpdate002, TestSize.Level1)
+{
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(iconFrameNode, nullptr);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelIconFrameNode, nullptr);
+
+    auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    auto cancelimageRenderProperty = cancelIconFrameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(cancelimageRenderProperty, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(searchNode->GetPattern());
+
+    IconOptions iconOptions;
+    iconOptions.color_ = Color::BLUE;
+    SearchModelNG::SetSearchImageIcon(searchNode, iconOptions);
+
+    auto theme = searchPattern->GetTheme();
+    searchPattern->OnIconColorConfigrationUpdate(theme);
+
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColorValue(Color()), Color::BLUE);
+
+    IconOptions iconOptionsEmpty;
+    SearchModelNG::SetSearchImageIcon(searchNode, iconOptionsEmpty);
+
+    searchPattern->OnIconColorConfigrationUpdate(theme);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColorValue(Color()), Color::RED);
+}
+
+/**
+ * @tc.name: SearchCompressLeadingPunctuation
+ * @tc.desc: Test the enable or disable the CompressLeadingPunctuation attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchCompressLeadingPunctuation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    SearchModelNG searchModelNG;
+    searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    searchModelNG.SetCompressLeadingPunctuation(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get CompressLeadingPunctuation Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), true);
+    EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), true);
+    /**
+     * @tc.expected: Set CompressLeadingPunctuation False
+     */
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, false);
+    /**
+     * @tc.expected: Get CompressLeadingPunctuation Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), false);
+    EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), false);
 }
 } // namespace OHOS::Ace::NG

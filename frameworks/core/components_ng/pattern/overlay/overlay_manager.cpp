@@ -4346,7 +4346,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
-    SetDragNodeNeedClean();
+    SetDragNodeNeedClean(true);
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     // There is overlay under the root node or it is in atomicservice
@@ -4400,7 +4400,12 @@ bool OverlayManager::RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay)
         auto topOrderNode = GetTopOrderNode();
         auto topFocusableNode = GetTopFocusableNode();
         PopLevelOrder(overlay->GetId());
-        rootNode->RemoveChild(overlay);
+        auto gatherNode = gatherNodeWeak_.Upgrade();
+        if (overlay == gatherNode) {
+            SetDragNodeNeedClean(false);
+        } else {
+            rootNode->RemoveChild(overlay);
+        }
         FocusNextOrderNode(topFocusableNode);
         SendAccessibilityEventToNextOrderNode(topOrderNode);
     }
@@ -5423,7 +5428,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
 }
 
 void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -5787,7 +5792,7 @@ void OverlayManager::PlaySheetTransition(
 }
 
 void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -5818,7 +5823,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     // build content
-    RefPtr<UINode> sheetContentNode = buildNodeFunc();
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    RefPtr<UINode> sheetContentNode = buildNodeFunc(instanceId);
     CHECK_NULL_VOID(sheetContentNode);
     auto frameChildNode = sheetContentNode->GetFrameChildByIndex(0, true);
     if (!frameChildNode) {
@@ -6064,11 +6070,13 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     CHECK_NULL_VOID(sheetContentNode);
-    auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
-    if (titleBuilder) {
-        titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
+    RefPtr<FrameNode> titleBuilder = nullptr;
+    if (buildtitleNodeFunc) {
+        titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
+        if (titleBuilder) {
+            titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
+        }
     }
-
     CHECK_NULL_VOID(targetNode);
     auto sheetNode = SheetView::CreateSheetPage(
         targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);
@@ -6847,8 +6855,38 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     MountCustomKeyboard(customKeyboard, targetId);
 }
 
+bool OverlayManager::ChangeBindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
+{
+    CHECK_NULL_RETURN(keyboard, false);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto pipeline = rootNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto customKeyboardId = textFieldManager->GetCustomKeyboardId();
+    bool isCustomKeyboardNodeIdMatched = customKeyboardId == keyboard->GetId();
+    auto customKeyboardNode = customKeyboardNode_.Upgrade();
+    if (customKeyboardNode && isCustomKeyboardNodeIdMatched && oldTargetId_ != targetId &&
+        customKeyboardMap_.find(oldTargetId_) != customKeyboardMap_.end()) {
+        if (oldTargetId_ != -1) {
+            customKeyboardMap_.erase(oldTargetId_);
+        }
+        customKeyboardMap_[targetId] = customKeyboardNode;
+        oldTargetId_ = targetId;
+        auto pattern = customKeyboardNode->GetPattern<KeyboardPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->SetTargetId(oldTargetId_);
+        return true;
+    }
+    return false;
+}
+
 void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
 {
+    if (ChangeBindKeyboardWithNode(keyboard, targetId)) {
+        return;
+    }
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
         return;
     }
@@ -6856,6 +6894,8 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
+    customKeyboardNode_ = WeakClaim(RawPtr(customKeyboard));
+    oldTargetId_ = targetId;
     if (!customKeyboard) {
         return;
     }
@@ -8860,13 +8900,13 @@ void OverlayManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWr
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
 }
 
-void OverlayManager::SetDragNodeNeedClean()
+void OverlayManager::SetDragNodeNeedClean(bool needClean)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetIsDragNodeNeedClean(true);
+    dragDropManager->SetIsDragNodeNeedClean(needClean);
 }
 
 BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const

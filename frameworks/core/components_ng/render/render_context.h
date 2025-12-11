@@ -56,6 +56,7 @@ class Blender;
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::Kit {
@@ -352,7 +353,10 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
+    virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
+    void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -374,6 +378,12 @@ public:
     virtual void SetScrollScale(float scale) {}
     virtual void ResetScrollScale() {}
     virtual void SetBackgroundColor(uint32_t colorValue) {}
+    // Bind a dynamic color picker to this node so the render service can periodically sample
+    // its rendered pixels and resolve a concrete color for the given placeholder. Strategy
+    // controls the sampling algorithm (e.g. dominant, average, contrast). Interval (ms) hints
+    // the desired sampling period; 0 uses a backend default. Rebinding replaces previous values.
+    // Passing ColorPlaceholder::NONE clears any existing binding.
+    virtual void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval) {}
     virtual void SetRenderPivot(float pivotX, float pivotY) {}
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
@@ -547,6 +557,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnExcludeFromRenderGroupUpdate(bool exclude) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnDynamicDimDegreeUpdate(const float degree) {}
@@ -614,6 +625,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
@@ -734,8 +746,8 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    // cornerApplyType
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CornerApplyType, CornerApplyType);
+    // renderStrategy
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderStrategy, RenderStrategy);
 
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
@@ -797,7 +809,7 @@ public:
 
     virtual void SetRenderFit(RenderFit renderFit) {}
 
-    virtual void OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType) {}
+    virtual void OnRenderStrategyUpdate(RenderStrategy renderStrategy) {}
 
     virtual OffsetF GetBaseTransalteInXY() const
     {
@@ -958,6 +970,7 @@ private:
     std::function<void(bool)> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
+    RefPtr<UiMaterial> uiMaterial_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG

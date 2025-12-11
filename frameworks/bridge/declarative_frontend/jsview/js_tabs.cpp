@@ -196,6 +196,30 @@ void JSTabs::SetOnUnselected(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
 }
 
+void JSTabs::SetOnContentDidScroll(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (!info[0]->IsFunction()) {
+        if (info[0]->IsUndefined()) {
+            TabsModel::GetInstance()->SetOnContentDidScroll(nullptr);
+        }
+        return;
+    }
+
+    auto contentDidScrollHandler = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onContentDidScroll = [execCtx = info.GetExecutionContext(),
+                                func = std::move(contentDidScrollHandler)](
+                                int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Tabs.onContentDidScroll");
+        func->Execute(selectedIndex, index, position, mainAxisLength);
+    };
+    TabsModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
 void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -960,6 +984,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
     JSClass<JSTabs>::StaticMethod("onUnselected", &JSTabs::SetOnUnselected);
+    JSClass<JSTabs>::StaticMethod("onContentDidScroll", &JSTabs::SetOnContentDidScroll);
     JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
     JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
     JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);

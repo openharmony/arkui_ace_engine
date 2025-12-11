@@ -160,7 +160,6 @@ public:
     }
 
     void OnModifyDone() override;
-    void MultiThreadDelayedExecution();
 
     void OnWindowHide() override;
 
@@ -191,6 +190,7 @@ public:
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
     void DumpTextStyleInfo5();
+    void DumpInfoRes();
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
@@ -241,12 +241,13 @@ public:
     void SetSelectDetectEnable(bool value);
     bool GetSelectDetectEnable();
     void ResetSelectDetectEnable();
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
-    std::vector<TextDataDetectType> GetSelectDetectConfig();
-    void ResetSelectDetectConfig();
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {}
+    std::vector<TextDataDetectType> GetSelectDetectConfig()
+    {
+        return std::vector<TextDataDetectType>();
+    }
+    void ResetSelectDetectConfig() {}
     void SelectAIDetect();
-    void UseSelectDetectConfigFollow(std::unordered_map<TextDataDetectType, bool>& optionTypes);
-    void UseSelectDetectConfigUserSet(std::unordered_map<TextDataDetectType, bool>& optionTypes);
     // --------------- select AI detect end -------------------
     void SetTextDetectEnableMultiThread(bool enable);
     bool GetTextDetectEnable()
@@ -322,6 +323,11 @@ public:
         return spans_;
     }
 
+    int32_t GetPlaceholderCount()
+    {
+        return placeholderCount_;
+    }
+
     int32_t GetDisplayWideTextLength()
     {
         return textForDisplay_.length();
@@ -361,7 +367,6 @@ public:
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
     void CloseSelectOverlayMultiThread(bool animation);
-    void CloseSelectOverlayMultiThreadAction(bool animation);
     void CreateHandles() override;
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
@@ -496,7 +501,6 @@ public:
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
-    void SetTextSelectionMultiThreadAction(int32_t selectionStart, int32_t selectionEnd);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -616,6 +620,9 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    bool IsShowMenu(MenuPolicy options, bool defaultValue);
     void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
@@ -635,7 +642,7 @@ public:
     {
         isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
     }
-    
+
     bool IsAskCeliaEnabled() const
     {
         return isAskCeliaEnabled_;
@@ -650,6 +657,8 @@ public:
     {
         return isShowAskCeliaInRightClick_;
     }
+
+    bool IsAskCeliaSupported();
 
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
@@ -704,6 +713,11 @@ public:
     std::vector<CustomSpanPlaceholderInfo> GetCustomSpanPlaceholderInfo()
     {
         return customSpanPlaceholder_;
+    }
+
+    TextSelectionOptions GetTextSelectionOptions()
+    {
+        return textSelectionOptions_;
     }
 
     void ClearCustomSpanPlaceholderInfo()
@@ -942,6 +956,13 @@ public:
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
 
+    bool AllowVisibleAreaCheck() const override
+    {
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, false);
+        return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
+    }
+
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()
@@ -1113,8 +1134,6 @@ protected:
     RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
     bool selectDetectEnabledIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
     bool selectDetectEnabled_ = true;
-    bool selectDetectConfigIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
-    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
@@ -1124,6 +1143,7 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    TextSelectionOptions textSelectionOptions_ = {0, 0, MenuPolicy::DEFAULT};
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
@@ -1294,15 +1314,6 @@ private:
     bool isRegisteredAreaCallback_ = false;
 
     // ----- multi thread state variables -----
-    bool setTextDetectEnableMultiThread_ = false;
-    bool setExternalSpanItemMultiThread_ = false;
-    bool closeSelectOverlayMultiThread_ = false;
-    bool closeSelectOverlayMultiThreadValue_ = false;
-    bool setTextSelectionMultiThread_ = true;
-    int32_t setTextSelectionMultiThreadValue0_ = -1;
-    int32_t setTextSelectionMultiThreadValue1_ = -1;
-    bool textDetectConfigMultiThread_ = false;
-    TextDetectConfig textDetectConfigMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

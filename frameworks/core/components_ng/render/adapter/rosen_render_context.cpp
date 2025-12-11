@@ -28,6 +28,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_base/include/common/rs_color.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -72,9 +73,10 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
+#include "ui/properties/ui_material.h"
+#include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -438,6 +440,14 @@ void RosenRenderContext::SetSurfaceChangedCallBack(const std::function<void(floa
 #endif
 }
 
+void RosenRenderContext::BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval)
+{
+    CHECK_NULL_VOID(rsNode_);
+    // Forward placeholder + strategy + interval to RSNode. Backend decides actual sampling cadence.
+    rsNode_->SetColorPickerParams(
+        static_cast<RSColorPlaceholder>(placeholder), static_cast<Rosen::ColorPickStrategyType>(strategy), interval);
+}
+
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -537,7 +547,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::SURFACE: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
             break;
         }
@@ -556,7 +567,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::COMPOSITE_COMPONENT: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
             break;
         }
@@ -588,7 +600,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode, .isSync = true };
-    surfaceNodeConfig.isSkipCheckInMultiInstance = param->isSkipCheckInMultiInstance;
+    surfaceNodeConfig.isSkipCheckInMultiInstance = true;
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     if (rsUIContext) {
         surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
@@ -613,7 +625,8 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
     const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-        .isTextureExportNode = isTextureExportNode };
+        .isTextureExportNode = isTextureExportNode,
+        .isSkipCheckInMultiInstance = true };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
 }
@@ -840,9 +853,11 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     }
 }
 
-void RosenRenderContext::ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor)
+void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsColor)
 {
-    rsColor = OHOS::Rosen::RSColor::FromArgbInt(color.GetValue());
+    rsColor = ACE_UNLIKELY(color.IsPlaceholder())
+                  ? Rosen::RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()))
+                  : Rosen::RSColor::FromArgbInt(color.GetValue());
     GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
     if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
         colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
@@ -925,6 +940,16 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
     return task;
 }
 
+bool CheckFirstPixelMap(RefPtr<CanvasImage>& bgImage)
+{
+    auto decodeImage = bgImage->GetFirstPixelMap();
+    if (!decodeImage) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Image decoding failed.");
+        return false;
+    }
+    return true;
+}
+
 void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
 {
     if (bgImage_->IsStatic()) {
@@ -934,8 +959,7 @@ void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
     } else {
         auto syncMode = GetBackgroundImageSyncMode().value_or(false);
         if (syncMode) {
-            auto decodeImage = bgImage_->GetFirstPixelMap();
-            CHECK_NULL_VOID(decodeImage);
+            CHECK_EQUAL_VOID(CheckFirstPixelMap(bgImage_), false);
             PaintBackground();
             CHECK_EQUAL_VOID(requestNextFrame, false);
             RequestNextFrame();
@@ -946,8 +970,7 @@ void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
                 CHECK_NULL_VOID(ctx);
                 auto host = ctx->GetHost();
                 CHECK_NULL_VOID(host);
-                auto decodeImage = image->GetFirstPixelMap();
-                CHECK_NULL_VOID(decodeImage);
+                CHECK_EQUAL_VOID(CheckFirstPixelMap(ctx->bgImage_), false);
                 ctx->OnPaintBackgroundDynamic(requestNextFrame);
             });
             auto taskExecutor = Container::CurrentTaskExecutor();
@@ -1458,26 +1481,33 @@ void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 
 void RosenRenderContext::UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
-    CHECK_NULL_VOID(visualEffect);
+    CHECK_NULL_VOID(rsNode_ && visualEffect);
     rsNode_->SetVisualEffect(visualEffect);
 }
 
 void RosenRenderContext::UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
-    CHECK_NULL_VOID(backgroundFilter);
+    CHECK_NULL_VOID(rsNode_ && backgroundFilter);
     rsNode_->SetUIBackgroundFilter(backgroundFilter);
 }
 
 void RosenRenderContext::UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
 {
-    CHECK_NULL_VOID(foregroundFilter);
+    CHECK_NULL_VOID(rsNode_ && foregroundFilter);
     rsNode_->SetUIForegroundFilter(foregroundFilter);
 }
 
 void RosenRenderContext::UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    CHECK_NULL_VOID(compositingFilter);
+    CHECK_NULL_VOID(rsNode_ && compositingFilter);
     rsNode_->SetUICompositingFilter(compositingFilter);
+}
+
+void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIMaterialFilter(materialFilter);
+    RequestNextFrame();
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
@@ -2066,6 +2096,11 @@ void RosenRenderContext::AddOrUpdateModifier(std::shared_ptr<ModifierName>& modi
 {
     if (modifier != nullptr) {
         (*modifier.*Setter)(value);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetNeedCallbackAreaChange(true);
     } else {
         modifier = std::make_shared<ModifierName>();
         (*modifier.*Setter)(value);
@@ -4128,6 +4163,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
+    FREE_NODE_CHECK(uiNode, OnZIndexUpdate, parent);
     auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
         auto parent = weak.Upgrade();
         CHECK_NULL_VOID(parent);
@@ -4926,6 +4962,8 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     CHECK_NULL_VOID(rsNode_);
     if (blendApplyType == BlendApplyType::FAST) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::FAST);
+    } else if (blendApplyType == BlendApplyType::OFFSCREEN_WITH_BACKGROUND) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_INIT_WITH_PREVIOUS_CONTENT);
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_ALPHA);
     } else {
@@ -5875,10 +5913,10 @@ void RosenRenderContext::SetRenderFit(RenderFit renderFit)
     }
 }
 
-void RosenRenderContext::OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType)
+void RosenRenderContext::OnRenderStrategyUpdate(RenderStrategy renderStrategy)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(cornerApplyType));
+    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(renderStrategy));
 }
 
 void RosenRenderContext::ClearDrawCommands()
@@ -6208,6 +6246,10 @@ void RosenRenderContext::DumpInfo()
             + progressMaskPropertyPtr->GetColor().ToString() + " enableBreathe:"
             + std::to_string(progressMaskPropertyPtr->GetEnableBreathe())
         );
+    }
+
+    if (GetExcludeFromRenderGroupValue(false)) {
+        DumpLog::GetInstance().AddDesc(std::string("excludeRenderGroup:1"));
     }
 }
 
@@ -6750,6 +6792,13 @@ void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bo
     rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
 }
 
+void RosenRenderContext::OnExcludeFromRenderGroupUpdate(bool exclude)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ExcludedFromNodeGroup(exclude);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnNodeNameUpdate(const std::string& id)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -6802,7 +6851,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 #endif
 #if defined(IOS_PLATFORM)
 #if defined(PLATFORM_VIEW_SUPPORTED)
-    if (patternType_ == PatternType::PLATFORM_VIEW) {
+    if (patternType_ == PatternType::PLATFORM_VIEW || patternType_ == PatternType::XCOM) {
         RSSurfaceExtConfig config = {
             .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
             .additionalData = nativeWindow,
@@ -7608,24 +7657,25 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
     }
 }
 
-void RosenRenderContext::FreezeCanvasNode(bool freezeFlag)
+void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 {
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
-        canvasNode_->SetFreeze(freezeFlag);
+    if (keyFrameNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode: %{public}d", freezeFlag);
+        keyFrameNode_->SetFreeze(freezeFlag);
     }
 }
 
-void RosenRenderContext::RemoveCanvasNode()
+void RosenRenderContext::RemoveKeyFrameNode()
 {
     if (reDraggingFlag_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
         reDraggingFlag_ = false;
         return;
     }
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
-        canvasNode_->RemoveFromTree();
-        canvasNode_ = nullptr;
+    if (keyFrameNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: removed");
+        keyFrameNode_->RemoveFromTree();
+        keyFrameNode_ = nullptr;
     }
 }
 
@@ -7638,19 +7688,19 @@ void RosenRenderContext::CheckAnimationParametersValid(int32_t& animationParam)
     }
 }
 
-bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
+bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
 {
     static bool animationFlag = false;
     if (animationFlag) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "animationFlag is true.");
         return false;
     }
-    if (!canvasNode_) {
+    if (!keyFrameNode_) {
         return true;
     }
 
-    FreezeCanvasNode(true);
-    canvasNode_->SetAlpha(1.0f);
+    FreezeKeyFrameNode(true);
+    keyFrameNode_->SetAlpha(1.0f);
     FlushImplicitTransaction();
 
     CheckAnimationParametersValid(duration);
@@ -7661,18 +7711,18 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
     option.SetCurve(Curves::EASE_OUT);
     AnimationUtils::Animate(option,
         [this]() {
-            if (canvasNode_) {
+            if (keyFrameNode_) {
                 animationFlag = true;
-                canvasNode_->SetAlpha(0.0f);
+                keyFrameNode_->SetAlpha(0.0f);
             }
         },
         [this, isDragEnd]() {
-            if (canvasNode_) {
-                canvasNode_->SetAlpha(1.0f);
+            if (keyFrameNode_) {
+                keyFrameNode_->SetAlpha(1.0f);
             }
-            FreezeCanvasNode(false);
+            FreezeKeyFrameNode(false);
             if (isDragEnd) {
-                RemoveCanvasNode();
+                RemoveKeyFrameNode();
             }
             if (callbackAnimateEnd_) {
                 callbackAnimateEnd_();
@@ -7703,36 +7753,36 @@ void RosenRenderContext::FlushImplicitTransaction()
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
-void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
+void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& rootNode)
 {
-    if (canvasNode_ && rootNode) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
+    if (keyFrameNode_ && rootNode) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "LinkKeyFrameNodeToRootNode");
         auto renderContext = rootNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        canvasNode_->SetLinkedRootNodeId(renderContext->GetNodeId());
+        keyFrameNode_->SetLinkedNodeId(renderContext->GetNodeId());
         FlushImplicitTransaction();
     }
 }
 
-void RosenRenderContext::CreateCanvasNode()
+void RosenRenderContext::CreateKeyFrameNode()
 {
-    if (!canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
+    if (!keyFrameNode_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "CreateKeyFrameNode");
         if (!SystemProperties::GetMultiInstanceEnabled()) {
-            canvasNode_ = Rosen::RSCanvasNode::Create();
+            keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create();
             Rosen::RSTransaction::FlushImplicitTransaction();
         } else {
             auto pipeline = GetPipelineContext();
             auto rsUIContext = GetRSUIContext(pipeline);
-            canvasNode_ = Rosen::RSCanvasNode::Create(false, false, rsUIContext);
+            keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create(false, false, rsUIContext);
             FlushImplicitTransaction();
         }
     }
 }
 
-std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode() const
+std::shared_ptr<Rosen::RSWindowKeyFrameNode> RosenRenderContext::GetKeyFrameNode() const
 {
-    return canvasNode_;
+    return keyFrameNode_;
 }
 
 void RosenRenderContext::SetColorGamut(uint32_t colorGamut)

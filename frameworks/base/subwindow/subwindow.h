@@ -73,6 +73,8 @@ public:
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
+    virtual bool SetReceiveDragEventEnabled(bool enabled) = 0;
+    virtual bool GetIsReceiveDragEventEnabled() = 0;
     virtual bool ShowPreviewNG(bool isStartDraggingFromSubWindow) = 0;
     virtual void SetWindowTouchable(bool touchable) = 0;
     virtual void HidePreviewNG() = 0;
@@ -246,15 +248,14 @@ public:
     virtual OHOS::Ace::MenuWindowState GetDetachState() {return MenuWindowState::DEFAULT;};
 
     virtual void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange,
-        std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange,
-        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
+        std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,
+        std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        const RefPtr<NG::FrameNode>& targetNode) = 0;
     virtual int32_t ShowBindSheetByUIContext(
         const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32 } from "@koalaui/common"
@@ -27,6 +28,7 @@ import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { AttributeModifier, hookSymbolSpanAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -46,6 +48,7 @@ export class ArkSymbolSpanPeer extends PeerNode {
         return _peer
     }
     setSymbolSpanOptionsAttribute(value: Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         Resource_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._SymbolSpanInterface_setSymbolSpanOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -87,10 +90,10 @@ export class ArkSymbolSpanPeer extends PeerNode {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
                     thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueTmpValueTmpElement instanceof number) {
+                } else if (valueTmpValueTmpElement instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as int32
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string
@@ -258,6 +261,7 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         if (this.checkPriority("setSymbolSpanOptions")) {
             const value_casted = value as (Resource)
             this.getPeer()?.setSymbolSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SymbolSpanAttribute');
             return this
         }
         return this
@@ -319,12 +323,17 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
-        hookSymbolSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSymbolSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

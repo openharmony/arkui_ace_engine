@@ -21,6 +21,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/drawable/drawable_descriptor.h"
 
 namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
@@ -30,7 +31,6 @@ class ACE_EXPORT ImageModelStatic {
 public:
     static void SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info);
     static void SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>& pixelMap);
-    static void SetDrawableDescriptor(FrameNode* frameNode, void* drawable, int type);
     static void SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value);
     static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption);
     static void SetImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
@@ -40,17 +40,18 @@ public:
     static void SetImageSourceSize(FrameNode* frameNode, const std::optional<std::pair<Dimension, Dimension>>& size);
     static void SetImageFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetSupportSvg2(FrameNode* frameNode, bool enable);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter);
-
-private:
-    // temporary animation
-    static void SetPixelMapList(
-        FrameNode* frameNode, const std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iteration);
+    static void SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawableAddr);
+    static void SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_H

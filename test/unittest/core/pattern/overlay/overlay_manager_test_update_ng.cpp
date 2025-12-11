@@ -102,7 +102,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
-    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>(int32_t id)> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
 
 protected:
@@ -197,7 +197,7 @@ void OverlayManagerTestUpdateNg::CreateSheetStyle(SheetStyle& sheetStyle)
 
 void OverlayManagerTestUpdateNg::CreateSheetBuilder()
 {
-    auto builderFunc = []() -> RefPtr<UINode> {
+    auto builderFunc = [](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });

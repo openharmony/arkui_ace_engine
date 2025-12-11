@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

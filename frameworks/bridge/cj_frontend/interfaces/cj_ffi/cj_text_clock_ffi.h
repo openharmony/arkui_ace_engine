@@ -78,6 +78,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreateSimple(int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFormat(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockOnChange(void (*callback)(int64_t timeStamp));
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockTextColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockResetTextColor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontSize(double size, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontStyle(int32_t value);

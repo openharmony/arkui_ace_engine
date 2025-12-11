@@ -143,7 +143,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level0)
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode())
-        .Times(Exactly(3))
+        .Times(Exactly(2))
         .WillOnce(Return(rsNode));
     // call AddForm manually
     formRenderer->AddForm(want, formJsInfo);
@@ -277,7 +277,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(5))
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(4))
         .WillRepeatedly(Return(rsNode));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Foreground()).WillOnce(Return());
     formRenderer->AddForm(want, formJsInfo);
@@ -785,10 +785,11 @@ HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
     float borderWidth = 1.0f;
     float width = 1.0f;
     float height = 1.0f;
-    formRenderer->UpdateFormSize(width, height, borderWidth);
+    float formViewScale = 1.0f;
+    formRenderer->UpdateFormSize(width, height, borderWidth, formViewScale);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    formRenderer->UpdateFormSize(width, height, borderWidth);
+    formRenderer->UpdateFormSize(width, height, borderWidth, formViewScale);
 }
 
 /**

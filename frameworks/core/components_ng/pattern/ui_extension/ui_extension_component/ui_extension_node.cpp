@@ -64,7 +64,8 @@ HitTestResult UIExtensionNode::TouchTest(const PointF& globalPoint, const PointF
     if (testResult == HitTestResult::OUT_OF_REGION) {
         return HitTestResult::OUT_OF_REGION;
     }
-    if (touchRestrict.touchEvent.type == TouchType::HOVER_ENTER) {
+    if (touchRestrict.touchEvent.type == TouchType::HOVER_ENTER ||
+        touchRestrict.mouseAction == MouseAction::WINDOW_LEAVE) {
         return testResult;
     }
     auto pattern = GetPattern<UIExtensionPattern>();

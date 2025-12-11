@@ -14,6 +14,8 @@
  */
 
 import image from '@ohos.multimedia.image';
+import drawing from '@ohos.graphics.drawing';
+import { AnimationStatus, ResourceStr, Resource } from '@ohos.arkui.component';
 
 class NativeDestructor {
   private ptr: long = 0
@@ -38,6 +40,16 @@ function finalizerUnregister(target: Object) {
   destroyRegister.unregister(target)
 }
 
+export interface DrawableDescriptorLoadedResult {
+  imageWidth: int;
+  imageHeight: int;
+}
+
+class DrawableDescriptorLoadedResultImpl implements DrawableDescriptorLoadedResult {
+  imageWidth: int;
+  imageHeight: int;
+}
+
 export class DrawableDescriptor {
   @JSONStringifyIgnore protected pixelMap?: image.PixelMap = undefined
   @JSONStringifyIgnore protected nativeObj: long = 0
@@ -48,12 +60,25 @@ export class DrawableDescriptor {
     return this.pixelMap
   }
 
+  loadSync(): DrawableDescriptorLoadedResult {
+    return DrawableDescriptorInner.loadSync(this)
+  }
+
+  load(): Promise<DrawableDescriptorLoadedResult> {
+    return DrawableDescriptorInner.load(this)
+  }
+
   static transferStatic(input: Any): Object {
     if (typeof (input) !== 'object' || input === null) {
       return new Object();
     }
     let inputVal = ESValue.wrap(input) as ESValue;
-    return DrawableDescriptorInner.nativeTransferStatic(inputVal);
+    let typeNameProperty = inputVal.getProperty("typeName");
+    if (!typeNameProperty.isString()) {
+      return new Object();
+    }
+    let typeName = typeNameProperty.toString();
+    return DrawableDescriptorInner.nativeTransferStatic(inputVal, typeName);
   }
 
   static transferDynamic(input: Object): Any {
@@ -145,21 +170,56 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   static getMaskClipPath(): string {
     return DrawableDescriptorInner.getMaskClipPath()
   }
+
+  setBlendMode(mode: drawing.BlendMode | undefined): void {
+    if (mode != undefined) {
+      DrawableDescriptorInner.setBlendMode(this, mode)
+    }
+  }
 }
 
 export interface AnimationOptions {
-  duration?: number;
-  iterations?: number;
+  duration?: int;
+  iterations?: int;
+  frameDurations?: Array<int>;
+  autoPlay?: boolean;
 }
 
 class AnimationOptionsImpl implements AnimationOptions {
-  duration?: number;
-  iterations?: number;
+  duration?: int;
+  iterations?: int;
+  frameDurations?: Array<int>;
+  autoPlay?: boolean;
   constructor() { }
 }
 
+export interface AnimationController {
+  start(): void;
+  stop(): void;
+  pause(): void;
+  resume(): void;
+  getStatus(): AnimationStatus;
+}
+
+class AnimationControllerInner implements AnimationController {
+    static {
+        loadLibrary("drawable_descriptor_ani");
+    }
+    @JSONStringifyIgnore private nativeObj: long = 0;
+    constructor(nativeObj: long) {
+      if (this.nativeObj === 0){
+          this.nativeObj = nativeObj;
+      }
+    }
+    public native start(): void;
+    public native stop(): void;
+    public native pause(): void;
+    public native resume(): void;
+    public native getStatus(): AnimationStatus;
+}
+
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
-  @JSONStringifyIgnore private pixelMaps: Array<image.PixelMap>
+  @JSONStringifyIgnore private pixelMaps!: Array<image.PixelMap>
   @JSONStringifyIgnore private options: AnimationOptions | undefined = undefined
   @JSONStringifyIgnore private finalization: NativeDestructor
   constructor(pixelMaps: Array<image.PixelMap>, options?: AnimationOptions) {
@@ -173,6 +233,41 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     this.finalization = new NativeDestructor(this.nativeObj)
     finalizerRegister(this, this.finalization)
   }
+
+  constructor(src: ResourceStr | Array<image.PixelMap>, options?: AnimationOptions) {
+    super()
+    this.options = options
+    if (src instanceof ResourceStr) {
+      if (src instanceof string) {
+        DrawableDescriptorInner.createAnimatedDrawableByString(this, src as string, options)
+      }
+      else if (src instanceof Resource) {
+        DrawableDescriptorInner.createAnimatedDrawableByResource(this, src as Resource, options)
+      }
+    } else {
+      let pixelMapsParm: Array<image.PixelMap> = src as Array<image.PixelMap>
+      if (pixelMapsParm.length > 0) {
+        this.pixelMap = pixelMapsParm[0]
+      }
+      this.pixelMaps = pixelMapsParm
+      DrawableDescriptorInner.createAnimatedDrawable(this, pixelMapsParm, options)
+    }
+    
+    this.finalization = new NativeDestructor(this.nativeObj)
+    finalizerRegister(this, this.finalization)
+  }
+
+  getPixelMap(): image.PixelMap | undefined {
+    if (this.pixelMap) {
+      return this.pixelMap
+    }
+    this.pixelMap = DrawableDescriptorInner.createPixelMap(this)
+    return this.pixelMap
+  }
+
+  getAnimationController(id?: string): AnimationController | undefined {
+    return DrawableDescriptorInner.getAnimationController(this, id)
+  }
 }
 
 class DrawableDescriptorInner {
@@ -182,12 +277,20 @@ class DrawableDescriptorInner {
     background?: image.PixelMap, mask?: image.PixelMap): void;
   native static createAnimatedDrawable(value: AnimatedDrawableDescriptor,
       pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void;
-  native static createPixelMap(value: PixelMapDrawableDescriptor): image.PixelMap;
+  native static createAnimatedDrawableByResource(value: AnimatedDrawableDescriptor,
+      resource: Resource, options?: AnimationOptions): void;
+  native static createAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
+      src: string, options?: AnimationOptions): void;
+  native static createPixelMap(value: DrawableDescriptor): image.PixelMap;
   native static composePixelMap(value: LayeredDrawableDescriptor): image.PixelMap;
   native static createForeground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
-  native static nativeTransferStatic(input: ESValue): DrawableDescriptor;
+  native static loadSync(value: DrawableDescriptor): DrawableDescriptorLoadedResult;
+  native static load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>;
+  native static getAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined;
+  native static setBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void;
+  native static nativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor;
   native static destructDrawable(ptr: long): void;
 }

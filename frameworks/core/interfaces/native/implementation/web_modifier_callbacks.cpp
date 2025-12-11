@@ -443,8 +443,8 @@ void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallb
     auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_FullScreenEnterEvent parameter;
-    parameter.videoWidth = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalWidth());
-    parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
+    parameter.videoWidth = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalWidth());
+    parameter.videoHeight = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalHeight());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler = peer;
@@ -488,7 +488,7 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
 }
 
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -503,10 +503,11 @@ RefPtr<WebResponse> OnInterceptRequest(
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request = peer;
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
-        Callback_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult, nullptr);
-    return arkResult->handler;
+    const auto arkResult = arkCallback.InvokeWithOptConvertResult<Ark_WebResourceResponse, Opt_WebResourceResponse,
+        Callback_Opt_WebResourceResponse_Void>(parameter);
+    CHECK_NULL_RETURN(arkResult.has_value(), nullptr);
+    Ark_WebResourceResponse value = arkResult.value();
+    return value->handler;
 }
 
 std::string OnOverrideErrorPage(
@@ -528,9 +529,7 @@ std::string OnOverrideErrorPage(
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetWebResourceRequest();
     parameter.request = requestPeer;
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_String,
-        Callback_String_Void>(parameter);
-    return Converter::Convert<std::string>(arkResult);
+    return arkCallback.InvokeWithConvertResult<std::string, Ark_String, Callback_String_Void>(parameter);
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
@@ -641,9 +640,15 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
     auto tempValue = vecHolder.ArkValue();
+    for (int i = 0; i < tempValue.length; ++i) {
+        tempValue.array[i].resource.resourceId = i;
+        tempValue.array[i].resource.hold = [](int id) { return; };
+        tempValue.array[i].resource.release = [](int id) { return; };
+    }
     parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(tempValue);
     auto peer = new SslErrorHandlerPeer();
-    peer->handler = eventInfo->GetResult();
+    peer->sslErrorHandler = eventInfo->GetResult();
+    peer->type = SSL_ERROR_HANDLER;
     parameter.handler = peer;
     arkCallback.InvokeSync(parameter);
     return true;
@@ -669,10 +674,8 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     auto url = eventInfo->GetUrl();
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
-    // need check
-#ifdef WRONG_NEW_ACE
-    peer->handler = eventInfo->GetResult();
-#endif
+    peer->allSslErrorHandler = eventInfo->GetResult();
+    peer->type = ALL_SSL_ERROR_HANDLER;
     parameter.handler = peer;
     arkCallback.InvokeSync(parameter);
     return true;
@@ -1349,21 +1352,23 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     parameter.attributes = attributes;
 
     auto frameNode = Referenced::RawPtr(refNode);
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
-        Callback_WebKeyboardOptions_Void>(parameter);
-    opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
-    if (auto enterKeyType = Converter::OptConvert<int32_t>(arkResult.enterKeyType); enterKeyType) {
-        opt.enterKeyTpye_ = enterKeyType.value();
-    }
-    if (auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(arkResult.customKeyboard); optBuilder) {
-        opt.customKeyboardBuilder_ = [
-            callback = CallbackHelper(optBuilder.value()),
-            node = reinterpret_cast<Ark_NativePointer>(frameNode)
-        ]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-    }
+    auto cont = CallbackKeeper::Claim<Callback_WebKeyboardOptions_Void>(
+        [&opt, frameNode](Ark_WebKeyboardOptions arkResult) {
+        opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
+        if (auto enterKeyType = Converter::OptConvert<int32_t>(arkResult.enterKeyType); enterKeyType) {
+            opt.enterKeyTpye_ = enterKeyType.value();
+        }
+        if (auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(arkResult.customKeyboard); optBuilder) {
+            opt.customKeyboardBuilder_ = [
+                callback = CallbackHelper(optBuilder.value()),
+                node = reinterpret_cast<Ark_NativePointer>(frameNode)
+            ]() {
+                auto builderNode = callback.BuildSync(node);
+                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+            };
+        }
+    });
+    arkCallback.InvokeSync(parameter, cont.ArkValue());
     return opt;
 }
 

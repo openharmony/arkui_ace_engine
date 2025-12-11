@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "base/network/download_manager.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #ifndef PREVIEW
 #include <dlfcn.h>
 #endif
@@ -139,6 +141,23 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
     businessErrorObj->SetProperty<int32_t>("code", static_cast<int32_t>(eventInfo.GetErrorInfo().errorCode));
     businessErrorObj->SetProperty("message", eventInfo.GetErrorInfo().errorMessage);
     obj->SetPropertyObject("error", businessErrorObj);
+    if (!eventInfo.GetErrorInfo().downloadInfo) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    auto container = Container::Current();
+    if (!eventInfo.GetErrorInfo().downloadInfo || !container || container->IsSceneBoardWindow()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto downloadInfoNapiValue = DownloadManager::GetInstance()->WrapDownloadInfoToNapiValue(
+        reinterpret_cast<void*>(nativeEngine), eventInfo.GetErrorInfo());
+    auto downloadInfoJsValue =
+        JsConverter::ConvertNapiValueToJsVal(reinterpret_cast<napi_value>(downloadInfoNapiValue));
+    obj->SetPropertyObject("downloadInfo", downloadInfoJsValue);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -671,6 +690,19 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     ParseResizableLattice(resizableObject);
 }
 
+void JSImage::JsAntiAlias(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto infoObj = info[0];
+    bool antiAlias = false;
+    if (infoObj->IsBoolean()) {
+        antiAlias = infoObj->ToBoolean();
+    }
+    ImageModel::GetInstance()->SetAntiAlias(antiAlias);
+}
+
 void ApplySliceResource(ImageResizableSlice& sliceResult, const std::string& resKey,
     const RefPtr<ResourceObject>& resObj, BorderImageDirection direction)
 {
@@ -752,7 +784,7 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
         ImageModel::GetInstance()->SetBackBorder();
         return;
     }
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -921,7 +953,7 @@ void JSImage::SetSyncLoad(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetSyncMode(tmpInfo->ToBoolean());
 }
 
-void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
+void JSImage::ConstructorCallback(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
         return;
@@ -934,8 +966,8 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         return;
     }
-    auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
-    if (jscolorfilter == nullptr) {
+    auto imageColorFilter = Referenced::MakeRefPtr<ImageColorFilter>();
+    if (imageColorFilter == nullptr) {
         return;
     }
     std::vector<float> colorfilter;
@@ -948,12 +980,12 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
         return;
     }
-    jscolorfilter->SetColorFilterMatrix(std::move(colorfilter));
-    jscolorfilter->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jscolorfilter));
+    imageColorFilter->SetColorFilterMatrix(std::move(colorfilter));
+    imageColorFilter->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(imageColorFilter));
 }
 
-void JSColorFilter::DestructorCallback(JSColorFilter* obj)
+void JSImage::DestructorCallback(ImageColorFilter* obj)
 {
     if (obj != nullptr) {
         obj->DecRefCount();
@@ -977,9 +1009,9 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-        JSColorFilter* colorFilter;
+        ImageColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
+            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<ImageColorFilter>();
         } else {
             ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;
@@ -1115,6 +1147,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);
+    JSClass<JSImage>::StaticMethod("antialiased", &JSImage::JsAntiAlias);
 
     JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSImage>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -1140,8 +1173,8 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
-    JSClass<JSColorFilter>::Declare("ColorFilter");
-    JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
+    JSClass<ImageColorFilter>::Declare("ColorFilter");
+    JSClass<ImageColorFilter>::Bind(globalObj, JSImage::ConstructorCallback, JSImage::DestructorCallback);
 }
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)

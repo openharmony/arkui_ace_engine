@@ -189,7 +189,13 @@ void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentPr
 
 void DotIndicatorModifier::CalCBackground(ContentProperty& contentProperty)
 {
-    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
+    // During the animation stage of enlarging the backboard, there will be no dirty area updates.
+    // It is necessary to perform dirty area calculations in advance and bypass restrictions.
+    if (targetContentProperty_.needForceCalc) {
+        targetContentProperty_.needForceCalc = false;
+    } else {
+        CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
+    }
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
     auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
@@ -506,6 +512,7 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
 void DotIndicatorModifier::UpdateDilatePaintProperty(const LinearVector<float>& hoverItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
+    targetContentProperty_.needForceCalc = true;
     indicatorMargin_->Set({ 0, 0 });
     targetContentProperty_.indicatorMargin = { 0, 0 };
     indicatorPadding_->Set(static_cast<float>(paddingSide_.ConvertToPx()));
@@ -982,6 +989,11 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     RefPtr<Curve> curve = headCurve_;
     optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
+
+    auto headSpringCurve = DynamicCast<InterpolatingSpring>(curve);
+    if (headSpringCurve && Negative(headSpringCurve->GetVelocity())) {
+        headSpringCurve->UpdateVelocity(0.0f);
+    }
 
     AnimationOption optionTail = CreateTailOption(longPointCenterX, gestureState, isNormal);
     AnimationOption optionLeft = optionTail;

@@ -37,6 +37,9 @@ public:
         std::function<void(const UpdateTask&)>&& emplaceTaskFunc) override;
 
     bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) override;
+
+    bool RegisterUpdateInstanceForEnvFunc(
+        const WeakPtr<AceType>& node, std::function<void(int32_t)>&& updateInstanceForEnvValueFunc) override;
 };
 
 } // namespace OHOS::Ace::NG

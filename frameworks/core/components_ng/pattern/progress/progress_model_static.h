@@ -33,6 +33,7 @@ public:
     static void SetScaleWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowText(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);
@@ -44,6 +45,11 @@ public:
     static void SetStrokeRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetValue(FrameNode* frameNode, const std::optional<double>& valueOpt);
+    static void Initialize(FrameNode* frameNode, double min, double value, double cachedValue, double max,
+        NG::ProgressType type);
+    static void SetTextDefaultStyle(FrameNode* frameNode, const RefPtr<FrameNode>& textNode,
+        double value, double maxValue);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
 };
 
 } // namespace OHOS::Ace::NG

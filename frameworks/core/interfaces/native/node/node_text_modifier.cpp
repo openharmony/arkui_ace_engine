@@ -18,12 +18,15 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
@@ -56,16 +59,6 @@ constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 const std::string EMPTY_STRING = "";
-const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
-    OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
-const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
-    TextContentAlign::BOTTOM };
-const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
-    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
-const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
-    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
@@ -83,6 +76,9 @@ constexpr int NUM_10 = 10;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
+constexpr Dimension DEFAULT_MARQUEE_STEP_VALUE = 4.0_vp;
+constexpr float DEFAULT_MARQUEE_STEP_NUMBER_VALUE = 4.0f;
+constexpr Dimension DEFAULT_MARQUEE_SPACING_WIDTH = 48.0_vp;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -249,6 +245,32 @@ void ResetTextAlign(ArkUINodeHandle node)
     TextModelNG::SetTextAlign(frameNode, OHOS::Ace::TextAlign::START);
 }
 
+void SetTextDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+        TextModelNG::ResetTextDirection(frameNode);
+        return;
+    }
+    TextModelNG::SetTextDirection(frameNode, TEXT_DIRECTIONS[textDirection]);
+}
+
+int32_t GetTextDirection(ArkUINodeHandle node)
+{
+    auto defaultTextDirection = static_cast<int32_t>(OHOS::Ace::TextDirection::INHERIT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextDirection);
+    return static_cast<int32_t>(TextModelNG::GetTextDirection(frameNode));
+}
+
+void ResetTextDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetTextDirection(frameNode);
+}
+
 void SetTextContentAlign(ArkUINodeHandle node, ArkUI_Uint32 testContentAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -290,6 +312,8 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
         }
         if (resObj) {
             pattern->RegisterResource<Color>("TextColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("TextColor");
         }
     }
     TextModelNG::SetTextColor(frameNode, result);
@@ -423,6 +447,31 @@ void ResetTextLineHeightMultiply(ArkUINodeHandle node)
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("LineHeightMultiply");
     }
+}
+
+void SetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(
+        frameNode, options->start, options->end, static_cast<MenuPolicy>(options->menuPolicy));
+}
+
+void GetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextSelectionOptions textSelectionOptions = TextModelNG::GetTextSelectionOptions(frameNode);
+    options->start = textSelectionOptions.start;
+    options->end = textSelectionOptions.end;
+    options->menuPolicy = static_cast<ArkUIMenuPolicy>(textSelectionOptions.menuPolicy);
+}
+
+void ResetTextTextSelection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(frameNode, 0, 0, static_cast<MenuPolicy>(0));
 }
 
 void SetTextMinimumLineHeight(
@@ -728,11 +777,15 @@ void ResetTextMaxFontScale(ArkUINodeHandle node)
 void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length, void* fontFamilyRawPtr)
 {
     CHECK_NULL_VOID(fontFamilies);
-    if (length <= 0) {
-        return;
-    }
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length <= 0) {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontFamily");
+        return;
+    }
     std::vector<std::string> families;
     for (uint32_t i = 0; i < length; i++) {
         const char* family = *(fontFamilies + i);
@@ -1030,17 +1083,17 @@ void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODES.size()) {
         ellipsisMode = 2; // 2 is the default value of EllipsisMode::TAIL
     }
-    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[ellipsisMode]);
 }
 
 void ResetEllipsisMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[2]); // 2 is the default value of EllipsisMode::TAIL
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[2]); // 2 is the default value of EllipsisMode::TAIL
 }
 
 void SetTextDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -1262,35 +1315,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     TextModelNG::ResetSelectDetectEnable(frameNode);
 }
 
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    TextModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = TextModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextModelNG::ResetSelectDetectConfig(frameNode);
-}
-
 ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1376,6 +1400,8 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
         }
         if (resObj) {
             pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("SelectedBackgroundColor");
         }
     }
     TextModelNG::SetSelectedBackgroundColor(frameNode, result);
@@ -1631,21 +1657,36 @@ void ResetTextEnableHapticFeedback(ArkUINodeHandle node)
     TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
 
-void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value)
+void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value,
+    void* spacingRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     TextMarqueeOptions marqueeOptions;
     marqueeOptions.UpdateTextMarqueeStart(value->start);
-    marqueeOptions.UpdateTextMarqueeStep(value->step);
+    marqueeOptions.UpdateTextMarqueeStep(GreatNotEqual(value->step, 0.0f) ? value->step :
+        DEFAULT_MARQUEE_STEP_VALUE.ConvertToPx());
     marqueeOptions.UpdateTextMarqueeLoop(value->loop);
     marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     marqueeOptions.UpdateTextMarqueeDelay(value->delay);
     marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
     marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+    marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
+    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
+    if (spacing.IsNegative()) {
+        spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
+    }
+    marqueeOptions.UpdateTextMarqueeSpacing(spacing);
 
     TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
 }
 
 void ResetMarqueeOptions(ArkUINodeHandle node)
@@ -1654,6 +1695,37 @@ void ResetMarqueeOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextMarqueeOptions marqueeOptions;
     TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MarqueeSpacing");
+    }
+}
+
+ArkUITextMarqueeOptions GetMarqueeOptions(ArkUINodeHandle node)
+{
+    ArkUITextMarqueeOptions option;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, option);
+    TextMarqueeOptions marqueeOptions = TextModelNG::GetMarqueeOptions(frameNode);
+
+    CalcDimension stepVal(marqueeOptions.GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_NUMBER_VALUE));
+    option.step = stepVal.ConvertToVp();
+    option.delay = marqueeOptions.GetTextMarqueeDelay().value_or(0);
+    option.loop = marqueeOptions.GetTextMarqueeLoop().value_or(-1);
+    option.marqueeStartPolicy =
+        static_cast<int32_t>(marqueeOptions.GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT));
+    option.start = marqueeOptions.GetTextMarqueeStart().value_or(true);
+    option.fromStart =
+        marqueeOptions.GetTextMarqueeDirection().value_or(MarqueeDirection::DEFAULT) == MarqueeDirection::DEFAULT;
+    option.fadeout = marqueeOptions.GetTextMarqueeFadeout().value_or(false);
+    option.marqueeUpdatePolicy =
+        static_cast<int32_t>(marqueeOptions.GetTextMarqueeUpdatePolicy().value_or(MarqueeUpdatePolicy::DEFAULT));
+    CalcDimension spacingVal = marqueeOptions.GetTextMarqueeSpacing().value_or(DEFAULT_MARQUEE_SPACING_WIDTH);
+    option.spacing.value = spacingVal.ConvertToVp();
+    option.spacing.units = static_cast<int32_t>(DimensionUnit::VP);
+    return option;
 }
 
 void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
@@ -1694,6 +1766,27 @@ void ResetTextOptimizeTrailingSpace(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOptimizeTrailingSpace(frameNode, DEFAULT_TRIM_SPACE);
+}
+
+void SetTextCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetTextCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, false);
 }
 
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
@@ -2200,6 +2293,8 @@ void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorSh
         }
         if (resObj) {
             pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        } else {
+            pattern->UnRegisterResource("ColorShaderStyle");
         }
     }
 }
@@ -2323,6 +2418,284 @@ ArkUITextLineMetrics GetLineMetrics(ArkUINodeHandle node, ArkUI_Int32 lineNumber
     lineMetrics.firstCharMetrics = fontMetrics;
     return lineMetrics;
 }
+
+ArkUITextMenuItemArray ConvertToArkUITextMenuItemArray(
+    ArkUITextMenuItem* textMenuItems, const std::vector<NG::MenuItemParam>& itemPrams)
+{
+    ArkUITextMenuItemArray itemArray;
+    itemArray.items = nullptr;
+    itemArray.length = 0;
+    CHECK_NULL_RETURN(textMenuItems, itemArray);
+    for (size_t i = 0; i < itemPrams.size(); ++i) {
+        const auto& itemParam = itemPrams[i];
+        if (itemParam.menuOptionsParam.content.has_value()) {
+            textMenuItems[i].content = itemParam.menuOptionsParam.content.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.icon.has_value()) {
+            textMenuItems[i].icon = itemParam.menuOptionsParam.icon.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+            textMenuItems[i].labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+        }
+        textMenuItems[i].id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+    }
+    itemArray.items = textMenuItems;
+    itemArray.length = itemPrams.size();
+    return itemArray;
+}
+
+std::vector<NG::MenuOptionsParam> ConvertToMenuOptionsParams(const ArkUITextMenuItemArray& itemArray)
+{
+    std::vector<NG::MenuOptionsParam> outOptionVec;
+    CHECK_NULL_RETURN(itemArray.items, outOptionVec);
+    for (uint32_t i = 0; i < itemArray.length; ++i) {
+        NG::MenuOptionsParam menuOption;
+        auto& item = itemArray.items[i];
+        if (item.content) {
+            menuOption.content = std::string(item.content);
+        }
+        if (item.isDelContent) {
+            delete[] item.content;
+        }
+        if (item.icon) {
+            menuOption.icon = std::string(item.icon);
+        }
+        if (item.isDelIcon) {
+            delete[] item.icon;
+        }
+        if (item.labelInfo) {
+            menuOption.labelInfo = std::string(item.labelInfo);
+        }
+        if (item.isDelLabel) {
+            delete[] item.labelInfo;
+        }
+        menuOption.id = SelectOverlayNode::ConvertToStrMenuId(item.id);
+        outOptionVec.push_back(menuOption);
+    }
+    delete[] itemArray.items;
+    return outOptionVec;
+}
+
+NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback =
+        [adapterCallback = optionsParam->createAdapterCallback, userCallback = optionsParam->onCreateMenu,
+            userData = optionsParam->createUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onCreateMenuCallback;
+}
+
+NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnMenuItemClickCallback onMenuItemClick =
+        [adapterCallback = optionsParam->itemClickAdapterCallback, userCallback = optionsParam->onMenuItemClick,
+            userData = optionsParam->clickUserData](const NG::MenuItemParam& itemParam) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItem;
+                if (itemParam.menuOptionsParam.content.has_value()) {
+                    menuItem.content = itemParam.menuOptionsParam.content.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.icon.has_value()) {
+                    menuItem.icon = itemParam.menuOptionsParam.icon.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+                    menuItem.labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+                }
+                menuItem.id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+                return adapterCallback(userCallback, userData, &menuItem, itemParam.start, itemParam.end);
+            }
+            return false;
+        };
+    return onMenuItemClick;
+}
+
+NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnPrepareMenuCallback onPrepareMenuCallback =
+        [adapterCallback = optionsParam->prepareAdapterCallback, userCallback = optionsParam->onPrepareMenu,
+            userData = optionsParam->prepareUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onPrepareMenuCallback;
+}
+
+void SetTextEditMenuOptions(ArkUINodeHandle node, ArkUIEditOptionsParam* optionsParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (optionsParam->onCreateMenu) {
+        NG::OnCreateMenuCallback createCallback = WrapOnCreateMenuCallback(optionsParam);
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(createCallback));
+    }
+    if (optionsParam->onMenuItemClick) {
+        NG::OnMenuItemClickCallback itemClickCallback = WrapOnMenuItemClickCallback(optionsParam);
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(itemClickCallback));
+    }
+    if (optionsParam->onPrepareMenu) {
+        NG::OnPrepareMenuCallback prepareCallback = WrapOnPrepareMenuCallback(optionsParam);
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(prepareCallback));
+    }
+}
+
+void ResetTextEditMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
+}
+
+void SetTextBindSelectionMenu(ArkUINodeHandle node, ArkUITextBindMenuParam* menuParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* contentNode = reinterpret_cast<FrameNode*>(menuParam->contentNode);
+    CHECK_NULL_VOID(contentNode);
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    if (!TextSpanTypeMapper::GetTextSpanTypeFromJsType(menuParam->textSpanType, textSpanType)) {
+        textSpanType = TextSpanType::TEXT;
+    }
+    auto textResponseType = static_cast<TextResponseType>(menuParam->textResponseType);
+    std::function<void()> builderFunc = [contentNode = AceType::Claim(contentNode)]() {
+        ViewStackProcessor::GetInstance()->Push(contentNode);
+    };
+    SelectMenuParam selectMenuParam;
+    selectMenuParam.previewMenuOptions.hapticFeedbackMode =
+        static_cast<HapticFeedbackMode>(menuParam->hapticFeedbackMode);
+    if (menuParam->onMenuShow) {
+        auto onMenuShow = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuShow);
+        selectMenuParam.onMenuShow = [onMenuShow, userData = menuParam->onMenuShowUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuShow) {
+                onMenuShow(start, end, userData);
+            }
+        };
+    }
+    if (menuParam->onMenuHide) {
+        auto onMenuHide = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuHide);
+        selectMenuParam.onMenuHide = [onMenuHide, userData = menuParam->onMenuHideUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuHide) {
+                onMenuHide(start, end, userData);
+            }
+        };
+    }
+    TextModelNG::BindSelectionMenu(frameNode, textSpanType, textResponseType, builderFunc, selectMenuParam);
+}
+
+void ResetTextBindSelectionMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetBindSelectionMenu(frameNode);
+}
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+ArkUI_Bool GetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextModelNG::GetIncludeFontPadding(frameNode));
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(fallbackLineSpacing));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
+ArkUI_Bool GetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextModelNG::GetFallbackLineSpacing(frameNode));
+}
+
+void SetTextSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    TextModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("selectedDragPreviewStyleColor");
+        }
+    }
+}
+
+void ResetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2350,6 +2723,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextLineHeightMultiply = SetTextLineHeightMultiply,
         .getTextLineHeightMultiply = GetTextLineHeightMultiply,
         .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextTextSelection = SetTextTextSelection,
+        .getTextTextSelection = GetTextTextSelection,
+        .resetTextTextSelection = ResetTextTextSelection,
         .setTextMinimumLineHeight = SetTextMinimumLineHeight,
         .getTextMinimumLineHeight = GetTextMinimumLineHeight,
         .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
@@ -2434,9 +2810,6 @@ const ArkUITextModifier* GetTextModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,
@@ -2479,6 +2852,7 @@ const ArkUITextModifier* GetTextModifier()
         .setImmutableFontWeight = SetImmutableFontWeight,
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
+        .getTextMarqueeOptions = GetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .getLineCount = GetLineCount,
@@ -2502,6 +2876,25 @@ const ArkUITextModifier* GetTextModifier()
         .getRectsForRange = GetRectsForRange,
         .getGlyphPositionAtCoordinate = GetGlyphPositionAtCoordinate,
         .getLineMetrics = GetLineMetrics,
+        .setTextEditMenuOptions = SetTextEditMenuOptions,
+        .resetTextEditMenuOptions = ResetTextEditMenuOptions,
+        .setTextBindSelectionMenu = SetTextBindSelectionMenu,
+        .resetTextBindSelectionMenu = ResetTextBindSelectionMenu,
+        .setTextCompressLeadingPunctuation = SetTextCompressLeadingPunctuation,
+        .getTextCompressLeadingPunctuation = GetTextCompressLeadingPunctuation,
+        .resetTextCompressLeadingPunctuation = ResetTextCompressLeadingPunctuation,
+        .setTextDirection = SetTextDirection,
+        .getTextDirection = GetTextDirection,
+        .resetTextDirection = ResetTextDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .getIncludeFontPadding = GetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
+        .getFallbackLineSpacing = GetFallbackLineSpacing,
+        .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
+        .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
+        .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -2609,9 +3002,6 @@ const CJUITextModifier* GetCJUITextModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,

@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/container.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -50,6 +51,7 @@ struct NavDestinationInfo {
     NavDestinationState state;
     int32_t index;
     napi_value param;
+    std::string interopParam;
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
@@ -100,29 +102,27 @@ struct ScrollEventInfo {
 
 struct NavDestinationSwitchInfo {
     // UIContext
-    napi_value context;
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation;
 
-    NavDestinationSwitchInfo(napi_value ctx, std::optional<NavDestinationInfo>&& fromInfo,
-        std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
-        : context(ctx), from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+    NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo, std::optional<NavDestinationInfo>&& toInfo,
+        NavigationOperation op)
+        : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
           to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
     {}
 };
 
 struct RouterPageInfoNG {
-    napi_value context;
     int32_t index;
     std::string name;
     std::string path;
     RouterPageState state;
     std::string pageId;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+    RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
         std::string pageId)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+        : index(index), name(std::move(name)), path(std::move(path)), state(state),
           pageId(std::move(pageId))
     {}
 };
@@ -178,9 +178,19 @@ struct TextChangeEventInfo {
     {}
 };
 
-struct WindowSizeBreakpoint {
-    WidthBreakpoint widthBreakpoint;
-    HeightBreakpoint heightBreakpoint;
+struct SwiperItemInfoNG {
+    int32_t uniqueId = -1;
+    int32_t index = -1;
+
+    SwiperItemInfoNG(int32_t uniqueId, int32_t index)
+        : uniqueId(uniqueId), index(index)
+    {}
+};
+
+struct SwiperContentInfo {
+    std::string id = "";
+    int32_t uniqueId = -1;
+    std::vector<SwiperItemInfoNG> swiperItemInfos = {};
 };
 
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };
@@ -206,6 +216,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabContentStateUpdateForAni(const TabContentInfo& info);
     void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
@@ -217,15 +228,21 @@ public:
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
+    void NotifyNavDestinationSwitchForAni(std::optional<NavDestinationInfo>& from,
+        std::optional<NavDestinationInfo>& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
+    void NotifySwiperContentUpdate(const SwiperContentInfo& info);
+    bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
+    using ScrollEventHandleFuncForAni = std::function<void(const ScrollEventInfo& info)>;
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
     using DrawCommandSendHandleFunc = std::function<void()>;
     using LayoutDoneHandleFunc = std::function<void()>;
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFuncForAni = std::function<void(NavDestinationSwitchInfo&)>;
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
@@ -239,11 +256,16 @@ public:
     using TabChangeHandleFunc = void (*)(const TabContentInfo&);
     using TabChangeHandleFuncForAni = std::function<void(const TabContentInfo& info)>;
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
+    using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
+    using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
+    using SwiperContentObservrEmptyFunc = bool (*)();
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
+    NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
+    void SetHandleScrollEventChangeFuncForAni(ScrollEventHandleFuncForAni func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
@@ -251,12 +273,14 @@ public:
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+    void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
+    void SetHandleNavDestinationSwitchFuncForAni(NavDestinationSwitchHandleFuncForAni func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
@@ -279,10 +303,13 @@ public:
     using DidClickHandleFuncForAni = std::function<void()>;
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
     void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
+    void SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func);
+    void SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
+    ScrollEventHandleFuncForAni scrollEventHandleFuncForAni_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     RouterPageHandleFuncForAni routerPageHandleFuncForAni_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
@@ -291,14 +318,18 @@ private:
     WinSizeLayoutBreakpointHandleFunc winSizeLayoutBreakpointHandleFunc_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFuncForAni navDestinationSwitchHandleFuncForAni_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabContentHandleFuncForAni tabContentHandleFuncForAni_ = nullptr;
     TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
     TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
+    SwiperContentUpdateHandleFunc swiperContentUpdateHandleFunc_ = nullptr;
+    SwiperContentObservrEmptyFunc swiperContentObservrEmptyFunc_ = nullptr;
 
     BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;
     AfterPanStartHandleFuncForAni afterPanStartHandleFuncForAni_ = nullptr;

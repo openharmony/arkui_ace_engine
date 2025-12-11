@@ -35,6 +35,7 @@ namespace OHOS::Ace {
 
 class WebDelegate;
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using ScriptItemsByOrder = std::vector<std::string>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
@@ -144,11 +145,8 @@ struct BlankScreenDetectionConfig {
     int32_t contentfulNodesCountThreshold;
     bool operator==(const BlankScreenDetectionConfig& config) const
     {
-        if (enable == config.enable && contentfulNodesCountThreshold == config.contentfulNodesCountThreshold &&
-            detectionTiming == config.detectionTiming && detectionMethods == config.detectionMethods) {
-            return true;
-        }
-        return false;
+        return enable == config.enable && contentfulNodesCountThreshold == config.contentfulNodesCountThreshold &&
+               detectionTiming == config.detectionTiming && detectionMethods == config.detectionMethods;
     }
 };
 
@@ -289,6 +287,13 @@ class WebController : public virtual AceType {
     DECLARE_ACE_TYPE(WebController, AceType);
 
 public:
+    ~WebController() override
+    {
+        if (cookieManager_ != nullptr) {
+            delete cookieManager_;
+            cookieManager_ = nullptr;
+        }
+    }
     using LoadUrlImpl = std::function<void(std::string, const std::map<std::string, std::string>&)>;
     using AccessBackwardImpl = std::function<bool()>;
     using AccessForwardImpl = std::function<bool()>;

@@ -51,6 +51,7 @@ class InteropExtractorModule {
     static transferCompatibleDynamicBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
     static createCompatibleStaticState?: (value: Object) => Object;
     static transferCompatibleUpdatableBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
+    static localStorageSetProxy?: (storage: Object, proxy: Object) => void;
 }
 
 class StaticInteropHook {
@@ -101,4 +102,8 @@ function registerCreateCompatibleStaticState(callback: (value: Object) => Object
 
 function registerTransferCompatibleUpdatableBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void): void {
     InteropExtractorModule.transferCompatibleUpdatableBuilder = callback;
+}
+
+function registerLocalStorageSetProxy(callback: (storage: Object, proxy: Object) => void): void {
+     InteropExtractorModule.localStorageSetProxy = callback;
 }

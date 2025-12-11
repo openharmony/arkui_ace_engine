@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class GridItemModifier extends CommonMethodModifier implements GridItemAttribute,AttributeModifier<GridItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,13 +37,13 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     applyDisabledAttribute(instance: GridItemAttribute): void { }
     applySelectedAttribute(instance: GridItemAttribute): void { }
     _rowStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _rowStart_0_0value?: number | undefined
+    _rowStart_0_0value?: int32 | undefined
     _rowEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _rowEnd_0_0value?: number | undefined
+    _rowEnd_0_0value?: int32 | undefined
     _columnStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnStart_0_0value?: number | undefined
+    _columnStart_0_0value?: int32 | undefined
     _columnEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnEnd_0_0value?: number | undefined
+    _columnEnd_0_0value?: int32 | undefined
     _selectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectable_0_0value?: boolean | undefined
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -49,13 +51,14 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGridItemPeer;
         if (this._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._rowStart_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRowStartAttribute((this._rowStart_0_0value as number | undefined));
+                    peer.setRowStartAttribute((this._rowStart_0_0value as int32 | undefined));
                     this._rowStart_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -65,7 +68,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                 }
                 default: {
                     this._rowStart_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRowStartAttribute((undefined as number | undefined));
+                    peer.setRowStartAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -73,7 +76,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             switch (this._rowEnd_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRowEndAttribute((this._rowEnd_0_0value as number | undefined));
+                    peer.setRowEndAttribute((this._rowEnd_0_0value as int32 | undefined));
                     this._rowEnd_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -83,7 +86,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                 }
                 default: {
                     this._rowEnd_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRowEndAttribute((undefined as number | undefined));
+                    peer.setRowEndAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -91,7 +94,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             switch (this._columnStart_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColumnStartAttribute((this._columnStart_0_0value as number | undefined));
+                    peer.setColumnStartAttribute((this._columnStart_0_0value as int32 | undefined));
                     this._columnStart_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -101,7 +104,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                 }
                 default: {
                     this._columnStart_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColumnStartAttribute((undefined as number | undefined));
+                    peer.setColumnStartAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -109,7 +112,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             switch (this._columnEnd_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColumnEndAttribute((this._columnEnd_0_0value as number | undefined));
+                    peer.setColumnEndAttribute((this._columnEnd_0_0value as int32 | undefined));
                     this._columnEnd_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -119,7 +122,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                 }
                 default: {
                     this._columnEnd_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColumnEndAttribute((undefined as number | undefined));
+                    peer.setColumnEndAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -180,6 +183,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     }
     mergeModifier(modifier: GridItemModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._rowStart_0_flag) {
@@ -189,7 +193,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                     break;
                 }
                 default: {
-                    this.rowStart((undefined as number | undefined));
+                    this.rowStart((undefined as int32 | undefined));
                 }
             }
         }
@@ -202,7 +206,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                     break;
                 }
                 default: {
-                    this.rowEnd((undefined as number | undefined));
+                    this.rowEnd((undefined as int32 | undefined));
                 }
             }
         }
@@ -215,7 +219,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                     break;
                 }
                 default: {
-                    this.columnStart((undefined as number | undefined));
+                    this.columnStart((undefined as int32 | undefined));
                 }
             }
         }
@@ -228,7 +232,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
                     break;
                 }
                 default: {
-                    this.columnEnd((undefined as number | undefined));
+                    this.columnEnd((undefined as int32 | undefined));
                 }
             }
         }
@@ -272,7 +276,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
             }
         }
     }
-    rowStart(value: number | undefined): this {
+    rowStart(value: int32 | undefined): this {
         if (((this._rowStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._rowStart_0_0value) !== (value)))
         {
             this._rowStart_0_flag = AttributeUpdaterFlag.UPDATE
@@ -283,7 +287,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         }
         return this
     }
-    rowEnd(value: number | undefined): this {
+    rowEnd(value: int32 | undefined): this {
         if (((this._rowEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._rowEnd_0_0value) !== (value)))
         {
             this._rowEnd_0_flag = AttributeUpdaterFlag.UPDATE
@@ -294,7 +298,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         }
         return this
     }
-    columnStart(value: number | undefined): this {
+    columnStart(value: int32 | undefined): this {
         if (((this._columnStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnStart_0_0value) !== (value)))
         {
             this._columnStart_0_flag = AttributeUpdaterFlag.UPDATE
@@ -305,7 +309,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         }
         return this
     }
-    columnEnd(value: number | undefined): this {
+    columnEnd(value: int32 | undefined): this {
         if (((this._columnEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnEnd_0_0value) !== (value)))
         {
             this._columnEnd_0_flag = AttributeUpdaterFlag.UPDATE

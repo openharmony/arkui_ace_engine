@@ -48,6 +48,16 @@ void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPo
 }
 
 template<>
+void AssignCast(std::optional<MarqueeUpdatePolicy>& dst, const Ark_MarqueeUpdatePolicy& src)
+{
+    switch (src) {
+        case ARK_MARQUEE_UPDATE_POLICY_DEFAULT: dst = MarqueeUpdatePolicy::DEFAULT; break;
+        case ARK_MARQUEE_UPDATE_POLICY_PRESERVE_POSITION: dst = MarqueeUpdatePolicy::PRESERVE_POSITION; break;
+        default: LOGE("Unexpected enum value in Ark_MarqueeUpdatePolicy: %{public}d", src);
+    }
+}
+
+template<>
 inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
 {
     FontSettingOptions options;
@@ -103,6 +113,15 @@ TextMarqueeOptions Convert(const Ark_TextMarqueeOptions& src)
         options.UpdateTextMarqueeStartPolicy(optStartPolicy.value());
     }
 
+    auto optUpdatePolicy = OptConvert<MarqueeUpdatePolicy>(src.marqueeUpdatePolicy);
+    if (optUpdatePolicy) {
+        options.UpdateTextMarqueeUpdatePolicy(optUpdatePolicy.value());
+    }
+
+    auto optSpacing = OptConvert<CalcDimension>(src.spacing);
+    if (optSpacing && !optSpacing.value().IsNegative()) {
+        options.UpdateTextMarqueeSpacing(optSpacing.value());
+    }
     return options;
 }
 
@@ -435,7 +454,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> indent = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(value->value, DimensionUnit::FP);
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
@@ -594,23 +613,36 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
         TextModelStatic::ResetSelectionMenuOptions(frameNode);
         return;
     }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onCreateMenuCallback =
+        nullptr;
+    std::function<bool(NG::MenuItemParam)> onMenuItemClick = nullptr;
+    auto createMenuCallbackArk = Converter::GetOpt(optValue->onCreateMenu);
+    if (createMenuCallbackArk.has_value()) {
+        auto createMenuCallback = createMenuCallbackArk.value();
+        onCreateMenuCallback =
+            [arkCreateMenu = CallbackHelper(createMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
             auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
             return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    }
+    auto clickCallbackArk = Converter::GetOpt(optValue->onMenuItemClick);
+    if (clickCallbackArk.has_value()) {
+        auto clickCallback = clickCallbackArk.value();
+        onMenuItemClick = [arkMenuItemClick = CallbackHelper(clickCallback)](
+                              NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range { .start = menuOptionsParam.start, .end = menuOptionsParam.end };
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            auto arkResult =
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    TextModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+        TextModelStatic::SetSelectionMenuOptions(
+            frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    }
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -627,6 +659,30 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
+}
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
@@ -770,6 +826,9 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetEditMenuOptionsImpl,
         TextAttributeModifier::SetHalfLeadingImpl,
         TextAttributeModifier::SetEnableHapticFeedbackImpl,
+        TextAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAttributeModifier::SetIncludeFontPaddingImpl,
+        TextAttributeModifier::SetFallbackLineSpacingImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

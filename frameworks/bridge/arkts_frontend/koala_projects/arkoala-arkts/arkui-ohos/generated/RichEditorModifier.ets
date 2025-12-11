@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
@@ -29,8 +30,10 @@ import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
 import { CustomBuilder } from "./component/builder"
+import { ComponentContent } from "arkui.ComponentContent"
 export class RichEditorModifier extends CommonMethodModifier implements RichEditorAttribute,AttributeModifier<RichEditorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -93,25 +96,32 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _barState_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barState_0_0value?: BarState | undefined
     _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: number | undefined
+    _maxLength_0_0value?: int32 | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: number | undefined
+    _maxLines_0_0value?: int32 | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _stopBackPress_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stopBackPress_0_0value?: boolean | undefined
+    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _compressLeadingPunctuation_0_0value?: boolean | undefined
+    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _includeFontPadding_0_0value?: boolean | undefined
+    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fallbackLineSpacing_0_0value?: boolean | undefined
     _bindSelectionMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _bindSelectionMenu_0_0value?: RichEditorSpanType | undefined
     _bindSelectionMenu_0_1value?: CustomBuilder | undefined
     _bindSelectionMenu_0_2value?: ResponseType | RichEditorResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | undefined
+    _customKeyboard_0_0value?: CustomBuilder | ComponentContent | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     _placeholder_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _placeholder_0_0value?: ResourceStr | undefined
     _placeholder_0_1value?: PlaceholderStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRichEditorPeer;
         if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -586,7 +596,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._maxLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as number | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -596,7 +606,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLengthAttribute((undefined as number | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -604,7 +614,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -614,7 +624,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -654,6 +664,60 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._bindSelectionMenu_0_flag) {
@@ -676,7 +740,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContent | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -686,7 +750,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContent | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -711,6 +775,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     }
     mergeModifier(modifier: RichEditorModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onReady_0_flag) {
@@ -1058,7 +1123,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.maxLength((undefined as number | undefined));
+                    this.maxLength((undefined as int32 | undefined));
                 }
             }
         }
@@ -1071,7 +1136,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as number | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1101,6 +1166,45 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._bindSelectionMenu_0_flag) {
@@ -1123,7 +1227,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | ComponentContent | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -1427,7 +1531,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1438,7 +1542,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1471,6 +1575,39 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._compressLeadingPunctuation_0_0value = value
+        } else
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
+            this._includeFontPadding_0_0value = value
+        } else
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fallbackLineSpacing_0_0value = value
+        } else
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         if (((this._bindSelectionMenu_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true) || (true) || (true))
         {
@@ -1485,7 +1622,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE

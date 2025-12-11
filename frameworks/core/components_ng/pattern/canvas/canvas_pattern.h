@@ -31,6 +31,7 @@ class ImageAnalyzerManager;
 
 namespace OHOS::Ace::NG {
 using ReadyEvent = std::function<void()>;
+using ReadyEventNew = std::function<void(bool, CanvasUnit)>;
 class CanvasPaintMethod;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
@@ -62,7 +63,7 @@ public:
     }
 
     void AttachRenderContext();
-    void DetachRenderContext();
+    void DetachRenderContext(bool forceDetach = false);
     void OnAttachToMainTree() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -96,6 +97,11 @@ public:
     void SetOnReady(ReadyEvent&& readyEvent)
     {
         readyEvent_ = std::move(readyEvent);
+    }
+
+    void SetOnReady(ReadyEventNew&& readyEvent)
+    {
+        readyEventNew_ = std::move(readyEvent);
     }
 
     void SetAntiAlias(bool isEnabled);
@@ -203,6 +209,15 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
+    void SetUpdateContextCallback(std::function<void(CanvasUnit)>&& updateContextCB);
+    void UpdateUnit(CanvasUnit unit);
+    CanvasUnit GetUnit() const
+    {
+        return unit_;
+    }
+    void SetImmediateRender(bool immediateRender);
+    void SetRSCanvasForDrawingContext();
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -218,28 +233,29 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void OnModifyDone() override;
     void UpdateTextDefaultDirection();
-    void FireReadyEvent() const
-    {
-        ACE_SCOPED_TRACE("CanvasPattern::FireReadyEvent");
-        if (readyEvent_) {
-            readyEvent_();
-        }
-    }
+    void FireReadyEvent() const;
 
     std::function<void()> onContext2DAttach_;
     std::function<void()> onContext2DDetach_;
-    ReadyEvent readyEvent_;
-    RefPtr<CanvasPaintMethod> paintMethod_;
+    ReadyEvent readyEvent_; // need to remove when static api is ok
+    ReadyEventNew readyEventNew_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
     SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;
     int32_t id_ = -1;
+
+    RefPtr<CanvasPaintMethod> paintMethod_;
+    TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
+
+    std::function<void(CanvasUnit)> updateContextCB_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    std::optional<bool> immediateRender_ = std::nullopt;
+
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -141,7 +141,6 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
     }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
     HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
-    AddAfterLayoutTaskForExportTexture();
     host->MarkNeedSyncRenderTree();
 }
 
@@ -334,6 +333,7 @@ void XComponentPatternV2::DisposeSurface()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->RemoveChild(renderContextForSurface_);
     renderContextForSurface_ = nullptr;
+    handlingSurfaceRenderContext_ = renderContextForSurface_;
 #ifdef ENABLE_ROSEN_BACKEND
     FlushImplicitTransaction(host);
 #endif
@@ -498,6 +498,8 @@ void XComponentPatternV2::OnRebuildFrame()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(renderContextForSurface_);
+    auto pipeline = host->GetContext();
+    renderContextForSurface_->SetRSUIContext(pipeline);
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
@@ -507,6 +509,7 @@ void XComponentPatternV2::InitializeRenderContext(bool isThreadSafeNode)
         return;
     }
     renderContextForSurface_ = RenderContext::Create();
+    handlingSurfaceRenderContext_ = renderContextForSurface_;
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface",
         RenderContext::PatternType::XCOM };
     if (isThreadSafeNode) {

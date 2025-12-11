@@ -19,6 +19,7 @@
 
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "common_ani_modifier.h"
+#include "securec.h"
 #include "ui/properties/color.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
@@ -83,6 +84,7 @@ const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
+const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -95,21 +97,22 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 } // namespace
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
+static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
+static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    // auto context = NG::PipelineContext::GetCurrentContextSafely();
-    // if (context == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
-    //     return nullptr;
-    // }
-    // auto frontend = context->GetFrontend();
-    // if (frontend == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
-    //     return nullptr;
-    // }
-    // return frontend->GetHostContext(key);
-    return nullptr;
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext();
 }
 
 void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)
@@ -323,13 +326,12 @@ ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
 
 ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> nativeContext)
 {
-    // auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
-    //     &nativeContext, FrontendType::ARK_TS);
-    // CHECK_NULL_RETURN(container, -1);
-    // int32_t instanceId = container->GetInstanceId();
-    // ContainerScope::Add(instanceId);
-    // return instanceId;
-    return -1;
+    auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
+        &nativeContext, FrontendType::ARK_TS);
+    CHECK_NULL_RETURN(container, -1);
+    int32_t instanceId = container->GetInstanceId();
+    ContainerScope::Add(instanceId);
+    return instanceId;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
@@ -615,6 +617,26 @@ std::optional<std::string> GetWindowName(ani_int instanceId)
     CHECK_NULL_RETURN(window, std::nullopt);
     std::string windowName = window->GetWindowName();
     return windowName;
+}
+
+std::optional<uint32_t> GetWindowId(ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    return context->GetFocusWindowId();
+}
+
+ani_int GetWindowWidthBreakpoint()
+{
+    return ViewAbstract::GetWindowWidthBreakpoint();
+}
+
+ani_int GetWindowHeightBreakpoint()
+{
+    return ViewAbstract::GetWindowHeightBreakpoint();
 }
 
 void* TransferKeyEventPointer(ani_long nativePtr)
@@ -929,6 +951,97 @@ void ApplyThemeScopeId(ani_env* env, ani_long ptr, ani_int themeScopeId)
     }
 }
 
+template<typename T>
+void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    CHECK_NULL_VOID(nativePtr);
+    auto accessor = reinterpret_cast<T>(nativePtr);
+    CHECK_NULL_VOID(accessor && accessor->GetBaseInfo());
+    CHECK_NULL_VOID(keys && length);
+    auto eventKeys = accessor->GetBaseInfo()->GetPressedKeyCodes();
+    auto size = static_cast<int32_t>(eventKeys.size());
+    if (size <= 0) {
+        return;
+    }
+    *length = size;
+    *keys = new char* [size];
+    for (auto index = 0; index < size; index++) {
+        std::string keyStr;
+        switch (eventKeys[index]) {
+            case KeyCode::KEY_CTRL_LEFT:
+            case KeyCode::KEY_CTRL_RIGHT:
+                keyStr = "ctrl";
+                break;
+            case KeyCode::KEY_SHIFT_LEFT:
+            case KeyCode::KEY_SHIFT_RIGHT:
+                keyStr = "shift";
+                break;
+            case KeyCode::KEY_ALT_LEFT:
+            case KeyCode::KEY_ALT_RIGHT:
+                keyStr = "alt";
+                break;
+            case KeyCode::KEY_FN:
+                keyStr = "fn";
+                break;
+            default:
+                keyStr = "";
+                break;
+        }
+        (*keys)[index] = new char[keyStr.length() + 1];
+        auto result = strcpy_s((*keys)[index], keyStr.length() + 1, keyStr.c_str());
+        if (result != 0) {
+            TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "GetPressedModifierKey error: strcpy_s with error code: %d", result);
+            for (auto i = 0; i <= index; i++) {
+                delete[](*keys)[i];
+            }
+            delete[] * keys;
+            *keys = nullptr;
+            *length = 0;
+            return;
+        }
+    }
+}
+
+void GetBaseEventPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    GetPressedModifierKey<Ark_BaseEvent>(nativePtr, keys, length);
+}
+
+void GetKeyEventPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    GetPressedModifierKey<Ark_KeyEvent>(nativePtr, keys, length);
+}
+
+ani_boolean SetClickEventPreventDefault(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, true);
+    auto accessor = reinterpret_cast<Ark_ClickEvent>(nativePtr);
+    CHECK_NULL_RETURN(accessor && accessor->GetBaseInfo(), true);
+    auto eventInfo = accessor->GetBaseInfo();
+    CHECK_NULL_RETURN(eventInfo, true);
+    auto patternName = eventInfo->GetPatternName();
+    if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
+        return false;
+    }
+    eventInfo->SetPreventDefault(true);
+    return true;
+}
+
+ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, true);
+    auto accessor = reinterpret_cast<Ark_TouchEvent>(nativePtr);
+    CHECK_NULL_RETURN(accessor && accessor->GetBaseInfo(), true);
+    auto eventInfo = accessor->GetBaseInfo();
+    CHECK_NULL_RETURN(eventInfo, true);
+    auto patternName = eventInfo->GetPatternName();
+    if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
+        return false;
+    }
+    eventInfo->SetPreventDefault(true);
+    return true;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -966,6 +1079,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .getWindowId = OHOS::Ace::NG::GetWindowId,
+        .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
+        .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
@@ -987,6 +1103,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByString = OHOS::Ace::NG::GetColorValueByString,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
         .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,
@@ -999,13 +1116,17 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
         .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
         .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize,
-        .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId
+        .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId,
+        .getBaseEventPressedModifierKey = OHOS::Ace::NG::GetBaseEventPressedModifierKey,
+        .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
+        .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
+        .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault
     };
     return &impl;
 }
 
 void SetDrawModifier(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun,
-    void* fnDrawForegroundFun)
+    void* fnDrawForegroundFun, void* fnDrawOverlayFun)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode && frameNode->IsSupportDrawModifier());
@@ -1029,6 +1150,11 @@ void SetDrawModifier(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* f
         auto* fnDrawForegroundFunPtr =
             static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawForegroundFun);
         drawModifier->drawForegroundFunc = *fnDrawForegroundFunPtr;
+    }
+    if (flag & FLAG_DRAW_OVERLAY) {
+        auto* fnDrawOverlayFunPtr =
+            static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawOverlayFun);
+        drawModifier->drawOverlayFunc = *fnDrawOverlayFunPtr;
     }
     frameNode->SetDrawModifier(drawModifier);
     if (frameNode) {

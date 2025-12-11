@@ -28,6 +28,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomTheme } from "@ohos.arkui.theme"
 import { ThemeColorMode } from "./common"
 import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater, hookWithThemeOptions } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { WithThemeModifier } from "./../WithThemeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
@@ -57,7 +58,7 @@ export interface WithThemeOptions {
     colorMode?: ThemeColorMode;
 }
 export interface WithThemeAttribute {
-    setWithThemeOptions(options: WithThemeOptions): this {
+    setWithThemeOptions(options: WithThemeOptions | undefined): this {
         throw new Error("Unimplemented method setWithThemeOptions")
     }
     attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
@@ -65,7 +66,7 @@ export interface WithThemeAttribute {
     }
 }
 export class ArkWithThemeStyle implements WithThemeAttribute {
-    setWithThemeOptions(options: WithThemeOptions): this {
+    setWithThemeOptions(options: WithThemeOptions | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
@@ -80,21 +81,27 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         }
         return (this.peer as ArkWithThemePeer)
     }
-    public setWithThemeOptions(options: WithThemeOptions): this {
+    public setWithThemeOptions(options: WithThemeOptions | undefined): this {
         if (this.checkPriority("setWithThemeOptions")) {
             hookWithThemeOptions(this, options);
+            this.applyOptionsFinish('WithThemeAttribute');
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
-        hookWithThemeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => { 
+          hookWithThemeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
         ArkThemeScopeManager.getInstance().themeOptionsStack.pop();
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

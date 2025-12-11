@@ -792,120 +792,6 @@ HWTEST_F(GridScrollerEventTestTwoNg, onWillScrollAndOnDidScroll006, TestSize.Lev
 }
 
 /**
- * @tc.name: SpringAnimationTest001
- * @tc.desc: Test Grid onReachEnd when change height during spring animation.
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerEventTestTwoNg, SpringAnimationTest001, TestSize.Level1)
-{
-    int32_t reachEndTimes = 0;
-    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
-    MockAnimationManager::GetInstance().Reset();
-    MockAnimationManager::GetInstance().SetTicks(2);
-    auto model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    model.SetOnReachEnd(std::move(onReachEnd));
-    CreateFixedItems(10);
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. Simulate a scrolling gesture.
-     * @tc.expected: Grid trigger spring animation.
-     */
-
-    GestureEvent info;
-    info.SetMainVelocity(-1200.f);
-    info.SetMainDelta(-200.f);
-    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
-    scrollable->HandleTouchDown();
-    scrollable->HandleDragStart(info);
-    scrollable->HandleDragUpdate(info);
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-
-    EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    scrollable->HandleTouchUp();
-    scrollable->HandleDragEnd(info);
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-
-    /**
-     * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
-     * @tc.expected: reachEnd will not trigger by height change
-     */
-
-    MockAnimationManager::GetInstance().Tick();
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 100))));
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
-    FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
-    EXPECT_EQ(reachEndTimes, 2);
-}
-
-/**
- * @tc.name: SpringAnimationTest002
- * @tc.desc: Test Grid onReachEnd when change height during spring animation.
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerEventTestTwoNg, SpringAnimationTest002, TestSize.Level1)
-{
-    int32_t reachEndTimes = 0;
-    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
-    MockAnimationManager::GetInstance().Reset();
-    MockAnimationManager::GetInstance().SetTicks(2);
-    auto model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    model.SetOnReachEnd(std::move(onReachEnd));
-    CreateFixedItems(10);
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. Simulate a scrolling gesture.
-     * @tc.expected: Grid trigger spring animation.
-     */
-
-    GestureEvent info;
-    info.SetMainVelocity(-1200.f);
-    info.SetMainDelta(-200.f);
-    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
-    scrollable->HandleTouchDown();
-    scrollable->HandleDragStart(info);
-    scrollable->HandleDragUpdate(info);
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-
-    EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    scrollable->HandleTouchUp();
-    scrollable->HandleDragEnd(info);
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-
-    /**
-     * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
-     * @tc.expected: reachEnd will not trigger by height change
-     */
-
-    MockAnimationManager::GetInstance().Tick();
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 100))));
-    FlushUITasks();
-    EXPECT_EQ(reachEndTimes, 1);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
-    FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
-    EXPECT_EQ(reachEndTimes, 2);
-}
-
-/**
  * @tc.name: HandleOnWillStopDragging001
  * @tc.desc: Test HandleOnWillStopDragging001
  * @tc.type: FUNC
@@ -1053,5 +939,173 @@ HWTEST_F(GridScrollerEventTestTwoNg, onDidStopDragging001, TestSize.Level1)
 
     EXPECT_TRUE(isDidStopDraggingCallBack);
     EXPECT_TRUE(isFlingAfterDrag);
+}
+
+/**
+ * @tc.name: OnReachEndWithHeightChange
+ * @tc.desc: Test Grid OnReachEnd with height changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestTwoNg, OnReachEndWithHeightChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a grid that adapts to the main size of gridItems.
+     * @tc.expected: onReachEnd not called
+     */
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    GetGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetMaxCount(1);
+    int32_t reachEndCount = 0;
+    auto event = [&reachEndCount]() { ++reachEndCount; };
+    model.SetOnReachEnd(event);
+    CreateGridItems(1);
+    CreateDone();
+    EXPECT_EQ(reachEndCount, 0);
+
+    /**
+     * @tc.steps: step2. Remove all gridItems
+     * @tc.expected: onReachEnd not called
+     */
+    frameNode_->RemoveChildAtIndex(0);
+    FlushUITasks();
+    EXPECT_EQ(reachEndCount, 0);
+
+    /**
+     * @tc.steps: step3. Add 4 gridItems
+     * @tc.expected: onReachEnd not called
+     */
+    for (int32_t i = 0; i < 4; i++) {
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_MAIN_SIZE)));
+        RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+        auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+        currentFrameNode->MountToParent(frameNode_);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(reachEndCount, 0);
+}
+
+/**
+ * @tc.name: SpringAnimationTest001
+ * @tc.desc: Test Grid onReachEnd when change height during spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestTwoNg, SpringAnimationTest001, TestSize.Level1)
+{
+    int32_t reachEndTimes = 0;
+    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetOnReachEnd(std::move(onReachEnd));
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    /**
+     * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
+     * @tc.expected: reachEnd will not trigger by height change
+     */
+
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 100))));
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
+    EXPECT_EQ(reachEndTimes, 2);
+}
+
+/**
+ * @tc.name: SpringAnimationTest002
+ * @tc.desc: Test Grid onReachEnd when change height during spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestTwoNg, SpringAnimationTest002, TestSize.Level1)
+{
+    int32_t reachEndTimes = 0;
+    auto onReachEnd = [&reachEndTimes]() { ++reachEndTimes; };
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetOnReachEnd(std::move(onReachEnd));
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+
+    /**
+     * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
+     * @tc.expected: reachEnd will not trigger by height change
+     */
+
+    MockAnimationManager::GetInstance().Tick();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 100))));
+    FlushUITasks();
+    EXPECT_EQ(reachEndTimes, 1);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0.f);
+    EXPECT_EQ(reachEndTimes, 2);
 }
 } // namespace OHOS::Ace::NG

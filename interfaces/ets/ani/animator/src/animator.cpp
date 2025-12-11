@@ -423,9 +423,9 @@ static void JSPlay(ani_env *env, ani_object obj)
 
 static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Napi::AnimatorOption> option)
 {
-    ani_double durationAni;
-    ani_double iterationsAni;
-    ani_double delayAni;
+    ani_int durationAni;
+    ani_int iterationsAni;
+    ani_int delayAni;
     ani_ref easingAni;
     ani_ref fillAni;
     ani_ref directionAni;
@@ -450,9 +450,9 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Na
             simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
         return;
     }
-    env->Object_GetPropertyByName_Double(obj, "duration", &durationAni);
-    env->Object_GetPropertyByName_Double(obj, "iterations", &iterationsAni);
-    env->Object_GetPropertyByName_Double(obj, "delay", &delayAni);
+    env->Object_GetPropertyByName_Int(obj, "duration", &durationAni);
+    env->Object_GetPropertyByName_Int(obj, "iterations", &iterationsAni);
+    env->Object_GetPropertyByName_Int(obj, "delay", &delayAni);
     env->Object_GetPropertyByName_Double(obj, "begin", &beginAni);
     env->Object_GetPropertyByName_Double(obj, "end", &endAni);
     env->Object_GetPropertyByName_Ref(obj, "easing", &easingAni);
@@ -787,7 +787,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
         return animatorObj;
     }
 
-    // create animatot and construct animatorResult
+    // create animator and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
     ParseAnimatorOption(env, aniOption, option);
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());
@@ -878,13 +878,13 @@ void ANICreateSimpleAnimatorOptionsWithParam(ani_env* env, [[maybe_unused]] ani_
 }
 
 ani_object ANISetSimpleAnimatorDuration(ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_double duration)
+    [[maybe_unused]] ani_int duration)
 {
     auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
     if (simpleAnimatorOption == nullptr) {
         return object;
     }
-    simpleAnimatorOption->SetDuration(static_cast<double>(duration));
+    simpleAnimatorOption->SetDuration(static_cast<int32_t>(duration));
     return object;
 }
 
@@ -901,13 +901,13 @@ ani_object ANISetSimpleAnimatorEasing(ani_env* env, [[maybe_unused]] ani_object 
 }
 
 ani_object ANISetSimpleAnimatorDelay(ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_double delay)
+    [[maybe_unused]] ani_int delay)
 {
     auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
     if (simpleAnimatorOption == nullptr) {
         return object;
     }
-    simpleAnimatorOption->SetDelay(static_cast<double>(delay));
+    simpleAnimatorOption->SetDelay(static_cast<int32_t>(delay));
     return object;
 }
 
@@ -976,13 +976,13 @@ ani_object ANISetSimpleAnimatorDirection(ani_env* env, [[maybe_unused]] ani_obje
 }
 
 ani_object ANISetSimpleAnimatorIterations(ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_double iteration)
+    [[maybe_unused]] ani_int iteration)
 {
     auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
     if (simpleAnimatorOption == nullptr) {
         return object;
     }
-    simpleAnimatorOption->SetIterations(static_cast<double>(iteration));
+    simpleAnimatorOption->SetIterations(static_cast<int32_t>(iteration));
     return object;
 }
 

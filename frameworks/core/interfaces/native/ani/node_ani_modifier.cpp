@@ -35,11 +35,14 @@
 #include "parallelize_ui_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
+#include "paste_button_ani_modifier.h"
+#include "save_button_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "styled_string_ani_modifier.h"
 #include "trace_ani_modifier.h"
 #include "video_ani_modifier.h"
+#include "visual_effect_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
@@ -65,6 +68,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
+        .getVisualEffectAniModifier = OHOS::Ace::NG::GetVisualEffectAniModifier,
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
@@ -87,6 +91,8 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
         .getCommonNodeAniModifier = OHOS::Ace::NG::GetCommonNodeAniModifier,
         .getParallelizeUIModifier = OHOS::Ace::NG::GetParallelizeUIAniModifier,
+        .getSaveButtonAniModifier = OHOS::Ace::NG::GetSaveButtonAniModifier,
+        .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
     };
     return &impl;
 }

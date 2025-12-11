@@ -97,6 +97,7 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
+int32_t SystemProperties::pageLoadTimethreshold_ = 1000;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
@@ -115,6 +116,8 @@ bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
+bool SystemProperties::isAutoFillSupport_ = false;
+bool SystemProperties::isOpenYuvDecode_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -334,6 +337,11 @@ bool SystemProperties::IsPCMode()
     return isPCMode_;
 }
 
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return g_isConfigChangePerform;
@@ -342,6 +350,11 @@ bool SystemProperties::ConfigChangePerform()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+int32_t SystemProperties::GetPageLoadTimethreshold()
+{
+    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::GetContainerDeleteFlag()

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -24,6 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, hookCounterAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -43,6 +45,7 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCounterOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._CounterInterface_setCounterOptions(this.peer.ptr)
     }
     setOnIncAttribute(value: VoidCallback | undefined): void {
@@ -150,6 +153,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
     public setCounterOptions(): this {
         if (this.checkPriority("setCounterOptions")) {
             this.getPeer()?.setCounterOptionsAttribute()
+            this.applyOptionsFinish('CounterAttribute');
             return this
         }
         return this
@@ -187,12 +191,17 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCounterAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCounterAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

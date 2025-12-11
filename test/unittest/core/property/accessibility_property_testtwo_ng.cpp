@@ -108,7 +108,7 @@ HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg002, Test
     AccessibilityHoverTestPath path;
     auto root = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    root->accessibilityProperty_ = nullptr;
+    root->GetOrCreateAccessibilityProperty() = nullptr;
     NG::PointF hoverPoint(0, 0);
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     accessibilityProperty.HoverTest(hoverPoint, root, debugInfo);
@@ -170,7 +170,7 @@ HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg004, Test
     auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
     EXPECT_FALSE(responseRegionList.size() != 1);
 
     auto rect = responseRegionList.back();

@@ -62,83 +62,72 @@ void InitSearchMaxFontScale(const RefPtr<FrameNode>& frameNode)
 }
 } // namespace
 
-void SearchPattern::OnAttachToMainTreeMultiThread()
-{
-    if (processTextFieldDefaultStyleAndBehaviorsMultiThread_) {
-        processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
-        ProcessTextFieldDefaultStyleAndBehaviorsMultiThread();
-    }
-    if (processDividerDefaultStyleAndBehaviorsMultiThread_) {
-        processDividerDefaultStyleAndBehaviorsMultiThread_ = false;
-        ProcessDividerDefaultStyleAndBehaviorsMultiThread();
-    }
-}
-
 void SearchPattern::ProcessDividerDefaultStyleAndBehaviors()
-{
-    processDividerDefaultStyleAndBehaviorsMultiThread_ = true;
-}
-
-void SearchPattern::ProcessDividerDefaultStyleAndBehaviorsMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dividerNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
-    CHECK_NULL_VOID(dividerNode);
-    auto pipeline = dividerNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto searchDividerColor = searchTheme->GetSearchDividerColor();
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
-    dividerRenderProperty->UpdateDividerColor(searchDividerColor);
-    auto searchDividerWidth = Dimension(searchTheme->GetSearchDividerWidth().ConvertToPx());
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_VOID(dividerLayoutProperty);
-    dividerLayoutProperty->UpdateVertical(true);
-    dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& searchPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(searchPattern);
+        auto host = searchPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto dividerNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
+        CHECK_NULL_VOID(dividerNode);
+        auto pipeline = dividerNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(searchTheme);
+        auto searchDividerColor = searchTheme->GetSearchDividerColor();
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(searchDividerColor);
+        auto searchDividerWidth = Dimension(searchTheme->GetSearchDividerWidth().ConvertToPx());
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_VOID(dividerLayoutProperty);
+        dividerLayoutProperty->UpdateVertical(true);
+        dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
+    });
 }
 
 void SearchPattern::ProcessTextFieldDefaultStyleAndBehaviors()
 {
-    processTextFieldDefaultStyleAndBehaviorsMultiThread_ = true;
-}
-
-void SearchPattern::ProcessTextFieldDefaultStyleAndBehaviorsMultiThread()
-{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto frameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textFieldPaintProperty);
-    auto colorMode = pipeline->GetColorMode();
-    pattern->InitSurfaceChangedCallback();
-    pattern->RegisterWindowFocusChangeCallback();
-    pattern->RegisterWindowSizeCallback();
-    pattern->SetTextFadeoutCapacity(true);
-    pattern->InitSurfacePositionChangedCallback();
-    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
-    if (pipeline->GetHasPreviewTextOption()) {
-        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
-    }
-    if (!textFieldPaintProperty->HasCaretColorFlagByUser()) {
-        textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    }
-    if (!textFieldPaintProperty->HasCursorWidth()) {
-        textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
-    }
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    InitSearchMaxFontScale(frameNode);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& searchPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(searchPattern);
+        auto host = searchPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto frameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textFieldPaintProperty);
+        auto colorMode = pipeline->GetColorMode();
+        pattern->InitSurfaceChangedCallback();
+        pattern->RegisterWindowSizeCallback();
+        pattern->RegisterWindowFocusChangeCallback();
+        pattern->SetTextFadeoutCapacity(true);
+        pattern->InitSurfacePositionChangedCallback();
+        pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
+        if (pipeline->GetHasPreviewTextOption()) {
+            pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+        }
+        if (!textFieldPaintProperty->HasCaretColorFlagByUser()) {
+            textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+        }
+        if (!textFieldPaintProperty->HasCursorWidth()) {
+            textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+        }
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        InitSearchMaxFontScale(frameNode);
+    });
 }
-
 } // namespace OHOS::Ace::NG

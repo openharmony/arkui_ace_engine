@@ -53,6 +53,9 @@ public:
         const std::optional<NG::SelectDivider>& divider, const std::optional<DividerMode>& mode);
     static void SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance);
     static void SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam);
+    static void SetDefaultMenuParam(FrameNode* frameNode, NG::MenuParam& menuParam);
+    static void SetShowInSubWindow(FrameNode* frameNode, const std::optional<bool>& isShowInSubWindow);
+    static void SetShowDefaultSelectedIcon(FrameNode* frameNode, const std::optional<bool>& show);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static void ResetDividerStyle(FrameNode* frameNode);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);

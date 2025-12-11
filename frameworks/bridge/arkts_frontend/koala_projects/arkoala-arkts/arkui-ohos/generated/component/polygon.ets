@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -27,6 +28,7 @@ import { ShapePoint } from "./line"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookPolygonAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -46,6 +48,7 @@ export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setPolygonOptionsAttribute(options?: PolygonOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -70,10 +73,10 @@ export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_0ForIdx0  = valueTmpValueTmpElement_0 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_0ForIdx0)
-                } else if (valueTmpValueTmpElement_0 instanceof number) {
+                } else if (valueTmpValueTmpElement_0 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElement_0ForIdx1)
+                    const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElement_0ForIdx1)
                 } else if (valueTmpValueTmpElement_0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as Resource
@@ -84,10 +87,10 @@ export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_1ForIdx0  = valueTmpValueTmpElement_1 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_1ForIdx0)
-                } else if (valueTmpValueTmpElement_1 instanceof number) {
+                } else if (valueTmpValueTmpElement_1 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElement_1ForIdx1)
+                    const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElement_1ForIdx1)
                 } else if (valueTmpValueTmpElement_1 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as Resource
@@ -141,6 +144,7 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         if (this.checkPriority("setPolygonOptions")) {
             const options_casted = options as (PolygonOptions | undefined)
             this.getPeer()?.setPolygonOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PolygonAttribute');
             return this
         }
         return this
@@ -154,12 +158,17 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPolygonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPolygonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

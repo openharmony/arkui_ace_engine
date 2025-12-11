@@ -78,7 +78,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_Number_String* value)
+                           const Opt_Union_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,7 +86,7 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
 void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -129,7 +129,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     }
 }
 void SetFrictionImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource* value)
+                     const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,7 +197,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
 void SetFlingSpeedLimitImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

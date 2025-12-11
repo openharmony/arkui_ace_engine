@@ -188,6 +188,8 @@ public:
     static ArkUINativeModuleValue ResetAccessibilityFocusCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetConstraintSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -244,6 +246,8 @@ public:
     static ArkUINativeModuleValue ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDragPreview(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDragPreview(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResponseRegionList(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResponseRegionList(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMouseResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -282,12 +286,15 @@ public:
     static ArkUINativeModuleValue ResetAccessibilityScrollTriggerable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityFocusDrawLevel(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityFocusDrawLevel(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAccessibilityStateDescription(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAccessibilityStateDescription(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetKeyBoardShortCutAll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPointLightStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetPointLightStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClipWithEdge(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -325,7 +332,7 @@ public:
     static void GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers,
         int32_t& count, double& distanceThreshold, bool& limitFingerCount, uint32_t argNumber);
     static void GetLongPressGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat,
-        int32_t& duration, bool& limitFingerCount, int32_t& allowableMovement, uint32_t argNumber);
+        int32_t& duration, bool& limitFingerCount, double& allowableMovement, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
         PanDistanceMapDimension& distanceMap, bool& limitFingerCount, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateTapGestureLocationInfo(
@@ -426,6 +433,7 @@ public:
     static ArkUINativeModuleValue RemoveGestureByTag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ClearGestures(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetWindowId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowHeightBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -493,9 +501,17 @@ public:
     static ArkUINativeModuleValue ResetForegroundFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCompositingFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCompositingFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMaterialFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMaterialFilter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFreeze(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFreeze(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AllowForceDark(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetExcludeFromRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetExcludeFromRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

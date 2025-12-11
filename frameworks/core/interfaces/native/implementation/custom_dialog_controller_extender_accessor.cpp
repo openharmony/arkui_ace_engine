@@ -66,7 +66,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetLevelMode(value->showInSubWindow, value->levelMode);
     peer->SetLevelUniqueId(value->levelUniqueId);
     peer->SetImersiveMode(value->immersiveMode);
-    peer->SetLevelOrder(value->levelOrder);
+    peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
 
     return AceType::RawPtr(peer);
@@ -101,6 +101,12 @@ Ark_CustomDialogControllerExternalOptionsExtender GetExternalOptionsImpl(Ark_Cus
     result.customStyle = peer->GetCustomStyle();
     return result;
 }
+Ark_promptAction_CommonState GetStateImpl(Ark_CustomDialogControllerExtender peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto state = peer->GetState();
+    return Converter::ArkValue<Ark_promptAction_CommonState>(state);
+}
 } // CustomDialogControllerExtenderAccessor
 const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogControllerExtenderAccessor()
 {
@@ -112,6 +118,7 @@ const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogCont
         CustomDialogControllerExtenderAccessor::CloseImpl,
         CustomDialogControllerExtenderAccessor::SetOwnerViewImpl,
         CustomDialogControllerExtenderAccessor::GetExternalOptionsImpl,
+        CustomDialogControllerExtenderAccessor::GetStateImpl,
     };
     return &CustomDialogControllerExtenderAccessorImpl;
 }

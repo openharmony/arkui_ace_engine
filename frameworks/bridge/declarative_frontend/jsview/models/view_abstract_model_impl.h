@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 class SpanString;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::Framework {
@@ -156,7 +157,7 @@ public:
     void SetMotionPath(const MotionPathOption& option) override;
     void SetRenderGroup(bool isRenderGroup) override {}
     void SetRenderFit(RenderFit renderFit) override {}
-    void SetCornerApplyType(CornerApplyType cornerApplyType) override {}
+    void SetRenderStrategy(RenderStrategy renderStrategy) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
@@ -253,6 +254,9 @@ public:
     void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
+    void SetResponseRegionList(
+        const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+        override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
@@ -328,8 +332,11 @@ public:
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+    
+    void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override {};
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
     {
@@ -373,6 +380,8 @@ public:
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) override;
+    void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) override;
+    void ResetAccessibilityActionOptions() override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
@@ -384,6 +393,7 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
+    void SetAccessibilityStateDescription(const std::string& stateDescription) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

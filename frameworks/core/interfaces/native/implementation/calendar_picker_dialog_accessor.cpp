@@ -148,6 +148,22 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     }
     return buttonInfos;
 }
+
+std::optional<Ark_Date> ProcessDateStr(const std::string info)
+{
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(info);
+    CHECK_NULL_RETURN(argsPtr, std::nullopt);
+    const auto year = argsPtr->GetValue("year")->GetInt();
+    const auto month = argsPtr->GetValue("month")->GetInt();
+    const auto day = argsPtr->GetValue("day")->GetInt();
+
+    PickerDateTime dateTime;
+    dateTime.SetDate(PickerDate(year, month, day));
+    dateTime.SetTime(PickerTime::Current());
+    auto result = Converter::ArkValue<Ark_Date>(dateTime.ToString(true));
+    return result;
+}
+
 void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
 {
 }
@@ -173,16 +189,20 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     auto acceptCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onAccept);
     if (acceptCallbackOpt) {
         auto onAcceptFunc = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
-            Ark_Date date = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(date);
+            auto result = ProcessDateStr(info);
+            if (result) {
+                arkCallback.Invoke(result.value());
+            }
         };
         dialogEvent["acceptId"] = onAcceptFunc;
     }
     auto changeCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onChange);
     if (changeCallbackOpt) {
         auto onChangeFunc = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
-            Ark_Date date = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(date);
+            auto result = ProcessDateStr(info);
+            if (result) {
+                arkCallback.Invoke(result.value());
+            }
         };
         dialogEvent["changeId"] = onChangeFunc;
     }
@@ -206,8 +226,18 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowCalendarDialog(
-        dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostTask(
+        [dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowCalendarDialog(
+                dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()

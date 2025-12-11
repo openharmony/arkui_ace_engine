@@ -105,6 +105,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
     }
     SetImageFillSetByUser(false);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, IsYUVDecode, true);
 }
 
 void ImageModelNG::ResetImage()
@@ -174,6 +175,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateImageSourceInfo(srcInfo);
+    layoutProperty->UpdateIsYUVDecode(true);
     return frameNode;
 }
 
@@ -557,15 +559,22 @@ void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
 #endif
 }
 
-void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
+void ImageModelNG::SetDrawableDescriptor(FrameNode* frameNode, void* newDrawableDescriptor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(animatedDrawableDescriptor);
-    CHECK_NULL_VOID(pattern);
-    auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    pattern->UpdateDrawableDescriptor(drawable);
+    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableAddr);
+    auto drawableType = drawableAddr->GetDrawableType();
+    if (drawableType != DrawableType::ANIMATED) {
+        auto pixelMap = drawableAddr->GetPixelMap();
+        auto srcInfo = ImageSourceInfo(pixelMap);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+    } else {
+        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+        pattern->UpdateDrawableDescriptor(drawable);
+    }
 }
 
 void ImageModelNG::SetResource(FrameNode* frameNode, void* resource)
@@ -1427,6 +1436,25 @@ void ImageModelNG::ResetImageAltError(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImageError();
+}
+
+void ImageModelNG::SetAntiAlias(bool antiAlias)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias);
+}
+
+void ImageModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias, frameNode);
+}
+
+bool ImageModelNG::GetAntiAlias(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), false);
+    return paintProperty->GetImagePaintStyle()->GetAntiAlias().value_or(false);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

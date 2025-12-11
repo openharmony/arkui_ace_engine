@@ -40,25 +40,9 @@ public:
         LayoutProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        LayoutProperty::ToJsonValue(json, filter);
-        auto align = Alignment::TOP_LEFT;
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        if (GetPositionProperty()) {
-            align = GetPositionProperty()->GetAlignment().value_or(Alignment::TOP_LEFT);
-        }
-        json->PutExtAttr("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str(), filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void FromJson(const std::unique_ptr<JsonValue>& json) override
-    {
-        UpdateAlignment(Alignment::GetAlignment(TextDirection::LTR, json->GetString("alignContent")));
-        LayoutProperty::FromJson(json);
-    }
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RenderNodeLayoutProperty);

@@ -149,6 +149,16 @@ std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<u
     return delegate->SpanstringConvertHtml(content);
 }
 
+bool VaultPlainTextImpl::ProcessAutoFillOnPaste()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->ProcessAutoFillOnPaste();
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -838,6 +848,14 @@ void WebClientImpl::OnWindowNewByJS(
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnWindowNew(targetUrl, isAlert, isUserTrigger, handler);
+}
+
+void WebClientImpl::OnWindowNewExtByJS(std::shared_ptr<NWeb::NWebWindowNewEventInfo> dataInfo)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnWindowNewExt(dataInfo);
 }
 
 void WebClientImpl::OnActivateContentByJS()
@@ -1630,6 +1648,14 @@ void WebClientImpl::OnRefreshAccessedHistoryV2(const std::string& url, bool isRe
     delegate->OnRefreshAccessedHistory(url, isReload, isMainFrame);
 }
 
+void WebClientImpl::OnTextSelectionChange(const std::string& selectionText)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnTextSelectionChange(selectionText);
+}
+
 void WebClientImpl::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
 {
@@ -1637,6 +1663,15 @@ void WebClientImpl::OnDetectedBlankScreen(
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnDetectedBlankScreen(url, blankScreenReason, detectedContentfulNodesCount);
+}
+
+void WebClientImpl::OnFirstScreenPaint(
+    const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnFirstScreenPaint(url, navigationStartTime, firstScreenPaintTime);
 }
 
 bool WebClientImpl::IsQuickMenuShow()
@@ -1676,5 +1711,29 @@ bool WebClientImpl::OnVerifyPinRequestByJS(
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientVerifyPinRequest");
     return jsResult;
+}
+
+void WebClientImpl::OnClippedSelectionBoundsChanged(int x, int y, int width, int height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnClippedSelectionBoundsChanged(x, y, width, height);
+}
+
+void WebClientImpl::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnCameraCaptureStateChanged(originalState, newState);
+}
+
+void WebClientImpl::OnMicrophoneCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnMicrophoneCaptureStateChanged(originalState, newState);
 }
 } // namespace OHOS::Ace

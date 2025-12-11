@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class StepperModifier extends CommonMethodModifier implements StepperAttribute,AttributeModifier<StepperAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,12 +41,13 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
     _onSkip_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSkip_0_0value?: (() => void) | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    _onChange_0_0value?: ((prevIndex: int32,index: int32) => void) | undefined
     _onNext_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onNext_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    _onNext_0_0value?: ((prevIndex: int32,index: int32) => void) | undefined
     _onPrevious_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPrevious_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    _onPrevious_0_0value?: ((prevIndex: int32,index: int32) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkStepperPeer;
         if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -87,7 +90,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((prevIndex: int32,index: int32) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -97,7 +100,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
@@ -105,7 +108,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             switch (this._onNext_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnNextAttribute((this._onNext_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnNextAttribute((this._onNext_0_0value as ((prevIndex: int32,index: int32) => void) | undefined));
                     this._onNext_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -115,7 +118,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                 }
                 default: {
                     this._onNext_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnNextAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnNextAttribute((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
@@ -123,7 +126,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             switch (this._onPrevious_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPreviousAttribute((this._onPrevious_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnPreviousAttribute((this._onPrevious_0_0value as ((prevIndex: int32,index: int32) => void) | undefined));
                     this._onPrevious_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -133,13 +136,14 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                 }
                 default: {
                     this._onPrevious_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPreviousAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    peer.setOnPreviousAttribute((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: StepperModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onFinish_0_flag) {
@@ -175,7 +179,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    this.onChange((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
@@ -188,7 +192,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                     break;
                 }
                 default: {
-                    this.onNext((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    this.onNext((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
@@ -201,7 +205,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
                     break;
                 }
                 default: {
-                    this.onPrevious((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                    this.onPrevious((undefined as ((prevIndex: int32,index: int32) => void) | undefined));
                 }
             }
         }
@@ -228,7 +232,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         }
         return this
     }
-    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onChange(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -239,7 +243,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         }
         return this
     }
-    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onNext(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (((this._onNext_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onNext_0_flag = AttributeUpdaterFlag.UPDATE
@@ -250,7 +254,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         }
         return this
     }
-    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onPrevious(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (((this._onPrevious_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onPrevious_0_flag = AttributeUpdaterFlag.UPDATE

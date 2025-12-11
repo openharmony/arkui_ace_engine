@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_EVENT_DUMP_H
 
 #include <cstdint>
+#include <deque>
 #include <list>
 #include <map>
 #include <string>
@@ -121,6 +122,23 @@ struct EventTreeRecord {
         std::vector<std::pair<std::string, std::pair<std::string, std::unique_ptr<JsonValue>>>> stateInfoList,
         std::unique_ptr<JsonValue>& json) const;
     std::list<EventTree> eventTreeList;
+};
+
+struct EventTouchInfo {
+    int32_t pointerID;
+    TimeStamp creatTime;
+    TimeStamp processTime;
+    TimeStamp dispatchTime;
+};
+
+struct EventTouchInfoRecord {
+    void AddTouchPoint(const TouchEvent& event, TimeStamp dispatchTime);
+    void ClearDumpDeque();
+    void DumpAndClear(std::list<std::string>& dumpList);
+    void DumpAndClear(std::unique_ptr<JsonValue>& json);
+    std::deque<EventTouchInfo> touchHistory_;
+    int dequeMaxCnt_ = 0;
+    bool isUseDumpTouchInfo_ = false;
 };
 }
 #endif

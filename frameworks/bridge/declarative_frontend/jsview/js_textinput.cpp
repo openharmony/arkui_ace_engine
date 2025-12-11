@@ -71,6 +71,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("showPasswordIcon", &JSTextField::SetShowPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
+    JSClass<JSTextInput>::StaticMethod("textDirection", &JSTextField::SetTextDirection);
     JSClass<JSTextInput>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
@@ -112,7 +113,6 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("passwordRules", &JSTextField::SetPasswordRules);
     JSClass<JSTextInput>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextInput>::StaticMethod("enableSelectedDataDetector", &JSTextField::SetSelectDetectEnable);
-    JSClass<JSTextInput>::StaticMethod("selectedDataDetectorConfig", &JSTextField::SetSelectDetectConfig);
     JSClass<JSTextInput>::StaticMethod("enableAutoFillAnimation", &JSTextField::SetEnableAutoFillAnimation);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
@@ -144,6 +144,10 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
     JSClass<JSTextInput>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextInput>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
+    JSClass<JSTextInput>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
+    JSClass<JSTextInput>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
+    JSClass<JSTextInput>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
+    JSClass<JSTextInput>::StaticMethod("selectedDragPreviewStyle", &JSTextField::SetSelectedDragPreviewStyle);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

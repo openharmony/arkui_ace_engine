@@ -31,6 +31,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -52,7 +53,7 @@ class SheetPopupTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>(int32_t id)> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
 protected:
     static RefPtr<FrameNode> InitTargetNodeEnv(RefPtr<FrameNode>& rootNode, const SizeF& rootSize,
@@ -140,7 +141,7 @@ void SheetPopupTestNg::CreateSheetStyle(SheetStyle& sheetStyle, const Dimension&
 
 void SheetPopupTestNg::CreateSheetBuilder(float builderHeight, float titleHeight)
 {
-    auto builderFunc = [builderHeight]() -> RefPtr<UINode> {
+    auto builderFunc = [builderHeight](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1136,5 +1137,78 @@ HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard002, TestSize.Level1)
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
     auto expectedOffsetY = sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx();
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+}
+
+/**
+ * @tc.name: IsAccessibilityModalTest
+ * @tc.desc: Test the IsAccessibilityModal function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, IsAccessibilityModalTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create sheetNode and sheetWrapperNode, init them.
+     * @tc.expected: sheetNode != nullptr and sheetWrapperNode != nullptr.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(1, "sheetPage", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>(0, "sheetWrapper"));
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
+
+    /**
+     * @tc.steps: step2: get sheetWrapperAccessibility.
+     * @tc.expected: sheetWrapperAccessibility != nullptr, modal is true.
+     */
+    auto sheetWrapperAccessibility = sheetWrapperNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(sheetWrapperAccessibility, nullptr);
+    EXPECT_TRUE(sheetWrapperAccessibility->IsAccessibilityModal());
+
+    /**
+     * @tc.steps: step3: get sheetObj.
+     * @tc.expected: sheetObj != nullptr.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    auto sheetObj = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObj, nullptr);
+
+    /**
+     * @tc.steps: step3: set SheetType::SHEET_POPUP .
+     * @tc.expected: modal is false.
+     */
+    sheetObj->UpdateSheetType(SheetType::SHEET_POPUP);
+    EXPECT_FALSE(sheetWrapperAccessibility->IsAccessibilityModal());
+
+    /**
+     * @tc.steps: step4: set interactive true .
+     * @tc.expected: modal is false.
+     */
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    NG::SheetStyle style;
+    style.interactive = true;
+    layoutProperty->UpdateSheetStyle(style);
+    EXPECT_FALSE(sheetWrapperAccessibility->IsAccessibilityModal());
+
+    /**
+     * @tc.steps: step5: set interactive false .
+     * @tc.expected: modal is true.
+     */
+    style.interactive = false;
+    layoutProperty->UpdateSheetStyle(style);
+    EXPECT_TRUE(sheetWrapperAccessibility->IsAccessibilityModal());
+
+    /**
+     * @tc.steps: step6: set SheetType::SHEET_CONTENT_COVER .
+     * @tc.expected: modal is true.
+     */
+    sheetObj->UpdateSheetType(SheetType::SHEET_CONTENT_COVER);
+    EXPECT_TRUE(sheetWrapperAccessibility->IsAccessibilityModal());
 }
 } // namespace OHOS::Ace::NG

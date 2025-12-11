@@ -93,6 +93,7 @@ ohos_source_set("preview_osal_source") {
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "stage_card_parser.cpp",
+      "statistic_event_adapter.cpp",
       "statusbar_event_proxy_preview.cpp",
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",

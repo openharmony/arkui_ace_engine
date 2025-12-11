@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Column, Component, AnimateParam, BuilderParam, Stack, SizeOptions, px2vp, animateTo, Curve,
+import { Column, Component, AnimateParam, BuilderParam, Stack, SizeOptions, Curve,
   Callback, LocalizedEdges, Builder, Entry, Text } from '@ohos.arkui.component';
 import { State, Prop, Watch, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError } from '@ohos.base';
@@ -426,7 +426,7 @@ export struct FoldSplitContainer {
   private isHoverMode: boolean | undefined = undefined;
 
   aboutToAppear() {
-    this.listener?.on('change', (result) => {
+    this.listener?.onChange((result) => {
       this.isSmallScreen = result.matches;
     });
 
@@ -486,7 +486,7 @@ export struct FoldSplitContainer {
 
   aboutToDisappear() {
     if (this.listener) {
-      this.listener?.off('change');
+      this.listener?.offChange();
       this.listener = undefined;
     }
     try {
@@ -628,13 +628,13 @@ export struct FoldSplitContainer {
       this.secondaryLayout = regionLayout.secondary;
       this.extraLayout = regionLayout.extra;
     } else if (this.animationOptions === undefined) {
-      animateTo({ curve: curves.springMotion(0.35, 1, 0) }, () => {
+      this.getUIContext()?.animateTo({ curve: curves.springMotion(0.35, 1, 0) }, () => {
         this.primaryLayout = regionLayout.primary;
         this.secondaryLayout = regionLayout.secondary;
         this.extraLayout = regionLayout.extra;
       });
     } else {
-      animateTo(this.animationOptions as AnimateParam, () => {
+      this.getUIContext()?.animateTo(this.animationOptions as AnimateParam, () => {
         this.primaryLayout = regionLayout.primary;
         this.secondaryLayout = regionLayout.secondary;
         this.extraLayout = regionLayout.extra;
@@ -810,10 +810,10 @@ export struct FoldSplitContainer {
     let height: Long = 0;
     if (rects && rects.length) {
       const rect = rects[0];
-      left = (px2vp(rect.left) - this.containerGlobalPosition.x) as Long;
-      top = (px2vp(rect.top) - this.containerGlobalPosition.y) as Long;
-      width = px2vp(rect.width) as Long;
-      height = px2vp(rect.height) as Long;
+      left = (this.getUIContext().px2vp(rect.left) - this.containerGlobalPosition.x) as Long;
+      top = (this.getUIContext().px2vp(rect.top) - this.containerGlobalPosition.y) as Long;
+      width = this.getUIContext().px2vp(rect.width) as Long;
+      height = this.getUIContext().px2vp(rect.height) as Long;
     }
 
     return { left, top, width, height };

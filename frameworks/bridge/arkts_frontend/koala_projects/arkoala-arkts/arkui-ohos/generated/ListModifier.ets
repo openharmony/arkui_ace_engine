@@ -23,6 +23,7 @@ import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from "./component/list"
@@ -31,6 +32,7 @@ import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { LengthConstrain, Dimension } from "./component/units"
 export class ListModifier extends CommonMethodModifier implements ListAttribute,AttributeModifier<ListAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,15 +47,15 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _listDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _listDirection_0_0value?: Axis | undefined
     _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentStartOffset_0_0value?: number | undefined
+    _contentStartOffset_0_0value?: double | undefined
     _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentEndOffset_0_0value?: number | undefined
+    _contentEndOffset_0_0value?: double | undefined
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _divider_0_0value?: ListDividerOptions | null | undefined
     _multiSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _multiSelectable_0_0value?: boolean | undefined
     _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_0_0value?: number | undefined
+    _cachedCount_0_0value?: int32 | undefined
     _chainAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _chainAnimation_0_0value?: boolean | undefined
     _chainAnimationOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -69,21 +71,21 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _stackFromEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stackFromEnd_0_0value?: boolean | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollIndex_0_0value?: ((start: number,end: number,center: number) => void) | undefined
+    _onScrollIndex_0_0value?: ((start: int32,end: int32,center: int32) => void) | undefined
     _onScrollVisibleContentChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollVisibleContentChange_0_0value?: OnScrollVisibleContentChangeCallback | undefined
     _onItemMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemMove_0_0value?: ((from: number,to: number) => boolean) | undefined
+    _onItemMove_0_0value?: ((from: int32,to: int32) => boolean) | undefined
     _onItemDragStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onItemDragStart_0_0value?: OnItemDragStartCallback | undefined
     _onItemDragEnter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onItemDragEnter_0_0value?: ((event: ItemDragInfo) => void) | undefined
     _onItemDragMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
+    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
     _onItemDragLeave_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
+    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined
     _onItemDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -91,23 +93,23 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDidScroll_0_0value?: OnScrollCallback | undefined
     _lanes_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lanes_0_0value?: number | LengthConstrain | undefined
+    _lanes_0_0value?: int32 | LengthConstrain | undefined
     _lanes_0_1value?: Dimension | undefined
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_0value?: int32 | undefined
     _cachedCount_1_1value?: boolean | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | number | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarWidth_0_0value?: number | string | undefined
+    _scrollBarWidth_0_0value?: double | string | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nestedScroll_0_0value?: NestedScrollOptions | undefined
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _friction_0_0value?: number | Resource | undefined
+    _friction_0_0value?: double | Resource | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -117,7 +119,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -131,6 +133,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkListPeer;
         if (this._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -173,7 +176,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._contentStartOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as number | undefined));
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | undefined));
                     this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -183,7 +186,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentStartOffsetAttribute((undefined as number | undefined));
+                    peer.setContentStartOffsetAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -191,7 +194,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._contentEndOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as number | undefined));
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | undefined));
                     this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -201,7 +204,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentEndOffsetAttribute((undefined as number | undefined));
+                    peer.setContentEndOffsetAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -245,7 +248,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._cachedCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as int32 | undefined));
                     this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -255,7 +258,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                    peer.setCachedCount0Attribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -389,7 +392,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._onScrollIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((start: number,end: number,center: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((start: int32,end: int32,center: int32) => void) | undefined));
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -399,7 +402,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScrollIndexAttribute((undefined as ((start: number,end: number,center: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((undefined as ((start: int32,end: int32,center: int32) => void) | undefined));
                 }
             }
         }
@@ -425,7 +428,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._onItemMove_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemMoveAttribute((this._onItemMove_0_0value as ((from: number,to: number) => boolean) | undefined));
+                    peer.setOnItemMoveAttribute((this._onItemMove_0_0value as ((from: int32,to: int32) => boolean) | undefined));
                     this._onItemMove_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -435,7 +438,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._onItemMove_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemMoveAttribute((undefined as ((from: number,to: number) => boolean) | undefined));
+                    peer.setOnItemMoveAttribute((undefined as ((from: int32,to: int32) => boolean) | undefined));
                 }
             }
         }
@@ -479,7 +482,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._onItemDragMove_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                     this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -489,7 +492,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._onItemDragMove_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -497,7 +500,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._onItemDragLeave_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                     this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -507,7 +510,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._onItemDragLeave_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -515,7 +518,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._onItemDrop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                     this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -525,7 +528,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._onItemDrop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                 }
             }
         }
@@ -587,7 +590,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._lanes_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLanesAttribute((this._lanes_0_0value as number | LengthConstrain | undefined), (this._lanes_0_1value as Dimension | undefined | undefined));
+                    peer.setLanesAttribute((this._lanes_0_0value as int32 | LengthConstrain | undefined), (this._lanes_0_1value as Dimension | undefined | undefined));
                     this._lanes_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -597,7 +600,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._lanes_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLanesAttribute((undefined as number | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
+                    peer.setLanesAttribute((undefined as int32 | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
                 }
             }
         }
@@ -605,7 +608,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._cachedCount_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | undefined), (this._cachedCount_1_1value as boolean | undefined));
                     this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -615,7 +618,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                    peer.setCachedCount1Attribute((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -641,7 +644,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -651,7 +654,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -659,7 +662,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._scrollBarWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as double | string | undefined));
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -669,7 +672,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarWidthAttribute((undefined as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -713,7 +716,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._friction_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFrictionAttribute((this._friction_0_0value as number | Resource | undefined));
+                    peer.setFrictionAttribute((this._friction_0_0value as double | Resource | undefined));
                     this._friction_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -723,7 +726,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFrictionAttribute((undefined as number | Resource | undefined));
+                    peer.setFrictionAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -803,7 +806,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -813,7 +816,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -910,6 +913,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     }
     mergeModifier(modifier: ListModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignListItem_0_flag) {
@@ -945,7 +949,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.contentStartOffset((undefined as number | undefined));
+                    this.contentStartOffset((undefined as double | undefined));
                 }
             }
         }
@@ -958,7 +962,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.contentEndOffset((undefined as number | undefined));
+                    this.contentEndOffset((undefined as double | undefined));
                 }
             }
         }
@@ -997,7 +1001,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined));
+                    this.cachedCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -1101,7 +1105,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.onScrollIndex((undefined as ((start: number,end: number,center: number) => void) | undefined));
+                    this.onScrollIndex((undefined as ((start: int32,end: int32,center: int32) => void) | undefined));
                 }
             }
         }
@@ -1127,7 +1131,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.onItemMove((undefined as ((from: number,to: number) => boolean) | undefined));
+                    this.onItemMove((undefined as ((from: int32,to: int32) => boolean) | undefined));
                 }
             }
         }
@@ -1166,7 +1170,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDragMove((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    this.onItemDragMove((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -1179,7 +1183,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDragLeave((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    this.onItemDragLeave((undefined as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                 }
             }
         }
@@ -1192,7 +1196,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.onItemDrop((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    this.onItemDrop((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                 }
             }
         }
@@ -1244,7 +1248,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.lanes((undefined as number | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
+                    this.lanes((undefined as int32 | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
                 }
             }
         }
@@ -1257,7 +1261,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                    this.cachedCount((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -1283,7 +1287,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | number | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -1296,7 +1300,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarWidth((undefined as number | string | undefined));
+                    this.scrollBarWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -1335,7 +1339,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.friction((undefined as number | Resource | undefined));
+                    this.friction((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1400,7 +1404,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -1492,7 +1496,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    contentStartOffset(value: number | undefined): this {
+    contentStartOffset(value: double | undefined): this {
         if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentStartOffset_0_0value) !== (value)))
         {
             this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1503,7 +1507,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    contentEndOffset(value: number | undefined): this {
+    contentEndOffset(value: double | undefined): this {
         if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentEndOffset_0_0value) !== (value)))
         {
             this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1536,7 +1540,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1624,7 +1628,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this {
+    onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1646,7 +1650,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this {
+    onItemMove(value: ((from: int32,to: int32) => boolean) | undefined): this {
         if (((this._onItemMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemMove_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1679,7 +1683,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
         if (((this._onItemDragMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1690,7 +1694,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
         if (((this._onItemDragLeave_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1701,7 +1705,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
         if (((this._onItemDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1745,7 +1749,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
+    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
         if (((this._lanes_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._lanes_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1757,7 +1761,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
@@ -1780,7 +1784,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1791,7 +1795,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1824,7 +1828,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1879,7 +1883,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE

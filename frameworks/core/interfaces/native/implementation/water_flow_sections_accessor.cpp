@@ -21,7 +21,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-    template<>
+template<>
 WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
 {
     WaterFlowSections::Section dst;
@@ -32,8 +32,8 @@ WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
     if (onGetItemMainSizeByIndex) {
         auto modelCallback = [callback = CallbackHelper(*onGetItemMainSizeByIndex)]
             (int32_t value) -> float {
-                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
-                auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Number, Callback_Number_Void>(param);
+                Ark_Int32 param = Converter::ArkValue<Ark_Int32>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Float64, Callback_F64_Void>(param);
                 return resultOpt.value_or(0);
             };
         dst.onGetItemMainSizeByIndex = modelCallback;
@@ -57,21 +57,20 @@ std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
 }
 void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src, ConvContext *ctx)
 {
-    dst.itemsCount = Converter::ArkValue<Ark_Number>(src.itemsCount);
-    dst.crossCount = Converter::ArkValue<Opt_Number>(src.crossCount);
-    auto cb = [src](const Ark_Number index, const Callback_Number_Void continuation) {
+    dst.itemsCount = Converter::ArkValue<Ark_Int32>(src.itemsCount);
+    dst.crossCount = Converter::ArkValue<Opt_Int32>(src.crossCount);
+    auto cb = [src](const Ark_Int32 index, const Callback_F64_Void continuation) {
         auto result = src.onGetItemMainSizeByIndex(Converter::Convert<int32_t>(index));
         auto helper = CallbackHelper(continuation);
-        helper.Invoke(Converter::ArkValue<Ark_Number>(result));
+        helper.Invoke(Converter::ArkValue<Ark_Float64>(result));
     };
-    auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex,
-                                                   std::function<void(Ark_Number, Callback_Number_Void)>>(cb);
+    auto rc = CallbackKeeper::ReturnReverseCallback<::GetItemMainSizeByIndex>(cb);
     dst.onGetItemMainSizeByIndex = Converter::ArkValue<Opt_GetItemMainSizeByIndex>(rc);
     dst.columnsGap = Converter::ArkValue<Opt_Dimension>(src.columnsGap, ctx);
     dst.rowsGap = Converter::ArkValue<Opt_Dimension>(src.rowsGap, ctx);
     dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin, ctx);
 }
-}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
@@ -88,8 +87,8 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
-                       const Ark_Number* start,
-                       const Opt_Number* deleteCount,
+                       Ark_Int32 start,
+                       const Opt_Int32* deleteCount,
                        const Opt_Array_SectionOptions* sections)
 {
     CHECK_NULL_RETURN(peer, false);
@@ -100,7 +99,7 @@ Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
     auto sectionsOpt = Converter::OptConvertPtr<Array_SectionOptions>(sections);
     if (sectionsOpt) {
         auto sections = Converter::OptConvert<std::vector<WaterFlowSections::Section>>(*sectionsOpt);
-        peer->GetController()->ChangeData(Converter::Convert<int32_t>(*start), delCnt, sections.value());
+        peer->GetController()->ChangeData(Converter::Convert<int32_t>(start), delCnt, sections.value());
         return true;
     } else {
         return false;
@@ -119,7 +118,7 @@ Ark_Boolean PushImpl(Ark_WaterFlowSections peer,
     return true;
 }
 Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
-                       const Ark_Number* sectionIndex,
+                       Ark_Int32 sectionIndex,
                        const Ark_SectionOptions* section)
 {
     CHECK_NULL_RETURN(peer, false);
@@ -127,7 +126,7 @@ Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
     std::vector<WaterFlowSections::Section> sections;
     auto newSection = Converter::OptConvert<WaterFlowSections::Section>(*section);
     sections.push_back(newSection.value());
-    peer->GetController()->ChangeData(Converter::Convert<int32_t>(*sectionIndex), 0, sections);
+    peer->GetController()->ChangeData(Converter::Convert<int32_t>(sectionIndex), 0, sections);
     return true;
 }
 Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
@@ -138,13 +137,13 @@ Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
     auto options = Converter::ArkValue<Array_SectionOptions>(info, Converter::FC);
     return options;
 }
-Ark_Number LengthImpl(Ark_WaterFlowSections peer)
+Ark_Int32 LengthImpl(Ark_WaterFlowSections peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->GetController(), errValue);
     auto res = peer->GetController()->GetSectionInfo().size();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(res));
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(res));
 }
 } // WaterFlowSectionsAccessor
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()

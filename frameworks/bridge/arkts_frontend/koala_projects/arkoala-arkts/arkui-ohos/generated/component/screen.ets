@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookScreenAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -74,17 +75,23 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
         if (this.checkPriority("setScreenOptions")) {
             const screenId_casted = screenId as (number)
             this.getPeer()?.setScreenOptionsAttribute(screenId_casted)
+            this.applyOptionsFinish('ScreenAttribute');
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScreenAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookScreenAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

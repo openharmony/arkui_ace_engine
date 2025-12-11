@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { InteropNativeModule } from "@koalaui/interop"
-import { int32, float32, int8Array } from "@koalaui/common"
+import { int8, int32, float32 } from '@koalaui/common'
 import { memo } from "@koalaui/runtime/annotations"
 
 export const TEST_LOG_NUMBER = 4
@@ -41,7 +41,7 @@ export class NativeLog {
     getNativeLog(group: int32): string {
         let ptr = InteropNativeModule._GetGroupedLog(group)
         let length = InteropNativeModule._StringLength(ptr)
-        let data = int8Array(length);
+        let data: FixedArray<int8> = new int8[length];
         // @ts-ignore
         InteropNativeModule._StringData(ptr, data, length)
         InteropNativeModule._InvokeFinalizer(ptr, InteropNativeModule._GetStringFinalizer())

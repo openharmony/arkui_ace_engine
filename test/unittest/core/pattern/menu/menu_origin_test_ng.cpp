@@ -37,6 +37,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -459,7 +460,7 @@ HWTEST_F(MenuTestNg, DesktopMenuPattern001, TestSize.Level1)
     containerPattern->OnModifyDone();
     EXPECT_EQ(pattern1->type_, MenuType::MULTI_MENU);
     Shadow shadow;
-    pattern1->GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+    pattern1->GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow, nullptr);
     EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), shadow);
 }
 

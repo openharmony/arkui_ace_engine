@@ -405,7 +405,7 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool resampleEnable, TouchEvent
         resultPoint = point;
     }
 
-    if (!RVSEnableCheck()) {
+    if (!RVSEnableCheck() || !rvsSignalEnable_) {
         return;
     }
 
@@ -756,12 +756,27 @@ void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(c
 
 TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point)
 {
-    if (RVSEnableCheck()) {
+    if (RVSEnableCheck() && rvsSignalEnable_) {
         std::list<TouchEvent> touchEvents;
         touchEvents.push_back(point);
         RVSQueueUpdate(touchEvents);
         return std::move(touchEvents.back());
     }
     return point;
+}
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    ACE_SCOPED_TRACE("TpFlush end by up event");
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
 }
 }
