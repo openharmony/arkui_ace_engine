@@ -1281,20 +1281,32 @@ void ButtonPattern::OnColorConfigurationUpdate()
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto backgroundColor = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    auto textColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
-        auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        renderContext->UpdateBackgroundColor(color);
+        renderContext->UpdateBackgroundColor(backgroundColor);
     }
+    OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
     if (SystemProperties::ConfigChangePerform()) {
-        themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+        if (renderContext->HasForegroundColor() && renderContext->GetForegroundColorValue() == themeTextColor_) {
+            renderContext->UpdateForegroundColor(textColor);
+            PropagateForegroundColorToChildren();
+        }
+        themeBgColor_ = backgroundColor;
+        themeTextColor_ = textColor;
     }
-    auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
+}
+
+void ButtonPattern::OnColorConfigurationUpdateTextColor(const RefPtr<FrameNode>& host,
+    const ButtonStyleMode& buttonStyle, const ButtonRole& buttonRole, const Color& textColor)
+{
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetTextColor().value_or(themeTextColor_) == themeTextColor_) {
-        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textLayoutProperty->UpdateTextColor(textColor);
         textNode->MarkDirtyNode();
     }
 }

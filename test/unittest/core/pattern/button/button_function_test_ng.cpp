@@ -1492,4 +1492,30 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest019, TestSize.Level1)
     buttonPattern->SetBuilderFunc(node);
     buttonPattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: ButtonFunctionTest020
+ * @tc.desc: Test ButtonModelNG::SetButtonStyleOnly and ButtonModelNG::SetRoleOnly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = true;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
+    buttonModelNG.SetButtonStyleOnly(ButtonStyleMode::NORMAL);
+    buttonModelNG.SetRoleOnly(ButtonRole::NORMAL);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+
+    EXPECT_EQ(buttonLayoutProperty->GetButtonRoleValue(), ButtonRole::NORMAL);
+    EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::NORMAL);
+}
 } // namespace OHOS::Ace::NG
