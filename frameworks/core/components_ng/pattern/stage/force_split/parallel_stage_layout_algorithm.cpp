@@ -45,7 +45,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    auto primaryNode = stagePattern->GetPrimaryPage().Upgrade();
+    auto primaryNode = stagePattern->GetPrimaryPage();
     if (primaryNode) {
         primaryIndex_ = hostNode->GetChildIndex(primaryNode);
     } else {
@@ -71,6 +71,10 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     dividerConstraint.selfIdealSize.SetHeight(size.Height());
     dividerWrapper->Measure(dividerConstraint);
     auto detailWrapper = layoutWrapper->GetOrCreateChildByIndex(stageSize - 1);
+    // If failed to load relatedPage, the primaryPage and the last child of stage might be the same page.
+    if (detailWrapper == primaryPageWrapper) {
+        return;
+    }
     MeasureSplitPage(detailWrapper, size);
 }
 
@@ -138,6 +142,10 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     // layout secondary page
     auto detailPageWrapper = layoutWrapper->GetOrCreateChildByIndex(stageSize - 1);
     CHECK_NULL_VOID(detailPageWrapper);
+    // If failed to load relatedPage, the primaryPage and the last child of stage might be the same page.
+    if (detailPageWrapper == primaryPageWrapper) {
+        return;
+    }
     offset.SetX(dividerOffset + dividerWidth);
     offset.SetY(0.0f);
     auto geometryNode = detailPageWrapper->GetGeometryNode();

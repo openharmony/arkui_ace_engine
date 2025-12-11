@@ -68,16 +68,29 @@ std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
     return str;
 }
 
-class PlaceholderPattern : public Pattern {
-    DECLARE_ACE_TYPE(PlaceholderPattern, Pattern);
+class PlaceholderPattern : public StackPattern {
+    DECLARE_ACE_TYPE(PlaceholderPattern, StackPattern);
 public:
     PlaceholderPattern() = default;
     ~PlaceholderPattern() override = default;
 
     void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
+    void RefreshBackgroundColor();
 };
 
 void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::OnAttachToMainTree()
+{
+    StackPattern::OnAttachToMainTree();
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::RefreshBackgroundColor()
 {
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(host);
@@ -103,11 +116,14 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<Pipelin
     CHECK_NULL_RETURN(forceSplitMgr, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<StackPattern>(); });
+        []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
     CHECK_NULL_RETURN(stackNode, nullptr);
     auto stackLayoutProperty = stackNode->GetLayoutProperty();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+        .edges = SAFE_AREA_EDGE_ALL };
+    stackLayoutProperty->UpdateSafeAreaExpandOpts(opts);
 
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -257,18 +273,10 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
 {
     int32_t phId = ElementRegister::GetInstance()->MakeUniqueId();
     auto phNode = FrameNode::GetOrCreateFrameNode(
-        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
+        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<Pattern>(); });
     CHECK_NULL_RETURN(phNode, nullptr);
     auto context = phNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, nullptr);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(navManager, nullptr);
-    auto renderContext = phNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    Color bgColor;
-    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
-        renderContext->UpdateBackgroundColor(bgColor);
-    }
     auto property = phNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdateVisibility(VisibleType::INVISIBLE);

@@ -424,7 +424,7 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
     return nullptr;
 }
 
-bool NavigationGroupNode::HandleBackForHomeDestination()
+bool NavigationGroupNode::HandleBackForHomeOrRelatedDestination()
 {
     auto pattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, false);
@@ -435,7 +435,7 @@ bool NavigationGroupNode::HandleBackForHomeDestination()
         CHECK_NULL_BREAK(parentNavNode);
         bool isEntry = false;
         if (parentNavNode->CheckCanHandleBack(isEntry)) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parent Navigation handle back for HomeNavDestination");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parent Navigation handle back for Home or Related NavDestination");
             return true;
         }
     } while (false);
@@ -443,7 +443,7 @@ bool NavigationGroupNode::HandleBackForHomeDestination()
     CHECK_NULL_RETURN(context, false);
     auto frontend = context->GetFrontend();
     CHECK_NULL_RETURN(frontend, false);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Frontend will handle back for HomeNavDestination");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Frontend will handle back for Home or Related NavDestination");
     return frontend->OnBackPressed();
 }
 
@@ -481,9 +481,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
-        if (navDestination->IsHomeDestination()) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination");
-            return navigation->HandleBackForHomeDestination();
+        if (navDestination->IsHomeDestination() ||
+            navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination or related NavDestination");
+            return navigation->HandleBackForHomeOrRelatedDestination();
         }
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
@@ -505,7 +506,6 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             navigation->MarkModifyDone();
             navigation->MarkDirtyNode();
         }
-
         return result;
     }; // backButton event
 
@@ -1536,6 +1536,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current navigation has no parent page");
     }
     CreateHomeDestinationIfNeeded();
+    LoadRelatedPageIfNeeded();
     auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
@@ -1550,6 +1551,41 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
     }
+}
+
+void NavigationGroupNode::LoadRelatedPageIfNeeded()
+{
+    auto pattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(false) ||
+        !forceSplitMgr->HasRelatedPage() ||
+        !pattern->GetIsTargetForceSplitNav() ||
+        relatedPageDestinationNode_) {
+        return;
+    }
+    const auto& relatedPageName = forceSplitMgr->GetRelatedPageName();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will create related NavDestination: %{public}s", relatedPageName.c_str());
+    RefPtr<UINode> customNode = nullptr;
+    RefPtr<NavDestinationGroupNode> destNode = nullptr;
+    if (!pattern->CreateRelatedDestination(relatedPageName, customNode, destNode)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create related NavDestination");
+        return;
+    }
+    CHECK_NULL_VOID(customNode);
+    CHECK_NULL_VOID(destNode);
+    SetBackButtonEvent(destNode);
+    auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAppear();
+    AddChild(destNode, 1);
+    relatedPageCustomNode_ = customNode;
+    relatedPageDestinationNode_ = destNode;
 }
 
 bool NavigationGroupNode::CheckNeedUpdateParentNode(const RefPtr<UINode>& curNode)

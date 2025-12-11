@@ -154,7 +154,8 @@ void NavDestinationEventHub::FireOnAppear()
         onAppearAction();
         return;
     }
-    if (navDestination && navDestination->IsHomeDestination()) {
+    if (navDestination->IsHomeDestination() ||
+        navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
         onAppearAction();
         return;
     }

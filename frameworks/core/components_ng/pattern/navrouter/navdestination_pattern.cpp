@@ -523,7 +523,7 @@ void NavDestinationPattern::OnDetachFromMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     backupStyle_.reset();
     currStyle_.reset();
-    if (!host->IsHomeDestination()) {
+    if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
