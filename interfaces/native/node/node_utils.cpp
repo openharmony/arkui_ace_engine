@@ -825,6 +825,40 @@ int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle
     return impl->getNodeModifiers()->getAtomicServiceModifier()->setMenuBarVisible(context, visible);
 }
 
+int32_t OH_ArkUI_NaviteModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset position,
+    ArkUI_IntOffset* windowPosition)
+{
+    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(windowPosition, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    ArkUI_Int32 tempOffset[2] = { position.x, position.y };
+    ArkUI_Int32 tempPosition[2];
+ 
+    auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(targetNode->uiNodeHandle,
+        tempOffset, &tempPosition);
+    windowPosition->x = tempPosition[0];
+    windowPosition->y = tempPosition[1];
+    return result;
+}
+ 
+int32_t OH_ArkUI_NaviteModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
+    ArkUI_IntOffset* position)
+{
+    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(position, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    ArkUI_Int32 tempOffset[2] = { windowPosition.x, windowPosition.y };
+    ArkUI_Int32 tempPosition[2];
+ 
+    auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(targetNode->uiNodeHandle,
+        tempOffset, &tempPosition);
+    position->x = tempPosition[0];
+    position->y = tempPosition[1];
+    return result;
+}
+
 #ifdef __cplusplus
 };
 #endif

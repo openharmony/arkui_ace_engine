@@ -4415,6 +4415,34 @@ OffsetF FrameNode::ConvertPoint(OffsetF position, const RefPtr<FrameNode>& targe
     return OffsetF(targetNodePoint.GetX(), targetNodePoint.GetY());
 }
 
+OffsetF FrameNode::ConvertPositionToWindow(OffsetF position, bool fromWindow)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    Point point = Point(position.GetX(), position.GetY());
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->CheckTopWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        if (fromWindow) {
+            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        } else {
+            point = point - Offset(parentOffset.GetX(), parentOffset.GetY());
+        }
+        point = parentMatrix * point;
+        if (parent->tag_ == V2::ROOT_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    return OffsetF(point.GetX(), point.GetY());
+}
+
 std::vector<Point> GetRectPoints(SizeF& frameSize)
 {
     std::vector<Point> pointList;
