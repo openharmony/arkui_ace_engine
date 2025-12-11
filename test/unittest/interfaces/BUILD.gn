@@ -792,6 +792,7 @@ ohos_unittest("js_drawable_descriptor_test") {
     "$ace_root/interfaces/native/node",
     "$ace_root/interfaces/native/",
     "$ace_root/interfaces/inner_api/drawable_descriptor",
+    "$ace_root/frameworks/core/interfaces/drawable",
   ]
 
   deps = []
