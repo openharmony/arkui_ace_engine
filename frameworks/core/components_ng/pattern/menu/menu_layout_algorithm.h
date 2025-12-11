@@ -276,7 +276,7 @@ private:
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect);
     void CheckPreviewConstraintForConstant(const RefPtr<GeometryNode>& previewGeometryNode);
     void CheckPreviewSize(const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern);
-    void ModifyOffset(OffsetF& offset);
+    void ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern);
     OffsetF UpdateMenuPosition(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode,
         RefPtr<MenuPattern> menuPattern, const RefPtr<MenuLayoutProperty>& menuProp);
     bool IsSelectMenuShowInSubWindow(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode);
