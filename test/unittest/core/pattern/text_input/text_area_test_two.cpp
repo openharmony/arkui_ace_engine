@@ -890,4 +890,25 @@ HWTEST_F(TextAreaTestTwo, ShouldReMeasurePlaceholder, TestSize.Level1)
     auto ret = textAreaLayoutAlgorithm->ShouldReMeasurePlaceholder(pattern_);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: ToJsonValue112
+ * @tc.desc: Test TextFieldLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, ToJsonValue112, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetIsOnlyBetweenLines(true); });
+
+    /**
+     * @tc.steps: step2. run ToJsonValue().
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("selectedDragPreviewStyle"), "#FFFFFFFF");
+}
 } // namespace OHOS::Ace::NG
