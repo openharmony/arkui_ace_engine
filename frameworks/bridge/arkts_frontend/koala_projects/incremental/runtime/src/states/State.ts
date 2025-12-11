@@ -97,10 +97,10 @@ export interface ArrayState<Item> extends ReadableState<ReadonlyArray<Item>> {
     at(index: int32): Item
     get(index: int32): Item
     set(index: int32, item: Item): void
-    copyWithin(target: number, start: number, end?: number): Array<Item>
-    fill(value: Item, start?: number, end?: number): Array<Item>
+    copyWithin(target: int32, start: int32, end?: int32): Array<Item>
+    fill(value: Item, start?: int32, end?: int32): Array<Item>
     pop(): Item | undefined
-    push(...items: Item[]): int
+    push(...items: Item[]): number
     reverse(): Array<Item>
     shift(): Item | undefined
     sort(comparator?: (a: Item, b: Item) => number): Array<Item>
@@ -467,11 +467,11 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         this.mutable[index] = item
     }
 
-    copyWithin(target: number, start: number, end?: number): Array<Item> {
+    copyWithin(target: int32, start: int32, end?: int32): Array<Item> {
         return this.mutable.copyWithin(target, start, end)
     }
 
-    fill(value: Item, start?: number, end?: number): Array<Item> {
+    fill(value: Item, start?: int32, end?: int32): Array<Item> {
         return this.mutable.fill(value, start, end)
     }
 
@@ -479,7 +479,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return this.mutable.pop()
     }
 
-    push(...items: Item[]): int {
+    push(...items: Item[]): number {
         return this.mutable.push(...items)
     }
 
@@ -500,7 +500,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return array.splice(start, deleteCount ?? array.length, ...items)
     }
 
-    unshift(...items: Item[]): int {
+    unshift(...items: Item[]): number {
         return this.mutable.unshift(...items)
     }
 
