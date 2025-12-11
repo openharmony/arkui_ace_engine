@@ -62,6 +62,7 @@ static constexpr uint32_t PARAM_SIZE_TWO   = 2;
 static constexpr uint32_t PARAM_SIZE_THREE = 3;
 static constexpr uint32_t PARAM_TRHEE_INDEX = 2;
 constexpr int FUNC_SET_CREATE_ARG_LEN = 2;
+using UpdateCallback = std::function<void(const std::string& data)>;
 }
 
 JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr<JsonValue>& jsonValue)
@@ -96,45 +97,32 @@ JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr
     }
 }
 
-void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::ObjectRef>& obj)
+static void ProcessCardData(const EcmaVM* vm, const std::string& data, const JSRef<JSVal>& targetObject,
+    const JSRef<JSFunc>& targetFunc, const char* logPrefix)
 {
-    JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
-    JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
-    if (!storageValue->IsObject()) {
+    CHECK_NULL_VOID(vm);
+    TAG_LOGI(AceLogTag::ACE_FORM, "%s, dataList length: %{public}zu", logPrefix, data.length());
+    std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
+    CHECK_NULL_VOID(jsonRoot);
+    auto child = jsonRoot->GetChild();
+    if (!child || !child->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "%s failed", logPrefix);
         return;
     }
 
-    JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
-    JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
-    if (!setOrCreateVal->IsFunction()) {
-        return;
+    while (child && child->IsValid()) {
+        const std::string& key = child->GetKey();
+        JSRef<JSVal> args[] = {
+            JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, key)),
+            CreateJsObjectFromJsonValue(vm, child),
+        };
+        targetFunc->Call(targetObject, FUNC_SET_CREATE_ARG_LEN, args);
+        child = child->GetNext();
     }
+}
 
-    JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
-    auto callback = [storage, setOrCreate, id = ContainerScope::CurrentId()](const std::string& data) {
-        ContainerScope scope(id);
-        const EcmaVM* vm = storage->GetEcmaVM();
-        CHECK_NULL_VOID(vm);
-        LocalScope localScope(vm);
-        TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
-        std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
-        CHECK_NULL_VOID(jsonRoot);
-        auto child = jsonRoot->GetChild();
-        if (!child || !child->IsValid()) {
-            return;
-        }
-
-        while (child && child->IsValid()) {
-            const std::string& key = child->GetKey();
-            JSRef<JSVal> args[] = {
-                JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, key)),
-                CreateJsObjectFromJsonValue(vm, child),
-            };
-            setOrCreate->Call(storage, FUNC_SET_CREATE_ARG_LEN, args);
-            child = child->GetNext();
-        }
-    };
-
+static void SetCardUpdateCallback(int64_t cardId, UpdateCallback&& callback)
+{
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
@@ -142,16 +130,67 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_VOID(delegate);
-        delegate->SetUpdateCardDataCallback(callback);
+        delegate->SetUpdateCardDataCallback(std::move(callback));
         delegate->UpdatePageDataImmediately();
     } else {
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_VOID(delegate);
-        delegate->SetUpdateCardDataCallback(callback);
+        delegate->SetUpdateCardDataCallback(std::move(callback));
         delegate->UpdatePageDataImmediately();
     }
+}
+
+void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::ObjectRef>& obj)
+{
+    JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
+    JSRef<JSVal> isV2Value = object->GetProperty("__isV2__Internal");
+    if (!isV2Value->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "isV2Value is not function");
+        return;
+    }
+    JSRef<JSFunc> isV2Func = JSRef<JSFunc>::Cast(isV2Value);
+    JSRef<JSVal> result = isV2Func->Call(object);
+    if (!result->IsBoolean()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "result is not boolean");
+        return;
+    }
+    UpdateCallback callback;
+    if (result->ToBoolean()) {
+        JSRef<JSVal> setTsCardVal = object->GetProperty("__setTSCard__Internal");
+        if (!setTsCardVal->IsFunction()) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "GetProperty setTsCard failed");
+            return;
+        }
+
+        JSRef<JSFunc> setTsCard = JSRef<JSFunc>::Cast(setTsCardVal);
+        auto id = ContainerScope::CurrentId();
+        callback = [object, setTsCard, id](const std::string& data) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = object->GetEcmaVM();
+            ProcessCardData(vm, data, object, setTsCard, "setTsCard");
+        };
+    } else {
+        JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
+        if (!storageValue->IsObject()) {
+            return;
+        }
+        JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
+        JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
+        if (!setOrCreateVal->IsFunction()) {
+            return;
+        }
+
+        JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
+        auto id = ContainerScope::CurrentId();
+        callback = [storage, setOrCreate, id](const std::string& data) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = storage->GetEcmaVM();
+            ProcessCardData(vm, data, storage, setOrCreate, "setOrCreate");
+        };
+    }
+    SetCardUpdateCallback(cardId, std::move(callback));
 }
 
 void SetFormCallbacks(RefPtr<Container> container, JSView* view)
