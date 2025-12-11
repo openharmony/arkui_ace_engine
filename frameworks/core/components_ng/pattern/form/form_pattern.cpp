@@ -55,8 +55,8 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 200;
-constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
+constexpr uint32_t DELAY_TIME_FOR_RM_IMG_WHEN_UPDATING_SIZE = 60;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -1739,13 +1739,14 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
         DelayDeleteImageNode(want.GetBoolParam(
             OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, false)) {
-        RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+        DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE,
+            DELAY_TIME_FOR_RM_IMG_WHEN_UPDATING_SIZE);
     } else {
         DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     }
 }
 
-void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
+void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType, uint32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1759,7 +1760,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
         },
-        STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE, "DelayRemoveFormChildNode" + nodeIdStr);
+        delay, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)

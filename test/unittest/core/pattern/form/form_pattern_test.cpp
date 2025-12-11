@@ -1486,20 +1486,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_037, TestSize.Level1)
     AAFwk::Want want;
 
     pattern->ProcDeleteImageNode(want);
-    int32_t num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    int32_t count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 
     want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->ProcDeleteImageNode(want);
-    num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 
     want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, true);
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->ProcDeleteImageNode(want);
-    num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 }
 
 /**
@@ -2076,8 +2076,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-    int32_t num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    int32_t count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 }
 
 /**
