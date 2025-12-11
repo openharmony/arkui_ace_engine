@@ -684,6 +684,14 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -829,6 +837,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAttributeModifier::SetIncludeFontPaddingImpl,
         TextAttributeModifier::SetFallbackLineSpacingImpl,
+        TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

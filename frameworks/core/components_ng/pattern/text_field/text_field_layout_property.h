@@ -96,6 +96,13 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto themeScopeId = host->GetThemeScopeId();
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>(themeScopeId);
+        CHECK_NULL_VOID(theme);
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", UtfUtils::Str16DebugToStr8(propErrorText_.value_or(u"")).c_str(), filter);
@@ -138,6 +145,8 @@ public:
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
         json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("selectedDragPreviewStyle",
+        GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
         ToJsonValueMore(json, filter);
     }
 

@@ -1224,4 +1224,42 @@ HWTEST_F(TextTestNgSeven, TextContentModifier004, TestSize.Level1)
     EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
     textPattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: CreateTextDragInfo004
+ * @tc.desc: Test CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, CreateTextDragInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto dragInfo = textPattern->CreateTextDragInfo();
+    EXPECT_EQ(dragInfo.dragBackgroundColor.value_or(Color::WHITE), Color::WHITE);
+}
+
+/**
+ * @tc.name: CreateTextDragInfo005
+ * @tc.desc: Test CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, CreateTextDragInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"Hello World");
+    textModelNG.SetSelectedDragPreviewStyle(Color::BLUE);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    textModelNG.SetSelectedDragPreviewStyle(frameNode, Color::BLUE);
+    auto color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
+    EXPECT_EQ(color.GetValue(), Color::BLUE.GetValue());
+}
 } // namespace OHOS::Ace::NG

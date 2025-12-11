@@ -399,8 +399,6 @@ void TextModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::op
 
 void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
-    
     if (color.has_value()) {
         TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
         return;

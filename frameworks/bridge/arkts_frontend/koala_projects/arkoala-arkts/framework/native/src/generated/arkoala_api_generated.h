@@ -2883,6 +2883,8 @@ typedef struct Ark_ScrollToIndexOptions Ark_ScrollToIndexOptions;
 typedef struct Opt_ScrollToIndexOptions Opt_ScrollToIndexOptions;
 typedef struct Ark_SearchOptions Ark_SearchOptions;
 typedef struct Opt_SearchOptions Opt_SearchOptions;
+typedef struct Ark_SelectedDragPreviewStyle Ark_SelectedDragPreviewStyle;
+typedef struct Opt_SelectedDragPreviewStyle Opt_SelectedDragPreviewStyle;
 typedef struct Ark_SelectionMenuOptions Ark_SelectionMenuOptions;
 typedef struct Opt_SelectionMenuOptions Opt_SelectionMenuOptions;
 typedef struct Ark_SelectionMenuOptionsExt Ark_SelectionMenuOptionsExt;
@@ -18719,6 +18721,14 @@ typedef struct Opt_SearchOptions {
     Ark_Tag tag;
     Ark_SearchOptions value;
 } Opt_SearchOptions;
+typedef struct Ark_SelectedDragPreviewStyle {
+    /* kind: Interface */
+    Opt_ResourceColor color;
+} Ark_SelectedDragPreviewStyle;
+typedef struct Opt_SelectedDragPreviewStyle {
+    Ark_Tag tag;
+    Ark_SelectedDragPreviewStyle value;
+} Opt_SelectedDragPreviewStyle;
 typedef struct Ark_SelectionMenuOptions {
     /* kind: Interface */
     Opt_MenuOnAppearCallback onAppear;
@@ -24751,6 +24761,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                                   const Opt_Boolean* value);
     void (*setFallbackLineSpacing)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
+                                        const Opt_SelectedDragPreviewStyle* value);
     void (*setSearchButton)(Ark_NativePointer node,
                             const Opt_String* value,
                             const Opt_SearchButtonOptions* option);
@@ -25401,6 +25413,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                   const Opt_Boolean* value);
     void (*setFallbackLineSpacing)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
+                                        const Opt_SelectedDragPreviewStyle* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -25542,6 +25556,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                                   const Opt_Boolean* value);
     void (*setFallbackLineSpacing)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
+                                        const Opt_SelectedDragPreviewStyle* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
@@ -25729,6 +25745,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                                   const Opt_Boolean* value);
     void (*setFallbackLineSpacing)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
+                                        const Opt_SelectedDragPreviewStyle* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
