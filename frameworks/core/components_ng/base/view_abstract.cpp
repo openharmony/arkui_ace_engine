@@ -7124,6 +7124,15 @@ void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& m
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
 }
 
+std::optional<MotionPathOption> ViewAbstract::GetMotionPath(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, std::nullopt);
+    auto motionPath = target->GetMotionPath();
+    return motionPath;
+}
+
 void ViewAbstract::SetFocusOnTouch(FrameNode* frameNode, bool isSet)
 {
     CHECK_NULL_VOID(frameNode);

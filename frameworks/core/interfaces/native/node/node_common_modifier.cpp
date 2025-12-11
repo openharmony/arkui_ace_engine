@@ -4127,6 +4127,33 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
+ArkUI_Bool GetMotionPath(ArkUINodeHandle node, ArkUI_MotionPathOptions* options)
+{
+    if (!node || !options) {
+        return false;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto motionPathOption = ViewAbstract::GetMotionPath(frameNode);
+    if (!motionPathOption.has_value()) {
+        return false;
+    }
+    const auto& path = motionPathOption->GetPath();
+    size_t length = path.length() + 1;
+    auto optionPath = new (std::nothrow) char[length];
+    CHECK_NULL_RETURN(optionPath, false);
+    path.copy(optionPath, path.length());
+    optionPath[path.length()] = '\0';
+    if (options->path) {
+        delete[] options->path;
+        options->path = nullptr;
+    }
+    options->path = optionPath;
+    options->from = motionPathOption->GetBegin();
+    options->to = motionPathOption->GetEnd();
+    options->rotatable = motionPathOption->GetRotate();
+    return true;
+}
 
 void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anchorX, ArkUI_Float32 anchorY)
 {
@@ -10931,6 +10958,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowForceDark = ResetAllowForceDark,
         .getAllowForceDark = GetAllowForceDark,
         .getPixelRound = GetPixelRound,
+        .getMotionPath = GetMotionPath,
         .setRenderStrategy = SetRenderStrategy,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
