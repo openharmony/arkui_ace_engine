@@ -2026,6 +2026,8 @@ public:
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
     static void RemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
+        MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty = false);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
