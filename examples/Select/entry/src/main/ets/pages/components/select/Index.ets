@@ -46,7 +46,12 @@ export struct SelectIndex {
     { name: 'SelectLevel5', path: 'SelectLevel5' },
     { name: 'SelectLevel6', path: 'SelectLevel6' },
     { name: 'SelectLevel7', path: 'SelectLevel7' },
-    { name: 'SelectMenuOutline', path: 'SelectMenuOutline' }
+    { name: 'SelectMenuOutline', path: 'SelectMenuOutline' },
+    { name: 'SelectShowInSubWindow', path: 'SelectShowInSubWindow' },
+    { name: 'SelectShowDefaultSelectedIcon', path: 'SelectShowDefaultSelectedIcon' },
+    { name: 'selectOptionTextModifier', path: 'selectOptionTextModifier' },
+    { name: 'selectSelectedOptionTextModifier', path: 'selectSelectedOptionTextModifier' },
+    { name: 'selectTextModifier', path: 'selectTextModifier' }
   ]
 
   build() {

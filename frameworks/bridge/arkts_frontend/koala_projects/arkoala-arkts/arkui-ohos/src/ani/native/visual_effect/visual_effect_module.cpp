@@ -14,11 +14,80 @@
  */
 #include "visual_effect_module.h"
 
+#include <mutex>
+
+#include "load.h"
 #include "log/log.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
+ani_namespace GetOrCreateMaterialNamespace([[maybe_unused]] ani_env* env)
+{
+    static ani_namespace globalNamespace = nullptr; // cache global namespace
+    static std::mutex mutex;
+    if (globalNamespace) {
+        return globalNamespace;
+    }
+    std::lock_guard<std::mutex> lock(mutex);
+    if (globalNamespace) {
+        return globalNamespace;
+    }
+    ani_namespace nmSpace = nullptr;
+    ANI_CALL(env, FindNamespace("@ohos.arkui.uiMaterial.uiMaterial", &nmSpace), return nullptr);
+    ani_ref refValue = nullptr;
+    ANI_CALL(env, GlobalReference_Create(nmSpace, &refValue), return nullptr);
+    globalNamespace = static_cast<ani_namespace>(refValue);
+    return globalNamespace;
+}
+
+ani_enum GetOrCreateMaterialEnumClass([[maybe_unused]] ani_env* env)
+{
+    static ani_enum globalMaterialTypeEnum = nullptr;
+    static std::mutex mutex;
+    if (globalMaterialTypeEnum) {
+        return globalMaterialTypeEnum;
+    }
+    std::lock_guard<std::mutex> lock(mutex);
+    if (globalMaterialTypeEnum) {
+        return globalMaterialTypeEnum;
+    }
+    ani_enum materialTypeEnum = nullptr;
+    auto nmSpace = GetOrCreateMaterialNamespace(env);
+    CHECK_NULL_RETURN(nmSpace, nullptr);
+    ANI_CALL(env, Namespace_FindEnum(nmSpace, "MaterialType", &materialTypeEnum), return nullptr);
+    ani_ref globalMaterialTypeRef = nullptr;
+    ANI_CALL(env, GlobalReference_Create(materialTypeEnum, &globalMaterialTypeRef), return nullptr);
+    globalMaterialTypeEnum = static_cast<ani_enum>(globalMaterialTypeRef);
+    return globalMaterialTypeEnum;
+}
+
+int32_t ParseMaterialOptionType(ani_env* env, ani_object aniOption)
+{
+    constexpr int32_t defaultType = 0; // NONE
+    if (AniUtils::IsUndefined(env, aniOption)) {
+        return defaultType;
+    }
+    ani_ref typeRef = nullptr;
+    ANI_CALL(env, Object_GetPropertyByName_Ref(aniOption, "type", &typeRef), return defaultType);
+    if (AniUtils::IsUndefined(env, typeRef)) {
+        return defaultType;
+    }
+    ani_object typeObj = static_cast<ani_object>(typeRef);
+    ani_enum materialTypeEnumClass = GetOrCreateMaterialEnumClass(env);
+    CHECK_NULL_RETURN(materialTypeEnumClass, defaultType);
+    ani_boolean isMaterialType = false;
+    ANI_CALL(env, Object_InstanceOf(typeObj, materialTypeEnumClass, &isMaterialType), return defaultType);
+    if (!isMaterialType) {
+        HILOGW("type is not materialType enum class");
+        return defaultType;
+    }
+    ani_int typeInt = 0;
+    ani_enum_item typeItem = static_cast<ani_enum_item>(typeObj);
+    ANI_CALL(env, EnumItem_GetValue_Int(typeItem, &typeInt), return defaultType);
+    return static_cast<int32_t>(typeInt);
+}
+
 ani_long GetPropertyName(ani_env* env, ani_object obj, const char* name)
 {
     ani_long propertyValue = 0L;
@@ -105,5 +174,28 @@ ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, 
     }
 
     return GetNativePtrFromMethod(env, obj, "getNativePtr");
+}
+
+ani_long ExtractorsToUiMaterialMaterialPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    ani_long result = GetNativePtrFromMethod(env, obj, "getNativeObject");
+    return result;
+}
+
+ani_long UiMaterialConstructMaterial(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    int32_t type = ParseMaterialOptionType(env, obj);
+    auto* material = modifier->getVisualEffectAniModifier()->constructMaterial(type);
+    return reinterpret_cast<ani_long>(material);
+}
+
+void UiMaterialDestroyMaterial(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto* pointer = reinterpret_cast<OHOS::Ace::UiMaterial*>(ptr);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->getVisualEffectAniModifier()->destroyMaterial(pointer);
 }
 } // namespace OHOS::Ace::Ani

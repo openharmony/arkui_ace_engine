@@ -67,6 +67,8 @@ build_component_ng("pattern_ng") {
     "canvas/canvas_modifier.cpp",
     "canvas/canvas_paint_method.cpp",
     "canvas/canvas_pattern.cpp",
+    "canvas/canvas_render_context_deferred.cpp",
+    "canvas/canvas_render_context_immediate.cpp",
     "canvas/canvas_rendering_context_2d_model_ng.cpp",
     "canvas/custom_paint_paint_method.cpp",
     "canvas/custom_paint_util.cpp",

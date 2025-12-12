@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
@@ -383,6 +384,14 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createContainerPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ContainerPickerModel::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<CustomPattern>());
@@ -718,6 +727,8 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #else
     nullptr,
 #endif
+    nullptr,
+    createContainerPickerNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

@@ -141,6 +141,11 @@ typedef enum {
      * @since 20
      */
     ARKUI_NODE_UNDEFINED,
+    /**
+     * Picker container.
+     * @since 23
+     */
+    ARKUI_NODE_PICKER = 1018,
 } ArkUI_NodeType;
 
 /**
@@ -2965,6 +2970,21 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_DIRECTION = 1052,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the {@link Arkui_AttributeItem} parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value {@link Arkui_AttributeItem}: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_SELECTED_DRAG_PREVIEW_STYLE = 1053,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -4084,6 +4104,20 @@ typedef enum {
     NODE_TEXT_INPUT_DIRECTION = 7047,
 
     /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_INPUT_SELECTED_DRAG_PREVIEW_STYLE = 7048,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4633,6 +4667,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_DIRECTION = 8044,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_AREA_SELECTED_DRAG_PREVIEW_STYLE = 8045,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -7748,6 +7796,8 @@ typedef enum {
      */
     NODE_GRID_MULTI_SELECTABLE = 1013013,
 
+    NODE_GRID_SUPPORT_LAZY_LOADING_EMPTY_BRANCH = 1013014,
+
     /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -8051,6 +8101,64 @@ typedef enum {
      * @since 23
      */
     NODE_MONOPOLIZE_EVENTS = 117,
+
+    /**
+     * @brief Defines the index of the default selected item in the data selection range of the picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: index. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: index. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_OPTION_SELECTED_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_PICKER,
+
+    /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 23
+     */
+    NODE_PICKER_ENABLE_HAPTIC_FEEDBACK = 1018001,
+
+    /**
+     * @brief Defines whether to support scroll looping for the picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support scroll looping. The value <b>true</b> means to support scroll looping, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The value <b>1</b> means to support scroll looping, and <b>0</b> means the opposite. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_CAN_LOOP = 1018002,
+
+    /**
+     * @brief Sets the type and parameters of the selection indicator.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} Format: \n
+     * .object: Parameter type {@link ArkUI_PickerIndicatorStyle}.
+     * \n
+     * Attribute fetch method return value {@link ArkUI_AttributeItem} format: \n
+     * .object: Parameter type {@link ArkUI_PickerIndicatorStyle}.
+     *
+     * @since 23
+     */
+    NODE_PICKER_SELECTION_INDICATOR = 1018003,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -9768,6 +9876,32 @@ typedef enum {
      * @since 23
      */
     NODE_GRID_ITEM_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID_ITEM,
+
+    /**
+     * @brief Defines the event triggered when an item is selected in the <b>ARKUI_NODE_PICKER</b> component.
+     *
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_PICKER,
+
+     /**
+      * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+      * <b>ARKUI_NODE_PICKER</b> component.
+      *
+      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+      * {@link ArkUI_NodeComponentEvent}. \n
+      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+      * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+      *
+      * @since 23
+      */
+    NODE_PICKER_EVENT_ON_SCROLL_STOP = 1018001,
 } ArkUI_NodeEventType;
 
 /**
@@ -11626,6 +11760,38 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
  * @since 21
  */
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Converts a point's coordinates from the target node's coordinate system 
+ * to the window's coordinate system.
+ *
+ * @param node ArkUI_NodeHandle The target node.
+ * @param position The point's coordinates in the target node's local coordinate system, in px.
+ * @param windowPosition The converted coordinates in the window's coordinate system, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
+ * @since 23
+ */
+int32_t OH_ArkUI_NaviteModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset position,
+    ArkUI_IntOffset* windowPosition);
+ 
+/**
+ * @brief Converts a point's coordinates from the window's coordinate system 
+ * to the target node's coordinate system.
+ *
+ * @param node ArkUI_NodeHandle The target node.
+ * @param windowPosition The point's coordinates in the window's coordinate system, in px.
+ * @param position The converted coordinates in the target node's local coordinate system, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
+ * @since 23
+ */
+int32_t OH_ArkUI_NaviteModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
+    ArkUI_IntOffset* position);
 
 /** 
  * @brief Stop the animation being executed by the Swiper node.

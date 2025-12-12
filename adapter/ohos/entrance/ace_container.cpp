@@ -1223,6 +1223,27 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     front->OnNewRequest(data);
 }
 
+void AceContainer::InitForceSplitManager()
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    auto abilityInfo = abilityInfo_.lock();
+    if (abilityInfo && abilityInfo->iconId != 0) {
+        mgr->SetAppIconId(abilityInfo->iconId);
+        return;
+    }
+    auto runtimeContext = runtimeContext_.lock();
+    CHECK_NULL_VOID(runtimeContext);
+    auto appInfo = runtimeContext->GetApplicationInfo();
+    if (appInfo && appInfo->iconId != 0) {
+        mgr->SetAppIconId(appInfo->iconId);
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to get app iconId");
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
@@ -2739,6 +2760,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
+    InitForceSplitManager();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
         auto container = weak.Upgrade();
@@ -3716,7 +3738,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(

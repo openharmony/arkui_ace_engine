@@ -32,34 +32,34 @@ ani_long NodeAdapterConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass
     auto nodeAdapterRef = std::make_shared<AniGlobalReference>(env, nodeAdapter);
     auto onAttachToNode = [env, nodeAdapterRef](ani_double nodeId) {
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onAttachToNodePtr", nullptr, nodeId);
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onAttachToNodePtr", "d:", nodeId);
     };
     auto onDetachFromNode = [env, nodeAdapterRef]() {
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDetachFromNodePtr", nullptr);
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDetachFromNodePtr", ":");
     };
-    auto onGetId = [env, nodeAdapterRef](ani_double index) -> int32_t {
-        ani_double nodeId = index;
-        ani_double id;
-        env->Object_CallMethodByName_Double(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onGetChildId", nullptr, &id, nodeId);
+    auto onGetId = [env, nodeAdapterRef](ani_int index) -> int32_t {
+        ani_int nodeId = index;
+        ani_int id;
+        env->Object_CallMethodByName_Int(
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onGetChildId", "i:i", &id, nodeId);
         return static_cast<int32_t>(id);
     };
     auto onCreateChild = [env, nodeAdapterRef](ani_double index) -> ani_long {
         ani_double nodeId = index;
         ani_long node;
         env->Object_CallMethodByName_Long(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onCreateNewNodePtr", nullptr, &node, nodeId);
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onCreateNewNodePtr", "d:l", &node, nodeId);
         return node;
     };
     auto onDisposeChild = [env, nodeAdapterRef](ani_double node, ani_double id) {
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDisposeNodePtr", nullptr, id, node);
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDisposeNodePtr", "dd:", id, node);
     };
 
     auto onUpdateChild = [env, nodeAdapterRef](ani_double node, ani_double id) {
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onUpdateNodePtr", nullptr, id, node);
+            reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onUpdateNodePtr", "dd:", id, node);
     };
 
     NodeAdapterInfo info = { .onAttachToNode = std::move(onAttachToNode),

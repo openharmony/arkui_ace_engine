@@ -28,12 +28,14 @@ public:
     virtual ~CanvasModel() = default;
 
     virtual RefPtr<AceType> Create() = 0;
-    virtual RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) { return pattern; };
     virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
     virtual void SetOnReady(std::function<void()>&& onReady) {};
+    virtual void SetOnReady(std::function<void(bool, CanvasUnit)>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};
     virtual void SetImageAIOptions(void* options) {};
     virtual void DetachRenderContext() {};
+    virtual void SetImmediateRender(bool immediateRender) {};
+    virtual void UpdateUnit(CanvasUnit unit) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_PAINT_CANVAS_MODEL_H

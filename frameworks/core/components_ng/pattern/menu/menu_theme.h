@@ -136,6 +136,7 @@ public:
             theme->menuHapticFeedback_ =
                 pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
             theme->menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
+            theme->minKeyboardAvoidDistance_ = pattern->GetAttr<Dimension>("menu_min_keyboard_avoid_distance", 8.0_vp);
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -426,6 +427,11 @@ public:
         return menuOutlineColor_;
     }
 
+    Dimension GetMinKeyboardAvoidDistance()
+    {
+        return minKeyboardAvoidDistance_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -486,6 +492,7 @@ private:
     uint32_t embeddedExpandIconId_ = 0;
     uint32_t stackExpandIconId_ = 0;
     Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
+    Dimension minKeyboardAvoidDistance_ = Dimension();
 };
 
 } // namespace OHOS::Ace::NG

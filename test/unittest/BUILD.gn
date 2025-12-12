@@ -452,6 +452,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/manager/toolbar/toolbar_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
@@ -633,6 +634,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
@@ -907,6 +909,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_immediate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",

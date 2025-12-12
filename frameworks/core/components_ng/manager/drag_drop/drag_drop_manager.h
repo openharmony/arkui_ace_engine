@@ -216,6 +216,7 @@ public:
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
     void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const DragPointerEvent& pointerEvent,
         const std::string& extraInfo);
+    bool ShouldSkipDragMoveOutForSubwindow() const;
 
     bool IsWindowConsumed() const
     {

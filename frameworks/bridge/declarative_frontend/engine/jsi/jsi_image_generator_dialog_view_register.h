@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H
 
-#include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
 namespace OHOS::Ace::Framework {

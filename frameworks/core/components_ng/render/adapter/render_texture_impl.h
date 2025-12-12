@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,11 +78,25 @@ public:
         return textureId_;
     }
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+    void GetTextureIsVideo(int32_t& type);
+
+    void SetPatternType(int type)
+    {
+        if (patternType_ != type) {
+            patternType_ = type;
+        }
+    }
+#endif
 private:
     WeakPtr<NG::RenderContext> renderContext_;
     RefPtr<ExtTexture> extTexture_;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallback_;
     int64_t textureId_ = -1;
+#ifdef RENDER_EXTRACT_SUPPORTED
+    void* nativeWindow_ = nullptr;
+    int patternType_ = 0;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_RENDER_SURFACE_IMPL_H

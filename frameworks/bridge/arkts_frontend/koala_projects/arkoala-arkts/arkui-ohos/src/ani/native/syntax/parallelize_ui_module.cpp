@@ -19,6 +19,9 @@
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
+namespace {
+constexpr int32_t SPECIFIED_CAPACITY = 16;
+} // namespace
 
 ani_long ParallelizeUIAdapterNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
 {
@@ -52,6 +55,9 @@ void ConvertGetCountCallbackFun(
         ani_env* env = nullptr;
         auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
         CHECK_NULL_RETURN(env, 0);
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return 0;
+        }
         std::vector<ani_ref> args = {};
         ani_ref ret = nullptr;
         callbackAni->Call(env, args.size(), args.data(), &ret);
@@ -60,8 +66,10 @@ void ConvertGetCountCallbackFun(
         }
         ani_int aniValue = 0;
         if (ANI_OK != env->Object_CallMethodByName_Int((ani_object)ret, "toInt", ":i", &aniValue)) {
+            env->DestroyLocalScope();
             return 0;
         }
+        env->DestroyLocalScope();
         return aniValue;
     };
 }
@@ -75,6 +83,9 @@ void ConvertGetFrameNodeCallbackFun(ani_vm* vm, std::function<ArkUINodeHandle(in
         ani_env* env = nullptr;
         auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
         CHECK_NULL_RETURN(env, nullptr);
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return nullptr;
+        }
         auto indexAni = AniUtils::CreateInt32(env, index);
         auto needBuildAni = AniUtils::CreateInt32(env, needBuild);
         auto isCacheAni = AniUtils::CreateInt32(env, isCache);
@@ -89,6 +100,7 @@ void ConvertGetFrameNodeCallbackFun(ani_vm* vm, std::function<ArkUINodeHandle(in
         if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "toLong", ":l", &aniValue)) {
             return nullptr;
         }
+        env->DestroyLocalScope();
         return reinterpret_cast<ArkUINodeHandle>(aniValue);
     };
 }

@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/modifier.h"
 
@@ -35,8 +36,7 @@ void JSDrawingRenderingContext::JSBind(BindingTarget globalObj)
         "size", &JSDrawingRenderingContext::JsGetSize, &JSDrawingRenderingContext::JsSetSize);
     JSClass<JSDrawingRenderingContext>::CustomProperty(
         "canvas", &JSDrawingRenderingContext::JsGetCanvas, &JSDrawingRenderingContext::JsSetCanvas);
-    JSClass<JSDrawingRenderingContext>::CustomMethod(
-        "invalidate", &JSDrawingRenderingContext::SetInvalidate);
+    JSClass<JSDrawingRenderingContext>::CustomMethod("invalidate", &JSDrawingRenderingContext::SetInvalidate);
 
     JSClass<JSDrawingRenderingContext>::Bind(
         globalObj, JSDrawingRenderingContext::Constructor, JSDrawingRenderingContext::Destructor);
@@ -65,6 +65,15 @@ JSDrawingRenderingContext::JSDrawingRenderingContext()
     SetInstanceId(Container::CurrentIdSafely());
 }
 
+void JSDrawingRenderingContext::SetCanvasPattern(const RefPtr<AceType>& canvas)
+{
+    if (canvasPattern_.Upgrade() != canvas) {
+        context2d_.Reset();
+        canvasPattern_ = canvas;
+        SetRSCanvasCallback(canvasPattern_);
+    }
+}
+
 void JSDrawingRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
 {
     info.SetReturnValue(jsCanvasVal_);
@@ -88,7 +97,7 @@ void JSDrawingRenderingContext::JsGetSize(const JSCallbackInfo& info)
     info.SetReturnValue(retObj);
 }
 
-void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPattern)
+void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern)
 {
     auto func = [wp = WeakClaim(this)](RSCanvas* canvas, double width, double height) {
         auto context = wp.Upgrade();
@@ -108,7 +117,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         context->jsCanvasVal_ = JSRef<JSVal>::Cast(jsCanvasVal);
     };
     std::function<void(RSCanvas*, double, double)> callback = func;
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);
     }
@@ -116,8 +125,42 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
 
 void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     CHECK_NULL_VOID(customPaintPattern);
     customPaintPattern->SetInvalidate();
+}
+
+void JSDrawingRenderingContext::SetUnit(CanvasUnit unit)
+{
+    unit_ = unit;
+    if (!context2d_->IsNull()) {
+        auto renderContext = Referenced::Claim(JSRef<JSObject>::Cast(context2d_)->Unwrap<JSRenderingContext>());
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetUnit(unit_);
+    }
+}
+
+const JSRef<JSVal>& JSDrawingRenderingContext::GetOrCreateContext2D(bool antialias)
+{
+    if (!canvasPattern_.Upgrade()) {
+        JSException::Throw(
+            ERROR_CODE_CANVAS_CONTEXT_NOT_BOUND, "%s", "The drawingContext is not bound to a canvas component.");
+        return context2d_;
+    }
+    if (context2d_->IsNull()) {
+        context2d_ = JSClass<JSRenderingContext>::NewInstance();
+        auto renderContext = Referenced::Claim(JSRef<JSObject>::Cast(context2d_)->Unwrap<JSRenderingContext>());
+        renderContext->SetBuiltIn(true);
+        renderContext->SetInstanceId(Container::CurrentId());
+        renderContext->SetCanvasPattern(canvasPattern_.Upgrade());
+        renderContext->SetUnit(unit_);
+        renderContext->SetDensity();
+    }
+    // 解析info[1],把antialias给到pattern
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
+    if (customPaintPattern) {
+        customPaintPattern->SetAntiAlias(antialias);
+    }
+    return context2d_;
 }
 } // namespace OHOS::Ace::Framework

@@ -259,6 +259,8 @@ private:
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void OnFontScaleConfigurationUpdate() override;
     void InitButtonAlphaOffscreen();
+    void OnColorConfigurationUpdateTextColor(const RefPtr<FrameNode>& host, const ButtonStyleMode& buttonStyle,
+        const ButtonRole& buttonRole, const Color& textColor);
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;

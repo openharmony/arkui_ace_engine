@@ -29,9 +29,8 @@ enum class RouterPageType : int32_t {
     PRIMARY_PAGE = 0,
     SECONDARY_PAGE = 1,
     PLACEHOLDER_PAGE = 2,
+    RELATED_PAGE = 3
 };
-
-using LoadPlaceHolderPageCallback = std::function<RefPtr<FrameNode>()>;
 
 // ParallelPagePattern is the base class for page root render node.
 class ParallelPagePattern : public PagePattern {
@@ -58,41 +57,14 @@ public:
         return type_;
     }
 
-    bool IsPlaceHolderPageBuildCompleted() const
+    bool IsPageBuildCompleted() const
     {
-        return isPHPagedBuildCompleted_;
+        return isPageBuildCompleted_;
     }
 
-    void SetIsPlaceHolderPageBuildCompleted(bool completed)
+    void SetIsPageBuildCompleted(bool completed)
     {
-        isPHPagedBuildCompleted_ = completed;
-    }
-
-    void SetPrimaryPage(const WeakPtr<FrameNode>& primaryPage)
-    {
-        primaryPage_ = primaryPage;
-    }
-
-    RefPtr<FrameNode> GetPrimaryPage() const
-    {
-        return primaryPage_.Upgrade();
-    }
-
-    void SetPrePrimaryPage(const WeakPtr<FrameNode>& prePrimaryPage)
-    {
-        prePrimaryPage_ = prePrimaryPage;
-    }
-
-    RefPtr<FrameNode> GetPrePrimaryPage() const
-    {
-        return prePrimaryPage_.Upgrade();
-    }
-
-    RefPtr<FrameNode> GetOrCreatePlaceHolderPage();
-
-    void SetLoadPlaceHolderPageCallback(LoadPlaceHolderPageCallback&& callback)
-    {
-        loadPlaceHolderPageCallback_ = std::move(callback);
+        isPageBuildCompleted_ = completed;
     }
 
     bool GetIsShow() const
@@ -104,17 +76,23 @@ public:
 
     void RemoveOnTouchEvent();
 
+    void NotifyAboutToDisappear();
+    void SetNeedNotifyRelatedPageAboutToDisappear(bool need)
+    {
+        needNotifyRelatedPageAboutToDisappear_ = need;
+    }
+
 private:
     bool IsShowOrHideAllowed();
     void BeforeCreateLayoutWrapper() override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
 
     RouterPageType type_ = RouterPageType::SECONDARY_PAGE;
-    RefPtr<FrameNode> placeHolderPage_;
-    bool isPHPagedBuildCompleted_ = false;
-    WeakPtr<FrameNode> primaryPage_;
-    WeakPtr<FrameNode> prePrimaryPage_;
-    LoadPlaceHolderPageCallback loadPlaceHolderPageCallback_;
+    bool isPageBuildCompleted_ = false;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    bool needNotifyRelatedPageAboutToAppear_ = true;
+    bool needNotifyRelatedPageAboutToDisappear_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPagePattern);
 };

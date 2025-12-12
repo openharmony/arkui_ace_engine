@@ -168,6 +168,8 @@ public:
     void ResetTextAreaScrollBarColor() override;
     void SetTextDirection(TextDirection value) override;
     void ResetTextDirection() override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
 
     static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -397,6 +399,9 @@ public:
     static void SetTextDirection(FrameNode* frameNode, TextDirection value);
     static void ResetTextDirection(FrameNode* frameNode);
     static TextDirection GetTextDirection(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

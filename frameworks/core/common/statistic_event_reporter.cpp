@@ -45,6 +45,7 @@ void StatisticEventReporter::SendEvent(StatisticEventType eventType)
     if (iter == statisitcEventMap_.end()) {
         std::string eventName = ConvertToEventName(eventType);
         if (eventName == "") {
+            TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "invalid statistic event type");
             return;
         }
         statisitcEventMap_[eventType] = { eventName, 1 };

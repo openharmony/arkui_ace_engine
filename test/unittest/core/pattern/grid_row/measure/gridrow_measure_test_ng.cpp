@@ -329,14 +329,14 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfTest, TestSize.Level0)
      * @tc.expected: gridRowHeight equal to selfHeight 60.0f when API >= 11
      */
     EXPECT_EQ(gridRowHeight, 60.f) << gridRowHeight;
-    
+
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
     algorithm.MeasureSelf(Referenced::RawPtr(gridRow), 90.f, 60.f);
     /**
-     * @tc.expected: gridRowHeight equal to selfHeight 60.0f which is constrained by selfIdealSize
+     * @tc.expected: gridRowHeight is equal to the childHeight
      */
     gridRowHeight = gridRow->GetGeometryNode()->GetFrameSize().Height();
-    EXPECT_EQ(gridRowHeight, 60.f) << gridRowHeight;
+    EXPECT_EQ(gridRowHeight, 90.f) << gridRowHeight;
 
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
     algorithm.MeasureSelf(Referenced::RawPtr(gridRow), 90.f, 60.f);

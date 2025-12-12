@@ -94,6 +94,7 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<RichEditorTheme>();
+        SetupTheme<TextTheme>();
     }
 
     std::vector<MenuItemParam> GetMenuItemParams()

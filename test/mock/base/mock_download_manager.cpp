@@ -73,6 +73,8 @@ public:
     {
         return nullptr;
     }
+
+    void RemoveUrlCache(const std::string& /* url */) override {}
 };
 
 DownloadManager* DownloadManager::GetInstance()

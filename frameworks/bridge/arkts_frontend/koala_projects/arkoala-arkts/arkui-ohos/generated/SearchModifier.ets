@@ -28,7 +28,7 @@ import { ResourceColor, Dimension, Font, ResourceStr } from "./component/units"
 import { Color, CopyOptions, TextAlign } from "./component/enums"
 import { Resource } from "global.resource"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { ColorMetrics } from "arkui.Graphics"
@@ -141,6 +141,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _fallbackLineSpacing_0_0value?: boolean | undefined
     _dividerColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dividerColor_0_0value?: ColorMetrics | undefined
+    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _searchButton_0_0value?: string | undefined
     _searchButton_0_1value?: SearchButtonOptions | undefined
@@ -1018,6 +1020,24 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1700,6 +1720,19 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2265,6 +2298,17 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedDragPreviewStyle_0_0value = value
+        } else
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

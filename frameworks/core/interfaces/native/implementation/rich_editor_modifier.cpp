@@ -489,7 +489,7 @@ void SetDataDetectorConfigImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<TextDetectConfig>(value);
     if (!convValue) {
-        // Implement Reset value
+        RichEditorModelNG::SetTextDetectConfig(frameNode, TextDetectConfig());
         return;
     }
     RichEditorModelNG::SetTextDetectConfig(frameNode, *convValue);

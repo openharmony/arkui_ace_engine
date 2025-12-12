@@ -1000,6 +1000,14 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Color>(value->value.color);
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
                         const Opt_Callback_String_Void* error)
@@ -1140,6 +1148,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextInputAttributeModifier::SetIncludeFontPaddingImpl,
         TextInputAttributeModifier::SetFallbackLineSpacingImpl,
+        TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,

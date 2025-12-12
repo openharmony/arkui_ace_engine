@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <gmock/gmock.h>
 
 #define private public
 #define protected public
@@ -27,6 +28,8 @@
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "test/mock/core/render/mock_render_context.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -36,6 +39,11 @@ class AccessibilityFrameNodeUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+};
+
+class MockAccessibilityProperty : public AccessibilityProperty {
+public:
+    MOCK_METHOD(bool, GetAccessibilityInnerVisibleRect, (RectF&), (override));
 };
 
 void AccessibilityFrameNodeUtilsTest::SetUpTestCase()
@@ -200,5 +208,105 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, UpdateAccessibilityVisibleToRoot002, T
     // step 1 gettag == V2::PAGE_ETS_TAG
     AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(frameNode2);
     EXPECT_EQ(frameNode2->GetAccessibilityVisible(), false);
+}
+
+/**
+ * @tc.name: IsCoveredByBrother_001
+ * @tc.desc: Covered by brother
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, IsCoveredByBrother_001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto backupScreenReadEnabled = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    bool nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNode, nodeAccessibilityVisible);
+    EXPECT_TRUE(nodeAccessibilityVisible);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+    nodeAccessibilityVisible = false;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNode, nodeAccessibilityVisible);
+    EXPECT_FALSE(nodeAccessibilityVisible);
+
+    auto parentNode = FrameNode::CreateFrameNode("parent",
+    ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parentNode, nullptr);
+    auto frameNodeChild1 = FrameNode::CreateFrameNode("child1",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeChild1, nullptr);
+    parentNode->AddChild(frameNodeChild1);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+    nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild1, nodeAccessibilityVisible);
+    EXPECT_TRUE(nodeAccessibilityVisible);
+
+    auto frameNodeChild2 = FrameNode::CreateFrameNode("child2",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeChild2, nullptr);
+    parentNode->AddChild(frameNodeChild2);
+    auto frameNodeChild3 = FrameNode::CreateFrameNode("child3",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeChild3, nullptr);
+    parentNode->AddChild(frameNodeChild3);
+
+    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
+    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
+    auto mockRenderContext3 = AceType::MakeRefPtr<MockRenderContext>();
+    frameNodeChild1->renderContext_ = mockRenderContext1;
+    frameNodeChild2->renderContext_ = mockRenderContext2;
+    frameNodeChild3->renderContext_ = mockRenderContext3;
+    RectF rect1(100, 100, 100, 100);
+    RectF rect2(100, 200, 100, 100);
+    RectF rect3(100, 300, 100, 100);
+    mockRenderContext1->UpdatePaintRect(rect1);
+    mockRenderContext2->UpdatePaintRect(rect2);
+    mockRenderContext3->UpdatePaintRect(rect3);
+    mockRenderContext1->SetPaintRectWithTransform(rect1);
+    mockRenderContext2->SetPaintRectWithTransform(rect2);
+    mockRenderContext3->SetPaintRectWithTransform(rect3);
+    auto accProp = AceType::MakeRefPtr<MockAccessibilityProperty>();
+    parentNode->accessibilityProperty_ = accProp;
+    EXPECT_CALL(*accProp, GetAccessibilityInnerVisibleRect(_)).Times(4)
+        .WillOnce([](RectF& rect) -> bool {
+            rect = RectF(100, 201, 100, 98);
+            return true;
+        })
+        .WillOnce([](RectF& rect) -> bool {
+            rect = RectF(100, 201, 100, 98);
+            return true;
+        })
+        .WillOnce([](RectF& rect) -> bool {
+            rect = RectF(100, 201, 100, 98);
+            return true;
+        })
+        .WillOnce([](RectF& rect) -> bool {
+            rect = RectF(100, 250, 100, 0);
+            return true;
+        });
+
+    parentNode->isWindowBoundary_ = true;
+    nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild1, nodeAccessibilityVisible);
+    EXPECT_TRUE(nodeAccessibilityVisible);
+    
+    parentNode->isWindowBoundary_ = false;
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+    nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild1, nodeAccessibilityVisible);
+    EXPECT_FALSE(nodeAccessibilityVisible);
+
+    nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild3, nodeAccessibilityVisible);
+    EXPECT_FALSE(nodeAccessibilityVisible);
+
+    nodeAccessibilityVisible = true;
+    AccessibilityFrameNodeUtils::IsCoveredByBrother(frameNodeChild2, nodeAccessibilityVisible);
+    EXPECT_FALSE(nodeAccessibilityVisible);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(backupScreenReadEnabled);
 }
 } // namespace OHOS::Ace::NG

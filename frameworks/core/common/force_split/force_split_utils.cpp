@@ -40,6 +40,11 @@ const std::vector<std::string> HOME_NAME_KEYWORDS = {"main", "home", "index", "r
 const std::vector<std::string> EXCLUDE_NAME_KEYWORDS = {"guide", "load", "splash", "login", "privacy"};
 constexpr int32_t HOME_PAGE_CHILD_NODE_DEPTH_THRESHOLD = 30;
 constexpr int32_t HOME_PAGE_CHILD_NODE_COUNT_THRESHOLD = 100;
+constexpr char NAV_BAR_HOME_PAGE_NAME[] = "navBar";
+constexpr char HOME_PAGE_KEY[] = "homePage";
+constexpr char RELATED_PAGE_KEY[] = "relatedPage";
+constexpr char ENABLE_ARKUI_HOOK_KEY[] = "enableArkUIHook";
+constexpr char HOME_NAVIGATION_ID_KEY[] = "homeNavigationId";
 constexpr char ENABLE_HOOK_KEY[] = "enableHook";
 constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
 constexpr char NAVIGATION_OPTIONS_ID_KEY[] = "id";
@@ -48,16 +53,44 @@ constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholde
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 
-class PlaceholderPattern : public Pattern {
-    DECLARE_ACE_TYPE(PlaceholderPattern, Pattern);
+std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
+{
+    std::string str("[");
+    int32_t idx = 0;
+    for (const auto& page : fullScreenPages) {
+        if (idx != 0) {
+            str.append(", ");
+        }
+        str.append(page);
+        idx++;
+    }
+    str.append("]");
+    return str;
+}
+
+class PlaceholderPattern : public StackPattern {
+    DECLARE_ACE_TYPE(PlaceholderPattern, StackPattern);
 public:
     PlaceholderPattern() = default;
     ~PlaceholderPattern() override = default;
 
     void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
+    void RefreshBackgroundColor();
 };
 
 void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::OnAttachToMainTree()
+{
+    StackPattern::OnAttachToMainTree();
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::RefreshBackgroundColor()
 {
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(host);
@@ -79,15 +112,18 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<Pipelin
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    auto windowManager = context->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<StackPattern>(); });
+        []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
     CHECK_NULL_RETURN(stackNode, nullptr);
     auto stackLayoutProperty = stackNode->GetLayoutProperty();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+        .edges = SAFE_AREA_EDGE_ALL };
+    stackLayoutProperty->UpdateSafeAreaExpandOpts(opts);
 
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -95,7 +131,7 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<Pipelin
     CHECK_NULL_RETURN(imageNode, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
-    auto id = windowManager->GetAppIconId();
+    auto id = forceSplitMgr->GetAppIconId();
     auto pixelMap = themeConstants->GetPixelMap(id);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -159,6 +195,19 @@ RefPtr<NavDestinationGroupNode> ForceSplitUtils::CreateNavDestinationProxyNode()
 bool ForceSplitUtils::IsHomePageNavBar(const RefPtr<NavBarNode>& navBar)
 {
     CHECK_NULL_RETURN(navBar, false);
+    auto context = navBar->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto manager = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(manager, false);
+    const auto& expectedHomeName = manager->GetHomePageName();
+    if (!expectedHomeName.empty()) {
+        if (expectedHomeName == NAV_BAR_HOME_PAGE_NAME) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find navBar homePage with expectedName");
+            return true;
+        }
+        return false;
+    }
+
     int32_t count = 0;
     int32_t depth = 0;
     navBar->GetPageNodeCountAndDepth(&count, &depth);
@@ -181,11 +230,11 @@ bool ForceSplitUtils::IsHomePageNavDestination(const RefPtr<NavDestinationGroupN
 
     auto context = node->GetContext();
     CHECK_NULL_RETURN(context, false);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(navManager, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
     auto pattern = node->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    const auto& expectedHomeName = navManager->GetHomePageName();
+    const auto& expectedHomeName = forceSplitMgr->GetHomePageName();
     std::string name = pattern->GetName();
     if (!expectedHomeName.empty()) {
         if (expectedHomeName == name) {
@@ -224,18 +273,10 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
 {
     int32_t phId = ElementRegister::GetInstance()->MakeUniqueId();
     auto phNode = FrameNode::GetOrCreateFrameNode(
-        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
+        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<Pattern>(); });
     CHECK_NULL_RETURN(phNode, nullptr);
     auto context = phNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, nullptr);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(navManager, nullptr);
-    auto renderContext = phNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    Color bgColor;
-    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
-        renderContext->UpdateBackgroundColor(bgColor);
-    }
     auto property = phNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdateVisibility(VisibleType::INVISIBLE);
@@ -328,9 +369,9 @@ bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& ful
     return true;
 }
 
-bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
+bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse forceSplit config: %{public}s", configJsonStr.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
     auto configJson = JsonUtil::ParseJsonString(configJsonStr);
     if (!configJson) {
         return false;
@@ -351,6 +392,111 @@ bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, Fo
         }
     }
     return true;
+}
+
+bool ForceSplitUtils::ParseAppForceSplitConfig(
+    bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse app forceSplit config: %{public}s", configJsonStr.c_str());
+    if (configJsonStr.empty()) {
+        return true;
+    }
+    auto configJson = JsonUtil::ParseJsonString(configJsonStr);
+    if (!configJson) {
+        return false;
+    }
+    if (!configJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json object!",
+            isRouter ? "routerSplitOptions" : "navigationSplitOptions");
+        return false;
+    }
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_ARKUI_HOOK_KEY, false);
+    if (configJson->Contains(HOME_PAGE_KEY)) {
+        auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
+        if (!homePageJson->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not string!", HOME_PAGE_KEY);
+            return false;
+        }
+        auto homePageStr = homePageJson->GetString();
+        if (!homePageStr.empty()) {
+            config.homePage = homePageStr;
+        }
+    }
+    if (configJson->Contains(RELATED_PAGE_KEY)) {
+        auto relatedPageJson = configJson->GetValue(RELATED_PAGE_KEY);
+        if (!relatedPageJson->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not string!", RELATED_PAGE_KEY);
+            return false;
+        }
+        auto relatedPageStr = relatedPageJson->GetString();
+        if (!relatedPageStr.empty()) {
+            config.relatedPage = relatedPageStr;
+        }
+    }
+    if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
+        if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
+            return false;
+        }
+    }
+    if (isRouter) {
+        return true;
+    }
+    if (configJson->Contains(HOME_NAVIGATION_ID_KEY)) {
+        auto idJson = configJson->GetValue(HOME_NAVIGATION_ID_KEY);
+        if (!idJson->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not string!", HOME_NAVIGATION_ID_KEY);
+            return false;
+        }
+        auto idStr = idJson->GetString();
+        if (!idStr.empty()) {
+            config.navigationId = idStr;
+        }
+    }
+    if (configJson->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
+        auto disablePlaceholderJson = configJson->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
+        if (!disablePlaceholderJson->IsBool()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not bool!",
+                NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
+            return false;
+        }
+        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
+    }
+    if (configJson->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
+        auto disableDividerJson = configJson->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
+        if (!disableDividerJson->IsBool()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not bool!",
+                NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
+            return false;
+        }
+        config.navigationDisableDivider = disableDividerJson->GetBool();
+    }
+    return true;
+}
+
+void ForceSplitUtils::LogSystemForceSplitConfig(
+    bool isRouter, const std::string& homePage, const ForceSplitConfig& config)
+{
+    TAG_LOGI(
+        AceLogTag::ACE_NAVIGATION,
+        "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
+        "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        isRouter, homePage.c_str(), FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
+        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
+        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+}
+
+void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
+        "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
+        "disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
+        FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
+        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        config.navigationDisablePlaceholder, config.navigationDisableDivider);
 }
 } // namespace OHOS::Ace::NG
 

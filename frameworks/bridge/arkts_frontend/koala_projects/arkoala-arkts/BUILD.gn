@@ -119,8 +119,7 @@ action("arkui.abc") {
   ]
 
   deps = [
-    "$koala_root/incremental:incremental",
-    "$koala_root/ui2abc:ui2abc",
+    "$koala_root/incremental:incremental"
   ]
 }
 
@@ -128,8 +127,7 @@ group("install_all") {
   deps = [
     ":arkoala_install",
     "$koala_root/incremental:incremental_install",
-    "$koala_root/interop:interop_install",
-    "$koala_root/ui2abc:ui2abc_install",
+    "$koala_root/interop:interop_install"
   ]
 }
 ohos_prebuilt_etc("arkoala_build") {

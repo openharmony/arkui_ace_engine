@@ -26,11 +26,14 @@ struct NavIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'Select', path: 'SelectIndex' },
+    { name: 'SelectStatic', path: 'SelectIndexStatic' },
     { name: 'Button', path: 'ButtonIndex' },
     { name: 'Toggle', path: 'ToggleIndex' },
     { name: 'Checkbox', path: 'CheckboxIndex' },
     { name: 'Rating', path: 'RatingIndex' },
+    { name: 'RatingStatic', path: 'RatingIndexStatic' },
     { name: 'Slider', path: 'SliderIndex' },
+    { name: 'SliderStatic', path: 'SliderIndexStatic' },
     { name: 'Radio', path: 'RadioIndex' },
     { name: 'Form', path:'FormIndex'}
   ]

@@ -249,6 +249,8 @@ public:
     {
         onResultCallback_ = onResultCallback;
     }
+
+    void InvokeOnStateChanged();
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -260,7 +262,6 @@ protected:
     std::function<void()> onStateChangedCallback_;
     std::function<void(const std::string)> onPopCallback_;
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
-    void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);
     const PathInfo* GetPathInfo(size_t index) const;
     std::function<void(Opt_Object)> onResultCallback_;
@@ -359,11 +360,18 @@ public:
     void RegisterOnResultCallback();
 
     bool IsTopFromSingletonMoved() override;
+
+    void SetNavDestinationBuilder(std::function<RefPtr<NG::UINode>(int32_t)>&& navDestBuilder)
+    {
+        navDestBuilder_ = navDestBuilder;
+    }
+    std::string GetNameByIndex(int32_t index) const;
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
     std::function<RefPtr<NG::UINode>(int32_t)> createNavDestinationCallback_;
+    std::function<RefPtr<NG::UINode>(int32_t)> navDestBuilder_;
 
 private:
     void SetIsReplace(int32_t value)
@@ -371,7 +379,6 @@ private:
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
     int32_t GetSize() const override;
-    std::string GetNameByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;

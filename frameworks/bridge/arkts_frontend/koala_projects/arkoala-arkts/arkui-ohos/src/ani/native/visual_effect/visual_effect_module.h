@@ -31,6 +31,9 @@ ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj
 ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long ExtractorsToUiMaterialMaterialPtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long UiMaterialConstructMaterial(ani_env* env, ani_object aniClass, ani_object obj);
+void UiMaterialDestroyMaterial(ani_env* env, ani_object aniClass, ani_long ptr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_VISUAL_EFFECT_VISUAL_EFFECT_MODULE_H

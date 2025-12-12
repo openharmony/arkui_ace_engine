@@ -137,7 +137,7 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_, listContentSize_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(
-        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, noDividerItems_);
 }
 
 void ListItemGroupPattern::SyncItemsToCachedItemPosition()

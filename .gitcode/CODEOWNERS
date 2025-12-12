@@ -182,7 +182,7 @@ adapter/ohos/osal/resource_convertor.h @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.cpp @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.h @arkui_framework_resource
 adapter/ohos/osal/ressched_report.cpp @arkui_framework_resource
-adapter/ohos/osal/statistic_event_adapter.cpp @arkui_framework_resource
+adapter/ohos/osal/statistic_event_adapter.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.h @arkui_framework_xnode
 adapter/ohos/osal/stylus_detector_default.cpp @ArkUI_Event
@@ -2466,6 +2466,7 @@ frameworks/core/components_ng/layout/ @arkuilayout1
 frameworks/core/components_ng/layout/section/ @arkuiscroll
 frameworks/core/components_ng/manager/avoid_info/ @arkui_navigation
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
+frameworks/core/components_ng/manager/content_change_manager/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/display_sync/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/drag_drop/ @ArkUI_Event
 frameworks/core/components_ng/manager/focus/ @ArkUI_Event
@@ -3726,8 +3727,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/s
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
-[Koala mirror]
-frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
+[UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
 
 [window scene]

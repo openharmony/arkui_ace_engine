@@ -1089,7 +1089,7 @@ void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj
             isWidthNotAuto = false;
         }
         if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
-            (GreatNotEqual(imageSpanWidth.Value(), 0.0) || (imageSpanWidth.Value() == 0.0 && isWidthNotAuto))) {
+            GreatOrEqual(imageSpanWidth.Value(), 0.0) && isWidthNotAuto) {
             imageSize.width = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetProperty("height");
@@ -1099,7 +1099,7 @@ void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj
             isHeightNotAuto = false;
         }
         if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
-            (GreatNotEqual(imageSpanHeight.Value(), 0.0) || (imageSpanHeight.Value() == 0.0 && isHeightNotAuto))) {
+            GreatOrEqual(imageSpanHeight.Value(), 0.0) && isHeightNotAuto) {
             imageSize.height = imageSpanHeight;
         }
         imageStyle.size = imageSize;

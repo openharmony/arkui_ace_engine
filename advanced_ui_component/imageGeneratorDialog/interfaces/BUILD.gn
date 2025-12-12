@@ -11,28 +11,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import("//foundation/arkui/ace_engine/ace_config.gni")
-# import("//build/templates/abc/ohos_abc.gni")
-
-# ohos_abc("imageGeneratorDialog") {
-#   sources = [ "imageGeneratorDialog.js" ]
-#   output_name = "imageGeneratorDialog"
-#   install_images = [ "system" ]
-#   module_install_dir = "etc/abc/arkui"
-#   subsystem_name = ace_engine_subsystem
-#   part_name = ace_engine_part
-# }
-
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
+action("run_rollup") {
+  script = "run_rollup.py"
+
+  inputs = [
+    rebase_path("image_generator_dialog_project/general/components/Main.js"),
+  ]
+
+  outputs = [
+    target_out_dir + "/summary.js"
+  ]
+
+  args = [
+    rebase_path("//prebuilts/build-tools/common/js-framework/node_modules/rollup/dist/bin"),
+    rebase_path("image_generator_dialog_project/general/components/Main.js"),
+    rebase_path(target_out_dir + "/summary.js")
+  ]
+}
+
 es2abc_gen_abc("gen_imageGeneratorDialog_abc") {
-  src_js = rebase_path("imageGeneratorDialog.js")
+  src_js = rebase_path(target_out_dir + "/summary.js")
   dst_file = rebase_path(target_out_dir + "/imageGeneratorDialog.abc")
-  in_puts = [ "imageGeneratorDialog.js" ]
+  in_puts = []
   out_puts = [ target_out_dir + "/imageGeneratorDialog.abc" ]
+  extra_dependencies = [ ":run_rollup" ]
   extra_args = [ "--module" ]
 }
 

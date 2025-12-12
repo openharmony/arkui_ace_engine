@@ -857,6 +857,10 @@ public:
     {
         return nullptr;
     }
+    virtual void OnHoverWithHightLight(bool isHover) {}
+    virtual void OnPaintFocusState(bool isFocus) {}
+    virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
+    virtual void OnContentChangeUnregister() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

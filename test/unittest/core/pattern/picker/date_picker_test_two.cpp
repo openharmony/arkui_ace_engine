@@ -1279,4 +1279,92 @@ inline void VerifySolarDate(const PickerDate& date, int expectedYear, int expect
     solarResult = datePickerPattern->LunarToSolar(result);
     VerifySolarDate(solarResult, 2071, 9, 24);
 }
+
+/**
+ * @tc.name: DatePickerGetInnerFocusPaintRect001
+ * @tc.desc: Test datePicker GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerGetInnerFocusPaintRect001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    RoundRect rect;
+    pickerPattern->useButtonFocusArea_ = true;
+    pickerPattern->GetInnerFocusPaintRect(rect);
+    EXPECT_EQ(rect.GetCornerRadius(RoundRect::TOP_LEFT_POS).x, 3.0f);
+}
+
+/**
+ * @tc.name: DatePickerCreateLunarSwitchTextNode001
+ * @tc.desc: Test DatePicker CreateLunarSwitchTextNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCreateLunarSwitchTextNode001, TestSize.Level1)
+{
+    DatePickerDialogView::useButtonFocusArea_ = true;
+    auto textNode = DatePickerDialogView::CreateLunarSwitchTextNode();
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textLayoutProperty->GetMaxLines(), 1);
+}
+
+/**
+ * @tc.name: DatePickerUpdateConfirmButtonTextLayoutProperty001
+ * @tc.desc: Test DatePicker UpdateConfirmButtonTextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateConfirmButtonTextLayoutProperty001, TestSize.Level1)
+{
+    DatePickerDialogView::useButtonFocusArea_ = true;
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textConfirmNode, nullptr);
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, theme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
+}
+
+/**
+ * @tc.name: DatePickerUpdateCancelButtonTextLayoutProperty001
+ * @tc.desc: Test DatePicker UpdateCancelButtonTextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateCancelButtonTextLayoutProperty001, TestSize.Level1)
+{
+    DatePickerDialogView::useButtonFocusArea_ = true;
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textCancelLayoutProperty, nullptr);
+    DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, theme);
+    EXPECT_EQ(textCancelLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
+}
+
+/**
+ * @tc.name: DatePickerUpdateLinearMargin001
+ * @tc.desc: Test DatePicker UpdateLinearMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateLinearMargin001, TestSize.Level1)
+{
+    DatePickerDialogView::useButtonFocusArea_ = true;
+    auto contentRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(contentRow, nullptr);
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    DatePickerDialogView::UpdateLinearMargin(layoutProps);
+    ASSERT_NE(layoutProps->GetMarginProperty(), nullptr);
+    DatePickerDialogView::useButtonFocusArea_ = false;
+}
 } // namespace OHOS::Ace::NG

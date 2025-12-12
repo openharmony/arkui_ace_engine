@@ -2080,7 +2080,8 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
         return true;
     } else {
         auto canExpand =
-            GetSubBuilder() != nullptr && menuPattern && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
+            (GetSubBuilder() != nullptr || GetSubSelectMenuBuilder() != nullptr) && menuPattern &&
+            !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu() &&
             (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
         if (canExpand) {
             return true;
@@ -3256,17 +3257,15 @@ void MenuItemPattern::UpdateDividerPressStatus(bool isPress)
 
 void MenuItemPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
 {
-    if (optionApply_ && !optionApply) {
+    if (optionApply) {
         ResetSelectTextProps();
         ApplyOptionThemeStyles();
-        return;
+        ApplyTextModifier(optionApply);
+    } else if (optionApply_) {
+        ResetSelectTextProps();
+        ApplyOptionThemeStyles();
     }
     optionApply_ = optionApply;
-    if (optionApply_) {
-        ResetSelectTextProps();
-        ApplyOptionThemeStyles();
-        ApplyTextModifier(optionApply_);
-    }
 }
 
 RefPtr<FrameNode> MenuItemPattern::CreateCheckMarkNode(const RefPtr<FrameNode>& parent, uint32_t index)
@@ -3341,17 +3340,15 @@ void MenuItemPattern::SetCheckMarkVisibleType(VisibleType type)
 void MenuItemPattern::SetSelectedOptionTextModifier(
     const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
 {
-    if (optionSelectedApply_ && !optionSelectedApply) {
+    if (optionSelectedApply) {
         ResetSelectTextProps();
         ApplySelectedThemeStyles();
-        return;
+        ApplyTextModifier(optionSelectedApply);
+    } else if (optionSelectedApply_) {
+        ResetSelectTextProps();
+        ApplySelectedThemeStyles();
     }
     optionSelectedApply_ = optionSelectedApply;
-    if (optionSelectedApply_) {
-        ResetSelectTextProps();
-        ApplySelectedThemeStyles();
-        ApplyTextModifier(optionSelectedApply_);
-    }
 }
 
 void MenuItemPattern::ApplyTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
@@ -3472,6 +3469,10 @@ RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()
 
 void MenuItemPattern::OnColorConfigurationUpdate()
 {
+    if (isSelectOption_) {
+        UpdateOptionStyle();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu();
@@ -3501,5 +3502,25 @@ void MenuItemPattern::OnColorConfigurationUpdate()
         content_->MarkModifyDone();
         content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+void MenuItemPattern::UpdateOptionStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ResetSelectTextProps();
+    if (isSelected_) {
+        ApplySelectedThemeStyles();
+        if (optionSelectedApply_) {
+            ApplyTextModifier(optionSelectedApply_);
+        }
+    } else {
+        ApplyOptionThemeStyles();
+        if (optionApply_) {
+            ApplyTextModifier(optionApply_);
+        }
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

@@ -1486,20 +1486,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_037, TestSize.Level1)
     AAFwk::Want want;
 
     pattern->ProcDeleteImageNode(want);
-    int32_t num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    int32_t count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 
     want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->ProcDeleteImageNode(want);
-    num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 
     want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, true);
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->ProcDeleteImageNode(want);
-    num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 }
 
 /**
@@ -2076,8 +2076,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-    int32_t num = formNode->GetTotalChildCount();
-    EXPECT_EQ(num, 0);
+    int32_t count = formNode->GetTotalChildCount();
+    EXPECT_EQ(count, 0);
 }
 
 /**
@@ -2214,5 +2214,37 @@ HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
     EXPECT_NE(pattern, nullptr);
     pattern->OnLanguageConfigurationUpdate();
     EXPECT_FALSE(pattern->isTibetanLanguage_);
+}
+
+/**
+ * @tc.name: FormPatternTest_SetColorMode
+ * @tc.desc: SetColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_SetColorMode, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->formColorMode_, -1);
+ 
+    pattern->SetColorMode(0);
+    EXPECT_EQ(pattern->formColorMode_, 0);
+}
+
+/**
+ * @tc.name: FormPatternTest_064
+ * @tc.desc: GetRSUIContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_064, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->GetRSUIContext();
+    EXPECT_FALSE(pattern->rsUIContext_ != nullptr);
 }
 } // namespace OHOS::Ace::NG

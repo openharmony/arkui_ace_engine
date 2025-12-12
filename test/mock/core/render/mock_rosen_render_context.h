@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_RENDER_CONTEXT_H
 
+#include "ui/properties/ui_material.h"
+
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {

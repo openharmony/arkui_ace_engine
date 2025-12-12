@@ -48,7 +48,9 @@ void UiMaterialNapi::WrapMaterialObject(napi_env env, napi_value jsThis, int32_t
     if (status != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "wrap MaterialObject failed");
         delete uiMaterial;
+        return;
     }
+    uiMaterial->IncRefCount();
 }
 
 napi_valuetype UiMaterialNapi::GetValueType(napi_env env, napi_value value)
@@ -109,7 +111,9 @@ napi_value UiMaterialNapi::Constructor(napi_env env, napi_callback_info info)
 void UiMaterialNapi::Destructor(napi_env env, void* nativeObject, void* finalize)
 {
     UiMaterial *uiMaterial = reinterpret_cast<UiMaterial*>(nativeObject);
-    delete uiMaterial;
+    if (uiMaterial) {
+        uiMaterial->DecRefCount();
+    }
 }
 
 napi_value UiMaterialNapi::JsEnumIntInit(napi_env env, napi_value exports)

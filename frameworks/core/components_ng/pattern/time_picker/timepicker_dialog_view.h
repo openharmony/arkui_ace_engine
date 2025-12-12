@@ -115,6 +115,10 @@ private:
     static thread_local Dimension selectedTextStyleFont_;
     static thread_local Dimension normalTextStyleFont_;
     static thread_local Dimension disappearTextStyleFont_;
+    static thread_local Dimension pickerDialogMargin_;
+    static thread_local Dimension pickerTitleHeight_;
+    static thread_local Color buttonColor_;
+    static thread_local bool useButtonFocusArea_;
 };
 } // namespace OHOS::Ace::NG
 

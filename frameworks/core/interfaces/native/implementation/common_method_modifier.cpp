@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -449,11 +450,15 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
     if (shadowOpt.has_value()) {
         popupParam->SetShadow(shadowOpt.value());
+        if (src.shadow.value.selector == 1) {
+            popupParam->SetIsShadowStyle(true);
+        }
     } else {
         auto defaultPopupShadowStyle = g_getPopupDefaultShadow();
         Shadow shadow;
         g_getShadowFromTheme(defaultPopupShadowStyle, shadow);
         popupParam->SetShadow(shadow);
+        popupParam->SetIsShadowStyle(true);
     }
     auto popupBackgroundBlurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
     if (popupBackgroundBlurStyleOpt.has_value()) {
@@ -2830,6 +2835,8 @@ void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderR
                 radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
         }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, Dimension(0));
     }
     auto renderStrategy = type->value;
     ViewAbstractModelStatic::SetRenderStrategy(
@@ -3164,6 +3171,7 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -5114,6 +5122,13 @@ void SetAccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
+void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<UiMaterial*>(value);
+    ViewAbstract::SetSystemMaterial(frameNode, ptrOpt.value_or(nullptr));
+}
 void SetCustomPropertyImpl(Ark_NativePointer node,
                            const Ark_String* name,
                            const Opt_Object* value)
@@ -5138,6 +5153,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaType |= vec[i].value_or(0);
         }
         opts.type = safeAreaType;
+    } else {
+        opts.type = SAFE_AREA_TYPE_ALL;
     }
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (convEdges.has_value()) {
@@ -5146,6 +5163,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaEdge |= vec[i].value_or(0);
         }
         opts.edges = safeAreaEdge;
+    } else {
+        opts.edges = NG::SAFE_AREA_EDGE_ALL;
     }
     ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
@@ -5710,6 +5729,20 @@ void SetBindPopupImpl(Ark_NativePointer node,
             ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         });
 }
+void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto child = uiNode->GetFirstChild();
+    CHECK_NULL_VOID(child);
+    auto menuNode = child->GetFirstChild();
+    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
+        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<InnerMenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->OnModifyDone();
+    }
+}
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
     const bool setShow,
@@ -5745,6 +5778,7 @@ void BindMenuBase(Ark_NativePointer node,
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
                 auto builder = [uiNode]() {
+                    CallMenuOnModifyDone(uiNode);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
@@ -5806,6 +5840,7 @@ void BindContextMenuBase(Ark_NativePointer node,
                 [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
                     auto builder = [frameNode, uiNode]() {
                         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        CallMenuOnModifyDone(uiNode);
                         ViewStackProcessor::GetInstance()->Push(uiNode);
                     };
                     ViewAbstractModelStatic::BindContextMenuStatic(
@@ -6447,6 +6482,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+        CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

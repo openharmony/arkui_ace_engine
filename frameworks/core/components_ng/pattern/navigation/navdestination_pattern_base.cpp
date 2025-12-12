@@ -453,9 +453,9 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navManager);
-    if (touchListener_ || !navManager->IsForceSplitSupported()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (touchListener_ || !forceSplitMgr->IsForceSplitSupported(false)) {
         return;
     }
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -489,9 +489,9 @@ void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navManager);
-    if (!touchListener_ || !navManager->IsForceSplitSupported()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!touchListener_ || !forceSplitMgr->IsForceSplitSupported(false)) {
         return;
     }
     auto gesture = frameNode->GetOrCreateGestureEventHub();

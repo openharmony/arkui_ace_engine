@@ -24,22 +24,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr Dimension MAX_WINDOW_WIDTH = 600.0_vp;
 constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
-
-const char* DeviceOrientationToString(DeviceOrientation ori)
-{
-    switch (ori) {
-        case DeviceOrientation::PORTRAIT:
-            return "PORTRAIT";
-        case DeviceOrientation::LANDSCAPE:
-            return "LANDSCAPE";
-        case DeviceOrientation::ORIENTATION_UNDEFINED:
-            return "ORIENTATION_UNDEFINED";
-        default:
-            return "UNKNOWN";
-    }
-}
 
 void LogPrimaryChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
 {
@@ -115,48 +100,51 @@ void ParallelStagePattern::OnAttachToMainTree()
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto id = hostNode->GetId();
-    pipeline->AddWindowSizeChangeCallback(id);
     pipeline->AddWindowStateChangedCallback(id);
-    CalculateMode(pipeline->GetRootWidth());
+    pipeline->AddWindowSizeChangeCallback(id);
+    auto mgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    auto listener = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CalculateMode();
+    };
+    mgr->AddForceSplitStateListener(hostNode->GetId(), std::move(listener));
+    CalculateMode();
 }
 
-bool ParallelStagePattern::CalculateMode(double width)
+bool ParallelStagePattern::CalculateMode()
 {
     // calculate mode
     PageMode splitMode = PageMode::STACK;
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     auto pipelineContext = hostNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipelineContext->GetForceSplitManager());
+    CHECK_NULL_RETURN(forceSplitMgr, false);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
-    if (stageManager->GetForceSplitEnable() && !stageManager->IsTopFullScreenPage()) {
-        auto thresholdWidth = MAX_WINDOW_WIDTH.ConvertToPx();
-        auto dipScale = pipelineContext->GetDipScale();
-        bool ignoreOrientation = stageManager->GetIgnoreOrientation();
-        auto orientation = SystemProperties::GetDeviceOrientation();
-        bool isInSplitScreenMode = false;
+    if (forceSplitMgr->IsForceSplitEnable(true) && !stageManager->IsTopFullScreenPage()) {
+        auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+        CHECK_NULL_RETURN(container, false);
+        bool isMainWindow = container->IsMainWindow();
         auto windowManager = pipelineContext->GetWindowManager();
         CHECK_NULL_RETURN(windowManager, false);
         auto windowMode = windowManager->GetWindowMode();
-        if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isInSplitScreenMode = true;
-        }
-        splitMode = ((ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
-            thresholdWidth < width && !isInSplitScreenMode) ? PageMode::SPLIT : PageMode::STACK;
+        bool isInSplitScreenMode =
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+        splitMode = (isMainWindow && !isInSplitScreenMode) ? PageMode::SPLIT : PageMode::STACK;
         TAG_LOGI(AceLogTag::ACE_ROUTER,
-            "calc splitMode, ignoreOrientation: %{public}d, orientation: %{public}s, dipScale: %{public}f, "
-            "thresholdWidth: %{public}f, curWidth: %{public}f, windowMode: %{public}d, isInSplitScreenMode: "
-            "%{public}d, resultMode: %{public}d", ignoreOrientation, DeviceOrientationToString(orientation), dipScale,
-            thresholdWidth, width, windowMode, static_cast<int32_t>(isInSplitScreenMode),
-            static_cast<int32_t>(splitMode));
+            "calc splitMode, isMainWindow: %{public}d, windowMode: %{public}d, isInSplitScreenMode: %{public}d, "
+            "resultMode: %{public}d", isMainWindow, windowMode, isInSplitScreenMode, static_cast<int32_t>(splitMode));
     }
     if (mode_ == splitMode) {
         return false;
     }
     mode_ = splitMode;
     TAG_LOGI(AceLogTag::ACE_ROUTER, "update router mode: %{public}d", mode_);
-    if (stageManager->IsForceSplitSupported()) {
+    if (forceSplitMgr->IsForceSplitSupported(true)) {
         pipelineContext->SetIsCurrentInForceSplitMode(mode_ == PageMode::SPLIT);
     }
     if (mode_ == PageMode::SPLIT) {
@@ -193,27 +181,42 @@ bool ParallelStagePattern::CalculateMode(double width)
 
 void ParallelStagePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    CalculateMode(width);
+    CalculateMode();
 }
 
 void ParallelStagePattern::OnDirectionConfigurationUpdate()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    CalculateMode(pipeline->GetRootWidth());
+    CalculateMode();
 }
 
 void ParallelStagePattern::OnDetachFromMainTree()
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    do {
+        CHECK_NULL_BREAK(relatedPage_);
+        auto relatedPattern = relatedPage_->GetPattern<ParallelPagePattern>();
+        CHECK_NULL_BREAK(relatedPattern);
+        if (hostNode->GetChildIndex(relatedPage_) == -1) {
+            // relatedPage has already detach from main tree.
+            relatedPattern->NotifyAboutToDisappear();
+            relatedPage_ = nullptr;
+        } else {
+            // relatedPage still exist on main tree, it will detach from main tree late.
+            relatedPattern->SetNeedNotifyRelatedPageAboutToDisappear(true);
+        }
+    } while (false);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto id = hostNode->GetId();
-    pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
+    auto mgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    if (!mgr->IsForceSplitSupported(true)) {
+        return;
+    }
+    pipeline->RemoveWindowSizeChangeCallback(id);
+    mgr->RemoveForceSplitStateListener(id);
 }
 
 void ParallelStagePattern::CreateDividerNodeIfNeeded()
@@ -252,14 +255,5 @@ void ParallelStagePattern::OnWindowHide()
     if (windowStateChangeCallback_) {
         windowStateChangeCallback_(false);
     }
-}
-
-void ParallelStagePattern::OnForceSplitConfigUpdate()
-{
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    CalculateMode(pipeline->GetRootWidth());
 }
 } // namespace OHOS::Ace::NG

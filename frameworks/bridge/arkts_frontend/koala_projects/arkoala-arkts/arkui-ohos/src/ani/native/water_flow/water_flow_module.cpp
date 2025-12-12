@@ -302,7 +302,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
             if (env->Array_Get(static_cast<ani_array>(sectionOptionsArray), j, &section) != ANI_OK) {
                 continue;
             }
-            ani_boolean isSectionOptions = ANI_FALSE;
+            ani_boolean isSectionOptions;
             env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
             if (!isSectionOptions) {
                 continue;
@@ -389,7 +389,7 @@ void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, 
         return;
     }
 
-    ani_size sectionsLength = 0;
+    ani_size sectionsLength;
     if (env->Array_GetLength(static_cast<ani_array>(sections), &sectionsLength) != ANI_OK) {
         return;
     }
@@ -406,7 +406,7 @@ void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, 
         if (env->Array_Get(static_cast<ani_array>(sections), j, &section) != ANI_OK) {
             continue;
         }
-        ani_boolean isSectionOptions = ANI_FALSE;
+        ani_boolean isSectionOptions;
         env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
         if (!isSectionOptions) {
             continue;

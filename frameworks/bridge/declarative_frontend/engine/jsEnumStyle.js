@@ -2084,6 +2084,10 @@ let GestureControl;
     GestureType[GestureType.ROTATION_GESTURE = 5] = 'ROTATION_GESTURE';
     GestureType[GestureType.DRAG = 6] = 'DRAG';
     GestureType[GestureType.CLICK = 7] = 'CLICK';
+    GestureType[GestureType.BOX_SELECT_GESTURE = 8] = 'BOX_SELECT_GESTURE';
+    GestureType[GestureType.WEB_SCROLL_GESTURE = 9] = 'WEB_SCROLL_GESTURE';
+    GestureType[GestureType.TEXT_FIELD_SELECT_GESTURE = 10] = 'TEXT_FIELD_SELECT_GESTURE';
+    GestureType[GestureType.CONTEXT_MENU_HOVER_GESTURE = 11] = 'CONTEXT_MENU_HOVER_GESTURE';
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
@@ -2775,12 +2779,52 @@ class NavPathStack {
     if (!this.checkPathValid(info)) {
       return;
     }
-    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
-    let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
+    // parseNavigationOptions
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof optionParam === 'boolean') {
+      animated = optionParam;
+    } else if (optionParam !== undefined && optionParam !== null) {
+      if (typeof optionParam.animated === 'boolean') {
+        animated = optionParam.animated;
+      }
+      if (optionParam.launchMode !== undefined && optionParam.launchMode !== null) {
+        launchMode = optionParam.launchMode;
+      }
+    }
+    // pushWithLaunchModeAndAnimated
+    let ret = false;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      let index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].needUpdate = true;
+        this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
+        if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+          this.moveIndexToTop(index, animated);
+        } else {
+          this.innerPopToIndex(index, undefined, animated, false);
+        }
+        ret = true;
+      }
+    }
     if (ret) {
       return;
     }
-    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    // find in pop array
+    info.index = -1;
+    info.navDestinationId = undefined;
+    for (let i = this.popArray.length - 1; i >= 0; i--) {
+      if (info.name === this.popArray[i].name) {
+        let infoFind = this.popArray.splice(i, 1);
+        info.index = infoFind[0].index;
+        info.navDestinationId = infoFind[0].navDestinationId;
+        break;
+      }
+    }
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -3923,6 +3967,12 @@ let AvoidanceMode;
   AvoidanceMode[AvoidanceMode.COVER_TARGET = 0] = 'COVER_TARGET';
   AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
 })(AvoidanceMode || (AvoidanceMode = {}));
+
+let MenuKeyboardAvoidMode;
+(function (MenuKeyboardAvoidMode) {
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
+})(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
 
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {

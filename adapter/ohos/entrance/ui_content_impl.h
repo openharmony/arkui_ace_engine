@@ -381,9 +381,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) override;
-    void SetForceSplitConfig(const std::string& configJsonStr) override;
+    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                             const std::optional<AppForceSplitConfig>& appConfig) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -472,6 +472,8 @@ public:
 
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
+
+    void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
 
 protected:
     void RunIntentPageIfNeeded();

@@ -37,34 +37,6 @@ void PanRecognizerTestNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: PanRecognizerTest001
- * @tc.desc: Test PanRecognizer function: OnAccepted OnRejected
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-
-    /**
-     * @tc.steps: step2. call OnAccepted function and compare result.
-     * @tc.expected: step2. result equals.
-     */
-    panRecognizer->OnAccepted();
-    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
-
-    /**
-     * @tc.steps: step3. call OnRejected function and compare result.
-     * @tc.expected: step3. result equals.
-     */
-    panRecognizer->OnRejected();
-    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
-}
-
-/**
  * @tc.name: PanRecognizerPanRecognizerTest001
  * @tc.desc: Test PanRecognizer function PanRecognizer
  * @tc.type: FUNC
@@ -160,6 +132,34 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerPanRecognizerTest002, TestSize.Level1
     panGestureOption->SetDirection(panDirection);
     RefPtr<PanRecognizer> panRecognizer8 = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
     EXPECT_NE(panRecognizer8->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: PanRecognizerTest001
+ * @tc.desc: Test PanRecognizer function: OnAccepted OnRejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    /**
+     * @tc.steps: step2. call OnAccepted function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    panRecognizer->OnAccepted();
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    /**
+     * @tc.steps: step3. call OnRejected function and compare result.
+     * @tc.expected: step3. result equals.
+     */
+    panRecognizer->OnRejected();
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**

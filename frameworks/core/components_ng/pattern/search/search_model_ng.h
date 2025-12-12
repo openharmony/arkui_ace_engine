@@ -126,6 +126,8 @@ public:
     void SetUserMargin() override;
     void SetTextDirection(TextDirection value) override;
     void ResetTextDirection() override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -233,6 +235,9 @@ public:
     static void SetTextDirection(FrameNode* frameNode, TextDirection value);
     static void ResetTextDirection(FrameNode* frameNode);
     static TextDirection GetTextDirection(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

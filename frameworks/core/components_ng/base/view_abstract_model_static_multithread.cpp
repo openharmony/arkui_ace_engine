@@ -66,7 +66,7 @@ void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& pa
 }
 
 void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
-    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
+    std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
 {
     CHECK_NULL_VOID(targetNode);
     targetNode->PostAfterAttachMainTreeTask(

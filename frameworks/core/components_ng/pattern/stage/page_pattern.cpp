@@ -905,7 +905,11 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
-    if (!CheckEnableCustomNodeDel()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->IsCustomNodeDeleteInTransition()) {
         return;
     }
 

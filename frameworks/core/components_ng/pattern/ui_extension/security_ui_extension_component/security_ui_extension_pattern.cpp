@@ -212,6 +212,15 @@ void SecurityUIExtensionPattern::OnAttachContext(PipelineContext *context)
         needReNotifyForeground_ = false;
         NotifyForeground();
     }
+
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        auto wantWrap = GetWantWrap();
+        CHECK_NULL_VOID(wantWrap);
+        PLATFORM_LOGI("OnAttachContext updateWant, newInstanceId");
+        Initialize();
+        UpdateWant(wantWrap);
+        SetWantWrap(nullptr);
+    }
 }
 
 void SecurityUIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
@@ -902,6 +911,21 @@ const char* SecurityUIExtensionPattern::ToString(AbilityState state)
         default:
             return "NONE";
     }
+}
+
+void SecurityUIExtensionPattern::Initialize()
+{
+    if (hasInitialized_) {
+        return;
+    }
+    SessionCreateParam sessionCreateParam;
+    sessionCreateParam.hostPattern = WeakClaim(this);
+    sessionCreateParam.instanceId = instanceId_;
+    sessionCreateParam.isTransferringCaller = isTransferringCaller_;
+    sessionWrapper_ =
+        SessionWrapperFactory::CreateSessionWrapper(SessionType::SECURITY_UI_EXTENSION_ABILITY, sessionCreateParam);
+    accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
+    hasInitialized_ = true;
 }
 
 void SecurityUIExtensionPattern::InitializeAccessibility()

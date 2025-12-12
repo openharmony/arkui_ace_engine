@@ -433,6 +433,45 @@ void ListItemPattern::SetDeleteArea()
     springController_.Reset();
 }
 
+void ListItemPattern::OnHoverWithHightLight(bool isHover)
+{
+    NotifyItemState(ITEM_STATE_HOVERED, isHover);
+}
+
+void ListItemPattern::OnPaintFocusState(bool isFocus)
+{
+    NotifyItemState(ITEM_STATE_FOCUSED, isFocus);
+}
+
+void ListItemPattern::NotifyItemState(ItemState itemState, bool isEffective)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto parent = host->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        auto listGroupPattern = DynamicCast<ListItemGroupPattern>(parent->GetPattern());
+        CHECK_NULL_VOID(listGroupPattern);
+        if (isEffective) {
+            listGroupPattern->SetItemState(itemState, nodeId);
+        } else {
+            listGroupPattern->ResetItemState(itemState, nodeId);
+        }
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (parent->GetTag() == V2::LIST_ETS_TAG) {
+        auto listPattern = DynamicCast<ListPattern>(parent->GetPattern());
+        CHECK_NULL_VOID(listPattern);
+        if (isEffective) {
+            listPattern->SetItemState(itemState, nodeId);
+        } else {
+            listPattern->ResetItemState(itemState, nodeId);
+        }
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 V2::SwipeEdgeEffect ListItemPattern::GetEdgeEffect()
 {
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();

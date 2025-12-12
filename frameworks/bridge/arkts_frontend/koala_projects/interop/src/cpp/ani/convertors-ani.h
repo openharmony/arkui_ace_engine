@@ -36,6 +36,15 @@ do {                                                                            
 }                                                                                                \
 while (0)
 
+#define CHECK_RETHROW_ERROR(env, result) \
+do {                                     \
+    ani_boolean isError = false;           \
+    env->ExistUnhandledError(&isError);    \
+    if (isError) {                         \
+        return result;                     \
+    }                                      \
+} while (0)
+
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
@@ -156,7 +165,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       void* data {};
       ani_arraybuffer result;
       CHECK_ANI_FATAL(env->CreateArrayBuffer(value.length, &data, &result));
-      interop_memcpy(data, value.length, value.data, value.length);
+      interop_memory_copy(data, value.length, value.data, value.length);
       value.dispose(value.resourceId);
       return result;
     }
@@ -182,16 +191,18 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
+        CHECK_RETHROW_ERROR(env, nullptr);
         ani_fixedarray_byte result = nullptr;
         ani_boolean errorExist;
         env->ExistUnhandledError(&errorExist);
         if (!errorExist) {
             CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
             CHECK_ANI_FATAL(
-                env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
+                env->FixedArray_SetRegion_Byte(result, 0, value.length,
+                  reinterpret_cast<const ani_byte*>(value.data)));
         }
-      value.dispose(value.data, value.length);
-      return result;
+        value.dispose(value.data, value.length);
+        return result;
     };
     static inline void release(ani_env* env, InteropType value, KInteropReturnBuffer converted) {}
 };
@@ -212,10 +223,11 @@ struct InteropTypeConverter<KStringPtr> {
         return result;
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
-      ani_string result = nullptr;
-      int length = value.length();
-      CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length, &result));
-      return result;
+        CHECK_RETHROW_ERROR(env, nullptr);
+        ani_string result = nullptr;
+        int length = value.length();
+        CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length, &result));
+        return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}
 };
@@ -1880,7 +1892,7 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   ani_env* env = reinterpret_cast<ani_env*>(venv);                                                              \
   ani_int result = 0;                                                                                   \
   long long args_casted = reinterpret_cast<long long>(args);                                            \
-  CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));    \
+  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length);    \
 }
 
 #define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                                  \
@@ -1914,7 +1926,7 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
       "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
-    CHECK_ANI_FATAL(env->String_NewUTF8(message, interop_strlen(message), &messageObject));                     \
+    CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \
     CHECK_ANI_FATAL(env->GetUndefined(&undefined));                                                     \
     ani_object throwObject{};                                                                           \

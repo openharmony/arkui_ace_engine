@@ -73,9 +73,10 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
+#include "ui/properties/ui_material.h"
+#include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1480,26 +1481,33 @@ void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 
 void RosenRenderContext::UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
-    CHECK_NULL_VOID(visualEffect);
+    CHECK_NULL_VOID(rsNode_ && visualEffect);
     rsNode_->SetVisualEffect(visualEffect);
 }
 
 void RosenRenderContext::UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
-    CHECK_NULL_VOID(backgroundFilter);
+    CHECK_NULL_VOID(rsNode_ && backgroundFilter);
     rsNode_->SetUIBackgroundFilter(backgroundFilter);
 }
 
 void RosenRenderContext::UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
 {
-    CHECK_NULL_VOID(foregroundFilter);
+    CHECK_NULL_VOID(rsNode_ && foregroundFilter);
     rsNode_->SetUIForegroundFilter(foregroundFilter);
 }
 
 void RosenRenderContext::UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    CHECK_NULL_VOID(compositingFilter);
+    CHECK_NULL_VOID(rsNode_ && compositingFilter);
     rsNode_->SetUICompositingFilter(compositingFilter);
+}
+
+void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIMaterialFilter(materialFilter);
+    RequestNextFrame();
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
@@ -6843,7 +6851,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 #endif
 #if defined(IOS_PLATFORM)
 #if defined(PLATFORM_VIEW_SUPPORTED)
-    if (patternType_ == PatternType::PLATFORM_VIEW) {
+    if (patternType_ == PatternType::PLATFORM_VIEW || patternType_ == PatternType::XCOM) {
         RSSurfaceExtConfig config = {
             .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
             .additionalData = nativeWindow,

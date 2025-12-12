@@ -4845,10 +4845,6 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -5610,6 +5606,20 @@ void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen:
     target->UpdateCompositingFilter(compositingFilter);
 }
 
+void ViewAbstract::SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilter);
+}
+
+void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
+}
+
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5622,6 +5632,9 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
     CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
         auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
         auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
@@ -6565,6 +6578,9 @@ void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr
 
 void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)
 {
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
@@ -6639,10 +6655,6 @@ void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gr
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }

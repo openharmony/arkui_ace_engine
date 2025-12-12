@@ -981,7 +981,8 @@ void FrameNode::DumpCommonInfo()
                             ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                             : "NA"));
     }
-    if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+    DumpLog::GetInstance().AddDesc(std::string("IsOnMaintree: ").append(std::to_string(IsOnMainTree())));
+    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
     }
@@ -1317,6 +1318,8 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
         responseRegionMap = gestureEventHub->GetResponseRegionMap();
+        responseRegion = gestureEventHub->GetResponseRegion();
+        mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->PutExtAttr("touchable", touchable, filter);
@@ -3549,6 +3552,7 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
     if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+        responseRegionResult.emplace_back(rect);
         return;
     }
     if (width.value() < 0.0 || height.value() < 0.0) {
@@ -3600,6 +3604,9 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         for (const auto& region : responseRegionMap[ResponseRegionSupportedTool::ALL]) {
             ParseRegionAndAdd(region, scaleProperty, rect, responseRegionResult);
         }
+    }
+    if (responseRegionResult.empty()) {
+        responseRegionResult.emplace_back(rect);
     }
     return responseRegionResult;
 }
@@ -3928,7 +3935,15 @@ void FrameNode::AnimateHoverEffect(bool isHovered) const
         renderContext->AnimateHoverEffectScale(isHovered);
     } else if (animationType == HoverEffectType::BOARD) {
         renderContext->AnimateHoverEffectBoard(isHovered);
+        OnHoverWithHightLight(isHovered);
     }
+}
+
+void FrameNode::OnHoverWithHightLight(bool isHover) const
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnHoverWithHightLight(isHover);
 }
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
@@ -4405,6 +4420,34 @@ OffsetF FrameNode::ConvertPoint(OffsetF position, const RefPtr<FrameNode>& targe
         historyNodes.pop_back();
     }
     return OffsetF(targetNodePoint.GetX(), targetNodePoint.GetY());
+}
+
+OffsetF FrameNode::ConvertPositionToWindow(OffsetF position, bool fromWindow)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    Point point = Point(position.GetX(), position.GetY());
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->CheckTopWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        if (fromWindow) {
+            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        } else {
+            point = point - Offset(parentOffset.GetX(), parentOffset.GetY());
+        }
+        point = parentMatrix * point;
+        if (parent->tag_ == V2::ROOT_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    return OffsetF(point.GetX(), point.GetY());
 }
 
 std::vector<Point> GetRectPoints(SizeF& frameSize)
@@ -7808,5 +7851,19 @@ void FrameNode::MountToParent(const RefPtr<UINode>& parent,
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
+}
+
+void FrameNode::OnContentChangeRegister(const ContentChangeConfig& config)
+{
+    if (pattern_) {
+        pattern_->OnContentChangeRegister(config);
+    }
+}
+
+void FrameNode::OnContentChangeUnregister()
+{
+    if (pattern_) {
+        pattern_->OnContentChangeUnregister();
+    }
 }
 } // namespace OHOS::Ace::NG

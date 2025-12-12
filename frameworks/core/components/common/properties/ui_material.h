@@ -31,7 +31,7 @@ extern const char UI_MATERIAL_FUNC_NAME[];
 namespace NG {
 class PipelineContext;
 class FrameNode;
-} // // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
 
 enum class MaterialType: int32_t {
     NONE = 0,

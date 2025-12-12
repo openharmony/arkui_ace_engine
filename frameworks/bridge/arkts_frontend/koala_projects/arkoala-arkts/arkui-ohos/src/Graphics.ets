@@ -26,8 +26,8 @@ import { default as drawing } from "@ohos.graphics.drawing"
 import { BusinessError } from '@ohos.base';
 import { SystemOps } from './framework';
 export interface Size {
-    width: number;
-    height: number;
+    width: double;
+    height: double;
 }
 export interface SizeT<T> {
     width: T,
@@ -42,15 +42,15 @@ export class SizeInternal implements Size {
     }
 }
 export interface Frame {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: double;
+    y: double;
+    width: double;
+    height: double;
 }
 export type NodePosition = Vector2;
 export interface Vector2 {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export enum LengthMetricsUnit {
     DEFAULT = 0,
@@ -66,12 +66,12 @@ export enum LengthUnit {
 
 export class LengthMetrics {
     public unit: LengthUnit;
-    public value: number;
+    public value: double;
     constructor(){
         this.value = 0;
         this.unit = LengthUnit.VP;
     }
-    constructor(value: number, unit?: LengthUnit) {
+    constructor(value: double, unit?: LengthUnit) {
         this.value = value;
         if (unit === undefined || unit === null || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
             this.unit = LengthUnit.VP;
@@ -81,19 +81,19 @@ export class LengthMetrics {
             this.value = value;
         }
     }
-    static px(value: number) {
+    static px(value: double) {
         return new LengthMetrics(value, LengthUnit.PX);
     }
-    static vp(value: number) {
+    static vp(value: double) {
         return new LengthMetrics(value, LengthUnit.VP);
     }
-    static fp(value: number) {
+    static fp(value: double) {
         return new LengthMetrics(value, LengthUnit.FP);
     }
-    static percent(value: number) {
+    static percent(value: double) {
         return new LengthMetrics(value, LengthUnit.PERCENT);
     }
-    static lpx(value: number) {
+    static lpx(value: double) {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
     static resource(res: Resource) {
@@ -112,11 +112,11 @@ const MAX_ALPHA_VALUE = 1;
 const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
 const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 export class ColorMetrics {
-    private red_: number;
-    private green_: number;
-    private blue_: number;
-    private alpha_: number;
-    private resourceId_: number = -1;
+    private red_: int32;
+    private green_: int32;
+    private blue_: int32;
+    private alpha_: int32;
+    private resourceId_: int32 = -1;
     static readonly WHITE: int32 = 0xffffffff;
     static readonly BLACK: int32 = 0xff000000;
     static readonly BLUE: int32 = 0xff0000ff;
@@ -132,16 +132,16 @@ export class ColorMetrics {
     get color(): string {
         return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / MAX_CHANNEL_VALUE})`;
     }
-    get red(): number {
+    get red(): int32 {
         return this.red_!;
     }
-    get green(): number {
+    get green(): int32 {
         return this.green_!;
     }
-    get blue(): number {
+    get blue(): int32 {
         return this.blue_!;
     }
-    get alpha(): number {
+    get alpha(): int32 {
         return this.alpha_!;
     }
     private static clamp(value: number): number {
@@ -154,12 +154,12 @@ export class ColorMetrics {
         this.alpha_ = MAX_CHANNEL_VALUE;
     }
     constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
-        this.red_ = ColorMetrics.clamp(red);
-        this.green_ = ColorMetrics.clamp(green);
-        this.blue_ = ColorMetrics.clamp(blue);
-        this.alpha_ = ColorMetrics.clamp(alpha);
+        this.red_ = ColorMetrics.clamp(red) as int32;
+        this.green_ = ColorMetrics.clamp(green) as int32;
+        this.blue_ = ColorMetrics.clamp(blue) as int32;
+        this.alpha_ = ColorMetrics.clamp(alpha) as int32;
     }
-    public static numeric(value: number): ColorMetrics {
+    public static numeric(value: int32): ColorMetrics {
         const red = (value >> 16) & 0x000000FF;
         const green = (value >> 8) & 0x000000FF;
         const blue = value & 0x000000FF;
@@ -169,7 +169,7 @@ export class ColorMetrics {
         }
         return new ColorMetrics(red, green, blue, alpha);
     }
-    public static rgba(red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    public static rgba(red: double, green: double, blue: double, alpha?: double): ColorMetrics {
         const red_casted = red as (number)
         const green_casted = green as (number)
         const blue_casted = blue as (number)
@@ -221,14 +221,14 @@ export class ColorMetrics {
             const blue = chanels[3];
             const alpha = chanels[4];
             let colorMetrics = new ColorMetrics(red, green, blue, alpha);
-            colorMetrics.alpha_ = ColorMetrics.clamp(alpha);
+            colorMetrics.alpha_ = ColorMetrics.clamp(alpha) as int32;
             if (chanels.length > 5) {
                 const resourceId = chanels[5];
-                colorMetrics.setResourceId(resourceId);
+                colorMetrics.setResourceId(resourceId as int32);
             }
             return colorMetrics;
-        } else if (typeof color === 'number') {
-            return ColorMetrics.numeric(color as int32 as number);
+        } else if (typeof color === 'int') {
+            return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
             if (ColorMetrics.isHexFormat(colorValue)) {
@@ -289,10 +289,10 @@ export class ColorMetrics {
 
         return new ColorMetrics(red, green, blue, alpha);
     }
-    setResourceId(resourceId: number): void {
+    setResourceId(resourceId: int32): void {
         this.resourceId_ = resourceId;
     }
-    getResourceId(): number {
+    getResourceId(): int32 {
         return this.resourceId_;
     }
 }
@@ -337,9 +337,9 @@ export class ShapeMask {
         this.circle = null;
         this.roundRect = null;
     }
-    public fillColor: number = 0XFF000000;
-    public strokeColor: number = 0XFF000000;
-    public strokeWidth: number = 0;
+    public fillColor: int32 = 0XFF000000;
+    public strokeColor: int32 = 0XFF000000;
+    public strokeWidth: double = 0;
 }
 export class ShapeClip {
     public rect: Rect | null = null;
@@ -408,27 +408,27 @@ export interface Vector2T<T> {
 }
 export type PositionT<T> = Vector2T<T>;
 export interface Vector3 {
-    x: number;
-    y: number;
-    z: number;
+    x: double;
+    y: double;
+    z: double;
 }
 export type Matrix4 = [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double,
+    double
 ]
 export interface NodeEdges<T> {
     top?: T;
@@ -449,9 +449,9 @@ export interface RoundRect {
     corners: CornerRadius;
 }
 export interface Circle {
-    centerX: number;
-    centerY: number;
-    radius: number;
+    centerX: double;
+    centerY: double;
+    radius: double;
 }
 export interface CommandPath {
     commands: string;
@@ -462,11 +462,11 @@ export type Scale = Vector2;
 export type Translation = Vector2;
 export type Rotation = Vector3;
 
-export function edgeColors(all: number): NodeEdges<number> {
+export function edgeColors(all: int32): NodeEdges<int32> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function edgeWidths(all: number): NodeEdges<number> {
+export function edgeWidths(all: double): NodeEdges<double> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
@@ -474,9 +474,9 @@ export function borderStyles(all: BorderStyle): NodeEdges<BorderStyle> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function borderRadiuses(all: number): Corners<number> {
+export function borderRadiuses(all: double): Corners<double> {
     return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
 }
 
-export type NodeBorderRadiuses = Corners<number>;
+export type NodeBorderRadiuses = Corners<double>;
 export type NodeOffset = Vector2;

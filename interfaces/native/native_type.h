@@ -119,6 +119,60 @@ typedef struct {
 } ArkUI_GridItemRect;
 
 /**
+
+ * @brief Enumerates the selected indicator type of picker.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** background. */
+    ARKUI_PICKER_INDICATOR_BACKGROUND = 0,
+    /** divider. */
+    ARKUI_PICKER_INDICATOR_DIVIDER = 1,
+} ArkUI_PickerIndicatorType;
+
+/**
+ * @brief style parameters of background indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /**  background color, in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t backgroundColor;
+    /** radius of the top left corner. */
+    float topLeftRadius;
+    /** radius of the top right corner */
+    float topRightRadius;
+    /** radius of the bottom left corner */
+    float bottomLeftRadius;
+    /** radius of the bottom right corner. */
+    float bottomRightRadius;
+} ArkUI_PickerIndicatorBackground;
+
+/**
+ * @brief style parameters of divider indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /** stroke width */
+    float strokeWidth;
+    /** divider color,in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t dividerColor;
+    /** the distance between the divider and the beginning of the side of the picker, unit vp. */
+    float startMargin;
+    /** the distance between the divider and the end of the side of the picker (unit: vp). */
+    float endMargin;
+} ArkUI_PickerIndicatorDivider;
+
+/**
+ * @brief Definition of indicator style.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_PickerIndicatorStyle ArkUI_PickerIndicatorStyle;
+
+/**
  * @brief Defines the <b>Grid</b> layout options.
  *
  * @since 21
@@ -2966,6 +3020,53 @@ typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerR
   * @since 23
   */
 typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
+
+/**
+ * @brief Create the ArkUI_PickerIndicatorStyle instance.
+ *
+ * @param ArkUI_PickerIndictorType, enumeration type.
+ * @return  ArkUI_PickerIndicatorStyle instance. If the instance returns a null pointer,
+ *         it indicates creation failure, and the reason for the failure may be that the address space is full or
+ *         the type not supported.
+ * @since 23
+*/
+ArkUI_PickerIndicatorStyle* OH_ArkUI_PickerIndicatorStyle_Create(ArkUI_PickerIndicatorType type);
+
+/**
+* @brief Destroy the ArkUI_PickerIndicatorStyle instance.
+*
+* @param ArkUI_PickerIndicatorStyle instance to be destroyed.
+* @since 23
+*/
+void OH_ArkUI_PickerIndicatorStyle_Dispose(ArkUI_PickerIndicatorStyle* style);
+
+/**
+* @brief Set the parameters of background style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of background style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "background".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorBackground* background);
+
+/**
+* @brief Set the parameters of divider style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of divider style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "divider".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorDivider* divider);
 
 typedef struct {
     float x;
@@ -7025,6 +7126,44 @@ void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* optio
  * @since 23
  */
 ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
 
 #ifdef __cplusplus
 };

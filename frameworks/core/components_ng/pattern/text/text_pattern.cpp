@@ -3514,6 +3514,11 @@ TextDragInfo TextPattern::CreateTextDragInfo()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, info);
     info.handleColor = theme->GetCaretColor();
+    if (textLayoutProperty->HasSelectedDragPreviewStyle()) {
+        info.dragBackgroundColor = textLayoutProperty->GetSelectedDragPreviewStyleValue();
+    } else {
+        info.dragBackgroundColor = std::nullopt;
+    }
     info.selectedBackgroundColor = theme->GetSelectedColor();
     selectOverlay_->GetVisibleDragViewHandles(info.firstHandle, info.secondHandle);
     if (IsAiSelected()) {
@@ -7059,6 +7064,7 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+        DEFINE_PROP_HANDLER(selectedDragPreviewStyleColor, Color, UpdateSelectedDragPreviewStyle),
 
         { "LineHeight", [](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {

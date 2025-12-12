@@ -44,9 +44,9 @@ void NavigationPattern::OnAttachToMainTreeMultiThread()
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsForceSplitSupported()) {
+    if (manager->IsForceSplitSupported(false)) {
         RegisterForceSplitListener(context, id);
     }
 
@@ -74,9 +74,9 @@ void NavigationPattern::OnDetachFromMainTreeMultiThread()
     auto id = host->GetId();
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
-    auto manager = pipeline->GetNavigationManager();
+    auto manager = pipeline->GetForceSplitManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsForceSplitSupported()) {
+    if (manager->IsForceSplitSupported(false)) {
         UnregisterForceSplitListener(pipeline, id);
     }
 }
@@ -92,4 +92,4 @@ void NavigationPattern::SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle
     };
     host->PostAfterAttachMainTreeTask(std::move(setTask));
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

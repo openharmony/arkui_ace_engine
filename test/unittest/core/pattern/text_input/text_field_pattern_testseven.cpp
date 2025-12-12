@@ -551,4 +551,25 @@ HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText004, TestSize.Level
     ASSERT_NE(accessibilityProperty_, nullptr);
     EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
 }
+
+/**
+ * @tc.name: CreateTextDragInfo002
+ * @tc.desc: Test TextFieldPattern CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, CreateTextDragInfo002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dragInfo = pattern->CreateTextDragInfo();
+    EXPECT_EQ(dragInfo.dragBackgroundColor.value_or(Color::WHITE), Color::WHITE);
+}
 }

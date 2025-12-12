@@ -1468,4 +1468,23 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions016, 
     count = columnPattern->GetOptionCount();
     EXPECT_EQ(ZERO, count);
 }
+
+/**
+ * @tc.name: TextPickerColumnUpdateTextAreaPadding001
+ * @tc.desc: Test UpdateTextAreaPadding function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnUpdateTextAreaPadding001, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto property = AceType::MakeRefPtr<TextLayoutProperty>();
+    textPickerColumnPattern->useButtonFocusArea_ = true;
+    textPickerColumnPattern->UpdateTextAreaPadding(theme, property);
+    auto ret = property->GetPaddingProperty()->left->GetDimension();
+    EXPECT_EQ(ret, 16.0_vp);
+}
 } // namespace OHOS::Ace::NG

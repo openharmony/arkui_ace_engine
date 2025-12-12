@@ -348,6 +348,7 @@ private:
     bool notifyTransitionFlag_ = false;
     bool cameraPostprocessingEnabled_ = false;
     bool isGestureTriggeredLongPress_ = false;
+    bool handleImageError_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

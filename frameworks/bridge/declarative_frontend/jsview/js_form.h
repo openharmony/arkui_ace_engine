@@ -33,6 +33,7 @@ public:
     static void AllowUpdate(const JSCallbackInfo& info);
     static void SetVisibility(const JSCallbackInfo& info);
     static void JsOnAcquired(const JSCallbackInfo& info);
+    static void SetColorMode(const JSCallbackInfo& info);
     static void JsOnError(const JSCallbackInfo& info);
     static void JsOnUninstall(const JSCallbackInfo& info);
     static void JsOnRouter(const JSCallbackInfo& info);

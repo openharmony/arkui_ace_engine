@@ -69,6 +69,9 @@ public:
     virtual int32_t ExeAppAIFunction(
         const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
         override;
+    virtual int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
+        const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
+    virtual int32_t UnregisterContentChangeCallback() override;
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;

@@ -2253,20 +2253,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
-
-    // instructive change begin
-    public updateNeedSync(needSync: boolean): void {
-        this._needSync = needSync;
-    }
-
-    public isNeedSync(): boolean {
-        return this._needSync;
-    }
-
-    public updateNavDestination(navdestination: PageMapBuilder): void {
-        this._navDestination = navdestination;
-    }
-    // instructive change end
 }
 
 @memo

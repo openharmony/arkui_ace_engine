@@ -1745,6 +1745,10 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
 void RichEditorPattern::DeleteBackwardFunction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "DeleteBackwardFunction called");
+    if (IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Skipping delete operation: preview text inputting");
+        return;
+    }
     HandleOnDelete(true);
 }
 
@@ -4656,7 +4660,8 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
         std::swap(realStart, realEnd);
     }
     RefPtr<SpanString> spanString = MakeRefPtr<SpanString>(u"");
-    if (aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (aiWriteAdapter && aiWriteAdapter->GetAIWrite()) {
         SetSubSpansWithAIWrite(spanString, realStart, realEnd);
     } else {
         SetSubSpans(spanString, realStart, realEnd, spans_);
@@ -4994,8 +4999,8 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString,
     } else {
         AddSpansByPaste(spanString->GetSpanItems(), reason);
     }
-
-    if (aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (aiWriteAdapter && aiWriteAdapter->GetAIWrite()) {
         return;
     }
     StartTwinkling();
@@ -6630,7 +6635,8 @@ void RichEditorPattern::AfterInsertValue(
     moveLength_ += insertValueLength;
     IF_TRUE(!previewTextRecord_.needUpdateCaret, moveLength_ = 0);
     UpdateSpanPosition();
-    if (isIME || aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (isIME || (aiWriteAdapter && aiWriteAdapter->GetAIWrite())) {
         AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
         return;
     }
@@ -13218,8 +13224,6 @@ bool RichEditorPattern::IsShowAIWrite()
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Failed to obtain AI write package name!");
         return false;
     }
-    aiWriteAdapter_->SetBundleName(bundleName);
-    aiWriteAdapter_->SetAbilityName(abilityName);
 
     auto isAISupport = false;
     if (theme->GetAIWriteIsSupport() == "true") {
@@ -13230,11 +13234,19 @@ bool RichEditorPattern::IsShowAIWrite()
     CHECK_NULL_RETURN(host, false);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Whether the device supports AI write: %{public}d, nodeId: %{public}d",
         isAISupport, host->GetId());
+    if (isAISupport) {
+        auto aiWriteAdapter = GetAIWriteAdapter();
+        CHECK_NULL_RETURN(aiWriteAdapter, false);
+        aiWriteAdapter->SetBundleName(bundleName);
+        aiWriteAdapter->SetAbilityName(abilityName);
+    }
     return isAISupport;
 }
 
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
 {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    CHECK_NULL_VOID(aiWriteAdapter);
     CHECK_NULL_VOID(!textSelector_.SelectNothing());
     info.firstHandle = textSelector_.firstHandle.ToString();
     info.secondHandle = textSelector_.secondHandle.ToString();
@@ -13251,13 +13263,13 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceStart = 0;
     auto sentenceEnd = textSize;
     for (int32_t i = info.selectStart; i >= 0; --i) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceStart = i + 1;
             break;
         }
     }
     for (int32_t i = info.selectEnd; i < textSize; i++) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceEnd = i;
             break;
         }
@@ -13274,12 +13286,14 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d-%{public}d], content=" SEC_PLD(%{public}s),
         info.selectStart, info.selectEnd, SEC_PARAM(spanString->GetString().c_str()));
     spanString->EncodeTlv(info.selectBuffer);
-    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter->GetSelectLengthOnlyText(spanString->GetU16string()));
 }
 
 void RichEditorPattern::HandleOnAIWrite()
 {
-    aiWriteAdapter_->SetAIWrite(true);
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    CHECK_NULL_VOID(aiWriteAdapter);
+    aiWriteAdapter->SetAIWrite(true);
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
@@ -13290,14 +13304,14 @@ void RichEditorPattern::HandleOnAIWrite()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
-        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        auto aiWriteAdapter = pattern->GetAIWriteAdapter();
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    aiWriteAdapter_->SetPipelineContext(WeakClaim(pipeline));
-    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+    aiWriteAdapter->SetPipelineContext(WeakClaim(pipeline));
+    aiWriteAdapter->ShowModalUIExtension(info, callback);
 }
 
 SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem)
@@ -13583,6 +13597,20 @@ void RichEditorPattern::ReportComponentChangeEvent() {
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}zu",
         frameId_, str.length());
 #endif
+}
+
+RefPtr<AIWriteAdapter> RichEditorPattern::GetAIWriteAdapter()
+{
+    auto pipeline = GetContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetAIWriteAdapter, pipeline is null");
+        return nullptr;
+    }
+    auto adapter = pipeline->GetOrCreateAIWriteAdapter().Upgrade();
+    if (!adapter) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetAIWriteAdapter, adapter is null");
+    }
+    return adapter;
 }
 
 void RichEditorPattern::UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty)

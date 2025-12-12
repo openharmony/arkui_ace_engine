@@ -208,6 +208,14 @@ bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
     return isUndefined;
 }
 
+bool AniUtils::IsUndefined(ani_env* env, ani_ref ref)
+{
+    CHECK_NULL_RETURN(env, true);
+    ani_boolean isUndefined = false;
+    ANI_CALL(env, Reference_IsUndefined(ref, &isUndefined), return true);
+    return isUndefined;
+}
+
 ani_object AniUtils::GetUndefined(ani_env* env)
 {
     CHECK_NULL_RETURN(env, nullptr);

@@ -1440,6 +1440,34 @@ HWTEST_F(SheetShowInSubwindowTestNg, UpdateSheetObject, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetPopupScrollUserDefinedIdealSize
+ * @tc.desc: Test SheetPresentationPattern::ResetPopupScrollUserDefinedIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, ResetPopupScrollUserDefinedIdealSize, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+
+    SheetStyle style;
+    style.sheetType = SheetType::SHEET_POPUP;
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollProps, nullptr);
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1000)));
+    sheetPattern->ResetPopupScrollUserDefinedIdealSize(SheetType::SHEET_POPUP);
+    EXPECT_EQ(scrollProps->GetCalcLayoutConstraint()->selfIdealSize->Height(), std::nullopt);
+}
+
+/**
  * @tc.type: FUNC
  * @tc.name: Test BindSheet
  * @tc.desc: Test SheetSideObject::AvoidKeyboard.

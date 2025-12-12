@@ -1196,6 +1196,40 @@ BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 }
 
 template<>
+BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src)
+{
+    BorderRadiusPropertyOpt property;
+    std::optional<CalcDimension> topStart;
+    auto topStartOpt = Converter::OptConvert<Dimension>(src.topStart);
+    if (topStartOpt) {
+        topStart = topStartOpt.value();
+    }
+    std::optional<CalcDimension> topEnd;
+    auto topEndOpt = Converter::OptConvert<Dimension>(src.topEnd);
+    if (topEndOpt) {
+        topEnd = topEndOpt.value();
+    }
+    std::optional<CalcDimension> bottomStart;
+    auto bottomStartOpt = Converter::OptConvert<Dimension>(src.bottomStart);
+    if (bottomStartOpt) {
+        bottomStart = bottomStartOpt.value();
+    }
+    std::optional<CalcDimension> bottomEnd;
+    auto bottomEndOpt = Converter::OptConvert<Dimension>(src.bottomEnd);
+    if (bottomEndOpt) {
+        bottomEnd = bottomEndOpt.value();
+    }
+    bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    property.value.radiusTopLeft = isRtl ? topEnd : topStart;
+    property.value.radiusTopRight = isRtl ? topStart : topEnd;
+    property.value.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
+    property.value.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
+    property.value.multiValued = true;
+    return property;
+}
+
+template<>
 BorderStyleProperty Convert(const Ark_BorderStyle& src)
 {
     BorderStyleProperty property;
@@ -2639,9 +2673,9 @@ PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src)
         dst.backgroundColor = backgroundColor.value();
         dst.isDefaultBackgroundColor = false;
     }
-    auto borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+    auto borderRadius = Converter::OptConvert<BorderRadiusPropertyOpt>(src.borderRadius);
     if (borderRadius.has_value()) {
-        dst.borderRadius = borderRadius;
+        dst.borderRadius = (*borderRadius).value;
         dst.isDefaultBorderRadius = false;
     }
     return dst;
@@ -2800,6 +2834,18 @@ BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
     return borderRadius;
 }
 
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src)
+{
+    BorderRadiusPropertyOpt borderRadius;
+    borderRadius.value.radiusTopLeft = Converter::OptConvert<Dimension>(src.topLeft);
+    borderRadius.value.radiusTopRight = Converter::OptConvert<Dimension>(src.topRight);
+    borderRadius.value.radiusBottomLeft = Converter::OptConvert<Dimension>(src.bottomLeft);
+    borderRadius.value.radiusBottomRight = Converter::OptConvert<Dimension>(src.bottomRight);
+    borderRadius.value.multiValued = true;
+    return borderRadius;
+}
+
 static BorderRadiusProperty BorderRadiusPropertyFromDimension(std::optional<Dimension> radius)
 {
     BorderRadiusProperty dst;
@@ -2839,6 +2885,46 @@ template<>
 BorderRadiusProperty Convert(const Ark_Resource& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Number& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Float64& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_String& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Resource& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
 }
 
 template<>
@@ -3263,6 +3349,32 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src)
+{
+    PickerBackgroundStyle dst;
+    dst.color = Converter::OptConvert<Color>(src.color);
+    dst.borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+    return dst;
+}
+
+template<>
+void AssignCast(
+    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_LengthMetrics& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_BorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_LocalizedBorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        []() {});
 }
 
 template<>
@@ -3828,6 +3940,16 @@ void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Fil
         return;
     }
     dst = reinterpret_cast<OHOS::Rosen::Filter*>(src);
+}
+
+template<>
+void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<UiMaterial*>(src);
 }
 
 template<>

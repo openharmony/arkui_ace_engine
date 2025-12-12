@@ -1553,4 +1553,66 @@ HWTEST_F(EventHubTestNg, EventHubTest029, TestSize.Level1)
     eventHub->RemoveSupportedUIState(UI_STATE_PRESSED, false);
     EXPECT_EQ(EXCLUDE_INNER_FLAG_NONE, eventHub->stateStyleMgr_->userSubscribersExcludeConfigs_);
 }
+
+/**
+ * @tc.name: EventHubTest030
+ * @tc.desc: FireDrawCompletedNDKCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnAttachContext(AceType::RawPtr(context));
+    bool callbackTrggered = false;
+    for (int32_t index = 0 ; index < 20; index++) {
+        auto callback = [&callbackTrggered]() {
+            callbackTrggered = true;
+        };
+        eventHub->SetNDKDrawCompletedCallback(std::move(callback));
+        std::thread t([context, eventHub]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            eventHub->FireDrawCompletedNDKCallback(AceType::RawPtr(context));
+        });
+        eventHub->SetNDKDrawCompletedCallback(nullptr);
+        t.join();
+        EXPECT_FALSE(callbackTrggered);
+    }
+}
+
+/**
+ * @tc.name: EventHubTest031
+ * @tc.desc: FireLayoutNDKCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    eventHub->OnAttachContext(AceType::RawPtr(context));
+    bool callbackTrggered = false;
+    for (int32_t index = 0 ; index < 20; index++) {
+        auto callback = [&callbackTrggered]() {
+            callbackTrggered = true;
+        };
+        eventHub->SetNDKLayoutCallback(std::move(callback));
+        std::thread t([context, eventHub]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            eventHub->FireLayoutNDKCallback(AceType::RawPtr(context));
+        });
+        eventHub->SetNDKLayoutCallback(nullptr);
+        t.join();
+        EXPECT_FALSE(callbackTrggered);
+    }
+}
 } // namespace OHOS::Ace::NG

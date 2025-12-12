@@ -499,7 +499,6 @@ public:
         auto focusColor = pickerTheme->GetFocusColor();
         FocusPaintParam focusPaintParams;
         focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(TIME_FOCUS_PAINT_WIDTH);
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
@@ -760,11 +759,27 @@ private:
     void MinOrSecColumnBuilding(
         const RefPtr<FrameNode>& columnFrameNode, bool isMinute, uint32_t selectedTime);
     void InitFocusEvent();
+    void InitSelect();
     void SetCallBack();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     bool OnThemeScopeUpdateMultiThread();
 
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
+    void UpdateFocusStyles(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty,
+        const RefPtr<FrameNode>& timePickerColumnNode, const Dimension& height, bool isFocusButton);
+    void UpdateButtonConfirmLayoutProperty(const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty);
+    void PaintRectWithoutButtonFocusArea(RoundRect& paintRect);
+    void PaintRectWithButtonFocusArea(RoundRect& paintRect);
+        
     void UpdateTextStyleCommon(
         const PickerTextStyle& textStyle,
         const TextStyle& defaultTextStyle,
@@ -835,6 +850,8 @@ private:
     bool isUserSetGradientFont_ = false;
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
+    Dimension pickerSelectorItemRadius_ = 8.0_vp;
+    Dimension pickerPadding_ = 6.0_vp;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     bool isShowInDatePickerDialog_ = false;
@@ -849,6 +866,11 @@ private:
     bool isUserSetSelectColor_ = false;
     bool isClearFocus_ = true;
     bool isDirectionSetByAr = false;
+
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 

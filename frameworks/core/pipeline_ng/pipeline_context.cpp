@@ -60,6 +60,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -2766,6 +2767,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 #endif
 }
 
+void NotifyDirtyMenu(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto menuChildrens = node->GetChildren();
+    for (auto child : menuChildrens) {
+        if (child) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void PipelineContext::MarkDirtyOverlay()
 {
     CHECK_NULL_VOID(rootNode_);
@@ -2773,6 +2785,8 @@ void PipelineContext::MarkDirtyOverlay()
     for (auto child: childNodes) {
         if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
             child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            NotifyDirtyMenu(child);
         }
     }
 }
@@ -4661,6 +4675,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.screenY = event.screenY;
     result.convertInfo.first = UIInputEventType::AXIS;
     result.convertInfo.second = UIInputEventType::MOUSE;
+    result.targetDisplayId = event.targetDisplayId;
     return result;
 }
 
@@ -7170,5 +7185,10 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
 const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
 {
     return loadCompleteMgr_;
+}
+
+const RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager() const
+{
+    return contentChangeMgr_;
 }
 } // namespace OHOS::Ace::NG

@@ -75,6 +75,7 @@ public:
     static void SetCancelSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue);
     static void SetFallbackLineSpacing(FrameNode* frameNode, std::optional<bool>& optValue);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 private:
 
 };

@@ -51,6 +51,7 @@ public:
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter);
     static void SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawableAddr);
+    static void SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_H

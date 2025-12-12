@@ -948,7 +948,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         {
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
-            subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline != mainPipeline));
+            subWindow = SubwindowManager::GetInstance()->ShowPreviewNG(
+                (pipeline != mainPipeline), dragEventActuator_->GetRestartDrag());
         }
     }
     CHECK_NULL_VOID(overlayManager);

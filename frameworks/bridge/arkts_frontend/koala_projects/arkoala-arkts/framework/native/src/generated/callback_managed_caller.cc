@@ -1746,6 +1746,28 @@ void callManagedCallback_KeyEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 re
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_Long_Void(Ark_Int32 resourceId, Ark_Int64 value)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Long_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt64(value);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_Long_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int64 value)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_Long_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt64(value);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_Map_String_RecordData_Void(Ark_Int32 resourceId, Map_String_Opt_Object value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -5743,6 +5765,49 @@ void callManagedNavExtender_OnUpdateStackSync(Ark_VMContext vmContext, Ark_Int32
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedNavExtender_PageMapNodeBuilder(Ark_Int32 resourceId, Ark_String url, Opt_Object params, Callback_Pointer_Void continuation)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_NavExtender_PageMapNodeBuilder);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(url);
+    if (runtimeType(params) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto paramsTmpValue = params.value;
+        argsSerializer.writeObject(paramsTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(10, &callbackBuffer);
+}
+
+void callManagedNavExtender_PageMapNodeBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String url, Opt_Object params, Callback_Pointer_Void continuation)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_NavExtender_PageMapNodeBuilder);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(url);
+    if (runtimeType(params) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto paramsTmpValue = params.value;
+        argsSerializer.writeObject(paramsTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedOnAdsBlockedCallback(Ark_Int32 resourceId, Ark_AdsBlockedDetails details)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8508,6 +8573,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_ItemDragInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Void);
         case Kind_Callback_KeyEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_Boolean);
         case Kind_Callback_KeyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_Void);
+        case Kind_Callback_Long_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Long_Void);
         case Kind_Callback_Map_String_RecordData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Map_String_RecordData_Void);
         case Kind_Callback_MarqueeState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MarqueeState_Void);
         case Kind_Callback_MouseEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MouseEvent_Void);
@@ -8659,6 +8725,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegate);
         case Kind_NavExtender_CreateNavDestination: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_CreateNavDestination);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStack);
+        case Kind_NavExtender_PageMapNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_PageMapNodeBuilder);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallback);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallback);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallback);
@@ -8834,6 +8901,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_ItemDragInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_VoidSync);
         case Kind_Callback_KeyEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_BooleanSync);
         case Kind_Callback_KeyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_VoidSync);
+        case Kind_Callback_Long_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Long_VoidSync);
         case Kind_Callback_Map_String_RecordData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Map_String_RecordData_VoidSync);
         case Kind_Callback_MarqueeState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MarqueeState_VoidSync);
         case Kind_Callback_MouseEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MouseEvent_VoidSync);
@@ -8985,6 +9053,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegateSync);
         case Kind_NavExtender_CreateNavDestination: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_CreateNavDestinationSync);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStackSync);
+        case Kind_NavExtender_PageMapNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_PageMapNodeBuilderSync);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallbackSync);
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallbackSync);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallbackSync);

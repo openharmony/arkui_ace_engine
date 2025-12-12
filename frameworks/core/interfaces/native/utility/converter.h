@@ -105,6 +105,9 @@ using StringArray = std::vector<std::string>;
 using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
+struct BorderRadiusPropertyOpt {
+    BorderRadiusProperty value;
+};
 
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
@@ -553,6 +556,13 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_Float64& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Number& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Resource& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_String& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
     template<> BorderStyleProperty Convert(const Ark_EdgeStyles& src);
     template<> BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src);
@@ -639,6 +649,7 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_Resource& src);
     template<> PaddingProperty Convert(const Ark_String& src);
+    template<> PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src);
     template<> PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src);
     template<> PickerRangeType Convert(const Ark_Resource& src);
     template<> PickerRangeType Convert(const Array_Array_String& src);
@@ -957,6 +968,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src);
     template<> void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src);
+    template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src);
     template<> void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!

@@ -254,6 +254,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
     bubblePattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
     bubblePattern->SetInnerBorderWidth(param->GetInnerBorderWidth());
+    bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
     if (param->IsTips()) {
         bubblePattern->SetTipsTag(true);
     }
@@ -449,6 +450,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     popupPattern->SetOutlineWidth(param->GetOutlineWidth());
     popupPattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
     popupPattern->SetInnerBorderWidth(param->GetInnerBorderWidth());
+    popupPattern->SetIsShadowStyle(param->IsShadowStyle());
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -807,6 +809,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
     bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
     bubblePattern->SetHasPlacement(param->HasPlacement());
+    bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
 
     if (!(param->GetIsPartialUpdate().has_value())) {
         bubblePattern->SetHasTransition(param->GetHasTransition());

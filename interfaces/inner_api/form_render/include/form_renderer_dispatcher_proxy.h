@@ -44,6 +44,7 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void SetObscured(bool isObscured) override;
+    void SetColorMode(int32_t colorMode) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
     void OnAccessibilityChildTreeDeregister() override;
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;

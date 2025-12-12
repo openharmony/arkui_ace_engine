@@ -100,6 +100,10 @@ constexpr float FIVE = 5.0f;
 constexpr float TEN = 10.0f;
 constexpr float FIFTY = 50.0f;
 constexpr float ONE_HUNDRED = 100.0f;
+constexpr float KEY_BOARD_TOP_POSITION = 800.0f;
+constexpr float WRAPPER_RECT_HEIGHT_SMALL = 600.0f;
+constexpr float WRAPPER_RECT_HEIGHT_LARGE = 1200.0f;
+constexpr float WRAPPER_RECT_CENTER = 900.0f;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
@@ -743,7 +747,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
     ASSERT_NE(menuNode, nullptr);
     menuPattern->AttachToFrameNode(menuNode);
@@ -752,7 +756,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
  
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
 }
  
@@ -1023,5 +1027,161 @@ HWTEST_F(MenuLayout3TwoTestNg, UpdateConstraintBaseOnOptions001, TestSize.Level1
     childConstraint.maxSize.SetWidth(TV_MAX_WIDTH);
     menuAlgorithm->UpdateConstraintBaseOnOptions(&layoutWrapper, childConstraint);
     EXPECT_TRUE(selectTheme->IsTV());
+}
+
+/**
+ * @tc.name: MenuKeyboardAvoidMode001
+ * @tc.desc: Verify InitializeMenuAvoidKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node
+     */
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    /**
+     * @tc.steps: step2. get menu layout algorithm
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step3. call InitializeMenuAvoidKeyboard
+     * @tc.expected: wrapperRect_ not change
+     */
+    layoutAlgorithm->InitializeMenuAvoidKeyboard(menuNode);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect());
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    MenuParam menuParam;
+    menuParam.keyboardAvoidMode = MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+    menuWrapperPattern->SetMenuParam(menuParam);
+    /**
+     * @tc.steps: step4. set keyboard avoid mode
+     * @tc.expected: wrapperRect_ not change
+     */
+    layoutAlgorithm->InitializeMenuAvoidKeyboard(menuNode);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect());
+}
+
+/**
+ * @tc.name: MenuKeyboardAvoidMode002
+ * @tc.desc: Verify MenuAvoidKeyboard with normal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node
+     */
+    MockPipelineContextGetTheme();
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    /**
+     * @tc.steps: step2. get menu layout algorithm
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step3. The test when the top of the soft keyboard is larger than the bottom of the menu layout area
+     * @tc.expected: wrapperRect_ not change
+     */
+    std::optional<Dimension> minKeyboardAvoidDistance = std::nullopt;
+    auto wrapperRect = Rect(0.0f, 0.0f, 0.0f, WRAPPER_RECT_HEIGHT_SMALL);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRect);
+    /**
+     * @tc.steps: step4. The test when the top of the soft keyboard is smaller than the top of the menu layout area
+     * @tc.expected: wrapperRect_ not change
+     */
+    wrapperRect = Rect(0.0f, WRAPPER_RECT_CENTER, 0.0f, WRAPPER_RECT_HEIGHT_SMALL);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRect);
+    /**
+     * @tc.steps: step5. The test menu need to be avoided normally
+     * @tc.expected: The menu successfully avoids the soft keyboard
+     */
+    wrapperRect = Rect(0.0f, 0.0f, 0.0f, WRAPPER_RECT_HEIGHT_LARGE);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    minKeyboardAvoidDistance = Dimension();
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION));
+}
+
+/**
+ * @tc.name: MenuKeyboardAvoidMode003
+ * @tc.desc: Verify MenuAvoidKeyboard with preview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node
+     */
+    MockPipelineContextGetTheme();
+    auto menuNode = GetOrCreateMenu(MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    /**
+     * @tc.steps: step2. get menu layout algorithm
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step3. Set preview mode, make the height after the avoidance is 0
+     * @tc.expected: wrapperRect_ not change
+     */
+    std::optional<Dimension> minKeyboardAvoidDistance = Dimension();
+    auto wrapperRect = Rect(0.0f, 0.0f, 0.0f, WRAPPER_RECT_HEIGHT_LARGE);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
+    layoutAlgorithm->param_.bottomSecurity = WRAPPER_RECT_HEIGHT_SMALL;
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRect);
+    /**
+     * @tc.steps: step4. Set preview mode, ,male the height after avoidance is 0, but the theme value can be avoided
+     * @tc.expected: wrapperRect_ change to keyboard top position subtract theme min keyboard avoid distance
+     */
+    layoutAlgorithm->param_.bottomSecurity = 0.0f;
+    layoutAlgorithm->param_.topSecurity = WRAPPER_RECT_HEIGHT_SMALL;
+    minKeyboardAvoidDistance = Dimension(WRAPPER_RECT_HEIGHT_SMALL);
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    auto context = menuNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    auto expectRect =
+        Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - menuTheme->GetMinKeyboardAvoidDistance().ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, expectRect);
+    /**
+     * @tc.steps: step5. The test preview menu need to be avoided normally
+     * @tc.expected: The menu successfully avoids the soft keyboard
+     */
+    layoutAlgorithm->param_.topSecurity = 0.0f;
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    expectRect = Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - WRAPPER_RECT_HEIGHT_SMALL);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, expectRect);
 }
 } // namespace OHOS::Ace::NG

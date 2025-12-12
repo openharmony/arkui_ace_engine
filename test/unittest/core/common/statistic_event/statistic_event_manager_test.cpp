@@ -93,8 +93,8 @@ HWTEST_F(StatisticEventManagerTest, SendStatisticEvents001, TestSize.Level1)
 HWTEST_F(StatisticEventManagerTest, ReportTimedStatisticEvent001, TestSize.Level1)
 {
     DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.clear();
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedMap_.clear();
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedMap_[1] = { "FA_APP_START" };
+    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.clear();
+    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(1);
     DelayedSingleton<StatisticEventManager>::GetInstance()->InitReporter();
     
     std::string bundleName = "";
@@ -110,6 +110,35 @@ HWTEST_F(StatisticEventManagerTest, ReportTimedStatisticEvent001, TestSize.Level
     EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 1);
 
     DelayedSingleton<StatisticEventManager>::GetInstance()->ReportTimedStatisticEvent(1);
+    EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 0);
+}
+
+/**
+ * @tc.name: StatisticEventManagerTest
+ * @tc.desc: Test ReportCustomTimedStatisticEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventManagerTest, ReportCustomTimedStatisticEvents001, TestSize.Level1)
+{
+    DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.clear();
+    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.clear();
+    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(1);
+    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(2);
+    DelayedSingleton<StatisticEventManager>::GetInstance()->customEventReportInterval_["FA_APP_START"] = 2;
+    
+    std::string bundleName = "";
+    AppInfoParcel newAppInfo(bundleName);
+    std::string eventName = "FA_APP_START";
+    StatisticEventInfoParcel newEventInfo(eventName, 1);
+    std::vector<StatisticEventInfoParcel> eventInfos;
+    eventInfos.emplace_back(newEventInfo);
+    DelayedSingleton<StatisticEventManager>::GetInstance()->SendStatisticEvents(
+        newAppInfo, eventInfos);
+
+    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportCustomTimedStatisticEvents(0);
+    EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 1);
+
+    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportCustomTimedStatisticEvents(2);
     EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 0);
 }
 } // namespace OHOS::Ace

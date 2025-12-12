@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context_deferred.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
@@ -49,16 +50,45 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+struct CanvasTestProperty {
+    std::optional<bool> immediateRender = std::nullopt;
+    std::optional<CanvasUnit> unit = std::nullopt;
+    std::optional<std::function<void(bool, CanvasUnit)>> onReady = std::nullopt;
+};
 
+CanvasTestProperty g_canvasTestProperty;
 class CanvasTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static RefPtr<FrameNode> CreateCanvasNode(CanvasTestProperty& testProperty);
+
+    void TearDown() override
+    {
+        g_canvasTestProperty.immediateRender = std::nullopt;
+        g_canvasTestProperty.unit = std::nullopt;
+        g_canvasTestProperty.onReady = std::nullopt;
+    }
 };
 
 void CanvasTestNg::SetUpTestCase() {}
 
 void CanvasTestNg::TearDownTestCase() {}
+
+RefPtr<FrameNode> CanvasTestNg::CreateCanvasNode(CanvasTestProperty& testProperty)
+{
+    auto immediateRender = testProperty.immediateRender.value_or(false);
+    auto unit = testProperty.unit.value_or(CanvasUnit::DEFAULT);
+    CanvasModelNG canvasModelNG;
+    canvasModelNG.Create();
+    canvasModelNG.UpdateUnit(unit);
+    canvasModelNG.SetImmediateRender(immediateRender);
+    if (testProperty.onReady.has_value()) {
+        canvasModelNG.SetOnReady(std::move(testProperty.onReady.value()));
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
+    return AceType::DynamicCast<FrameNode>(element);
+}
 
 /**
  * @tc.name: CanvasPatternTest001
@@ -381,10 +411,10 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnAttachToMainTreeTest
-* @tc.desc: CanvasPattern::OnAttachToMainTree
-* @tc.type: FUNC
-*/
+ * @tc.name: OnAttachToMainTreeTest
+ * @tc.desc: CanvasPattern::OnAttachToMainTree
+ * @tc.type: FUNC
+ */
 HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level1)
 {
     /**
@@ -410,16 +440,20 @@ HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level1)
     auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
     ASSERT_TRUE(contentModifier);
     pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    pattern->SetImmediateRender(false);
     ASSERT_TRUE(pattern->paintMethod_);
     pattern->OnAttachToMainTree();
-    EXPECT_EQ(pattern->paintMethod_->customNodeName_, "testName");
+    auto canvasRenderContext =
+        AceType::DynamicCast<CanvasRenderContextDeferred>(pattern->paintMethod_->canvasRenderContext_);
+    ASSERT_TRUE(canvasRenderContext);
+    EXPECT_EQ(canvasRenderContext->customNodeName_, "testName");
 }
 
 /**
-* @tc.name: FireOnContext2DAttachTest
-* @tc.desc: CanvasPattern::FireOnContext2DAttach
-* @tc.type: FUNC
-*/
+ * @tc.name: FireOnContext2DAttachTest
+ * @tc.desc: CanvasPattern::FireOnContext2DAttach
+ * @tc.type: FUNC
+ */
 HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level1)
 {
     /**
@@ -441,18 +475,16 @@ HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level1)
      * @tc.expected: onContext2DAttach equal 1.
      */
     int32_t onContext2DAttach = 0;
-    pattern->SetOnContext2DAttach([&onContext2DAttach]() {
-        ++onContext2DAttach;
-    });
+    pattern->SetOnContext2DAttach([&onContext2DAttach]() { ++onContext2DAttach; });
     pattern->FireOnContext2DAttach();
     EXPECT_EQ(onContext2DAttach, 1);
 }
 
 /**
-* @tc.name: FireOnContext2DDetachTest
-* @tc.desc: CanvasPattern::FireOnContext2DDetach
-* @tc.type: FUNC
-*/
+ * @tc.name: FireOnContext2DDetachTest
+ * @tc.desc: CanvasPattern::FireOnContext2DDetach
+ * @tc.type: FUNC
+ */
 HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level1)
 {
     /**
@@ -468,24 +500,22 @@ HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level1)
     geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
     ASSERT_TRUE(pattern);
-    
+
     /**
      * @tc.steps2: instantiation onContext2DDetach_.
      * @tc.expected: onContext2DDetach equal 1.
      */
     int32_t onContext2DDetach = 0;
-    pattern->SetOnContext2DDetach([&onContext2DDetach]() {
-        ++onContext2DDetach;
-    });
+    pattern->SetOnContext2DDetach([&onContext2DDetach]() { ++onContext2DDetach; });
     pattern->FireOnContext2DDetach();
     EXPECT_EQ(onContext2DDetach, 1);
 }
 
 /**
-* @tc.name: GetImageDataTest
-* @tc.desc: CanvasPattern::GetImageData
-* @tc.type: FUNC
-*/
+ * @tc.name: GetImageDataTest
+ * @tc.desc: CanvasPattern::GetImageData
+ * @tc.type: FUNC
+ */
 HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
 {
     /**
@@ -701,5 +731,37 @@ HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
      * @tc.expected: Function IsEnableMatchParent returns true.
      */
     EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
+
+/**
+ * @tc.name: CanvasPatternNoCacheTest
+ * @tc.desc: CanvasPatternNoCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
+{
+    g_canvasTestProperty.immediateRender = true;
+    g_canvasTestProperty.unit = CanvasUnit::DEFAULT;
+    bool onReadyHasTriggered = false;
+    g_canvasTestProperty.onReady = [&onReadyHasTriggered](bool needDrawingContext, CanvasUnit unit) {
+        onReadyHasTriggered = needDrawingContext;
+    };
+
+    /**
+     * @tc.steps: step1. Create Canvas with no cache.
+     * @tc.expected: Create successfully.
+     */
+    auto frameNode = CreateCanvasNode(g_canvasTestProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_TRUE(pattern->immediateRender_);
+
+    /**
+     * @tc.steps: step2. trigger onReady.
+     * @tc.expected: OnReady trigger successfully.
+     */
+    pattern->FireReadyEvent();
+    EXPECT_TRUE(onReadyHasTriggered);
 }
 } // namespace OHOS::Ace::NG

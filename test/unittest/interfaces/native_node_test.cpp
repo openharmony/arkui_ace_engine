@@ -1906,6 +1906,12 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DROP));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ITEM_ON_SELECT, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_SELECT));
+    
+    nodeType = static_cast<int32_t>(ARKUI_NODE_PICKER);
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_PICKER_EVENT_ON_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_PICKER_EVENT_ON_SCROLL_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_SCROLL_STOP));
 }
 
 /**
@@ -2160,6 +2166,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DROP));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_SELECT);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ITEM_ON_SELECT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CONTAINER_PICKER_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CONTAINER_PICKER_SCROLL_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_SCROLL_STOP));
 }
 
 /**
@@ -11479,5 +11489,38 @@ HWTEST_F(NativeNodeTest, ShowCounterConfigTest001, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0xFF0000FF);
     EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0xFFFFFF00);
     OH_ArkUI_ShowCounterConfig_Dispose(config);
+} 
+
+/**
+ * @tc.name: NativeNodeConvertToWindowTest001
+ * @tc.desc: Test convert to window function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeConvertToWindowTest001, TestSize.Level1)
+{
+    auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    ArkUI_IntOffset position = {10, 30};
+    ArkUI_IntOffset pos1;
+    auto ret = OH_ArkUI_NaviteModule_ConvertPositionToWindow(node, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
+    ret = OH_ArkUI_NaviteModule_ConvertPositionToWindow(nullptr, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeNodeConvertFromWindowTest001
+ * @tc.desc: Test convert to window function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeConvertFromWindowTest001, TestSize.Level1)
+{
+    auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    ArkUI_IntOffset position = {10, 30};
+    ArkUI_IntOffset pos1;
+    auto ret = OH_ArkUI_NaviteModule_ConvertPositionFromWindow(node, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
+    ret = OH_ArkUI_NaviteModule_ConvertPositionFromWindow(nullptr, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
 } // namespace OHOS::Ace
