@@ -405,7 +405,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializeParam(menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify && canExpandCurrentWindow_) {
-        ModifyOffset(position_);
+        ModifyOffset(position_, menuPattern);
     }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
@@ -2990,7 +2990,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
-            ModifyOffset(targetOffset_);
+            ModifyOffset(targetOffset_, menuPattern);
             menuPattern->SetTargetOffset(targetOffset_);
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
@@ -3630,11 +3630,15 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     return menuWindowRect;
 }
 
-void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset)
+void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", offset.ToString().c_str());
     if (isExpandDisplay_) {
-        auto containerId = Container::CurrentId();
+        auto host = menuPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto containerId = context->GetInstanceId();
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(containerId);
         CHECK_NULL_VOID(subwindow);
         offset += displayWindowRect_.GetOffset() - subwindow->GetWindowRect().GetOffset();

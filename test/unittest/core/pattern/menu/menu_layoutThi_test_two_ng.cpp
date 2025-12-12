@@ -747,7 +747,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
     ASSERT_NE(menuNode, nullptr);
     menuPattern->AttachToFrameNode(menuNode);
@@ -756,7 +756,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
  
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
 }
  
