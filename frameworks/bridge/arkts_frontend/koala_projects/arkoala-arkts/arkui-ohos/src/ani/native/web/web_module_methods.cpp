@@ -87,11 +87,14 @@ static void DefaultOnShowFileSelector(ani_vm* vm, void* paramPeer, void* resultP
     ani_env* env = GetAniEnv(vm);
     if (!env) {
         HILOGE("DefaultOnShowFileSelector callback env is nullptr");
+        release(paramPeer);
+        release(resultPeer);
         return;
     }
     ani_object paramObj;
     if (!GetFileSelectorObject(env, "arkui.component.web.FileSelectorParam", &paramObj, paramPeer)) {
         release(paramPeer);
+        release(resultPeer);
         return;
     }
     ani_object resultObj;
