@@ -473,6 +473,8 @@ public:
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
 
+    void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+
 protected:
     void RunIntentPageIfNeeded();
     void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);

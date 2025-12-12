@@ -215,4 +215,17 @@ int32_t UIContentServiceStubImpl::ExeAppAIFunction(
     UiSessionManager::GetInstance()->ExeAppAIFunction(funcName, params);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::RegisterContentChangeCallback(const ContentChangeConfig& config,
+    const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
+{
+    UiSessionManager::GetInstance()->RegisterContentChangeCallback(config);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterContentChangeCallback()
+{
+    UiSessionManager::GetInstance()->UnregisterContentChangeCallback();
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

@@ -68,6 +68,8 @@ public:
         SENDCOMMAND_EVENT,
         SEND_COMMAND,
         EXE_APP_AI_FUNCTION,
+        REGISTER_CONTENT_CHANGE,
+        UNREGISTER_CONTENT_CHANGE,
     };
 
     /**
@@ -281,6 +283,19 @@ public:
      */
     virtual int32_t ExeAppAIFunction(const std::string& funcName, const std::string& params,
         const std::function<void(uint32_t)>& finishCallback) = 0;
+
+    /**
+     * @description: define register a callback on content change occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
+        const std::function<void(ChangeType type, const std::string& simpleTree)> callback) = 0;
+
+    /**
+     * @description: define unregister the content change occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterContentChangeCallback() = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -304,6 +319,7 @@ public:
         SEND_IMAGES,
         SEND_CURRENT_PAGE_NAME,
         SEND_EXE_APP_AI_FUNCTION_RESULT,
+        SEND_CONTENT_CHANGE,
     };
 
     /**
@@ -380,6 +396,11 @@ public:
      * @description: define ui send execute application AI function result for sa service
      */
     virtual void SendExeAppAIFunctionResult(uint32_t result) = 0;
+
+    /**
+     * @description: define send the content change to the proxy interface
+     */
+    virtual void SendContentChange(ChangeType type, const std::string& simpleTree) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

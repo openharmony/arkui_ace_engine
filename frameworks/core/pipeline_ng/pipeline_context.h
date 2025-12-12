@@ -90,6 +90,7 @@ class NodeRenderStatusMonitor;
 class MagnifierController;
 class LoadCompleteManager;
 class PageInfo;
+class ContentChangeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1343,6 +1344,7 @@ public:
     {
         isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
     }
+    const RefPtr<ContentChangeManager>& GetContentChangeManager() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1706,6 +1708,7 @@ private:
     std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    RefPtr<ContentChangeManager> contentChangeMgr_;
 };
 
 /**

@@ -122,6 +122,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
@@ -5850,6 +5851,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
+    SetContentChangeDetectCallback(taskExecutor);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6241,5 +6243,44 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
     LOGI(
         "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
     return static_cast<int32_t>(windowId);
+}
+
+void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
+        (ContentChangeConfig config) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [config]() {
+                AceEngine::Get().NotifyContainers([config](const RefPtr<Container>& container) {
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+                    CHECK_NULL_VOID(ngPipeline);
+                    auto contentChangeMgr = ngPipeline->GetContentChangeManager();
+                    CHECK_NULL_VOID(contentChangeMgr);
+                    contentChangeMgr->StartContentChangeReport(config);
+                });
+            },
+            TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStart");
+    });
+    UiSessionManager::GetInstance()->SetStopContentChangeDetectCallback([weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+                    CHECK_NULL_VOID(ngPipeline);
+                    auto contentChangeMgr = ngPipeline->GetContentChangeManager();
+                    CHECK_NULL_VOID(contentChangeMgr);
+                    contentChangeMgr->StopContentChangeReport();
+                });
+            },
+            TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
+    });
 }
 } // namespace OHOS::Ace

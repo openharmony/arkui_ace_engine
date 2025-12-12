@@ -1489,6 +1489,9 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
 
+    void OnContentChangeRegister(const ContentChangeConfig& config);
+    void OnContentChangeUnregister();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
