@@ -3134,8 +3134,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFormFullSet(ArkUIRun
         { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS },
         { "Button", ARKUI_BUTTON }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE },
         { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK }, { "TextTimer", ARKUI_TEXT_TIMER },
-        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER } };
+        { "Marquee", ARKUI_MARQUEE }, { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP },
+        { "Rating", ARKUI_RATING}, { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Toggle", ARKUI_TOGGLE }};
     auto reslut = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMapFull);
     return reslut;
 }

@@ -3548,6 +3548,8 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
     }
     if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
         PreloadUIContent(localRuntime_);
+        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
+        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
     }
     currentMode_ = mode;
 }
