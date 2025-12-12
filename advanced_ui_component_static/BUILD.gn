@@ -48,6 +48,7 @@ group("advanced_ui_component_static") {
       "toolbar:toolBar",
       "filter:Filter",
       "formmenu:formMenu",
+      "arcslider:arcSlider",
     ]
   }
 }
