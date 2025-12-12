@@ -453,7 +453,11 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
     richEditorPattern->UpdatePlaceholderFontColor(color);
 
     // test update placeholder textColor
-    auto layout
+    auto layoutProperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto placeholderTextColor = layoutProperty->GetPlaceholderTextColor();
+    EXPECT_TRUE(placeholderTextColor.has_value());
+    EXPECT_EQ(placeholderTextColor.value(), color);
 }
 
 }
