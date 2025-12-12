@@ -170,7 +170,12 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindScrollAncestor(
     CHECK_NULL_RETURN(currentNode, AceFocusMoveResult::FIND_FAIL);
     auto supportScrollActionFunc = supportScrollActionFuncs.find(checkAction);
     CHECK_EQUAL_RETURN(supportScrollActionFunc, supportScrollActionFuncs.end(), AceFocusMoveResult::FIND_FAIL);
-    auto parent = currentNode->GetAceParent();
+    std::shared_ptr<FocusRulesCheckNode> parent;
+    if (condition.bypassSelf) {
+        parent = currentNode->GetAceParent();
+    } else {
+        parent = currentNode;
+    }
     while (parent) {
         if (parent->IsAccessibiltyVisible()) {
             if (supportScrollActionFunc->second(parent)) {
