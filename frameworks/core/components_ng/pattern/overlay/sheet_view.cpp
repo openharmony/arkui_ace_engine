@@ -66,6 +66,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
+    InitSheetKey(sheetNode, builder->GetId(), targetId);
     sheetPattern->UpdateSheetType();
     sheetPattern->InitSheetObject();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
@@ -82,6 +83,23 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateCloseIconButtonNode(sheetNode, sheetStyle);
     return sheetNode;
+}
+
+void SheetView::InitSheetKey(const RefPtr<FrameNode>& sheetNode, int32_t builderId, int32_t targetId)
+{
+    CHECK_NULL_VOID(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    const auto& overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    bool isValidTarget = overlayManager->CheckTargetIdIsValid(targetId);
+    auto overlayRootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(overlayRootNode);
+    SheetKey sheetKey;
+    if (!isValidTarget && NearEqual(targetId, overlayRootNode->GetId())) {
+        sheetKey = SheetKey(isValidTarget, builderId, targetId);
+    }
+    sheetPattern->SetSheetKey(sheetKey);
 }
 
 RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
