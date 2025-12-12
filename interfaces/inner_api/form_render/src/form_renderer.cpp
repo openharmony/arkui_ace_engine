@@ -639,14 +639,13 @@ void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
         HILOG_ERROR("SetRenderGroupEnableFlag rsSurfaceNode is nullptr.");
         return ;
     }
-    
+
+    HILOG_INFO("SetRenderGroupEnableFlag isEnable:%{public}d",isEnable);
     if (!isEnable) {
         rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
-        HILOG_INFO("force disable uifirst and rendergroup");
-    } else {
-        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::NONE);
-        HILOG_INFO("reset uifirst and rendergroup");
+        return;
     }
+    rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::NONE);
 }
  
 void FormRenderer::SetVisibleChange(bool isVisible)
