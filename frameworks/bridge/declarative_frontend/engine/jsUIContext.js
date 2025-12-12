@@ -301,7 +301,7 @@ class UIContext {
      * @since 10
      */
     constructor(instanceId) {
-        this.instanceId_ = instanceId ?? -1;
+        this.instanceId_ = instanceId;
     }
 
     static getCallingScopeUIContext() {
@@ -477,7 +477,7 @@ class UIContext {
     }
 
     getId() {
-        return this.instanceId_;
+        return this.instanceId_ ?? -1;
     }
 
     getComponentUtils() {
