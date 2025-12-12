@@ -92,6 +92,7 @@ public:
         const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) override;
+    void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -213,6 +214,8 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
     static void SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed);
     static ScrollSnapAnimationSpeed GetScrollSnapAnimationSpeed(FrameNode* frameNode);
+    static void SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool supportEmptyBranch);
+    static bool GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;
