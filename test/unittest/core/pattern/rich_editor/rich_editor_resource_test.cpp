@@ -451,6 +451,9 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
 
     richEditorPattern->OnColorModeChange(0);
     richEditorPattern->UpdatePlaceholderFontColor(color);
+
+    // test update placeholder textColor
+    auto layout
 }
 
 }
