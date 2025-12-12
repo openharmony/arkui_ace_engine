@@ -73,7 +73,7 @@ ArkUIWaterFlowSectionGap ParseDimension(ani_env *env, ani_ref dimensionRef)
     env->Object_InstanceOf(static_cast<ani_object>(dimensionRef), doubleClass, &isDouble);
     if (isDouble) {
         ani_double dimension;
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "unboxed", ":d", &dimension);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "toDouble", ":d", &dimension);
         if (dimension < 0) {
             dimension = 0;
         }
@@ -157,7 +157,7 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
     }
     if (!isUndefined) {
         ani_double crossCnt;
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "unboxed", ":d", &crossCnt);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "toDouble", ":d", &crossCnt);
         if (crossCnt <= 0) {
             crossCnt = 1;
         }
@@ -218,7 +218,7 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
 
             env->FunctionalObject_Call(static_cast<ani_fn_object>(fnObjGlobalRef), 1, &aniIndex, &aniRes);
             ani_double res;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(aniRes), "unboxed", ":d", &res);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(aniRes), "toDouble", ":d", &res);
             return static_cast<float>(res);
         };
         curSection.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);

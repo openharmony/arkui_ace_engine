@@ -82,7 +82,7 @@ void ConvertComponentCreateFunc(ani_vm* vm, std::function<int64_t(const int32_t&
             return 0;
         }
         ani_long aniValue;
-        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "unboxed", ":l", &aniValue)) {
+        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "toLong", ":l", &aniValue)) {
             HILOGE("[ACE_APPBAR]Create app bar custom node failed");
             return 0;
         }

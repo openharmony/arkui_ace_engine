@@ -913,13 +913,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "toDouble", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "toDouble", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }

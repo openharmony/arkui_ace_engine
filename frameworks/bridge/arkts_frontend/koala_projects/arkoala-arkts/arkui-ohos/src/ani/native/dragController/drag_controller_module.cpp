@@ -616,8 +616,8 @@ std::optional<Dimension> ConvertDimensionType(ani_env* env, ani_ref touchPoint)
     if (AniUtils::IsClassObject(env, touchPoint, "std.core.Numeric")) {
         ani_double numberValue;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(touchPoint), "unboxed", ":d", &numberValue)) {
-            HILOGW("Failed to call unboxed method on Numeric object");
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(touchPoint), "toDouble", ":d", &numberValue)) {
+            HILOGW("Failed to call toDouble method on Numeric object");
         }
         parameter.SetValue(static_cast<double>(numberValue));
         parameter.SetUnit(DimensionUnit::VP);

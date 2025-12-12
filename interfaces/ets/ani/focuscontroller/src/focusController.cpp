@@ -92,7 +92,7 @@ static bool GetBooleanValue(ani_env* env, ani_object object, bool& value)
         return false;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "unboxed", ":z", &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "toBoolean", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);

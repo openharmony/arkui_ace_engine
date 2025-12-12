@@ -41,7 +41,7 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     }
 
     ani_long frameNodePeerPtr;
-    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "unboxed", ":J", &frameNodePeerPtr);
+    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "toLong", ":J", &frameNodePeerPtr);
     if (status != ANI_OK) {
         LOGE("fail to unbox frameNodePeerObj");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -244,7 +244,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     }
 
     ani_long nodeContentPeerPtr;
-    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "unboxed", ":J", &nodeContentPeerPtr);
+    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "toLong", ":J", &nodeContentPeerPtr);
     if (status != ANI_OK) {
         LOGE("unbox nodeContentPeerObj fail");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;

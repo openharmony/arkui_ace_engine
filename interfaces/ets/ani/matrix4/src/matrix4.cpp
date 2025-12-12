@@ -100,7 +100,7 @@ ani_method GetOrCreateToIntMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(intClass, "unboxed", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(intClass, "toInt", nullptr, &result)) {
         return nullptr;
     }
 
@@ -230,7 +230,7 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
             }
             ani_double unboxedDouble {};
             if (env->Object_CallMethodByName_Double(
-                reinterpret_cast<ani_object>(value), "unboxed", ":d", &unboxedDouble) != ANI_OK) {
+                reinterpret_cast<ani_object>(value), "toDouble", ":d", &unboxedDouble) != ANI_OK) {
                 return result;
             }
             auto ret = static_cast<double>(unboxedDouble);

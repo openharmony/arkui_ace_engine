@@ -305,7 +305,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(onlyForLifting);
             ani_boolean onlyForLiftingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &onlyForLiftingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &onlyForLiftingValue)) {
                 info.onlyForLifting = static_cast<bool>(onlyForLiftingValue);
             }
         }
@@ -317,7 +317,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(delayCreating);
             ani_boolean delayCreatingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &delayCreatingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &delayCreatingValue)) {
                 info.delayCreating = static_cast<bool>(delayCreatingValue);
             }
         }
