@@ -132,6 +132,28 @@ export interface LayoutConstraint {
     percentReference: Size;
 }
 
+export class LayoutConstraintImpl implements LayoutConstraint {
+    maxSize: Size;
+    minSize: Size;
+    percentReference: Size;
+    constructor(maxSizeWidth: double, maxSizeHeight: double,
+        minSizeWidth: double, minSizeHeight: double,
+        percentReferenceWidth: double, percentReferenceHeight: double) {
+        this.maxSize = { width: maxSizeWidth, height: maxSizeHeight };
+        this.minSize = { width: minSizeWidth, height: minSizeHeight };
+        this.percentReference = { width: percentReferenceWidth, height: percentReferenceHeight };
+    }
+}
+
+export class NodePositionImpl implements NodePosition{
+    x: double;
+    y: double;
+    constructor(x: double, y: double) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -232,8 +254,7 @@ export class FrameNode implements MaterializedBase {
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
-                ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-                ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
+                ArkUIAniModule._SetCustomCallbackWithCheck(this!.peer!.ptr, this);  
             } else {
                 const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
@@ -469,31 +490,30 @@ export class FrameNode implements MaterializedBase {
     public getLayoutPosition(): NodePosition {
         return FrameNodeExtender.getLayoutPosition(this);
     }
-   public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigBorderWidth(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
+        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth_serialize(this);
+        return {
+            top: borderWidth.top, left: borderWidth.left,
+            bottom: borderWidth.bottom, right: borderWidth.right
+        };
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigPadding(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let padding = FrameNodeExtender.getUserConfigPadding_serialize(this)
+        return {
+            top: padding.top, left: padding.left,
+            bottom: padding.bottom, right: padding.right
+        }
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigMargin(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let margin = FrameNodeExtender.getUserConfigMargin_serialize(this)
+        return {
+            top: margin.top, left: margin.left,
+            bottom: margin.bottom, right: margin.right
+        }
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        let sizeTLengthMetrics: SizeTLengthMetrics = FrameNodeExtender.getUserConfigSize(this);
-        let result: SizeT<LengthMetrics> = {
-            width: sizeTLengthMetrics.width,
-            height: sizeTLengthMetrics.height
-        };
-        return result;
+        let size = FrameNodeExtender.getUserConfigSize_serialize(this)
+        return { width: size.width, height: size.height }
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
@@ -513,25 +533,13 @@ export class FrameNode implements MaterializedBase {
     public getInspectorInfo(): Object {
         return FrameNodeExtender.getInspectorInfo(this);
     }
-    public onDraw(context: DrawContext): void {
-    }
-    public onMeasureInner(width1: number, height1: number, width2: number, height2: number,
-        width3: number, height3: number): void {
-        const maxSize: Size = { width: width1, height: height1 };
-        const minSize: Size = { width: width2, height: height2 };
-        const percentReference: Size = { width: width3, height: height3 };
-        const constraint: LayoutConstraint = { maxSize: maxSize, minSize: minSize, percentReference: percentReference };
-        this.onMeasure(constraint);
-    }
-    public onMeasure(constraint: LayoutConstraint): void {
-        ArkUIAniModule._OnMeasure_InnerMeasure(this!.peer!.ptr);
-    }
-    public onLayoutInner(x: number, y: number): void {
-        const position: NodePosition = { x: x, y: y };
-        this.onLayout(position);
-    }
-    public onLayout(position: NodePosition): void {
-        ArkUIAniModule._OnLayout_InnerLayout(this!.peer!.ptr);
+    public onDrawWrapper(context: DrawContext): void {
+        context.canvas.clipRect({
+            left: 0,
+            top: 0,
+            right: this.uiContext!.vp2px(context.size.width),
+            bottom: this.uiContext!.vp2px(context.size.height)
+        })
     }
     public setMeasuredSize(size: Size): void {
         const width = Math.max(size.width, 0);
