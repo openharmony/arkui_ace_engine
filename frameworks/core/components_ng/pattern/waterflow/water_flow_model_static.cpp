@@ -112,8 +112,9 @@ void WaterFlowModelStatic::SetCachedCount(FrameNode* frameNode, const std::optio
 void WaterFlowModelStatic::SetCachedCount(
     FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
-    if (count.has_value() && count.value() >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count.value(), frameNode);
+    if (count) {
+        int32_t value = count.value() < 0 ? 1 : count.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
     }
