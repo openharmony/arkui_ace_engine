@@ -16,6 +16,7 @@
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {

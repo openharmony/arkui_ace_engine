@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG::Converter {

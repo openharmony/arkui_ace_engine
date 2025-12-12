@@ -16,7 +16,6 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/frontend.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -184,12 +183,12 @@ void MoveCommonUnderPageNodeImpl(Ark_NativePointer commonNode,
         return;
     }
     stageNode->RemoveChildSilently(AceType::Claim(common));
-    
+
     auto page = reinterpret_cast<FrameNode*>(pageNode);
     CHECK_NULL_VOID(page);
     auto pageFrameNode = AceType::Claim(page);
     common->MountToParent(pageFrameNode);
-    
+
     pageFrameNode->MarkModifyDone();
     pageFrameNode->MarkDirtyNode();
     common->MarkDirtyNode();

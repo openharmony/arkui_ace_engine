@@ -39,10 +39,13 @@
 #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
@@ -770,7 +773,7 @@ bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    const auto event = Converter::ArkKeyEventSync(keyEventInfo);
+    const auto event = Converter::SyncEvent<Ark_KeyEvent>(keyEventInfo);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(
         event.ArkValue());
     return result.value_or(false);
@@ -1228,7 +1231,7 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     Ark_NativeEmbedTouchInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
-    const auto event = Converter::ArkTouchEventSync(touchEventInfo);
+    const auto event = Converter::SyncEvent<Ark_TouchEvent>(touchEventInfo);
     parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
@@ -1247,7 +1250,7 @@ void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback
     Ark_NativeEmbedMouseInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto mouseEventInfo = eventInfo->GetMouseEventInfo();
-    const auto event = Converter::ArkMouseEventSync(mouseEventInfo);
+    const auto event = Converter::SyncEvent<Ark_MouseEvent>(mouseEventInfo);
     parameter.mouseEvent = Converter::ArkValue<Opt_MouseEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();

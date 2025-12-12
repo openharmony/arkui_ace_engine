@@ -24,7 +24,6 @@
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "generated/type_helpers.h"

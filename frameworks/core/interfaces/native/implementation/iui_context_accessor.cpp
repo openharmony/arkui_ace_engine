@@ -15,9 +15,9 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"

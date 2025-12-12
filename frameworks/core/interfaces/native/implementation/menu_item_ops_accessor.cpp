@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
- 
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemOpsAccessor {
 Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
@@ -47,4 +46,3 @@ const GENERATED_ArkUIMenuItemOpsAccessor* GetMenuItemOpsAccessor()
     return &MenuItemOpsAccessorImpl;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
- 

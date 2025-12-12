@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -44,7 +48,7 @@ void SetOnClickImpl(Ark_UICommonEvent peer, const Opt_Callback_ClickEvent_Void* 
     auto arkOnClick = Converter::GetOptPtr(callback_);
     if (arkOnClick) {
         auto onClick = [arkCallback = CallbackHelper(arkOnClick.value())](GestureEvent& info) {
-            auto clickEvent = Converter::ArkClickEventSync(info);
+            auto clickEvent = Converter::SyncEvent<Ark_ClickEvent>(info);
             arkCallback.InvokeSync(clickEvent.ArkValue());
         };
         ViewAbstract::SetFrameNodeCommonOnClick(rawPtr, std::move(onClick));
@@ -61,7 +65,7 @@ void SetOnTouchImpl(Ark_UICommonEvent peer, const Opt_Callback_TouchEvent_Void* 
     auto arkOnTouch = Converter::GetOptPtr(callback_);
     if (arkOnTouch) {
         auto onTouch = [arkCallback = CallbackHelper(arkOnTouch.value())](TouchEventInfo& info) {
-            auto touchEvent = Converter::ArkTouchEventSync(info);
+            auto touchEvent = Converter::SyncEvent<Ark_TouchEvent>(info);
             arkCallback.InvokeSync(touchEvent.ArkValue());
         };
         ViewAbstract::SetFrameNodeCommonOnTouch(rawPtr, std::move(onTouch));
@@ -107,7 +111,7 @@ void SetOnKeyEventImpl(Ark_UICommonEvent peer, const Opt_Callback_KeyEvent_Void*
     std::optional<Callback_KeyEvent_Void> arkOnKey = callback_ ? Converter::GetOpt(*callback_) : std::nullopt;
     if (arkOnKey) {
         auto onKey = [arkCallback = CallbackHelper(arkOnKey.value())](KeyEventInfo& info) {
-            auto keyEvent = Converter::ArkKeyEventSync(info);
+            auto keyEvent = Converter::SyncEvent<Ark_KeyEvent>(info);
             arkCallback.InvokeSync(keyEvent.ArkValue());
             LOGW("arkCallback does not return value");
             return false;
@@ -154,7 +158,7 @@ void SetOnHoverImpl(Ark_UICommonEvent peer, const Opt_HoverCallback* callback_)
     auto arkOnHover = Converter::GetOptPtr(callback_);
     if (arkOnHover) {
         auto onHover = [arkCallback = CallbackHelper(arkOnHover.value())](bool isHover, HoverInfo& info) {
-            auto hoverEvent = Converter::ArkHoverEventSync(info);
+            auto hoverEvent = Converter::SyncEvent<Ark_HoverEvent>(info);
             auto arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
             arkCallback.InvokeSync(arkIsHover, hoverEvent.ArkValue());
         };
@@ -172,7 +176,7 @@ void SetOnMouseImpl(Ark_UICommonEvent peer, const Opt_Callback_MouseEvent_Void* 
     auto arkOnMouse = Converter::GetOptPtr(callback_);
     if (arkOnMouse) {
         auto onMouse = [arkCallback = CallbackHelper(arkOnMouse.value())](MouseInfo& info) {
-            auto mouseEvent = Converter::ArkMouseEventSync(info);
+            auto mouseEvent = Converter::SyncEvent<Ark_MouseEvent>(info);
             arkCallback.InvokeSync(mouseEvent.ArkValue());
         };
         ViewAbstract::SetFrameNodeCommonOnMouse(rawPtr, std::move(onMouse));

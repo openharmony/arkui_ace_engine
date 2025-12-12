@@ -18,6 +18,7 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_static.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -98,10 +99,12 @@ SwiperDigitalParameters Convert(const Ark_DigitIndicator& src)
     p.dimEnd = Converter::OptConvert<Dimension>(src._end);
 
     if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
-        std::tie(p.fontSize, p.fontWeight) = *font;
+        p.fontSize = font->size;
+        p.fontWeight = font->weight;
     }
     if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
-        std::tie(p.selectedFontSize, p.selectedFontWeight) = *font;
+        p.selectedFontSize = font->size;
+        p.selectedFontWeight = font->weight;
     }
 
     p.fontColor = Converter::OptConvert<Color>(src._fontColor);

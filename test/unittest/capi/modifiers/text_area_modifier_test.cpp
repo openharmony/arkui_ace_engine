@@ -28,6 +28,7 @@
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"

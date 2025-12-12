@@ -17,7 +17,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/ani/frame_node_peer_impl.h"
@@ -25,9 +24,9 @@
 #include "core/interfaces/native/implementation/cut_event_peer.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
@@ -53,7 +52,7 @@ void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue&
     dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText(), ctx);
 }
 
-void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src)
+void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanIndex = Converter::ArkValue<Ark_Int32>(src.GetSpanIndex());
     dst.spanRange.value0 = Converter::ArkValue<Ark_Int32>(src.GetSpanRangeStart());
@@ -556,7 +555,7 @@ void SetOnSubmitImpl(Ark_NativePointer node,
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](int32_t param1,
         NG::TextFieldCommonEvent& param2) {
         auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
-        const auto event = Converter::ArkSubmitEventSync(param2);
+        const auto event = Converter::SyncEvent<Ark_SubmitEvent>(param2);
         arkCallback.InvokeSync(enterKey, event.ArkValue());
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
@@ -802,7 +801,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Ark_KeyboardOptions>(options);
+    auto convValue = Converter::GetOptPtr(options);
     std::optional<bool> supportAvoidance;
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);

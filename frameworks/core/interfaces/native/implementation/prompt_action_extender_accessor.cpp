@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -21,6 +20,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"

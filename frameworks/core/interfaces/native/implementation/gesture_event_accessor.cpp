@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
@@ -79,7 +78,7 @@ Array_FingerInfo GetFingerInfosImpl(Ark_GestureEvent peer)
     std::list<FingerInfo> fingerInfos;
     std::list<FingerInfo> touchFingers;
     std::list<FingerInfo> otherFingers;
-    
+
     for (const auto& finger : fingerList) {
         if (finger.sourceType_ == SourceType::TOUCH &&
             finger.sourceTool_ == SourceTool::FINGER) {

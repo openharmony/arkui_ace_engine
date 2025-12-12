@@ -14,7 +14,6 @@
  */
 
 #include <optional>
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -130,7 +129,7 @@ Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
-    
+
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);

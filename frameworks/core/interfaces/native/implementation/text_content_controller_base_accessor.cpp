@@ -24,7 +24,7 @@ template<> void AssignCast(std::optional<int32_t>& dst, const Ark_TextContentCon
     dst = Converter::OptConvert<int32_t>(src.offset);
 }
 
-void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
+void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src, ConvContext *ctx)
 {
     dst.x = Converter::ArkValue<Ark_Int32>(src.GetX());
     dst.y = Converter::ArkValue<Ark_Int32>(src.GetY());
