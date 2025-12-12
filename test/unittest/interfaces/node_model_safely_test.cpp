@@ -745,3 +745,15 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest027, TestSize.Level1)
 
     DisposeNodeSafely(node);
 }
+
+/**
+ * @tc.name: NodeModelSafelyTest028
+ * @tc.desc: Test GetUserDataSafely function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest028, TestSize.Level1)
+{
+    ArkUI_NodeHandle node = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_UNDEFINED);
+    ASSERT_EQ(node, nullptr);
+    DisposeNodeSafely(node);
+}

@@ -8530,6 +8530,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest149, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest150
+ * @tc.desc: Test Undefined function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest150, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_UNDEFINED);
+    ASSERT_EQ(node, nullptr);
+    nodeAPI->disposeNode(node);
+}
+
+/**
  * @tc.name: NativeNodeTest_OutlineColor001
  * @tc.desc: Test customNode function.
  * @tc.type: FUNC
