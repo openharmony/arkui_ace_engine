@@ -44532,6 +44532,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
+    Ark_TextMenuItemId GetPasswordVaultImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
+        }
+        string out("getPasswordVault(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)
@@ -50309,6 +50321,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextMenuItemIdAccessor::GetTRANSLATEImpl,
             TextMenuItemIdAccessor::GetSEARCHImpl,
             TextMenuItemIdAccessor::GetSHAREImpl,
+            TextMenuItemIdAccessor::GetAutoFillImpl,
+            TextMenuItemIdAccessor::GetPasswordVaultImpl,
         };
         return &TextMenuItemIdAccessorImpl;
     }

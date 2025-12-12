@@ -597,7 +597,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern022, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern023
- * @tc.desc: Test TextPattern CloseKeyboard.
+ * @tc.desc: Test TextPattern CloseKeyboard
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern023, TestSize.Level1)
@@ -624,7 +624,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern023, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern024
- * @tc.desc: Test TextPattern AutoFillValueChanged.
+ * @tc.desc: Test TextPattern AutoFillValueChanged
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
@@ -644,7 +644,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern025
- * @tc.desc: Test TextPattern HandleLongPress.
+ * @tc.desc: Test TextPattern HandleLongPress
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
@@ -693,7 +693,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern026
- * @tc.desc: Test TextPattern InitEditingValueText.
+ * @tc.desc: Test TextPattern InitEditingValueText
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern026, TestSize.Level1)
@@ -714,7 +714,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern026, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern027
- * @tc.desc: Test TextPattern InitValueText.
+ * @tc.desc: Test TextPattern InitValueText
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern027, TestSize.Level1)
@@ -737,7 +737,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern027, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern028
- * @tc.desc: Test TextPattern HandleRightMouseEvent.
+ * @tc.desc: Test TextPattern HandleRightMouseEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern028, TestSize.Level1)

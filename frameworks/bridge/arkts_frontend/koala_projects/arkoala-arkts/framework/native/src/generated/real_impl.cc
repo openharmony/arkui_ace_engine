@@ -18465,6 +18465,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_TextMenuItemId GetPasswordVaultImpl()
+    {
+        return {};
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)
@@ -22590,6 +22594,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextMenuItemIdAccessor::GetTRANSLATEImpl,
             TextMenuItemIdAccessor::GetSEARCHImpl,
             TextMenuItemIdAccessor::GetSHAREImpl,
+            TextMenuItemIdAccessor::GetAutoFillImpl,
+            TextMenuItemIdAccessor::GetPasswordVaultImpl,
         };
         return &TextMenuItemIdAccessorImpl;
     }

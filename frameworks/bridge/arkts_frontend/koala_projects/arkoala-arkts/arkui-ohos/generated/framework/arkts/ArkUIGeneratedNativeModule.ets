@@ -6022,6 +6022,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextMenuItemId_getAutoFill(): KPointer
     @ani.unsafe.Direct
+    native static _TextMenuItemId_getPasswordVault(): KPointer
+    @ani.unsafe.Direct
     native static _TextPickerDialog_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextPickerDialog_getFinalizer(): KPointer
