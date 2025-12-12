@@ -2389,12 +2389,20 @@ HWTEST_F(RosenRenderContextTest, RemoveKeyFrameNode, TestSize.Level1)
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
     rosenRenderContext->CreateKeyFrameNode();
     ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
-    rosenRenderContext->reDraggingFlag_ = true;
+    // test not to remove when dragging or has cache
+    rosenRenderContext->SetIsDraggingFlag(true);
+    rosenRenderContext->SetHasKeyFrameCache(false);
     rosenRenderContext->RemoveKeyFrameNode();
-    ASSERT_EQ(rosenRenderContext->reDraggingFlag_, false);
-    ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    EXPECT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    rosenRenderContext->SetIsDraggingFlag(false);
+    rosenRenderContext->SetHasKeyFrameCache(true);
     rosenRenderContext->RemoveKeyFrameNode();
-    ASSERT_EQ(rosenRenderContext->keyFrameNode_, nullptr);
+    EXPECT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    // test remove ok
+    rosenRenderContext->SetIsDraggingFlag(false);
+    rosenRenderContext->SetHasKeyFrameCache(false);
+    rosenRenderContext->RemoveKeyFrameNode();
+    EXPECT_EQ(rosenRenderContext->keyFrameNode_, nullptr);
 }
 
 /**
