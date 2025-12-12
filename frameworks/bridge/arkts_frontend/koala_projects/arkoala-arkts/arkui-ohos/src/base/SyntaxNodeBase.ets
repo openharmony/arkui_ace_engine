@@ -17,6 +17,7 @@ import { IncrementalNode, Disposable } from '@koalaui/runtime'
 import { int32, KoalaCallsiteKey } from '@koalaui/common'
 import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
+import { ReusablePool } from '../ReusablePool'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 
 export class NodeHolder {
@@ -54,6 +55,8 @@ export class ForEachNodePeer extends PeerNode {
 }
 
 export class LazyNodePeer extends PeerNode {
+    private _reusePool?: Map<string, ReusablePool>
+
     public static create(isRepeat: boolean = false): LazyNodePeer {
         const peerId = PeerNode.nextId()
         const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
@@ -65,6 +68,27 @@ export class LazyNodePeer extends PeerNode {
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
+    }
+
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+        if (!this._reusePool) {
+            return undefined
+        }
+        if (this._reusePool!.has(reuseKey)) {
+            return this._reusePool!.get(reuseKey)!.get()
+        }
+        return undefined
+    }
+
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool!.has(reuseKey)) {
+            this._reusePool!.set(reuseKey, new ReusablePool())
+        }
+        this._reusePool!.get(reuseKey)!.put(child)
+        return true
     }
 }
 
