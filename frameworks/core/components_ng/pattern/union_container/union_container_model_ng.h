@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_render_context_creator.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H
 
-#include <gmock/gmock.h>
+#include "core/components_ng/pattern/union_container/union_container_model.h"
 
-#include "test/mock/core/render/mock_render_context.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
-thread_local RenderContextCreateFunction MockRenderContextCreator::renderContextCreateFunc_ = nullptr;
-RefPtr<RenderContext> RenderContext::Create()
-{
-    if (MockRenderContextCreator::renderContextCreateFunc_) {
-        return MockRenderContextCreator::renderContextCreateFunc_();
-    }
-    return MakeRefPtr<::testing::NiceMock<MockRenderContext>>();
-}
+class ACE_EXPORT UnionContainerModelNG : public OHOS::Ace::UnionContainerModel {
+public:
+    void Create(const UnionContainerOptions& options) override;
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H

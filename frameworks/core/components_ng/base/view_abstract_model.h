@@ -322,6 +322,7 @@ public:
     virtual void SetUseEffect(bool useEffect, EffectType effectType) = 0;
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
+    virtual void SetUseUnion(bool useUnion) {}
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,

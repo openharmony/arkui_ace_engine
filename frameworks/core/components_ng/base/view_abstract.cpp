@@ -5888,6 +5888,15 @@ void ViewAbstract::SetUseEffect(bool useEffect, EffectType effectType)
     SetUseEffect(frameNode, useEffect, effectType);
 }
 
+void ViewAbstract::SetUseUnion(bool useUnion)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetUseUnion(frameNode, useUnion);
+}
+
 void ViewAbstract::SetFreeze(bool freeze)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6897,6 +6906,11 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
         target->UpdateUseEffect(useEffect);
         target->UpdateUseEffectType(effectType);
     }
+}
+
+void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnion, useUnion, frameNode);
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)

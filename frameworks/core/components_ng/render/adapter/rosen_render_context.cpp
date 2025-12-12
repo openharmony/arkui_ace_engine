@@ -32,6 +32,7 @@
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -579,6 +580,10 @@ void RosenRenderContext::CreateNodeByType(
             } else {
                 rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode, rsContext);
             }
+            break;
+        }
+        case ContextType::UNION: {
+            rsNode_ = Rosen::RSUnionNode::Create(false, isTextureExportNode, rsContext);
             break;
         }
         case ContextType::EXTERNAL:
@@ -3116,6 +3121,13 @@ void RosenRenderContext::OnUseEffectTypeUpdate(EffectType effectType)
     rsNode_->SetUseEffectType(effectTypeParam);
     auto useEffect = GetUseEffect().value_or(false);
     OnUseEffectUpdate(useEffect);
+}
+
+void RosenRenderContext::OnUseUnionUpdate(bool useUnion)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseUnion(useUnion);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnUseShadowBatchingUpdate(bool useShadowBatching)
@@ -8040,5 +8052,13 @@ void RosenRenderContext::SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegi
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetNeedUseCmdlistDrawRegion(needUseCmdlistDrawRegion);
+}
+
+void RosenRenderContext::SetUnionSpacing(float spacing)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto unionNode = rsNode_->ReinterpretCastTo<Rosen::RSUnionNode>();
+    CHECK_NULL_VOID(unionNode);
+    unionNode->SetUnionSpacing(spacing);
 }
 } // namespace OHOS::Ace::NG

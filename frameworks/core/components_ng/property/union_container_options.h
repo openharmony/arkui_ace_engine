@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
+
+#include "base/geometry/calc_dimension.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
-const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
-{
-    return nullptr;
-}
-
-void RosenRenderContext::SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode) {}
-
-void RosenRenderContext::SetUnionSpacing(float spacing) {}
+struct UnionContainerOptions {
+    CalcDimension spacing;
+    RefPtr<ResourceObject> spacingResObj;
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
