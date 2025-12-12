@@ -2299,6 +2299,33 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDefaultFileSelectorShow001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetDefaultFileSelectorShow001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+    WebModelStatic::SetDefaultFileSelectorShow(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webPatternStatic->GetDefaultFileSelectorShowCallback()(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetOnDetectedBlankScreen
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC

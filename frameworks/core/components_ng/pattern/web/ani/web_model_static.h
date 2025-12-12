@@ -130,6 +130,8 @@ public:
     static void SetRenderExitedId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnFileSelectorShow(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetDefaultFileSelectorShow(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);

@@ -62,6 +62,71 @@ static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
     webviewControllerPeer->releaseRefFunc = std::move(releaseRefFunc);
 }
 
+static bool GetFileSelectorObject(ani_env* env, const char* classDesc, ani_object* obj, void* args)
+{
+    ani_class cls;
+    if (env->FindClass(classDesc, &cls) != ANI_OK) {
+        HILOGE("FindClass fail: %{public}s", classDesc);
+        return false;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", "l:", &ctor) != ANI_OK) {
+        HILOGE("Class_FindMethod fail, <ctor> in %{public}s", classDesc);
+        return false;
+    }
+    if (env->Object_New(cls, ctor, obj, args) != ANI_OK) {
+        HILOGE("Object_New fail: %{public}s", classDesc);
+        return false;
+    }
+    return true;
+}
+
+static void DefaultOnShowFileSelector(ani_vm* vm, void* paramPeer, void* resultPeer, std::function<void(void*)> release)
+{
+    HILOGI("Call defaultOnShowFileSelector start");
+    ani_env* env = GetAniEnv(vm);
+    if (!env) {
+        HILOGE("DefaultOnShowFileSelector callback env is nullptr");
+        return;
+    }
+    ani_object paramObj;
+    if (!GetFileSelectorObject(env, "arkui.component.web.FileSelectorParam", &paramObj, paramPeer)) {
+        release(paramPeer);
+        return;
+    }
+    ani_object resultObj;
+    if (!GetFileSelectorObject(env, "arkui.component.web.FileSelectorResult", &resultObj, resultPeer)) {
+        release(resultPeer);
+        return;
+    }
+    ani_class cls;
+    if (env->FindClass("@ohos.web.fileSelector.SelectorDialog", &cls) != ANI_OK) {
+        HILOGE("FindClass fail: SelectorDialog");
+        return;
+    }
+    ani_method method;
+    if (env->Class_FindMethod(cls, "<ctor>", ":", &method) != ANI_OK) {
+        HILOGE("Class_FindMethod fail, <ctor> in SelectorDialog");
+        return;
+    }
+    ani_object obj;
+    if (env->Object_New(cls, method, &obj) != ANI_OK) {
+        HILOGE("Object_New fail: SelectorDialog");
+        return;
+    }
+    if (env->Class_FindMethod(cls, "defaultOnShowFileSelector",
+                              "C{arkui.component.web.FileSelectorParam}C{arkui.component.web.FileSelectorResult}:",
+                              &method) != ANI_OK) {
+        HILOGE("Class_FindMethod fail, defaultOnShowFileSelector");
+        return;
+    }
+    if (env->Object_CallMethod_Void(obj, method, paramObj, resultObj) != ANI_OK) {
+        HILOGE("Call defaultOnShowFileSelector fail");
+        return;
+    }
+    HILOGI("Call defaultOnShowFileSelector done");
+}
+
 static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
     WebviewControllerPeer* webviewControllerPeer)
 {
@@ -96,9 +161,13 @@ static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
         }
         envTemp->GlobalReference_Delete(object);
     };
+    auto defaultOnShowFileSelectorFunc = [vm](void* paramPeer, void* resultPeer, std::function<void(void*)> release) {
+        DefaultOnShowFileSelector(vm, paramPeer, resultPeer, std::move(release));
+    };
     webviewControllerPeer->setWebIdFunc = std::move(setWebIdFunc);
     webviewControllerPeer->setHapPathFunc = std::move(setHapPathFunc);
     webviewControllerPeer->setWebDetachFunc = std::move(setWebDetachFunc);
+    webviewControllerPeer->defaultOnShowFileSelectorFunc = std::move(defaultOnShowFileSelectorFunc);
 }
 
 static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,

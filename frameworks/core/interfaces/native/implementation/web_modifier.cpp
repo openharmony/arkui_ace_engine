@@ -265,6 +265,12 @@ void SetWebOptionsImpl(Ark_NativePointer node,
         WebModelStatic::SetWebIdCallback(frameNode, std::move(controller->setWebIdFunc));
         WebModelStatic::SetHapPathCallback(frameNode, std::move(controller->setHapPathFunc));
         WebModelStatic::SetWebDetachCallback(frameNode, std::move(controller->setWebDetachFunc));
+        auto fileSelectorShowFromUserCallback = [callback = std::move(controller->defaultOnShowFileSelectorFunc),
+                                                    weakNode = AceType::WeakClaim(frameNode),
+                                                    instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultOnShowFileSelector(std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetDefaultFileSelectorShow(frameNode, std::move(fileSelectorShowFromUserCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */

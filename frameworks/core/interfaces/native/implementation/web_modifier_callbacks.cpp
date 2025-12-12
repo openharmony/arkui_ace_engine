@@ -385,6 +385,34 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     return result.value_or(false);
 }
 
+void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    CHECK_NULL_VOID(callback);
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    auto paramPeer = new FileSelectorParamPeer();
+    paramPeer->handler = eventInfo->GetParam();
+    auto resultPeer = new FileSelectorResultPeer();
+    resultPeer->handler = eventInfo->GetFileSelectorResult();
+    auto releaseFunc = [&paramPeer, &resultPeer](void* peer) {
+        if (paramPeer == peer) {
+            delete paramPeer;
+            paramPeer = nullptr;
+        } else if (resultPeer == peer) {
+            delete resultPeer;
+            resultPeer = nullptr;
+        }
+    };
+    callback(paramPeer, resultPeer, std::move(releaseFunc));
+}
+
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
