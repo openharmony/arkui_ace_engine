@@ -206,6 +206,14 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(sceneSession_->GetShowRecent(), true);
 
+    auto sessionInfo = sceneSession_->GetSessionInfo();
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
+    Media::PixelMap pixelMap;
+    ssm_->preLoadStartingWindowMap_.emplace_back(std::pair<std::string, std::shared_ptr<Media::PixelMap>>(
+        key, std::make_shared<Media::PixelMap>(pixelMap)));
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(sceneSession_->GetShowRecent(), true);
+
     sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
     sceneSession_->SetShowRecent(false);
     sceneSession_->isAppLockControl_.store(false);
