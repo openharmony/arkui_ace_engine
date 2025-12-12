@@ -276,6 +276,9 @@ PipelineContext::PipelineContext()
     if (!loadCompleteMgr_) {
         loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
+    if (!contentChangeMgr_) {
+        contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
+    }
 }
 
 float PipelineContext::GetCurrentRootWidth()

@@ -194,6 +194,12 @@ ace_unittest("drag_drop_spring_loading_test_ng") {
   sources = [ "./drag_drop/drag_drop_spring_loading_test_ng.cpp" ]
 }
 
+ace_unittest("content_change_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "content_change_manager_test_ng.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [

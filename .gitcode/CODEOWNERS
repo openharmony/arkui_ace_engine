@@ -3564,6 +3564,7 @@ test/unittest/core/layout/ @arkuilayout1
 test/unittest/core/layout/safe_area/ @arkuilayout1
 test/unittest/core/manager/  @ArkUI_Event
 test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_navigation
+test/unittest/core/manager/content_change_manager_test_ng.cpp  @arkui_framework_xnode
 test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_navigation
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout1
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_navigation
