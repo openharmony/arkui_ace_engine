@@ -43,7 +43,8 @@ struct RefreshMainPage {
     new TextList(9, 'ListLanesRefreshLoad', 'pages/refresh/ListLanesRefreshLoad'),
     new TextList(10, 'RefreshPromptText', 'pages/refresh/RefreshPromptText'),
     new TextList(11, 'RefreshIndex', 'pages/refresh/RefreshIndex'),
-    new TextList(12, 'RefreshList', 'pages/refresh/CAPI/RefreshList')
+    new TextList(12, 'RefreshList', 'pages/refresh/CAPI/RefreshList'),
+    new TextList(13, 'RefreshPullUpToCancelRefresh', 'pages/refresh/RefreshPullToCancelRefresh')
   ]
   @State fontSize: Resource | undefined = undefined
 

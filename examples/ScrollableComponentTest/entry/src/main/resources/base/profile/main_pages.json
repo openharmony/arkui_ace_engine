@@ -130,6 +130,7 @@
     "pages/refresh/RefreshPromptText",
     "pages/refresh/RefreshIndex",
     "pages/refresh/CAPI/RefreshList",
+    "pages/refresh/RefreshPullToCancelRefresh",
     "pages/grid/GridBindSheetDrag",
     "pages/grid/GridCalculator",
     "pages/grid/GridCAPI",
