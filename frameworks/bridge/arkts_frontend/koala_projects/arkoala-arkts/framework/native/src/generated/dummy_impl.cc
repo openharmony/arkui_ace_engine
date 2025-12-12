@@ -61,7 +61,7 @@ void appendGroupedLog(int kind, const std::string& str) {
 
 void dummyClassFinalizer(KNativePointer* ptr) {
     char hex[20];
-    interop_snprintf(hex, sizeof(hex), "0x%llx", (long long)ptr);
+    InteropPrintToBufferN(hex, sizeof(hex), "0x%llx", (long long)ptr);
     string out("dummyClassFinalizer(");
     out.append(hex);
     out.append(")");
