@@ -127,6 +127,7 @@ public:
     static const std::map<OHOS::Accessibility::ActionType, std::string> actionToFocusActionName;
 
     virtual bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+    virtual bool IsRootType(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
     std::shared_ptr<FocusRulesCheckNode> GetParentNodeStopByRootType(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode, bool& hitRootType);
