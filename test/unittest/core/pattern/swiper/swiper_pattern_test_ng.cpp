@@ -2233,6 +2233,22 @@ HWTEST_F(SwiperPatternTestNg, FillType001, TestSize.Level1)
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
     SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 900);
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 5);
+    /**
+     * @tc.steps: step4. Create swiper.
+     * @tc.expected: check fillType value out of range.
+     */
+    model.SetFillType(-1);
+    SwiperModelNG::SetFillType(AceType::RawPtr(frameNode_), -1);
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperLayoutProperty->propFillType_ = -1;
+    frameNode_->layoutProperty_ = swiperLayoutProperty;
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 100);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 1);
+
+    swiperLayoutProperty->propFillType_ = 3;
+    frameNode_->layoutProperty_ = swiperLayoutProperty;
+    SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 100);
+    EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 1);
 }
 
 /**
