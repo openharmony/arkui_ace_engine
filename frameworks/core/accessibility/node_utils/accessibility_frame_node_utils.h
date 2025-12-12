@@ -46,6 +46,9 @@ public:
     static void GetLastestPageNodes(
         const RefPtr<FrameNode>& node,
         std::vector<WeakPtr<FrameNode>>& pageNodes);
+    static void IsCoveredByBrother(
+        const RefPtr<NG::FrameNode>& frameNode,
+        bool& nodeAccessibilityVisible);
 };
 } // namespace OHOS::Ace::NG
 

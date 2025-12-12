@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
@@ -160,6 +159,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
     JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
+    JSClass<JSSelect>::StaticMethod("keyboardAvoidMode", &JSSelect::SetKeyboardAvoidMode);
+    JSClass<JSSelect>::StaticMethod("minKeyboardAvoidDistance", &JSSelect::SetMinKeyboardAvoidDistance);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -610,7 +611,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(2, params);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();
@@ -1142,5 +1142,46 @@ void JSSelect::SetShowDefaultSelectedIcon(const JSCallbackInfo& info)
         return;
     }
     SelectModel::GetInstance()->SetShowDefaultSelectedIcon(info[0]->ToBoolean());
+}
+
+void JSSelect::SetKeyboardAvoidMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetKeyboardAvoidMode(std::nullopt);
+        return;
+    }
+    std::optional<NG::MenuKeyboardAvoidMode> mode = std::nullopt;
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
+        case static_cast<int32_t>(NG::MenuKeyboardAvoidMode::NONE):
+            mode = NG::MenuKeyboardAvoidMode::NONE;
+            break;
+        case static_cast<int32_t>(NG::MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE):
+            mode = NG::MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+            break;
+        default:
+            break;
+    }
+    SelectModel::GetInstance()->SetKeyboardAvoidMode(mode);
+}
+
+void JSSelect::SetMinKeyboardAvoidDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetMinKeyboardAvoidDistance(std::nullopt);
+        return;
+    }
+    std::optional<Dimension> distance = std::nullopt;
+    CalcDimension value;
+    if (ParseLengthMetricsToPositiveDimension(info[0], value) && value.IsNonNegative()) {
+        distance = value;
+    }
+    SelectModel::GetInstance()->SetMinKeyboardAvoidDistance(distance);
 }
 } // namespace OHOS::Ace::Framework

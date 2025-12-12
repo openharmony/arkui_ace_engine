@@ -190,6 +190,10 @@ public:
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback);
     void SendExeAppAIFunctionResult(uint32_t result) override;
+    void SendContentChange(ChangeType type, const std::string& simpleTree) override;
+    void RegisterContentChangeCallback(
+        const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
+    void UnregisterContentChangeCallback();
 
 private:
     EventCallback clickEventCallback_;
@@ -207,6 +211,7 @@ private:
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
     std::function<void(uint32_t)> exeAppAIFunctionCallback_;
+    std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

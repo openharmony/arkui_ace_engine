@@ -216,6 +216,12 @@ public:
         return indicatorColorByJSRadioTheme_;
     }
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+    bool ReportInitOnChangeEvent(int32_t nodeId, bool isChecked);
+    bool ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool force = false);
+    static bool IsJsonValid(const std::unique_ptr<JsonValue>& json);
+    static bool IsJsonObject(const std::unique_ptr<JsonValue>& json);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

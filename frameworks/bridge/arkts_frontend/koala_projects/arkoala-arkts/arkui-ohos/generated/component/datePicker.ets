@@ -20,11 +20,13 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Date_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"
 import { AttributeModifier, hookDatePickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -73,6 +75,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setDatePickerOptionsAttribute(options?: DatePickerOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -168,6 +171,18 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DatePickerAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCanLoopAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DatePickerAttribute_setCanLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface DatePickerResult {
     year?: int32;
@@ -210,6 +225,9 @@ export interface DatePickerAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
     }
+    canLoop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method canLoop")
+    }
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -222,6 +240,7 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     onDateChange_value?: ((value0: Date) => void) | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
+    canLoop_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined
     setDatePickerOptions(options?: DatePickerOptions): this {
         return this
@@ -245,6 +264,9 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    canLoop(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -286,6 +308,7 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
+    canLoop?: boolean;
 }
 
 export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
@@ -360,8 +383,18 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public canLoop(value: boolean | undefined): this {
+        if (this.checkPriority("canLoop")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCanLoopAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDatePickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookDatePickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -496,10 +529,10 @@ export class LunarSwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
@@ -520,10 +553,10 @@ export class LunarSwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
@@ -544,10 +577,10 @@ export class LunarSwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForStrokeColorTmpValue instanceof number) {
+            } else if (valueHolderForStrokeColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeColorTmpValueForIdx1)
+                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx1)
             } else if (valueHolderForStrokeColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
@@ -567,11 +600,11 @@ export class LunarSwitchStyle_serializer {
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                selectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -579,18 +612,18 @@ export class LunarSwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | number | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
         const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                unselectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -598,18 +631,18 @@ export class LunarSwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColorTmpBuf : ResourceColor | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeColorTmpBuf_ : Color | number | string | Resource | undefined
+            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (strokeColorTmpBuf_UnionSelector == (0).toChar()) {
                 strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (strokeColorTmpBuf_UnionSelector == (1).toChar()) {
-                strokeColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (strokeColorTmpBuf_UnionSelector == (2).toChar()) {
                 strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -617,7 +650,7 @@ export class LunarSwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | number | string | Resource)
+            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
         let value : LunarSwitchStyle = ({selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult, strokeColor: strokeColorTmpResult} as LunarSwitchStyle)
@@ -803,10 +836,10 @@ export class DatePickerDialogOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -920,6 +953,14 @@ export class DatePickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEnableHapticFeedbackTmpValue  = valueHolderForEnableHapticFeedback!
             valueSerializer.writeBoolean(valueHolderForEnableHapticFeedbackTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCanLoop  = value.canLoop
+        if (valueHolderForCanLoop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCanLoopTmpValue  = valueHolderForCanLoop!
+            valueSerializer.writeBoolean(valueHolderForCanLoopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1094,11 +1135,11 @@ export class DatePickerDialogOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1106,7 +1147,7 @@ export class DatePickerDialogOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1234,7 +1275,13 @@ export class DatePickerDialogOptions_serializer {
             enableHapticFeedbackTmpBuf = valueDeserializer.readBoolean()
         }
         const enableHapticFeedbackTmpResult : boolean | undefined = enableHapticFeedbackTmpBuf
-        let value : DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult} as DatePickerDialogOptions)
+        const canLoopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let canLoopTmpBuf : boolean | undefined = undefined
+        if ((canLoopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            canLoopTmpBuf = valueDeserializer.readBoolean()
+        }
+        const canLoopTmpResult : boolean | undefined = canLoopTmpBuf
+        let value : DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, canLoop: canLoopTmpResult} as DatePickerDialogOptions)
         return value
     }
 }

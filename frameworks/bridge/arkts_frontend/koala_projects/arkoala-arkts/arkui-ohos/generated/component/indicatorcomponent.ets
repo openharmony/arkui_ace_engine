@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { DotIndicator_serializer, DigitIndicator_serializer, DotIndicator, DigitIndicator } from "./swiper"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -28,6 +29,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookIndicatorComponentAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { IndicatorComponentModifier } from "./../IndicatorComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class IndicatorComponentControllerInternal {
@@ -106,6 +108,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setIndicatorComponentOptionsAttribute(controller?: IndicatorComponentController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (controller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -322,7 +325,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookIndicatorComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookIndicatorComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

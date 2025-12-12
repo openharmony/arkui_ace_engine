@@ -25,7 +25,10 @@ config("ani_config") {
 
 ohos_shared_library("drawable_descriptor_ani") {
   configs = [ ":ani_config" ]
-  sources = [ "./src/drawable_descriptor_inner.cpp" ]
+  sources = [ 
+    "./src/drawable_descriptor_inner.cpp",
+    "./src/drawableDescriptor_utils.cpp" ,
+  ]
   deps = [
     "$ace_root/build:libace_compatible",
     "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",

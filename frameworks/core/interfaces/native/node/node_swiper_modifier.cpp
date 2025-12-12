@@ -1919,7 +1919,9 @@ void ResetSwiperFillType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetFillType(frameNode, NUM_0);
+    SwiperModelNG::ResetFillType(frameNode);
+    // DisplayCount need to be reset to the default value 1.
+    SwiperModelNG::SetDisplayCount(frameNode, 1);
 }
 
 ArkUI_Int32 GetSwiperFillType(ArkUINodeHandle node)

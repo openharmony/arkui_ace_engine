@@ -143,6 +143,7 @@ public:
     void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId) override;
     void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) override;
     void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
+    void SetWindowNewExtEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) override;
     void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
@@ -209,11 +210,11 @@ public:
     void SetMetaViewport(bool enabled) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
     void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) override;
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) override;
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) override;
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
     void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
@@ -255,10 +256,13 @@ public:
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
     void SetRotateRenderEffect(WebRotateEffect effect) override;
+    void SetOnTextSelectionChange(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
         const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
+    void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetEnableImageAnalyzer(bool isEnabled) override;
+    void SetEnableAutoFill(bool isEnabled) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
@@ -266,6 +270,7 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) override;
     void SetBackToTop(bool isBackToTop) override;
     void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -361,6 +366,8 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetWindowNewEvent(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback);
+    static void SetWindowNewExtEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback);
     static void SetOnFullScreenEnter(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetWindowExitEventId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnAlert(
@@ -371,10 +378,14 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
     static void SetOnShowFileSelector(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnTextSelectionChange(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetBlankScreenDetectionConfig(
         FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
+    static void SetOnFirstScreenPaint(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled);
     static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
@@ -414,6 +425,9 @@ public:
     static void SetBackToTop(FrameNode* frameNode, bool isBackToTop);
     static void SetCameraCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetMicrophoneCaptureStateChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

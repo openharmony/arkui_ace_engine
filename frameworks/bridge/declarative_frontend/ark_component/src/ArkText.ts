@@ -48,23 +48,6 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().text.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class FontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -557,6 +540,23 @@ class TextOptimizeTrailingSpaceModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().text.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -965,7 +965,8 @@ class TextMarqueeOptionsModifier extends ModifierWithKey<MarqueeOptions> {
       getUINativeModule().text.resetMarqueeOptions(node);
     } else {
       getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
-        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy,
+        this.value.marqueeUpdatePolicy, this.value.spacing);
     }
   }
   checkObjectDiff(): boolean {
@@ -998,6 +999,42 @@ class TextEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
     }
     else {
       getUINativeModule().text.setEnableAutoSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().text.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().text.setFallbackLineSpacing(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -1063,6 +1100,23 @@ class TextVerticalAlignModifier extends ModifierWithKey<TextVerticalAlign> {
   }
 }
 
+class TextSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('textSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().text.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+    }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1077,10 +1131,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
   enableDataDetector(value: boolean): this {
@@ -1196,6 +1246,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   optimizeTrailingSpace(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
+    return this;
+  }
+  compressLeadingPunctuation(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity, TextCompressLeadingPunctuationModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
@@ -1314,6 +1368,14 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEnableAutoSpacingModifier.identity, TextEnableAutoSpacingModifier, value);
     return this;
   }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextIncludeFontPaddingModifier.identity, TextIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextFallbackLineSpacingModifier.identity, TextFallbackLineSpacingModifier, value);
+    return this;
+  }
   shaderStyle(value: {
     center: Array<any>;
     radius: number | string;
@@ -1327,6 +1389,13 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   textVerticalAlign(value: TextVerticalAlign): this {
     modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
+    return this;
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
+        TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }

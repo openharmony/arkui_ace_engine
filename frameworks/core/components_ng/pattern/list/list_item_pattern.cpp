@@ -346,7 +346,7 @@ void ListItemPattern::ExpandSwipeAction(ListItemSwipeActionDirection direction)
     auto targetIndex = direction == ListItemSwipeActionDirection::START ? ListItemSwipeIndex::SWIPER_START
                                                                         : ListItemSwipeIndex::SWIPER_END;
     CHECK_EQUAL_VOID(targetIndex, swiperIndex_);
-    auto nodeIndex = direction == ListItemSwipeActionDirection::START ? endNodeIndex_ : startNodeIndex_;
+    auto nodeIndex = direction == ListItemSwipeActionDirection::START ? startNodeIndex_ : endNodeIndex_;
     CHECK_EQUAL_VOID(nodeIndex, -1);
     auto targetSize = targetIndex == ListItemSwipeIndex::SWIPER_START ? startNodeSize_ : -endNodeSize_;
     if (!NearZero(targetSize)) {
@@ -431,6 +431,45 @@ void ListItemPattern::SetDeleteArea()
     gestureHub->RemovePanEvent(panEvent_);
     panEvent_.Reset();
     springController_.Reset();
+}
+
+void ListItemPattern::OnHoverWithHightLight(bool isHover)
+{
+    NotifyItemState(ITEM_STATE_HOVERED, isHover);
+}
+
+void ListItemPattern::OnPaintFocusState(bool isFocus)
+{
+    NotifyItemState(ITEM_STATE_FOCUSED, isFocus);
+}
+
+void ListItemPattern::NotifyItemState(ItemState itemState, bool isEffective)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto parent = host->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        auto listGroupPattern = DynamicCast<ListItemGroupPattern>(parent->GetPattern());
+        CHECK_NULL_VOID(listGroupPattern);
+        if (isEffective) {
+            listGroupPattern->SetItemState(itemState, nodeId);
+        } else {
+            listGroupPattern->ResetItemState(itemState, nodeId);
+        }
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (parent->GetTag() == V2::LIST_ETS_TAG) {
+        auto listPattern = DynamicCast<ListPattern>(parent->GetPattern());
+        CHECK_NULL_VOID(listPattern);
+        if (isEffective) {
+            listPattern->SetItemState(itemState, nodeId);
+        } else {
+            listPattern->ResetItemState(itemState, nodeId);
+        }
+        parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 V2::SwipeEdgeEffect ListItemPattern::GetEdgeEffect()
@@ -1383,18 +1422,19 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto offset = geometryNode->GetFrameOffset();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    RectF paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
     if (indexInListItemGroup_ != -1) {
         auto parentFrameNode = GetParentFrameNode();
         CHECK_NULL_RETURN(parentFrameNode, false);
-        auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-        CHECK_NULL_RETURN(parentGeometryNode, false);
-        auto parentOffset = parentGeometryNode->GetFrameOffset();
+        auto parentRenderContext = parentFrameNode->GetRenderContext();
+        CHECK_NULL_RETURN(parentRenderContext, false);
+        auto parentOffset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
         offset = offset + parentOffset;
     }
-    auto size = geometryNode->GetFrameSize();
+    auto size = paintRect.GetSize();
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {

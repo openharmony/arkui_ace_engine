@@ -16,10 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
+import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { Font_serializer, ResourceColor, Dimension, Font, ResourceStr, Length } from "./units"
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ColorMetrics_serializer } from "./../Graphics"
@@ -31,6 +32,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CopyOptions, TextAlign } from "./enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
 import { ColorMetrics } from "arkui.Graphics"
@@ -54,6 +56,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSearchOptionsAttribute(options?: SearchOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -74,10 +77,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -178,10 +181,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -218,10 +221,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -733,6 +736,18 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDividerColorAttribute(value: ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -743,6 +758,42 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SearchAttribute_setDividerColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSelectedDragPreviewStyleAttribute(value: SelectedDragPreviewStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SelectedDragPreviewStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
@@ -985,8 +1036,20 @@ export interface SearchAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
     dividerColor(value: ColorMetrics | undefined): this {
         throw new Error("Unimplemented method dividerColor")
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
@@ -1046,8 +1109,12 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     dividerColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
+    selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
     setSearchOptions(options?: SearchOptions): this {
         return this
     }
@@ -1183,7 +1250,19 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
     dividerColor(value: ColorMetrics | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
@@ -1576,6 +1655,38 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (this.checkPriority("selectedDragPreviewStyle")) {
+            const value_casted = value as (SelectedDragPreviewStyle | undefined)
+            this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         if (this.checkPriority("searchButton")) {
             const value_casted = value as (string | undefined)
@@ -1604,7 +1715,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSearchAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSearchAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -1794,10 +1907,10 @@ export class IconOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSizeTmpValueForIdx0  = valueHolderForSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForSizeTmpValueForIdx0)
-            } else if (valueHolderForSizeTmpValue instanceof number) {
+            } else if (valueHolderForSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSizeTmpValueForIdx1  = valueHolderForSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSizeTmpValueForIdx1)
+                const valueHolderForSizeTmpValueForIdx1  = valueHolderForSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSizeTmpValueForIdx1)
             } else if (valueHolderForSizeTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSizeTmpValueForIdx2  = valueHolderForSizeTmpValue as Resource
@@ -1814,10 +1927,10 @@ export class IconOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1853,28 +1966,28 @@ export class IconOptions_serializer {
         let sizeTmpBuf : Length | undefined = undefined
         if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const sizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let sizeTmpBuf_ : string | number | Resource | undefined
+            let sizeTmpBuf_ : string | double | Resource | undefined
             if (sizeTmpBuf_UnionSelector == (0).toChar()) {
                 sizeTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (sizeTmpBuf_UnionSelector == (1).toChar()) {
-                sizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                sizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (sizeTmpBuf_UnionSelector == (2).toChar()) {
                 sizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for sizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            sizeTmpBuf = (sizeTmpBuf_ as string | number | Resource)
+            sizeTmpBuf = (sizeTmpBuf_ as string | double | Resource)
         }
         const sizeTmpResult : Length | undefined = sizeTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1882,7 +1995,7 @@ export class IconOptions_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1915,10 +2028,10 @@ export class SearchButtonOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx0)
-            } else if (valueHolderForFontSizeTmpValue instanceof number) {
+            } else if (valueHolderForFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx1)
+                const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx1)
             } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
@@ -1935,10 +2048,10 @@ export class SearchButtonOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -1966,28 +2079,28 @@ export class SearchButtonOptions_serializer {
         let fontSizeTmpBuf : Length | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontSizeTmpBuf_ : string | number | Resource | undefined
+            let fontSizeTmpBuf_ : string | double | Resource | undefined
             if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
                 fontSizeTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
-                fontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (fontSizeTmpBuf_UnionSelector == (2).toChar()) {
                 fontSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for fontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontSizeTmpBuf = (fontSizeTmpBuf_ as string | number | Resource)
+            fontSizeTmpBuf = (fontSizeTmpBuf_ as string | double | Resource)
         }
         const fontSizeTmpResult : Length | undefined = fontSizeTmpBuf
         const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1995,7 +2108,7 @@ export class SearchButtonOptions_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const autoDisableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

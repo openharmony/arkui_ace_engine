@@ -116,6 +116,14 @@ public:
 
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
 
+    void IterateElements(const std::function<bool(ElementIdType, const RefPtr<AceType>&)>& visitor) const
+    {
+        for (auto& [k, v] : itemMap_) {
+            if (visitor(k, v.Upgrade())) {
+                break;
+            }
+        }
+    }
 private:
     // ElementID assigned during initial render
     // first to Component, then synced to Element
@@ -662,5 +670,10 @@ uint64_t ElementRegister::GetSurfaceIdByEmbedNode(NG::FrameNode* node)
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
     DELEGATE(AddReferenced(elmtId, referenced), false);
+}
+
+void ElementRegister::IterateElements(const std::function<bool(ElementIdType, const RefPtr<AceType>&)>& visitor) const
+{
+    DELEGATE(IterateElements(visitor));
 }
 } // namespace OHOS::Ace

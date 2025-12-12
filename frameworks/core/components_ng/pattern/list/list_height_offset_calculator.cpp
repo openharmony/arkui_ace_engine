@@ -144,7 +144,7 @@ int32_t ListHeightOffsetCalculator::GetPosMapEndIndex()
     return posMap_ ? posMap_->GetEndIndexAndPos().first : -1;
 }
 
-bool ListHeightOffsetCalculator::CalculateRangeWithPosMap(int start, int end)
+bool ListHeightOffsetCalculator::CalcRangeLeftHalf(int start, int end)
 {
     auto prevHeight = estimateHeight_;
     ListPositionInfo posMapStart = posMap_ ? posMap_->GetPositionInfo(start) : ListPositionInfo { -1.0f, -1.0f };
@@ -153,13 +153,52 @@ bool ListHeightOffsetCalculator::CalculateRangeWithPosMap(int start, int end)
         posMapEnd.mainSize < 0.0f || posMapStart.isGroup || posMapEnd.isGroup) {
         return false;
     }
-    estimateHeight_ += posMapEnd.mainPos - posMapStart.mainPos + posMapEnd.mainSize + (start == 0 ? 0.0f : spaceWidth_);
+    estimateHeight_ +=
+        posMapEnd.mainPos - posMapStart.mainPos + posMapEnd.mainSize + (start == 0 ? 0.0f : spaceWidth_);
     auto rowCount = posMapStart.isGroup ? (end - start + 1) : (end - start + 1) / lanes_;
     auto totalSpaceWidth = (start == 0 ? spaceWidth_ * (rowCount - 1) : spaceWidth_ * rowCount);
     totalItemHeight_ += posMapStart.isGroup ? (estimateHeight_ - prevHeight - totalSpaceWidth)
                                             : (estimateHeight_ - prevHeight - totalSpaceWidth) * lanes_;
     totalItemCount_ += end - start + 1;
     currentIndex_ = end + 1;
+    return true;
+}
+
+bool ListHeightOffsetCalculator::CalcRangeRightHalf(int start, int end)
+{
+    ListPositionInfo posMapStart = posMap_ ? posMap_->GetPositionInfo(start) : ListPositionInfo { -1.0f, -1.0f };
+    ListPositionInfo posMapEnd = posMap_ ? posMap_->GetPositionInfo(end) : ListPositionInfo { -1.0f, -1.0f };
+    if (posMapStart.isGroup || posMapEnd.isGroup) {
+        return false;
+    }
+    if (Negative(posMapStart.mainSize)) {
+        if (NonNegative(posMapEnd.mainSize)) {
+            end = posMap_->GetEntryAtOrAfterIndex(start) - 1;
+        }
+        if (start > end) {
+            return false;
+        }
+        auto rowCount = GetLines(lanes_, end - start + 1);
+        estimateHeight_ += (GetAverageItemHeight() + spaceWidth_) * rowCount;
+        currentIndex_ = end + 1;
+    } else {
+        if (Negative(posMapEnd.mainSize)) {
+            end = posMap_->GetEntryAtOrBeforeIndex(end);
+            posMapEnd = posMap_->GetPositionInfo(end);
+        }
+        if (Negative(posMapEnd.mainSize)) {
+            return false;
+        }
+        auto prevHeight = estimateHeight_;
+        estimateHeight_ +=
+            posMapEnd.mainPos - posMapStart.mainPos + posMapEnd.mainSize + (start == 0 ? 0.0f : spaceWidth_);
+        auto rowCount = posMapStart.isGroup ? (end - start + 1) : (end - start + 1) / lanes_;
+        auto totalSpaceWidth = (start == 0 ? spaceWidth_ * (rowCount - 1) : spaceWidth_ * rowCount);
+        totalItemHeight_ += posMapStart.isGroup ? (estimateHeight_ - prevHeight - totalSpaceWidth)
+                                                : (estimateHeight_ - prevHeight - totalSpaceWidth) * lanes_;
+        totalItemCount_ += end - start + 1;
+        currentIndex_ = end + 1;
+    }
     return true;
 }
 
@@ -183,7 +222,7 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
     while (currentIndex_ < lazyEndIndex) {
         if (currentIndex_ < startIndex_) {
             int32_t jumpTarget = (startIndex_ - 1 < lazyEndIndex) ? startIndex_ - 1 : lazyEndIndex - 1;
-            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, jumpTarget)) {
+            if (hasGroup_ || !CalcRangeLeftHalf(currentIndex_, jumpTarget)) {
                 CalculatePosMapNode();
             }
         } else if (currentIndex_ <= endIndex_) {
@@ -206,7 +245,7 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
             }
         } else if (currentIndex_ <= GetPosMapEndIndex()) {
             int32_t jumpTarget = (GetPosMapEndIndex() < lazyEndIndex) ? GetPosMapEndIndex() : lazyEndIndex - 1;
-            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, jumpTarget)) {
+            if (hasGroup_ || !CalcRangeRightHalf(currentIndex_, jumpTarget)) {
                 CalculatePosMapNode();
             }
         } else if (currentIndex_ < lazyEndIndex) {

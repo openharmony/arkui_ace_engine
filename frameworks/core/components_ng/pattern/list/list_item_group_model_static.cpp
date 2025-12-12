@@ -25,11 +25,16 @@ namespace OHOS::Ace::NG {
 void ListItemGroupModelStatic::SetDivider(
     FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor)
 {
+    CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
         FREE_NODE_CHECK(frameNode, SetDivider, frameNode, divider, needGetThemeColor);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, Divider,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+        auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
 }
 

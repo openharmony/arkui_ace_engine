@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { __context, __id } from "../internals"
-import { ReadableState as State } from 'arkui.incremental.runtime.state';
+import { __context, __id } from '../internals'
+import { ReadableState } from 'arkui.incremental.runtime.state';
 import { StateContext, InternalScope } from '../states/State';
 
 /**
@@ -22,7 +22,7 @@ import { StateContext, InternalScope } from '../states/State';
  * @returns the named context state or `undefined` if it does not exist
  */
 /** @memo:intrinsic */
-export function contextLocal<Value>(name: string): State<Value> | undefined {
+export function contextLocal<Value>(name: string): ReadableState<Value> | undefined {
     return (__context() as StateContext).stateBy<Value>(name)
 }
 
@@ -51,7 +51,7 @@ export function contextLocalScope<Value>(
     value: Value,
     /** @memo */
     content: () => void
-) {
+): void {
     const scope = __context().scope<void>(__id(), 1);
     (scope as InternalScope<void>).paramEx<Value>(0, value, undefined, name, true); // can be found by name
     if (scope.unchanged) {

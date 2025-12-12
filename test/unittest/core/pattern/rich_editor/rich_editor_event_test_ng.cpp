@@ -898,4 +898,77 @@ HWTEST_F(RichEditorEventTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level
     EXPECT_NE(richEditorPattern->richEditorInstanceId_, -2);
 }
 
+/**
+ * @tc.name: OnFocusNodeChange001
+ * @tc.desc: Test OnFocusNodeChange when blockKbInFloatingWindow_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, OnFocusNodeChange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->blockKbInFloatingWindow_ = true;
+
+    richEditorPattern->OnFocusNodeChange(FocusReason::DEFAULT);
+    EXPECT_FALSE(richEditorPattern->blockKbInFloatingWindow_);
+}
+
+/**
+ * @tc.name: SetStopBackPress001
+ * @tc.desc: test SetStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, SetStopBackPress001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetStopBackPress(true);
+    EXPECT_TRUE(richEditorPattern->IsStopBackPress());
+
+    richEditorModel.SetStopBackPress(false);
+    EXPECT_FALSE(richEditorPattern->IsStopBackPress());
+}
+
+/**
+ * @tc.name: SetOnCopy001
+ * @tc.desc: test SetOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, SetOnCopy, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onCopy = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    auto setOnPaste = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(false);
+        return;
+    };
+
+    richEditorModel.SetOnCopy(onCopy);
+    richEditorModel.SetOnPaste(setOnPaste);
+    TextCommonEvent event;
+    eventHub->FireOnCopy(event);
+    EXPECT_TRUE(event.IsPreventDefault());
+    eventHub->FireOnPaste(event);
+    EXPECT_FALSE(event.IsPreventDefault());
+}
 }

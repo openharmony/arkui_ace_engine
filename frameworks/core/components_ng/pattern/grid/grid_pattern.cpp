@@ -358,6 +358,9 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     if (!isInitialized_) {
         FireObserverOnReachEnd();
     }
+    if (!NearZero(info_.prevHeight_) && !NearZero(mainSizeChanged_)) {
+        info_.prevHeight_ += mainSizeChanged_;
+    }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
@@ -526,6 +529,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     bool offsetEnd = info_.offsetEnd_;
+    mainSizeChanged_ = info_.lastMainSize_ - gridLayoutInfo.lastMainSize_;
     info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
@@ -537,8 +541,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (!offsetEnd && info_.offsetEnd_) {
-        endHeight_ = info_.currentHeight_;
+    if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
+        bool irregular = UseIrregularLayout();
+        float mainGap = GetMainGap();
+        auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular) + info_.contentEndOffset_;
+        auto overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+        endHeight_ = info_.currentHeight_ + overScroll;
     }
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);

@@ -42,6 +42,8 @@ public:
         itemCounts_ = itemCounts;
     }
 
+    bool GetAccessibilityInnerVisibleRect(RectF& rect) override;
+    ScrollableStatus GetScrollableStatus() const override;
 private:
     int32_t itemCounts_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupAccessibilityProperty);

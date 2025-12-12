@@ -25,6 +25,13 @@ class ReporterImpl : public Reporter {
 
 public:
     void HandleUISessionReporting(const JsonReport& report) const override;
+    void HandleInputEventInspectorReporting(const TouchEvent& event) const override;
+    void HandleInputEventInspectorReporting(const MouseEvent& event) const override;
+    void HandleInputEventInspectorReporting(const AxisEvent& event) const override;
+    void HandleInputEventInspectorReporting(const KeyEvent& event) const override;
+    void HandleWindowFocusInspectorReporting(bool isFocus) const override;
+private:
+    void HandleInspectorReporting(const JsonReport& report) const override;
 };
 } // namespace OHOS::Ace::NG
 #endif

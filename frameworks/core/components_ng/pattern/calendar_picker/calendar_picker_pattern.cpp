@@ -202,7 +202,6 @@ void CalendarPickerPattern::UpdateEdgeAlign()
 
     auto rtlAlignType = align_;
     auto rtlX = offset_.GetX().Value();
-    auto rtlY = offset_.GetY().Value();
     if (textDirection == TextDirection::RTL) {
         switch (align_) {
             case CalendarEdgeAlign::EDGE_ALIGN_START:
@@ -219,13 +218,11 @@ void CalendarPickerPattern::UpdateEdgeAlign()
 
     layoutProperty->UpdateDialogAlignType(rtlAlignType);
 
-    if (!std::isfinite(offset_.GetX().ConvertToPx())) {
-        rtlX = 0.0f;
+    if (std::isfinite(offset_.GetX().ConvertToPx()) && std::isfinite(offset_.GetY().ConvertToPx())) {
+        layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(rtlX), offset_.GetY()));
+    } else {
+        layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(), Dimension()));
     }
-    if (!std::isfinite(offset_.GetY().ConvertToPx())) {
-        rtlY = 0.0f;
-    }
-    layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(rtlX), Dimension(rtlY)));
 }
 
 bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(

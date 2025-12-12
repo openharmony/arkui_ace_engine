@@ -483,6 +483,11 @@ void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
     processMap_[key] = id;
 }
 
+void UiSessionManagerOhos::EraseProcessId(const std::string& key)
+{
+    processMap_.erase(key);
+}
+
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
@@ -630,5 +635,51 @@ void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
             LOGW("report send execute application AI function result failed,process id:%{public}d", pair.first);
         }
     }
+}
+
+void UiSessionManagerOhos::RegisterContentChangeCallback(const ContentChangeConfig& config)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (startContentChangeDetectCallback_) {
+        startContentChangeDetectCallback_(config);
+    }
+}
+
+void UiSessionManagerOhos::UnregisterContentChangeCallback()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (stopContentChangeDetectCallback_) {
+        stopContentChangeDetectCallback_();
+    }
+}
+
+void UiSessionManagerOhos::ReportContentChangeEvent(ChangeType type, const std::string& simpleTree)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    if (!processMap_.count("contentChange") || !reportObjectMap_.count(processMap_["contentChange"])) {
+        LOGW("ReportContentChangeEvent no report proxy");
+        return;
+    }
+
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["contentChange"]]);
+    reportService->SendContentChange(type, simpleTree);
+}
+
+void UiSessionManagerOhos::SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&& startCallback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (startContentChangeDetectCallback_) {
+        return;
+    }
+    startContentChangeDetectCallback_ = startCallback;
+}
+
+void UiSessionManagerOhos::SetStopContentChangeDetectCallback(std::function<void()>&& stopCallback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (stopContentChangeDetectCallback_) {
+        return;
+    }
+    stopContentChangeDetectCallback_ = stopCallback;
 }
 } // namespace OHOS::Ace

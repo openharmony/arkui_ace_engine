@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 
 namespace OHOS::Ace::NG {
@@ -106,6 +107,7 @@ public:
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableImageAnalyzer, bool);
 
     void SetWebSrc(const std::string &webSrc);
     void SetWebSrcStatic(const std::string &webSrc);
@@ -122,7 +124,12 @@ public:
 
     void JavaScriptOnDocumentStart(const ScriptItems&);
     void JavaScriptOnDocumentEnd(const ScriptItems&);
-    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {}
 
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
@@ -153,6 +160,7 @@ public:
     void SetSetWebDetachCallback(SetWebDetachCallback&& callback) {}
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
+    void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
 
 private:
     std::string GetMixedModeAsString() const;
@@ -245,6 +253,7 @@ private:
     void OnEnableSelectedDataDetectorUpdate(bool enable) {}
     void OnZoomControlAccessUpdate(bool zoomControlAccess) {}
     void OnGestureFocusModeUpdate(GestureFocusMode mode) {}
+    void OnEnableImageAnalyzerUpdate(bool isEnabled) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {

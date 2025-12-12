@@ -1166,4 +1166,56 @@ HWTEST_F(EventManagerTestNg, DispatchTouchEventTest001, TestSize.Level1)
     eventManager->DispatchTouchEvent(event, true);
     EXPECT_NE(ret, !eventManager->touchTestResults_[event.id].empty());
 }
+
+/**
+ * @tc.name: EventManagerTest101
+ * @tc.desc: Test FalsifyCancelEventAndDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create lastTouchEvent_, downFingerIds_ and touchTestResults_.
+     * @tc.expected: create successfully.
+     */
+    eventManager->lastTouchEvent_.id = 0;
+    eventManager->lastTouchEvent_.originalId = 0;
+    eventManager->lastTouchEvent_.sourceTool = SourceTool::MOUSE;
+    eventManager->downFingerIds_[0] = 0;
+    TouchTestResult touchTestResults;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    touchTestResults.push_back(eventTarget);
+    eventManager->touchTestResults_.emplace(0, touchTestResults);
+
+    /**
+     * @tc.steps: step3. CALL FalsifyCancelEventAndDispatch.
+     * @tc.expected: call successfully.
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.originalId = 0;
+    touchPoint.isFalsified = false;
+    touchPoint.type = TouchType::MOVE;
+    touchPoint.sourceType = SourceType::MOUSE;
+    touchPoint.sourceTool = SourceTool::FINGER;
+    touchPoint.isInterpolated = false;
+    eventManager->FalsifyCancelEventAndDispatch(touchPoint);
+
+    /**
+     * @tc.steps: step4. Test eventManager's lastTouchEvent_.
+     * @tc.expected: success.
+     */
+    EXPECT_TRUE(eventManager->lastTouchEvent_.isFalsified);
+    EXPECT_TRUE(eventManager->lastTouchEvent_.isInterpolated);
+    EXPECT_EQ(eventManager->lastTouchEvent_.type, TouchType::CANCEL);
+    EXPECT_EQ(eventManager->lastTouchEvent_.sourceType, SourceType::TOUCH);
+    EXPECT_EQ(eventManager->lastTouchEvent_.sourceTool, SourceTool::MOUSE);
+}
 } // namespace OHOS::Ace::NG

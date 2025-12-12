@@ -2707,7 +2707,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
-    
+    context_->touchOptimizer_->rvsSignalEnable_ = true;
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     
@@ -2944,5 +2944,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
 }
+
+
+/**
+ * @tc.name: PipelineContextTestNg096
+ * @tc.desc: Test get Focused windowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: GetFocusWindowId
+     * @tc.expected: windowId equals 0
+     */
+    auto focusedWindowId = context_->GetFocusWindowId();
+    EXPECT_EQ(focusedWindowId, 0);
+}
+
 } // namespace NG
 } // namespace OHOS::Ace

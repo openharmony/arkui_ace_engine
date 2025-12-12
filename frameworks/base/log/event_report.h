@@ -63,6 +63,7 @@ enum class PageRouterExcepType {
     UPDATE_PAGE_ERR,
     LOAD_PAGE_ERR,
     REPLACE_PAGE_ERR,
+    PAGE_LOAD_TIMEOUT,
 };
 
 // EXCEPTION_COMPONENT
@@ -78,7 +79,6 @@ enum class ComponentExcepType {
     LIST_ITEM_ERR,
     MARQUEE_ERR,
     NAVIGATION_BAR_ERR,
-    COMPONENT_LOAD_TIMEOUT,
 };
 
 // EXCEPTION_API_CHANNEL
@@ -161,7 +161,7 @@ struct EventInfo {
     std::string eventType;
     int32_t errorType = 0;
     std::string pageUrl;
-    int64_t loadCost = 0;
+    std::vector<std::string> pageLoadCost;
 };
 
 struct DragInfo {
@@ -224,7 +224,7 @@ public:
     static void SendAppStartException(AppStartExcepType type);
     static void SendPageRouterException(PageRouterExcepType type, const std::string& pageUrl = "");
     static void SendComponentException(ComponentExcepType type);
-    static void ReportComponentLoadTimeout(const EventInfo& eventInfo);
+    static void ReportPageLoadTimeout(const EventInfo& eventInfo);
     static void SendAPIChannelException(APIChannelExcepType type);
     static void SendRenderException(RenderExcepType type);
     static void SendJsException(JsExcepType type);
@@ -258,6 +258,8 @@ public:
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
+    static void ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+            const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
     static void ReportRichEditorInfo(const RichEditorInfo& richEditorInfo);
     static void ReportScrollableErrorEvent(

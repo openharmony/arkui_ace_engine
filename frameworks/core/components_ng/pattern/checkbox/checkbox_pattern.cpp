@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -479,6 +480,7 @@ void CheckBoxPattern::OnClick()
     }
     paintProperty->UpdateCheckBoxSelect(!isSelected);
     UpdateState();
+    ReportChangeEvent(!isSelected);
 }
 
 void CheckBoxPattern::OnTouchDown()
@@ -1020,6 +1022,7 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
     paintProperty->UpdateCheckBoxSelect(select);
     UpdateState();
     OnModifyDone();
+    ReportChangeEvent(select);
 }
 
 void CheckBoxPattern::FireBuilder()
@@ -1220,6 +1223,57 @@ RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()
     }
     groupManager_ = GroupManager::GetGroupManager();
     return groupManager_.Upgrade();
+}
+
+int32_t CheckBoxPattern::ParseCommand(const std::string& command, bool& selectStatus)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "selectCheckBox") {
+        return RET_FAILED;
+    }
+
+    if (!json->Contains("selectStatus") || !json->GetValue("selectStatus")->IsBool()) {
+        return RET_FAILED;
+    }
+
+    selectStatus = json->GetBool("selectStatus", selectStatus);
+    return RET_SUCCESS;
+}
+
+int32_t CheckBoxPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, RET_FAILED);
+    bool currentStatus = paintProperty->GetCheckBoxSelectValue(false);
+    bool selectStatus = currentStatus;
+    auto ret = ParseCommand(command, selectStatus);
+    CHECK_EQUAL_RETURN(ret, RET_FAILED, RET_FAILED);
+    CHECK_EQUAL_RETURN(currentStatus, selectStatus, RET_SUCCESS);
+    SetCheckBoxSelect(selectStatus);
+    return RET_SUCCESS;
+}
+
+void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
+{
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("selectStatus", selectStatus);
+    params->Put("cmd", "selectCheckBox");
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", params);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    json->Put("nodeId", id);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString());
 }
 
 void CheckBoxPattern::RegisterVisibleAreaChange()

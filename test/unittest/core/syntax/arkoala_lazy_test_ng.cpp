@@ -335,14 +335,14 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest010)
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest011)
 {
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    EXPECT_EQ(lazyNode->children_.size(), 0);
-    CreateChildren(lazyNode, TOTAL_COUNT);
-    auto ret = lazyNode->GetChildren();
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    EXPECT_EQ(repeatNode->children_.size(), 0);
+    CreateChildren(repeatNode, TOTAL_COUNT);
+    auto ret = repeatNode->GetChildren();
     EXPECT_EQ(ret.size(), TOTAL_COUNT);
 
-    lazyNode->children_.clear();
-    ret = lazyNode->GetChildren();
+    repeatNode->children_.clear();
+    ret = repeatNode->GetChildren();
     EXPECT_EQ(ret.size(), TOTAL_COUNT);
 }
 
@@ -353,10 +353,10 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest011)
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest012)
 {
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    CreateChildren(lazyNode, TOTAL_COUNT);
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, TOTAL_COUNT);
     std::list<RefPtr<UINode>> ret;
-    lazyNode->ForEachL1Node([&ret, this](int32_t index, const RefPtr<UINode>& node) {
+    repeatNode->ForEachL1Node([&ret, this](int32_t index, const RefPtr<UINode>& node) {
         ret.push_back(node);
     });
     EXPECT_EQ(ret.size(), TOTAL_COUNT);
@@ -439,7 +439,8 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
     lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);
     int32_t result_size = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
     EXPECT_EQ(static_cast<int32_t>(lazyNode->node4Index_.Size()), result_size);
-    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), result_size);
+    int32_t children_size = INDEX_9 - INDEX_1 + 1;
+    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), children_size);
 
     auto repeatNode = CreateRepeatNode(GetNextId());
     CreateChildren(repeatNode, totalCount);
@@ -447,6 +448,22 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
     int32_t result_size_2 = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
     EXPECT_EQ(static_cast<int32_t>(repeatNode->node4Index_.Size()), result_size_2);
     EXPECT_EQ(static_cast<int32_t>(repeatNode->GetChildren().size()), result_size_2);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest018
+ * @tc.desc: Test ArkoalaLazyNode ForEachL1NodeWithOnMove.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest018)
+{
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, TOTAL_COUNT);
+    std::list<RefPtr<UINode>> ret;
+    repeatNode->ForEachL1NodeWithOnMove([&ret, this](const RefPtr<UINode>& node) {
+        ret.push_back(node);
+    });
+    EXPECT_EQ(ret.size(), TOTAL_COUNT);
 }
 
 /**

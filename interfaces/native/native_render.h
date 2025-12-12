@@ -332,7 +332,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node);
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
- *         {@link ARKUI_ERROR_CODE_CHILD_RENDER_NOT_EXIST} The child does not exist.
+ *         {@link ARKUI_ERROR_CODE_RENDER_CHILD_NOT_EXIST} The child does not exist.
  *         {@link ARKUI_ERROR_CODE_RENDER_IS_FROM_FRAME_NODE} if the node is obtained from a FrameNode.
  *         Add since api 23.
  * @since 20
@@ -348,7 +348,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
- *         {@link ARKUI_ERROR_CODE_CHILD_RENDER_NOT_EXIST} The child does not exist.
+ *         {@link ARKUI_ERROR_CODE_RENDER_CHILD_NOT_EXIST} The child does not exist.
  *         {@link ARKUI_ERROR_CODE_RENDER_IS_FROM_FRAME_NODE} if the node is obtained from a FrameNode.
  *         Add since api 23.
  * @since 20
@@ -364,7 +364,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkU
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
- *         {@link ARKUI_ERROR_CODE_CHILD_RENDER_NOT_EXIST} The child does not exist.
+ *         {@link ARKUI_ERROR_CODE_RENDER_CHILD_NOT_EXIST} The child does not exist.
  * @since 20
  */
 int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling);
@@ -378,7 +378,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, Ark
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
- *         {@link ARKUI_ERROR_CODE_CHILD_RENDER_NOT_EXIST} The child does not exist.
+ *         {@link ARKUI_ERROR_CODE_RENDER_CHILD_NOT_EXIST} The child does not exist.
  * @since 20
  */
 int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling);

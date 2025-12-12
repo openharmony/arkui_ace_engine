@@ -316,6 +316,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite();
+    menuInfo.showAutoFill = pattern->IsShowAutoFill();
     menuInfo.isAskCeliaEnabled = pattern->IsAskCeliaEnabled();
     menuInfo.isShowAskCeliaInRightClick = pattern->IsShowAskCeliaInRightClick();
     pattern->UpdateSelectMenuInfo(menuInfo);
@@ -433,6 +434,12 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             break;
+        case OptionMenuActionId::PASSWORD_VAULT:
+            pattern->HandleOnPasswordVault();
+            return;
+        case OptionMenuActionId::AUTO_FILL:
+            HandleOnAutoFill(type);
+            return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
             break;

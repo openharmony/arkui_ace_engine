@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/compat"
-import { createSha1 } from "./sha1";
+import { float64toInt32, int32 } from '@koalaui/compat'
+import { createSha1 } from './sha1'
 
 export class UniqueId {
     private sha = createSha1()
@@ -53,10 +53,10 @@ export class UniqueId {
         if (data instanceof Uint32Array) {
             return this.addU32Array(data)
         }
-        return this.addI32(data as int32)
+        return this.addI32(float64toInt32(data))
     }
 
     public compute(): string {
-        return this.sha.digest("hex") as string
+        return this.sha.digest('hex') as string
     }
 }

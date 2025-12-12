@@ -836,6 +836,16 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     } else {
         NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     }
+    // add accessibilityText
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBackButtonText(nativeNode);
+    RefPtr<ResourceObject> textResourceObj;
+    std::string textString;
+    Local<JSValueRef> jsText = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (!ArkTSUtils::ParseJsString(vm, jsText, textString, textResourceObj)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavBackButtonText(nativeNode, textString.c_str(),
+        AceType::RawPtr(textResourceObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -855,6 +865,7 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     std::string src;
     NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBackButtonText(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -972,6 +983,16 @@ ArkUINativeModuleValue NavigationBridge::SetMenus(ArkUIRuntimeCallInfo* runtimeC
     } else if (menusArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getNavigationModifier()->resetNavMenus(nativeNode);
     }
+    // deal menu options
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() <= NUM_2 || !info[NUM_2]->IsObject()) {
+        return panda::StringRef::Undefined(vm);
+    }
+    NG::NavigationMenuOptions options;
+    auto optObj = JSRef<JSObject>::Cast(info[NUM_2]);
+    auto moreButtonProperty = optObj->GetProperty("moreButtonOptions");
+    JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -982,6 +1003,10 @@ ArkUINativeModuleValue NavigationBridge::ResetMenus(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavigationModifier()->resetNavMenus(nativeNode);
+    NavigationModelNG::ResetResObj(reinterpret_cast<FrameNode*>(nativeNode),
+        NavigationPatternType::TITLE_BAR, "navigation.navigationMenuOptions");
+    NG::NavigationMenuOptions options;
+    NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
 

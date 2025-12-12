@@ -63,6 +63,7 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -474,7 +475,9 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
     taskExecutor_ = taskExecutorImpl;
     // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ ||
+        type_ == FrontendType::ARK_TS || type_ == FrontendType::DYNAMIC_HYBRID_STATIC ||
+        type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         GetSettings().useUIAsJSThread = true;
     } else {
         taskExecutorImpl->InitJsThread();
@@ -1220,6 +1223,27 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     front->OnNewRequest(data);
 }
 
+void AceContainer::InitForceSplitManager()
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    auto abilityInfo = abilityInfo_.lock();
+    if (abilityInfo && abilityInfo->iconId != 0) {
+        mgr->SetAppIconId(abilityInfo->iconId);
+        return;
+    }
+    auto runtimeContext = runtimeContext_.lock();
+    CHECK_NULL_VOID(runtimeContext);
+    auto appInfo = runtimeContext->GetApplicationInfo();
+    if (appInfo && appInfo->iconId != 0) {
+        mgr->SetAppIconId(appInfo->iconId);
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to get app iconId");
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
@@ -1416,21 +1440,26 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
+    auto&& densityChangeCallback = [id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density, id]() {
-            context->OnSurfaceDensityChanged(density);
-            if (context->IsNeedReloadDensity()) {
-                auto container = Container::GetContainer(id);
-                CHECK_NULL_VOID(container);
-                auto aceContainer = DynamicCast<AceContainer>(container);
-                CHECK_NULL_VOID(aceContainer);
-                aceContainer->NotifyDensityUpdate(density);
-                context->SetIsNeedReloadDensity(false);
+        auto container = Container::GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto callback = [container, density]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->OnSurfaceDensityChanged(density);
+                if (pipelineContext->IsNeedReloadDensity()) {
+                    auto aceContainer = DynamicCast<AceContainer>(container);
+                    CHECK_NULL_VOID(aceContainer);
+                    aceContainer->NotifyDensityUpdate(density);
+                    pipelineContext->SetIsNeedReloadDensity(false);
+                }
             }
         };
-        auto taskExecutor = context->GetTaskExecutor();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
@@ -1655,12 +1684,16 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-
+    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content, params);
+        auto result = front->RunPageByNamedRouter(content, params);
+        container->LoadCompleteManagerStopCollect();
+        return result;
     }
 
-    return front->RunPage(content, params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1671,7 +1704,10 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    return front->RunPage(content, params);
+    container->LoadCompleteManagerStartCollect(params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 bool AceContainer::RunDynamicPage(
@@ -1710,9 +1746,10 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
-          onFinish_(onFinish)
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), triggerType_(triggerType),
+          isNative_(isNative), onFinish_(onFinish)
     {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
@@ -1730,19 +1767,20 @@ public:
             auto node = node_.Upgrade();
             CHECK_NULL_VOID(node);
             taskExecutor->PostTask(
-                [viewDataWrap, node, autoFillType = autoFillType_]() {
+                [viewDataWrap, node, autoFillType = autoFillType_, triggerType = triggerType_]() {
                     if (node) {
-                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType);
+                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType, triggerType);
                     }
                 },
                 TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");
             return;
         }
-
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
         taskExecutor->PostTask(
-            [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
+            [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {
-                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap);
+                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap, triggerType, node);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestSuccess");
@@ -1911,6 +1949,7 @@ private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+    AceAutoFillTriggerType triggerType_ = AceAutoFillTriggerType::AUTO_REQUEST;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
@@ -2075,7 +2114,8 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
 
 int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -2091,7 +2131,8 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, triggerType, isNative,
+        onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -2115,6 +2156,7 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    autoFillRequest.autoFillTriggerType = static_cast<AbilityRuntime::AutoFill::AutoFillTriggerType>(triggerType);
     AbilityRuntime::AutoFill::AutoFillResult result;
     auto resultCode =
         AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);
@@ -2718,6 +2760,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
+    InitForceSplitManager();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
         auto container = weak.Upgrade();
@@ -3695,7 +3738,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(
@@ -4752,9 +4795,16 @@ void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
 
 void AceContainer::SetIsFocusActive(bool isFocusActive)
 {
-    auto pipelineContext = DynamicCast<NG::PipelineContext>(GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetIsFocusActive(isFocusActive);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this), isFocusActive]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetIsFocusActive(isFocusActive);
+    },
+    TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 bool AceContainer::CloseWindow(int32_t instanceId)
@@ -5065,5 +5115,19 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     if (subFrontend_) {
         subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
     }
+}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+}
+
+void AceContainer::LoadCompleteManagerStopCollect()
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StopCollect();
 }
 } // namespace OHOS::Ace::Platform

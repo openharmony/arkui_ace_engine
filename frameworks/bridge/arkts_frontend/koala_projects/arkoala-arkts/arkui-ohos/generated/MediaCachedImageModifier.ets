@@ -29,12 +29,14 @@ import { default as drawing } from "@ohos.graphics.drawing"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
 import { ImageModifier } from "./ImageModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkMediaCachedImagePeer, MediaCachedImageAttribute } from "./component/mediaCachedImage"
 import { int32 } from "@koalaui/common"
 export class MediaCachedImageModifier extends CommonMethodModifier implements MediaCachedImageAttribute,AttributeModifier<MediaCachedImageAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -99,6 +101,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMediaCachedImagePeer;
         if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -590,6 +593,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
     }
     mergeModifier(modifier: MediaCachedImageModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alt_0_flag) {

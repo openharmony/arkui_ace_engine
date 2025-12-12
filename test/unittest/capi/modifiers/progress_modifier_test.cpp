@@ -319,7 +319,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleValidValues, TestSize.Leve
 {
     Ark_LinearStyleOptions linearStyle;
     linearStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
-    linearStyle.strokeRadius = Converter::ArkValue<Opt_Union_String_Number_Resource>(Ark_Empty());
+    linearStyle.strokeRadius = Converter::ArkValue<Opt_Union_String_F64_Resource>(Ark_Empty());
     linearStyle.strokeWidth = Converter::ArkValue<Opt_Length>("3px");
     auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
@@ -356,21 +356,21 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, T
             auto result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_RADIUS_NAME);
             EXPECT_EQ(result, expectedStr);
         };
-    auto value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(12.34);
+    auto value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(12.34);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "12.34vp");
 
-    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>("1.00");
+    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_String>("1.00");
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "1.00vp");
 
     auto strokeRes = CreateResource(RES_NAME_ID, ResourceType::FLOAT);
-    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
+    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "22.55px");
 
     strokeRes = CreateResource(RES_NAME_NEG_ID, ResourceType::FLOAT);
-    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
+    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "25.00px");
 }

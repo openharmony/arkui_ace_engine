@@ -423,6 +423,7 @@ private:
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
+    void AdjustStepAccessibilityVirtualNode(SizeF& pointSize, PointF& point, uint32_t pointCount, uint32_t index);
     void UpdateStepAccessibilityVirtualNode();
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
@@ -458,6 +459,8 @@ private:
         RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options);
 
     void RemoveCallbackOnDetach(FrameNode* frameNode);
+
+    int32_t CheckAccessibilityStepCount();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

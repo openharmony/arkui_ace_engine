@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_CORRECTION_PARSER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_CORRECTION_PARSER_H
 
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_parser_base.h"
 
 namespace OHOS::Ace {
-class UICorrectionParser : public ConfigXMLParserBase {
+class UICorrectionParser : public ConfigParserBase {
 public:
     UICorrectionParser() = default;
     ~UICorrectionParser() = default;

@@ -154,6 +154,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         propBackBlendMode.has_value() ? static_cast<uint16_t>(propBackBlendMode.value()) : 0, filter);
     json->PutExtAttr("dynamicDimming", propDynamicDimDegree.has_value() ?
         static_cast<float_t>(propDynamicDimDegree.value()) : 1.0f, filter);
+    json->PutExtAttr("systemBarEffect", propSystemBarEffect.value_or(false) ? "true" : "false", filter);
     auto jsonBgBrightness = JsonUtil::Create(true);
     jsonBgBrightness->Put(
         "dynamicLightUpRate", propDynamicLightUpRate.has_value() ? propDynamicLightUpRate.value() : 0.0);
@@ -311,7 +312,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     if (filter.IsFastFilter()) {
         return;
     }
-    if (propClipShape.has_value()) {
+    if (propClipShape.has_value() && propClipShape.value()) {
         auto jsonClip = JsonUtil::Create(true);
         auto shape = propClipShape.value();
         auto shapeType = BasicShapeTypeToString(shape->GetBasicShapeType());
@@ -324,7 +325,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     }
 
     auto jsonMask = JsonUtil::Create(true);
-    if (propClipMask.has_value()) {
+    if (propClipMask.has_value() && propClipMask.value()) {
         auto shape = propClipMask.value();
         auto shapeType = BasicShapeTypeToString(shape->GetBasicShapeType());
         if (!shapeType.empty()) {

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -42,6 +44,7 @@ export class ArkFormLinkPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFormLinkOptionsAttribute(options: FormLinkOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         FormLinkOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._FormLinkInterface_setFormLinkOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -91,7 +94,9 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         return this
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFormLinkAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFormLinkAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

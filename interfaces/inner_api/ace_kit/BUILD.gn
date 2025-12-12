@@ -37,10 +37,12 @@ ohos_source_set("ace_kit") {
     "src/agingadapation/aging_adapation_dialog_util.cpp",
     "src/animation/animation_utils.cpp",
     "src/napi/napi_parser.cpp",
+    "src/ani/ani_parser.cpp",
     "src/properties/property.cpp",
     "src/resource/resource_parser.cpp",
     "src/utils/measure_utils.cpp",
     "src/view/components/column.cpp",
+    "src/view/components/stack.cpp",
     "src/view/components/custom_node.cpp",
     "src/view/components/menu_view.cpp",
     "src/view/components/tabs.cpp",
@@ -66,6 +68,7 @@ ohos_source_set("ace_kit") {
     "$ace_root",
     "$ace_root/frameworks",
     "$ace_root/interfaces/inner_api/ace_kit/src",
+    "$ace_root/frameworks/core/interfaces/native/generated/interface",
   ]
 
   deps = []

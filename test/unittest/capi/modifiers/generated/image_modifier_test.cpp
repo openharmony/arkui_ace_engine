@@ -488,7 +488,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -989,7 +989,7 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
  */
 HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1070,7 +1070,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setSyncLoadTestSyncLoadInvalidValues, TestS
  */
 HWTEST_F(ImageModifierTest, DISABLED_setColorFilterTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1668,7 +1668,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1909,7 +1909,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomInvalidValu
  */
 HWTEST_F(ImageModifierTest, DISABLED_setEdgeAntialiasingTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1990,7 +1990,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setEnableAnalyzerTestEnableAnalyzerInvalidV
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAnalyzerConfigTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2000,7 +2000,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setAnalyzerConfigTestPlaceholder, TestSize.
  */
 HWTEST_F(ImageModifierTest, DISABLED_setResizableTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2081,7 +2081,7 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidValues
  */
 HWTEST_F(ImageModifierTest, DISABLED_setEnhancedImageQualityTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

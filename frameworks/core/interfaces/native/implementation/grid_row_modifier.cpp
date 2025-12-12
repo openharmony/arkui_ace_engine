@@ -59,6 +59,11 @@ namespace OHOS::Ace::NG::Converter {
         return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
     }
     template<>
+    GridRowSizeOption Convert(const Ark_Float64& value)
+    {
+        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
+    }
+    template<>
     GridRowSizeOption Convert(const Ark_String& value)
     {
         return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
@@ -81,7 +86,7 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    V2::Gutter Convert(const Ark_Number& value)
+    V2::Gutter Convert(const Ark_Float64& value)
     {
         return V2::Gutter(Converter::Convert<Dimension>(value));
     }
@@ -162,7 +167,7 @@ namespace OHOS::Ace::NG::Converter {
         if (optReference.has_value()) {
             toValue.reference = optReference.value();
         }
-        if (!optBreakpoints.has_value()) {
+        if (!optBreakpoints.has_value() || optBreakpoints->size() > MAX_NUMBER_BREAKPOINT - 1) {
             return toValue;
         }
         toValue.breakpoints.clear();

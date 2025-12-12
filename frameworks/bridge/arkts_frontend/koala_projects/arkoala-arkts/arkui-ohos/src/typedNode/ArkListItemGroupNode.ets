@@ -60,8 +60,11 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> |
-        AttributeModifier<CommonMethod> | undefined): this {
+    attributeModifier(
+        value: AttributeModifier<ListItemGroupAttribute> |
+        AttributeModifier<CommonMethod> |
+        undefined
+    ): this {
         throw new Error('Unimplemented method attributeModifier')
     }
 }

@@ -111,6 +111,7 @@ public:
     virtual void SetContentTransition(ContentTransitionType contentTransition) = 0;
     virtual void SetAltError(const ImageSourceInfo& src) = 0;
     virtual void SetAltPlaceholder(const ImageSourceInfo& src) = 0;
+    virtual void SetAntiAlias(bool antiAlias) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;

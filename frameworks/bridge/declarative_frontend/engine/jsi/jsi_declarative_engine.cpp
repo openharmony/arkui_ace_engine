@@ -488,6 +488,7 @@ thread_local void* g_declarativeRuntime = nullptr;
 
 // ArkTsCard start
 thread_local bool isUnique_ = false;
+thread_local FormJsXNodeLoadMode currentMode_ = FormJsXNodeLoadMode::NONE;
 // ArkTsCard end
 
 thread_local bool isWorker_ = false;
@@ -3334,6 +3335,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
 
@@ -3374,6 +3376,7 @@ void JsiDeclarativeEngine::JsSetAceDebugMode()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
     const JSRef<JSVal> setAceDebugMode = globalObject->GetProperty("setAceDebugMode");
@@ -3396,6 +3399,7 @@ void JsiDeclarativeEngine::JsUnregisterInstanceId()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
     const JSRef<JSVal> unregisterInstanceIdFun = globalObject->GetProperty("unregisterInstanceIdForEnv");
@@ -3510,6 +3514,42 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
     JSNApi::HintGC(vm, JSNApi::MemoryReduceDegree::MIDDLE, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
+}
+
+void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoadMode mode)
+{
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        return;
+    }
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module, loadMode=%{public}d, current=%{public}d",
+        static_cast<int32_t>(mode), static_cast<int32_t>(currentMode_));
+    if (static_cast<int32_t>(currentMode_) >= static_cast<int32_t>(mode)) {
+        return;
+    }
+    LocalScope scope(vm);
+    switch (mode) {
+        case FormJsXNodeLoadMode::NONE:
+            return;
+        case FormJsXNodeLoadMode::LITE:
+            JsRegisterFormJsXNodeLite(JSNApi::GetGlobalObject(vm));
+            break;
+        case FormJsXNodeLoadMode::FULL:
+            JsRegisterFormJsXNodeFull(JSNApi::GetGlobalObject(vm), (currentMode_ == FormJsXNodeLoadMode::LITE));
+            break;
+        default:
+            return;
+    }
+    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
+        PreloadUIContent(localRuntime_);
+    }
+    currentMode_ = mode;
 }
 #endif
 

@@ -119,13 +119,13 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
         return false;
     }
 
-    FireChangeEvent();
     currentDelta_ = 0.0f;
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto pickerAlgorithm = DynamicCast<ContainerPickerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(pickerAlgorithm, false);
     GetLayoutProperties(pickerAlgorithm);
+    FireChangeEvent();
     PostIdleTask(GetHost());
     SetDefaultTextStyle(false);
     HandleTargetIndex();
@@ -286,9 +286,9 @@ void ContainerPickerPattern::FireChangeEvent()
 {
     auto currentMiddleItem =
         ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
-    auto newSelectedIndex_ = currentMiddleItem.first;
-    if (newSelectedIndex_ != selectedIndex_) {
-        selectedIndex_ = newSelectedIndex_;
+    auto newSelectedIndex = currentMiddleItem.first;
+    if (newSelectedIndex != selectedIndex_) {
+        selectedIndex_ = newSelectedIndex;
         auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
         CHECK_NULL_VOID(pickerEventHub);
         pickerEventHub->FireChangeEvent(selectedIndex_);
@@ -913,23 +913,19 @@ void ContainerPickerPattern::PlayTargetAnimation()
     if (!scrollProperty_) {
         CreateScrollProperty();
     }
-    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    int32_t targetIndex = targetIndex_.value_or(0);
+    if (targetIndex < 0 || targetIndex >= totalItemCount_) {
+        targetIndex = 0;
+    }
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex);
     CreateTargetAnimation(targetPos);
     targetIndex_.reset();
 }
 
 void ContainerPickerPattern::CalcEndOffset(float& endOffset, double velocity)
 {
-    float defaultK = 1.5f;
     float defaultY = 0.75f;
-    float a = 1.848f;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t optionItems = host->TotalChildCount();
-    float maxItems = 60.0f;
-    float realK = exp(-a * (1 - optionItems / maxItems));
-    realK = std::min(realK, 1.0f) * defaultK;
-    endOffset = realK / (4.2f * defaultY) * velocity * (1 - exp(-defaultY * CUSTOM_SPRING_ANIMATION_DURATION));
+    endOffset = REAL_K / (4.2f * defaultY) * velocity * (1 - exp(-defaultY * CUSTOM_SPRING_ANIMATION_DURATION));
 
     // Adjust the position to ensure it is centered.
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
@@ -1250,8 +1246,7 @@ void ContainerPickerPattern::PlayResetAnimation()
 void ContainerPickerPattern::ForceResetWithoutAnimation()
 {
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
-    float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
-    currentDelta_ = resetOffset;
+    currentDelta_ = CalculateResetOffset(currentOffsetFromMiddle);
     PickerMarkDirty();
 }
 
@@ -1521,7 +1516,6 @@ bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
             int32_t upIndex = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
             SwipeTo(upIndex);
             selectedIndex_ = upIndex;
-            FireScrollStopEvent();
             break;
         }
 
@@ -1529,7 +1523,6 @@ bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
             int32_t downIndex = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
             SwipeTo(downIndex);
             selectedIndex_ = downIndex;
-            FireScrollStopEvent();
             break;
         }
 

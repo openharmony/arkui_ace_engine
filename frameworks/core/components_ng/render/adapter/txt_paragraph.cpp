@@ -92,6 +92,8 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
         style.ellipsis = ELLIPSIS;
     }
     style.enableAutoSpace = paraStyle.enableAutoSpacing;
+    style.includeFontPadding = paraStyle.includeFontPadding;
+    style.fallbackLineSpacing = paraStyle.fallbackLineSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =
@@ -100,6 +102,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
     style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
+    style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -536,6 +539,10 @@ float TxtParagraph::MakeEmptyOffsetX(bool isLtr)
 {
     auto width = GetMaxWidth();
     switch (textAlign_) {
+        case TextAlign::LEFT:
+            return 0.0f;
+        case TextAlign::RIGHT:
+            return width;
         case TextAlign::CENTER:
             return width * 0.5f;
         case TextAlign::END:

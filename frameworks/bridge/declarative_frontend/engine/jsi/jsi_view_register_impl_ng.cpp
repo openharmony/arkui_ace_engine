@@ -49,6 +49,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
@@ -532,6 +533,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradient::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);

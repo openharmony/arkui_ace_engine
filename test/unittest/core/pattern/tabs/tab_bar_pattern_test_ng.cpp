@@ -2915,4 +2915,23 @@ HWTEST_F(TabBarPatternTestNg, HandleBottomTabBarAnimation, TestSize.Level1)
     tabBarPattern_->HandleBottomTabBarAnimation(1);
     EXPECT_NE(tabBarPattern_->tabBarStyles_[1], TabBarStyle::BOTTOMTABBATSTYLE);
 }
+/**
+ * @tc.name: SetOnTabBarItemsChangeEvent
+ * @tc.desc: test SetOnTabBarItemsChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, SetOnTabBarItemsChangeEvent, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    OnTabBarItemsChangeEvent func = [](){};
+    tabBarPattern_->NotifyTabBarItemsChange();
+    tabBarPattern_->SetOnTabBarItemsChangeEvent(std::move(func));
+    tabBarPattern_->NotifyTabBarItemsChange();
+    EXPECT_NE(tabBarPattern_->onTabBarItemsChangeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG

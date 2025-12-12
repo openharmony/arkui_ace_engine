@@ -25,10 +25,12 @@ import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ScrollState, ScrollSnapAlign } from "./list"
 import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -201,10 +203,10 @@ export class Scroller implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const dxForIdx0  = dx as string
             thisSerializer.writeString(dxForIdx0)
-        } else if (dx instanceof number) {
+        } else if (dx instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dxForIdx1  = dx as number
-            thisSerializer.writeNumber(dxForIdx1)
+            const dxForIdx1  = dx as double
+            thisSerializer.writeFloat64(dxForIdx1)
         } else if (dx instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const dxForIdx2  = dx as Resource
@@ -214,10 +216,10 @@ export class Scroller implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const dyForIdx0  = dy as string
             thisSerializer.writeString(dyForIdx0)
-        } else if (dy instanceof number) {
+        } else if (dy instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dyForIdx1  = dy as number
-            thisSerializer.writeNumber(dyForIdx1)
+            const dyForIdx1  = dy as double
+            thisSerializer.writeFloat64(dyForIdx1)
         } else if (dy instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const dyForIdx2  = dy as Resource
@@ -259,6 +261,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setScrollOptionsAttribute(scroller?: Scroller): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scroller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -839,7 +842,9 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookScrollAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

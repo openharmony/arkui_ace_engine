@@ -18,10 +18,6 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
-    WordBreak::HYPHENATION };
-const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
-    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)
     : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor),
@@ -50,6 +46,9 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propWordSpacing_.value == rhs.propWordSpacing_.value && propEllipsisMode_ == rhs.propEllipsisMode_ &&
            propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
            propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_ &&
+           propCompressLeadingPunctuation_ == rhs.propCompressLeadingPunctuation_ &&
+           propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
+           propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ &&
            NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 

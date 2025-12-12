@@ -23,7 +23,7 @@ build_component_ng("form_pattern_ng") {
     "form_node.cpp",
     "form_pattern.cpp",
     "form_special_style.cpp",
-    "form_util.cpp",
+    "form_snapshot_util.cpp",
   ]
 
   if (is_ohos_standard_system) {

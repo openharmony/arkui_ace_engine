@@ -97,6 +97,13 @@ void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType
     frameNode->MarkModifyDone();
 }
 
+void GaugeModelStatic::ReSetDescription(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, false, frameNode);
+    frameNode->MarkModifyDone();
+}
+
 void GaugeModelStatic::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
@@ -110,6 +117,9 @@ void GaugeModelStatic::SetGradientColors(FrameNode* frameNode, const std::vector
         ColorStopArray colorStopArray;
         for (const auto& item2: item1) {
             colorStopArray.push_back(std::make_pair(item2.first.value_or(ERROR_COLOR), item2.second));
+        }
+        if (item1.empty()) {
+            colorStopArray.push_back(std::make_pair(ERROR_COLOR, Dimension(0.f)));
         }
         convColors.push_back(colorStopArray);
     }

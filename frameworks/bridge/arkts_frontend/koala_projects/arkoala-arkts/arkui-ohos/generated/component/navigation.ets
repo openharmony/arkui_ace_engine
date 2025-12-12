@@ -21,7 +21,9 @@ import { VoidCallback, Length, Dimension, ResourceStr, ResourceColor } from "./u
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { hookPushPathMethod, hookPushPathByNameMethod, hookReplacePathMethod, hookReplacePathByNameMethod, hookPopMethod, hookPopToNameMethod, hookPopToIndexMethod, hookGetParamByIndexMethod, hookGetParamByNameMethod, extractors, AttributeModifier, hookSetNavigationOptions, hookSetNavDestination, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookSetNavigationOptions, hookSetNavDestination, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { Bindable_Arkui_Component_Units_Length_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -1143,6 +1145,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setNavigationOptionsAttribute(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (pathInfos !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1173,10 +1176,10 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as double
+                    thisSerializer.writeFloat64(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
@@ -2237,7 +2240,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookNavigationAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookNavigationAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -2248,20 +2253,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
-
-    // instructive change begin
-    public updateNeedSync(needSync: boolean): void {
-        this._needSync = needSync;
-    }
-
-    public isNeedSync(): boolean {
-        return this._needSync;
-    }
-
-    public updateNavDestination(navdestination: PageMapBuilder): void {
-        this._navDestination = navdestination;
-    }
-    // instructive change end
 }
 
 @memo
@@ -3098,10 +3089,10 @@ export class NavigationCustomTitle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
-            } else if (valueHolderForHeightForIdx1 instanceof number) {
+            } else if (valueHolderForHeightForIdx1 instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
-                valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
+                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as double
+                valueSerializer.writeFloat64(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
@@ -3129,17 +3120,17 @@ export class NavigationCustomTitle_serializer {
             heightTmpBuf = TitleHeight.fromValue(valueDeserializer.readInt32())
         } else if (heightTmpBufUnionSelector == (1).toChar()) {
             const heightTmpBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBufBufU : string | number | Resource | undefined
+            let heightTmpBufBufU : string | double | Resource | undefined
             if (heightTmpBufBufUUnionSelector == (0).toChar()) {
                 heightTmpBufBufU = (valueDeserializer.readString() as string)
             } else if (heightTmpBufBufUUnionSelector == (1).toChar()) {
-                heightTmpBufBufU = (valueDeserializer.readNumber() as number)
+                heightTmpBufBufU = valueDeserializer.readFloat64()
             } else if (heightTmpBufBufUUnionSelector == (2).toChar()) {
                 heightTmpBufBufU = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBufBufU has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBufBufU as string | number | Resource)
+            heightTmpBuf = (heightTmpBufBufU as string | double | Resource)
         } else {
             throw new Error("One of the branches for heightTmpBuf has to be chosen through deserialisation.")
         }
@@ -3159,10 +3150,10 @@ export class NavigationTitleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -3254,11 +3245,11 @@ export class NavigationTitleOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -3266,7 +3257,7 @@ export class NavigationTitleOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3362,10 +3353,10 @@ export class NavigationToolbarOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -3433,11 +3424,11 @@ export class NavigationToolbarOptions_serializer {
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
                 backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
                 backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -3445,7 +3436,7 @@ export class NavigationToolbarOptions_serializer {
             } else {
                 throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
         const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

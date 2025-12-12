@@ -455,8 +455,12 @@ void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
     CHECK_NULL_VOID(refereeNG);
     if (refereeNG->QueryAllDone()) {
         for (const auto& recognizer : responseLinkRecognizer_) {
-            if (recognizer && recognizer != AceType::Claim(this)) {
-                recognizer->ResetResponseLinkRecognizer();
+            if (recognizer.Invalid()) {
+                continue;
+            }
+            auto upgradeRecognizer = recognizer.Upgrade();
+            if (upgradeRecognizer && upgradeRecognizer != AceType::Claim(this)) {
+                upgradeRecognizer->ResetResponseLinkRecognizer();
             }
         }
         ResetResponseLinkRecognizer();
@@ -733,6 +737,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "distanceThreshold: " << distanceThreshold_.Value() << ", "
         << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();

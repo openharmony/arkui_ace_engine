@@ -86,6 +86,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 
 void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
+    FlushAfterOverlayShowTask();
     CHECK_NULL_VOID(latestReqeust_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
@@ -315,6 +316,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showAutoFill = pattern->IsShowAutoFill();
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
@@ -419,6 +421,12 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU, false, true);
+            return;
+        case OptionMenuActionId::PASSWORD_VAULT:
+            pattern->HandleOnPasswordVault();
+            return;
+        case OptionMenuActionId::AUTO_FILL:
+            HandleOnAutoFill(type);
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
@@ -839,5 +847,19 @@ void TextFieldSelectOverlay::UpdateAISelectMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+}
+
+void TextFieldSelectOverlay::OnHandleMarkInfoChange(
+    const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    BaseTextSelectOverlay::OnHandleMarkInfoChange(info, flag);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & DIRTY_SELECT_AI_MENU) == DIRTY_SELECT_AI_MENU) {
+        auto textFieldPattern = GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        info->menuInfo.showAIWrite = textFieldPattern->IsShowAIWrite();
+        manager->NotifyUpdateToolBar(true);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -161,34 +161,38 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+Opt_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
     auto result = peer->GetCaretOffset();
-    return Converter::ArkValue<Ark_Int32>(result);
+    return Converter::ArkValue<Opt_Int32>(result);
 }
-Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
-                               const Ark_Int32* offset)
+Opt_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
+                               Ark_Int32 offset)
 {
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(offset, false);
-    int32_t caretOffset = Converter::Convert<int32_t>(*offset);
-    bool result = peer->SetCaretOffset(caretOffset);
-    return Converter::ArkValue<Ark_Boolean>(result);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
+    bool result = peer->SetCaretOffset(offset);
+    return Converter::ArkValue<Opt_Boolean>(result);
 }
 void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->CloseSelectionMenu();
 }
-Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
+Opt_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_RichEditorTextStyle>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_RichEditorTextStyle>(Ark_Empty()));
     auto style = peer->GetTypingStyle();
     if (style) {
-        return Converter::ArkValue<Ark_RichEditorTextStyle>(style.value(), Converter::FC);
+        return Converter::ArkValue<Opt_RichEditorTextStyle>(style.value(), Converter::FC);
     }
-    return Converter::CreateEmptyArkTextStyle();
+    return Converter::ArkValue<Opt_RichEditorTextStyle>(Converter::CreateEmptyArkTextStyle());
 }
 void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
                         const Ark_RichEditorTextStyle* value)
@@ -212,30 +216,36 @@ void SetSelectionImpl(Ark_RichEditorBaseController peer,
     auto optOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(start, end, optOptions, start < end);
 }
-Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
+Opt_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
     bool result = peer->IsEditing();
-    return Converter::ArkValue<Ark_Boolean>(result);
+    return Converter::ArkValue<Opt_Boolean>(result);
 }
 void StopEditingImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_VOID(peer);
     peer->StopEditing();
 }
-Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
+Opt_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), {});
+    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     auto layoutManagerPeer = GetLayoutManagerAccessor()->construct();
-    CHECK_NULL_RETURN(layoutManagerPeer, {});
+    CHECK_NULL_RETURN(layoutManagerPeer, Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    return Converter::ArkValue<Opt_LayoutManager>(layoutManagerPeer);
 }
-Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
+Opt_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PreviewText>(Ark_Empty()));
+    auto controller = (peer->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_PreviewText>(Ark_Empty()));
     auto result = peer->GetPreviewText();
-    return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
+    return Converter::ArkValue<Opt_PreviewText>(result, Converter::FC);
 }
 Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
 {
@@ -245,6 +255,11 @@ Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
     CHECK_NULL_RETURN(caretRect, invalidValue);
     CHECK_EQUAL_RETURN(caretRect->IsValid(), false, invalidValue);
     return Converter::ArkValue<Opt_RectResult>(*caretRect);
+}
+void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->DeleteBackward();
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
@@ -264,6 +279,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
         RichEditorBaseControllerAccessor::GetCaretRectImpl,
+        RichEditorBaseControllerAccessor::DeleteBackwardImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

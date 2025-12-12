@@ -202,7 +202,7 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
         .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456),
     };
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -282,6 +282,6 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
  */
 HWTEST_F(ListItemGroupModifierTest, DISABLED_setChildrenMainSizeTest, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
-
 } // namespace OHOS::Ace::NG

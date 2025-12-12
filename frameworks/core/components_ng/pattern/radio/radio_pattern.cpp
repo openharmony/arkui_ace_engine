@@ -20,6 +20,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -354,6 +355,7 @@ void RadioPattern::MarkIsSelected(bool isSelected)
     CHECK_NULL_VOID(host);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire change event %{public}d", host->GetId(),
         isSelected);
+    ReportOnChangeEvent(host->GetId(), isSelected);
     if (isSelected) {
         eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
@@ -633,6 +635,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(radioEventHub);
         TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
         radioEventHub->UpdateChangeEvent(false);
+        ReportOnChangeEvent(frameNode->GetId(), false);
         isOnAnimationFlag_ = false;
     }
     preCheck_ = false;
@@ -835,7 +838,9 @@ void RadioPattern::UpdateGroupCheckStatus(
         TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire group change event %{public}d",
             frameNode->GetId(), check);
         radioEventHub->UpdateChangeEvent(check);
+        ReportOnChangeEvent(frameNode->GetId(), check);
     }
+    ReportInitOnChangeEvent(frameNode->GetId(), check);
 }
 
 void RadioPattern::UpdateUIStatus(bool check)
@@ -1177,5 +1182,66 @@ void RadioPattern::OnColorConfigurationUpdate()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+int32_t RadioPattern::OnInjectionEvent(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(IsJsonValid(json), RET_FAILED);
+    CHECK_NULL_RETURN(IsJsonObject(json), RET_FAILED);
+
+    std::string cmd = json->GetString("cmd");
+    bool value = true;
+    auto paramJson = json->GetValue("params");
+    if (IsJsonObject(paramJson)) {
+        value = paramJson->GetBool("value", false);
+    }
+    if (cmd == "checked") {
+        SetRadioChecked(value);
+        return RET_SUCCESS;
+    }
+    return RET_FAILED;
+}
+
+bool RadioPattern::ReportInitOnChangeEvent(int32_t nodeId, bool isChecked)
+{
+    if (!isFirstCreated_) {
+        return false;
+    }
+    if (!isChecked) {
+        return false;
+    }
+    return ReportOnChangeEvent(nodeId, true, true);
+}
+
+bool RadioPattern::ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool force)
+{
+    if (!force) {
+        if (preCheck_ == isChecked) {
+            return false;
+        }
+    }
+
+    auto params = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("checked", isChecked);
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("Radio", "onChange");
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
+    return true;
+}
+
+bool RadioPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool RadioPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
 }
 } // namespace OHOS::Ace::NG

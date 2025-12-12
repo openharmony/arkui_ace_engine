@@ -515,7 +515,9 @@ void MenuPattern::BuildDivider()
     buildDividerTaskAdded_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isNeedDivider_ = false;
+    if (!IsSelectOverlayExtensionMenuWithSubMenu()) {
+        isNeedDivider_ = false;
+    }
     auto uiNode = AceType::DynamicCast<UINode>(host);
     RefPtr<UINode> previousNode = nullptr;
     UpdateMenuItemChildren(uiNode, previousNode);
@@ -1114,6 +1116,18 @@ void MenuPattern::HideStackMenu() const
     ShowStackMenuDisappearAnimation(menuNode, host, option);
 }
 
+void MenuPattern::HideAllEmbeddedMenuItems(bool isNeedAnimation)
+{
+    auto embeddedMenuItems = GetEmbeddedMenuItems();
+    for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
+        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
+        if (!menuItemPattern) {
+            continue;
+        }
+        menuItemPattern->HideEmbedded(isNeedAnimation);
+    }
+}
+
 void MenuPattern::HideSubMenu()
 {
     if (!showedSubMenu_) {
@@ -1301,14 +1315,11 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     }
 }
 
-bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, PipelineContext* pipelineContext)
 {
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
@@ -1323,17 +1334,17 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     CHECK_NULL_VOID(renderContext);
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
-
+    auto pipelineContext = host->GetContextWithCheck();
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
         Shadow shadow;
-        if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+        if (GetShadowFromTheme(ShadowStyle::None, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
     } else {
         Shadow shadow;
-        auto shadowStyle = GetMenuDefaultShadowStyle();
-        if (GetShadowFromTheme(shadowStyle, shadow)) {
+        auto shadowStyle = GetMenuDefaultShadowStyle(pipelineContext);
+        if (GetShadowFromTheme(shadowStyle, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
     }
@@ -1362,8 +1373,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         renderContext->UpdateBackgroundColor(bgColor);
     }
     Shadow shadow;
-    auto defaultShadowStyle = GetMenuDefaultShadowStyle();
-    if (GetShadowFromTheme(defaultShadowStyle, shadow)) {
+    auto defaultShadowStyle = GetMenuDefaultShadowStyle(pipeline);
+    if (GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
         renderContext->UpdateBackShadow(shadow);
     }
     // make menu round rect
@@ -2325,6 +2336,28 @@ RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
     return mainMenuFrameNode->GetPattern<MenuPattern>();
 }
 
+bool MenuPattern::IsSelectOverlayExtensionMenuWithSubMenu() const
+{
+    auto wrapperFrameNode = GetMenuWrapper();
+    CHECK_NULL_RETURN(wrapperFrameNode, false);
+    if (wrapperFrameNode->GetTag() != V2::SELECT_OVERLAY_ETS_TAG) {
+        return false;
+    }
+    RefPtr<UINode> mainMenuUINode = nullptr;
+    for (auto& child : wrapperFrameNode->GetChildren()) {
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            mainMenuUINode = child;
+            break;
+        }
+    }
+    CHECK_NULL_RETURN(mainMenuUINode, false);
+    auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    CHECK_NULL_RETURN(mainMenuFrameNode, false);
+    auto menuPattern = mainMenuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayExtensionMenu();
+}
+
 void InnerMenuPattern::RecordItemsAndGroups()
 {
     itemsAndGroups_.clear();
@@ -2370,7 +2403,7 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }
@@ -2380,7 +2413,7 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+    if (GetShadowFromTheme(ShadowStyle::None, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }
@@ -2408,13 +2441,15 @@ void MenuPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
 
-    auto optionNode = menuPattern->GetOptions();
-    for (const auto& child : optionNode) {
-        auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        optionsPattern->SetFontColor(menuTheme->GetFontColor());
+    if (!isSelectMenu_) {
+        auto optionNode = menuPattern->GetOptions();
+        for (const auto& child : optionNode) {
+            auto optionsPattern = child->GetPattern<MenuItemPattern>();
+            optionsPattern->SetFontColor(menuTheme->GetFontColor());
 
-        child->MarkModifyDone();
-        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            child->MarkModifyDone();
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
     host->SetNeedCallChildrenUpdate(false);
 

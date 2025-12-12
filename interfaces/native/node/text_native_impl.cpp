@@ -16,6 +16,9 @@
 
 #include <securec.h>
 
+#include "node_extened.h"
+#include "node_model.h"
+
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -237,6 +240,12 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_TextMenuItem insertItem;
+    insertItem.content = nullptr;
+    insertItem.isDelContent = false;
+    insertItem.icon = nullptr;
+    insertItem.isDelIcon = false;
+    insertItem.labelInfo = nullptr;
+    insertItem.isDelLabel = false;
     if (OH_ArkUI_TextMenuItem_SetContent(&insertItem, item->content) != ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR) {
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
@@ -254,21 +263,20 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* itemAr
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto eraseIter = itemArray->items.begin() + index;
-    ArkUI_TextMenuItem eraseItem = *eraseIter;
-    if (eraseItem.isDelContent && eraseItem.content) {
-        delete[] eraseItem.content;
-        eraseItem.content = nullptr;
-        eraseItem.isDelContent = false;
+    if (eraseIter->isDelContent && eraseIter->content) {
+        delete[] eraseIter->content;
+        eraseIter->content = nullptr;
+        eraseIter->isDelContent = false;
     }
-    if (eraseItem.isDelIcon && eraseItem.icon) {
-        delete[] eraseItem.icon;
-        eraseItem.icon = nullptr;
-        eraseItem.isDelIcon = false;
+    if (eraseIter->isDelIcon && eraseIter->icon) {
+        delete[] eraseIter->icon;
+        eraseIter->icon = nullptr;
+        eraseIter->isDelIcon = false;
     }
-    if (eraseItem.isDelLabel && eraseItem.labelInfo) {
-        delete[] eraseItem.labelInfo;
-        eraseItem.labelInfo = nullptr;
-        eraseItem.isDelLabel = false;
+    if (eraseIter->isDelLabel && eraseIter->labelInfo) {
+        delete[] eraseIter->labelInfo;
+        eraseIter->labelInfo = nullptr;
+        eraseIter->isDelLabel = false;
     }
     itemArray->items.erase(eraseIter);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -432,6 +440,183 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     selectionMenuOptions->onMenuHide = reinterpret_cast<void*>(callback);
     selectionMenuOptions->onMenuHideUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_TextContentBaseController_ScrollToVisible(
+    ArkUI_TextContentBaseController* controller, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(controller);
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (controller->textFieldType == NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->scrollToVisible(
+            controller->node->uiNodeHandle, start, end);
+        return;
+    }
+    if (controller->textFieldType == NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->scrollToVisible(
+            controller->node->uiNodeHandle, start, end);
+    }
+}
+ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create()
+{
+    ArkUI_TextMarqueeOptions* option = new ArkUI_TextMarqueeOptions();
+    option->step = -1.0f;
+    option->delay = 0;
+    option->loop = -1;
+    option->marqueeStartPolicy = ArkUI_MarqueeStartPolicy::ARKUI_MARQUEESTARTPOLICY_DEFAULT;
+    option->start = true;
+    option->fromStart = true;
+    option->fadeout = false;
+    option->marqueeUpdatePolicy = ArkUI_MarqueeUpdatePolicy::ARKUI_MARQUEEUPDATEPOLICY_DEFAULT;
+    option->spacing = -1.0f;
+    return option;
+}
+
+void OH_ArkUI_TextMarqueeOptions_Dispose(ArkUI_TextMarqueeOptions* option)
+{
+    if (!option) {
+        return;
+    }
+    delete option;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStart(ArkUI_TextMarqueeOptions* option, bool start)
+{
+    CHECK_NULL_VOID(option);
+    option->start = start;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetStart(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->start;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStep(ArkUI_TextMarqueeOptions* option, float step)
+{
+    CHECK_NULL_VOID(option);
+    option->step = step;
+}
+
+float OH_ArkUI_TextMarqueeOptions_GetStep(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0.0f);
+    return option->step;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetSpacing(ArkUI_TextMarqueeOptions* option, float spacing)
+{
+    CHECK_NULL_VOID(option);
+    option->spacing = spacing;
+}
+
+float OH_ArkUI_TextMarqueeOptions_GetSpacing(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0.0f);
+    return option->spacing;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetLoop(ArkUI_TextMarqueeOptions* option, int32_t loop)
+{
+    CHECK_NULL_VOID(option);
+    option->loop = loop;
+}
+
+int32_t OH_ArkUI_TextMarqueeOptions_GetLoop(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0);
+    return option->loop;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetFromStart(ArkUI_TextMarqueeOptions* option, bool fromStart)
+{
+    CHECK_NULL_VOID(option);
+    option->fromStart = fromStart;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetFromStart(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->fromStart;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetDelay(ArkUI_TextMarqueeOptions* option, int32_t delay)
+{
+    CHECK_NULL_VOID(option);
+    option->delay = delay;
+}
+
+int32_t OH_ArkUI_TextMarqueeOptions_GetDelay(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, 0);
+    return option->delay;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetFadeout(ArkUI_TextMarqueeOptions* option, bool fadeout)
+{
+    CHECK_NULL_VOID(option);
+    option->fadeout = fadeout;
+}
+
+bool OH_ArkUI_TextMarqueeOptions_GetFadeout(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->fadeout;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetStartPolicy(ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeStartPolicy startPolicy)
+{
+    CHECK_NULL_VOID(option);
+    option->marqueeStartPolicy = startPolicy;
+}
+
+ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, ArkUI_MarqueeStartPolicy::ARKUI_MARQUEESTARTPOLICY_DEFAULT);
+    return option->marqueeStartPolicy;
+}
+
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
+    ArkUI_MarqueeUpdatePolicy updatePolicy)
+{
+    CHECK_NULL_VOID(option);
+    option->marqueeUpdatePolicy = updatePolicy;
+}
+
+ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option)
+{
+    CHECK_NULL_RETURN(option, ArkUI_MarqueeUpdatePolicy::ARKUI_MARQUEEUPDATEPOLICY_DEFAULT);
+    return option->marqueeUpdatePolicy;
+}
+
+
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create()
+{
+    ArkUI_SelectedDragPreviewStyle* options = new ArkUI_SelectedDragPreviewStyle();
+    return options;
+}
+
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config)
+{
+    if (!config) {
+        return;
+    }
+    delete config;
+    config = nullptr;
+}
+
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color)
+{
+    CHECK_NULL_VOID(config);
+    config->color = {1, color};
+}
+
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config)
+{
+    CHECK_NULL_RETURN(config, -1);
+    return config->color.value;
 }
 #ifdef __cplusplus
 }

@@ -20,11 +20,11 @@ import router from '@system.router'
 @Entry
 @Component
 struct Parent {
-  @State finalResult: string = "Pending..."
-  @State finalResultsString: string = ""
+  @State finalResult: string = 'Pending...';
+  @State finalResultsString: string = '';
 
   reportFinal = (): void => {
-    this.finalResult = TestStats.isAllPassed() ? "PASSED" : "FAILED";
+    this.finalResult = TestStats.isAllPassed() ? 'PASSED' : 'FAILED';
     this.finalResultsString = TestStats.getFinalReport();
     if (TestStats.isAllPassed()) {
       console.log(TestStats.getFinalReport(true));
@@ -40,7 +40,11 @@ struct Parent {
         'pages/v1_tests',
         'pages/v2_tests',
         'pages/repeat_tests',
+        'pages/v2_card_tests',
         // Add more pages if needed
+        'pages/v2_reusable_tests',
+        // Performance should be enabled manually
+        // 'pages/performance_tests'
       ])
       PageController.start(this.reportFinal)
     }, 200)

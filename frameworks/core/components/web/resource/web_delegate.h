@@ -263,6 +263,7 @@ public:
     std::string GetDefaultPath() override;
     std::vector<std::string> GetDescriptions() override;
     bool IsAcceptAllOptionExcluded() override;
+    AcceptFileTypeLists GetAccepts() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
@@ -1121,7 +1122,7 @@ public:
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void ReleaseResizeHold();
     bool GetPendingSizeStatus();
-    void OnInactive();
+    void OnInactive(bool isOfflineWebOffMainTree = false);
     void OnActive();
     void GestureBackBlur();
     void OnWebviewHide();
@@ -1143,7 +1144,7 @@ public:
     }
     void HandleAccessibilityHoverEvent(
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
-    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
@@ -1234,6 +1235,7 @@ public:
     NWeb::NWebDragData::DragOperationsMask allowed_op_ = NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventInfo> dataInfo);
     void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
@@ -1284,8 +1286,8 @@ public:
     void JavaScriptOnDocumentStartByOrder();
     void JavaScriptOnDocumentEndByOrder();
     void JavaScriptOnHeadReadyByOrder();
-    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptRegexItems& scriptRegexItems,
+        const ScriptItemType& type, const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     MouseInfo TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent>& mouseEvent);
@@ -1295,6 +1297,7 @@ public:
     void SetDragResizeStartFlag(bool isDragResizeStart);
     void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool ProcessAutoFillOnPaste();
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
@@ -1371,6 +1374,7 @@ public:
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
+    void OnMicrophoneCaptureStateChanged(int originalState, int newState);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1470,6 +1474,7 @@ public:
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
+    void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
@@ -1492,9 +1497,12 @@ public:
         double borderRadiusBottomRight);
 
     void SetViewportScaleState();
+    std::string GetLastSelectionText() const;
+    void OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay = false);
     void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
     void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
+    void OnFirstScreenPaint(const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime);
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
@@ -1683,6 +1691,7 @@ private:
     EventCallbackV2 onLoadFinishedV2_;
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
     EventCallbackV2 onCameraCaptureStateChangedV2_;
+    EventCallbackV2 onMicrophoneCaptureStateChangedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1724,6 +1733,9 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;
+    std::optional<ScriptRegexItems> onDocumentStartScriptRegexItems_;
+    std::optional<ScriptRegexItems> onDocumentEndScriptRegexItems_;
+    std::optional<ScriptRegexItems> onHeadReadyScriptRegexItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
@@ -1768,6 +1780,7 @@ private:
 
     uint32_t blanklessFrameWidth_ = 0;
     uint32_t blanklessFrameHeight_ = 0;
+    std::string lastSelectionText_ = "";
 #endif
 };
 

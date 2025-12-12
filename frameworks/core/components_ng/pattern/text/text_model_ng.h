@@ -47,6 +47,8 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetTextDirection(TextDirection value) override;
+    void ResetTextDirection() override;
     void SetTextContentAlign(TextContentAlign value) override;
     void ReSetTextContentAlign() override;
     void SetTextOverflow(TextOverflow value) override;
@@ -66,9 +68,7 @@ public:
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetSelectDetectEnable(bool value) override;
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void ResetSelectDetectEnable() override;
-    void ResetSelectDetectConfig() override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
@@ -105,12 +105,17 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
     void ResetGradientShaderStyle() override;
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -123,6 +128,9 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextDirection(FrameNode* frameNode, TextDirection value);
+    static void ResetTextDirection(FrameNode* frameNode);
+    static TextDirection GetTextDirection(FrameNode* frameNode);
     static void SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void ResetTextColor(FrameNode* frameNode);
@@ -153,13 +161,13 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
+    static void SetTextTextSelection(FrameNode* frameNode,
+        int32_t startIndex, int32_t endIndex, MenuPolicy menuItem);
+    static TextSelectionOptions GetTextSelectionOptions(FrameNode* frameNode);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
-    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
-    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
-    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void ResetFontFeature(FrameNode* frameNode);
     static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
@@ -244,9 +252,15 @@ public:
     static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
     static Color GetColorShaderStyle(FrameNode* frameNode);
@@ -261,6 +275,9 @@ public:
     static void ResetLineHeightMultiply(FrameNode* frameNode);
     static void ResetMinimumLineHeight(FrameNode* frameNode);
     static void ResetMaximumLineHeight(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

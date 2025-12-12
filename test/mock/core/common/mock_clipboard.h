@@ -33,6 +33,7 @@ public:
     void HasDataType(
         const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
     void SetData(const std::string& data, CopyOptions copyOption, bool isDragData) override;
+    void GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode) override;
 
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
@@ -47,6 +48,9 @@ public:
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
     void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        bool syncMode = false) override;
+    void GetSpanStringData(
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
         bool syncMode = false) override;
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
 

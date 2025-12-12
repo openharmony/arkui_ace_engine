@@ -121,7 +121,17 @@ public:
         sheetWidth_ = other->sheetWidth_;
         sheetHeight_ = other->sheetHeight_;
     }
-    
+
+    float GetSideSheetWidth() const
+    {
+        return sheetWidth_;
+    }
+
+    float GetSideSheetMaxWidth() const
+    {
+        return sheetMaxWidth_;
+    }
+
     virtual bool CheckIfUpdateObject(SheetType newType)
     {
         return (newType == SheetType::SHEET_SIDE) || (newType == SheetType::SHEET_CONTENT_COVER);

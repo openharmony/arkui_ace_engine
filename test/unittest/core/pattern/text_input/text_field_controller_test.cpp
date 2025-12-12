@@ -1792,4 +1792,37 @@ HWTEST_F(TextFieldControllerTest, GetAlignParentSize001, TestSize.Level1)
     auto size = controller->GetAlignParentSize();
     EXPECT_EQ(size.Height(), controller->paragraph_->GetHeight());
 }
+
+/**
+ * @tc.name: TextFiledControllerScrollToVisible
+ * @tc.desc: Test TextFieldController ScrollToVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFiledControllerScrollToVisible, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text filed node
+     */
+    CreateTextField();
+
+    /**
+     * @tc.expected: Check if the number of lines meets the expectation
+     */
+    auto controller = pattern_->GetTextFieldController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    layoutProperty_->CleanDirty();
+    textFiled->contentRect_ = RectF(0, 0, 10, 10);
+    textFiled->textRect_ = RectF(0, 0, 20, 10);
+    textFiled->contentController_->SetTextValueOnly(u"Hello World");
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    textFiled->selectController_->paragraph_ = mockParagraph;
+    std::vector<RectF> expectedRects = { RectF(6, 6, 10, 5) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(expectedRects));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    controller->ScrollToVisible({ .start = 5, .end = 6 });
+    EXPECT_EQ(textFiled->textRect_.GetOffset().GetX(), -6.0f);
+}
 }

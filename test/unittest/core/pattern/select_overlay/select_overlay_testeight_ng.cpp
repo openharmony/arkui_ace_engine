@@ -1233,6 +1233,37 @@ HWTEST_F(SelectOverlayEightTestNg, UpdateMainWindowOffset008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSafeAreaTop
+ * @tc.desc: Test GetSafeAreaTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, GetSafeAreaTop, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(selectOverlayLayoutAlgorithm));
+    auto layoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->systemSafeArea_.top_ = { .start = 0, .end = 50 };
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    ASSERT_NE(avoidInfoMgr, nullptr);
+    avoidInfoMgr->avoidInfo_.needAvoid = true;
+    avoidInfoMgr->avoidInfo_.controlBottonsRect = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    EXPECT_EQ(layoutAlgorithm->GetSafeAreaTop(), 100);
+}
+
+/**
  * @tc.name: TextMenuController.disableSystemServiceMenuItems001
  * @tc.desc: test disableSystemServiceMenuItems
  * @tc.type: FUNC

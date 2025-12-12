@@ -55,6 +55,8 @@ public:
         const std::string& extraData) override;
 
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+    int32_t ReportStatisticEvents(const AppInfoParcel& appInfo,
+        const std::vector<StatisticEventInfoParcel>& events) override;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 

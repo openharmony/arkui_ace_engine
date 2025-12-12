@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { VoidCallback } from "./component/units"
 import { CustomBuilder } from "./component/builder"
 export class WebModifier extends CommonMethodModifier implements WebAttribute,AttributeModifier<WebAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -310,6 +312,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _zoomControlAccess_0_0value?: boolean | undefined
     _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableSelectedDataDetector_0_0value?: boolean | undefined
+    _enableImageAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableImageAnalyzer_0_0value?: boolean | undefined
     _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _registerNativeEmbedRule_0_0value?: string | undefined
     _registerNativeEmbedRule_0_1value?: string | undefined
@@ -319,6 +323,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _bindSelectionMenu_0_2value?: WebResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkWebPeer;
         if (this._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -2769,6 +2774,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableImageAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableImageAnalyzerAttribute((this._enableImageAnalyzer_0_0value as boolean | undefined));
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableImageAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._registerNativeEmbedRule_0_flag) {
@@ -2808,6 +2831,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     }
     mergeModifier(modifier: WebModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._javaScriptAccess_0_flag) {
@@ -4576,6 +4600,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableImageAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableImageAnalyzer(modifier._enableImageAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableImageAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -6096,6 +6133,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableImageAnalyzer(value: boolean | undefined): this {
+        if (((this._enableImageAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableImageAnalyzer_0_0value) !== (value)))
+        {
+            this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableImageAnalyzer_0_0value = value
+        } else
+        {
+            this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

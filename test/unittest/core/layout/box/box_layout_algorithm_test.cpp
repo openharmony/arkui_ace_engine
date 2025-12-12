@@ -566,7 +566,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent001, TestSize.Level0)
     BoxLayoutAlgorithm boxLayoutAlgorithm;
     std::list<RefPtr<LayoutWrapper>> childList;
     childList = layoutWrapper->GetAllChildrenWithBuild();
-    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(Referenced::RawPtr(layoutWrapper), childList);
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(Referenced::RawPtr(layoutWrapper), childList, true);
 
     EXPECT_TRUE(NearEqual(geometryNode->GetFrameSize().Height(), 0.0f));
 }
@@ -603,7 +603,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent002, TestSize.Level0)
     BoxLayoutAlgorithm boxLayoutAlgorithm;
     std::list<RefPtr<LayoutWrapper>> childList;
     childList = layoutWrapper->GetAllChildrenWithBuild();
-    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(Referenced::RawPtr(layoutWrapper), childList);
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(Referenced::RawPtr(layoutWrapper), childList, true);
 
     EXPECT_TRUE(NearEqual(geometryNode->GetFrameSize().Height(), 0.0f));
 }

@@ -847,7 +847,8 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         if (host) {
             auto pipeline = host->GetContextWithCheck();
             if (pipeline) {
-                pipeline->GetLoadCompleteManager()->StartCollect("");
+                std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(index);
+                pipeline->GetLoadCompleteManager()->StartCollect(url);
             }
         }
         tabBarPattern->SetMaskAnimationByCreate(true);

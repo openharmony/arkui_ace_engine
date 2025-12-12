@@ -243,7 +243,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnableDataDetectorTestEnableDataDet
  */
 HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -298,7 +298,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setDataDetectorConfigTestValidValues, 
  */
 HWTEST_F(RichEditorModifierTest, DISABLED_setCaretColorTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -308,7 +308,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCaretColorTestPlaceholder, TestSize
  */
 HWTEST_F(RichEditorModifierTest, DISABLED_setSelectedBackgroundColorTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -318,7 +318,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setSelectedBackgroundColorTestPlacehol
  */
 HWTEST_F(RichEditorModifierTest, DISABLED_setEnterKeyTypeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1397,7 +1397,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

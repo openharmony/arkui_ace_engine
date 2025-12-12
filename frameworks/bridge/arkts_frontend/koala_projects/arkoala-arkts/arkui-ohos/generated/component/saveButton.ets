@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, BorderRadiuses_serializer, Dimension, SizeOptions, BorderRadiuses } from "./units"
@@ -25,7 +26,8 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { extractors, hookSaveButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, hookSaveButtonAttributeModifier, hookSaveButtonOnClick, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -48,6 +50,7 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
         return _peer
     }
     setSaveButtonOptionsAttribute(options?: SaveButtonOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -307,8 +310,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     }
     public onClick(value: SaveButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
-            const value_casted = value as (SaveButtonCallback | undefined)
-            this.getPeer()?.setOnClickAttribute(value_casted)
+            hookSaveButtonOnClick(this, value)
             return this
         }
         return this
@@ -362,7 +364,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         return this
     }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookSaveButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSaveButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

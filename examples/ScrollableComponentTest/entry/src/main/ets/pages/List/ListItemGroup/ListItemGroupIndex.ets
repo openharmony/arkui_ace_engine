@@ -25,6 +25,7 @@ let routerData: routerInfo[] = [
   { url: 'pages/List/ListItemGroup/dividerEndMargin', info: 'divider_EndMargin' },
   { url: 'pages/List/ListItemGroup/dividerStartMargin', info: 'divider_StartMargin' },
   { url: 'pages/List/ListItemGroup/dividerStrokeWidth', info: 'divider_StrokeWidth' },
+  { url: 'pages/List/ListItemGroup/ListItemGroupDragSort', info: 'ListItemGroupDragSort' },
 ]
 
 @Entry

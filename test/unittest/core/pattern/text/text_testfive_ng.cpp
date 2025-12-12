@@ -321,10 +321,16 @@ HWTEST_F(TextTestFiveNg, GetSpanParagraphStyle001, TestSize.Level1)
     spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
     spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
-    ParagraphUtil::GetSpanParagraphStyle(nullptr, spanItem, pStyle);
+    std::list<RefPtr<SpanItem>> spanGroup;
+    ParagraphUtil::GetSpanParagraphStyle(nullptr, spanItem, pStyle, spanGroup);
     EXPECT_EQ(pStyle.maxLines, 1024);
     EXPECT_EQ(pStyle.ellipsisMode, EllipsisMode::HEAD);
     EXPECT_EQ(pStyle.lineBreakStrategy, LineBreakStrategy::GREEDY);
+    EXPECT_EQ(pStyle.direction, TextDirection::INHERIT);
+
+    spanItem->textLineStyle->UpdateTextDirection(TextDirection::AUTO);
+    ParagraphUtil::GetSpanParagraphStyle(nullptr, spanItem, pStyle, spanGroup);
+    EXPECT_EQ(pStyle.direction, TextDirection::AUTO);
 }
 
 /**

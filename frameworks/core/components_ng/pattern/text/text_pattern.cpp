@@ -1042,7 +1042,8 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
     subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
     multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
     taskExecutor->PostTask(
-        [spans, multiTypeRecordImpl, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+        [spans, multiTypeRecordImpl, copyOption = copyOption_, weak = WeakClaim(this),
+            task = WeakClaim(RawPtr(taskExecutor))]() {
             CHECK_NULL_VOID(multiTypeRecordImpl);
             std::string htmlText = HtmlUtils::ToHtml(spans);
             multiTypeRecordImpl->SetHtmlText(htmlText);
@@ -1050,12 +1051,12 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
             auto uiTaskExecutor = task.Upgrade();
             CHECK_NULL_VOID(uiTaskExecutor);
             uiTaskExecutor->PostTask(
-                [weak, multiTypeRecordImpl]() {
+                [weak, multiTypeRecordImpl, copyOption]() {
                     auto textPattern = weak.Upgrade();
                     CHECK_NULL_VOID(textPattern && textPattern->clipboard_);
                     RefPtr<PasteDataMix> pasteData = textPattern->clipboard_->CreatePasteDataMix();
                     textPattern->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
-                    textPattern->clipboard_->SetData(pasteData, textPattern->copyOption_);
+                    textPattern->clipboard_->SetData(pasteData, copyOption);
                 }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopySpanStringHtmlSetClipboardData");
         }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopySpanStringHtml");
 }
@@ -1136,7 +1137,7 @@ void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& past
     auto taskExecutor = GetTaskExecutorItem();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [pasteData, multiTypeRecordImpl, fontStyle, textLineStyle, spans,
+        [pasteData, multiTypeRecordImpl, fontStyle, textLineStyle, spans, copyOption = copyOption_,
             weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
@@ -1153,12 +1154,12 @@ void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& past
             auto uiTaskExecutor = task.Upgrade();
             CHECK_NULL_VOID(uiTaskExecutor);
             uiTaskExecutor->PostTask(
-                [weak, multiTypeRecordImpl]() {
+                [weak, multiTypeRecordImpl, copyOption]() {
                     auto textPattern = weak.Upgrade();
                     CHECK_NULL_VOID(textPattern && textPattern->clipboard_);
                     RefPtr<PasteDataMix> pasteDataMix = textPattern->clipboard_->CreatePasteDataMix();
                     textPattern->clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
-                    textPattern->clipboard_->SetData(pasteDataMix, textPattern->copyOption_);
+                    textPattern->clipboard_->SetData(pasteDataMix, copyOption);
                 }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopyWithoutSpanStringSetClipboardData");
         }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopyWithoutSpanStringHtml");
 }
@@ -1364,52 +1365,6 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
     return frameNode->GetRenderContext();
 }
 
-void TextPattern::UseSelectDetectConfigFollow(std::unordered_map<TextDataDetectType, bool>& optionTypes)
-{
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
-    auto dataDetectorAdapter = GetDataDetectorAdapter();
-    if (textDetectEnable_) {
-        std::set<std::string> newTypesSet;
-        std::istringstream iss(dataDetectorAdapter->textDetectTypes_);
-        std::string type;
-        while (std::getline(iss, type, ',')) {
-            newTypesSet.insert(type);
-        }
-        for (auto& typeStr : newTypesSet) {
-            if (TEXT_DETECT_MAP_REVERSE.find(typeStr) == TEXT_DETECT_MAP_REVERSE.end()) {
-                continue;
-            }
-            optionTypes[TEXT_DETECT_MAP_REVERSE.at(typeStr)] = true;
-        }
-        if (dataDetectorAdapter->hasUrlType_) {
-            optionTypes[TextDataDetectType::URL] = true;
-        }
-    } else {
-        for (auto& mapItr : TEXT_DETECT_MAP) {
-            optionTypes[mapItr.first] = true;
-        }
-    }
-}
-
-void TextPattern::UseSelectDetectConfigUserSet(std::unordered_map<TextDataDetectType, bool>& optionTypes)
-{
-    if (selectDetectEnabled_) {
-        if (selectDetectEnabledIsUserSet_) {
-            for (auto& mapItr : TEXT_DETECT_MAP) {
-                optionTypes[mapItr.first] = true;
-            }
-        }
-        if (selectDetectConfigIsUserSet_ && !selectDataDetectorTypes_.empty()) {
-            optionTypes.clear();
-            for (auto typeItr : selectDataDetectorTypes_) {
-                optionTypes[typeItr] = true;
-            }
-        }
-    } else {
-        optionTypes.clear();
-    }
-}
-
 // ret: whether show aiMenuOption
 bool TextPattern::PrepareAIMenuOptions(
         std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
@@ -1424,16 +1379,9 @@ bool TextPattern::PrepareAIMenuOptions(
     auto dataDetectorAdapter = GetDataDetectorAdapter();
     int selectedAiEntityNum = 0;
     auto spanIter = detectorAdapter->aiSpanMap_.begin();
-    std::unordered_map<TextDataDetectType, bool> typeMap;
-    // Use User Set Select Detect Config
-    if (selectDetectEnabledIsUserSet_ || selectDetectConfigIsUserSet_) {
-        UseSelectDetectConfigUserSet(typeMap);
-    } else { // Follow DataDetectorConfig
-        UseSelectDetectConfigFollow(typeMap);
-    }
     aiMenuOptions.clear();
     for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
-        if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+        if (TEXT_DETECT_MAP.find(spanIter->second.type) == TEXT_DETECT_MAP.end()) {
             continue;
         }
         selectedAiEntityNum++;
@@ -3566,6 +3514,11 @@ TextDragInfo TextPattern::CreateTextDragInfo()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, info);
     info.handleColor = theme->GetCaretColor();
+    if (textLayoutProperty->HasSelectedDragPreviewStyle()) {
+        info.dragBackgroundColor = textLayoutProperty->GetSelectedDragPreviewStyleValue();
+    } else {
+        info.dragBackgroundColor = std::nullopt;
+    }
     info.selectedBackgroundColor = theme->GetSelectedColor();
     selectOverlay_->GetVisibleDragViewHandles(info.firstHandle, info.secondHandle);
     if (IsAiSelected()) {
@@ -3639,6 +3592,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textShadows = node->GetTextShadowValue({});
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
     textStyle.paragraphSpacing = node->GetParagraphSpacing();
+    textStyle.textDirection = static_cast<int32_t>(node->GetTextDirectionValue(TextDirection::INHERIT));
     auto textVerticalAlign = node->GetTextVerticalAlign();
     if (textVerticalAlign.has_value()) {
         textStyle.textVerticalAlign =static_cast<int32_t>(textVerticalAlign.value());
@@ -5036,8 +4990,10 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("Content: ").append(
             UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "))));
     }
-    dumpLog.AddDesc(std::string("isSpanStringMode: ").append(std::to_string(isSpanStringMode_)));
-    dumpLog.AddDesc(std::string("externalParagraph: ").append(std::to_string(externalParagraph_.has_value())));
+    dumpLog.AddDesc(
+        std::string("isSpanStringMode: ")
+            .append(std::to_string(isSpanStringMode_))
+            .append(std::string(" externalParagraph: ").append(std::to_string(externalParagraph_.has_value()))));
     DumpTextStyleInfo();
     if (contentMod_) {
         contentMod_->ContentModifierDump();
@@ -5101,6 +5057,9 @@ void TextPattern::DumpTextStyleInfo()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>(GetThemeScopeId());
     dumpLog.AddDesc(
         std::string("FontColor: ")
             .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ToString())
@@ -5113,7 +5072,11 @@ void TextPattern::DumpTextStyleInfo()
             .append(" TextColorFlagByUser: ")
             .append(textLayoutProp->HasTextColorFlagByUser()
                 ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
-                : "Na"));
+                : "Na")
+            .append(" TextThemeColor: ")
+            .append(textTheme ? textTheme->GetTextStyle().GetTextColor().ToString() : "Na")
+            .append(" ConfigChangePerform: ")
+            .append(std::to_string(SystemProperties::ConfigChangePerform())));
     if (renderContext->HasForegroundColorStrategy()) {
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
@@ -5241,12 +5204,6 @@ void TextPattern::DumpTextStyleInfo3()
                 .append(textLayoutProp->HasTextOverflow()
                             ? StringUtils::ToString(textLayoutProp->GetTextOverflowValue(TextOverflow::NONE))
                             : "Na"));
-        dumpLog.AddDesc(std::string("TextAlign: ")
-                            .append(StringUtils::ToString(textStyle_->GetTextAlign()))
-                            .append(" prop: ")
-                            .append(textLayoutProp->HasTextAlign()
-                                        ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
-                                        : "Na"));
     }
 }
 
@@ -5256,6 +5213,17 @@ void TextPattern::DumpTextStyleInfo4()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("TextAlign: ")
+                .append(StringUtils::ToString(textStyle_->GetTextAlign()))
+                .append(" prop: ")
+                .append(textLayoutProp->HasTextAlign()
+                            ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
+                            : "Na")
+                .append(" TextDirection prop:")
+                .append(textLayoutProp->HasTextDirection()
+                            ? V2::ConvertTextDirectionToString(
+                                textLayoutProp->GetTextDirectionValue(TextDirection::INHERIT))
+                            : "Na"));
         dumpLog.AddDesc(std::string("WordBreak: ")
                             .append(StringUtils::ToString(textStyle_->GetWordBreak()))
                             .append(std::string(" TextCase: "))
@@ -5313,6 +5281,24 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(textLayoutProp->HasTextDecorationColor()
                             ? textLayoutProp->GetTextDecorationColorValue(Color::BLACK).ColorToString()
                             : "Na"));
+    }
+    DumpInfoRes();
+}
+
+void TextPattern::DumpInfoRes()
+{
+    CHECK_NULL_VOID(resourceMgr_);
+    auto& dumpLog = DumpLog::GetInstance();
+    const std::vector<std::string>& keys = resourceMgr_->GetResKeyArray();
+    if (!keys.empty()) {
+        std::string keyInfo = "ResourceKeys: ";
+        for (size_t i = 0; i < keys.size(); ++i) {
+            keyInfo.append(keys[i]);
+            if (i < keys.size() - 1) {
+                keyInfo.append(", ");
+            }
+        }
+        dumpLog.AddDesc(keyInfo);
     }
 }
 
@@ -5796,33 +5782,6 @@ void TextPattern::ResetSelectDetectEnable()
     selectDetectEnabled_ = true;
 }
 
-void TextPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    if (types.empty()) {
-        types = TEXT_DETECT_ALL_TYPES_VECTOR;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSelectDetectorAdapter());
-    selectDetectorAdapter_->frameNode_ = host;
-    selectDetectConfigIsUserSet_ = true;
-    if (types == selectDataDetectorTypes_) {
-        return;
-    }
-    selectDataDetectorTypes_ = types;
-}
-
-std::vector<TextDataDetectType> TextPattern::GetSelectDetectConfig()
-{
-    return selectDataDetectorTypes_;
-}
-
-void TextPattern::ResetSelectDetectConfig()
-{
-    selectDetectConfigIsUserSet_ = false;
-    selectDataDetectorTypes_.clear();
-}
-
 void TextPattern::SelectAIDetect()
 {
     auto [start, end] = GetSelectedStartAndEnd();
@@ -6197,6 +6156,80 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
         resultObject.valueString = u" ";
     }
     return resultObject;
+}
+
+void TextPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    textSelectionOptions_.start = selectionStart;
+    textSelectionOptions_.end = selectionEnd;
+    textSelectionOptions_.menuPolicy = options.menuPolicy;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    if (frameRect.IsEmpty()) {
+        return;
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (mode == TextSelectableMode::UNSELECTABLE ||
+        textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || GetTextEffect()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Text is unselectable or has invalid state");
+        return;
+    }
+    if (!IsSetObscured()) {
+        ActSetSelectionFlag(selectionStart, selectionEnd, options);
+    }
+}
+void TextPattern::ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto length = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+    selectionStart = std::clamp(selectionStart, 0, length);
+    selectionEnd = std::clamp(selectionEnd, 0, length);
+    if (selectionStart >= selectionEnd) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
+    HandleSelectionChange(selectionStart, selectionEnd);
+    UpdateSelectionSpanType(selectionStart, selectionEnd);
+    CalculateHandleOffsetAndShowOverlay();
+    if (textSelector_.firstHandle == textSelector_.secondHandle && pManager_) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
+
+    if (!IsShowHandle()) {
+        CloseSelectOverlay();
+        if (IsSelected()) {
+            selectOverlay_->SetSelectionHoldCallback();
+        }
+    } else {
+        bool isShowMenu = IsShowMenu(options.menuPolicy, selectOverlay_->IsCurrentMenuVisibile());
+        if (!isShowMenu && IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            ShowSelectOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextPattern::IsShowMenu(MenuPolicy options, bool defaultValue)
+{
+    if (options == MenuPolicy::HIDE) {
+        return false;
+    }
+    if (options == MenuPolicy::SHOW) {
+        return true;
+    }
+    return defaultValue;
 }
 
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
@@ -7031,6 +7064,7 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+        DEFINE_PROP_HANDLER(selectedDragPreviewStyleColor, Color, UpdateSelectedDragPreviewStyle),
 
         { "LineHeight", [](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
@@ -7039,6 +7073,18 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
                         realValue->Reset();
                     }
                     prop->UpdateLineHeight(*realValue);
+                }
+            }
+        },
+
+        { "MarqueeSpacing", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        prop->ResetTextMarqueeSpacing();
+                    } else {
+                        prop->UpdateTextMarqueeSpacing(*realValue);
+                    }
                 }
             }
         },

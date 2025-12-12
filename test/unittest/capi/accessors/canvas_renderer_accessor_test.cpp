@@ -46,7 +46,6 @@ const double DEFAULT_SCALE_VALUE = 1.0;
 const std::string DEFAULT_STRING_VALUE = "text";
 const std::string EMPTY_STRING = "";
 constexpr double MATH_2_PI = 2 * M_PI;
-constexpr double DIFF = 1e-10;
 const Opt_Boolean OPT_BOOLEAN_FALSE = Converter::ArkValue<Opt_Boolean>(false);
 const std::string INVALID_STRING = "invalid";
 const std::string REPEAT_STRING = "repeat";
@@ -54,23 +53,40 @@ const double FLT_PRECISION = 0.001;
 const double DEFAULT_DENSITY = 1.0;
 const double DENSITY_1_25 = 1.25;
 const double DENSITY_2_50 = 2.50;
-const uint32_t EXPECTED_COLOR = 0xFFFFFFFF;
 // test plan
-std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Number>(100), 100 },
-    { Converter::ArkValue<Ark_Number>(0), 0 },
-    { Converter::ArkValue<Ark_Number>(-100), -100 },
-    { Converter::ArkValue<Ark_Number>(12.34), 12.34 },
-    { Converter::ArkValue<Ark_Number>(-56.73), -56.73 },
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 0 },
+    { Converter::ArkValue<Ark_Float64>(-100), -100 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+    { Converter::ArkValue<Ark_Float64>(-56.73), -56.73 },
 };
-std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_ALPHA_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Number>(100), 100 },
-    { Converter::ArkValue<Ark_Number>(0), 0 },
-    { Converter::ArkValue<Ark_Number>(-0.54), -0.54 },
-    { Converter::ArkValue<Ark_Number>(0.98), 0.98 },
-    { Converter::ArkValue<Ark_Number>(1.00), 1.00 },
-    { Converter::ArkValue<Ark_Number>(1.01), 1.01 },
-    { Converter::ArkValue<Ark_Number>(-100), -100 },
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_LINE_WIDTH_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 1 },
+    { Converter::ArkValue<Ark_Float64>(-100), 1 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_MITER_LIMIT_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 10 },
+    { Converter::ArkValue<Ark_Float64>(-100), 10 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 0 },
+    { Converter::ArkValue<Ark_Float64>(-100), 0 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_ALPHA_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 1.0 },
+    { Converter::ArkValue<Ark_Float64>(0), 0 },
+    { Converter::ArkValue<Ark_Float64>(-0.54), 0.0 },
+    { Converter::ArkValue<Ark_Float64>(0.98), 0.98 },
+    { Converter::ArkValue<Ark_Float64>(1.00), 1.00 },
+    { Converter::ArkValue<Ark_Float64>(1.01), 1.0 },
+    { Converter::ArkValue<Ark_Float64>(-100), 0.0 },
 };
 std::vector<std::pair<std::vector<double>, std::vector<double>>> ARRAY_LINE_DASH_TEST_PLAN = {
     { { 100, 10.25, 2.35 }, { 100, 10.25, 2.35, 100, 10.25, 2.35 } },
@@ -87,35 +103,35 @@ std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("value %2"), "value %2" },
     { Converter::ArkValue<Ark_String>("echo(%10)"), "echo(%10)" }
 };
-std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_MAX_WIDTH_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Number>(100), 100 },
-    { Converter::ArkValue<Opt_Number>(0), 0 },
-    { Converter::ArkValue<Opt_Number>(-100), -100 },
-    { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
-    { Converter::ArkValue<Opt_Number>(-56.73), -56.73 },
-    { Converter::ArkValue<Opt_Number>(Ark_Empty()), FLT_MAX },
+std::vector<std::tuple<Opt_Float64, std::optional<double>>> OPT_MAX_WIDTH_TEST_PLAN = {
+    { Converter::ArkValue<Opt_Float64>(100), 100 },
+    { Converter::ArkValue<Opt_Float64>(0), 0 },
+    { Converter::ArkValue<Opt_Float64>(-100), -100 },
+    { Converter::ArkValue<Opt_Float64>(12.34), 12.34 },
+    { Converter::ArkValue<Opt_Float64>(-56.73), -56.73 },
+    { Converter::ArkValue<Opt_Float64>(Ark_Empty()), FLT_MAX },
 };
-std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER },
-    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP },
-    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN },
-    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT },
-    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER },
-    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP },
-    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN },
-    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT },
-    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER },
-    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY },
-    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR },
-    { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER},
-    { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER },
+std::vector<std::tuple<Ark_String, CompositeOperation, std::string>> ARK_COMPOSITE_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER, "source-over" },
+    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP, "source-atop" },
+    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN, "source-in" },
+    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT, "source-out" },
+    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER, "destination-over" },
+    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP, "destination-atop" },
+    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN, "destination-in" },
+    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT, "destination-out" },
+    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER, "lighter" },
+    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY, "copy" },
+    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR, "xor" },
+    { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER, "source-over" },
+    { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER, "source-over" },
 };
-std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
-    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_String>(""), Color(0x00000000) },
-    { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
+std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_COLOR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("#ff0000ff"), "#FF0000FF" },
+    { Converter::ArkValue<Ark_String>("#00000000"), "#00000000" },
+    { Converter::ArkValue<Ark_String>("#80ffffff"), "#80FFFFFF" },
+    { Converter::ArkValue<Ark_String>(""), "" },
+    { Converter::ArkValue<Ark_String>("invalid color"), "" },
 };
 std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
     { Converter::ArkValue<Ark_Boolean>(EXPECTED_FALSE), EXPECTED_FALSE },
@@ -169,9 +185,9 @@ std::vector<std::pair<std::string, Dimension>> FONT_SIZE_PX_TEST_PLAN = {
     { "invalid", Dimension(0) },
 };
 std::vector<std::pair<std::string, Dimension>> FONT_SIZE_VP_TEST_PLAN = {
-    { "10vp", Dimension(10, DimensionUnit::VP) },
-    { "0vp", Dimension(0, DimensionUnit::VP) },
-    { "-10vp", Dimension(-10, DimensionUnit::VP) },
+    { "10vp", Dimension(10) },
+    { "0vp", Dimension(0) },
+    { "-10vp", Dimension(-10) },
     { "", Dimension(0) },
     { "invalid", Dimension(0) },
 };
@@ -374,7 +390,7 @@ HWTEST_F(CanvasRendererAccessorTest, setLineDashTest, TestSize.Level1)
     double density = DENSITY_1_25;
     ChangeDensity(density);
     for (const auto& [actual, expected] : ARRAY_LINE_DASH_TEST_PLAN) {
-        const auto segments = Converter::ArkValue<Array_Number>(actual, Converter::FC);
+        const auto segments = Converter::ArkValue<Array_Float64>(actual, Converter::FC);
         std::vector<double> target;
         if (actual.size() > 0) {
             EXPECT_CALL(*renderingModel_, SetLineDash(_)).WillOnce(DoAll(SaveArg<0>(&target)));
@@ -397,22 +413,22 @@ HWTEST_F(CanvasRendererAccessorTest, setLineDashTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, clearRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->clearRect, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
             EXPECT_CALL(*renderingModel_, ClearRect(rect)).Times(1);
-            accessor_->clearRect(peer_, &x, &y, &arkD, &arkD);
+            accessor_->clearRect(peer_, x, y, arkD, arkD);
         }
     }
     // with density
     double density = DENSITY_2_50;
     ChangeDensity(density);
-    for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [w, expectedW] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [h, expectedH] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
             EXPECT_CALL(*renderingModel_, ClearRect(rect * density)).Times(1);
-            accessor_->clearRect(peer_, &arkD, &arkD, &w, &h);
+            accessor_->clearRect(peer_, arkD, arkD, w, h);
         }
     }
 }
@@ -425,22 +441,22 @@ HWTEST_F(CanvasRendererAccessorTest, clearRectTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, fillRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fillRect, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
             EXPECT_CALL(*renderingModel_, FillRect(rect)).Times(1);
-            accessor_->fillRect(peer_, &x, &y, &arkD, &arkD);
+            accessor_->fillRect(peer_, x, y, arkD, arkD);
         }
     }
     // with density
     double density = DENSITY_1_25;
     ChangeDensity(density);
-    for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [w, expectedW] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [h, expectedH] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
             EXPECT_CALL(*renderingModel_, FillRect(rect * density)).Times(1);
-            accessor_->fillRect(peer_, &arkD, &arkD, &w, &h);
+            accessor_->fillRect(peer_, arkD, arkD, w, h);
         }
     }
 }
@@ -453,22 +469,22 @@ HWTEST_F(CanvasRendererAccessorTest, fillRectTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, strokeRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->strokeRect, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
             EXPECT_CALL(*renderingModel_, StrokeRect(rect)).Times(1);
-            accessor_->strokeRect(peer_, &x, &y, &arkD, &arkD);
+            accessor_->strokeRect(peer_, x, y, arkD, arkD);
         }
     }
     // with density
     double density = DENSITY_2_50;
     ChangeDensity(density);
-    for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [w, expectedW] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [h, expectedH] : ARK_FLOAT64_TEST_PLAN) {
             auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
             EXPECT_CALL(*renderingModel_, StrokeRect(rect * density)).Times(1);
-            accessor_->strokeRect(peer_, &arkD, &arkD, &w, &h);
+            accessor_->strokeRect(peer_, arkD, arkD, w, h);
         }
     }
 }
@@ -523,10 +539,10 @@ HWTEST_F(CanvasRendererAccessorTest, resetTransformTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, rotateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rotate, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, CanvasRendererRotate(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->rotate(peer_, &actual);
+        accessor_->rotate(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
 }
@@ -539,12 +555,12 @@ HWTEST_F(CanvasRendererAccessorTest, rotateTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, scaleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scale, nullptr);
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             double targetX, targetY;
             EXPECT_CALL(*renderingModel_, CanvasRendererScale(_, _))
                 .WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
-            accessor_->scale(peer_, &x, &y);
+            accessor_->scale(peer_, x, y);
             EXPECT_NEAR(targetX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(targetY, expectedY, FLT_PRECISION);
         }
@@ -559,11 +575,11 @@ HWTEST_F(CanvasRendererAccessorTest, scaleTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, translateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->translate, nullptr);
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             double targetX, targetY;
             EXPECT_CALL(*renderingModel_, Translate(_, _)).WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
-            accessor_->translate(peer_, &x, &y);
+            accessor_->translate(peer_, x, y);
             EXPECT_NEAR(targetX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(targetY, expectedY, FLT_PRECISION);
         }
@@ -571,11 +587,11 @@ HWTEST_F(CanvasRendererAccessorTest, translateTest, TestSize.Level1)
     // with density
     double density = DENSITY_1_25;
     ChangeDensity(density);
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             double targetX, targetY;
             EXPECT_CALL(*renderingModel_, Translate(_, _)).WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
-            accessor_->translate(peer_, &x, &y);
+            accessor_->translate(peer_, x, y);
             EXPECT_NEAR(targetX, expectedX * density, FLT_PRECISION);
             EXPECT_NEAR(targetY, expectedY * density, FLT_PRECISION);
         }
@@ -625,18 +641,20 @@ HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setGlobalAlphaTest
+ * @tc.name: globalAlphaSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setGlobalAlphaTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, globalAlphaSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalAlpha, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_ALPHA_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetGlobalAlpha(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setGlobalAlpha(peer_, &actual);
-        EXPECT_NEAR(target, expected, FLT_PRECISION);
+        accessor_->setGlobalAlpha(peer_, actual);
+        auto globalAlpha = accessor_->getGlobalAlpha(peer_);
+        auto alpha = Converter::Convert<double>(globalAlpha);
+        EXPECT_EQ(alpha, expected);
     }
 }
 
@@ -649,19 +667,19 @@ HWTEST_F(CanvasRendererAccessorTest, fillTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fillText, nullptr);
     auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    auto arkOpt = Converter::ArkValue<Opt_Float64>(arkD);
     for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
         FillTextInfo target;
         EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-        accessor_->fillText(peer_, &actual, &arkD, &arkD, &arkOpt);
+        accessor_->fillText(peer_, &actual, arkD, arkD, &arkOpt);
         EXPECT_EQ(target.text, expected);
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             FillTextInfo target;
             EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-            accessor_->fillText(peer_, &arkT, &x, &y, &arkOpt);
+            accessor_->fillText(peer_, &arkT, x, y, &arkOpt);
             EXPECT_NEAR(target.x, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.y, expectedY, FLT_PRECISION);
         }
@@ -670,10 +688,10 @@ HWTEST_F(CanvasRendererAccessorTest, fillTextTest, TestSize.Level1)
         FillTextInfo target;
         if (expected && expected.value() < 0) {
             EXPECT_CALL(*renderingModel_, SetFillText(_, _)).Times(0);
-            accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
+            accessor_->fillText(peer_, &arkT, arkD, arkD, &actual);
         } else {
             EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-            accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
+            accessor_->fillText(peer_, &arkT, arkD, arkD, &actual);
             EXPECT_EQ(target.maxWidth.has_value(), expected.has_value());
             EXPECT_NEAR(target.maxWidth ? *target.maxWidth : DEFAULT_DOUBLE_VALUE,
                 expected ? *expected : DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
@@ -690,19 +708,19 @@ HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->strokeText, nullptr);
     auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    auto arkOpt = Converter::ArkValue<Opt_Float64>(arkD);
     for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
         FillTextInfo target;
         EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-        accessor_->strokeText(peer_, &actual, &arkD, &arkD, &arkOpt);
+        accessor_->strokeText(peer_, &actual, arkD, arkD, &arkOpt);
         EXPECT_EQ(target.text, expected);
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             FillTextInfo target;
             EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-            accessor_->strokeText(peer_, &arkT, &x, &y, &arkOpt);
+            accessor_->strokeText(peer_, &arkT, x, y, &arkOpt);
             EXPECT_NEAR(target.x, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.y, expectedY, FLT_PRECISION);
         }
@@ -711,10 +729,10 @@ HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
         FillTextInfo target;
         if (expected && expected.value() < 0) {
             EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).Times(0);
-            accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
+            accessor_->strokeText(peer_, &arkT, arkD, arkD, &actual);
         } else {
             EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
-            accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
+            accessor_->strokeText(peer_, &arkT, arkD, arkD, &actual);
             EXPECT_EQ(target.maxWidth.has_value(), expected.has_value());
             EXPECT_NEAR(target.maxWidth ? *target.maxWidth : DEFAULT_DOUBLE_VALUE,
                 expected ? *expected : DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
@@ -730,31 +748,31 @@ HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform0, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkS = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_SCALE_VALUE));
-    for (const auto& [x, expectedX] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_ALPHA_TEST_PLAN) {
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    auto arkS = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setTransform0(peer_, &x, &arkD, &arkD, &y, &arkD, &arkD);
+            accessor_->setTransform0(peer_, x, arkD, arkD, y, arkD, arkD);
             EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
         }
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setTransform0(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
+            accessor_->setTransform0(peer_, arkS, x, y, arkS, arkD, arkD);
             EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
         }
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setTransform0(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
+            accessor_->setTransform0(peer_, arkS, arkD, arkD, arkS, x, y);
             EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
         }
@@ -762,11 +780,11 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1
     // with density
     double density = DENSITY_1_25;
     ChangeDensity(density);
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setTransform0(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
+            accessor_->setTransform0(peer_, arkS, arkD, arkD, arkS, x, y);
             EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
             EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
         }
@@ -781,60 +799,63 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->transform, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkS = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_SCALE_VALUE));
-    for (const auto& [x, expectedX] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_ALPHA_TEST_PLAN) {
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    auto arkS = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->transform(peer_, &x, &arkD, &arkD, &y, &arkD, &arkD);
-            EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
+            accessor_->transform(peer_, x, arkD, arkD, y, arkD, arkD);
+            EXPECT_FLOAT_EQ(target.scaleX, expectedX);
+            EXPECT_FLOAT_EQ(target.scaleY, expectedY);
         }
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->transform(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
-            EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
+            accessor_->transform(peer_, arkS, x, y, arkS, arkD, arkD);
+            EXPECT_FLOAT_EQ(target.skewX, expectedX);
+            EXPECT_FLOAT_EQ(target.skewY, expectedY);
         }
     }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->transform(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
-            EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
-            EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
+            accessor_->transform(peer_, arkS, arkD, arkD, arkS, x, y);
+            EXPECT_FLOAT_EQ(target.translateX, expectedX);
+            EXPECT_FLOAT_EQ(target.translateY, expectedY);
         }
     }
     // with density
     double density = DENSITY_2_50;
     ChangeDensity(density);
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [x, expectedX] : ARK_FLOAT64_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_FLOAT64_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->transform(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
-            EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
-            EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
+            accessor_->transform(peer_, arkS, arkD, arkD, arkS, x, y);
+            EXPECT_FLOAT_EQ(target.translateX, expectedX * density);
+            EXPECT_FLOAT_EQ(target.translateY, expectedY * density);
         }
     }
 }
 
 /**
- * @tc.name: setGlobalCompositeOperationTest
+ * @tc.name: globalCompositeOperationSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setGlobalCompositeOperationTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, globalCompositeOperationSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalCompositeOperation, nullptr);
-    for (const auto& [actual, expected] : ARK_COMPOSITE_TEST_PLAN) {
+    for (const auto& [actual, expected, expectedStr] : ARK_COMPOSITE_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, SetCompositeType(expected)).Times(1);
         accessor_->setGlobalCompositeOperation(peer_, &actual);
+        auto globalCompositeOperation = accessor_->getGlobalCompositeOperation(peer_);
+        auto compositeStr = Converter::Convert<std::string>(globalCompositeOperation);
+        EXPECT_EQ(compositeStr, expectedStr);
     }
 }
 
@@ -854,80 +875,97 @@ HWTEST_F(CanvasRendererAccessorTest, setFilterTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setImageSmoothingEnabledTest
+ * @tc.name: imageSmoothingEnabledSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingEnabledTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, imageSmoothingEnabledSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setImageSmoothingEnabled, nullptr);
     for (const auto& [actual, expected] : ARK_BOOL_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, SetSmoothingEnabled(expected)).Times(1);
         accessor_->setImageSmoothingEnabled(peer_, actual);
+        auto imageSmoothingEnabled = accessor_->getImageSmoothingEnabled(peer_);
+        auto enabled = Converter::Convert<bool>(imageSmoothingEnabled);
+        EXPECT_EQ(enabled, expected);
     }
 }
 
 /**
- * @tc.name: setLineDashOffsetTest
+ * @tc.name: lineDashOffsetSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, lineDashOffsetSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineDashOffset, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetLineDashOffset(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setLineDashOffset(peer_, &actual);
+        accessor_->setLineDashOffset(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto lineDashOffset = accessor_->getLineDashOffset(peer_);
+        auto offset = Converter::Convert<double>(lineDashOffset);
+        EXPECT_EQ(offset, expected);
     }
 }
 
 /**
- * @tc.name: setLineWidthTest
+ * @tc.name: lineWidthSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setLineWidthTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, lineWidthSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineWidth, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    ChangeDensity(DEFAULT_DENSITY);
+    for (const auto& [actual, expected] : ARK_FLOAT64_LINE_WIDTH_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetLineWidth(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setLineWidth(peer_, &actual);
+        accessor_->setLineWidth(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto lineWidth = accessor_->getLineWidth(peer_);
+        auto width = Converter::Convert<double>(lineWidth);
+        EXPECT_EQ(width, expected);
     }
 }
 
 /**
- * @tc.name: setMiterLimitTest
+ * @tc.name: miterLimitSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRendererAccessorTest, setMiterLimitTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setMiterLimit, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    ChangeDensity(DEFAULT_DENSITY);
+    for (const auto& [actual, expected] : ARK_FLOAT64_MITER_LIMIT_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetMiterLimit(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setMiterLimit(peer_, &actual);
+        accessor_->setMiterLimit(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto miterLimit = accessor_->getMiterLimit(peer_);
+        auto limit = Converter::Convert<double>(miterLimit);
+        EXPECT_EQ(limit, expected);
     }
 }
 
 /**
- * @tc.name: setShadowBlurTest
+ * @tc.name: shadowBlurSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowBlurSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowBlur, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetShadowBlur(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setShadowBlur(peer_, &actual);
+        accessor_->setShadowBlur(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowBlur = accessor_->getShadowBlur(peer_);
+        auto blur = Converter::Convert<double>(shadowBlur);
+        EXPECT_EQ(blur, expected);
     }
 }
 
@@ -939,41 +977,58 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowColor, nullptr);
-    for (const auto& [actual, expected] : ARK_STRING_COLOR_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetShadowColor(expected)).Times(1);
+    for (const auto& [actual, expectedStr] : ARK_STRING_COLOR_TEST_PLAN) {
+        Color target;
+        if (expectedStr.empty()) {
+            EXPECT_CALL(*renderingModel_, SetShadowColor(_)).Times(0);
+        } else {
+            EXPECT_CALL(*renderingModel_, SetShadowColor(_)).WillOnce(SaveArg<0>(&target));
+        }
         accessor_->setShadowColor(peer_, &actual);
+        if (expectedStr.empty()) {
+            continue;
+        }
+        EXPECT_EQ(target.ToString(), expectedStr);
+        auto result = Converter::Convert<std::string>(accessor_->getShadowColor(peer_));
+        EXPECT_EQ(result, expectedStr);
     }
 }
 
 /**
- * @tc.name: setShadowOffsetXTest
+ * @tc.name: shadowOffsetXSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowOffsetXSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetX, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetShadowOffsetX(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setShadowOffsetX(peer_, &actual);
+        accessor_->setShadowOffsetX(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowOffsetX = accessor_->getShadowOffsetX(peer_);
+        auto offsetX = Converter::Convert<double>(shadowOffsetX);
+        EXPECT_EQ(offsetX, expected);
     }
 }
 
 /**
- * @tc.name: setShadowOffsetYTest
+ * @tc.name: shadowOffsetYSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowOffsetYSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetY, nullptr);
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetShadowOffsetY(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setShadowOffsetY(peer_, &actual);
+        accessor_->setShadowOffsetY(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowOffsetY = accessor_->getShadowOffsetY(peer_);
+        auto offsetY = Converter::Convert<double>(shadowOffsetY);
+        EXPECT_EQ(offsetY, expected);
     }
 }
 
@@ -1238,11 +1293,11 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
     auto valD = DEFAULT_DOUBLE_VALUE;
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto x0 = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y0 = Converter::ArkValue<Ark_Number>(expectedY);
-            auto x1 = Converter::ArkValue<Ark_Number>(valD);
-            auto y1 = Converter::ArkValue<Ark_Number>(valD);
-            auto peer = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
+            auto x0 = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y0 = Converter::ArkValue<Ark_Float64>(expectedY);
+            auto x1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto peer = accessor_->createLinearGradient(peer_, x0, y0, x1, y1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1259,11 +1314,11 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
     ChangeDensity(density);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto x0 = Converter::ArkValue<Ark_Number>(valD);
-            auto y0 = Converter::ArkValue<Ark_Number>(valD);
-            auto x1 = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y1 = Converter::ArkValue<Ark_Number>(expectedY);
-            auto peer = accessor_->createLinearGradient(peer_, &x0, &y0, &x1, &y1);
+            auto x0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto x1 = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y1 = Converter::ArkValue<Ark_Float64>(expectedY);
+            auto peer = accessor_->createLinearGradient(peer_, x0, y0, x1, y1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1289,13 +1344,13 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXRTest, TestSize.Level1
     auto valR = DEFAULT_SCALE_VALUE;
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedR : NUMBER_ALPHA_TEST_PLAN) {
-            auto x0 = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y0 = Converter::ArkValue<Ark_Number>(valD);
-            auto r0 = Converter::ArkValue<Ark_Number>(expectedR);
-            auto x1 = Converter::ArkValue<Ark_Number>(valD);
-            auto y1 = Converter::ArkValue<Ark_Number>(valD);
-            auto r1 = Converter::ArkValue<Ark_Number>(valR);
-            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
+            auto x0 = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto r0 = Converter::ArkValue<Ark_Float64>(expectedR);
+            auto x1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto r1 = Converter::ArkValue<Ark_Float64>(valR);
+            auto peer = accessor_->createRadialGradient(peer_, x0, y0, r0, x1, y1, r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1328,13 +1383,13 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientYRTest, TestSize.Level1
     ChangeDensity(density);
     for (const auto& expectedY : NUMBER_TEST_PLAN) {
         for (const auto& expectedR : NUMBER_ALPHA_TEST_PLAN) {
-            auto x0 = Converter::ArkValue<Ark_Number>(valD);
-            auto y0 = Converter::ArkValue<Ark_Number>(valD);
-            auto r0 = Converter::ArkValue<Ark_Number>(valR);
-            auto x1 = Converter::ArkValue<Ark_Number>(valD);
-            auto y1 = Converter::ArkValue<Ark_Number>(expectedY);
-            auto r1 = Converter::ArkValue<Ark_Number>(expectedR);
-            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
+            auto x0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto r0 = Converter::ArkValue<Ark_Float64>(valR);
+            auto x1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y1 = Converter::ArkValue<Ark_Float64>(expectedY);
+            auto r1 = Converter::ArkValue<Ark_Float64>(expectedR);
+            auto peer = accessor_->createRadialGradient(peer_, x0, y0, r0, x1, y1, r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1364,13 +1419,13 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXYTest, TestSize.Level1
     auto valR = DEFAULT_SCALE_VALUE;
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto x0 = Converter::ArkValue<Ark_Number>(valD);
-            auto y0 = Converter::ArkValue<Ark_Number>(expectedY);
-            auto r0 = Converter::ArkValue<Ark_Number>(valR);
-            auto x1 = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y1 = Converter::ArkValue<Ark_Number>(valD);
-            auto r1 = Converter::ArkValue<Ark_Number>(valR);
-            auto peer = accessor_->createRadialGradient(peer_, &x0, &y0, &r0, &x1, &y1, &r1);
+            auto x0 = Converter::ArkValue<Ark_Float64>(valD);
+            auto y0 = Converter::ArkValue<Ark_Float64>(expectedY);
+            auto r0 = Converter::ArkValue<Ark_Float64>(valR);
+            auto x1 = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y1 = Converter::ArkValue<Ark_Float64>(valD);
+            auto r1 = Converter::ArkValue<Ark_Float64>(valR);
+            auto peer = accessor_->createRadialGradient(peer_, x0, y0, r0, x1, y1, r1);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1400,10 +1455,10 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
     auto valR = DEFAULT_SCALE_VALUE;
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto x = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y = Converter::ArkValue<Ark_Number>(expectedY);
-            auto startAngle = Converter::ArkValue<Ark_Number>(valR);
-            auto peer = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
+            auto x = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y = Converter::ArkValue<Ark_Float64>(expectedY);
+            auto startAngle = Converter::ArkValue<Ark_Float64>(valR);
+            auto peer = accessor_->createConicGradient(peer_, startAngle, x, y);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1423,11 +1478,11 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
     ChangeDensity(density);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& actualA : NUMBER_ALPHA_TEST_PLAN) {
-            auto x = Converter::ArkValue<Ark_Number>(expectedX);
-            auto y = Converter::ArkValue<Ark_Number>(valD);
-            auto startAngle = Converter::ArkValue<Ark_Number>(actualA);
+            auto x = Converter::ArkValue<Ark_Float64>(expectedX);
+            auto y = Converter::ArkValue<Ark_Float64>(valD);
+            auto startAngle = Converter::ArkValue<Ark_Float64>(actualA);
             auto expectedA = fmod(actualA, (MATH_2_PI));
-            auto peer = accessor_->createConicGradient(peer_, &startAngle, &x, &y);
+            auto peer = accessor_->createConicGradient(peer_, startAngle, x, y);
             ASSERT_NE(peer, nullptr);
             std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
             ASSERT_NE(gradient, nullptr);
@@ -1440,102 +1495,6 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
             EXPECT_NEAR(optX->Value(), expectedX * density, FLT_PRECISION);
             EXPECT_NEAR(optY->Value(), valD * density, FLT_PRECISION);
             EXPECT_NEAR(optA->Value(), expectedA, FLT_PRECISION);
-        }
-    }
-}
-
-/**
- * @tc.name: createImageData0Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, createImageData0Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->createImageData0, nullptr);
-    for (const auto& actualW : NUMBER_TEST_PLAN) {
-        for (const auto& actualH : NUMBER_TEST_PLAN) {
-            auto sw = Converter::ArkValue<Ark_Number>(actualW);
-            auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            auto imageData = accessor_->createImageData0(peer_, &sw, &sh);
-            ASSERT_NE(imageData, nullptr);
-            auto expectedW = static_cast<uint32_t>(std::abs(actualW + DIFF));
-            auto expectedH = static_cast<uint32_t>(std::abs(actualH + DIFF));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData->value.dirtyWidth, expectedW));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData->value.dirtyHeight, expectedH));
-        }
-    }
-}
-
-/**
- * @tc.name: createImageData1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, createImageData1Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->createImageData1, nullptr);
-    for (const auto& actualW : BUFFER_TEST_PLAN) {
-        for (const auto& actualH : BUFFER_TEST_PLAN) {
-            uint32_t expectedW = std::abs(static_cast<int32_t>(actualW));
-            uint32_t expectedH = std::abs(static_cast<int32_t>(actualH));
-            if (expectedW == 0 || expectedH == 0) {
-                expectedW = 0;
-                expectedH = 0;
-            }
-            Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH };
-            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-            auto imageData = accessor_->createImageData1(peer_, arkImage);
-            PeerUtils::DestroyPeer(arkImage);
-            ASSERT_NE(imageData, nullptr);
-            for (const auto& v : imageData->value.data) {
-                EXPECT_EQ(v, EXPECTED_COLOR);
-            }
-            EXPECT_EQ(imageData->value.dirtyWidth, expectedW);
-            EXPECT_EQ(imageData->value.dirtyHeight, expectedH);
-        }
-    }
-}
-
-/**
- * @tc.name: getImageDataTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, getImageDataTest, TestSize.Level1)
-{
-    auto valD = DEFAULT_DOUBLE_VALUE;
-    ASSERT_NE(accessor_->getImageData, nullptr);
-    for (const auto& actualW : NUMBER_TEST_PLAN) {
-        for (const auto& actualH : NUMBER_TEST_PLAN) {
-            ImageSize target;
-            uint8_t* targetBuffer = nullptr;
-            uint32_t expectedW = static_cast<uint32_t>(std::abs(actualW + DIFF));
-            uint32_t expectedH = static_cast<uint32_t>(std::abs(actualH + DIFF));
-            if (expectedW == 0 || expectedH == 0) {
-                expectedW = 0;
-                expectedH = 0;
-            }
-            auto nCalls = (expectedW == 0 || expectedH == 0) ? 0 : 1;
-            if (nCalls == 0) {
-                EXPECT_CALL(*renderingModel_, GetImageDataModel(_, _)).Times(0);
-            } else {
-                EXPECT_CALL(*renderingModel_, GetImageDataModel(_, _))
-                    .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetBuffer)));
-            }
-            auto sx = Converter::ArkValue<Ark_Number>(valD);
-            auto sy = Converter::ArkValue<Ark_Number>(valD);
-            auto sw = Converter::ArkValue<Ark_Number>(actualW);
-            auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            auto imageData = accessor_->getImageData(peer_, &sx, &sy, &sw, &sh);
-            ASSERT_NE(imageData, nullptr);
-            EXPECT_EQ(imageData->value.dirtyWidth, expectedW);
-            EXPECT_EQ(imageData->value.dirtyHeight, expectedH);
-            if (nCalls == 0) {
-                EXPECT_EQ(imageData->value.data.data(), nullptr);
-            } else {
-                EXPECT_NE(targetBuffer, nullptr);
-                EXPECT_NE(imageData->value.data.data(), nullptr);
-            }
         }
     }
 }
@@ -1555,11 +1514,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
             ImageSize target;
             RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
             EXPECT_CALL(*renderingModel_, GetPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target), Return(pixelMap)));
-            auto sx = Converter::ArkValue<Ark_Number>(actualX);
-            auto sy = Converter::ArkValue<Ark_Number>(actualY);
-            auto sw = Converter::ArkValue<Ark_Number>(valD);
-            auto sh = Converter::ArkValue<Ark_Number>(valD);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, &sx, &sy, &sw, &sh);
+            auto sx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto sy = Converter::ArkValue<Ark_Float64>(actualY);
+            auto sw = Converter::ArkValue<Ark_Float64>(valD);
+            auto sh = Converter::ArkValue<Ark_Float64>(valD);
+            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
             ASSERT_NE(pixelMapPeer, nullptr);
             EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.left, actualX, FLT_PRECISION);
@@ -1574,11 +1533,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
             ImageSize target;
             RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
             EXPECT_CALL(*renderingModel_, GetPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target), Return(pixelMap)));
-            auto sx = Converter::ArkValue<Ark_Number>(actualX);
-            auto sy = Converter::ArkValue<Ark_Number>(actualY);
-            auto sw = Converter::ArkValue<Ark_Number>(valD);
-            auto sh = Converter::ArkValue<Ark_Number>(valD);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, &sx, &sy, &sw, &sh);
+            auto sx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto sy = Converter::ArkValue<Ark_Float64>(actualY);
+            auto sw = Converter::ArkValue<Ark_Float64>(valD);
+            auto sh = Converter::ArkValue<Ark_Float64>(valD);
+            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
             ASSERT_NE(pixelMapPeer, nullptr);
             EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.left, actualX * density, FLT_PRECISION);
@@ -1600,11 +1559,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
             ImageSize target;
             RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
             EXPECT_CALL(*renderingModel_, GetPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target), Return(pixelMap)));
-            auto sx = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto sy = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto sw = Converter::ArkValue<Ark_Number>(actualW);
-            auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, &sx, &sy, &sw, &sh);
+            auto sx = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+            auto sy = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+            auto sw = Converter::ArkValue<Ark_Float64>(actualW);
+            auto sh = Converter::ArkValue<Ark_Float64>(actualH);
+            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
             ASSERT_NE(pixelMapPeer, nullptr);
             EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.width, actualW, FLT_PRECISION);
@@ -1619,11 +1578,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
             ImageSize target;
             RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
             EXPECT_CALL(*renderingModel_, GetPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target), Return(pixelMap)));
-            auto sx = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto sy = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto sw = Converter::ArkValue<Ark_Number>(actualW);
-            auto sh = Converter::ArkValue<Ark_Number>(actualH);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, &sx, &sy, &sw, &sh);
+            auto sx = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+            auto sy = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+            auto sw = Converter::ArkValue<Ark_Float64>(actualW);
+            auto sh = Converter::ArkValue<Ark_Float64>(actualH);
+            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
             ASSERT_NE(pixelMapPeer, nullptr);
             EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.width, actualW * density, FLT_PRECISION);
@@ -1642,230 +1601,14 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPixelMap, nullptr);
-    auto arkD = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-    auto arkR = Converter::ArkValue<Ark_Number>(DEFAULT_SCALE_VALUE);
-    auto ptr = accessor_->getPixelMap(peer_, &arkD, &arkR, &arkD, &arkR);
+    auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
+    auto arkR = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
+    auto ptr = accessor_->getPixelMap(peer_, arkD, arkR, arkD, arkR);
     EXPECT_EQ(ptr, nullptr);
-    ptr = accessor_->getPixelMap(peer_, &arkR, &arkD, &arkR, &arkD);
+    ptr = accessor_->getPixelMap(peer_, arkR, arkD, arkR, arkD);
     EXPECT_EQ(ptr, nullptr);
 }
 #endif
-
-/**
- * @tc.name: putImageData0Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, putImageData0XYTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->putImageData0, nullptr);
-    auto actualW = DEFAULT_DOUBLE_VALUE;
-    auto actualH = DEFAULT_DOUBLE_VALUE;
-    std::vector<uint32_t> vbuffer(actualW * actualH);
-    Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH, .data = vbuffer };
-    Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-
-    for (const auto& actualX : NUMBER_TEST_PLAN) {
-        for (const auto& actualY : NUMBER_TEST_PLAN) {
-            Ace::ImageData target;
-            EXPECT_CALL(*renderingModel_, PutImageData(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            int32_t expectedX = static_cast<int32_t>(actualX);
-            int32_t expectedY = static_cast<int32_t>(actualY);
-            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
-            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
-
-            accessor_->putImageData0(peer_, arkImage, &dx, &dy);
-            EXPECT_EQ(target.x, expectedX);
-            EXPECT_EQ(target.y, expectedY);
-        }
-    }
-    PeerUtils::DestroyPeer(arkImage);
-}
-
-/**
- * @tc.name: putImageData0Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData0WHTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->putImageData0, nullptr);
-    auto valD = DEFAULT_DOUBLE_VALUE;
-    auto actualX = valD;
-    auto actualY = valD;
-
-    for (const auto& actualW : BUFFER_TEST_PLAN) {
-        for (const auto& actualH : BUFFER_TEST_PLAN) {
-            Ace::ImageData target;
-            EXPECT_CALL(*renderingModel_, PutImageData(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            int32_t expectedX = static_cast<int32_t>(actualX);
-            int32_t expectedY = static_cast<int32_t>(actualY);
-            uint32_t expectedW = std::abs(static_cast<int32_t>(actualW));
-            uint32_t expectedH = std::abs(static_cast<int32_t>(actualH));
-            if (expectedW == 0 || expectedH == 0) {
-                expectedW = 0;
-                expectedH = 0;
-            }
-            std::vector<uint32_t> vbuffer(0);
-            for (size_t i = 0; i < expectedW * expectedH; i++) {
-                vbuffer.push_back(EXPECTED_COLOR);
-            }
-            Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
-            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
-
-            accessor_->putImageData0(peer_, arkImage, &dx, &dy);
-            PeerUtils::DestroyPeer(arkImage);
-            for (const auto& v : target.data) {
-                EXPECT_EQ(v, EXPECTED_COLOR);
-            }
-            EXPECT_EQ(target.x, expectedX);
-            EXPECT_EQ(target.y, expectedY);
-            EXPECT_EQ(target.dirtyWidth, expectedW);
-            EXPECT_EQ(target.dirtyHeight, expectedH);
-        }
-    }
-}
-
-/**
- * @tc.name: putImageData1XYTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, putImageData1XYTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->putImageData1, nullptr);
-    auto actualW = DEFAULT_DOUBLE_VALUE;
-    auto actualH = DEFAULT_DOUBLE_VALUE;
-    std::vector<uint32_t> vbuffer(actualW * actualH);
-    Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH, .data = vbuffer };
-    Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-
-    for (const auto& actualX : NUMBER_TEST_PLAN) {
-        for (const auto& actualY : NUMBER_TEST_PLAN) {
-            Ace::ImageData target;
-            EXPECT_CALL(*renderingModel_, PutImageData(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            int32_t expectedX = static_cast<int32_t>(actualX);
-            int32_t expectedY = static_cast<int32_t>(actualY);
-            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
-            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
-            auto dirtyX = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto dirtyY = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto dirtyWidth = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(DEFAULT_DOUBLE_VALUE);
-            auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(DEFAULT_DOUBLE_VALUE);
-
-            accessor_->putImageData1(peer_, arkImage, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
-            EXPECT_EQ(target.x, expectedX);
-            EXPECT_EQ(target.y, expectedY);
-        }
-    }
-    PeerUtils::DestroyPeer(arkImage);
-}
-
-/**
- * @tc.name: putImageData1WHWTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData1WHTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->putImageData1, nullptr);
-    auto actualX = DEFAULT_DOUBLE_VALUE;
-    auto actualY = DEFAULT_DOUBLE_VALUE;
-    auto actualDirtyX = DEFAULT_DOUBLE_VALUE;
-    auto actualDirtyY = DEFAULT_DOUBLE_VALUE;
-
-    for (const auto& actualW : BUFFER_TEST_PLAN) {
-        for (const auto& actualH : BUFFER_TEST_PLAN) {
-            Ace::ImageData target;
-            EXPECT_CALL(*renderingModel_, PutImageData(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            int32_t expectedDirtyX = static_cast<int32_t>(actualDirtyX);
-            int32_t expectedDirtyY = static_cast<int32_t>(actualDirtyY);
-            int32_t expectedW = std::abs(static_cast<int32_t>(actualW));
-            int32_t expectedH = std::abs(static_cast<int32_t>(actualH));
-            if (expectedW == 0 || expectedH == 0) {
-                expectedW = 0;
-                expectedH = 0;
-            }
-            std::vector<uint32_t> vbuffer(0);
-            for (size_t i = 0; i < expectedW * expectedH; i++) {
-                vbuffer.push_back(EXPECTED_COLOR);
-            }
-            Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
-            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
-            auto dirtyX = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualDirtyX);
-            auto dirtyY = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualDirtyY);
-            auto dirtyWidth = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedW);
-            auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedH);
-
-            accessor_->putImageData1(peer_, arkImage, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
-            PeerUtils::DestroyPeer(arkImage);
-            // peer logic
-            expectedW = expectedDirtyX < 0 ? std::min(expectedDirtyX + expectedW, expectedW)
-                                           : std::min(expectedW - expectedDirtyX, expectedW);
-            expectedH = expectedDirtyY < 0 ? std::min(expectedDirtyY + expectedH, expectedH)
-                                           : std::min(expectedH - expectedDirtyY, expectedH);
-            for (const auto& v : target.data) {
-                EXPECT_EQ(v, EXPECTED_COLOR);
-            }
-            EXPECT_EQ(target.dirtyWidth, expectedW);
-            EXPECT_EQ(target.dirtyHeight, expectedH);
-        }
-    }
-}
-
-/**
- * @tc.name: putImageData1WHWTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData1DXYTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->putImageData1, nullptr);
-    auto actualX = DEFAULT_DOUBLE_VALUE;
-    auto actualY = DEFAULT_DOUBLE_VALUE;
-
-    for (const auto& actualDirtyX : BUFFER_TEST_PLAN) {
-        for (const auto& actualDirtyY : BUFFER_TEST_PLAN) {
-            Ace::ImageData target;
-            EXPECT_CALL(*renderingModel_, PutImageData(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            int32_t expectedW = std::abs(static_cast<int32_t>(DEFAULT_DOUBLE_VALUE));
-            int32_t expectedH = std::abs(static_cast<int32_t>(DEFAULT_DOUBLE_VALUE));
-            std::vector<uint32_t> vbuffer(0);
-            for (size_t i = 0; i < expectedW * expectedH; i++) {
-                vbuffer.push_back(EXPECTED_COLOR);
-            }
-            Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
-            int32_t expectedDirtyX = static_cast<int32_t>(actualDirtyX);
-            int32_t expectedDirtyY = static_cast<int32_t>(actualDirtyY);
-            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
-            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
-            auto dirtyX = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualDirtyX);
-            auto dirtyY = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualDirtyY);
-            auto dirtyWidth = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedW);
-            auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedH);
-
-            accessor_->putImageData1(peer_, arkImage, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
-            PeerUtils::DestroyPeer(arkImage);
-            // peer logic
-            expectedW = expectedDirtyX < 0 ? std::min(expectedDirtyX + expectedW, expectedW)
-                                           : std::min(expectedW - expectedDirtyX, expectedW);
-            expectedH = expectedDirtyY < 0 ? std::min(expectedDirtyY + expectedH, expectedH)
-                                           : std::min(expectedH - expectedDirtyY, expectedH);
-            for (const auto& v : target.data) {
-                EXPECT_EQ(v, EXPECTED_COLOR);
-            }
-            EXPECT_EQ(target.dirtyX, expectedDirtyX);
-            EXPECT_EQ(target.dirtyY, expectedDirtyY);
-            EXPECT_EQ(target.dirtyWidth, expectedW);
-            EXPECT_EQ(target.dirtyHeight, expectedH);
-        }
-    }
-}
 
 /**
  * @tc.name: createPatternTest

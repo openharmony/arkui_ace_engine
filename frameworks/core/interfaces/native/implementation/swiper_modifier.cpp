@@ -222,7 +222,7 @@ bool CheckSwiperParameters(SwiperParameters& p)
     ResetIfInvalid(p.selectedItemWidth);
     p.selectedItemWidth = p.selectedItemWidth ? p.selectedItemWidth : 6.0_vp;
     ResetIfInvalid(p.selectedItemHeight);
-    p.selectedItemHeight = p.selectedItemHeight ? p.itemWidth : 6.0_vp;
+    p.selectedItemHeight = p.selectedItemHeight ? p.selectedItemHeight : 6.0_vp;
 
     if (p.maxDisplayCountVal && (*(p.maxDisplayCountVal) < 6 || *(p.maxDisplayCountVal) > 9)) {
         p.maxDisplayCountVal.reset();
@@ -398,7 +398,7 @@ void SetDurationImpl(Ark_NativePointer node,
         SwiperModelStatic::SetDuration(frameNode, DEFAULT_DURATION);
         return;
     }
-    SwiperModelStatic::SetDuration(frameNode, *convValue);
+    SwiperModelStatic::SetDuration(frameNode, *convValue < 0 ? DEFAULT_DURATION : *convValue);
 }
 void SetVerticalImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -424,7 +424,8 @@ void SetItemSpaceImpl(Ark_NativePointer node,
         SwiperModelStatic::SetItemSpace(frameNode, value);
         return;
     }
-    SwiperModelStatic::SetItemSpace(frameNode, *aceOptVal);
+    SwiperModelStatic::SetItemSpace(frameNode,
+        *aceOptVal < OHOS::Ace::Dimension(0) ? OHOS::Ace::Dimension(0) : *aceOptVal);
 }
 void SetDisplayModeImpl(Ark_NativePointer node,
                         const Opt_SwiperDisplayMode* value)
@@ -729,6 +730,8 @@ void SetDisplayArrowImpl(Ark_NativePointer node,
     auto optArrow = Converter::OptConvertPtr<ArrowStyleVariantType>(value);
     if (auto show = Converter::OptConvertPtr<bool>(isHoverShow); show) {
         SwiperModelStatic::SetHoverShow(frameNode, *show);
+    } else {
+        SwiperModelStatic::SetHoverShow(frameNode, false);
     }
     if (!optArrow) {
         SwiperModelStatic::SetDisplayArrow(frameNode, false);

@@ -299,6 +299,17 @@ Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::Offse
     return windowAnchorInfo;
 }
 
+void SubwindowOhos::SetSubWindowVsyncListener(RefPtr<PipelineBase> parentPipeline, RefPtr<PipelineBase> childPipeline)
+{
+    CHECK_NULL_VOID(parentPipeline);
+    CHECK_NULL_VOID(childPipeline);
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipeline);
+    CHECK_NULL_VOID(parentPipelineContext);
+    auto childPipelineContext = AceType::DynamicCast<NG::PipelineContext>(childPipeline);
+    CHECK_NULL_VOID(childPipelineContext);
+    childPipelineContext->SetVsyncListener(parentPipelineContext->GetVsyncListener());
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -436,6 +447,12 @@ void SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
+    // ArkTS static need set subwindow vsyncListener because subwindow does not enter into ArktsFrontend::RunPage
+    if (parentPipeline->GetFrontendType() == FrontendType::ARK_TS
+        || parentPipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+        || parentPipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        SetSubWindowVsyncListener(parentPipeline, container->GetPipelineContext());
+    }
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
@@ -1381,14 +1398,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(childContainerId_);
     }
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-    ResizeWindow();
-    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
-        SetFollowParentWindowLayoutEnabled(false);
-    } else {
-        SetFollowParentWindowLayoutEnabled(true);
-    }
+    ResizeWindowForDialog(dialogProps);
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
@@ -1397,13 +1407,41 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
-        window_->SetFollowParentWindowLayoutEnabled(true);
         SetNodeId(dialog->GetId());
         SubwindowManager::GetInstance()->AddSubwindow(
             parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
     }
     haveDialog_ = true;
     return dialog;
+}
+
+void SubwindowOhos::ResizeWindowForDialog(const DialogProperties& dialogProps)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    // The PC window is full screen. The phone window follows the parent window except system window.
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
+    }
+    // UEC subwindow modal dialog follows the parent window.
+    if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
+        auto parentWindowRect = GetUIExtensionHostWindowRect();
+        // keep consistent with the size and position of the parent window in first frame.
+        CHECK_NULL_VOID(window_);
+        window_->MoveTo(parentWindowRect.GetOffset().GetX(), parentWindowRect.GetOffset().GetY());
+        window_->Resize(parentWindowRect.Width(), parentWindowRect.Height());
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    } else {
+        ResizeWindow();
+    }
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
@@ -1427,14 +1465,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(childContainerId_);
     }
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-    ResizeWindow();
-    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
-        SetFollowParentWindowLayoutEnabled(false);
-    } else {
-        SetFollowParentWindowLayoutEnabled(true);
-    }
+    ResizeWindowForDialog(dialogProps);
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
@@ -1443,7 +1474,6 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
-        window_->SetFollowParentWindowLayoutEnabled(true);
         SetNodeId(dialog->GetId());
         SubwindowManager::GetInstance()->AddSubwindow(
             parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
@@ -1487,14 +1517,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, childContainerId_);
     }
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    ResizeWindow();
-    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
-        SetFollowParentWindowLayoutEnabled(false);
-    } else {
-        SetFollowParentWindowLayoutEnabled(true);
-    }
+    ResizeWindowForDialog(dialogProps);
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
@@ -1503,7 +1526,6 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     auto dialog = overlay->OpenCustomDialog(dialogProps, std::move(callback));
     CHECK_NULL_VOID(dialog);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
-        window_->SetFollowParentWindowLayoutEnabled(true);
         SetNodeId(dialog->GetId());
         SubwindowManager::GetInstance()->AddSubwindow(
             parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
@@ -2540,5 +2562,18 @@ void SubwindowOhos::RemoveFollowParentWindowLayoutNode(int32_t nodeId)
         bool freeMultiWindowEnable = IsFreeMultiWindow();
         SwitchFollowParentWindowLayout(freeMultiWindowEnable);
     }
+}
+
+bool SubwindowOhos::SetReceiveDragEventEnabled(bool enabled)
+{
+    if (GetIsReceiveDragEventEnabled() == enabled) {
+        return false;
+    }
+    OHOS::Rosen::WMError ret = window_->SetReceiveDragEventEnabled(enabled);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "set subwindow receive drag event enabled failed");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace

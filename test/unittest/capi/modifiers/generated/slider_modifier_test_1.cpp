@@ -683,7 +683,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -777,7 +777,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -880,7 +880,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -1141,7 +1141,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1322,7 +1322,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1742,7 +1742,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
  */
 HWTEST_F(SliderModifierTest, DISABLED_setBlockStyleTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

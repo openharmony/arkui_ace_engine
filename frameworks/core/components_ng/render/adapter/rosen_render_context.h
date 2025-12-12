@@ -31,6 +31,7 @@
 #include "render_service_client/core/modifier_ng/geometry/rs_bounds_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_frame_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_transform_modifier.h"
+#include "render_service_client/core/feature/window_keyframe/rs_window_keyframe_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_texture_export.h"
@@ -239,6 +240,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
@@ -315,7 +317,7 @@ public:
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
     void SetRenderFit(RenderFit renderFit) override;
-    void OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType) override;
+    void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
@@ -374,6 +376,7 @@ public:
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
+    void OnZIndexUpdateMultiThread(const RefPtr<FrameNode>& parent);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
@@ -496,13 +499,13 @@ public:
     static bool initDrawNodeChangeCallback_;
     static bool initPropertyNodeChangeCallback_;
 
-    void FreezeCanvasNode(bool freezeFlag = false);
-    void RemoveCanvasNode();
+    void FreezeKeyFrameNode(bool freezeFlag = false);
+    void RemoveKeyFrameNode();
     void CheckAnimationParametersValid(int32_t& animationParam);
-    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
-    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
-    void CreateCanvasNode();
-    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode() const;
+    bool SetKeyFrameNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& rootNode);
+    void CreateKeyFrameNode();
+    std::shared_ptr<Rosen::RSWindowKeyFrameNode> GetKeyFrameNode() const;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
     {
@@ -635,6 +638,7 @@ protected:
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
+    void OnExcludeFromRenderGroupUpdate(bool exclude) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
@@ -892,7 +896,7 @@ protected:
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
-    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::shared_ptr<Rosen::RSWindowKeyFrameNode> keyFrameNode_;
     std::function<void()> callbackAnimateEnd_ = nullptr;
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
@@ -907,7 +911,6 @@ protected:
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 
 private:
-    void ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew);
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 

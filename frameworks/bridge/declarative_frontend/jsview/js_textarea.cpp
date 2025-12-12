@@ -46,6 +46,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextField::SetPlaceholderFont);
     JSClass<JSTextArea>::StaticMethod("backgroundColor", &JSTextField::SetBackgroundColor);
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
+    JSClass<JSTextArea>::StaticMethod("textDirection", &JSTextField::SetTextDirection);
     JSClass<JSTextArea>::StaticMethod("enableSelectedDataDetector", &JSTextField::SetSelectDetectEnable);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextField::SetCaretColor);
     JSClass<JSTextArea>::StaticMethod("height", &JSTextField::JsHeight);
@@ -130,6 +131,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextArea>::StaticMethod("scrollBarColor", &JSTextField::SetScrollBarColor);
     JSClass<JSTextArea>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
+    JSClass<JSTextArea>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
+    JSClass<JSTextArea>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
+    JSClass<JSTextArea>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
+    JSClass<JSTextArea>::StaticMethod("selectedDragPreviewStyle", &JSTextField::SetSelectedDragPreviewStyle);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

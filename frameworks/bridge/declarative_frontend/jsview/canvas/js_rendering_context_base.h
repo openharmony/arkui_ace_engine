@@ -33,7 +33,20 @@ public:
     virtual void SetCanvasPattern(const RefPtr<AceType>& canvas) = 0;
     virtual void SetInstanceId(int32_t id) = 0;
 
+    bool IsBuiltIn() const
+    {
+        return builtIn_;
+    }
+
+    void SetBuiltIn(bool builtIn)
+    {
+        builtIn_ = builtIn;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContextBase);
+
+private:
+    bool builtIn_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

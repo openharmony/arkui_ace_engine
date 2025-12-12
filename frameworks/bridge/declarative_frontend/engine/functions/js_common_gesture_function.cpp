@@ -24,12 +24,17 @@ JSRef<JSObject> JsCommonGestureFunction::GetTapLocation(const FingerInfo& finger
     const OHOS::Ace::Offset& localOffset = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& globalOffset = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& screenOffset = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     tapLocation->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
     tapLocation->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
     tapLocation->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     tapLocation->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     tapLocation->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     tapLocation->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+    tapLocation->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    tapLocation->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
 
     return tapLocation;
 }

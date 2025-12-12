@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,17 +24,21 @@ static const char* callCallbackFromNativeSig = "ili:i";
 
 const bool registerByOne = true;
 
-static bool registerNatives(ani_env *env, const ani_class clazz, const std::vector<std::tuple<std::string, std::string, void*, int>> impls) {
-    std::vector<ani_native_function> methods;
-    methods.reserve(impls.size());
+static bool registerNatives(
+    ani_env *env,
+    const ani_class clazz,
+    const std::vector<std::tuple<std::string, std::string, void*, int>> impls)
+{
+    std::vector<ani_native_function> staticMethods;
+    staticMethods.reserve(impls.size());
     bool result = true;
     for (const auto &[name, type, func, flag] : impls) {
-        ani_native_function method;
-        method.name = name.c_str();
-        method.pointer = func;
-        method.signature = nullptr;
+        ani_native_function staticMethod;
+        staticMethod.name = name.c_str();
+        staticMethod.pointer = func;
+        staticMethod.signature = nullptr;
         if (registerByOne) {
-            result &= env->Class_BindStaticNativeMethods(clazz, &method, 1) == ANI_OK;
+            result &= env->Class_BindStaticNativeMethods(clazz, &staticMethod, 1) == ANI_OK;
             ani_boolean isError = false;
             CHECK_ANI_FATAL(env->ExistUnhandledError(&isError));
             if (isError) {
@@ -43,11 +47,12 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
             }
         }
         else {
-            methods.push_back(method);
+            staticMethods.push_back(staticMethod);
         }
     }
     if (!registerByOne) {
-        result = env->Class_BindStaticNativeMethods(clazz, methods.data(), static_cast<ani_size>(methods.size())) == ANI_OK;
+        result = env->Class_BindStaticNativeMethods(
+            clazz, staticMethods.data(), static_cast<ani_size>(staticMethods.size())) == ANI_OK;
     }
     return registerByOne ? true : result;
 }
@@ -170,15 +175,12 @@ static struct {
     ani_static_method method = nullptr;
 } g_koalaANICallbackDispatcher;
 
-static thread_local ani_env* currentContext = nullptr;
-
 bool setKoalaANICallbackDispatcher(
     ani_env* aniEnv,
     ani_class clazz,
     const char* dispatcherMethodName,
     const char* dispatcherMethodSig
 ) {
-    currentContext = aniEnv;
     g_koalaANICallbackDispatcher.clazz = clazz;
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
@@ -193,8 +195,4 @@ bool setKoalaANICallbackDispatcher(
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
-}
-
-ani_env* getKoalaANIContext(void* hint) {
-    return reinterpret_cast<ani_env*>(hint);
 }

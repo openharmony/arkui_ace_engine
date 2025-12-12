@@ -142,13 +142,16 @@ static constexpr char START_PERFORMANCE_CHECK_MESSAGE[] = "StartArkPerformanceCh
 static constexpr char END_PERFORMANCE_CHECK_MESSAGE[] = "EndArkPerformanceCheck";
 static constexpr char ENABLE_NODE_TRACE[] = "EnableNodeTrace";
 static constexpr char DISABLE_NODE_TRACE[] = "DisableNodeTrace";
+static constexpr char ARKUI_INTERRACTION[] = "ArkUI.InteractionEvent";
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
 bool LayoutInspector::isUseStageModel_ = false;
 bool LayoutInspector::enableNodeTrace_ = false;
+bool LayoutInspector::enableInteractionEventReport_ = false;
 std::mutex LayoutInspector::recMutex_;
 std::shared_mutex LayoutInspector::enableTraceMutex_;
+std::shared_mutex LayoutInspector::interactionEventStatusMutex_;
 ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
 const char PNG_TAG[] = "png";
@@ -231,6 +234,18 @@ void LayoutInspector::SetEnableNodeTrace(bool enable)
 {
     std::unique_lock<std::shared_mutex> lock(enableTraceMutex_);
     enableNodeTrace_ = enable;
+}
+
+bool LayoutInspector::GetInteractionEventStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(interactionEventStatusMutex_);
+    return enableInteractionEventReport_;
+}
+
+void LayoutInspector::TriggerArkUIInteractionEventStatus(const std::string& message)
+{
+    std::unique_lock<std::shared_mutex> lock(interactionEventStatusMutex_);
+    enableInteractionEventReport_ = message.find("InteractionEventOpen", 0) != std::string::npos ? true : false;
 }
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
@@ -614,6 +629,9 @@ std::pair<uint32_t, int32_t> LayoutInspector::ProcessMessages(const std::string&
     } else if (message.find(DISABLE_NODE_TRACE, 0) != std::string::npos) {
         TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "disable node trace");
         SetEnableNodeTrace(false);
+    } else if (message.find(ARKUI_INTERRACTION, 0) != std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "trigger arkui interaction");
+        TriggerArkUIInteractionEventStatus(message);
     }
     auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
     uint32_t windowId = windowResult.first;

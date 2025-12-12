@@ -49,6 +49,7 @@ public:
         NG::ProgressType type);
     static void SetTextDefaultStyle(FrameNode* frameNode, const RefPtr<FrameNode>& textNode,
         double value, double maxValue);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
 };
 
 } // namespace OHOS::Ace::NG

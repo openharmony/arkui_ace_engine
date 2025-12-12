@@ -168,7 +168,8 @@ enum TextHeightBehavior {
 
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
-    TextAlign align = TextAlign::LEFT;
+    // 注意是否有不兼容变更
+    TextAlign align = TextAlign::START;
     TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
     uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;
@@ -190,6 +191,9 @@ struct ParagraphStyle {
     bool isFirstParagraphLineSpacing = true;
     bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
+    bool compressLeadingPunctuation = false;
+    bool includeFontPadding = false;
+    bool fallbackLineSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -200,7 +204,9 @@ struct ParagraphStyle {
                drawableLeadingMargin == others.drawableLeadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
-               enableAutoSpacing == others.enableAutoSpacing;
+               enableAutoSpacing == others.enableAutoSpacing &&
+               compressLeadingPunctuation == others.compressLeadingPunctuation &&
+               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -230,6 +236,12 @@ struct ParagraphStyle {
         result += indent.ToString();
         result += ", enableAutoSpacing: ";
         result += enableAutoSpacing;
+        result += ", compressLeadingPunctuation: ";
+        result += compressLeadingPunctuation;
+        result += ", includeFontPadding: ";
+        result += includeFontPadding;
+        result += ", fallbackLineSpacing: ";
+        result += fallbackLineSpacing;
         return result;
     }
 };
@@ -277,7 +289,7 @@ class Paragraph : public virtual AceType {
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
     static RefPtr<Paragraph> CreateRichEditorParagraph(
-        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode);
 
     static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build
@@ -355,6 +367,10 @@ public:
     virtual std::string GetDumpInfo()
     {
         return "";
+    }
+    virtual bool IsSingleLineMode()
+    {
+        return false;
     }
 };
 } // namespace OHOS::Ace::NG

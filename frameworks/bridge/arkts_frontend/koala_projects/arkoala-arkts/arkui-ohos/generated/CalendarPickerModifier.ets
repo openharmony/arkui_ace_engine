@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod, PickerTextStyle } from "./component/common"
 import { Offset } from "./component/units"
 export class CalendarPickerModifier extends CommonMethodModifier implements CalendarPickerAttribute,AttributeModifier<CalendarPickerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,6 +47,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
     _edgeAlign_0_0value?: CalendarAlign | undefined
     _edgeAlign_0_1value?: Offset | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCalendarPickerPeer;
         if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -122,6 +125,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
     }
     mergeModifier(modifier: CalendarPickerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textStyle_0_flag) {

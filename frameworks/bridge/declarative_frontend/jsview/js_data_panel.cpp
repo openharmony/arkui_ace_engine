@@ -372,7 +372,7 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         JSViewAbstract::JsBorderRadius(info);
     } else {
-        SetCornerApplyType(info);
+        SetRenderStrategy(info);
         std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
             JSCallbackInfoType::OBJECT };
         if (!CheckJSCallbackInfo("JsBorderRadius", info[0], checkList)) {

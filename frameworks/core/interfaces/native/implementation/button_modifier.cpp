@@ -74,6 +74,7 @@ ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
             parameters.fontFamily = labelFont->fontFamilies;
         }
     }
+    parameters.textAlign = Converter::OptConvert<TextAlign>(src.textAlign);
     return parameters;
 }
 }
@@ -218,6 +219,9 @@ void SetLabelStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
+    if (!parameters->textAlign.has_value()) {
+        ButtonModelStatic::ResetTextAlign(frameNode);
+    }
     ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,

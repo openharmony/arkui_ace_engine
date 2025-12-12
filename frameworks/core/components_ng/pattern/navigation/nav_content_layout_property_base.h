@@ -18,6 +18,7 @@
 
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -48,7 +49,7 @@ public:
         if (!host || !host->GetIgnoreLayoutProcess()) {
             return;
         }
-        RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
+        auto parent = AceType::DynamicCast<NavDestinationNodeBase>(host->GetAncestorNodeOfFrame(false));
         CHECK_NULL_VOID(parent);
         IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
             .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
@@ -64,10 +65,24 @@ public:
         if (parentConstraint) {
             expandedSize = parentConstraint->selfIdealSize;
         }
+
+        auto navBasePattern = parent->GetPattern<NavDestinationPatternBase>();
+        CHECK_NULL_VOID(navBasePattern);
+        auto barStyle = navBasePattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+        auto layoutProperty = parent->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+        if (layoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK ||
+            (barStyle == BarStyle::SAFE_AREA_PADDING && !NearZero(navBasePattern->GetTitleBarOffsetY()))) {
+            expandedSize.AddHeight(sae.top.value_or(0.0f));
+        }
+
+        auto toolBarStyle = navBasePattern->GetToolBarStyle().value_or(BarStyle::STANDARD);
+        if (!parent->IsToolBarVisible() || toolBarStyle == BarStyle::STACK) {
+            expandedSize.AddHeight(sae.bottom.value_or(0.0f));
+        }
+
         layoutConstraint_->selfIdealSize.SetWidth(
             expandedSize.Width().value_or(0.0f) + sae.left.value_or(0.0f) + sae.right.value_or(0.0f));
-        layoutConstraint_->selfIdealSize.SetHeight(
-            expandedSize.Height().value_or(0.0f) + sae.top.value_or(0.0f) + sae.bottom.value_or(0.0f));
+        layoutConstraint_->selfIdealSize.SetHeight(expandedSize.Height().value_or(0.0f));
     }
 };
 

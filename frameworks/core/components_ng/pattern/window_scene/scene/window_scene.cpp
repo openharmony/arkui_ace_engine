@@ -355,6 +355,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent([windowNode = std::move(host)]() { },
+        "ArkUIWindowDestoryWindowNode", TaskExecutor::TaskType::UI);
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {

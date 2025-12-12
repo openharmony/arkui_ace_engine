@@ -777,12 +777,14 @@ HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue001, TestSize.Level0)
     richEditorPattern->copyOption_ = CopyOptions::Local;
     richEditorPattern->SetSupportPreviewText(false);
     richEditorPattern->SetEnableAutoSpacing(true);
+    richEditorPattern->SetCompressLeadingPunctuation(true);
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
     EXPECT_EQ(jsonObject->GetInt("undoStyle"), 1);
     EXPECT_EQ(jsonObject->GetInt("copyOptions"), 2);
     EXPECT_EQ(jsonObject->GetString("enablePreviewText"), "false");
     EXPECT_EQ(jsonObject->GetString("enableAutoSpacing"), "true");
+    EXPECT_EQ(jsonObject->GetString("compressLeadingPunctuation"), "true");
 
     filter.filterFixed = 10;
     EXPECT_TRUE(filter.IsFastFilter());
@@ -870,6 +872,68 @@ HWTEST_F(RichEditorTextCalTestNg, SetMaxLength002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetMaxLength003
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetMaxLength003, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::optional<int32_t> maxLines = { 3 };
+    richEditorModel.SetMaxLength(richEditorNode, maxLines);
+
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), 3);
+}
+
+/**
+ * @tc.name: SetMaxLength004
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetMaxLength004, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::optional<int32_t> maxLines = { 4 };
+    richEditorModel.SetMaxLength(maxLines);
+
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), 4);
+}
+
+/**
+ * @tc.name: ResetMaxLength001
+ * @tc.desc: test ResetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, ResetMaxLength001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.ResetMaxLength();
+
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
+}
+
+/**
  * @tc.name: SetMaxLines001
  * @tc.desc: test SetMaxLines
  * @tc.type: FUNC
@@ -902,6 +966,48 @@ HWTEST_F(RichEditorTextCalTestNg, SetMaxLines003, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
+}
+
+/**
+ * @tc.name: SetMaxLines004
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetMaxLines004, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetMaxLines(1);
+
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), FLT_MAX);
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), 1);
+}
+
+/**
+ * @tc.name: SetMaxLines005
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetMaxLines005, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetMaxLines(richEditorNode, 2);
+
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), FLT_MAX);
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), 2);
 }
 
 float RichEditorTextCalTestNg::CheckMaxLinesHeight(float maxLinesHeight)
@@ -983,5 +1089,24 @@ HWTEST_F(RichEditorTextCalTestNg, ReportTextChange002, TestSize.Level0)
     UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(std::move(handleFunc));
     UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(nullptr);
     ClearSpan();
+}
+
+/**
+ * @tc.name: SetSupportPreviewText001
+ * @tc.desc: test SetSupportPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetSupportPreviewText001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSupportPreviewText(false);
+    EXPECT_FALSE(richEditorPattern->isTextPreviewSupported_);
 }
 } // namespace OHOS::Ace::NG

@@ -71,6 +71,7 @@ public:
     bool IsChildTreeContainer() override;
 
     bool IsEmbededTarget() override;
+    bool IsHeaderFooterInScroll() override;
 
     RefPtr<NG::FrameNode> GetFrameNode()
     {
@@ -86,6 +87,10 @@ public:
     {
         prevNode_ = frameNode;
     }
+
+    bool IsBackward() override;
+    bool IsForward() override;
+
 private:
     template<typename T>
     std::vector<std::shared_ptr<T>> GetChildrenTemplate();

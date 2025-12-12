@@ -343,6 +343,7 @@ export interface TapGestureParameters extends BaseHandlerOptions {
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
     count?: int32;
     fingers?: int32;
+    distanceThreshold?: double;
 }
 export interface LongPressGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: int32;
@@ -1860,6 +1861,10 @@ export namespace GestureControl {
         SWIPE_GESTURE = 4,
         ROTATION_GESTURE = 5,
         DRAG = 6,
-        CLICK = 7
+        CLICK = 7,
+        BOX_SELECT_GESTURE = 8,
+        WEB_SCROLL_GESTURE = 9,
+        TEXT_FIELD_SELECT_GESTURE = 10,
+        CONTEXT_MENU_HOVER_GESTURE = 11
     }
 }

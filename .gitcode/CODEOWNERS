@@ -23,6 +23,7 @@ README_zh.md @arkui_architecture
 .gitcode/ @arkui_architecture
 .gitcode/CODEOWNERS @liyujie43
 .gitcode/owner_config.json @liyujie43
+.gitcode/multi_thread_mapping.json @liyujie43
 
 [OpenHarmony adapter]
 adapter/ohos/build/ @arkui_architecture
@@ -32,6 +33,7 @@ adapter/ohos/capability/environment/ @arkui_statemgmt
 adapter/ohos/capability/html/ @huawei_g_five
 adapter/ohos/capability/interaction/ @ArkUI_Event
 adapter/ohos/capability/preference/ @arkui_statemgmt
+adapter/ohos/capability/statusbar/ @arkuiscroll
 adapter/ohos/capability/time/ @arkui001
 adapter/ohos/capability/udmf/ @ArkUI_Event
 adapter/ohos/capability/window_connection_ng/ @arkuilayout1
@@ -180,6 +182,7 @@ adapter/ohos/osal/resource_convertor.h @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.cpp @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.h @arkui_framework_resource
 adapter/ohos/osal/ressched_report.cpp @arkui_framework_resource
+adapter/ohos/osal/statistic_event_adapter.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.h @arkui_framework_xnode
 adapter/ohos/osal/stylus_detector_default.cpp @ArkUI_Event
@@ -247,6 +250,7 @@ advanced_ui_component/tabtitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbarv2/ @arkuiadvancedcomponent
 advanced_ui_component/treeview/ @arkuiadvancedcomponent
+advanced_ui_component_static/multinavigation/ @arkui_navigation
 
 [Extend UI Components]
 component_ext/arc_swiper/
@@ -1950,6 +1954,8 @@ frameworks/core/common/rosen/ @arkui_framework_xnode
 frameworks/core/common/router_recover_record.h @arkui_navigation
 frameworks/core/common/settings.h @arkui_framework_xnode
 frameworks/core/common/sharedata/ @arkui_framework_xnode
+frameworks/core/common/statistic_event_reporter.cpp @arkui_framework_xnode
+frameworks/core/common/statistic_event_reporter.h @arkui_framework_xnode
 frameworks/core/common/storage/ @arkui_statemgmt
 frameworks/core/common/stylus/stylus_detector_default.h @ArkUI_Event
 frameworks/core/common/stylus/stylus_detector_loader.h @ArkUI_Event
@@ -2079,6 +2085,8 @@ frameworks/core/components/common/properties/text_style_parser.cpp @huawei_g_fiv
 frameworks/core/components/common/properties/text_style_parser.h @huawei_g_five
 frameworks/core/components/common/properties/tween_option.h @arkui_framework_xnode
 frameworks/core/components/common/properties/background_image.h @ArkUI_Event
+frameworks/core/components/common/properties/ui_material.h @arkuicodepulse
+frameworks/core/components/common/properties/ui_material.cpp @arkuicodepulse
 frameworks/core/components/common/rotation/ @arkui_navigation
 frameworks/core/components/components.gni @arkui_architecture
 frameworks/core/components/container_modal/ @ArkUI_ability_group
@@ -2458,6 +2466,7 @@ frameworks/core/components_ng/layout/ @arkuilayout1
 frameworks/core/components_ng/layout/section/ @arkuiscroll
 frameworks/core/components_ng/manager/avoid_info/ @arkui_navigation
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
+frameworks/core/components_ng/manager/content_change_manager/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/display_sync/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/drag_drop/ @ArkUI_Event
 frameworks/core/components_ng/manager/focus/ @ArkUI_Event
@@ -2823,6 +2832,8 @@ frameworks/core/interfaces/native/common/ @arkui_framework_xnode
 frameworks/core/interfaces/native/BUILD.gn @arkui_architecture
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.cpp @arkuicodepulse
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.h @arkuicodepulse
+frameworks/core/interfaces/native/node/atomic_service_modifier.cpp @ArkUI_ability_group
+frameworks/core/interfaces/native/node/atomic_service_modifier.h @ArkUI_ability_group
 frameworks/core/interfaces/native/node/blank_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/blank_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/button_modifier.cpp @arkuipopupwindow_all
@@ -3198,6 +3209,7 @@ interfaces/napi/kits/prompt/ @arkuipopupwindow_all
 interfaces/napi/kits/router/ @arkui_navigation
 interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkui_framework_xnode
+interfaces/napi/kits/ui_material/ @arkuicodepulse
 
 [Arkoala]
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
@@ -3542,6 +3554,7 @@ test/unittest/core/common/storage/ @arkui_statemgmt
 test/unittest/core/common/task/ @arkui_framework_xnode
 test/unittest/core/common/vibrator/ @arkui_framework_xnode
 test/unittest/core/common/transform/ @ArkUI_Event
+test/unittest/core/common/statistic_event/ @arkui_framework_xnode
 test/unittest/core/event/ @ArkUI_Event
 test/unittest/core/gestures/ @ArkUI_Event
 test/unittest/core/image_file_cache/ @arkui001
@@ -3714,8 +3727,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/s
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
-[Koala mirror]
-frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
+[UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
 
 [window scene]

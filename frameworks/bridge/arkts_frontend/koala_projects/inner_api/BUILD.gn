@@ -17,12 +17,12 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_copy("copy_arkui_ets") {
   sources = [
-    "./arkui/ComponentBase.d.ets",
-    "./arkui/PeerNode.d.ets",
-    "./arkui/NativePeerNode.d.ets",
-    "./arkui/ReusablePool.d.ets",
     "./arkui/ArkComponentRoot.d.ets",
     "./arkui/ArkUIEntry.d.ets",
+    "./arkui/ComponentBase.d.ets",
+    "./arkui/NativePeerNode.d.ets",
+    "./arkui/PeerNode.d.ets",
+    "./arkui/ReusablePool.d.ets",
   ]
   sources += [
     "./arkui/base/UIContextUtil.d.ets",
@@ -33,9 +33,9 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/component/listItem.d.ets",
     "./arkui/component/navDestination.d.ets",
     "./arkui/component/navigation.d.ets",
+    "./arkui/component/stack.d.ets",
     "./arkui/component/tabs.d.ets",
     "./arkui/component/text.d.ets",
-    "./arkui/component/stack.d.ets",
     "./arkui/component/idlize.d.ets",
   ]
   sources += [
@@ -47,12 +47,10 @@ ohos_copy("copy_arkui_ets") {
   sources += [ "./@koalaui/interop/Finalizable.d.ets" ]
   sources += [ "./@koalaui/interop/SerializerBase.d.ets" ]
   sources += [
-    "./@koalaui/runtime/internals.d.ets",
     "./@koalaui/runtime/annotations.d.ets",
+    "./@koalaui/runtime/internals.d.ets",
     "./@koalaui/runtime/memo/node.d.ets",
     "./@koalaui/runtime/memo/remember.d.ets",
-    "./@koalaui/runtime/states/Disposable.d.ets",
-    "./@koalaui/runtime/tree/IncrementalNode.d.ets",
   ]
   sources += [
     "./@ohos/router.d.ets",

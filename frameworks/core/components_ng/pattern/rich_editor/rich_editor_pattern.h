@@ -24,6 +24,7 @@
 
 #include "base/log/event_report.h"
 #include "base/utils/device_config.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -56,6 +57,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/text_emoji_processor.h"
 
 #ifndef ACE_UNITTEST
@@ -99,6 +101,7 @@ class RichEditorUndoManager;
 struct UndoRedoRecord;
 class RichEditorContentPattern;
 class StyleManager;
+class RichEditorScrollController;
 using SpanOptions = std::variant<TextSpanOptions, ImageSpanOptions, SymbolSpanOptions, BuilderSpanOptions>;
 using OptionsList = std::list<SpanOptions>;
 
@@ -433,9 +436,7 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         HandleSysScaleChanged();
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(),
-            AISpanLayoutInfo{ GetAISpanMap(), NeedShowAIDetect() });
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
 
     void HandleSysScaleChanged()
@@ -540,6 +541,14 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    void SetCompressLeadingPunctuation(bool enabled)
+    {
+        CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
+        isCompressLeadingPunctuation_ = enabled;
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void OnAttachToFrameNodeMultiThread() {}
@@ -627,6 +636,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    void DeleteBackwardFunction();
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
     void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan, TextChangeReason reason);
@@ -649,6 +659,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
         TextChangeReason reason = TextChangeReason::UNKNOWN);
 #endif
+    void InitPlaceholderAccessibility(const RefPtr<PlaceholderSpanNode>& spanNode, const SpanOptionBase& options);
     std::u16string DeleteBackwardOperation(int32_t length, bool isIME = true);
     void DeleteForward(int32_t length = 1) override;
     void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);
@@ -670,7 +681,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         lastCaretPos_.reset();
         CHECK_NULL_VOID(HasFocus());
-        CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
+        CHECK_NULL_VOID(!((customKeyboardBuilder_ || customKeyboardNode_) && isCustomKeyboardAttached_));
 
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
@@ -859,6 +870,7 @@ public:
     void ReportEditorEvent(const std::string& eventType);
     void DeleteToMaxLength(std::optional<int32_t> length);
     void DeleteContent(int32_t length);
+    void ClearTextForDisplayIfEmpty();
 
     void ResetIsMousePressed()
     {
@@ -917,6 +929,9 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+    void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
+    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
@@ -935,6 +950,7 @@ public:
         WindowSizeChangeReason type) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
+    void RequestCustomKeyboardBuilder();
     bool CloseCustomKeyboard();
     void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const
@@ -999,6 +1015,7 @@ public:
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
+    RefPtr<TextFieldManagerNG> GetTextFieldManager();
 
     RectF GetCaretRelativeRect();
     // Add for Scroll
@@ -1027,10 +1044,7 @@ public:
         return richTextRect_;
     }
 
-    float GetScrollOffset() const
-    {
-        return scrollOffset_;
-    }
+    float GetScrollOffset() const;
 
     RefPtr<ScrollBar> GetScrollControllerBar()
     {
@@ -1114,8 +1128,12 @@ public:
     Color GetSelectedBackgroundColor() const;
 
     void SetCustomKeyboardOption(bool supportAvoidance);
+    void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
     void StopEditing();
     void ResetKeyboardIfNeed();
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
+    bool NeedCloseKeyboard() override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
 
     void HandleOnEnter() override
     {
@@ -1309,6 +1327,28 @@ public:
         return isStopBackPress_;
     }
 
+    void SetIncludeFontPadding(bool isIncludeFontPadding)
+    {
+        CHECK_NULL_VOID(isIncludeFontPadding_ != isIncludeFontPadding);
+        isIncludeFontPadding_ = isIncludeFontPadding;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
+    }
+
+    void SetFallbackLineSpacing(bool isFallbackLineSpacing)
+    {
+        CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
+        isFallbackLineSpacing_ = isFallbackLineSpacing;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
@@ -1412,6 +1452,15 @@ public:
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
+    bool ProcessAutoFill(AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void ProcessAutoFillOnPaste();
+    void HandleOnPasswordVault();
+    bool IsShowAutoFill();
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1432,6 +1481,9 @@ private:
     friend class StringUndoManager;
     friend class RichEditorContentPattern;
     friend class StyleManager;
+    friend class RichEditorLayoutAlgorithm;
+    friend class RichEditorPaintMethod;
+    friend class RichEditorScrollController;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1439,11 +1491,12 @@ private:
     Color GetUrlPressColor();
     Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    RefPtr<RichEditorScrollController> scrollController_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
-    std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)> CreatePasteCallback();
+    std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)> CreatePasteCallback();
     void PasteStr(const std::string& text);
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
@@ -1451,6 +1504,7 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent(FocusReason focusReason = FocusReason::DEFAULT);
     void OnFocusNodeChange(FocusReason focusReason) override;
+    void OnFocusCustomKeyboardChange();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
@@ -1645,23 +1699,20 @@ private:
 
     // add for scroll.
     void UpdateChildrenOffset();
-    void MoveFirstHandle(float offset);
-    void MoveSecondHandle(float offset);
     void InitScrollablePattern();
-    bool IsReachedBoundary(float offset);
     void UpdateScrollBarOffset() override;
     void CheckScrollable();
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
-    void ScheduleAutoScroll(AutoScrollParam param);
     void OnAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
-    float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRectHorizontal(const OffsetF& caretOffset);
+    void MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight);
     void MoveCaretToContentRect(float offset, int32_t source);
     bool IsCaretInContentArea();
     bool IsTextArea() const override
@@ -1669,15 +1720,6 @@ private:
         return true;
     }
     void ProcessInnerPadding();
-    bool IsReachTop()
-    {
-        return NearEqual(richTextRect_.GetY(), contentRect_.GetY());
-    }
-
-    bool IsReachBottom()
-    {
-        return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
-    }
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
@@ -1864,17 +1906,11 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
-    float scrollOffset_ = 0.0f;
     bool isFirstCallOnReady_ = false;
     bool scrollable_ = true;
-    CancelableCallback<void()> autoScrollTask_;
-    OffsetF prevAutoScrollOffset_;
-    AutoScrollParam currentScrollParam_;
-    bool isAutoScrollRunning_ = false;
     // add for ai input analysis
     bool hasClicked_ = false;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
@@ -1919,6 +1955,7 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     bool isEnableAutoSpacing_ = false;
+    bool isCompressLeadingPunctuation_ = false;
     float maxLinesHeight_ = FLT_MAX;
     int32_t maxLines_ = INT32_MAX;
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
@@ -1933,8 +1970,11 @@ private:
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
+    bool isIncludeFontPadding_ = false;
+    bool isFallbackLineSpacing_ = false;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    RefPtr<UINode> customKeyboardNode_;
     LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
@@ -1947,6 +1987,8 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
+    bool isSingleLineMode_ = false;
+
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;
 #endif

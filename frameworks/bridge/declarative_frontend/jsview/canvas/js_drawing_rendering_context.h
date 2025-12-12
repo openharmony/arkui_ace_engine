@@ -43,28 +43,21 @@ public:
     void JsSetCanvas(const JSCallbackInfo& info);
     void JsSetSize(const JSCallbackInfo& info);
     void SetInvalidate(const JSCallbackInfo& info);
-    void SetRSCanvasCallback(RefPtr<AceType>& canvasPattern);
+    void SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSDrawingRenderingContext);
 
     void SetAntiAlias() override {}
     void SetDensity() override {}
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas) override
-    {
-        canvasPattern_ = canvas;
-        SetRSCanvasCallback(canvasPattern_);
-    }
+    void SetCanvasPattern(const RefPtr<AceType>& canvas) override;
 
     void SetInstanceId(int32_t id) override
     {
         instanceId_ = id;
     }
 
-    void SetUnit(CanvasUnit unit)
-    {
-        unit_ = unit;
-    }
+    void SetUnit(CanvasUnit unit);
 
     CanvasUnit GetUnit()
     {
@@ -77,14 +70,17 @@ public:
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
+    const JSRef<JSVal>& GetOrCreateContext2D(bool antialias);
+
 protected:
-    RefPtr<AceType> canvasPattern_;
+    WeakPtr<AceType> canvasPattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
     JSRef<JSVal> jsCanvasVal_;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    JSRef<JSVal> context2d_ {};
 };
 } // namespace OHOS::Ace::Framework
 

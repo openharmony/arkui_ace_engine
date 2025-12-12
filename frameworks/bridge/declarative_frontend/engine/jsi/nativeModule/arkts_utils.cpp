@@ -30,6 +30,7 @@
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
+#include "base/i18n/localization.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,6 +53,8 @@ enum class MenuItemType {
     PASTE,
     CUT,
     SELECT_ALL,
+    AUTO_FILL,
+    PASSWORD_VAULT,
     UNKNOWN,
     CAMERA_INPUT,
     AI_WRITER,
@@ -69,6 +72,8 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_PASTE", MenuItemType::PASTE },
         { "OH_DEFAULT_CUT", MenuItemType::CUT },
         { "OH_DEFAULT_SELECT_ALL", MenuItemType::SELECT_ALL },
+        { "OH_DEFAULT_AUTO_FILL", MenuItemType::AUTO_FILL },
+        { "OH_DEFAULT_PASSWORD_VAULT", MenuItemType::PASSWORD_VAULT },
         { "OH_DEFAULT_CAMERA_INPUT", MenuItemType::CAMERA_INPUT },
         { "OH_DEFAULT_AI_WRITE", MenuItemType::AI_WRITER },
         { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
@@ -84,6 +89,26 @@ MenuItemType StringToMenuItemType(std::string_view id)
 
     auto item = keyMenuItemMap.find(id);
     return item != keyMenuItemMap.end() ? item->second : MenuItemType::UNKNOWN;
+}
+
+void UpdateSubMenuItemsInfo(std::vector<NG::MenuOptionsParam>& subMenuOptionsParam)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    for (auto& subMenuItem : subMenuOptionsParam) {
+        auto opType = StringToMenuItemType(subMenuItem.id);
+        switch (opType) {
+            case MenuItemType::PASSWORD_VAULT:
+                subMenuItem.symbolId = theme->GetPasswordVaultSymbolId();
+                break;
+            default:
+                subMenuItem.labelInfo = subMenuItem.labelInfo.value_or("");
+                subMenuItem.symbolId = subMenuItem.symbolId.value_or(0);
+                break;
+        }
+    }
 }
 
 void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
@@ -109,6 +134,10 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
         case MenuItemType::SELECT_ALL:
             menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
             menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
+            break;
+        case MenuItemType::AUTO_FILL:
+            menuOptionsParam.symbolId = theme->GetAutoFillSymbolId();
+            UpdateSubMenuItemsInfo(menuOptionsParam.subMenuItems);
             break;
         case MenuItemType::CAMERA_INPUT:
             menuOptionsParam.symbolId = theme->GetCameraInputSymbolId();
@@ -1575,6 +1604,26 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
     return false;
 }
 
+std::string ArkTSUtils::GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type)
+{
+    auto localization = Localization::GetInstance();
+    if (!localization) {
+        return std::string();
+    }
+
+    if (type == "d" && item->IsNumber()) {
+        std::string numStr = std::to_string(item->Int32Value(vm));
+        return localization->LocalizeNumber(numStr, 0) ? numStr : std::string();
+    }
+
+    if (type == "f" && item->IsNumber()) {
+        std::string numStr = std::to_string(item->ToNumber(vm)->Value());
+        return localization->LocalizeNumber(numStr, -1) ? numStr : std::string();
+    }
+
+    return std::string();
+}
+
 std::string GetReplaceContentStr(
     const EcmaVM* vm, int32_t pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
 {
@@ -1585,7 +1634,8 @@ std::string GetReplaceContentStr(
     auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->Int32Value(vm));
+            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
+            return result.empty() ? std::to_string(item->Int32Value(vm)) : result;
         }
     } else if (type == "s") {
         if (item->IsString(vm)) {
@@ -1593,7 +1643,8 @@ std::string GetReplaceContentStr(
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber(vm)->Value());
+            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
+            return result.empty() ? std::to_string(item->ToNumber(vm)->Value()) : result;
         }
     }
     return std::string();

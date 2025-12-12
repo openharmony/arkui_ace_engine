@@ -35,6 +35,11 @@ public:
         handler_ = WeakPtr(handler);
     }
 
+    WeakPtr<RichEditorBaseControllerBase> GetTargetController() const
+    {
+        return handler_;
+    }
+
     int32_t GetCaretOffset() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
@@ -57,6 +62,13 @@ public:
             return std::make_unique<RectF>(controller->GetCaretRect());
         }
         return nullptr;
+    }
+
+    void DeleteBackward()
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->DeleteBackward();
+        }
     }
 
     void CloseSelectionMenu() override

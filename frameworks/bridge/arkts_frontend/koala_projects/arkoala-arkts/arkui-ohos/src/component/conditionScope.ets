@@ -35,6 +35,7 @@ class ConditionScopePeer extends PeerNode {
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
+        this._branchesNode.parentPtr = this.getPeerPtr();
     }
 
     get branchesNode(): ConditionBranchesNode {
@@ -84,6 +85,7 @@ class ConditionScopePeer extends PeerNode {
 class ConditionBranchesNode extends IncrementalNode {
     private _changed = false;
     private _branches = new Array<ConditionBranchNode>();
+    private _parentPtr?: KPointer;
 
     public constructor() {
         super();
@@ -92,8 +94,15 @@ class ConditionBranchesNode extends IncrementalNode {
         this.onChildRemoved = this.onChange;
     }
 
+    set parentPtr(value: KPointer) {
+        this._parentPtr = value
+    }
+
     public onChange(): void {
         this._changed = true
+        if (this._parentPtr) {
+            ArkUIAniModule._ConditionScope_Mark_Dirty(this._parentPtr!)
+        }
     }
 
     public get branches(): Array<ConditionBranchNode> {

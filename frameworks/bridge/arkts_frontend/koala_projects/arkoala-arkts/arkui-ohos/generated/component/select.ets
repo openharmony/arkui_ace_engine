@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -23,6 +24,7 @@ import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_
 import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { Resource } from "global.resource"
 import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -198,7 +200,23 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
     private getValue_serialize(): ResourceStr {
         const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ResourceStr = ""
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : string | Resource | undefined
+            if (buffer_UnionSelector == (0).toChar()) {
+                buffer_ = (retvalDeserializer.readString() as string)
+            } else if (buffer_UnionSelector == (1).toChar()) {
+                buffer_ = Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as string | Resource)
+        }
+        const returnResult : ResourceStr = buffer
+        return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -305,6 +323,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSelectOptionsAttribute(options: Array<SelectOption>): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((options.length).toInt())
         for (let optionsCounterI = 0; optionsCounterI < options.length; optionsCounterI++) {
@@ -395,10 +414,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -423,10 +442,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -463,10 +482,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -491,10 +510,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -531,10 +550,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -571,10 +590,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -663,10 +682,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -790,6 +809,30 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShowInSubWindowAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setShowInSubWindow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setShowDefaultSelectedIconAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setShowDefaultSelectedIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -799,10 +842,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -946,6 +989,12 @@ export interface SelectAttribute extends CommonMethod {
     menuOutline(value: MenuOutlineOptions | undefined): this {
         throw new Error("Unimplemented method menuOutline")
     }
+    showInSubWindow(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showInSubWindow")
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showDefaultSelectedIcon")
+    }
     backgroundColor(value: ResourceColor | undefined): this
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
@@ -982,6 +1031,8 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     dividerStyle_value?: DividerStyleOptions | undefined
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
+    showInSubWindow_value?: boolean | undefined
+    showDefaultSelectedIcon_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
     backgroundColor_value?: ResourceColor | undefined
     setSelectOptions(options: Array<SelectOption>): this {
@@ -1066,6 +1117,12 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         return this
     }
     menuOutline(value: MenuOutlineOptions | undefined): this {
+        return this
+    }
+    showInSubWindow(value: boolean | undefined): this {
+        return this
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
         return this
     }
     backgroundColor(value: ResourceColor | undefined): this {
@@ -1307,6 +1364,22 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
+    public showInSubWindow(value: boolean | undefined): this {
+        if (this.checkPriority("showInSubWindow")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setShowInSubWindowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public showDefaultSelectedIcon(value: boolean | undefined): this {
+        if (this.checkPriority("showDefaultSelectedIcon")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public backgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1325,7 +1398,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSelectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSelectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -1483,10 +1558,10 @@ export class MenuOutlineOptions_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForColorTmpValueForIdx0ForIdx0  = valueHolderForColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueHolderForColorTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForColorTmpValueForIdx0 instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForColorTmpValueForIdx0ForIdx1  = valueHolderForColorTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx0ForIdx1)
+                    const valueHolderForColorTmpValueForIdx0ForIdx1  = valueHolderForColorTmpValueForIdx0 as int32
+                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForColorTmpValueForIdx0ForIdx2  = valueHolderForColorTmpValueForIdx0 as string
@@ -1540,11 +1615,11 @@ export class MenuOutlineOptions_serializer {
             let colorTmpBuf_ : ResourceColor | EdgeColors | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
                 if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
                     colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    colorTmpBuf_BufU = valueDeserializer.readInt32()
                 } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
                     colorTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
@@ -1552,7 +1627,7 @@ export class MenuOutlineOptions_serializer {
                 } else {
                     throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
                 colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
             } else {

@@ -199,12 +199,16 @@ void ResetSpanFontSize(ArkUINodeHandle node)
 
 void SetSpanFontFamily(ArkUINodeHandle node, const char** fontFamilies, uint32_t length, void* resObj)
 {
-    CHECK_NULL_VOID(fontFamilies);
-    if (length <= 0) {
-        return;
-    }
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
+    CHECK_NULL_VOID(fontFamilies);
+    if (length <= 0) {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UnregisterResource("fontFamily");
+        return;
+    }
     std::vector<std::string> families;
     for (uint32_t i = 0; i < length; i++) {
         const char* family = *(fontFamilies + i);
@@ -286,6 +290,8 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
         }
         if (resObj) {
             spanNode->RegisterResource<Color>("fontColor", resObj, result);
+        } else {
+            spanNode->UnregisterResource("fontColor");
         }
     }
     SpanModelNG::SetTextColor(uiNode, result);

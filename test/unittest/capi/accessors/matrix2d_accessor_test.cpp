@@ -130,8 +130,8 @@ HWTEST_F(Matrix2DAccessorTest, translateTest, TestSize.Level1)
         peer_->SetTranslateY(param[5]);
         auto expectedX = (peer_->GetTranslateX() + actual) * peer_->GetDensity();
         auto expectedY = (peer_->GetTranslateY() + TRANSFORM_ZERO_VALUE) * peer_->GetDensity();
-        auto tx = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
-        auto ty = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_ZERO_VALUE));
+        auto tx = Converter::ArkValue<Opt_Float64>(static_cast<float>(actual));
+        auto ty = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_ZERO_VALUE));
         accessor_->translate(peer_, &tx, &ty);
         EXPECT_NEAR(peer_->GetTranslateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetTranslateY(), expectedY, FLT_PRECISION);
@@ -142,8 +142,8 @@ HWTEST_F(Matrix2DAccessorTest, translateTest, TestSize.Level1)
         peer_->SetTranslateY(param[5]);
         auto expectedX = (peer_->GetTranslateX() + TRANSFORM_ZERO_VALUE) * peer_->GetDensity();
         auto expectedY = (peer_->GetTranslateY() + actual) * peer_->GetDensity();
-        auto tx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_ZERO_VALUE));
-        auto ty = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
+        auto tx = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_ZERO_VALUE));
+        auto ty = Converter::ArkValue<Opt_Float64>(static_cast<float>(actual));
         accessor_->translate(peer_, &tx, &ty);
         EXPECT_NEAR(peer_->GetTranslateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetTranslateY(), expectedY, FLT_PRECISION);
@@ -164,8 +164,8 @@ HWTEST_F(Matrix2DAccessorTest, scaleTest, TestSize.Level1)
         peer_->SetScaleY(param[5]);
         auto expectedX = (peer_->GetScaleX() * actual);
         auto expectedY = (peer_->GetScaleY() * TRANSFORM_UNITY_VALUE);
-        auto sx = Converter::ArkValue<Opt_Number>(actual);
-        auto sy = Converter::ArkValue<Opt_Number>(TRANSFORM_UNITY_VALUE);
+        auto sx = Converter::ArkValue<Opt_Float64>(actual);
+        auto sy = Converter::ArkValue<Opt_Float64>(TRANSFORM_UNITY_VALUE);
         accessor_->scale(peer_, &sx, &sy);
         EXPECT_NEAR(peer_->GetScaleX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetScaleY(), expectedY, FLT_PRECISION);
@@ -175,8 +175,8 @@ HWTEST_F(Matrix2DAccessorTest, scaleTest, TestSize.Level1)
         peer_->SetScaleY(param[5]);
         auto expectedX = (peer_->GetScaleX() * TRANSFORM_UNITY_VALUE);
         auto expectedY = (peer_->GetScaleY() * actual);
-        auto sx = Converter::ArkValue<Opt_Number>(TRANSFORM_UNITY_VALUE);
-        auto sy = Converter::ArkValue<Opt_Number>(actual);
+        auto sx = Converter::ArkValue<Opt_Float64>(TRANSFORM_UNITY_VALUE);
+        auto sy = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->scale(peer_, &sx, &sy);
         EXPECT_NEAR(peer_->GetScaleX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetScaleY(), expectedY, FLT_PRECISION);
@@ -209,7 +209,7 @@ HWTEST_F(Matrix2DAccessorTest, setScaleXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setScaleX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto sx = Converter::ArkValue<Opt_Number>(actual);
+        auto sx = Converter::ArkValue<Opt_Float64>(actual);
         auto expected = actual;
         accessor_->setScaleX(peer_, &sx);
         EXPECT_NEAR(peer_->GetScaleX(), expected, FLT_PRECISION);
@@ -315,10 +315,10 @@ HWTEST_F(Matrix2DAccessorTest,  rotateTest, TestSize.Level1)
         peer_->SetRotateY(param[5]);
         auto expectedX = (peer_->GetRotateX() * actual);
         auto expectedY = (peer_->GetRotateY() * actual);
-        auto degree = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
-        auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        accessor_->rotate(peer_, &degree, &rx, &ry);
+        auto degree = Converter::ArkValue<Ark_Float64>(static_cast<float>(actual));
+        auto rx = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        auto ry = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        accessor_->rotate(peer_, degree, &rx, &ry);
         EXPECT_NEAR(peer_->GetRotateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetRotateY(), expectedY, FLT_PRECISION);
     }
@@ -327,10 +327,10 @@ HWTEST_F(Matrix2DAccessorTest,  rotateTest, TestSize.Level1)
         peer_->SetRotateY(param[5]);
         auto expectedX = (peer_->GetRotateX() * actual);
         auto expectedY = (peer_->GetRotateY());
-        auto degree = Converter::ArkValue<Ark_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
-        auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        accessor_->rotate(peer_, &degree, &rx, &ry);
+        auto degree = Converter::ArkValue<Ark_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        auto rx = Converter::ArkValue<Opt_Float64>(static_cast<float>(actual));
+        auto ry = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        accessor_->rotate(peer_, degree, &rx, &ry);
         EXPECT_NEAR(peer_->GetRotateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetRotateY(), expectedY, FLT_PRECISION);
     }
@@ -339,10 +339,10 @@ HWTEST_F(Matrix2DAccessorTest,  rotateTest, TestSize.Level1)
         peer_->SetRotateY(param[5]);
         auto expectedX = (peer_->GetRotateX());
         auto expectedY = (peer_->GetRotateY() * actual);
-        auto degree = Converter::ArkValue<Ark_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
-        accessor_->rotate(peer_, &degree, &rx, &ry);
+        auto degree = Converter::ArkValue<Ark_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        auto rx = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        auto ry = Converter::ArkValue<Opt_Float64>(static_cast<float>(actual));
+        accessor_->rotate(peer_, degree, &rx, &ry);
         EXPECT_NEAR(peer_->GetRotateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetRotateY(), expectedY, FLT_PRECISION);
     }
@@ -361,17 +361,17 @@ HWTEST_F(Matrix2DAccessorTest,  rotateInvalidValuesTest, TestSize.Level1)
         peer_->SetRotateY(param[5]);
         auto expectedX = TRANSFORM_ZERO_VALUE;
         auto expectedY = (peer_->GetRotateY());
-        auto degree = Converter::ArkValue<Ark_Number>(TRANSFORM_UNITY_VALUE);
-        auto rx = Converter::ArkValue<Opt_Number>();
-        auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        accessor_->rotate(peer_, &degree, &rx, &ry);
+        auto degree = Converter::ArkValue<Ark_Float64>(TRANSFORM_UNITY_VALUE);
+        auto rx = Converter::ArkValue<Opt_Float64>();
+        auto ry = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        accessor_->rotate(peer_, degree, &rx, &ry);
         EXPECT_NEAR(peer_->GetRotateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetRotateY(), expectedY, FLT_PRECISION);
         expectedX = (peer_->GetRotateX());
         expectedY = TRANSFORM_ZERO_VALUE;
-        rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
-        ry = Converter::ArkValue<Opt_Number>();
-        accessor_->rotate(peer_, &degree, &rx, &ry);
+        rx = Converter::ArkValue<Opt_Float64>(static_cast<float>(TRANSFORM_UNITY_VALUE));
+        ry = Converter::ArkValue<Opt_Float64>();
+        accessor_->rotate(peer_, degree, &rx, &ry);
         EXPECT_NEAR(peer_->GetRotateX(), expectedX, FLT_PRECISION);
         EXPECT_NEAR(peer_->GetRotateY(), expectedY, FLT_PRECISION);
 }
@@ -385,7 +385,7 @@ HWTEST_F(Matrix2DAccessorTest, setRotateYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setRotateY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto sy = Converter::ArkValue<Opt_Number>(actual);
+        auto sy = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->setRotateY(peer_, &sy);
         EXPECT_NEAR(peer_->GetRotateY(), actual, FLT_PRECISION);
     }
@@ -400,7 +400,7 @@ HWTEST_F(Matrix2DAccessorTest, setRotateXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setRotateX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto sx = Converter::ArkValue<Opt_Number>(actual);
+        auto sx = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->setRotateX(peer_, &sx);
         EXPECT_NEAR(peer_->GetRotateX(), actual, FLT_PRECISION);
     }
@@ -415,7 +415,7 @@ HWTEST_F(Matrix2DAccessorTest, setScaleYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setScaleY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto sy = Converter::ArkValue<Opt_Number>(actual);
+        auto sy = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->setScaleY(peer_, &sy);
         EXPECT_NEAR(peer_->GetScaleY(), actual, FLT_PRECISION);
     }
@@ -430,7 +430,7 @@ HWTEST_F(Matrix2DAccessorTest, setTranslateXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTranslateX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto tx = Converter::ArkValue<Opt_Number>(actual);
+        auto tx = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->setTranslateX(peer_, &tx);
         EXPECT_NEAR(peer_->GetTranslateX(), actual, FLT_PRECISION);
     }
@@ -445,7 +445,7 @@ HWTEST_F(Matrix2DAccessorTest, setTranslateYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTranslateY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto ty = Converter::ArkValue<Opt_Number>(actual);
+        auto ty = Converter::ArkValue<Opt_Float64>(actual);
         accessor_->setTranslateY(peer_, &ty);
         EXPECT_NEAR(peer_->GetTranslateY(), actual, FLT_PRECISION);
     }

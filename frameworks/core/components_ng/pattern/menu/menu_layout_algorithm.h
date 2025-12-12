@@ -56,6 +56,8 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    bool showInSubWindow = false;
+    bool canExpandCurrentWindow = false;
     Rect menuWindowRect;
     Rect wrapperRect;
     float previewBeginScale = 0.0f;
@@ -96,10 +98,14 @@ public:
         return clipPath_;
     }
 
+    // true on two conditions
+    // 1. menu showed in subwindow for PC can show expand main window
+    // 2. menu showed in subwindow from UIExtension can show expand UIExtension window
     bool canExpandCurrentWindow_ = false;
-    void InitCanExpandCurrentWindow(bool isShowInSubWindow, LayoutWrapper* layoutWrapper);
+    void InitCanExpandCurrentWindow(bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty);
     bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
+    bool IsExpandDisplay();
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -270,7 +276,7 @@ private:
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect);
     void CheckPreviewConstraintForConstant(const RefPtr<GeometryNode>& previewGeometryNode);
     void CheckPreviewSize(const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern);
-    void ModifyTargetOffset();
+    void ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern);
     OffsetF UpdateMenuPosition(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode,
         RefPtr<MenuPattern> menuPattern, const RefPtr<MenuLayoutProperty>& menuProp);
     bool IsSelectMenuShowInSubWindow(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode);
@@ -301,6 +307,10 @@ private:
     float CalcSubMenuMaxHeightNoPreview(const RefPtr<FrameNode>& parentItem, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
     RefPtr<SelectTheme> GetCurrentSelectTheme(const RefPtr<FrameNode>& frameNode);
+    void InitializeMenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode);
+    void MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
+        float keyboardTopPosition);
+    std::optional<float> GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -354,14 +364,15 @@ private:
     bool flag_ = false;
     // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
+    std::optional<float> maxSpaceHeight_ = std::nullopt;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
-    bool isTargetNodeInSubwindow_ = false;
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
     RectF displayWindowRect_;
     RectF UIExtensionHostWindowRect_;
+    bool isContainerModal_ = false;
 
     OffsetF childOffset_;
     SizeF childMarginFrameSize_;

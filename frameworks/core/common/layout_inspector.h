@@ -74,6 +74,10 @@ public:
     static bool GetEnableNodeTrace();
     static void SetEnableNodeTrace(bool enable);
 
+    //arkui interaction
+    static bool GetInteractionEventStatus();
+    static void TriggerArkUIInteractionEventStatus(const std::string& message);
+
 private:
     static void SendEmpty3DSnapJson();
     static std::vector<PixelMapPair> Filter3DSnapshot(const std::vector<PixelMapPair>& snapinfos);
@@ -92,7 +96,9 @@ private:
     static void* handlerConnectServerSo;
     static SetArkUICallback setArkUICallback;
     static bool enableNodeTrace_;
+    static bool enableInteractionEventReport_;
     static std::shared_mutex enableTraceMutex_;
+    static std::shared_mutex interactionEventStatusMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H

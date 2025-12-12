@@ -431,7 +431,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -887,7 +887,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1521,7 +1521,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

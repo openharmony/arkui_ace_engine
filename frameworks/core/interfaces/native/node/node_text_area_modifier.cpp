@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -52,7 +53,6 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -208,6 +208,8 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
         }
         if (resObj) {
             pattern->RegisterResource<Color>("placeholderColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("placeholderColor");
         }
     }
     TextFieldModelNG::SetPlaceholderColor(frameNode, result);
@@ -238,6 +240,32 @@ void ResetTextAreaTextAlign(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextAlign(frameNode, TextAlign::START);
+}
+
+void SetTextAreaDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+        TextFieldModelNG::ResetTextDirection(frameNode);
+        return;
+    }
+    TextFieldModelNG::SetTextDirection(frameNode, TEXT_DIRECTIONS[textDirection]);
+}
+
+int32_t GetTextAreaDirection(ArkUINodeHandle node)
+{
+    auto defaultTextDirection = static_cast<int32_t>(OHOS::Ace::TextDirection::INHERIT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextDirection);
+    return static_cast<int32_t>(TextFieldModelNG::GetTextDirection(frameNode));
+}
+
+void ResetTextAreaDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetTextDirection(frameNode);
 }
 
 void SetTextAreaPlaceholderFont(ArkUINodeHandle node, const struct ArkUIResourceLength *size, ArkUI_CharPtr weight,
@@ -460,6 +488,8 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
         CHECK_NULL_VOID(pattern);
         if (resObj) {
             pattern->RegisterResource<Color>("caretColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("caretColor");
         }
     }
     TextFieldModelNG::SetCaretColor(frameNode, result);
@@ -507,6 +537,8 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
         }
         if (resObj) {
             pattern->RegisterResource<Color>("fontColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("fontColor");
         }
     }
     TextFieldModelNG::SetTextColor(frameNode, result);
@@ -729,13 +761,15 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
-    }
-    TextFieldModelNG::SetBackgroundColor(frameNode, result);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterResource<Color>("backgroundColor", resObj, result);
+        if (resObj) {
+            pattern->RegisterResource<Color>("backgroundColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
     }
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
 }
 
 void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color,
@@ -810,12 +844,12 @@ void SetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* 
     TextFieldModelNG::SetShowCounter(frameNode, showCountOptions->open);
     TextFieldModelNG::SetCounterType(frameNode, showCountOptions->thresholdPercentage);
     TextFieldModelNG::SetShowCounterBorder(frameNode, showCountOptions->highlightBorder);
-    if (showCountOptions->counterTextColor != -1) {
+    if (showCountOptions->counterTextColorIsSet) {
         TextFieldModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
     } else {
         TextFieldModelNG::ResetCounterTextColor(frameNode);
     }
-    if (showCountOptions->counterTextOverflowColor != -1) {
+    if (showCountOptions->counterTextOverflowColorIsSet) {
         TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
     } else {
         TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
@@ -1791,35 +1825,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     TextFieldModelNG::ResetSelectDetectEnable(frameNode);
 }
 
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    TextFieldModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = TextFieldModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::ResetSelectDetectConfig(frameNode);
-}
-
 void SetAllOptionalBorderStyle(
     NG::BorderStyleProperty& borderStyles, const uint32_t* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
 {
@@ -2426,17 +2431,17 @@ void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODES.size()) {
         ellipsisMode = ELLIPSIS_MODE_TAIL;
     }
-    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[ellipsisMode]);
 }
 
 void ResetEllipsisMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ELLIPSIS_MODE_TAIL]);
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[ELLIPSIS_MODE_TAIL]);
 }
 
 void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -2547,6 +2552,13 @@ void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
     TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
 }
 
+void ScrollToVisible(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ScrollToVisible(frameNode, start, end);
+}
+
 void SetTextAreaCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2595,6 +2607,118 @@ void ResetTextAreaOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void TextAreaDeleteBackward(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::DeleteBackward(frameNode);
+}
+
+void SetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+ArkUI_Bool GetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextFieldModelNG::GetIncludeFontPadding(frameNode));
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(fallbackLineSpacing));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
+ArkUI_Bool GetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextFieldModelNG::GetFallbackLineSpacing(frameNode));
+}
+
+void SetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("selectedDragPreviewStyleColor");
+        }
+    }
+}
+
+void ResetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2605,9 +2729,6 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,
@@ -2792,12 +2913,29 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaScrollBarColor = SetTextAreaScrollBarColor,
         .getTextAreaScrollBarColor = GetTextAreaScrollBarColor,
         .resetTextAreaScrollBarColor = ResetTextAreaScrollBarColor,
+        .scrollToVisible = ScrollToVisible,
         .setTextAreaCustomKeyboard = SetTextAreaCustomKeyboard,
         .getTextAreaCustomKeyboard = GetTextAreaCustomKeyboard,
         .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
         .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
-        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME
+        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
+        .textAreaDeleteBackward = TextAreaDeleteBackward,
+        .setTextAreaCompressLeadingPunctuation = SetTextAreaCompressLeadingPunctuation,
+        .getTextAreaCompressLeadingPunctuation = GetTextAreaCompressLeadingPunctuation,
+        .resetTextAreaCompressLeadingPunctuation = ResetTextAreaCompressLeadingPunctuation,
+        .setTextAreaDirection = SetTextAreaDirection,
+        .getTextAreaDirection = GetTextAreaDirection,
+        .resetTextAreaDirection = ResetTextAreaDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .getIncludeFontPadding = GetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
+        .getFallbackLineSpacing = GetFallbackLineSpacing,
+        .setTextAreaSelectedDragPreviewStyle = SetTextAreaSelectedDragPreviewStyle,
+        .resetTextAreaSelectedDragPreviewStyle = ResetTextAreaSelectedDragPreviewStyle,
+        .getTextAreaSelectedDragPreviewStyle = GetTextAreaSelectedDragPreviewStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2810,9 +2948,6 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,

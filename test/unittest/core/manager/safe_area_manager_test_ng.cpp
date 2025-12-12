@@ -33,9 +33,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
-
 constexpr double DISPLAY_HEIGHT = 1280;
-
 constexpr double SYSTEM_LEFT_START = 0.0f;
 constexpr double SYSTEM_LEFT_END = 30.0f;
 constexpr double SYSTEM_RIGHT_START = DISPLAY_WIDTH - 30.0f;
@@ -79,13 +77,9 @@ class SafeAreaManagerTest : public testing::Test {
 public:
 
     static void SetUpTestCase();
-
     static void TearDownTestCase();
-
     void SetUp() override;
-
     void TearDown() override;
-
     struct Rect {
         float left;
         float right;
@@ -94,7 +88,6 @@ public:
     };
 
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
-
     RefPtr<SafeAreaManager> safeAreaManager_;
     
     NG::SafeAreaInsets cutoutArea =
@@ -1303,25 +1296,27 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     // create nodes
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode2 = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode3 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     frameNode1->MountToParent(frameNode0);
     frameNode2->MountToParent(frameNode1);
     frameNode3->MountToParent(frameNode2);
+
     // make sure nodes mount correctly
     EXPECT_EQ(frameNode1->GetParent()->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_EQ(frameNode2->GetParent()->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(frameNode3->GetParent()->GetTag(), V2::FLEX_ETS_TAG);
+
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP };
     auto columnLayoutProperty = frameNode1->GetLayoutProperty();
     EXPECT_NE(columnLayoutProperty, nullptr);
+
     columnLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto flexLayoutProperty = frameNode2->GetLayoutProperty();
     EXPECT_NE(flexLayoutProperty, nullptr);
+
     flexLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto rowLayoutProperty = frameNode3->GetLayoutProperty();
     EXPECT_NE(rowLayoutProperty, nullptr);
@@ -1365,17 +1360,14 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 {
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<NavigationPattern>(), false);
-
     auto frameNode2 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<NavDestinationPattern>(), true);
-
     auto frameNode3 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_CONTENT_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true), false);
-
     auto frameNode4 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
@@ -1408,6 +1400,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         KeyBoardAvoidMode::RESIZE_WITH_CARET,
         KeyBoardAvoidMode::NONE
     };
+
     std::vector<std::pair<bool, bool>> expectedRes = {
         { true, false },
         { false, true },
@@ -1415,6 +1408,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         { false, true },
         { false, false }
     };
+
     for (int i= 0; i < modeArr.size(); ++i) {
         safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);

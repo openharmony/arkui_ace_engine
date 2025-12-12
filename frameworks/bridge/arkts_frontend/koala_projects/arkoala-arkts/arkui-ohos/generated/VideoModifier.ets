@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, hookVideoOnError, hookVideoAnalyzerConfig } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkVideoPeer, FullscreenInfo, PreparedInfo, PlaybackInfo, VideoAttribute } from "./component/video"
@@ -25,10 +26,12 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ImageFit } from "./component/enums"
 import { VoidCallback } from "./component/units"
+import { ErrorCallback } from "@ohos.base"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
 import { ColorMetrics } from "arkui.Graphics"
 export class VideoModifier extends CommonMethodModifier implements VideoAttribute,AttributeModifier<VideoAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -65,7 +68,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUpdate_0_0value?: ((value0: PlaybackInfo) => void) | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onError_0_0value?: (() => void) | undefined
+    _onError_0_0value?: VoidCallback | ErrorCallback | undefined
     _onStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onStop_0_0value?: VoidCallback | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -77,6 +80,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkVideoPeer;
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -317,7 +321,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             switch (this._onError_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as (() => void) | undefined));
+                    hookVideoOnError(peer, (this._onError_0_0value as VoidCallback | ErrorCallback | undefined));
                     this._onError_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -327,7 +331,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
                 default: {
                     this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as (() => void) | undefined));
+                    hookVideoOnError(peer, (undefined as VoidCallback | ErrorCallback | undefined));
                 }
             }
         }
@@ -371,7 +375,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             switch (this._analyzerConfig_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAnalyzerConfigAttribute((this._analyzerConfig_0_0value as ImageAnalyzerConfig | undefined));
+                    hookVideoAnalyzerConfig(peer, (this._analyzerConfig_0_0value as ImageAnalyzerConfig | undefined));
                     this._analyzerConfig_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -381,7 +385,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
                 default: {
                     this._analyzerConfig_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAnalyzerConfigAttribute((undefined as ImageAnalyzerConfig | undefined));
+                    hookVideoAnalyzerConfig(peer, (undefined as ImageAnalyzerConfig | undefined));
                 }
             }
         }
@@ -424,6 +428,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     }
     mergeModifier(modifier: VideoModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._muted_0_flag) {
@@ -602,7 +607,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                     break;
                 }
                 default: {
-                    this.onError((undefined as (() => void) | undefined));
+                    this.onError((undefined as VoidCallback | ErrorCallback | undefined));
                 }
             }
         }
@@ -815,7 +820,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         }
         return this
     }
-    onError(value: (() => void) | undefined): this {
+    onError(value: VoidCallback | ErrorCallback | undefined): this {
         if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE

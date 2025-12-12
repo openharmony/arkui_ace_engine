@@ -164,7 +164,10 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput(true);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto systemWindowId = pipeline->GetFocusWindowId();
+            inputMethod->RequestHideInput(systemWindowId, true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
         }
@@ -186,7 +189,10 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput(true);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto systemWindowId = pipeline->GetFocusWindowId();
+            inputMethod->RequestHideInput(systemWindowId, true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }

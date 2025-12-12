@@ -21,6 +21,7 @@
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"

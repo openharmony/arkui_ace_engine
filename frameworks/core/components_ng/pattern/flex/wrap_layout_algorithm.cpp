@@ -120,6 +120,10 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pipeline = host->GetContext();
     isPixelRoundAfterMeasure_ =
         pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
+    bool isMainAxisAdaptive = false;
+    bool needFillMainAxis = false;
+    auto constraint = flexProp->GetLayoutConstraint();
+    UpdateFixLengthLimit(flexProp, constraint, isMainAxisAdaptive);
     for (auto& item : children) {
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
@@ -163,6 +167,9 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             currentMainAxisItemsList.emplace_back(item);
             currentItemCount = 1;
+            if (isMainAxisAdaptive) {
+                needFillMainAxis = true;
+            }
         }
     }
     if (currentItemCount != 0) {
@@ -181,6 +188,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         frameSize_ = SizeF(hasIdealWidth_ ? crossLengthLimit_ : totalCrossLength_, mainLengthLimit_);
     }
+    UpdateFrameSizeWhenAdaptive(flexProp, needFillMainAxis);
     auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && calcLayoutConstraint) {
         OptionalSizeF finalSize(frameSize_.Width(), frameSize_.Height());
@@ -192,6 +200,46 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding_, frameSize_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     frameOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+}
+
+void WrapLayoutAlgorithm::UpdateFrameSizeWhenAdaptive(const RefPtr<LayoutProperty>& layoutProp, bool needFillMainAxis)
+{
+    CHECK_NULL_VOID(layoutProp);
+    auto layoutPolicy = layoutProp->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy);
+    bool isAdaptive = layoutPolicy->IsAdaptive();
+    if (!isAdaptive) {
+        return;
+    }
+    if (layoutPolicy->IsWidthFix()) {
+        if (isHorizontal_) {
+            mainLengthLimit_ = totalMainLength_;
+        } else {
+            crossLengthLimit_ = totalCrossLength_;
+        }
+    }
+    if (layoutPolicy->IsHeightFix()) {
+        if (isHorizontal_) {
+            crossLengthLimit_ = totalCrossLength_;
+        } else {
+            mainLengthLimit_ = totalMainLength_;
+        }
+    }
+    if (layoutPolicy->IsWidthAdaptive()) {
+        frameSize_.SetWidth(isHorizontal_ ? std::min(totalMainLength_, mainLengthLimit_)
+                                          : std::min(totalCrossLength_, crossLengthLimit_));
+    }
+    if (layoutPolicy->IsHeightAdaptive()) {
+        frameSize_.SetHeight(isHorizontal_ ? std::min(totalCrossLength_, crossLengthLimit_)
+                                           : std::min(totalMainLength_, mainLengthLimit_));
+    }
+    if (needFillMainAxis) {
+        if (isHorizontal_) {
+            frameSize_.SetWidth(std::max(mainLengthLimit_,  frameSize_.Width()));
+        } else {
+            frameSize_.SetHeight(std::max(mainLengthLimit_,  frameSize_.Height()));
+        }
+    }
 }
 
 float WrapLayoutAlgorithm::GetMainAxisLengthOfSize(const SizeF& size) const
@@ -249,8 +297,16 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutWholeColumnWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
         TraverseColumnContent(startPosition, spaceBetweenContentsOnCrossAxis);
     }
+    bool isContentOverflowWarning = ShouldDoOverflowWork();
+    OverflowCollector collector(false);
     for (const auto& child : children) {
         child->Layout();
+        if (isContentOverflowWarning) {
+            collector.AccumulateFromWrapper(child);
+        }
+    }
+    if (IsContentOverflow(layoutWrapper, collector)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in Flex container");
     }
     HandleContentOverflow(layoutWrapper);
     contentList_.clear();
@@ -296,6 +352,38 @@ void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& 
         } else {
             mainLengthLimit_ = constraint->maxSize.Height();
             crossLengthLimit_ = constraint->maxSize.Width();
+        }
+    }
+}
+
+void WrapLayoutAlgorithm::UpdateFixLengthLimit(const RefPtr<LayoutProperty>& layoutProp,
+    const std::optional<LayoutConstraintF>& layoutConstraint, bool& isMainAxisAdaptive)
+{
+    CHECK_NULL_VOID(layoutProp);
+    auto layoutPolicy = layoutProp->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy);
+    if (!layoutPolicy->IsFix()) {
+        return ;
+    }
+    isMainAxisAdaptive = isHorizontal_ ? layoutPolicy->IsWidthAdaptive() : layoutPolicy->IsHeightAdaptive();
+    OptionalSizeF calcMaxSize;
+    const auto& calcLayoutConstraint = layoutProp->GetCalcLayoutConstraint();
+    if (calcLayoutConstraint) {
+        UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(
+            calcMaxSize, calcLayoutConstraint->maxSize, layoutConstraint->percentReference, true);
+    }
+    if (layoutPolicy->IsWidthFix()) {
+        if (isHorizontal_) {
+            mainLengthLimit_ = calcMaxSize.Width().value_or(Infinity<float>());
+        } else {
+            crossLengthLimit_ = calcMaxSize.Width().value_or(Infinity<float>());
+        }
+    }
+    if (layoutPolicy->IsHeightFix()) {
+        if (isHorizontal_) {
+            crossLengthLimit_ = calcMaxSize.Height().value_or(Infinity<float>());
+        } else {
+            mainLengthLimit_ = calcMaxSize.Height().value_or(Infinity<float>());
         }
     }
 }

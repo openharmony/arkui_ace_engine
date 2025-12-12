@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class StepperModifier extends CommonMethodModifier implements StepperAttribute,AttributeModifier<StepperAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,6 +47,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
     _onPrevious_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPrevious_0_0value?: ((prevIndex: int32,index: int32) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkStepperPeer;
         if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -140,6 +143,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
     }
     mergeModifier(modifier: StepperModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onFinish_0_flag) {

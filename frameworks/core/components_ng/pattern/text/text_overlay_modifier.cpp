@@ -58,7 +58,7 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
     auto paintOffset = paintOffset_->Get();
     for (const auto& selectedRect : selectedRects_) {
         auto rect = selectedRect;
-        if (contentRect_.has_value()) {
+        if (contentRect_.has_value() && !isSingleLineMode_) {
             if (rect.Right() > contentRect_.value().Right()) {
                 rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0f));
             }
@@ -139,6 +139,11 @@ bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<RectF>& selec
 void TextOverlayModifier::SetShowSelect(bool value)
 {
     showSelect_->Set(value);
+}
+
+void TextOverlayModifier::SetSingleLine(bool value)
+{
+    isSingleLineMode_ = value;
 }
 
 std::vector<RectF> TextOverlayModifier::GetSelectedRects() const

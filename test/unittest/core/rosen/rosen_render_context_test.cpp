@@ -215,171 +215,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddRsNodeForCapture001
- * @tc.desc: test AddRsNodeForCapture with different node delete flag.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, AddRsNodeForCapture001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_TRUE(rosenRenderContext->rsNode_ != nullptr);
-
-    rosenRenderContext->rsNode_->isDrawNode_ = false;
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
-    rosenRenderContext->AddRsNodeForCapture();
-    EXPECT_EQ(rosenRenderContext->rsNode_->isDrawNode_, false);
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
-    rosenRenderContext->AddRsNodeForCapture();
-    EXPECT_EQ(rosenRenderContext->rsNode_->isDrawNode_, true);
-}
-
-/**
- * @tc.name: AddRsNodeForCapture002
- * @tc.desc: tst AddRsNodeForCapture with null host.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, AddRsNodeForCapture002, TestSize.Level1)
-{
-    auto rosenRenderContext = InitRosenRenderContext(nullptr);
-    ASSERT_TRUE(rosenRenderContext->rsNode_ != nullptr);
-
-    rosenRenderContext->AddRsNodeForCapture();
-    EXPECT_EQ(rosenRenderContext->rsNode_->isDrawNode_, false);
-}
-
-/**
- * @tc.name: AddNodeToRsTree001
- * @tc.desc: test AddNodeToRsTree with different node delete flag.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, AddNodeToRsTree001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_TRUE(rosenRenderContext->rsNode_ != nullptr);
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
-    EXPECT_EQ(rosenRenderContext->AddNodeToRsTree(), false);
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
-    EXPECT_EQ(rosenRenderContext->AddNodeToRsTree(), true);
-}
-
-/**
- * @tc.name: AddNodeToRsTree002
- * @tc.desc: tst AddNodeToRsTree with null host.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, AddNodeToRsTree002, TestSize.Level1)
-{
-    auto rosenRenderContext = InitRosenRenderContext(nullptr);
-    ASSERT_TRUE(rosenRenderContext->rsNode_ != nullptr);
-    EXPECT_EQ(rosenRenderContext->AddNodeToRsTree(), true);
-}
-
-/**
- * @tc.name: CanNodeBeDeleted001
- * @tc.desc: test CanNodeBeDeleted with different node delete flag.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, CanNodeBeDeleted001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
-    EXPECT_EQ(rosenRenderContext->CanNodeBeDeleted(frameNode), false);
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
-    frameNode->tag_ = V2::PAGE_ETS_TAG;
-    EXPECT_EQ(rosenRenderContext->CanNodeBeDeleted(frameNode), false);
-}
-
-/**
- * @tc.name: ReCreateRsNodeTree001
- * @tc.desc: test ReCreateRsNodeTree with different node delete flag.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, ReCreateRsNodeTree001, TestSize.Level1)
-{
-    auto srcFlag = SystemProperties::containerDeleteFlag_;
-    SystemProperties::containerDeleteFlag_ = true;
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode("child", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto overlayFrameNode =
-        FrameNode::GetOrCreateFrameNode("overlay", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    frameNode->children_.emplace_back(childFrameNode);
-    childFrameNode->isLayoutNode_ = true;
-    childFrameNode->overlayNode_ = overlayFrameNode;
-    rosenRenderContext->isNeedRebuildRSTree_ = true;
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::UNKNOWN;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    EXPECT_EQ(rosenRenderContext->isNeedRebuildRSTree_, true);
-    SystemProperties::containerDeleteFlag_ = srcFlag;
-}
-
-/**
- * @tc.name: ReCreateRsNodeTree002
- * @tc.desc: test ReCreateRsNodeTree with null host.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, ReCreateRsNodeTree002, TestSize.Level1)
-{
-    auto srcFlag = SystemProperties::containerDeleteFlag_;
-    SystemProperties::containerDeleteFlag_ = true;
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode("child", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(nullptr);
-    rosenRenderContext->isNeedRebuildRSTree_ = true;
-
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    EXPECT_EQ(rosenRenderContext->isNeedRebuildRSTree_, true);
-    SystemProperties::containerDeleteFlag_ = srcFlag;
-}
-
-/**
- * @tc.name: ReCreateRsNodeTree003
- * @tc.desc: test ReCreateRsNodeTree for node with existing parent with different node delete flag.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, ReCreateRsNodeTree003, TestSize.Level1)
-{
-    auto srcFlag = SystemProperties::containerDeleteFlag_;
-    SystemProperties::containerDeleteFlag_ = true;
-    auto parentFrameNode =
-        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto frameNode = FrameNode::GetOrCreateFrameNode("node", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode("child", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto overlayFrameNode =
-        FrameNode::GetOrCreateFrameNode("overlay", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    frameNode->SetParent(parentFrameNode, false);
-    frameNode->children_.emplace_back(childFrameNode);
-    childFrameNode->isLayoutNode_ = true;
-    childFrameNode->overlayNode_ = overlayFrameNode;
-    rosenRenderContext->isNeedRebuildRSTree_ = true;
-
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::UNKNOWN;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
-    rosenRenderContext->ReCreateRsNodeTree({childFrameNode});
-    EXPECT_EQ(rosenRenderContext->isNeedRebuildRSTree_, true);
-    SystemProperties::containerDeleteFlag_ = srcFlag;
-}
-
-/**
  * @tc.name: RosenRenderContextTest008
  * @tc.desc: OnForegroundEffectUpdate().
  * @tc.type: FUNC
@@ -2538,6 +2373,28 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation002, TestSize.Lev
     ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, 1.0f));
     rosenRenderContext->rsNode_ = nullptr;
     ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveKeyFrameNode
+ * @tc.desc: Test RemoveKeyFrameNode Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RemoveKeyFrameNode, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->CreateKeyFrameNode();
+    ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    rosenRenderContext->reDraggingFlag_ = true;
+    rosenRenderContext->RemoveKeyFrameNode();
+    ASSERT_EQ(rosenRenderContext->reDraggingFlag_, false);
+    ASSERT_NE(rosenRenderContext->keyFrameNode_, nullptr);
+    rosenRenderContext->RemoveKeyFrameNode();
+    ASSERT_EQ(rosenRenderContext->keyFrameNode_, nullptr);
 }
 
 /**

@@ -80,6 +80,10 @@ public:
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {
+        if (caretMetrics_.has_value()) {
+            caretCaretMetric = caretMetrics_.value();
+            return true;
+        }
         CHECK_NULL_RETURN(enableCalcCaretMetricsByPosition_, false);
         CHECK_NULL_RETURN(extent >= 0, false);
         if (textAffinity == TextAffinity::UPSTREAM) {
@@ -120,6 +124,8 @@ public:
     }
 
     void UpdateColor(size_t from, size_t to, const Color& color) override;
+
+    std::optional<CaretMetricsF> caretMetrics_;
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

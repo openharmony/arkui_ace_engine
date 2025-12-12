@@ -46,6 +46,7 @@ constexpr size_t URL_KEEP_TOTAL_LENGTH = 30;
 constexpr int32_t NEED_MASK_INDEX = 3;
 constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
 constexpr size_t NEED_MASK_START_OFFSET = 2;
+constexpr int32_t INVALID_ID = -1;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -593,6 +594,7 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     // update rotate orientation before decoding
     UpdateOrientation();
+    PreprocessYUVDecodeFormat(host);
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -608,6 +610,22 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
+{
+    if (!SystemProperties::IsOpenYuvDecode()) {
+        return;
+    }
+    CHECK_NULL_VOID(loadingCtx_);
+    auto obj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(obj);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasValidSlice = renderProperty && (renderProperty->HasImageResizableSlice() ||
+        renderProperty->HasImageResizableLattice());
+    bool isYUVDecode = layoutProperty->GetIsYUVDecode().value_or(false);
+    obj->SetIsYUVDecode(hasValidSlice? false : isYUVDecode);
 }
 
 // Update the necessary rotate orientation for drawing and measuring.
@@ -942,17 +960,16 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     }
     if (!needLayout) {
         loadingCtx_->FinishMeasure();
-    }
-    ClearReloadFlagsAfterLoad();
-    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
-    {
+    } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline) {
+        if (pipeline && host->GetId() != INVALID_ID) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
+    ClearReloadFlagsAfterLoad();
+    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
     loadingCtx_->LoadImageData();
 }
 
@@ -1006,7 +1023,7 @@ void ImagePattern::LoadImageDataIfNeed()
         auto altErrorImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
         LoadAltErrorImage(altErrorImageSourceInfo);
     }
-    if (loadingCtx_->NeedAlt()) {
+    if (loadingCtx_ && loadingCtx_->NeedAlt()) {
         if (imageLayoutProperty->GetAltPlaceholder()) {
             auto altImageSourceInfo = imageLayoutProperty->GetAltPlaceholder().value_or(ImageSourceInfo(""));
             isLoadAlt_ = false;
@@ -1861,6 +1878,14 @@ void ImagePattern::DumpRenderInfo()
     DumpBorderRadiusProperties(renderProp);
     DumpResizable(renderProp);
     DumpHdrBrightness(renderProp);
+    DumpAntiAlias(renderProp);
+}
+
+inline void ImagePattern::DumpAntiAlias(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
+    bool antiAlias = renderProp->GetAntiAliasValue(false);
+    DumpLog::GetInstance().AddDesc(
+        std::string("antiAlias: ").append(antiAlias ? "true" : "false"));
 }
 
 inline void ImagePattern::DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
@@ -2552,6 +2577,8 @@ void ImagePattern::DumpRenderInfo(std::unique_ptr<JsonValue>& json)
     }
     auto imageInterpolation = renderProp->GetImageInterpolation().value_or(interpolationDefault_);
     json->Put("imageInterpolation", GetImageInterpolation(imageInterpolation).c_str());
+    bool antiAlias = renderProp->GetAntiAlias().value_or(false);
+    json->Put("antiAlias", antiAlias);
 }
 
 void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

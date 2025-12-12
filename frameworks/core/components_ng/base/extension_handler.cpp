@@ -141,7 +141,11 @@ void ExtensionHandler::OnDraw(DrawingContext& context)
 
 void ExtensionHandler::OnOverlayDraw(DrawingContext& context)
 {
-    InnerOverlayDraw(context);
+    if (drawModifier_ && drawModifier_->drawOverlayFunc) {
+        drawModifier_->drawOverlayFunc(context);
+    } else {
+        InnerOverlayDraw(context);
+    }
 }
 
 void ExtensionHandler::InvalidateRender()

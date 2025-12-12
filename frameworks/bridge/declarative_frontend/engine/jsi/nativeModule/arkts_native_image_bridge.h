@@ -88,6 +88,8 @@ public:
     static ArkUINativeModuleValue ResetSupportSvg2(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetContentTransition(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetContentTransition(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

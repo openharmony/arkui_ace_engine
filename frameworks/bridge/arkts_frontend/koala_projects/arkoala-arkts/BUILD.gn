@@ -51,10 +51,6 @@ action("ui2abc_process") {
     ":install_all",
     ":ui2abc_annotate",
   ]
-  external_deps = [
-    "sdk:ohos_ets_api",
-    "sdk:ohos_ets_arkts",
-  ]
 }
 
 action("arkoala_install") {

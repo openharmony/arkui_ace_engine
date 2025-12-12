@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -784,4 +785,25 @@ HWTEST_F(RichEditorPreviewTextTestNg, MergeAdjacentSpansTest, TestSize.Level0)
     EXPECT_EQ(pattern->spans_.size(), 1);
 }
 
+/**
+ * @tc.name: SetSupportPreviewText001
+ * @tc.desc: test SetSupportPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, SetSupportPreviewText001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSupportPreviewText(true);
+    EXPECT_TRUE(richEditorPattern->isTextPreviewSupported_);
+
+    richEditorModel.SetSupportPreviewText(false);
+    EXPECT_FALSE(richEditorPattern->isTextPreviewSupported_);
+}
 } // namespace OHOS::Ace::NG

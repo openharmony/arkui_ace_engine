@@ -889,6 +889,9 @@ std::string NavDestinationGroupNode::ToDumpString()
         case NavDestinationType::PROXY:
             navDestinationType = "PROXY";
             break;
+        case NavDestinationType::RELATED:
+            navDestinationType = "RELATED";
+            break;
         default:
             navDestinationType = "INVALID";
             break;

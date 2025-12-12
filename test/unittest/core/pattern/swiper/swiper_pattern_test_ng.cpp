@@ -2296,4 +2296,110 @@ HWTEST_F(SwiperPatternTestNg, JSIndicatorControllerBase001, TestSize.Level1)
     swiperPattern->SetIndicatorController(controller);
     EXPECT_EQ(AceType::TypeName(swiperPattern->indicatorController_.Upgrade()), "JSIndicatorControllerBase");
 }
+
+/**
+ * @tc.:name HandleTargetIndex001
+ * @tc.desc: test function UpdateAnimationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTargetIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Swiper with SetMinSize and reset displayCount to make IsStretch(props) false.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(1);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Set animation running flags and same targetIndex.
+     * @tc.expected: The if condition is not met because IsStretch is false. Animation should be played.
+     */
+    pattern_->propertyAnimationIsRunning_ = true;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 2;
+    pattern_->itemPosition_[1] = { .startPos = 100.0f };
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 2;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 1;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 1;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    /**
+     * @tc.steps: step3. Verify that a new animation is played.
+     * @tc.expected: The runningTargetIndex should be updated to the new targetIndex.
+     */
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+}
+
+/**
+ * @tc.name: HandleTargetIndex002
+ * @tc.desc: test function UpdateAnimationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, HandleTargetIndex002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Swiper with SetMinSize and reset displayCount to make IsStretch(props) false.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Set animation running flags and same targetIndex.
+     * @tc.expected: The if condition is not met because IsStretch is false. Animation should be played.
+     */
+    pattern_->propertyAnimationIsRunning_ = true;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 2;
+    pattern_->itemPosition_[1] = { .startPos = 100.0f };
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 2;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 1;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->targetIndex_ = 1;
+    pattern_->runningTargetIndex_ = 1;
+
+    pattern_->HandleTargetIndex(nullptr, nullptr);
+    /**
+     * @tc.steps: step3. Verify that a new animation is played.
+     * @tc.expected: The runningTargetIndex should be updated to the new targetIndex.
+     */
+    EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
+}
 } // namespace OHOS::Ace::NG

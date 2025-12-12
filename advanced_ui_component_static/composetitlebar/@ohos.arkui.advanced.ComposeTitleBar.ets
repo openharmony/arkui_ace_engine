@@ -114,7 +114,7 @@ export struct ComposeTitleBar {
   menuItems?: Array<ComposeTitleBarMenuItem> = [] as Array<ComposeTitleBarMenuItem>;
   @State titleMaxWidth: number = 0;
   @State fontSize: number = 1;
-  @Provide uniqueId?: number = -1;
+  @Provide uniqueId?: long = -1;
 
   build() {
     Flex({
@@ -326,12 +326,12 @@ struct CollapsibleMenuSection {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
             ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
-            })
+            }, (item: ComposeTitleBarMenuItem) => { return JSON.stringify(item.value) })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
               (item: ComposeTitleBarMenuItem, index: int) => {
                 ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
-              })
+              }, (item: ComposeTitleBarMenuItem) => { return JSON.stringify(item.value) })
 
             Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
               SymbolGlyph(this.PUBLIC_MORE)

@@ -141,11 +141,11 @@ ArkUIWaterFlowSectionPadding ParseMargin(ani_env* env, ani_ref marginRef)
 ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
 {
     ArkUIWaterFlowSection curSection;
-    ani_double itemsCount;
-    if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(section), "itemsCount", &itemsCount) != ANI_OK) {
+    ani_int itemsCount;
+    if (env->Object_GetPropertyByName_Int(static_cast<ani_object>(section), "itemsCount", &itemsCount) != ANI_OK) {
         return curSection;
     }
-    curSection.itemsCount = static_cast<int32_t>(itemsCount);
+    curSection.itemsCount = itemsCount;
 
     ani_ref crossCount;
     if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "crossCount", &crossCount) != ANI_OK) {
@@ -200,11 +200,21 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
     }
 
     if (isGetItemMainSizeByIndex) {
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+
         ani_ref fnObjGlobalRef = nullptr;
         env->GlobalReference_Create(func, &fnObjGlobalRef);
-        auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
+
+        auto onGetItemMainSizeByIndex = [fnObjGlobalRef, vm](int32_t index) {
+            ani_env* env = nullptr;
+            ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || !env) {
+                return 0.0f;
+            }
+
             ani_ref aniRes;
-            ani_ref aniIndex = AniUtils::CreateDouble(env, ani_double(index));
+            ani_ref aniIndex = AniUtils::CreateInt32(env, index);
 
             env->FunctionalObject_Call(static_cast<ani_fn_object>(fnObjGlobalRef), 1, &aniIndex, &aniRes);
             ani_double res;
@@ -241,6 +251,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
     }
     ani_size changeArrayLength;
     if (env->Array_GetLength(static_cast<ani_array>(changeArray), &changeArrayLength) != ANI_OK) {
+        return;
     }
 
     ani_class sectionChangeInfo;
@@ -359,5 +370,61 @@ void SetWaterFlowLayoutMode(ani_env* env, [[maybe_unused]] ani_object aniClass, 
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     modifier->getArkUIAniWaterFlowModifier()->setWaterFlowLayoutMode(arkNode, static_cast<int32_t>(mode));
+}
+
+void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object changeInfo)
+{
+    ani_int start = 0;
+    if (env->Object_GetPropertyByName_Int(changeInfo, "start", &start) != ANI_OK) {
+        return;
+    }
+
+    ani_int deleteCount = 0;
+    if (env->Object_GetPropertyByName_Int(changeInfo, "deleteCount", &deleteCount) != ANI_OK) {
+        return;
+    }
+
+    ani_ref sections;
+    if (env->Object_GetPropertyByName_Ref(changeInfo, "sections", &sections) != ANI_OK) {
+        return;
+    }
+
+    ani_size sectionsLength;
+    if (env->Array_GetLength(static_cast<ani_array>(sections), &sectionsLength) != ANI_OK) {
+        return;
+    }
+
+    ani_class sectionOptions;
+    if (env->FindClass("arkui.component.waterFlow.SectionOptions", &sectionOptions) != ANI_OK) {
+        return;
+    }
+
+    int32_t length = static_cast<int32_t>(sectionsLength);
+    std::vector<ArkUIWaterFlowSection> newSections;
+    for (int32_t j = 0; j < length; j++) {
+        ani_ref section;
+        if (env->Array_Get(static_cast<ani_array>(sections), j, &section) != ANI_OK) {
+            continue;
+        }
+        ani_boolean isSectionOptions;
+        env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
+        if (!isSectionOptions) {
+            continue;
+        }
+        ArkUIWaterFlowSection curSection = ParseSectionOptions(env, section);
+        if (curSection.itemsCount < 0) {
+            continue;
+        }
+        newSections.emplace_back(curSection);
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    if (!modifier || !arkNode) {
+        return;
+    }
+
+    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowSection(
+        arkNode, start, deleteCount, static_cast<void*>(newSections.data()), newSections.size());
 }
 } // namespace OHOS::Ace::Ani

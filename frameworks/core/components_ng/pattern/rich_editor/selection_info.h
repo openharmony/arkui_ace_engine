@@ -131,6 +131,7 @@ struct TextStyleResult {
     bool optimizeTrailingSpace = false;
     std::optional<Dimension> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
+    std::optional<int32_t> textDirection;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
@@ -146,6 +147,7 @@ struct TextStyleResult {
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
     float lineThicknessScale = 1.0f;
+    bool compressLeadingPunctuation = false;
 };
 
 struct ImageStyleResult {
@@ -251,6 +253,7 @@ struct ParagraphInfo {
     // unit of paragraphSpacing is fp
     std::optional<double> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
+    std::optional<int32_t> textDirection;
 
     std::pair<int32_t, int32_t> range;
 };

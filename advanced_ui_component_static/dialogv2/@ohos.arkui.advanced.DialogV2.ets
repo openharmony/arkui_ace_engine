@@ -143,14 +143,14 @@ import {
   
   @ComponentV2
   export struct TipsDialogV2 {
-    @Require @Param imageRes: ResourceStr | PixelMap;
+    @Require @Param imageRes: ResourceStr | PixelMap | undefined;
     @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE } as SizeOptions;
     @Param imageBorderColor?: ColorMetrics = undefined;
     @Param imageBorderWidth?: LengthMetrics = undefined;
-    @Param title?: ResourceStr | null = null;
-    @Param content?: ResourceStr | null = null;
+    @Param title?: ResourceStr | undefined = undefined;
+    @Param content?: ResourceStr | undefined = undefined;
     @Event onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
-    @Param checkTips?: ResourceStr | null = null;
+    @Param checkTips?: ResourceStr | undefined = undefined;
     @Param checked?: boolean = false;
     @Local checkedInner?: boolean = false;
   
@@ -227,13 +227,16 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        contentBuilder: () => {
-          this.contentBuilder();
-        },
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     @Builder
@@ -334,7 +337,7 @@ import {
     textPart(): void {
       Scroll(this.contentScroller) {
         Column() {
-          if (this.title !== null) {
+          if (this.title !== undefined) {
             Row() {
               Text(this.title as ResourceStr)
                 .fontSize(`${TITLE_S}fp`)
@@ -348,7 +351,7 @@ import {
             }
             .padding({ bottom: $r('sys.float.padding_level8') } as Padding)
           }
-          if (this.content !== null) {
+          if (this.content !== undefined) {
             Row() {
               Text(this.content as ResourceStr)
                 .focusable(true)
@@ -370,11 +373,11 @@ import {
             }
           }
         }
-        .width('100%')
-        .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
     }
   
     aboutToAppear(): void {
@@ -395,9 +398,9 @@ import {
     doNothingBuilder() {
     };
   
-    @Param title?: ResourceStr | null = null;
-    @Param content?: ResourceStr | null = null;
-    @Param checkTips?: ResourceStr | null = null;
+    @Param title?: ResourceStr | undefined = undefined;
+    @Param content?: ResourceStr | undefined = undefined;
+    @Param checkTips?: ResourceStr | undefined = undefined;
     @Param minContentHeight: number = 0;
     @Event $minContentHeight?: (val: number) => void = undefined;
     @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
@@ -431,9 +434,11 @@ import {
           minHeight: CHECKBOX_CONTAINER_HEIGHT,
           maxHeight: constraint.maxHeight
         }
-        let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
-        checkBoxHeight = checkBoxMeasureResult.height;
-        height += checkBoxHeight;
+        let checkBoxMeasureResult: MeasureResult | undefined = checkboxChild.measure(checkboxConstraint);
+        if (checkBoxMeasureResult) {
+          checkBoxHeight = checkBoxMeasureResult.height;
+          height += checkBoxHeight;
+        }
       }
   
       let imageChild: Measurable = children[this.imageIndex.toInt()];
@@ -446,24 +451,28 @@ import {
         maxWidth: constraint.maxWidth,
         maxHeight: imageMaxHeight
       }
-      let imageMeasureResult: MeasureResult = imageChild.measure(imageConstraint);
-      height += imageMeasureResult.height;
-  
-      if (this.title !== null || this.content !== null) {
-        let textChild: Measurable = children[this.textIndex.toInt()];
-        let contentMaxHeight: number = Number(constraint.maxHeight as number) -
-        imageMeasureResult.height - checkBoxHeight;
-        let contentConstraint: ConstraintSizeOptions =
-          {
-            maxWidth: constraint.maxWidth,
-            maxHeight: Math.max(contentMaxHeight, TEXT_MIN_HEIGHT)
-          };
-        let contentMeasureResult: MeasureResult = textChild.measure(contentConstraint);
-        height += contentMeasureResult.height;
+      let imageMeasureResult: MeasureResult | undefined = imageChild.measure(imageConstraint);
+      if (imageMeasureResult) {
+        height += imageMeasureResult.height;
+
+        if (this.title !== null || this.content !== null) {
+          let textChild: Measurable = children[this.textIndex.toInt()];
+          let contentMaxHeight: number = Number(constraint.maxHeight as number) -
+          imageMeasureResult.height - checkBoxHeight;
+          let contentConstraint: ConstraintSizeOptions =
+            {
+              maxWidth: constraint.maxWidth,
+              maxHeight: Math.max(contentMaxHeight, TEXT_MIN_HEIGHT)
+            };
+          let contentMeasureResult: MeasureResult | undefined = textChild.measure(contentConstraint);
+          if (contentMeasureResult) {
+            height += contentMeasureResult.height;
+          }
       }
       sizeResult.height = height;
       this.$minContentHeight?.(Math.max(checkBoxHeight +
       imageMeasureResult.height + textMinHeight, MIN_CONTENT_HEIGHT));
+      }
       return sizeResult;
     }
   
@@ -474,7 +483,7 @@ import {
   
   @ComponentV2
   export struct SelectDialogV2 {
-    @Require @Param title: ResourceStr = '';
+    @Require @Param title: ResourceStr | undefined = '';
     @Param content?: ResourceStr = '';
     @Param confirm?: AdvancedDialogV2Button | undefined = undefined;
     @Require @Param radioContent: SheetInfo[] = [] as Array<SheetInfo>;
@@ -679,15 +688,18 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.title,
-        contentBuilder: () => {
-          this.contentBuilder();
-        },
-        buttons: this.buttons,
-        contentAreaPadding: this.contentPadding,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.title,
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: this.buttons,
+          contentAreaPadding: this.contentPadding,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -738,18 +750,22 @@ import {
         minHeight: CHECKBOX_CONTAINER_HEIGHT,
         maxHeight: constraint.maxHeight
       }
-      let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
-      height += checkBoxMeasureResult.height;
+      let checkBoxMeasureResult: MeasureResult | undefined = checkboxChild.measure(checkboxConstraint);
+      if (checkBoxMeasureResult) {
+        height += checkBoxMeasureResult.height;
   
-      let textChild: Measurable = children[this.textIndex.toInt()];
-      let textConstraint: ConstraintSizeOptions = {
-        maxWidth: constraint.maxWidth,
-        maxHeight: Number(constraint.maxHeight as number) - height
+        let textChild: Measurable = children[this.textIndex.toInt()];
+        let textConstraint: ConstraintSizeOptions = {
+          maxWidth: constraint.maxWidth,
+          maxHeight: Number(constraint.maxHeight as number) - height
+        }
+        let textMeasureResult: MeasureResult | undefined = textChild.measure(textConstraint);
+        if (textMeasureResult) {
+          height += textMeasureResult.height;
+          sizeResult.height = height;
+          this.$minContentHeight?.(Math.max(checkBoxMeasureResult.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT));
+        }
       }
-      let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
-      height += textMeasureResult.height;
-      sizeResult.height = height;
-      this.$minContentHeight?.(Math.max(checkBoxMeasureResult.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT));
       return sizeResult;
     }
   
@@ -760,7 +776,7 @@ import {
   
   @ComponentV2
   export struct ConfirmDialogV2 {
-    @Require @Param title: ResourceStr = '';
+    @Require @Param title: ResourceStr | undefined = '';
     @Param content?: ResourceStr = '';
     @Param checkTips?: ResourceStr = '';
     @Param checked?: boolean = false;
@@ -853,11 +869,11 @@ import {
               })
               .width('100%')
           }
-          .width('100%')
-          .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+          .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+          .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
         }
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+        .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
       }
     }
   
@@ -927,14 +943,17 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.title,
-        contentBuilder: () => {
-          this.buildContent();
-        },
-        minContentHeight: this.minContentHeight!!,
-        buttons: this.buttons,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.title,
+          contentBuilder: () => {
+            this.buildContent();
+          },
+          minContentHeight: this.minContentHeight!!,
+          buttons: this.buttons,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -946,7 +965,7 @@ import {
   export struct AlertDialogV2 {
     @Param primaryTitle?: ResourceStr = undefined;
     @Param secondaryTitle?: ResourceStr = undefined;
-    @Require @Param content: ResourceStr = '';
+    @Require @Param content: ResourceStr | undefined = '';
     @Param primaryButton?: AdvancedDialogV2Button | undefined = undefined;
     @Param secondaryButton?: AdvancedDialogV2Button | undefined = undefined;
     private textAlign: TextAlign = TextAlign.Center;
@@ -972,15 +991,18 @@ import {
     }
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.primaryTitle,
-        secondaryTitle: this.secondaryTitle,
-        contentBuilder: () => {
-          this.AlertDialogContentBuilder();
-        },
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.primaryTitle,
+          secondaryTitle: this.secondaryTitle,
+          contentBuilder: () => {
+            this.AlertDialogContentBuilder();
+          },
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   
     @Builder
@@ -996,8 +1018,8 @@ import {
             .fontSize(`${BODY_L}fp`)
             .fontWeight(this.getFontWeight() as int)
             .fontColor(this.fontColorWithTheme)
-            .width('100%')
-            .padding({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedPadding)
+            .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+            .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
             .textAlign(this.textAlign)
             .onKeyEvent((event: KeyEvent) => {
               if (event) {
@@ -1009,7 +1031,7 @@ import {
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
         .width('100%')
       }
-      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   
     onWillApplyTheme(theme: Theme): void {
@@ -1038,18 +1060,19 @@ import {
     @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   
     build() {
-      CustomDialogContentComponent({
-        primaryTitle: this.primaryTitle,
-        secondaryTitle: this.secondaryTitle,
-        contentBuilder: () => {
-          if (typeof this.contentBuilder === 'function') {
-            this.contentBuilder();
-          }
-        },
-        contentAreaPadding: this.contentAreaPadding,
-        buttons: this.buttons,
-        minContentHeight: this.minContentHeight!!,
-      })
+      Column() {
+        CustomDialogContentComponent({
+          primaryTitle: this.primaryTitle,
+          secondaryTitle: this.secondaryTitle,
+          contentBuilder: () => {
+              this.contentBuilder();
+          },
+          contentAreaPadding: this.contentAreaPadding,
+          buttons: this.buttons,
+          minContentHeight: this.minContentHeight!!,
+        })
+      }
+      .constraintSize({ maxHeight: '100%' })
     }
   }
   
@@ -1101,14 +1124,18 @@ import {
         minHeight: this.titleMinHeight,
         maxHeight: constraint.maxHeight
       };
-      let titleMeasureResult: MeasureResult = titleChild.measure(titleConstraint);
-      this.$titleHeight?.(titleMeasureResult.height);
-      height += titleMeasureResult.height;
+      let titleMeasureResult: MeasureResult | undefined = titleChild.measure(titleConstraint);
+      if (titleMeasureResult) {
+        this.$titleHeight?.(titleMeasureResult.height);
+        height += titleMeasureResult.height;
+      }
   
       let buttonChild: Measurable = children[this.buttonIndex.toInt()];
-      let buttonMeasureResult: MeasureResult = buttonChild.measure(constraint);
-      this.$buttonHeight?.(buttonMeasureResult.height);
-      height += buttonMeasureResult.height;
+      let buttonMeasureResult: MeasureResult | undefined = buttonChild.measure(constraint);
+      if (buttonMeasureResult) {
+        this.$buttonHeight?.(buttonMeasureResult.height);
+        height += buttonMeasureResult.height;
+      }
   
       let contentChild: Measurable = children[this.contentIndex.toInt()];
       let contentConstraint: ConstraintSizeOptions = {
@@ -1116,9 +1143,11 @@ import {
         maxHeight: Number(constraint.maxHeight as number) - height
       };
   
-      let contentMeasureResult: MeasureResult = contentChild.measure(contentConstraint);
-      height += contentMeasureResult.height;
-      sizeResult.height = height;
+      let contentMeasureResult: MeasureResult | undefined = contentChild.measure(contentConstraint);
+      if (contentMeasureResult) {
+        height += contentMeasureResult.height;
+        sizeResult.height = height;
+      }
       return sizeResult;
     }
   
@@ -1244,12 +1273,14 @@ import {
       let height: number = 0;
       children.forEach((child) => {
         this.contentMaxHeight = '100%';
-        let measureResult: MeasureResult = child.measure(constraint);
+        let measureResult: MeasureResult | undefined = child.measure(constraint);
         if (maxHeight - this.buttonHeight - this.titleHeight < this.minContentHeight) {
           this.contentMaxHeight = MAX_CONTENT_HEIGHT;
           measureResult = child.measure(constraint);
         }
-        height += measureResult.height;
+        if (measureResult) {
+          height += measureResult.height;
+        }
       });
       sizeResult.height = height;
       sizeResult.width = maxWidth;
@@ -1759,20 +1790,7 @@ import {
    * @returns resource size
    */
   function getNumberByResourceId(resourceId: long, defaultValue: number, allowZero?: boolean): number {
-    try {
-      let sourceValue: number = resourceManager.getSysResourceManager().getDouble(resourceId);
-      if (sourceValue > 0 || allowZero) {
-        return sourceValue;
-      } else {
-        return defaultValue;
-      }
-    } catch (error) {
-      let code: number | undefined = (error as ClassCastError).code;
-      let message: string | undefined = (error as ClassCastError).message;
-      hilog.error(0x3900, 'Ace',
-        `CustomContentDialog getNumberByResourceId error, code: ${code}, message: ${message}`);
-      return defaultValue;
-    }
+    return defaultValue;
   }
   
   /**
@@ -1783,20 +1801,7 @@ import {
    * @returns number
    */
   function getEnumNumberByResourceId(resourceId: long, defaultValue: number): number {
-    try {
-      let sourceValue: number = resourceManager.getSysResourceManager().getDouble(resourceId);
-      if (sourceValue > 0) {
-        return sourceValue;
-      } else {
-        return defaultValue;
-      }
-    } catch (error) {
-      let code: number | undefined = (error as ClassCastError).code;
-      let message: string | undefined = (error as ClassCastError).message;
-      hilog.error(0x3900, 'Ace',
-        `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
-      return defaultValue;
-    }
+    return defaultValue;
   }
   
   /**
@@ -1834,12 +1839,15 @@ import {
   
     build() {
       Column() {
-        CustomDialogContentComponent({
-          contentBuilder: () => {
-            this.contentBuilder();
-          },
-          minContentHeight: this.minContentHeight!!,
-        })
+        Column() {
+          CustomDialogContentComponent({
+            contentBuilder: () => {
+              this.contentBuilder();
+            },
+            minContentHeight: this.minContentHeight!!,
+          })
+        }
+        .constraintSize({ maxHeight: '100%' })
       }
     }
   
@@ -1880,7 +1888,7 @@ import {
   @ComponentV2
   export struct PopoverDialogV2 {
     @Require @Param
-    visible: boolean = false;
+    visible: boolean | undefined = false;
     @Event
     $visible?: PopoverDialogV2OnVisibleChange;
     @Require @Param

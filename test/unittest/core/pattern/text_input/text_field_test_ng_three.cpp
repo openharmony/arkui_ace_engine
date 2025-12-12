@@ -360,28 +360,6 @@ HWTEST_F(TextFieldTestNgThree, CalcDecoratorHeight001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextAreaInputRectUpdate001
- * @tc.desc: Test TextAreaInputRectUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTestNgThree, TextAreaInputRectUpdate001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(textFieldLayoutProperty, nullptr);
-    auto context = frameNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    textFieldPattern->textFieldTheme_ = context->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
-    RectF rect;
-    textFieldPattern->contentController_->content_ = u"";
-    textFieldPattern->TextAreaInputRectUpdate(rect);
-    EXPECT_EQ(textFieldPattern->selectOverlay_, 1);
-}
-
-/**
  * @tc.name: ResetObscureTickCountDown001
  * @tc.desc: Test ResetObscureTickCountDown
  * @tc.type: FUNC

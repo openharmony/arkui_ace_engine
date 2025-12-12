@@ -92,7 +92,7 @@ void SetCircleRadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
+    Validator::ValidatePositive(convValue);
     PatternLockModelStatic::SetCircleRadius(frameNode, convValue);
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,

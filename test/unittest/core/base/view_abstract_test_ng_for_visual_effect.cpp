@@ -15,6 +15,8 @@
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "core/components/common/properties/ui_material.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -206,5 +208,146 @@ HWTEST_F(ViewAbstractTestNg, SetBlendApplyType, TestSize.Level1)
     auto property = node->GetRenderContext()->GetBackBlendApplyType();
     ASSERT_TRUE(property.has_value());
     EXPECT_EQ(testType, property.value());
+}
+
+/**
+ * @tc.name: SetExcludeFromRenderGroup001
+ * @tc.desc: Test the SetExcludeFromRenderGroup function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetExcludeFromRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeInStack = stack->GetMainFrameNode();
+    ASSERT_NE(nodeInStack, nullptr);
+    auto renderContextInStack = nodeInStack->GetRenderContext();
+    ASSERT_NE(renderContextInStack, nullptr);
+    /**
+     * @tc.steps: step2. Set true to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step2. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(true);
+    ASSERT_TRUE(renderContextInStack->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextInStack->GetExcludeFromRenderGroup().value(), true);
+    /**
+     * @tc.steps: step3. Set false to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step3. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(false);
+    ASSERT_TRUE(renderContextInStack->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextInStack->GetExcludeFromRenderGroup().value(), false);
+}
+
+/**
+ * @tc.name: SetExcludeFromRenderGroup002
+ * @tc.desc: Test the SetExcludeFromRenderGroup function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetExcludeFromRenderGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContextOfNode = node->GetRenderContext();
+    ASSERT_NE(renderContextOfNode, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+    /**
+     * @tc.steps: step2. Set true to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step2. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(nodePtr, true);
+    ASSERT_TRUE(renderContextOfNode->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextOfNode->GetExcludeFromRenderGroup().value(), true);
+    /**
+     * @tc.steps: step3. Set false to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step3. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(nodePtr, false);
+    ASSERT_TRUE(renderContextOfNode->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextOfNode->GetExcludeFromRenderGroup().value(), false);
+}
+
+/**
+ * @tc.name: SetSystemMaterial001
+ * @tc.desc: Test the SetSystemMaterial function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeInStack = stack->GetMainFrameNode();
+    ASSERT_NE(nodeInStack, nullptr);
+    auto renderContextInStack = nodeInStack->GetRenderContext();
+    ASSERT_NE(renderContextInStack, nullptr);
+    /**
+     * @tc.steps: step2. call SetSystemMaterial and get.
+     * @tc.expected: step2. SystemMaterial type value is same with the value set.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+    material->SetType(type);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(material));
+    ASSERT_NE(renderContextInStack->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContextInStack->GetSystemMaterial()->GetType(), type);
+    /**
+     * @tc.steps: step3. call SetSystemMaterial with null and get.
+     * @tc.expected: step3. SystemMaterial pointer is null.
+     */
+    ViewAbstract::SetSystemMaterial(nullptr);
+    EXPECT_EQ(renderContextInStack->GetSystemMaterial(), nullptr);
+}
+
+/**
+ * @tc.name: SetSystemMaterial002
+ * @tc.desc: Test the SetSystemMaterial function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterial002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContextOfNode = node->GetRenderContext();
+    ASSERT_NE(renderContextOfNode, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+    /**
+     * @tc.steps: step2. call SetSystemMaterial and get.
+     * @tc.expected: step2. SystemMaterial type value is same with the value set.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+    material->SetType(type);
+    ViewAbstract::SetSystemMaterial(nodePtr, AceType::RawPtr(material));
+    ASSERT_NE(renderContextOfNode->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContextOfNode->GetSystemMaterial()->GetType(), type);
+    /**
+     * @tc.steps: step3. call SetSystemMaterial and get.
+     * @tc.expected: step3. SystemMaterial type value is same with the value set.
+     */
+    type = static_cast<int32_t>(MaterialType::NONE);
+    material->SetType(type);
+    ViewAbstract::SetSystemMaterial(nodePtr, AceType::RawPtr(material));
+    ASSERT_NE(renderContextOfNode->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContextOfNode->GetSystemMaterial()->GetType(), type);
+    /**
+     * @tc.steps: step4. call SetSystemMaterial with null and get.
+     * @tc.expected: step4. SystemMaterial pointer is null.
+     */
+    ViewAbstract::SetSystemMaterial(nodePtr, nullptr);
+    EXPECT_EQ(renderContextOfNode->GetSystemMaterial(), nullptr);
 }
 } // namespace OHOS::Ace::NG

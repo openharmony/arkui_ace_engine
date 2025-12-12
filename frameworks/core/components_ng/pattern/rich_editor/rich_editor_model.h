@@ -201,6 +201,7 @@ struct UpdateParagraphStyle {
         lineBreakStrategy.reset();
         paragraphSpacing.reset();
         textVerticalAlign.reset();
+        textDirection.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
@@ -208,6 +209,7 @@ struct UpdateParagraphStyle {
     std::optional<LineBreakStrategy> lineBreakStrategy;
     std::optional<Dimension> paragraphSpacing;
     std::optional<TextVerticalAlign> textVerticalAlign;
+    std::optional<TextDirection> textDirection;
 
     std::string ToString() const
     {
@@ -218,6 +220,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textVerticalAlign);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textDirection);
         return jsonValue->ToString();
     }
 };
@@ -331,6 +334,7 @@ public:
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
+    virtual void DeleteBackward() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
@@ -385,6 +389,7 @@ public:
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) = 0;
+    virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) = 0;
@@ -420,10 +425,14 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetEnableAutoSpacing(bool enabled) {};
+    virtual void SetCompressLeadingPunctuation(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};
     virtual void SetScrollBarColor(std::optional<Color> value) {};
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
+    virtual void SetSingleLine(bool iaEnable) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

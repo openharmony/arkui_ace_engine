@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { LinearGradient_serializer, LinearGradient } from "./dataPanel"
@@ -29,6 +30,7 @@ import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -48,6 +50,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGaugeOptionsAttribute(options: GaugeOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GaugeOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GaugeInterface_setGaugeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -101,10 +104,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -132,10 +135,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                             thisSerializer.writeInt8((0).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0  = valueTmpValueForIdx2TmpElement_0ForIdx0 as Color
                             thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0.getOrdinal())
-                        } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof number) {
+                        } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof int32) {
                             thisSerializer.writeInt8((1).toByte())
-                            const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as number
-                            thisSerializer.writeNumber(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1)
+                            const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as int32
+                            thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1)
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof string) {
                             thisSerializer.writeInt8((2).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx2  = valueTmpValueForIdx2TmpElement_0ForIdx0 as string
@@ -169,10 +172,10 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -184,9 +187,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDescriptionAttribute(value: CustomBuilder | undefined): void {
+    setDescriptionAttribute(value: CustomBuilder | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
@@ -196,9 +199,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: GaugeShadowOptions | undefined): void {
+    setTrackShadowAttribute(value: GaugeShadowOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             GaugeShadowOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -268,10 +271,10 @@ export interface GaugeAttribute extends CommonMethod {
     strokeWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeWidth")
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         throw new Error("Unimplemented method description")
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         throw new Error("Unimplemented method trackShadow")
     }
     indicator(value: GaugeIndicatorOptions | null | undefined): this {
@@ -293,8 +296,8 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     endAngle_value?: double | undefined
     colors_value?: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, double ]> | undefined
     strokeWidth_value?: Length | undefined
-    description_value?: CustomBuilder | undefined
-    trackShadow_value?: GaugeShadowOptions | undefined
+    description_value?: CustomBuilder | null | undefined
+    trackShadow_value?: GaugeShadowOptions | null | undefined
     indicator_value?: GaugeIndicatorOptions | null | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<GaugeConfiguration> | undefined
@@ -317,10 +320,10 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     strokeWidth(value: Length | undefined): this {
         return this
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         return this
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         return this
     }
     indicator(value: GaugeIndicatorOptions | null | undefined): this {
@@ -393,17 +396,17 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         }
         return this
     }
-    public description(value: CustomBuilder | undefined): this {
+    public description(value: CustomBuilder | null | undefined): this {
         if (this.checkPriority("description")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | null | undefined)
             this.getPeer()?.setDescriptionAttribute(value_casted)
             return this
         }
         return this
     }
-    public trackShadow(value: GaugeShadowOptions | undefined): this {
+    public trackShadow(value: GaugeShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
-            const value_casted = value as (GaugeShadowOptions | undefined)
+            const value_casted = value as (GaugeShadowOptions | null | undefined)
             this.getPeer()?.setTrackShadowAttribute(value_casted)
             return this
         }
@@ -432,7 +435,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         return this
     }
     public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGaugeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGaugeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -26,12 +26,14 @@ import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOpti
 import { LengthMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
 import { Color, FontStyle, FontWeight, TextCase, InteractionHand } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { BaseSpanModifier } from "./../BaseSpanModifier"
@@ -87,6 +89,7 @@ export class ArkSpanPeer extends PeerNode {
         return _peer
     }
     setSpanOptionsAttribute(value: string | Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
             thisSerializer.writeInt8((0).toByte())
@@ -121,10 +124,10 @@ export class ArkSpanPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -273,10 +276,10 @@ export class ArkSpanPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -599,7 +602,9 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         return this
     }
     public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBaseSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookBaseSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -772,7 +777,9 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         return this
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
-        hookSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -813,10 +820,10 @@ export class TextBackgroundStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -864,11 +871,11 @@ export class TextBackgroundStyle_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -876,7 +883,7 @@ export class TextBackgroundStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

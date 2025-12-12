@@ -118,7 +118,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, defaultOptionsTest, TestSize.Level1
  */
 HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultBuilderOptionTest, TestSize.Level1)
 {
-    // builder is not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /**
@@ -128,7 +128,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultBuilderOptionTest, 
  */
 HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultCancelOptionTest, TestSize.Level1)
 {
-    // builder is not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /**
@@ -138,7 +138,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultCancelOptionTest, T
  */
 HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultOnWillDismissOptionTest, TestSize.Level1)
 {
-    // builder is not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /**
@@ -318,7 +318,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, gridCountTest, TestSize.Level1)
 
 static const std::vector<std::pair<Ark_ResourceColor, std::string>> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
 };
@@ -354,7 +354,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, maskColorTest, TestSize.Level1)
  */
 HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_maskRectTest, TestSize.Level1)
 {
-    // test is not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /**
@@ -1324,7 +1324,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleBottomTest, TestSize.Lev
  */
 HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_shadowTest, TestSize.Level1)
 {
-    // test is not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 static const std::vector<std::pair<Ark_BlurStyle, int32_t>> BKG_BLUR_STYLE_TEST_PLAN = {

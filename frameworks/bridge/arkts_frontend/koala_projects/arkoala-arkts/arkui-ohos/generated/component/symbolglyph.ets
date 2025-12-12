@@ -20,6 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -28,6 +29,7 @@ import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
 import { AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -70,6 +72,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSymbolGlyphOptionsAttribute(value?: Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -117,10 +120,10 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
                     thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueTmpValueTmpElement instanceof number) {
+                } else if (valueTmpValueTmpElement instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as int32
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string
@@ -483,7 +486,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSymbolGlyphAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSymbolGlyphAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -69,21 +69,21 @@ inline const std::vector<float> VALID_MATRIX = { 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
 inline const std::vector<float> VALID_MATRIX_0 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 inline const std::vector<float> VALID_MATRIX_1 = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-inline ArkArrayHolder<Array_Number> EMPTY_HOLDER(EMPTY_VECTOR);
-inline ArkArrayHolder<Array_Number> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
-inline ArkArrayHolder<Array_Number> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
-inline ArkArrayHolder<Array_Number> VALID_HOLDER_0(VALID_MATRIX_0);
-inline ArkArrayHolder<Array_Number> VALID_HOLDER_1(VALID_MATRIX_1);
-inline ArkArrayHolder<Array_Number> VALID_HOLDER_2(VALID_MATRIX);
-inline ArkArrayHolder<Array_Number> DEFAULT_VALUE_MATRIX(INVALID_MATRIX_MORE);
+inline ArkArrayHolder<Array_Float64> EMPTY_HOLDER(EMPTY_VECTOR);
+inline ArkArrayHolder<Array_Float64> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
+inline ArkArrayHolder<Array_Float64> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
+inline ArkArrayHolder<Array_Float64> VALID_HOLDER_0(VALID_MATRIX_0);
+inline ArkArrayHolder<Array_Float64> VALID_HOLDER_1(VALID_MATRIX_1);
+inline ArkArrayHolder<Array_Float64> VALID_HOLDER_2(VALID_MATRIX);
+inline ArkArrayHolder<Array_Float64> DEFAULT_VALUE_MATRIX(INVALID_MATRIX_MORE);
 
-const std::vector<std::tuple<std::string, Array_Number, std::optional<std::vector<float>>>> floatMatrixTest {
-    { "EMPTY_VECTOR", ArkValue<Array_Number>(EMPTY_HOLDER.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_0", ArkValue<Array_Number>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
-    { "INVALID_HOLDER_0", ArkValue<Array_Number>(INVALID_HOLDER_0.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_1", ArkValue<Array_Number>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
-    { "INVALID_HOLDER_1", ArkValue<Array_Number>(INVALID_HOLDER_1.ArkValue()), std::nullopt },
-    { "VALID_HOLDER_2", ArkValue<Array_Number>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
+const std::vector<std::tuple<std::string, Array_Float64, std::optional<std::vector<float>>>> floatMatrixTest {
+    { "EMPTY_VECTOR", ArkValue<Array_Float64>(EMPTY_HOLDER.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_0", ArkValue<Array_Float64>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
+    { "INVALID_HOLDER_0", ArkValue<Array_Float64>(INVALID_HOLDER_0.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_1", ArkValue<Array_Float64>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
+    { "INVALID_HOLDER_1", ArkValue<Array_Float64>(INVALID_HOLDER_1.ArkValue()), std::nullopt },
+    { "VALID_HOLDER_2", ArkValue<Array_Float64>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
 };
 
 const MarginProperty MARGIN_PADDING_PROPERTY = { .left = TEST_CALC_LENGTH,
@@ -437,7 +437,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
  */
 HWTEST_F(ImageAttachmentAccessorTest, DISABLED_ctorTestDrawingColorFilter, TestSize.Level1)
 {
-    // DrawingColorFilter is not supperted yet
+    FAIL() << "Test is not implemented yet";
 };
 
 /**
@@ -653,6 +653,6 @@ HWTEST_F(ImageAttachmentAccessorTest, getColorFilterTestColorFilter, TestSize.Le
  */
 HWTEST_F(ImageAttachmentAccessorTest, DISABLED_getColorFilterTestDrawingColorFilter, TestSize.Level1)
 {
-    // DrawingColorFilter is not supperted yet
+    FAIL() << "Test is not implemented yet";
 };
 } // namespace OHOS::Ace::NG

@@ -84,11 +84,6 @@ const std::string TEST_CONTENT_ONE = "ContentTestOne";
 const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 } // namespace
 
-namespace Converter {
-    template<>
-    PreviewText Convert(const Ark_PreviewText& value);
-}
-
 namespace GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
 }

@@ -22,6 +22,10 @@ import {
 } from "../framework";
 import { LinearGradient } from "../component/dataPanel";
 import { ContentModifier } from "#handwritten";
+import { ArkSliderComponent, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from '#generated';
+import { ContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod} from '#handwritten';
+import { ComponentContent } from 'arkui.ComponentContent';
+import { hookSliderContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     constructParam(...param: Object[]): this {
@@ -45,8 +49,8 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
         this.markDirty();
         return this;
     }
-    blockColor(value: ResourceColor | undefined): this {
-        const value_casted = value as (ResourceColor | undefined);
+    blockColor(value: ResourceColor | LinearGradient | undefined): this {
+        const value_casted = value as (ResourceColor | LinearGradient | undefined);
         this.getPeer()?.setBlockColorAttribute(value_casted);
         this.markDirty();
         return this;
@@ -65,10 +69,27 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     }
     showSteps(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined);
-        this.getPeer()?.setShowStepsAttribute(value_casted);
+        this.getPeer()?.setShowSteps0Attribute(value_casted);
         this.markDirty();
         return this;
     }
+    showSteps(value: boolean, options: SliderShowStepOptions | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        const options_casted = options as (SliderShowStepOptions | undefined);
+        this.getPeer()?.setShowSteps1Attribute(value_casted, options_casted);
+        this.markDirty();
+        return this;
+    }
+    prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions| undefined): this {
+        hookSliderSetPrefixMethod(this.getPeer(), content, options);
+        this.markDirty();
+        return this;
+    }
+    suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions| undefined): this {
+        hookSliderSetSuffixMethod(this.getPeer(), content, options);
+         this.markDirty();
+         return this;
+     }
     trackThickness(value: Length | undefined): this {
         const value_casted = value as (Length | undefined);
         this.getPeer()?.setTrackThicknessAttribute(value_casted);
@@ -143,6 +164,7 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     }
     contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<SliderConfiguration> | undefined);
+        hookSliderContentModifier(this.getPeer(), value_casted);
         this.markDirty();
         return this;
     }

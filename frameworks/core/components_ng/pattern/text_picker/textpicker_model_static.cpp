@@ -407,6 +407,20 @@ void TextPickerModelStatic::SetNormalTextStyle(
         TextPickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, MinFontSize, ConvertFontScaleValue(value.minFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize, Dimension(), frameNode);
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, MaxFontSize, ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize, Dimension(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, TextOverflow, value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
 }
 
 void TextPickerModelStatic::SetSelectedTextStyle(
@@ -436,6 +450,20 @@ void TextPickerModelStatic::SetSelectedTextStyle(
         value.fontFamily.value_or(selectedStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedMinFontSize, ConvertFontScaleValue(value.minFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize, Dimension(), frameNode);
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedMaxFontSize, ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize, Dimension(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedTextOverflow, value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
 }
 
 void TextPickerModelStatic::SetDisappearTextStyle(
@@ -464,6 +492,33 @@ void TextPickerModelStatic::SetDisappearTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearFontStyle,
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize, Dimension(), frameNode);
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize, Dimension(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearTextOverflow, value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
+}
+
+void TextPickerModelStatic::SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value.color.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedBackgroundColor, value.color.value(), frameNode);
+    }
+    if (value.borderRadius.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedBorderRadius, value.borderRadius.value(), frameNode);
+    }
 }
 
 void TextPickerModelStatic::SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt)
@@ -652,7 +707,6 @@ void TextPickerModelStatic::SetValues(FrameNode* frameNode, const std::vector<st
         for (uint32_t i = 0; i < options.size(); i++) {
             ValidateData(options[i], values, i, selectedValues, valuesIndex);
         }
-        TextPickerModelStatic::SetSelecteds(frameNode, valuesIndex);
     } else {
         for (uint32_t i = 0; i < values.size(); i++) {
             selectedValues.emplace_back(values[i]);

@@ -182,6 +182,11 @@ enum class PreviewTextStyle {
 
 class SpanStringBase;
 
+struct TextScrollOptions {
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -213,6 +218,7 @@ public:
     {
         return {};
     }
+    virtual void ScrollToVisible(const TextScrollOptions& options) {};
     virtual void StopEditing() {}
 
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
@@ -280,6 +286,7 @@ public:
     }
 
     virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) {};
+    virtual void DeleteBackward() {};
 
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
@@ -303,9 +310,7 @@ public:
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
     virtual void SetSelectDetectEnable(bool value) = 0;
-    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void ResetSelectDetectEnable() = 0;
-    virtual void ResetSelectDetectConfig() = 0;
     virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void ResetPlaceholderColor() = 0;
@@ -433,9 +438,16 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};
     virtual void ResetTextAreaScrollBarColor() {};
+    virtual void SetTextDirection(TextDirection value) {}
+    virtual void ResetTextDirection() {}
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

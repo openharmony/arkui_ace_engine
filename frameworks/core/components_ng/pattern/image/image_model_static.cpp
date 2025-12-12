@@ -152,6 +152,41 @@ void ImageModelStatic::SetAlt(FrameNode* frameNode, const std::optional<ImageSou
     }
 }
 
+void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        if (ImageSourceInfo::ResolveURIType(src.value().GetSrc()) == SrcType::NETWORK) {
+            ImageSourceInfo defaultSrcInfo("");
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, defaultSrcInfo, frameNode);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltError, frameNode);
+    }
+}
+
+void ImageModelStatic::SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, frameNode);
+    }
+}
+
+void ImageModelStatic::SetSupportSvg2(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportSvg2(enable);
+}
+
+void ImageModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
+}
+
 void ImageModelStatic::SetImageInterpolation(
     FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
@@ -211,6 +246,16 @@ void ImageModelStatic::SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
+}
+
+void ImageModelStatic::SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (hdrBrightness) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, *hdrBrightness, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP

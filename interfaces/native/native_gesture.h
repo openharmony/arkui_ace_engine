@@ -850,7 +850,7 @@ ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
 * supported.
 * @since 22
 */
-int32_t OH_ArkUI_LongPressGesture_GetAllowableMovement(
+ArkUI_ErrorCode OH_ArkUI_LongPressGesture_GetAllowableMovement(
     ArkUI_GestureRecognizer* recognizer, double* allowableMovement);
 
 /**

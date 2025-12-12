@@ -3790,7 +3790,7 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
 
 void SheetPresentationPattern::OnWillAppear()
 {
-    isOnAppearing_ = true;
+    // isOnAppearing_ should be true in  OnWillAppear, so the initial value of isOnAppearing_ is true
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
     if (onWillAppear_) {
         onWillAppear_();
@@ -4038,6 +4038,8 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     }
     if (!sheetObject->CheckIfUpdateObject(newType)) {
         sheetObject->UpdateSheetType(newType);
+        // need delete after popup object
+        ResetPopupScrollUserDefinedIdealSize(newType);
         return;
     }
     if (newType == SheetType::SHEET_SIDE) {
@@ -4061,6 +4063,17 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     InitSheetMode();
     isFirstInit_ = false;
     AvoidAiBar();
+}
+
+void SheetPresentationPattern::ResetPopupScrollUserDefinedIdealSize(SheetType newType)
+{
+    if (newType == SheetType::SHEET_POPUP) {
+        auto scrollNode = GetSheetScrollNode();
+        CHECK_NULL_VOID(scrollNode);
+        auto props = scrollNode->GetLayoutProperty();
+        CHECK_NULL_VOID(props);
+        props->ClearUserDefinedIdealSize(true, true);
+    }
 }
 
 void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resObj,

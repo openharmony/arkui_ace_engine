@@ -102,7 +102,7 @@ Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasure_callbackImpl(Ark_C
         auto res = (*onMeasureFunc)(info);
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_CustomSpanMetrics>(res));
     };
-    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_CustomSpanMeasureInfo_CustomSpanMetrics,
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_CustomSpanMeasureInfo_CustomSpanMetrics,
         std::function<void(Ark_CustomSpanMeasureInfo, Callback_CustomSpanMetrics_Void)>>(handler);
     return callback;
 }
@@ -132,7 +132,7 @@ Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_CustomSp
         CHECK_NULL_VOID(arkCtxPtr);
         (*onDrawFunc)(*arkCtxPtr, Converter::Convert<CustomSpanOptions>(arkInfo));
     };
-    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_DrawContext_CustomSpanDrawInfo_Void,
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_DrawContext_CustomSpanDrawInfo_Void,
         std::function<void(Ark_DrawContext, Ark_CustomSpanDrawInfo)>>(handler);
     return callback;
 }

@@ -27,6 +27,7 @@
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -186,7 +187,7 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
     return touchOptimizer_;
 }
 
-const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
 }
@@ -1331,7 +1332,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<MockAccessibilityManager>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockAccessibilityManager>>();
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -1560,6 +1561,21 @@ std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
 }
 
 std::string NG::PipelineContext::GetCurrentPageNameCallback()
+{
+    return "";
+}
+
+const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo()
+{
+    return nullptr;
+}
+
+std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+{
+    return "";
+}
+
+std::string NG::PipelineContext::GetCurrentPageName()
 {
     return "";
 }

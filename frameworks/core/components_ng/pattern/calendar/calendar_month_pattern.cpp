@@ -644,7 +644,7 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     if (IsLargeSize(theme)) {
         gregorianDayHeight = GetDaySize(theme).ConvertToPx();
     }
-    auto browHeight = weekHeight + weekAndDayRowSpace - gregorianDayHeight;
+    auto browHeight = weekHeight + weekAndDayRowSpace - gregorianDayHeight - (rowSpace / 2);
     auto maxHeight = host->GetGeometryNode()->GetFrameSize().Height();
     auto maxWidth = host->GetGeometryNode()->GetFrameSize().Width();
     if ((offset.GetX() < 0) || (offset.GetX() > maxWidth) || (offset.GetY() < browHeight) ||
@@ -653,10 +653,12 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     }
     auto height = offset.GetY() - browHeight;
     int32_t y =
-        height < (dayHeight + rowSpace / 2) ? 0 : (height - dayHeight - rowSpace / 2) / (dayHeight + rowSpace) + 1;
-    int32_t x = offset.GetX() < (dayWidth + colSpace / 2)
-                    ? 0
-                    : (offset.GetX() - dayWidth - colSpace / 2) / (dayWidth + colSpace) + 1;
+        LessNotEqual(height, (dayHeight + rowSpace)) ? 0 : (height - dayHeight - rowSpace) / (dayHeight + rowSpace) + 1;
+    int32_t x =
+        LessNotEqual((offset.GetX() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx()), (dayWidth + colSpace / 2))
+            ? 0
+            : ((offset.GetX() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx()) - dayWidth - colSpace / 2) /
+                      (dayWidth + colSpace) + 1;
     auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (textDirection == TextDirection::RTL) {
         x = columnsOfData - x - 1;

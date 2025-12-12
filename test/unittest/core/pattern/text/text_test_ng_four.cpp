@@ -383,19 +383,22 @@ HWTEST_F(TextTestNgFour, HandleOnCopy001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call HandleOnCopy function when textSelector is valid and textStart is equal to textEnd
-     * @tc.steps: step3. call HandleOnCopy function when textSelector is not valid and textStart < 0
-     * @tc.expected: selectOverlay is closed
+     * @tc.steps: step3. call HandleOnCopy function when textSelector is not valid and textStart < 0.
+     * @tc.expected: selectOverlay is closed.
      */
-    std::vector<std::vector<int32_t>> params = { { 2, 2 }, { 1, 20 } };
+    std::vector<std::vector<int32_t>> params = { { 2, 2 }, { 1, 20 }, { -1, -1 } };
     for (int turn = 0; turn < params.size(); turn++) {
         pattern->textSelector_.Update(params[turn][0], params[turn][1]);
         pattern->HandleOnCopy();
         if (turn == 0) {
             EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
             EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
-        } else {
+        } else if (turn == 1) {
             EXPECT_EQ(pattern->textSelector_.GetTextStart(), 1);
             EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+        } else {
+            EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+            EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
         }
     }
 }

@@ -21,6 +21,7 @@
 #include "base/log/ace_trace.h"
 
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace::NG {
@@ -89,8 +90,19 @@ static void PostTaskToUV(uv_loop_t* loop)
     }
 }
 
+static void WorkerOnTerminated(void* arg)
+{
+    LOGI("The worker is being destroyed.");
+    EnvWithStatus* envWithStatus = static_cast<EnvWithStatus*>(arg);
+    CHECK_NULL_VOID(envWithStatus);
+
+    std::lock_guard<std::mutex> lock(envWithStatus->mutex);
+    envWithStatus->env = nullptr;
+    return;
+}
+
 UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
-    :env_(env)
+    :statusEnv_(env)
 {
     if (env == nullptr) {
         LOGE("env is null");
@@ -101,11 +113,20 @@ UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
         LOGE("native engine is null");
         return;
     }
+    napi_add_env_cleanup_hook(env, WorkerOnTerminated, &statusEnv_);
     threadId_ = engine->GetTid();
     auto uvLoop = engine->GetUVLoop();
     if (uvLoop && !IsMainThread()) {
         uv_register_task_to_worker(uvLoop, (uv_execute_specify_task)PostTaskToUV);
         uv_async_send(&uvLoop->wq_async);
+    }
+}
+
+UVTaskWrapperImpl::~UVTaskWrapperImpl()
+{
+    std::lock_guard<std::mutex> lock(statusEnv_.mutex);
+    if (statusEnv_.env != nullptr) {
+        napi_remove_env_cleanup_hook(statusEnv_.env, WorkerOnTerminated, &statusEnv_);
     }
 }
 
@@ -117,8 +138,9 @@ bool UVTaskWrapperImpl::WillRunOnCurrentThread()
 void UVTaskWrapperImpl::Call(
     const TaskExecutor::Task& task, PriorityType priorityType)
 {
+    std::lock_guard<std::mutex> lock(statusEnv_.mutex);
     if ((priorityType < PriorityType::LOW)) {
-        auto engine = reinterpret_cast<NativeEngine*>(env_);
+        auto engine = reinterpret_cast<NativeEngine*>(statusEnv_.env);
         if (engine == nullptr) {
             LOGE("native engine is null");
             return;
@@ -132,7 +154,7 @@ void UVTaskWrapperImpl::Call(
         }
         return;
     }
-    napi_send_event(env_, [work = std::make_shared<UVWorkWrapper>(task)] {
+    napi_send_event(statusEnv_.env, [work = std::make_shared<UVWorkWrapper>(task)] {
         ContainerScope scope(ContainerScope::CurrentLocalId());
         (*work)();
     }, napi_eprio_high);
@@ -146,7 +168,7 @@ void UVTaskWrapperImpl::Call(
         return;
     }
 
-    auto callInWorkerTask = [task, delayTime, env = env_] () {
+    auto callInWorkerTask = [task, delayTime, env = statusEnv_.env] () {
         UVTaskWrapperImpl::CallInWorker(task, delayTime, env);
     };
 

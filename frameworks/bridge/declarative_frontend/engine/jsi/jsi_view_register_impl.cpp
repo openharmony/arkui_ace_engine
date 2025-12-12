@@ -48,6 +48,7 @@
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
@@ -537,6 +538,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     { "FormButton", JSFormButton::JSBind },
@@ -776,6 +778,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "AbilityComponent", JSAbilityComponent::JSBind },
@@ -903,6 +906,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
@@ -942,6 +946,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradient::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
     }
@@ -1080,6 +1085,7 @@ void JsBindFormViews(
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
         JSLinearGradient::JSBind(globalObj);
+        JSColorMetricsLinearGradient::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
@@ -1099,6 +1105,11 @@ void JsBindFormViews(
         TAG_LOGI(AceLogTag::ACE_FORM, "register all form components, isReload:%{public}d", isReload);
         RegisterAllFormModule(globalObj, nativeEngine);
     }
+}
+
+void JsBindFormViewsForJsXNode(BindingTarget globalObj)
+{
+    JSScopeUtil::JSBind(globalObj);
 }
 
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)

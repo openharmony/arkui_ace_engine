@@ -1073,11 +1073,13 @@ public:
     {
         HandleOnSelectAll(true);
     }
+    void HandleOnPasswordVault();
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
     bool IsShowTranslate();
     bool IsShowSearch();
+    bool IsShowAutoFill();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1186,6 +1188,8 @@ public:
                static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
 
+    void ScheduleTaskWithLayoutDeferral(std::function<void()>&& task);
+    void OnScrollToVisible(const TextScrollOptions& options);
     void StopEditing();
     void StopEditingMultiThread();
 
@@ -1256,7 +1260,6 @@ public:
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
-    void TextAreaInputRectUpdate(RectF& rect);
     void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
@@ -1278,10 +1281,13 @@ public:
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();
     void DumpScaleInfo();
+    void DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty);
+    void DumpInputConfigInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty);
     std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
@@ -1384,8 +1390,6 @@ public:
         return lastClickTimeStamp_;
     }
 
-    void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
-
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -1461,7 +1465,10 @@ public:
         return transformContentRect;
     }
 
-    bool ProcessAutoFill(bool& isPopup, bool isFromKeyBoard = false, bool isNewPassWord = false);
+    bool ProcessAutoFill(bool& isPopup, bool ignoreFillType = false, bool isNewPassWord = false,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void ProcessAutoFillAndKeyboard(SourceType sourceType = SourceType::NONE, bool ignoreFillType = false,
+        bool isNewPassWord = false, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void SetAutoFillUserName(const std::string& userName)
     {
         autoFillUserName_ = userName;
@@ -1485,7 +1492,6 @@ public:
     {
         autoFillOtherAccount_ = otherAccount;
     }
-
     std::vector<RectF> GetPreviewTextRects() const;
 
     bool GetIsPreviewText() const
@@ -1757,6 +1763,7 @@ public:
     void UpdateMarginResource() override;
     void SetBackBorderRadius();
     void OnColorModeChange(uint32_t colorMode) override;
+    void OnFocusCustomKeyboardChange();
 
     void ProcessDefaultStyleAndBehaviors();
     void ProcessDefaultStyleAndBehaviorsMultiThread();
@@ -1787,14 +1794,23 @@ public:
     void SetSelectDetectEnable(bool value);
     bool GetSelectDetectEnable();
     void ResetSelectDetectEnable();
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
-    std::vector<TextDataDetectType> GetSelectDetectConfig();
-    void ResetSelectDetectConfig();
     void SelectAIDetect();
     void HandleAIMenuOption(const std::string& labelInfo = "");
     void UpdateAIMenuOptions();
     bool MaybeNeedShowSelectAIDetect();
+    void SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode);
+    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
+    bool NeedCloseKeyboard() override;
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
+    void SetPlaceholderColorInfo(const std::string& info)
+    {
+        if (placeholderColorInfo_.length() > 2000) { // Clear when exceeding 2000 characters
+            placeholderColorInfo_.clear();
+        }
+        placeholderColorInfo_.append("[" + info + "]");
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1846,8 +1862,6 @@ protected:
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool selectDetectEnabledIsUserSet_ = false;
     bool selectDetectEnabled_ = true;
-    bool selectDetectConfigIsUserSet_ = false;
-    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -1921,6 +1935,7 @@ private:
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
+    void RequestCustomKeyboardBuilder();
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void CancelDelayProcessOverlay();
@@ -2010,6 +2025,7 @@ private:
     void PaintCancelRect();
     void PaintUnitRect();
     void PaintPasswordRect();
+    void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool CancelNodeIsShow()
     {
         auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -2033,7 +2049,8 @@ private:
     void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
-    bool CheckAutoFill(bool isFromKeyBoard = false);
+    bool CheckAutoFill(bool ignoreFillType = false,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -2044,7 +2061,7 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
     void ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
@@ -2117,6 +2134,8 @@ private:
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void ProcessAutoFillOnPaste();
+    void HandleOnPasteCommon(const std::string& data);
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
@@ -2129,10 +2148,13 @@ private:
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
+    void GetSelectRectWithBlank(std::vector<RectF>& selectedRects);
+    void ScrollToVisible(const TextScrollOptions& options);
     void InitTextRect();
     void HandleInputOperations();
     void ReprocessAllRelatedToLPX();
     bool HasLPXBorder();
+    uint32_t GetWindowIdFromPipeline();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif
@@ -2357,6 +2379,7 @@ private:
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
     RelatedLPXInfo lpxInfo_;
+    std::string placeholderColorInfo_;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

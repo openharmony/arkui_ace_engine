@@ -49,7 +49,7 @@ import {
   GridItem, Grid, ForEach, TransitionType, VerticalAlign, TextAlign, Alignment, Position, ICurve, AnimateParam,
   TranslateOptions, $r, TransitionEffect
 } from '@ohos.arkui.component'
-import { State, Observed, Watch, Link } from '@ohos.arkui.stateManagement'
+import { State, Observed, Watch, Link, PropRef } from '@ohos.arkui.stateManagement'
 
 //  declaring Constants
 const COL_IMAGE_TEXT: number = 3;
@@ -119,10 +119,10 @@ const DELETE = 'delete';
 
 // declaring interface, enum, class
 export interface GridObjectSortComponentItem {
-  id: number | string;
+  id: Int | string;
   text: ResourceStr;
   selected: boolean;
-  order: number;
+  order: Int;
   url?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
   visibility?: Visibility;
@@ -130,7 +130,7 @@ export interface GridObjectSortComponentItem {
 
 export interface GridObjectSortComponentOptions {
   type?: GridObjectSortComponentType;
-  imageSize?: number | Resource;
+  imageSize?: Int | Resource;
   normalTitle?: ResourceStr;
   editTitle?: ResourceStr;
   showAreaTitle?: ResourceStr;
@@ -168,7 +168,7 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 @Component
 export struct GridObjectSortComponent {
   // component configuration data
-  @State options: GridObjectSortComponentOptions = {} as GridObjectSortComponentOptions;
+  @PropRef options: GridObjectSortComponentOptions = {} as GridObjectSortComponentOptions;
   // data
   dataList: GridObjectSortComponentItem[] = [] as GridObjectSortComponentItem[];
   // Drag and drop edit data,  selected === true
@@ -195,6 +195,7 @@ export struct GridObjectSortComponent {
   @State hoverId: number | string = '';
   // component state : edit === true   unedited === false
   @State @Watch('onGridComStateChange') gridComState: boolean = false;
+  @State comState: boolean = false;
   @State menuSwitch: boolean = false;
   // component width
   @State areaWidth: number = 0;
@@ -266,9 +267,9 @@ export struct GridObjectSortComponent {
 
   // component rendering
   aboutToAppear() {
-    this.dataList = this.dataList.slice(0, 50);
+    this.dataList.length = 50
     this.selected =
-      this.dataList && this.deduplicate(this.dataList).filter(val => val.selected !== undefined).sort(this.sortBy());
+      this.dataList && this.deduplicate(this.dataList).filter(val => val.selected).sort(this.sortBy());
     this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(val => !val.selected).sort(this.sortBy());
     this.copySelected = this.selected.slice();
     this.copyUnSelected = this.unSelected.slice();
@@ -291,7 +292,6 @@ export struct GridObjectSortComponent {
       let uiContent: UIContext = this.getUIContext();
       let hostContext: common.UIAbilityContext = uiContent.getHostContext() as common.UIAbilityContext
       this.applicationContext = hostContext.getApplicationContext();
-      this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
     } catch (paramError) {
       let code = (paramError as ClassCastError).code;
       let message = (paramError as ClassCastError).message;
@@ -304,6 +304,10 @@ export struct GridObjectSortComponent {
     }, 500);
     this.bundleName =
       (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    accessibility.onScreenReaderStateChange((state: boolean) => {
+      // 上面的state  就是无障碍的状态
+      this.isOpenAccessibility = state;
+    });
   }
 
   // get adaptive for symbol font size
@@ -314,16 +318,16 @@ export struct GridObjectSortComponent {
     }
     fontScale = Math.min(MIN_SYMBOL_FONT_SCALE, fontScale);
     fontScale = Math.max(fontScale, MIN_FONT_SCALE);
-    return `${SYMBOL_SIZE_12FP}vp`;
+    return (fontScale * SYMBOL_SIZE_12FP).toString() + 'vp';
   }
 
   // translate option imageSize to symbol fontSize
-  getSymbolFontSizeFrom(imageSize?: number | Resource | undefined): string | Resource {
+  getSymbolFontSizeFrom(imageSize?: Int | Resource | undefined): string | Resource {
     if (imageSize === undefined) {
       return SYMBOL_DEFAULT;
     }
     if (typeof imageSize === 'number') {
-      return `${imageSize as number}vp`;
+      return `${imageSize as Int}vp`;
     }
     return imageSize as Resource;
   }
@@ -368,17 +372,11 @@ export struct GridObjectSortComponent {
       duration: ENTER_EXIT_ICON_DURATION,
       curve: COMMON_BEZIER as ICurve,
     }, () => {
-      this.gridComState = false;
+      this.comState = false;
     });
     this.menuSwitch = false;
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
-    if (this.callbackId) {
-      this.applicationContext.offEnvironment(this.callbackId as Int,
-        (err: BusinessError<void> | null): void => {
-          hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
-        })
-    }
   }
 
   // Array deduplication
@@ -404,7 +402,7 @@ export struct GridObjectSortComponent {
 
   sortBy() {
     return (a: GridObjectSortComponentItem, b: GridObjectSortComponentItem) => {
-      return a.order - b.order;
+      return (a.order - b.order) as Number;
     };
   }
 
@@ -431,9 +429,7 @@ export struct GridObjectSortComponent {
     this.editGridDataLength = this.selected.length;
     this.calcGridHeight();
     this.isPointToAddTitleBarEditButton = true;
-    if (typeof this.onCancel === 'function') {
-      this.onCancel?.();
-    }
+    this.onCancel && this.onCancel?.();
   }
 
   // Enter edit function
@@ -492,9 +488,7 @@ export struct GridObjectSortComponent {
       this.selected = selected;
       this.unSelected = unSelected;
       this.calcGridHeight();
-      if (typeof this.onSave === 'function') {
-        this.onSave?.(selected, unSelected);
-      }
+      this.onSave && this.onSave?.(selected, unSelected);
     });
     setTimeout(() => {
       this.saveClick = false;
@@ -567,7 +561,7 @@ export struct GridObjectSortComponent {
     this.getUIContext()?.animateTo({
       curve: REMOVE_ADD_SPRING as ICurve, onFinish: () => {
         this.scaleIcon = 1;
-        this.selected.splice(1);
+        this.selected.splice(currentIndex, 1);
         this.unSelected.unshift(content);
         this.calcGridHeight();
         this.editGridDataLength = this.editGridDataLength - 1;
@@ -604,11 +598,11 @@ export struct GridObjectSortComponent {
   }
 
   getNewData(data: GridObjectSortComponentItem[],
-    state: boolean, startIndex: number): GridObjectSortComponentItem[] {
+    state: boolean, startIndex: Int): GridObjectSortComponentItem[] {
     data.forEach((val, index) => {
       if (val && typeof val === 'object') {
         val.selected = state;
-        val.order = startIndex + index;
+        val.order = startIndex + (index as Int);
         val.visibility = Visibility.Visible;
       }
     });
@@ -856,7 +850,7 @@ export struct GridObjectSortComponent {
   }
 
   // Add area movement function
-  getAddAreaItemTranslate(index: number): PositionXY {
+  getAddAreaItemTranslate(index: Int): TranslateOptions {
     // When an item is removed, the added area is moved rightward.
     if (this.clickRemoveBtn) {
       let addItemRightMove = this.getAddItemRightMove(index);
@@ -894,14 +888,14 @@ export struct GridObjectSortComponent {
           if (url === undefined) {
             SymbolGlyph()
               .draggable(false)
-              .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .height(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
+              .width(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
-              .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .height(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
+              .width(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
               .attributeModifier(url as SymbolGlyphModifier)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
               .symbolEffect(new SymbolEffect(), false)
@@ -982,6 +976,14 @@ export struct GridObjectSortComponent {
   }
 
   @Builder
+  PixelMapBuilderValue() {
+    if (this.dragContent) {
+      this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text ?? '');
+    }
+
+  }
+
+  @Builder
   HeaderTitleBuilder() {
     Column() {
       ComposeTitleBar({
@@ -1006,11 +1008,19 @@ export struct GridObjectSortComponent {
         this.pointToAddTitleBarEditButton();
       } else {
         if (this.isPointToEditTitleBarSaveButton) {
-          let resourceMan = resourceManager.getSysResourceManager()
-          let eventInfo: accessibility.EventInfo =
-            new accessibility.EventInfo('announceForAccessibility', this.bundleName, 'common');
-          eventInfo.textAnnouncedForAccessibility = resourceMan?.
-          getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) as string;
+          try {
+            let resourceMan = resourceManager.getSysResourceManager()
+            let eventInfo: accessibility.EventInfo =
+              new accessibility.EventInfo('announceForAccessibility', this.bundleName, 'common');
+            eventInfo.textAnnouncedForAccessibility = resourceMan?.
+            getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) as string;
+            accessibility.sendAccessibilityEvent(eventInfo);
+          } catch (paramError) {
+            let code = (paramError as BusinessError)?.code;
+            let message = (paramError as BusinessError)?.message;
+            hilog.error(0x3900, 'Ace',
+              `GridObjectSortComponent Faild to get textAnnouncedForAccessibility param error: ${code}, ${message}`);
+          }
         }
       }
     })
@@ -1097,6 +1107,24 @@ export struct GridObjectSortComponent {
             this.getStringByResourceToken(
               ACCESSIBILITY_UNSELECTED_BUTTON, this.getAccessibilityText(select.text))
           )
+        SymbolGlyph(this.imageTextRemoveIcon(select))
+          .fontSize(SYMBOL_SIZE_24VP)
+          .fontWeight(SYMBOL_WEIGHT)
+          .draggable(false)
+          .fontColor([$r('sys.color.ohos_id_color_secondary')])
+          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible :
+            Visibility.Hidden)
+          .width(ICON_SIZE)
+          .height(ICON_SIZE)
+          .position({
+            x: this.blockWidth - 40,
+            y: -MARGIN_EIGHT
+          })
+          .onClick(() => this.handleDeleteClick(select))
+          .accessibilityLevel(YES)
+          .accessibilityText(
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
+          )
       }
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
@@ -1136,7 +1164,7 @@ export struct GridObjectSortComponent {
           this.arrayUnSelectIsChange = 2;
           this.scaleIcon = 1;
           this.selected.push(content);
-          this.unSelected.splice(1);
+          this.unSelected.splice(index, 1);
           this.calcGridHeight();
           this.addItemMoveX = 0;
           this.addItemMoveY = 0;
@@ -1355,7 +1383,7 @@ export struct GridObjectSortComponent {
           }
           .onHover((isHover: boolean, event: HoverEvent) => {
             if (isHover) {
-              this.hoverId = item.id;
+              this.hoverId = item.id as Int;
             } else {
               this.hoverId = '';
             }
@@ -1490,7 +1518,7 @@ export struct GridObjectSortComponent {
             this.scaleIcon = 1;
             this.scaleAddIcon = 0;
             this.selected.push(item);
-            this.unSelected.splice(1);
+            this.unSelected.splice(index, 1);
             this.calcGridHeight();
             this.arrayUnSelectIsChange = 2;
             this.addItemMoveX = 0;
@@ -1557,7 +1585,7 @@ export struct GridObjectSortComponent {
           this.scaleIcon = 1;
           this.scaleAddIcon = 0;
           this.selected.push(item);
-          this.unSelected.splice(1);
+          this.unSelected.splice(index, 1);
           this.calcGridHeight();
           this.arrayUnSelectIsChange = 2;
           this.addItemMoveX = 0;
@@ -1604,7 +1632,7 @@ export struct GridObjectSortComponent {
             }
             .onHover((isHover: boolean, event: HoverEvent) => {
               if (isHover) {
-                this.hoverId = select.id;
+                this.hoverId = select.id as Int;
               } else {
                 this.hoverId = '';
               }
@@ -1654,7 +1682,7 @@ export struct GridObjectSortComponent {
             )
           }
           .clip(false)
-
+          .translate(this.getAddAreaItemTranslate(index) as TranslateOptions)
           .animation({
             curve: this.isStartDrag ? DRAG_SPRING as ICurve :
               index === this.selectedIndex ? REMOVE_ADD_SPRING as ICurve : DRAG_SPRING as ICurve,
@@ -1721,6 +1749,33 @@ export struct GridObjectSortComponent {
         duration: ENTER_EXIT_ICON_DURATION,
         curve: this.imageText ? REMOVE_ADD_SPRING as ICurve : COMMON_BEZIER as ICurve,
       } as AnimateParam : { duration: 0 } as AnimateParam)
+      .onItemDragStart((event: ItemDragInfo, itemIndex: Int) => {
+        this.itemIndex = itemIndex;
+        this.selectedIndex = -1;
+        if (!this.gridComState) {
+          return undefined;
+        }
+        this.isStartDrag = true;
+        this.insertIndex = itemIndex;
+        this.dragContent = this.selected[itemIndex as Int];
+        this.dragContentIndex = itemIndex;
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+          this.getAccessibilityText(this.dragContent?.text ?? ''));
+        this.sendAccessibility();
+        return this.PixelMapBuilderValue;
+        return undefined
+      })
+      .onItemDrop((event: ItemDragInfo, itemIndex: Int, insertIndex: Int, isSuccess: Boolean) => {
+        this.insertItem(itemIndex, insertIndex);
+      })
+      .onItemDragMove(
+        (event: ItemDragInfo, itemIndex: Int, insertIndex: Int) =>
+        this.onDragMoveEvent(event, itemIndex, insertIndex)
+      )
+      .onItemDragLeave((event: ItemDragInfo, itemIndex: Int) => {
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_ILLEGAL_AREA);
+        this.sendAccessibility();
+      })
     }
     .accessibilityLevel((this.selected.length === 0) ? YES : NO)
     .parallelGesture(
@@ -1787,8 +1842,8 @@ export struct GridObjectSortComponent {
     })
     this.isStartDrag = false;
     if (insertIndex !== -1) {
-      this.selected.splice(1);
-      this.selected.splice(0);
+      this.selected.splice(itemIndex, 1);
+      this.selected.splice(insertIndex, 0, this.dragContent);
       this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(insertIndex / this.colNum) + 1,

@@ -90,6 +90,11 @@ std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
                            ? "MarqueeStartPolicy.DEFAULT"
                            : "MarqueeStartPolicy.ON_FOCUS");
 
+    jsonValue->Put("spacing", GetTextMarqueeSpacing().value_or(CalcDimension()).ToString().c_str());
+    jsonValue->Put("updatePolicy",
+        GetTextMarqueeUpdatePolicy().value_or(MarqueeUpdatePolicy::DEFAULT) == MarqueeUpdatePolicy::DEFAULT
+                           ? "MarqueeUpdatePolicy.DEFAULT"
+                           : "MarqueeUpdatePolicy.PRESERVE_POSITION");
     return jsonValue->ToString();
 }
 
@@ -102,6 +107,8 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
     UpdateTextMarqueeDelay(json->GetInt("delay"));
     UpdateTextMarqueeFadeout(json->GetBool("fadeout"));
     UpdateTextMarqueeStartPolicy(V2::ConvertWrapStringToMarqueeStartPolicy(json->GetString("startPolicy")));
+    UpdateTextMarqueeUpdatePolicy(V2::ConvertWrapStringToMarqueeUpdatePolicy(json->GetString("updatePolicy")));
+    UpdateTextMarqueeSpacing(Dimension::FromString(json->GetString("spacing")));
 }
 
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -162,6 +169,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str(), filter);
     json->PutExtAttr("textAlign",
         V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
+    json->PutExtAttr(
+        "textDirection", StringUtils::ToString(GetTextDirection().value_or(TextDirection::INHERIT)).c_str(), filter);
     json->PutExtAttr("textVerticalAlign", V2::ConvertWrapTextVerticalAlignToString(
         GetTextVerticalAlign().value_or(TextVerticalAlign::BASELINE)).c_str(), filter);
     json->PutExtAttr("textOverflow",
@@ -194,11 +203,15 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("optimizeTrailingSpace", GetOptimizeTrailingSpace().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("compressLeadingPunctuation",
+        GetCompressLeadingPunctuation().value_or(false) ? "true" : "false", filter);
     if (HasLineHeightMultiply()) {
         json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(), filter);
     }
     json->PutExtAttr("maxLineHeight", GetMaximumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);
     json->PutExtAttr("minLineHeight", GetMinimumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);
+    json->PutExtAttr("includeFontPadding", std::to_string(GetIncludeFontPadding().value_or(false)).c_str(), filter);
+    json->PutExtAttr("fallbackLineSpacing", std::to_string(GetFallbackLineSpacing().value_or(false)).c_str(), filter);
 
     if (GetTextEffectStrategyValue(TextEffectStrategy::NONE) != TextEffectStrategy::NONE) {
         auto jsonNumericTransiton = JsonUtil::Create(true);
@@ -208,6 +221,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         jsonNumericTransiton->Put("enableBlur", enableBlur.c_str());
         json->PutExtAttr("numericTextTransitionOptions", jsonNumericTransiton->ToString().c_str(), filter);
     }
+    json->PutExtAttr("selectedDragPreviewStyle",
+        GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

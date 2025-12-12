@@ -937,7 +937,8 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
     if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
-        JSViewAbstract::ParseSheetCallback(info[INDEX_ONE], onAppearCallback, onDisappearCallback, shouldDismissFunc,
+        JSViewAbstract::ParseSheetCallback(info, info[INDEX_ONE], onAppearCallback, onDisappearCallback,
+            shouldDismissFunc,
             onWillDismissCallback, onWillAppearCallback, onWillDisappearCallback, onHeightDidChangeCallback,
             onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback, sheetSpringBackFunc);
         JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle);

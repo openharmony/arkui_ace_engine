@@ -143,12 +143,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setFontColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setFontColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -193,12 +193,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setMenuBackgroundColorTest, TestSize.Level
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setMenuBackgroundColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setMenuBackgroundColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -243,12 +243,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTest, TestSize.Lev
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setSelectedOptionBgColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setSelectedOptionBgColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -293,12 +293,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTest, TestSize.L
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setSelectedOptionFontColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setSelectedOptionFontColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -343,12 +343,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTest, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setOptionBgColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setOptionBgColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -393,12 +393,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionFontColorTest, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
-    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123401);
+    Opt_ResourceColor numberInt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123401);
     modifier_->setOptionFontColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f);
+    Opt_ResourceColor numberFlt = ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setOptionFontColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal4, "#00000000");
@@ -1211,7 +1211,7 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
         .strokeWidth = Converter::ArkValue<Opt_Dimension>("11px"),
         .startMargin = Converter::ArkValue<Opt_Dimension>(55.5f),
         .endMargin = Converter::ArkValue<Opt_Dimension>("77px"),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456),
     };
     divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);

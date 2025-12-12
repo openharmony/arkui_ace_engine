@@ -559,7 +559,6 @@ HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext001, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(node, nullptr);
     frameNode->MountToParent(node);
-    bool isTargetNodeInSubwindow = false;
     auto pipelineContext = MockPipelineContext::GetCurrent();
     frameNode->context_ = AceType::RawPtr(pipelineContext);
     MockSystemProperties::g_isSuperFoldDisplayDevice = true;
@@ -572,34 +571,48 @@ HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext001, TestSize.Level1)
     AceEngine::Get().AddContainer(0, containerOne);
     AceEngine::Get().AddContainer(1, containerTwo);
     SubwindowManager::GetInstance()->AddParentContainerId(0, 1);
-    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
+    auto context = dialogManager.GetMainPipelineContext(frameNode);
     EXPECT_EQ(context, pipelineContext);
 }
 
 /**
- * @tc.name: GetMainPipelineContext002
- * @tc.desc: Test GetMainPipelineContext
+ * @tc.name: BindKeyboardWithNode002
+ * @tc.desc: Test BindKeyboardWithNode.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext002, TestSize.Level1)
+HWTEST_F(OverlayManagerTestFourNg, BindKeyboardWithNode002, TestSize.Level1)
 {
-    DialogManager dialogManager;
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    RefPtr<FrameNode> frameNode1 = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
     ASSERT_NE(frameNode, nullptr);
-    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(node, nullptr);
-    frameNode->MountToParent(node);
-    bool isTargetNodeInSubwindow = true;
-    auto pipelineContext = MockPipelineContext::GetCurrent();
-    frameNode->context_ = AceType::RawPtr(pipelineContext);
-    auto pipeline = frameNode->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
-    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
-    containerOne->isSubContainer_ = true;
-    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
-    AceEngine::Get().AddContainer(0, containerOne);
-    auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
-    EXPECT_EQ(context, AceType::Claim(pipeline));
+    auto pipeline = rootNode->GetContext();
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    pipeline->SetTextFieldManager(textFieldManager);
+    OverlayManager overlayManager(rootNode);
+    overlayManager.customKeyboardMap_.insert({ TWO, frameNode });
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());;
+    int32_t targetId = TARGET_ID;
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto targetNode = FrameNode::CreateFrameNode("tag", TARGET_ID_NEW, pattern, false);
+    WeakPtr<UINode> weakNode = targetNode;
+    overlayManager.rootNodeWeak_ = weakNode;
+    overlayManager.BindKeyboardWithNode(customNode, targetId);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    customNode = AceType::MakeRefPtr<FrameNode>("node", 0, AceType::MakeRefPtr<Pattern>());
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    textFieldManager->SetCustomKeyboardId(0);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    overlayManager.oldTargetId_ = 3;
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    overlayManager.oldTargetId_ = 2;
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), true);
+    overlayManager.oldTargetId_ = -1;
+    overlayManager.customKeyboardMap_.insert({ -1, frameNode1 });
+    overlayManager.BindKeyboardWithNode(customNode, targetId);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
 }
 } // namespace OHOS::Ace::NG

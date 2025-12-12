@@ -283,8 +283,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
                         }
                     }, builder as () => void);
-                }
-                else {
+                } else {
                     this.__builder0?.builder();
                 }
                 setNeedCreate(result);

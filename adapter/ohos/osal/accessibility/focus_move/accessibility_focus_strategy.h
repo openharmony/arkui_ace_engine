@@ -43,6 +43,7 @@ enum class AceFocusMoveResult : int32_t {
     FIND_FAIL_IN_CHILDTREE,
     FIND_FAIL_IN_SCROLL,
     FIND_FAIL_LOST_NODE,
+    FIND_FAIL_IN_ROOT_TYPE,
 };
 
 struct AceFocusMoveDetailCondition {
@@ -100,6 +101,21 @@ public:
     {
         return false;
     }
+
+    virtual bool IsHeaderFooterInScroll()
+    {
+        return false;
+    }
+
+    virtual bool IsBackward()
+    {
+        return false;
+    }
+
+    virtual bool IsForward()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {
@@ -111,9 +127,10 @@ public:
     static const std::map<OHOS::Accessibility::ActionType, std::string> actionToFocusActionName;
 
     virtual bool CanAccessibilityFocus(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+    virtual bool IsRootType(const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
     std::shared_ptr<FocusRulesCheckNode> GetParentNodeStopByRootType(
-        const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode, bool& hitRootType);
 
     AceFocusMoveResult FindNextReadableNode (
         AceFocusMoveDetailCondition condition,
@@ -164,6 +181,16 @@ private:
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
+    AceFocusMoveResult IsFindNextReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult IsFindPrevReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
     virtual bool IsForceSupportScrollType(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode);
 
@@ -173,6 +200,10 @@ private:
         std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
         CheckSupportScrollAction checkAction,
         bool checkType);
+
+    AceFocusMoveResult CheckParentEarlyStop(
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     std::string GetChildrenIdsStr(
         const std::vector<std::shared_ptr<FocusRulesCheckNode>>& children);

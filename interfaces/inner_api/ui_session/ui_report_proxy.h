@@ -82,6 +82,7 @@ public:
     void SendWebText(int32_t nodeId, std::string res) override;
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void SendExeAppAIFunctionResult(uint32_t result) override;
+    void SendContentChange(ChangeType type, const std::string& simpleTree) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

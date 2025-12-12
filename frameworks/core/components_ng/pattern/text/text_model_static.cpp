@@ -382,4 +382,27 @@ void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::o
     TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
 }
 
+void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetIncludeFontPadding(frameNode, valueOpt.value_or(false));
+}
+
+void TextModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextModelNG::SetFallbackLineSpacing(frameNode, valueOpt.value_or(false));
+}
+
+void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        TextModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
 } // namespace OHOS::Ace::NG

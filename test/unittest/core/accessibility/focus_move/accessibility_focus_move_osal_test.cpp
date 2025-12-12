@@ -22,6 +22,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/properties/ui_material.h"
 
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
@@ -149,6 +150,24 @@ public:
     {
         return updateElementInfoResult_;
     }
+
+    bool CheckIsRootType(const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+    {
+        CHECK_NULL_RETURN(checkNode, false);
+        return checkNode->GetAccessibilityId() == isRootTypeId_;
+    }
+
+    bool CheckIsReadable(const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+    {
+        CHECK_NULL_RETURN(checkNode, false);
+        return checkNode->GetAccessibilityId() == isReadableId_;
+    }
+
+    bool CheckIsReadableRulesEnable()
+    {
+        // readable rules default enable
+        return true;
+    }
 public:
     bool updateOriginNodeInfoResult_ = true;
     std::shared_ptr<FocusRulesCheckNode> currentCheckNode_;
@@ -156,6 +175,8 @@ public:
     std::shared_ptr<FocusRulesCheckNode> rootCheckNode_;
     bool changeToEmbedResult_ = true;
     bool updateElementInfoResult_ = true;
+    int64_t isRootTypeId_ = -1;
+    int64_t isReadableId_ = -1;
 };
 
 /**
@@ -649,12 +670,19 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
     ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL);
 
-    // aceResult FIND_FAIL, finalNode nullptr
+    // aceResult FIND_FAIL_LOST_NODE, finalNode nullptr
     std::shared_ptr<FocusRulesCheckNode> targetNode2;
     aceResult = AceFocusMoveResult::FIND_FAIL_LOST_NODE;
     strategy.updateElementInfoResult_ = false;
-    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
+    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode2, aceResult, info);
     ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
+
+    // aceResult FIND_FAIL, finalNode nullptr
+    std::shared_ptr<FocusRulesCheckNode> targetNode3;
+    aceResult = AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE;
+    strategy.updateElementInfoResult_ = false;
+    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode3, aceResult, info);
+    ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL);
 }
 
 /**
@@ -941,4 +969,44 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition004, TestSize.L
     EXPECT_EQ(operatorCallback.mockResult_.resultType, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
 }
 
+/**
+ * @tc.name: NeedChangeToReadableNodeThroughAncestorTest001
+ * @tc.desc: NeedChangeToReadableNodeThroughAncestor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+
+    MockFocusStrategyOsal strategy(jsAccessibilityManager);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
+    bool result;
+    // frameNode -> frameNode1
+    // 1 frameNode frameNode1 not readable not rootType, return true;
+    result = strategy.NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+    EXPECT_TRUE(result);
+    // 2 frameNode1 not readable, frameNode rootType, return true;
+    strategy.isRootTypeId_ = frameNode->GetAccessibilityId();
+    result = strategy.NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+    EXPECT_TRUE(result);
+    // 3 frameNode1 not readable, frameNode readable, return true;
+    strategy.isRootTypeId_ = -1;
+    strategy.isReadableId_ = frameNode->GetAccessibilityId();
+    result = strategy.NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+    EXPECT_TRUE(result);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(frameNode->GetAccessibilityId(), targetNode->GetAccessibilityId());
+}
 } // namespace OHOS::Ace::NG

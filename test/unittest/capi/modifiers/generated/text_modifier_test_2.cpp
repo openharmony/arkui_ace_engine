@@ -198,7 +198,7 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, Test
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -289,7 +289,7 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20NumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20ResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -536,7 +536,7 @@ HWTEST_F(TextModifierTest, DISABLED_setDataDetectorConfigTestValidValues, TestSi
  */
 HWTEST_F(TextModifierTest, DISABLED_setFontFeatureTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1285,7 +1285,7 @@ HWTEST_F(TextModifierTest, setTextSelectableTestTextSelectableInvalidValues, Tes
  */
 HWTEST_F(TextModifierTest, DISABLED_setHalfLeadingTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2019,6 +2019,6 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontEnableVariableFontWeightInvalidV
  */
 HWTEST_F(TextModifierTest, DISABLED_setSelectionTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 } // namespace OHOS::Ace::NG

@@ -59,13 +59,14 @@ struct SpanParagraphStyle {
     std::optional<Dimension> textIndent;
     std::optional<Dimension> paragraphSpacing;
     std::optional<NG::DrawableLeadingMargin> drawableLeadingMargin;
+    std::optional<TextDirection> textDirection;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
         auto flag = align == other.align && textVerticalAlign == other.textVerticalAlign &&
-                    maxLines == other.maxLines && wordBreak == other.wordBreak &&
-                    textOverflow == other.textOverflow && textIndent == other.textIndent &&
-                    paragraphSpacing == other.paragraphSpacing;
+                    maxLines == other.maxLines && wordBreak == other.wordBreak && textOverflow == other.textOverflow &&
+                    textIndent == other.textIndent && paragraphSpacing == other.paragraphSpacing &&
+                    textDirection == other.textDirection;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {

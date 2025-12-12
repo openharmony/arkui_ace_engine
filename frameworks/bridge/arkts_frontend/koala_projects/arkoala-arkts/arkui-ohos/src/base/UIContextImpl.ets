@@ -15,8 +15,12 @@
 
 import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
 import { ArkUIGeneratedNativeModule } from '#components';
+import { ArkUINativeModule } from '#components'
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
+    registerNativeModuleLibraryName, wrapSystemCallback,
     runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
 import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
@@ -24,7 +28,7 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from '@ohos/arkui/UIContext';
+    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo} from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -37,7 +41,7 @@ import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
 import { ActionSheetOptions } from 'arkui/component/actionSheet';
 import { TimePickerDialogOptions } from "arkui/component/timePicker"
-import { TextPickerDialogOptions } from "arkui/component/textPicker"
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from "arkui/component/textPicker"
 import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -57,9 +61,9 @@ import { KeyProcessingMode } from 'arkui/component/focus';
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
-import { UIContextAtomicServiceBar, UIContextGetInfo } from '#generated';
+import { UIContextAtomicServiceBar, UIContextGetInfo } from 'arkui/component/idlize';
 import { GlobalScope, SheetOptions } from '#generated';
-import { default as mediaquery } from '@ohos/mediaquery';
+import { default as mediaquery } from '@ohos.mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from '#generated';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
@@ -73,8 +77,10 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
-import { IUIContext } from "arkui/component/idlize"
+import { IUIContext, SystemOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
+import { TabsController } from 'arkui/component/tabs';
+import { Scroller } from 'arkui/component/scroll';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -151,18 +157,18 @@ export class TextMenuControllerImpl extends TextMenuController {
     }
 }
 
-// export class AtomicServiceBarInternal implements AtomicServiceBar {
-    // instanceId_: int32;
-    // constructor(instanceId: int32) {
-    //     this.instanceId_ = instanceId;
-    // }
-    // public getBarRect(): Frame {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let frame = UIContextAtomicServiceBar.getBarRect();
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return frame;
-    // }
-// }
+export class AtomicServiceBarInternal implements AtomicServiceBar {
+    instanceId_: int32;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public getBarRect(): Frame {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let frame = UIContextAtomicServiceBar.getBarRect();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return frame;
+    }
+}
 
 export class FocusControllerImpl extends FocusController {
     instanceId_: int32
@@ -198,6 +204,12 @@ export class FocusControllerImpl extends FocusController {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.setKeyProcessingMode(mode);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public isActive(): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = focusController.isActive();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 }
 
@@ -1194,7 +1206,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1216,7 +1228,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1237,7 +1249,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<IncrementalNode>(nodeFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1278,7 +1290,7 @@ export class UIContextImpl extends UIContext {
     componentUtils_: ComponentUtilsImpl;
     componentSnapshot_: ComponentSnapshotImpl;
     dragController_: DragControllerImpl;
-    // atomicServiceBar_: AtomicServiceBarInternal;
+    atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
     overlayManager_: OverlayManagerImpl | null = null;
@@ -1298,6 +1310,8 @@ export class UIContextImpl extends UIContext {
     buffer: KBuffer = new KBuffer(this.bufferSize)
     position: int64 = 0
     deserializer: DeserializerBase = new DeserializerBase(this.buffer.buffer, this.bufferSize)
+    static windowFreeInstanceId: int32 = -1
+    static initFlag_ = false
 
     constructor(instanceId: int32) {
         super()
@@ -1306,7 +1320,7 @@ export class UIContextImpl extends UIContext {
         this.componentUtils_ = new ComponentUtilsImpl(instanceId);
         this.componentSnapshot_ = new ComponentSnapshotImpl(instanceId);
         this.dragController_ = new DragControllerImpl(instanceId);
-        // this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
+        this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuControllerImpl(instanceId);
         this.cursorController_ = new CursorControllerImpl(instanceId);
         this.font_ = new FontImpl(instanceId);
@@ -1419,7 +1433,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
-    getFrameNodeByUniqueId(id: number): FrameNode | null {
+    public getFrameNodeByUniqueId(id: int): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = FrameNodeExtender.getFrameNodeByUniqueId(id);
         if (retval === nullptr) {
@@ -1433,11 +1447,25 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
+
     getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let navigationInfo = UIContextGetInfo.getNavigationInfoByUniqueId(id);
         ArkUIAniModule._Common_Restore_InstanceId();
         return navigationInfo;
+    }
+
+     public getPageInfoByUniqueId(id: int): PageInfo {
+        const navDestinationInfo = ArkUIAniModule._CustomNode_QueryNavDestinationInfo1(id);
+        const routerPageInfo = ArkUIAniModule._CustomNode_QueryRouterPageInfo1(id);
+        if (routerPageInfo) {
+            routerPageInfo.context = this;
+        }
+        let pageInfo: PageInfo = {
+            navDestinationInfo: navDestinationInfo,
+            routerPageInfo: routerPageInfo
+        }
+        return pageInfo;
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
@@ -1458,8 +1486,7 @@ export class UIContextImpl extends UIContext {
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
-        throw new Error("no impl");
-        
+        return this.atomicServiceBar_;
     }
 
     public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
@@ -1467,6 +1494,34 @@ export class UIContextImpl extends UIContext {
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        if (!UIContextImpl.initFlag_) {
+            UIContextImpl.initFlag_ = true;
+            wrapSystemCallback(1, (buff : KSerializerBuffer, len : int32) => {
+                deserializeAndCallCallback(new DeserializerBase(buff, len))
+                return 0
+            })
+        }
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            return UIContextUtil.getOrCreateUIContextById(UIContextImpl.windowFreeInstanceId)
+        }
+        const instanceId = ArkUIAniModule._CreateWindowFreeContainer(context)
+        if (instanceId < 0) {
+            return undefined
+        }
+        UIContextImpl.windowFreeInstanceId = instanceId;
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+
+    static destroyUIContextWithoutWindow() {
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            ArkUIAniModule._DestroyWindowFreeContainer(UIContextImpl.windowFreeInstanceId)
+            UIContextUtil.removeUIContext(UIContextImpl.windowFreeInstanceId)
+            UIContextImpl.windowFreeInstanceId = -1
+        }
     }
 
     public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
@@ -1500,6 +1555,28 @@ export class UIContextImpl extends UIContext {
         let result = IUIContext.closeBindSheet(ptr);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.bindTabsToScrollable(tabsController, scroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.unbindTabsFromScrollable(tabsController, scroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public getFocusController(): FocusController {
@@ -1566,16 +1643,20 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return animatorRet;
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
-        const onFrameCallback_casted = onFrameCallback as (((index: number) => void))
-        const onIdleCallback_casted = onIdleCallback as (((index: number) => void))
-        const delayTime_casted = delayTime as (number)
-        this.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
+        SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
-      public getWindowName(): string | undefined {
+    public getWindowName(): string | undefined {
         return ArkUIAniModule._Common_getWindowName(this.instanceId_);
+    }
+    public getWindowId(): int32 | undefined {
+        let ret = ArkUIAniModule._Common_getWindowId(this.instanceId_);
+        if (ret === -1) {
+            return undefined;
+        }
+        return ret;
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
@@ -1585,37 +1666,27 @@ export class UIContextImpl extends UIContext {
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
         return ret as HeightBreakpoint;
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
          return ArkUIAniModule._Common_px2vp(value, this.instanceId_);
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
          return ArkUIAniModule._Common_fp2px(value, this.instanceId_);
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
          return ArkUIAniModule._Common_px2fp(value, this.instanceId_);
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
           return ArkUIAniModule._Common_lpx2px(value, this.instanceId_);
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
     public getId() : int32 {
         return this.instanceId_;
-    }
-    private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
-                                                         onIdleCallback: ((index: number) => void),
-                                                         delayTime: number): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onFrameCallback)
-        thisSerializer.holdAndWriteCallback(onIdleCallback)
-        // ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
-        //                                                        thisSerializer.length(), delayTime)
-        thisSerializer.release()
     }
     runScopedTask(callback: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
@@ -1634,7 +1705,7 @@ export class UIContextImpl extends UIContext {
         this.setFrameCallback(onFrameFunc, onIdleFunc, 0)
         ArkUIAniModule._Common_Restore_InstanceId()
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         const onFrameFunc = frameCallback.onFrame
         const onIdleFunc = frameCallback.onIdle
@@ -1711,7 +1782,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt ): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         DialogExtender.showTextPickerDialog(options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1724,7 +1795,7 @@ export class UIContextImpl extends UIContext {
     }
 
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         IUIContext.freezeUINode(id, isFrozen);
         ArkUIAniModule._Common_Restore_InstanceId()

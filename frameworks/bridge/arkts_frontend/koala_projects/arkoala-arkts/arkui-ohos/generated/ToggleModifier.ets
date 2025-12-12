@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookToggleContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from "./component/toggle"
@@ -28,6 +29,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class ToggleModifier extends CommonMethodModifier implements ToggleAttribute,AttributeModifier<ToggleAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,7 +47,10 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
     _switchPointColor_0_0value?: ResourceColor | undefined
     _switchStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _switchStyle_0_0value?: SwitchStyle | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<ToggleConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTogglePeer;
         if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -120,9 +125,28 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookToggleContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<ToggleConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookToggleContentModifier(peer, (undefined as ContentModifier<ToggleConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ToggleModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onChange_0_flag) {
@@ -175,6 +199,19 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<ToggleConfiguration> | undefined));
+                }
+            }
+        }
     }
     onChange(value: ((value0: boolean) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -217,6 +254,17 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         } else
         {
             this._switchStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -143,6 +143,12 @@ void SetListChildrenMainSize(ani_env* env, [[maybe_unused]] ani_object aniClass,
     if (!listModifier) {
         return;
     }
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(childrenSize, &isUndefined);
+    if (isUndefined) {
+        listModifier->resetListChildrenMainSize(arkNode);
+        return;
+    }
 
     ani_class listChildrenMainSize;
     if (env->FindClass("arkui.component.common.ChildrenMainSize", &listChildrenMainSize) != ANI_OK) {

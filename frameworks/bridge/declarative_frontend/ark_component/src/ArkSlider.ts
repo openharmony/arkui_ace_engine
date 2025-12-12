@@ -44,6 +44,10 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, TrackColorModifier.identity, TrackColorModifier, value);
     return this;
   }
+  trackColorMetrics(value: ColorMetricsLinearGradient): this {
+    modifierWithKey(this._modifiersWithKeys, TrackColorMetricsModifier.identity, TrackColorMetricsModifier, value);
+    return this;
+  }
   selectedColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, SelectColorModifier.identity, SelectColorModifier, value);
     return this;
@@ -417,6 +421,24 @@ class TrackColorModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().slider.resetTrackBackgroundColor(node);
     } else {
       getUINativeModule().slider.setTrackBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TrackColorMetricsModifier extends ModifierWithKey<ColorMetricsLinearGradient> {
+  constructor(value: ColorMetricsLinearGradient) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderTrackColorMetrics');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetTrackColorMetrics(node);
+    } else {
+      getUINativeModule().slider.setTrackColorMetrics(node, this.value);
     }
   }
 

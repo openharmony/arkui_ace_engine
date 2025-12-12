@@ -103,6 +103,24 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class VaultPlainTextImpl : public OHOS::NWeb::NWebVaultPlainTextCallback {
+public:
+    VaultPlainTextImpl() = default;
+    explicit VaultPlainTextImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~VaultPlainTextImpl() = default;
+
+    bool ProcessAutoFillOnPaste() override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl :
     public std::enable_shared_from_this<WebClientImpl>,
     public OHOS::NWeb::NWebHandler {
@@ -200,6 +218,7 @@ public:
         bool isAlert,
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnWindowNewExtByJS(std::shared_ptr<NWeb::NWebWindowNewEventInfo> dataInfo) override;
     void OnActivateContentByJS() override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
@@ -335,8 +354,10 @@ public:
     void OnRemoveBlanklessFrame(int delayTime) override;
     bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
         std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    void OnTextSelectionChange(const std::string& selectionText) override;
     void OnDetectedBlankScreen(
         const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) override;
+    void OnFirstScreenPaint(const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime) override;
     void OnPdfScrollAtBottom(const std::string& url) override;
     void OnPdfLoadEvent(int32_t result, const std::string& url) override;
     void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
@@ -355,6 +376,7 @@ public:
         std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity) override;
     void OnClippedSelectionBoundsChanged(int x, int y, int width, int height) override;
     void OnCameraCaptureStateChanged(int originalState, int new_state) override;
+    void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

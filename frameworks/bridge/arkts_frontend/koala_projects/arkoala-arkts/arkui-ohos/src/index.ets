@@ -19,8 +19,14 @@ export {
   CustomStyles,
   GestureModifier,
   UIGestureEvent,
-  DrawModifier
+  DrawModifier,
+  LayoutSafeAreaType,
+  TouchResult,
+  TouchTestInfo,
+  LayoutSafeAreaEdge,
+  ResponseRegion
 } from "./component/common";
+export * from "./component/gesture";
 export {
   LifeCycle,
   ExtendableComponent,

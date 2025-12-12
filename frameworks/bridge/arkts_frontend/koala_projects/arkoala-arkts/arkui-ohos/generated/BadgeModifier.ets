@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class BadgeModifier extends CommonMethodModifier implements BadgeAttribute,AttributeModifier<BadgeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,11 +37,13 @@ export class BadgeModifier extends CommonMethodModifier implements BadgeAttribut
     applyDisabledAttribute(instance: BadgeAttribute): void { }
     applySelectedAttribute(instance: BadgeAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkBadgePeer;
     }
     mergeModifier(modifier: BadgeModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
     }
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

@@ -277,6 +277,22 @@ void JsComponentSnapshot::ParseOptions(int32_t idx, NG::SnapshotOptions& options
     }
 
     result = false;
+    napi_has_named_property(env_, argv_[idx], "colorMode", &result);
+    if (result) {
+        napi_value colorModeObject = nullptr;
+        napi_get_named_property(env_, argv_[idx], "colorMode", &colorModeObject);
+        ParseColorMode(&colorModeObject, options);
+    }
+
+    result = false;
+    napi_has_named_property(env_, argv_[idx], "dynamicRangeMode", &result);
+    if (result) {
+        napi_value dynamicRangeModeObject = nullptr;
+        napi_get_named_property(env_, argv_[idx], "dynamicRangeMode", &dynamicRangeModeObject);
+        ParseDynamicRangeMode(&dynamicRangeModeObject, options);
+    }
+
+    result = false;
     napi_has_named_property(env_, argv_[idx], "region", &result);
     if (!result) {
         options.regionMode = NG::SnapshotRegionMode::NO_REGION;
@@ -381,6 +397,58 @@ bool JsComponentSnapshot::ParseLocalizedRegion(napi_value* regionObject, NG::Sna
     return true;
 }
 
+void JsComponentSnapshot::ParseColorMode(napi_value* colorModeObject, NG::SnapshotOptions& options)
+{
+    bool getColorModeResult = false;
+    napi_has_named_property(env_, *colorModeObject, "colorSpace", &getColorModeResult);
+    if (getColorModeResult) {
+        napi_value colorSpaceNapi = nullptr;
+        auto colorSpaceMode = NG::DEFAULT_COLORSPACE_VALUE_SRGB;
+        napi_get_named_property(env_, *colorModeObject, "colorSpace", &colorSpaceNapi);
+        if (colorSpaceNapi) {
+            napi_get_value_uint32(env_, colorSpaceNapi, &colorSpaceMode);
+        }
+        options.colorSpaceModeOptions.colorSpaceMode = static_cast<NG::ColorSpaceMode>(colorSpaceMode);
+    }
+
+    napi_has_named_property(env_, *colorModeObject, "isAuto", &getColorModeResult);
+    if (getColorModeResult) {
+        napi_value isAutoNapi = nullptr;
+        bool isAuto = false;
+        napi_get_named_property(env_, *colorModeObject, "isAuto", &isAutoNapi);
+        if (isAutoNapi) {
+            napi_get_value_bool(env_, isAutoNapi, &isAuto);
+        }
+        options.colorSpaceModeOptions.isAuto = isAuto;
+    }
+}
+
+void JsComponentSnapshot::ParseDynamicRangeMode(napi_value* dynamicRangeModeObject, NG::SnapshotOptions& options)
+{
+    bool getDynamicRangeModeResult = false;
+    napi_has_named_property(env_, *dynamicRangeModeObject, "dynamicRangeMode", &getDynamicRangeModeResult);
+    if (getDynamicRangeModeResult) {
+        napi_value dynamicRangeNapi = nullptr;
+        napi_get_named_property(env_, *dynamicRangeModeObject, "dynamicRangeMode", &dynamicRangeNapi);
+        auto dynamicRangeMode = NG::DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+        if (dynamicRangeNapi) {
+            napi_get_value_uint32(env_, dynamicRangeNapi, &dynamicRangeMode);
+        }
+        options.dynamicRangeModeOptions.dynamicRangeMode = static_cast<NG::DynamicRange>(dynamicRangeMode);
+    }
+
+    napi_has_named_property(env_, *dynamicRangeModeObject, "isAuto", &getDynamicRangeModeResult);
+    if (getDynamicRangeModeResult) {
+        napi_value isAutoNapi = nullptr;
+        bool isAuto = false;
+        napi_get_named_property(env_, *dynamicRangeModeObject, "isAuto", &isAutoNapi);
+        if (isAutoNapi) {
+            napi_get_value_bool(env_, isAutoNapi, &isAuto);
+        }
+        options.dynamicRangeModeOptions.isAuto = isAuto;
+    }
+}
+
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -450,6 +518,16 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     NG::SnapshotParam param;
     helper.ParseParamForBuilder(param);
 
+    // not support auto mode for colorMode and dynamicRangeMode
+    if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "The provided color space or dynamic range mode is not supported.");
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
     delegate->CreateSnapshot(builder, helper.CreateCallback(&result), true, param);
 
     napi_escape_handle(env, scope, result, &result);
@@ -509,6 +587,17 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
         case ERROR_CODE_PARAM_INVALID :
             napi_get_null(env, &result);
             NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot color space or dynamic range mode is not supported!",
+                ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env,
+                "The isAuto parameter of the Snapshot is not supported! ",
+                ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED);
             break;
     }
     napi_escape_handle(env, scope, result, &result);
@@ -611,6 +700,17 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
             napi_get_null(env, &result);
             NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
             break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot color space or dynamic range mode is not supported!",
+                ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env,
+                "The isAuto parameter of the Snapshot is not supported! ",
+                ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED);
+            break;
     }
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -663,6 +763,16 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
     
     NG::SnapshotParam param;
     helper.ParseParamForBuilder(param);
+
+    // not support auto mode for colorMode and dynamicRangeMode
+    if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "The provided color space or dynamic range mode is not supported.");
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
 
     delegate->CreateSnapshotFromComponent(nodeWk.Upgrade(), helper.CreateCallback(&result), false, param);
 

@@ -381,6 +381,10 @@ void DynamicPattern::OnAttachContext(PipelineContext *context)
         RegisterPipelineEvent(newInstanceId);
         instanceId_ = newInstanceId;
     }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container && (!container->IsSceneBoardWindow())) {
+        this->SetAllowCrossProcessNesting(false);
+    }
     AddToPageEventController();
 }
 

@@ -236,8 +236,8 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
@@ -245,8 +245,8 @@ const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
 };
 const std::vector<ColorTestStep> COLOR_TRANSPARENT_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT },
@@ -735,6 +735,7 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, multu
  */
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -896,6 +897,7 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
  */
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::vector<Ark_TextCascadePickerRangeContent> subcategoryVector;
     subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_2));
     subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_3));

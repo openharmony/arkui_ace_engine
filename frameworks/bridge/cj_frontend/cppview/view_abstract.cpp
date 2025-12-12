@@ -207,9 +207,8 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj, R
             return nullptr;
         }
     } else {
-        if (!obj.moduleName) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(obj.bundleName, nullptr);
+        CHECK_NULL_RETURN(obj.moduleName, nullptr);
         themeConstants = ViewAbstract::GetThemeConstants(obj.bundleName, obj.moduleName);
         if (!themeConstants) {
             return nullptr;

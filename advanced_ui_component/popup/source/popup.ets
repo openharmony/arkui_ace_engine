@@ -276,7 +276,7 @@ export struct PopupComponent {
   @State buttonHeight: number = 0;
   @State messageMaxWeight: number | undefined = 0;
   @State beforeScreenStatus: boolean | undefined = undefined;
-  @State currentScreenStatus: boolean = true;
+  @State currentScreenStatus: boolean | undefined = undefined;
   @State applySizeOptions: ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -525,7 +525,9 @@ export struct PopupComponent {
 
   aboutToAppear() {
     this.listener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      this.currentScreenStatus = mediaQueryResult.matches
+      setTimeout(() => {
+        this.currentScreenStatus = mediaQueryResult.matches
+      }, 10)
     })
   }
 
@@ -535,7 +537,8 @@ export struct PopupComponent {
 
   getScrollMaxHeight(): number | undefined {
     let scrollMaxHeight: number | undefined = undefined;
-    if (this.currentScreenStatus !== this.beforeScreenStatus) {
+    if (this.beforeScreenStatus === undefined ||
+      this.currentScreenStatus !== this.beforeScreenStatus) {
       this.applySizeOptions = this.getApplyMaxSize();
       this.beforeScreenStatus = this.currentScreenStatus
     }

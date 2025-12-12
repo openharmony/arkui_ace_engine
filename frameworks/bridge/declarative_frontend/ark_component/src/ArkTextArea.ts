@@ -164,23 +164,6 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextAreaSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textAreaSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().textArea.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1496,6 +1479,59 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().textArea.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textArea.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
   constructor(value: (client: IMEClient) => void) {
     super(value);
@@ -1507,6 +1543,23 @@ class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient
     } else {
       getUINativeModule().textArea.setOnWillAttachIME(node, this.value);
     }
+  }
+}
+
+class TextAreaSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().textArea.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
 
@@ -1525,10 +1578,6 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
   type(value: TextAreaType): TextAreaAttribute {
@@ -1898,6 +1947,14 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
     return this;
   }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaIncludeFontPaddingModifier.identity, TextAreaIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFallbackLineSpacingModifier.identity, TextAreaFallbackLineSpacingModifier, value);
+    return this;
+  }
   scrollBarColor(value: ColorMetrics): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
     return this;
@@ -1905,6 +1962,13 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   onWillAttachIME(callback: Callback<IMEClient>): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnWillAttachIMEModifier.identity,
       TextAreaOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectedDragPreviewStyleModifier.identity,
+        TextAreaSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }

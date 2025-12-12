@@ -94,10 +94,14 @@ public:
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
+    static void SetSingleLine(const JSCallbackInfo& info);
     static bool ParseJsColorWithResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
@@ -144,6 +148,7 @@ public:
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseParagraphSpacing(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseTextVerticalAlign(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseTextDirection(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseLineBreakStrategyParagraphStyle(
         const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
@@ -159,6 +164,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void DeleteBackward(const JSCallbackInfo& args);
     void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
@@ -229,6 +235,7 @@ public:
     void AddSymbolSpan(const JSCallbackInfo& args);
     void AddPlaceholderSpan(const JSCallbackInfo& args);
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
+    void ParseAccessibilityOptions(const JSRef<JSObject>& options, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     void ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValue, TextStyle& style, uint32_t& symbolId);

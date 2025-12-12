@@ -23,6 +23,11 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components/swiper/swiper_controller.h"
+#include "core/components/tab_bar/tab_theme.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -118,6 +123,39 @@ void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption)
     NG::TabsModelNG::SetBarBackgroundEffect(Referenced::RawPtr(tabsNode), effectOption);
 }
 
+uint32_t Tabs::GetAnimationDuration()
+{
+    auto tabBarNode = GetTabBar();
+    CHECK_NULL_RETURN(tabBarNode, 0);
+    auto aceFrameNode = reinterpret_cast<NG::FrameNode*>(tabBarNode->GetHandle());
+    CHECK_NULL_RETURN(aceFrameNode, 0);
+    auto tabPattern = aceFrameNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_RETURN(tabPattern, 0);
+    auto animationDuration = tabPattern->GetAnimationDuration();
+    if (animationDuration && animationDuration.value() >= 0) {
+        return animationDuration.value();
+    }
+
+    bool bottomStyle = false;
+    const int32_t itemSize = GetTabBarItemSize();
+    for (int32_t index = 0; index < itemSize; index++) {
+        if (tabPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE) {
+            bottomStyle = true;
+            break;
+        }
+    }
+    auto pipelineContext = tabPattern->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, 0);
+    auto duration = static_cast<uint32_t>(tabTheme->GetTabContentAnimationDuration());
+    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && bottomStyle)
+        || Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        duration = 0;
+    }
+    return duration;
+}
+
 double Tabs::GetTabBarTop()
 {
     const auto tabBarRect = GetTabBarFrameRect(node_);
@@ -128,6 +166,17 @@ double Tabs::GetTabBarBottom()
 {
     const auto tabBarRect = GetTabBarFrameRect(node_);
     return tabBarRect.Bottom();
+}
+
+std::size_t Tabs::GetTabBarItemSize()
+{
+    auto tabBarNode = GetTabBar();
+    CHECK_NULL_RETURN(tabBarNode, 0);
+    auto aceFrameNode = reinterpret_cast<NG::FrameNode*>(tabBarNode->GetHandle());
+    CHECK_NULL_RETURN(aceFrameNode, 0);
+    auto tabPattern = aceFrameNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_RETURN(tabPattern, 0);
+    return tabPattern->GetTabBarItemSize();
 }
 
 void Tabs::SetTabBarWidth(const Dimension& tabBarWidth)
@@ -179,6 +228,33 @@ void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
     NG::TabsModelNG::SetScrollableBarModeOptions(Referenced::RawPtr(tabsNode), option);
 }
 
+RefPtr<NG::TabsControllerNG> GetTabsControllerNode(const RefPtr<FrameNode>& node)
+{
+    auto tabsNode = GetTabsNode(node);
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<NG::SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    auto swiperControllerNode = swiperPattern->GetSwiperController();
+    CHECK_NULL_RETURN(swiperControllerNode, nullptr);
+    return AceType::DynamicCast<NG::TabsControllerNG>(swiperControllerNode);
+}
+
+void Tabs::SetTabBarTranslate(const NG::TranslateOptions& options)
+{
+    auto tabsController = GetTabsControllerNode(node_);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarTranslate(options);
+}
+
+void Tabs::SetTabBarOpacity(float opacity)
+{
+    auto tabsController = GetTabsControllerNode(node_);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarOpacity(opacity);
+}
+
 RefPtr<FrameNode> Tabs::GetTabBar()
 {
     auto tabsNode = GetTabsNode(node_);
@@ -215,4 +291,46 @@ void Tabs::SetOnChange(OnChangeEvent onChangeEvent)
     tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
+void Tabs::SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent)
+{
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(node_);
+    CHECK_NULL_VOID(frameNodeImpl);
+    auto aceFrameNode = frameNodeImpl->GetAceNode();
+    CHECK_NULL_VOID(aceFrameNode);
+    auto tabPattern = aceFrameNode->GetPattern<NG::TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    auto onTabBarClick = [onTabBarClickEvent](const BaseEventInfo* info) {
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            return;
+        }
+        onTabBarClickEvent(tabsInfo->GetIndex());
+    };
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
+}
+
+void Tabs::SetOnGestureSwipe(OnGestureSwipeEvent onGestureSwipe)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetOnGestureSwipe(Referenced::RawPtr(tabsNode), std::move(onGestureSwipe));
+}
+
+void Tabs::SetOnAnimationStart(OnAnimationStartEvent onAnimationStart)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetOnAnimationStart(Referenced::RawPtr(tabsNode), std::move(onAnimationStart));
+}
+
+void Tabs::SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event)
+{
+    auto tabBarNode = GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+    auto aceFrameNode = reinterpret_cast<NG::FrameNode*>(tabBarNode->GetHandle());
+    CHECK_NULL_VOID(aceFrameNode);
+    auto tabBarPattern = aceFrameNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetOnTabBarItemsChangeEvent(std::move(event));
+}
 } // namespace OHOS::Ace::Kit

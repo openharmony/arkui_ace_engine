@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { className, uint32 } from "@koalaui/common"
-import { __context, __id } from "../internals"
-import { IncrementalNode } from "../tree/IncrementalNode"
-import { memoEntry } from "./entry"
+import { className, uint32 } from '@koalaui/common'
+import { __context, __id } from '../internals'
+import { IncrementalNode } from '../tree/IncrementalNode'
+import { memoEntry1 } from './entry'
 import { StateContext } from '../states/State';
 
 /**
@@ -37,11 +37,13 @@ export function NodeAttach<Node extends IncrementalNode>(
     if (scope.unchanged) {
         scope.cached
     } else try {
-        if (!reuseKey)
+        if (!reuseKey) {
             update((__context() as StateContext).node as Node)
-        else
+        }
+        else {
             // reset ID addition to 0 to simplify the reuse process later
-            memoEntry(__context(), 0, () => { update((__context() as StateContext).node as Node) })
+            memoEntry1(__context(), 0, update, (__context() as StateContext).node as Node)
+        }
     } finally {
         scope.recache()
     }
@@ -57,10 +59,12 @@ export function NodeAttach<Node extends IncrementalNode>(
 /** @memo:intrinsic */
 export function contextNode<T extends IncrementalNode>(kind: uint32 = 1, name?: string): T {
     const node = (__context() as StateContext).node
-    if (node?.isKind(kind) == true) return node as T
+    if (node?.isKind(kind) === true) {
+        return node as T
+    }
     throw new Error(name
-        ? (name + " cannot be used in context of " + className(node))
-        : ("current " + className(node) + " does not contain the specified kind: " + kind)
+        ? (name + ' cannot be used in context of ' + className(node))
+        : ('current ' + className(node) + ' does not contain the specified kind: ' + kind)
     )
 }
 
@@ -86,7 +90,9 @@ export class DataNode<Data> extends IncrementalNode {
             scope.cached
         } else try {
             const node = (__context() as StateContext).node as DataNode<Data>
-            if (node.kind != kind) throw new Error("data node kind changed unexpectedly from " + node.kind + " to " + kind)
+            if (node.kind !== kind) {
+                throw new Error('data node kind changed unexpectedly from ' + node.kind + ' to ' + kind)
+            }
             node.data = state.value as Data // subscribe to the parameter change
             onDataChange?.()
         } finally {

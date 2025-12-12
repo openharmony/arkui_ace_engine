@@ -211,6 +211,7 @@ template("declarative_js_engine_ark") {
       "jsi_container_modal_view_register.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
+      "jsi_image_generator_dialog_view_register.cpp",
       "jsi_object_template.cpp",
       "jsi_types.cpp",
       "jsi_view_register.cpp",

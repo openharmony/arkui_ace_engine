@@ -16,14 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { PeerNode, findSiblingPeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker, ArkUINativeModule } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
 import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookToggleAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
@@ -40,12 +42,12 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTogglePeer {
         const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(peerId, flags)
-        const _peer  = new ArkTogglePeer(_peerPtr, peerId, 'Toggle', flags)
+        const _peer  = new ArkTogglePeer(nullptr, peerId, 'Toggle', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setToggleOptionsAttribute(options: ToggleOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ToggleOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._ToggleInterface_setToggleOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -72,10 +74,10 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -100,10 +102,10 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -218,6 +220,54 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     public setToggleOptions(options: ToggleOptions): this {
         if (this.checkPriority("setToggleOptions")) {
             const options_casted = options as (ToggleOptions)
+            if (!this.getPeer().peer.ptr) {
+                if (options.type == ToggleType.SWITCH) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.CHECKBOX) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.BUTTON) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else {
+                    throw new Error("Invalid Toggle Type")
+                    return this
+                }
+            } else {
+                if (!this.getPeer().parent || this.getPeer().parent == undefined) {
+                    console.log("Toggle's parent is null")
+                    return this
+                }
+
+                let sibling: PeerNode | undefined = findSiblingPeerNode(this.getPeer(), true)
+                const node = this.getPeer().parent! as PeerNode
+                const preNativePtr = this.getPeer().peer.ptr
+                node.peer.removeChild(this.getPeer().peer.ptr)
+                ArkUINativeModule._DisposeNode(preNativePtr)
+                
+                if (options.type == ToggleType.SWITCH) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr                   
+                } else if (options.type == ToggleType.CHECKBOX) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.BUTTON) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else {
+                    throw new Error("Invalid Toggle Type")
+                    return this
+                }
+
+                if (sibling === undefined) {
+                    // Add to the end (common case!).
+                    node.peer.addChild(this.getPeer().peer.ptr)
+                } else {
+                    // Insert child in the middle.
+                    node.peer.insertChildBefore(this.getPeer().peer.ptr, sibling?.peer?.ptr ?? nullptr)
+                }
+            }
             this.getPeer()?.setToggleOptionsAttribute(options_casted)
             this.applyOptionsFinish('ToggleAttribute');
             return this
@@ -263,7 +313,9 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
         return this
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookToggleAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookToggleAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -357,10 +409,10 @@ export class SwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
@@ -381,10 +433,10 @@ export class SwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPointColorTmpValueForIdx0  = valueHolderForPointColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForPointColorTmpValue instanceof number) {
+            } else if (valueHolderForPointColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPointColorTmpValueForIdx1)
+                const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx1)
             } else if (valueHolderForPointColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPointColorTmpValueForIdx2  = valueHolderForPointColorTmpValue as string
@@ -435,11 +487,11 @@ export class SwitchStyle_serializer {
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
                 unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                unselectedColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
                 unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -447,18 +499,18 @@ export class SwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         const pointColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pointColorTmpBuf : ResourceColor | undefined = undefined
         if ((pointColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const pointColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let pointColorTmpBuf_ : Color | number | string | Resource | undefined
+            let pointColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (pointColorTmpBuf_UnionSelector == (0).toChar()) {
                 pointColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (pointColorTmpBuf_UnionSelector == (1).toChar()) {
-                pointColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                pointColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (pointColorTmpBuf_UnionSelector == (2).toChar()) {
                 pointColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (pointColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -466,7 +518,7 @@ export class SwitchStyle_serializer {
             } else {
                 throw new Error("One of the branches for pointColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            pointColorTmpBuf = (pointColorTmpBuf_ as Color | number | string | Resource)
+            pointColorTmpBuf = (pointColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const pointColorTmpResult : ResourceColor | undefined = pointColorTmpBuf
         const trackBorderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

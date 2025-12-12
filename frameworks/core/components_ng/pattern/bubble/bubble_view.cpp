@@ -63,7 +63,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 
 RefPtr<PopupTheme> GetPopupTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -220,6 +220,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     }
     auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    popupProp->UpdateIsModal(param->IsBlockEvent());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     popupPaintProp->UpdateIsTips(param->IsTips());
     popupPaintProp->UpdateShowAtAnchor(param->GetAnchorType());
@@ -253,6 +254,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
     bubblePattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
     bubblePattern->SetInnerBorderWidth(param->GetInnerBorderWidth());
+    bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
     if (param->IsTips()) {
         bubblePattern->SetTipsTag(true);
     }
@@ -423,6 +425,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetTargetSpace().has_value()) {
         layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
     }
+    layoutProps->UpdateIsModal(param->IsBlockEvent());
     auto popupPaintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
     popupPaintProps->UpdateUseCustom(param->IsUseCustom());
     popupPaintProps->UpdateEnableArrow(param->EnableArrow());
@@ -447,6 +450,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     popupPattern->SetOutlineWidth(param->GetOutlineWidth());
     popupPattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
     popupPattern->SetInnerBorderWidth(param->GetInnerBorderWidth());
+    popupPattern->SetIsShadowStyle(param->IsShadowStyle());
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -805,6 +809,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     bubblePattern->SetAvoidTarget(param->GetAvoidTarget());
     bubblePattern->SetHasWidth(param->GetChildWidth().has_value());
     bubblePattern->SetHasPlacement(param->HasPlacement());
+    bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
 
     if (!(param->GetIsPartialUpdate().has_value())) {
         bubblePattern->SetHasTransition(param->GetHasTransition());

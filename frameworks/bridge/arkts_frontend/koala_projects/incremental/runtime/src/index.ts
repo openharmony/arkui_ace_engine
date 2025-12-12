@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-export { observableProxy, ObservableClass, TrackableProps } from "@koalaui/compat"
+export {
+    observableProxy
+} from '@koalaui/common'
 
 export {
     AnimatedState,
@@ -24,21 +26,21 @@ export {
     animatedState,
     mutableAnimatedState,
     stateAnimator,
-} from "./animation/AnimatedState"
+} from './animation/AnimatedState'
 export {
     AnimationRange,
     ArrayAnimationRange,
     NumberAnimationRange,
-} from "./animation/AnimationRange"
+} from './animation/AnimationRange'
 export {
     Easing,
     EasingCurve,
     EasingStepJump,
-} from "./animation/Easing"
+} from './animation/Easing'
 export {
     createAnimationTimer,
     getAnimationTimer,
-} from "./animation/GlobalTimer"
+} from './animation/GlobalTimer'
 export {
     rememberAnimatedState,
     rememberAnimator,
@@ -47,7 +49,7 @@ export {
     rememberNumberTransition,
     rememberTransition,
     sampledValue,
-} from "./animation/memo"
+} from './animation/memo'
 export {
     AnimationSpec,
     OnEdge,
@@ -65,36 +67,39 @@ export {
     smoothAnimation,
     timeAnimation,
     transition,
-} from "./animation/TimeAnimation"
+} from './animation/TimeAnimation'
 
-export { RuntimeProfiler } from "./common/RuntimeProfiler"
+export {
+    RuntimeProfiler,
+    RuntimeTracer,
+} from './common/RuntimeProfiler'
 
 export {
     memoBind,
     memoBind2,
     memoPartialBind2_1,
     memoPartialBind3_2,
-} from "./memo/bind"
+} from './memo/bind'
 export {
     OnChange,
     RunEffect,
-} from "./memo/changeListener"
+} from './memo/changeListener'
 export {
     contextLocal,
     contextLocalScope,
     contextLocalValue,
-} from "./memo/contextLocal"
+} from './memo/contextLocal'
 export {
     memoRoot,
     memoEntry,
     memoEntry1,
     memoEntry2,
-} from "./memo/entry"
+} from './memo/entry'
 export {
     DataNode,
     NodeAttach,
     contextNode,
-} from "./memo/node"
+} from './memo/node'
 export {
     memoize,
     memoLifecycle,
@@ -107,27 +112,30 @@ export {
     rememberDisposable,
     rememberMutableAsyncState,
     rememberMutableState,
-} from "./memo/remember"
+} from './memo/remember'
 export {
     Repeat,
     RepeatByArray,
     RepeatRange,
     RepeatWithKey,
-} from "./memo/repeat"
+} from './memo/repeat'
 export {
     TestNode,
     ReusableTestNode,
     testRoot,
     testTick,
     testUpdate,
-} from "./memo/testing"
+} from './memo/testing'
 
+export {
+    Dependent,
+} from './states/Dependency'
 export {
     Disposable,
     disposeContent,
     disposeContentBackward,
     disposeContentForward,
-} from "./states/Disposable"
+} from './states/Disposable'
 export {
     GlobalStateManager,
     arrayState,
@@ -135,7 +143,8 @@ export {
     mutableState,
     scheduleCallback,
     updateStateManager,
-} from "./states/GlobalStateManager"
+    globalMutableState,
+} from './states/GlobalStateManager'
 export {
     ArrayState,
     CONTEXT_ROOT_NODE,
@@ -148,9 +157,8 @@ export {
     MutableState,
     StateManager,
     StateManagerImpl,
-    StateImpl,
     ValueTracker,
-} from "./states/State"
+} from './states/State'
 
 export {
     __context,
@@ -160,12 +168,11 @@ export {
     __memo_transformed,
     __memo_transformed_before,
     __memo_transformed_after,
-} from "./internals"
-export { Dependency, StateToScopes } from "./states/Dependency"
+} from './internals'
+export { Dependency, StateToScopes } from './states/Dependency'
 
-export { IncrementalNode } from "./tree/IncrementalNode"
-export { PrimeNumbers } from "./tree/PrimeNumbers"
-export { ReadonlyTreeNode } from "./tree/ReadonlyTreeNode"
-export { TreeNode } from "./tree/TreeNode"
-export { TreePath } from "./tree/TreePath"
-
+export { IncrementalNode } from './tree/IncrementalNode'
+export { PrimeNumbers } from './tree/PrimeNumbers'
+export { ReadonlyTreeNode } from './tree/ReadonlyTreeNode'
+export { TreeNode } from './tree/TreeNode'
+export { TreePath } from './tree/TreePath'

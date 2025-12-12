@@ -171,14 +171,14 @@ static ani_status FindJavaScriptProxyPropertyAndGetGlobalRef(
     return ANI_OK;
 }
 
-static void DestroyJavaScriptProxyPropertyRef(ani_env* env, JavaScriptProxyProperyRef& properyRef)
+static void DestroyJavaScriptProxyPropertyRef(ani_env* env, JavaScriptProxyProperyRef& propertyRef)
 {
-    env->GlobalReference_Delete(properyRef.objectRef);
-    env->GlobalReference_Delete(properyRef.nameRef);
-    env->GlobalReference_Delete(properyRef.methodListRef);
-    env->GlobalReference_Delete(properyRef.controllerRef);
-    env->GlobalReference_Delete(properyRef.asyncMethodListRef);
-    env->GlobalReference_Delete(properyRef.permissionRef);
+    env->GlobalReference_Delete(propertyRef.objectRef);
+    env->GlobalReference_Delete(propertyRef.nameRef);
+    env->GlobalReference_Delete(propertyRef.methodListRef);
+    env->GlobalReference_Delete(propertyRef.controllerRef);
+    env->GlobalReference_Delete(propertyRef.asyncMethodListRef);
+    env->GlobalReference_Delete(propertyRef.permissionRef);
 }
 
 static int32_t GetJavaScriptProxyProperty(ani_env* env, ani_object object, JavaScriptProxyProperyRef& properyRef)
@@ -226,6 +226,16 @@ static void GetJavaScriptProxyFunc(ani_env* env, ani_vm* vm, ani_object object, 
         if (!envTemp) {
             HILOGE("jsProxyCallback callback envTemp is nullptr");
             return;
+        }
+        if (envTemp->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(controller),
+                                                  "jsProxy",
+                                                  nullptr,
+                                                  reinterpret_cast<ani_object>(jsObject),
+                                                  reinterpret_cast<ani_string>(name),
+                                                  reinterpret_cast<ani_array>(methodList),
+                                                  reinterpret_cast<ani_array>(asyncMethodList),
+                                                  reinterpret_cast<ani_string>(permission)) != ANI_OK) {
+            HILOGE("jsProxyCallback callback to call innerJavaScriptProxy failed");
         }
         envTemp->GlobalReference_Delete(jsObject);
         envTemp->GlobalReference_Delete(name);

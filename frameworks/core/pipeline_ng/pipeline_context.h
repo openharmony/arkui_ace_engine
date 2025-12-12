@@ -89,6 +89,8 @@ using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t fra
 class NodeRenderStatusMonitor;
 class MagnifierController;
 class LoadCompleteManager;
+class PageInfo;
+class ContentChangeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -198,6 +200,12 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     std::string GetCurrentPageNameCallback();
+
+    const RefPtr<PageInfo> GetLastPageInfo();
+
+    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);
+
+    std::string GetCurrentPageName();
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
@@ -842,7 +850,8 @@ public:
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
     bool CheckOverlayFocus();
-    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
+    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap,
+        AceAutoFillTriggerType triggerType, RefPtr<FrameNode> requestNode);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
         const std::string& fillContent = "", bool isPopup = false);
 
@@ -949,6 +958,10 @@ public:
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
     void SetVsyncListener(VsyncCallbackFun vsync);
+    VsyncCallbackFun GetVsyncListener()
+    {
+        return vsyncListener_;
+    }
 
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
@@ -1319,10 +1332,19 @@ public:
     }
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
-    const std::unique_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
+    const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
+    bool IsCustomNodeDeleteInTransition() const
+    {
+        return isCustomNodeDeleteInTransition_;
+    }
+    void SetIsCustomNodeDeleteInTransition(bool isCustomNodeDeleteInTransition)
+    {
+        isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
+    }
+    const RefPtr<ContentChangeManager>& GetContentChangeManager() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1662,6 +1684,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool isCustomNodeDeleteInTransition_ = false;
     AxisEventChecker axisEventChecker_;
     std::set<WeakPtr<UINode>> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
@@ -1684,7 +1707,8 @@ private:
     RefPtr<MagnifierController> magnifierController_;
     std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
-    std::unique_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    RefPtr<ContentChangeManager> contentChangeMgr_;
 };
 
 /**

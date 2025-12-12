@@ -179,6 +179,7 @@ public:
     void UpdateArrowHeight(const CalcDimension& dimension);
     void UpdateWidth(const CalcDimension& dimension);
     void UpdateRadius(const CalcDimension& dimension);
+    void UpdateShadow();
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -398,6 +399,16 @@ public:
         return IsTipsAppearing_;
     }
 
+    void SetIsShadowStyle(bool isShadowStyle)
+    {
+        isShadowStyle_ = isShadowStyle;
+    }
+
+    bool IsShadowStyle()
+    {
+        return isShadowStyle_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -491,6 +502,7 @@ private:
     bool isTips_ = false;
     RefPtr<FrameNode> messageNode_;
     bool IsTipsAppearing_ = false;
+    bool isShadowStyle_ = false;
 
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;

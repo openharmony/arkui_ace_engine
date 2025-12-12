@@ -15,6 +15,7 @@
 
 #include "ace_pixelmap_stub.h"
 
+#include "base/background_task_helper/background_task_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
@@ -50,6 +51,14 @@ RefPtr<NG::FrameNode> NG::FormModelNG::CreateFrameNode(int32_t nodeId)
     return nullptr;
 }
 
+std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    return {};
+}
+
+void NG::PathLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
+
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
     const PropertyCallback& callback, const RefPtr<PipelineBase>& context) {}
 
@@ -66,5 +75,19 @@ std::string SystemProperties::GetWebDebugRenderMode()
 RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
 {
     return AceType::MakeRefPtr<PixelMapStub>();
+}
+
+class MockBackgroundTaskHelper : public BackgroundTaskHelper {
+public:
+    bool HasBackgroundTask() override
+    {
+        return false;
+    }
+};
+
+BackgroundTaskHelper& BackgroundTaskHelper::GetInstance()
+{
+    static MockBackgroundTaskHelper instance;
+    return instance;
 }
 } // namespace OHOS::Ace

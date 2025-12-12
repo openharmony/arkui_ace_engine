@@ -72,6 +72,7 @@ public:
         Platform::SystemParams& systemParams) override;
     std::string GetJSONTree() override;
     bool OperateComponent(const std::string& attrsJson) override;
+    static int32_t GetUIContentWindowID(int32_t instanceId);
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
@@ -162,9 +163,6 @@ public:
     void PreLayout() override {};
 
     void SetStatusBarItemColor(uint32_t color) override;
-
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) override {}
 
     void EnableContainerModalGesture(bool isEnable) override {};
 

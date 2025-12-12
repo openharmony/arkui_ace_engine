@@ -237,6 +237,7 @@ public:
     }
     void AddFollowParentWindowLayoutNode(int32_t nodeId) override;
     void RemoveFollowParentWindowLayoutNode(int32_t nodeId) override;
+    bool SetReceiveDragEventEnabled(bool enabled) override;
     void SetNodeId(int32_t nodeId) override
     {
         nodeId_ = nodeId;
@@ -247,6 +248,7 @@ public:
     }
     void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
     Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
+    void ResizeWindowForDialog(const DialogProperties& dialogProps);
 
     // ArkTS 1.2
     void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
@@ -256,6 +258,10 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void OpenCustomDialogStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback) override;
+    bool GetIsReceiveDragEventEnabled() override
+    {
+        return window_->IsReceiveDragEventEnabled();
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -352,6 +358,7 @@ private:
         std::function<void(int32_t)>&& callback);
     void OpenCustomDialogForServiceStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback);
+    void SetSubWindowVsyncListener(RefPtr<PipelineBase> parentPipeline, RefPtr<PipelineBase> childPipeline);
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

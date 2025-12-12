@@ -208,7 +208,6 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    auto key = session_->GetScreenSnapshotStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d, "
         "isAppLock: %{public}d",
@@ -218,7 +217,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow(key)) {
+        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             return;
@@ -267,10 +266,10 @@ void WindowPattern::OnAttachToFrameNode()
     attachToFrameNodeFlag_ = true;
 }
 
-bool WindowPattern::CheckSnapshotWindow(uint32_t key)
+bool WindowPattern::CheckSnapshotWindow()
 {
     return session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSavingSnapshot(key) ||
+        (session_->GetScenePersistence()->IsSavingSnapshot() ||
         session_->GetScenePersistence()->HasSnapshot() ||
         session_->HasSnapshot());
 }
@@ -280,10 +279,9 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
     CHECK_EQUAL_RETURN(session_->IsPrelaunch(), false, false);
     auto state = session_->GetSessionState();
     auto host = GetHost();
-    auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_RETURN(HasStartingPage(), false, false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow(key)) {
+        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             isPrelaunch_ = true;
@@ -744,7 +742,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         CHECK_NULL_VOID(scenePersistence);
         auto key = session_->GetScreenSnapshotStatus();
         auto freeMultiWindow = session_->freeMultiWindow_.load();
-        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
+        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot();
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d, key: %{public}d",

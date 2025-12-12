@@ -440,7 +440,13 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
 int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        return ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO;
+    }
     CHECK_NULL_RETURN(child, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        return ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     auto result =
@@ -451,6 +457,9 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
     CHECK_NULL_RETURN(node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        return OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()
@@ -805,6 +814,49 @@ ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t t
     ArkUI_ContentTransitionEffect* contentTransitionEffect = new ArkUI_ContentTransitionEffect;
     contentTransitionEffect->contentTransitionType = type;
     return contentTransitionEffect;
+}
+
+int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle uiContext, bool visible)
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto* context = reinterpret_cast<ArkUIContext*>(uiContext);
+    return impl->getNodeModifiers()->getAtomicServiceModifier()->setMenuBarVisible(context, visible);
+}
+
+int32_t OH_ArkUI_NaviteModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset position,
+    ArkUI_IntOffset* windowPosition)
+{
+    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(windowPosition, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    ArkUI_Int32 tempOffset[2] = { position.x, position.y };
+    ArkUI_Int32 tempPosition[2];
+ 
+    auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(targetNode->uiNodeHandle,
+        tempOffset, &tempPosition);
+    windowPosition->x = tempPosition[0];
+    windowPosition->y = tempPosition[1];
+    return result;
+}
+ 
+int32_t OH_ArkUI_NaviteModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
+    ArkUI_IntOffset* position)
+{
+    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(position, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    ArkUI_Int32 tempOffset[2] = { windowPosition.x, windowPosition.y };
+    ArkUI_Int32 tempPosition[2];
+ 
+    auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(targetNode->uiNodeHandle,
+        tempOffset, &tempPosition);
+    position->x = tempPosition[0];
+    position->y = tempPosition[1];
+    return result;
 }
 
 #ifdef __cplusplus

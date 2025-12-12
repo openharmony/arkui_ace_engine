@@ -15,8 +15,9 @@
 
 import image from '@ohos.multimedia.image';
 import { BusinessError, AsyncCallback } from '@ohos.base';
-import { CustomBuilder } from '@ohos.arkui.component';
+import { CustomBuilder, DynamicRangeMode } from '@ohos.arkui.component';
 import { ComponentContent } from '@ohos.arkui.node';
+import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 
 export default namespace componentSnapshot {
 
@@ -44,10 +45,22 @@ export default namespace componentSnapshot {
 
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
 
+    export interface ColorModeOptions {  
+        colorSpace?: colorSpaceManager.ColorSpace
+        isAuto?: boolean
+    }
+
+    export interface DynamicRangeModeOptions {
+        dynamicRangeMode?: DynamicRangeMode
+        isAuto?: boolean
+    }
+
     export interface SnapshotOptions {
         scale?: double
         waitUntilRenderFinished?: boolean
         region?: SnapshotRegionType
+        colorMode?: ColorModeOptions
+        dynamicRangeMode?: DynamicRangeModeOptions
     }
 
     export native function get(id: string, callback: AsyncCallback<image.PixelMap>, options?: SnapshotOptions): void;

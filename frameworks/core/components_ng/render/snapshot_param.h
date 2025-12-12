@@ -23,7 +23,11 @@ namespace OHOS::Ace::NG {
 
 constexpr float DEFAULT_SNAPSHOT_SCALE = 1.f;
 constexpr int32_t DEFAULT_DELAY_TIME = 300;
+constexpr uint32_t DEFAULT_COLORSPACE_VALUE_SRGB = 4;
+constexpr uint32_t DEFAULT_DYNAMICRANGE_VALUE_STANDARD = 2;
 using NodeIdentity = std::pair<std::string, int32_t>;
+using ColorSpaceMode = uint32_t;
+using DynamicRange = uint32_t;
 
 enum SnapshotRegionMode {
     COMMON,
@@ -36,12 +40,22 @@ struct LocalizedSnapshotRegion {
     double end = -1.f;
     double bottom = -1.f;
 };
+struct ColorSpaceModeOptions {
+    ColorSpaceMode colorSpaceMode = DEFAULT_COLORSPACE_VALUE_SRGB;
+    bool isAuto = false;
+};
+struct DynamicRangeModeOptions {
+    DynamicRange dynamicRangeMode = DEFAULT_DYNAMICRANGE_VALUE_STANDARD;
+    bool isAuto = false;
+};
 
 struct SnapshotOptions {
     float scale;
     bool waitUntilRenderFinished;
     LocalizedSnapshotRegion snapshotRegion;
     SnapshotRegionMode regionMode;
+    ColorSpaceModeOptions colorSpaceModeOptions;
+    DynamicRangeModeOptions dynamicRangeModeOptions;
     explicit SnapshotOptions(float scale = DEFAULT_SNAPSHOT_SCALE, bool waitUntilRenderFinished = false,
         SnapshotRegionMode regionMode = SnapshotRegionMode::NO_REGION)
         : scale(scale), waitUntilRenderFinished(waitUntilRenderFinished), regionMode(regionMode) {}
@@ -50,7 +64,19 @@ struct SnapshotOptions {
         std::string region = (regionMode == SnapshotRegionMode::COMMON ? "{Common, " : "{Localized, ") +
             std::to_string(snapshotRegion.start) + ", " + std::to_string(snapshotRegion.top) + ", " +
             std::to_string(snapshotRegion.end) + ", " + std::to_string(snapshotRegion.bottom) + "}";
-        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true, " : "false, ") + region + "}";
+        std::string colorSpaceStr =
+            "{ColorSpace: " +
+            (colorSpaceModeOptions.isAuto ? "AUTO"
+                                          : std::to_string(static_cast<int>(colorSpaceModeOptions.colorSpaceMode))) +
+            "}";
+        std::string dynamicRangeStr =
+            "{DynamicRangeMode: " +
+            (dynamicRangeModeOptions.isAuto
+                    ? "AUTO"
+                    : std::to_string(static_cast<int>(dynamicRangeModeOptions.dynamicRangeMode))) +
+            "}";
+        return "{" + std::to_string(scale) + ", " + (waitUntilRenderFinished ? "true, " : "false, ") + region + ", " +
+               colorSpaceStr + ", " + dynamicRangeStr + "}";
     }
 };
 struct SnapshotParam {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicRef } from "@koalaui/common"
+import { AtomicRef } from '@koalaui/common'
 
 export interface Changes {
     /**
@@ -89,7 +89,7 @@ export class Journal implements Changes {
     getCachedArray<Item>(state: Object, array: Array<Item>): Array<Item> {
         const chunk = this.current.value
         const change = chunk.get<Array<Item>>(state)
-        if (change) return change.value
+        if (change) { return change.value }
         const copy = Array.from<Item>(find<Array<Item>>(state, chunk.previous.value)?.value ?? array)
         chunk.map.set(state, new AtomicRef<Array<Item>>(copy))
         return copy
@@ -118,7 +118,7 @@ class Chunk {
 
     get<Value>(state: Object): AtomicRef<Value> | undefined {
         const change = this.map.get(state)
-        if (change) return change as AtomicRef<Value>
+        if (change) { return change as AtomicRef<Value> }
         return undefined
     }
 }
@@ -133,7 +133,7 @@ class Chunk {
 function find<Value>(state: Object, chunk?: Chunk): AtomicRef<Value> | undefined {
     while (chunk) {
         const change = chunk?.get<Value>(state)
-        if (change) return change
+        if (change) { return change }
         chunk = chunk?.previous.value
     }
     return undefined

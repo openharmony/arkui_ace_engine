@@ -19,6 +19,8 @@
 #include "napi_runtime.cpp"
 #include "core/common/resource/resource_manager.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
+#include "base/i18n/localization.h"
+#include "test/mock/base/mock_localization.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -416,6 +418,56 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest007, TestSize.Level1)
     auto retVal = Napi::GetStringFromValueUtf8(napi_env(engine), napiTestStr);
     EXPECT_EQ(retVal.has_value(), true);
     EXPECT_EQ(retVal.value(), testStr);
+}
+
+/**
+ * @tc.name: NapiUtilsTest008
+ * @tc.desc: GetLocalizedParamStr - Non-numeric type should return original string
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest008, TestSize.Level1)
+{
+    std::string paramStr = "test string";
+    std::string type = "s";
+
+    std::string result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_EQ(result, paramStr);
+
+    type = "";
+    result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_EQ(result, paramStr);
+
+    type = "other";
+    result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_EQ(result, paramStr);
+}
+
+/**
+ * @tc.name: NapiUtilsTest009
+ * @tc.desc: GetLocalizedParamStr - Numeric type "d" should call LocalizeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest009, TestSize.Level1)
+{
+    std::string paramStr = "12345";
+    std::string type = "d";
+
+    std::string result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: NapiUtilsTest010
+ * @tc.desc: GetLocalizedParamStr - Numeric type "f" should call LocalizeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest010, TestSize.Level1)
+{
+    std::string paramStr = "123.45";
+    std::string type = "f";
+
+    std::string result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_FALSE(result.empty());
 }
 
 } // namespace OHOS::Ace

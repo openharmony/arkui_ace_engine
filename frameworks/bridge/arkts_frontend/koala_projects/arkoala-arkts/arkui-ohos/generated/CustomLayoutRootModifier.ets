@@ -23,8 +23,10 @@ import { ArkCustomLayoutRootPeer, Callback_onMeasureSize_SizeResult, Callback_on
 import { int32 } from "@koalaui/common"
 import { GeometryInfo, Measurable, Layoutable } from "./component/common"
 import { ConstraintSizeOptions } from "./component/units"
+import { ModifierState } from "./CommonModifier"
 export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModifier<CustomLayoutRoot> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,9 +41,11 @@ export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModif
     _subscribeOnPlaceChildren_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subscribeOnPlaceChildren_0_0value?: Callback_onPlaceChildren_Void
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkCustomLayoutRootPeer;
     }
     mergeModifier(modifier: CustomLayoutRootModifier): void {
+        this._state = modifier._state;
     }
     subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
         throw new Error("Not implemented")

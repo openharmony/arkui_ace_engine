@@ -35,6 +35,7 @@ let ColoringStrategy;
   ColoringStrategy.INVERT = 'invert';
   ColoringStrategy.AVERAGE = 'average';
   ColoringStrategy.PRIMARY = 'primary';
+  ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 let TextInputStyle;
@@ -56,6 +57,8 @@ let TextAlign;
   TextAlign[TextAlign.End = 2] = 'End';
   TextAlign[TextAlign.Justify = 3] = 'Justify';
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
+  TextAlign[TextAlign.LEFT = 4] = 'LEFT';
+  TextAlign[TextAlign.RIGHT = 5] = 'RIGHT';
 })(TextAlign || (TextAlign = {}));
 
 let TextVerticalAlign;
@@ -1887,6 +1890,15 @@ let ContextMenuMediaType;
   ContextMenuMediaType[ContextMenuMediaType.Image = 1] = 'Image';
 })(ContextMenuMediaType || (ContextMenuMediaType = {}));
 
+let ContextMenuDataMediaType;
+(function (ContextMenuDataMediaType) {
+  ContextMenuDataMediaType[ContextMenuDataMediaType.None = 0] = 'None';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Image = 1] = 'Image';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Video = 2] = 'Video';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Audio = 3] = 'Audio';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Canvas = 4] = 'Canvas';
+})(ContextMenuDataMediaType || (ContextMenuDataMediaType = {}));
+
 let ContextMenuInputFieldType;
 (function (ContextMenuInputFieldType) {
   ContextMenuInputFieldType[ContextMenuInputFieldType.None = 0] = 'None';
@@ -2072,6 +2084,10 @@ let GestureControl;
     GestureType[GestureType.ROTATION_GESTURE = 5] = 'ROTATION_GESTURE';
     GestureType[GestureType.DRAG = 6] = 'DRAG';
     GestureType[GestureType.CLICK = 7] = 'CLICK';
+    GestureType[GestureType.BOX_SELECT_GESTURE = 8] = 'BOX_SELECT_GESTURE';
+    GestureType[GestureType.WEB_SCROLL_GESTURE = 9] = 'WEB_SCROLL_GESTURE';
+    GestureType[GestureType.TEXT_FIELD_SELECT_GESTURE = 10] = 'TEXT_FIELD_SELECT_GESTURE';
+    GestureType[GestureType.CONTEXT_MENU_HOVER_GESTURE = 11] = 'CONTEXT_MENU_HOVER_GESTURE';
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
@@ -2433,6 +2449,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get autoFill() {
+    return new TextMenuItemId('OH_DEFAULT_AUTO_FILL');
+  }
+
   static get TRANSLATE() {
     return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
@@ -2590,7 +2610,6 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
-    this.preTopInfo = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2598,19 +2617,20 @@ class NavPathStack {
   setPathStack(pathStack, animated) {
     this.nativeStack?.setPathStack(this, pathStack, animated);
   }
-  updatePreTopInfo(preTopInfo) {
+  updatePreTopInfo() {
     if (this.pathArray.length === undefined || this.pathArray.length === 0) {
-        this.preTopInfo = undefined;
+        this.nativeStack.preTopInfo = undefined;
         return;
     }
-    this.preTopInfo = this.pathArray[this.pathArray.length - 1];
+    this.nativeStack.preTopInfo = this.pathArray[this.pathArray.length - 1];
   }
   isPushOperation() {
-    if (this.preTopInfo === undefined) {
+    const preTopInfo = this.nativeStack.preTopInfo;
+    if (preTopInfo === undefined) {
         return true;
     }
     return this.pathArray.findIndex((info)=>{ // If the top of the previous stack exists, the next stack operation is push.
-        return info === this.preTopInfo;
+        return info === preTopInfo;
     }) !== -1;
   }
   getJsIndexFromNativeIndex(index) {
@@ -2759,12 +2779,52 @@ class NavPathStack {
     if (!this.checkPathValid(info)) {
       return;
     }
-    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
-    let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
+    // parseNavigationOptions
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof optionParam === 'boolean') {
+      animated = optionParam;
+    } else if (optionParam !== undefined && optionParam !== null) {
+      if (typeof optionParam.animated === 'boolean') {
+        animated = optionParam.animated;
+      }
+      if (optionParam.launchMode !== undefined && optionParam.launchMode !== null) {
+        launchMode = optionParam.launchMode;
+      }
+    }
+    // pushWithLaunchModeAndAnimated
+    let ret = false;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      let index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].needUpdate = true;
+        this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
+        if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+          this.moveIndexToTop(index, animated);
+        } else {
+          this.innerPopToIndex(index, undefined, animated, false);
+        }
+        ret = true;
+      }
+    }
     if (ret) {
       return;
     }
-    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    // find in pop array
+    info.index = -1;
+    info.navDestinationId = undefined;
+    for (let i = this.popArray.length - 1; i >= 0; i--) {
+      if (info.name === this.popArray[i].name) {
+        let infoFind = this.popArray.splice(i, 1);
+        info.index = infoFind[0].index;
+        info.navDestinationId = infoFind[0].navDestinationId;
+        break;
+      }
+    }
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -3908,6 +3968,12 @@ let AvoidanceMode;
   AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
 })(AvoidanceMode || (AvoidanceMode = {}));
 
+let MenuKeyboardAvoidMode;
+(function (MenuKeyboardAvoidMode) {
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
+})(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -4041,6 +4107,7 @@ let ListItemGroupArea;
 
 let DragResult;
 (function (DragResult) {
+  DragResult[DragResult.UNKNOWN = -1] = 'UNKNOWN';
   DragResult[DragResult.DRAG_SUCCESSFUL = 0] = 'DRAG_SUCCESSFUL';
   DragResult[DragResult.DRAG_FAILED = 1] = 'DRAG_FAILED';
   DragResult[DragResult.DRAG_CANCELED = 2] = 'DRAG_CANCELED';
@@ -4401,6 +4468,12 @@ let MarqueeStartPolicy;
   MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
 })(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
+let MarqueeUpdatePolicy;
+(function (MarqueeUpdatePolicy) {
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.PRESERVE_POSITION = 1] = 'PRESERVE_POSITION';
+})(MarqueeUpdatePolicy || (MarqueeUpdatePolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus.CREATE = 0;
@@ -4486,15 +4559,6 @@ const ColorPlaceholder = {
   ACCENT: 'ACCENT',
   FOREGROUND: 'FOREGROUND',
 };
-let ColorPickStrategy;
-(function (ColorPickStrategy) {
-  ColorPickStrategy[ColorPickStrategy.NONE = 0] = 'NONE';
-  ColorPickStrategy[ColorPickStrategy.DOMINANT = 1] = 'DOMINANT';
-  ColorPickStrategy[ColorPickStrategy.AVERAGE = 2] = 'AVERAGE';
-  ColorPickStrategy[ColorPickStrategy.CONTRAST = 3] = 'CONTRAST';
-})(ColorPickStrategy || (ColorPickStrategy = {}));
-
-globalThis.ColorPlaceholder = ColorPlaceholder;
 
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
@@ -4512,6 +4576,8 @@ let TextDirection;
 (function (TextDirection) {
   TextDirection[TextDirection.LTR = 0] = 'LTR';
   TextDirection[TextDirection.RTL = 1] = 'RTL';
+  TextDirection[TextDirection.DEFAULT = 2] = 'DEFAULT';
+  TextDirection[TextDirection.AUTO = 3] = 'AUTO';
 })(TextDirection || (TextDirection = {}));
 
 let FocusPriority;
@@ -4776,6 +4842,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+  AxisModel[AxisModel.ABS_RX = 8] = 'ABS_RX';
+  AxisModel[AxisModel.ABS_RY = 9] = 'ABS_RY';
+  AxisModel[AxisModel.ABS_THROTTLE = 10] = 'ABS_THROTTLE';
+  AxisModel[AxisModel.ABS_RUDDER = 11] = 'ABS_RUDDER';
+  AxisModel[AxisModel.ABS_WHEEL = 12] = 'ABS_WHEEL';
+  AxisModel[AxisModel.ABS_HAT1X = 13] = 'ABS_HAT1X';
+  AxisModel[AxisModel.ABS_HAT1Y = 14] = 'ABS_HAT1Y';
+  AxisModel[AxisModel.ABS_HAT2X = 15] = 'ABS_HAT2X';
+  AxisModel[AxisModel.ABS_HAT2Y = 16] = 'ABS_HAT2Y';
+  AxisModel[AxisModel.ABS_HAT3X = 17] = 'ABS_HAT3X';
+  AxisModel[AxisModel.ABS_HAT3Y = 18] = 'ABS_HAT3Y';
 })(AxisModel || (AxisModel = {}));
 
 let CrownSensitivity;
@@ -4999,7 +5076,24 @@ let PresetFillType;
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
+  SystemProperties.WINDOW_SIZE = 'system.window.size';
+  SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
+  SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
+  SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
 })(SystemProperties || (SystemProperties = {}));
+
+let PinVerifyResult;
+(function (PinVerifyResult) {
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_SUCCESS = 0] = 'PIN_VERIFICATION_SUCCESS';
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_FAILED = 1] = 'PIN_VERIFICATION_FAILED';
+})(PinVerifyResult || (PinVerifyResult = {}));
+
+let CredentialType;
+(function (CredentialType) {
+  CredentialType[CredentialType.CREDENTIAL_USER = 2] = 'CREDENTIAL_USER';
+  CredentialType[CredentialType.CREDENTIAL_APP = 3] = 'CREDENTIAL_APP';
+  CredentialType[CredentialType.CREDENTIAL_UKEY = 4] = 'CREDENTIAL_UKEY';
+})(CredentialType || (CredentialType = {}));
 
 let ResolveStrategy;
 (function (ResolveStrategy) {

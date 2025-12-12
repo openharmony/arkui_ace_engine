@@ -121,7 +121,8 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
             node->GetChildren();
-            auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
+            auto preBuildResult = node->builder_->PreBuild(node->removingNodes_, deadline, node->itemConstraint_,
+                canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
             } else {
@@ -129,6 +130,10 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
                 node->itemConstraint_.reset();
             }
             ACE_SCOPED_TRACE("LazyForEach predict finish: %s", node->builder_->DumpHashKey().c_str());
+        }
+        // post idle task to release nodes if there is still nodes in removingNodes_
+        if (!node->removingNodes_.empty()) {
+            node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
         }
     });
 }
@@ -398,7 +403,9 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         child.second->SetJSViewActive(false, true);
-        return child.second->GetFrameChildByIndex(0, needBuild);
+        auto childNode = child.second->GetFrameChildByIndex(0, needBuild);
+        builder_->ProcessOffscreenNode(childNode, false);
+        return childNode;
     }
     if (isActive_) {
         child.second->SetJSViewActive(true, true);
@@ -478,6 +485,8 @@ void LazyForEachNode::DoSetActiveChildRange(
         end += cacheEnd;
         builder_->SetShowCached(cacheStart, cacheEnd);
     }
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
+        start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     if (builder_->SetActiveChildRange(start, end)) {
         tempChildren_.clear();
         tempChildren_.swap(children_);
@@ -538,6 +547,8 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
+
+    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const

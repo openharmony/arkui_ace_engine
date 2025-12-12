@@ -300,6 +300,17 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     } else {
         NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
     }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
+    // add accessibilityText
+    RefPtr<ResourceObject> textResourceObj;
+    std::string textString;
+    Local<JSValueRef> jsText = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (!ArkTSUtils::ParseJsString(vm, jsText, textString, textResourceObj)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()
+        ->setNavDestinationBackButtonText(nativeNode, textString.c_str(),
+                                          AceType::RawPtr(textResourceObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -342,6 +353,7 @@ ArkUINativeModuleValue NavDestinationBridge::ResetBackButtonIcon(ArkUIRuntimeCal
     RefPtr<PixelMap> pixMap = nullptr;
     std::string src;
     NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -488,6 +500,16 @@ ArkUINativeModuleValue NavDestinationBridge::SetMenus(ArkUIRuntimeCallInfo* runt
     } else if (menusArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
     }
+    // deal menu options
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() <= NUM_2 || !info[NUM_2]->IsObject()) {
+        return panda::StringRef::Undefined(vm);
+    }
+    NG::NavigationMenuOptions options;
+    auto optObj = JSRef<JSObject>::Cast(info[NUM_2]);
+    auto moreButtonProperty = optObj->GetProperty("moreButtonOptions");
+    JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    NavDestinationModel::GetInstance()->SetMenuOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -498,6 +520,10 @@ ArkUINativeModuleValue NavDestinationBridge::ResetMenus(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
+    NG::NavigationMenuOptions options;
+    NavDestinationModelNG::GetInstance()->SetMenuOptions(std::move(options));
+    NavDestinationModelNG::ResetResObj(reinterpret_cast<FrameNode*>(nativeNode),
+        NavDestinationPatternType::TITLE_BAR, "navDestination.navigationMenuOptions");
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -699,11 +725,12 @@ ArkUINativeModuleValue NavDestinationBridge::SetOnShown(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> onShown = [vm, func = panda::CopyableGlobal(vm, func), frameNode]() {
+    std::function<void(int32_t)> onShown = [vm, func = panda::CopyableGlobal(vm, func), frameNode](int32_t reason) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::Claim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, NUM_0);
+        panda::Local<panda::JSValueRef> params[1] = { panda::IntegerRef::New(vm, reason) };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
     };
     nodeModifiers->getNavDestinationModifier()->setNavDestinationOnShown(nativeNode, reinterpret_cast<void*>(&onShown));
     return panda::JSValueRef::Undefined(vm);
@@ -739,11 +766,12 @@ ArkUINativeModuleValue NavDestinationBridge::SetOnHidden(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> OnHidden = [vm, func = panda::CopyableGlobal(vm, func), frameNode]() {
+    std::function<void(int32_t)> OnHidden = [vm, func = panda::CopyableGlobal(vm, func), frameNode](int32_t reason) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::Claim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        panda::Local<panda::JSValueRef> params[1] = { panda::IntegerRef::New(vm, static_cast<int32_t>(reason)) };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
     };
     nodeModifiers->getNavDestinationModifier()->setNavDestinationOnHidden(
         nativeNode, reinterpret_cast<void*>(&OnHidden));

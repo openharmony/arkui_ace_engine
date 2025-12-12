@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
 
 #include "gmock/gmock.h"
+#include "ui/properties/ui_material.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -125,7 +126,16 @@ public:
         groupProperty->propEffectOption = effectOption;
     }
 
-    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    void OnUseEffectUpdate(bool useEffect) override
+    {
+        propUseEffect_ = useEffect;
+    }
+
+    void OnUseEffectTypeUpdate(EffectType effectType) override
+    {
+        propUseEffectType_ = effectType;
+    }
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;

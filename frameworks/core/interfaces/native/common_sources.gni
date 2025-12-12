@@ -37,6 +37,7 @@ common_sources = [
   "implementation/web_modifier_callbacks.cpp",
   "implementation/x_component_controller_peer_impl.cpp",
   "utility/accessor_utils.cpp",
+  "utility/callback_helper.cpp",
   "utility/converter_enums.cpp",
   "utility/peer_utils.cpp",
   "utility/reverse_converter.cpp",

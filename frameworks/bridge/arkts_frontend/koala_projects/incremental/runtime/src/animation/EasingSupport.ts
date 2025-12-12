@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-import { float64, isFiniteNumber, uint32 } from "@koalaui/common"
+import { float64, int32toFloat64, int64to32, isFiniteNumber, uint32 } from '@koalaui/common'
 
 export class EasingSupport {
     private x: Float64Array
     private y: Float64Array
 
     private constructor(size: uint32, xSupplier: (value: float64) => float64, ySupplier: (value: float64) => float64) {
-        if (!Number.isInteger(size) || size <= 1) throw new Error("easing size must be integer value greater than 1, but is " + size)
+        if (!Number.isInteger(size) || size <= 1) {
+            throw new Error('easing size must be integer value greater than 1, but is ' + size)
+        }
         this.x = new Float64Array(size)
         this.y = new Float64Array(size)
         this.x[0] = xSupplier(0)
@@ -29,30 +31,44 @@ export class EasingSupport {
         this.x[last] = xSupplier(1)
         this.y[last] = ySupplier(1)
         for (let i = 1; i < last; i++) {
-            const value = (i as float64) / last
+            const value = int32toFloat64(i) / last
             this.x[i] = xSupplier(value)
             this.y[i] = ySupplier(value)
         }
     }
 
     convert(value: float64): float64 {
-        let last = (this.x.length - 1) as uint32
-        let left = 0 as uint32
-        if (value < this.x[left]) return this.y[left]
+        let last = this.x.length - 1
+        let left = 0
+        if (value < this.x[left]) {
+            return this.y[left]
+        }
         let right = last
-        if (value > this.x[right]) return this.y[right]
+        if (value > this.x[right]) {
+            return this.y[right]
+        }
         while (left <= right) {
-            const center = ((left + right) >>> 1) as uint32
-            if (value < this.x[center]) right = center - 1
-            else if (value > this.x[center]) left = center + 1
-            else return this.y[center]
+            const center = int64to32((left + right) >>> 1)
+            if (value < this.x[center]) {
+                right = center - 1
+            }
+            else if (value > this.x[center]) {
+                left = center + 1
+            }
+            else {
+                return this.y[center]
+            }
         }
         return this.y[left > last ? last : left]
     }
 
     static newCubicBezier(p1x: float64, p1y: float64, p2x: float64, p2y: float64, size: uint32 = 1024): EasingSupport {
-        if (!isFiniteNumber(p1x) || !isFiniteNumber(p1y) || p1x < 0 || 1 < p1x) throw new Error(`illegal point: (${p1x},${p1y}), where 0 <= x <= 1`)
-        if (!isFiniteNumber(p2x) || !isFiniteNumber(p2y) || p2x < 0 || 1 < p2x) throw new Error(`illegal point: (${p2x},${p2y}), where 0 <= x <= 1`)
+        if (!isFiniteNumber(p1x) || !isFiniteNumber(p1y) || p1x < 0 || 1 < p1x) {
+            throw new Error(`illegal point: (${p1x},${p1y}), where 0 <= x <= 1`)
+        }
+        if (!isFiniteNumber(p2x) || !isFiniteNumber(p2y) || p2x < 0 || 1 < p2x) {
+            throw new Error(`illegal point: (${p2x},${p2y}), where 0 <= x <= 1`)
+        }
         return new EasingSupport(size, (value: float64) => cubicBezierValue(value, p1x, p2x), (value: float64) => cubicBezierValue(value, p1y, p2y))
     }
 }

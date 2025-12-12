@@ -21,22 +21,47 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace Converter;
 
 class UIContextAtomicServiceBarAccessorTest :
     public StaticAccessorTest<GENERATED_ArkUIUIContextAtomicServiceBarAccessor,
     &GENERATED_ArkUIAccessors::getUIContextAtomicServiceBarAccessor> {
 };
 
+/**
+ * @tc.name: appBarNull
+ * @tc.desc: Test AppBarView
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, appBarNull, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getBarRect, nullptr);
+
+    auto rect = Converter::OptConvert<RectF>(accessor_->getBarRect());
+    ASSERT_TRUE(rect.has_value());
+}
 
 /**
  * @tc.name: getBarRect
  * @tc.desc: Test GetAppBarRect
  * @tc.type: FUNC
  */
-HWTEST_F(UIContextAtomicServiceBarAccessorTest, DISABLED_getBarRect, TestSize.Level1)
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRect, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     ASSERT_NE(accessor_->getBarRect, nullptr);
+
+    // Convert frame check
+    Ark_Frame src = {
+        .x = ArkValue<Ark_Float64>(100.0),
+        .y = ArkValue<Ark_Float64>(200.0),
+        .width = ArkValue<Ark_Float64>(300.0),
+        .height = ArkValue<Ark_Float64>(400.0)
+    };
+    RectF result = Converter::Convert<RectF>(src);
+    ASSERT_EQ(result.GetX(), 100.0);
+    ASSERT_EQ(result.GetY(), 200.0);
+    ASSERT_EQ(result.Width(), 300.0);
+    ASSERT_EQ(result.Height(), 400.0);
 
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     auto container = Container::Current();
@@ -44,11 +69,10 @@ HWTEST_F(UIContextAtomicServiceBarAccessorTest, DISABLED_getBarRect, TestSize.Le
     container->SetAppBar(appBar);
 
     auto baseRect = appBar->GetAppBarRect();
-    ASSERT_TRUE(baseRect.has_value());
+    ASSERT_TRUE(baseRect);
     auto rect = Converter::OptConvert<RectF>(accessor_->getBarRect());
-    ASSERT_TRUE(rect.has_value());
+    ASSERT_TRUE(rect);
     EXPECT_EQ(rect.value(), baseRect.value());
-#endif
 }
 
 }

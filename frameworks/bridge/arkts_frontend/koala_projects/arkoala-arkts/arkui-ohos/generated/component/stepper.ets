@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -27,6 +28,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookStepperAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { StepperModifier } from "./../StepperModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkStepperPeer extends ArkCommonMethodPeer {
@@ -42,6 +44,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setStepperOptionsAttribute(value?: StepperOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -226,7 +229,9 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookStepperAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookStepperAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

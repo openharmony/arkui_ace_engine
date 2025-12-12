@@ -264,10 +264,7 @@ void OnWillScrollImpl(Ark_NativePointer node, const Opt_OnWillScrollCallback* ha
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<OnWillScrollCallback> arkCallback;
-    if (handler) {
-        arkCallback = Converter::OptConvert<OnWillScrollCallback>(*handler);
-    }
+    auto arkCallback = Converter::OptConvertPtr<OnWillScrollCallback>(handler);
     if (arkCallback) {
         auto modelCallback = [callback = CallbackHelper(arkCallback.value())]
             (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
@@ -275,7 +272,7 @@ void OnWillScrollImpl(Ark_NativePointer node, const Opt_OnWillScrollCallback* ha
             auto arkScrollOffset = Converter::ArkValue<Ark_Float64>(scrollOffset);
             auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
             auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt = callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_ScrollResult,
+            auto resultOpt = callback.InvokeWithOptConvertResult<ScrollFrameResult, Opt_ScrollResult,
                 Callback_Opt_ScrollResult_Void>(arkScrollOffset, arkScrollState, arkScrollSource);
             return resultOpt.value_or(ScrollFrameResult());
         };

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Resource_serializer } from "./../framework/resource"
@@ -28,6 +29,7 @@ import { ResourceColor, Length } from "./units"
 import { Color, LineCapStyle, LineJoinStyle } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, extractors, hookShapeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -48,6 +50,7 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         return _peer
     }
     setShapeOptionsAttribute(value?: image.PixelMap): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -80,10 +83,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -108,10 +111,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -159,10 +162,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx0)
-                } else if (valueTmpValueTmpElement instanceof number) {
+                } else if (valueTmpValueTmpElement instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource
@@ -567,7 +570,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookShapeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookShapeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

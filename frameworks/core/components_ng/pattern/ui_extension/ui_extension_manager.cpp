@@ -673,6 +673,10 @@ void UIExtensionManager::NotifyUECProviderIfNeedded()
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetContainerFloatingTitleVisible()) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "floating tile is show, not notify ui extension.");
+        return;
+    }
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_VOID(avoidInfoMgr);
     for (const auto& it : aliveUIExtensions_) {

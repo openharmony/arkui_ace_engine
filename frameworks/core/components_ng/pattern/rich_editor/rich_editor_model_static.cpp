@@ -164,6 +164,16 @@ void RichEditorModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, bool i
     pattern->SetEnableHapticFeedback(isEnabled);
 }
 
+void RichEditorModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty,
+        CompressLeadingPunctuation, enabled.value_or(false), frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled.value_or(false));
+}
+
 void RichEditorModelStatic::SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
     const std::optional<bool>& supportAvoidance)
 {
@@ -173,6 +183,15 @@ void RichEditorModelStatic::SetCustomKeyboard(FrameNode* frameNode, std::functio
         pattern->SetCustomKeyboard(std::move(func));
         pattern->SetCustomKeyboardOption(supportAvoidance.value_or(false));
     }
+}
+void RichEditorModelStatic::SetCustomKeyboardWithNode(
+    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+    pattern->SetCustomKeyboardOption(supportAvoidance.value_or(false));
 }
 
 void RichEditorModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,

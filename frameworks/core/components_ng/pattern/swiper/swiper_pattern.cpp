@@ -519,6 +519,30 @@ void SwiperPattern::OnModifyDone()
     }
 }
 
+void SwiperPattern::OnHostChildUpdateDone()
+{
+    Pattern::OnHostChildUpdateDone();
+
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    if (HasLeftButtonNode()) {
+        auto leftArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(leftButtonId_.value())));
+        CHECK_NULL_VOID(leftArrowNode);
+        auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->UpdateButtonNodeChildUpdateDone();
+    }
+    if (HasRightButtonNode()) {
+        auto rightArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(rightButtonId_.value())));
+        CHECK_NULL_VOID(rightArrowNode);
+        auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->UpdateButtonNodeChildUpdateDone();
+    }
+}
+
 void SwiperPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
@@ -1403,7 +1427,7 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
             pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
         }
 #endif
-        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_) {
+        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_ && SwiperUtils::IsStretch(props)) {
             // If property animation is running and the target index is the same as the running target index, the
             // animation is not played
             return;
@@ -5302,8 +5326,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
             swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
             ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d id %d",
-                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_,
-                swiper->swiperId_);
+                delayTime, swiper->GetLoopIndex(swiper->targetIndex_.value()), swiper->isVisibleArea_,
+                swiper->isWindowShow_, swiper->swiperId_);
             swiper->MarkDirtyNodeSelf();
         }
     });
@@ -6455,6 +6479,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     auto transition = tabContentAnimatedTransition.transition;
 
     if (!transition) {
+        LoadCompleteManagerStopCollect();
         OnCustomAnimationFinish(fromIndex, toIndex, false);
         return;
     }
@@ -6466,6 +6491,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnCustomAnimationFinish(fromIndex, toIndex, hasOnChanged);
+        swiperPattern->LoadCompleteManagerStopCollect();
     });
 
     transition(proxy);
@@ -7858,7 +7884,11 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(currentIndex_);
+        if (targetIndex_.has_value()) {
+            url += ",targetIndex-" + std::to_string(targetIndex_.value());
+        }
+        pipeline->GetLoadCompleteManager()->StartCollect(url);
     }
 }
 

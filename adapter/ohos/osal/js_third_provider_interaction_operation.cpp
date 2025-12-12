@@ -1032,4 +1032,22 @@ bool JsThirdProviderInteractionOperation::SendAccessibilitySyncEventToService(
         }, TaskExecutor::TaskType::BACKGROUND, "SetSearchElementInfoByTextResult");
     return true;
 }
+
+void JsThirdProviderInteractionOperation::CheckAndSendHoverEnterByReadableRules(int64_t thirdElementId)
+{
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        thirdElementId, splitElementId, splitTreeId);
+    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    auto accessibilityProvider = accessibilityProvider_.Upgrade();
+    NodeConfig config;
+    GetNodeConfig(config);
+    FocusStrategyOsalThird strategy(jsAccessibilityManager, accessibilityProvider, config);
+    int64_t targetId = splitElementId;
+    auto canSendResult = strategy.CanSendHoverWithTargetIdByReadableRules(splitElementId, targetId);
+    CHECK_EQUAL_VOID(canSendResult, false);
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(splitTreeId, targetId);
+    SendAccessibilityAsyncEventForThird(targetId, Accessibility::EventType::TYPE_VIEW_HOVER_ENTER_EVENT);
+}
 } // namespace OHOS::Ace::Framework

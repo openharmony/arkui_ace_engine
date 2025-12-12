@@ -46,10 +46,17 @@ public:
 
     void SetHostParams(const std::shared_ptr<OHOS::AAFwk::Want>& params);
 
+    bool IsAllowCrossProcessNesting() const
+    {
+        return allowCrossProcessNesting_;
+    }
+
 private:
     void SetHostUIContentType(const std::shared_ptr<OHOS::AAFwk::Want>& params);
+    void SetAllowCrossProcessNesting(const std::shared_ptr<OHOS::AAFwk::Want>& params);
 
     UIContentType hostUIContentType_ = UIContentType::UNDEFINED;
+    bool allowCrossProcessNesting_ = false;
 };
 
 } // namespace OHOS::Ace

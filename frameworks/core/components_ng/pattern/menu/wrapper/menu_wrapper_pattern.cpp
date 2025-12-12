@@ -669,7 +669,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
             CHECK_NULL_CONTINUE(menuPattern);
             isClearLastMenuItem_ = true;
-            if (menuPattern->IsSubMenu() && HasSideSubMenu() &&
+            if ((menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) && HasSideSubMenu() &&
                 IsTouchWithinParentMenuItemZone(child, children, position)) {
                 continue;
             }
@@ -1218,6 +1218,8 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());
+    DumpLog::GetInstance().AddDesc("ShowInSubWindow: " + std::to_string(dumpInfo_.showInSubWindow));
+    DumpLog::GetInstance().AddDesc("CanExpandCurrentWindow: " + std::to_string(dumpInfo_.canExpandCurrentWindow));
     DumpLog::GetInstance().AddDesc("MenuWindowRect: " + dumpInfo_.menuWindowRect.ToString());
     DumpLog::GetInstance().AddDesc("WrapperRect: " + dumpInfo_.wrapperRect.ToString());
     DumpLog::GetInstance().AddDesc("PreviewBeginScale: " + std::to_string(dumpInfo_.previewBeginScale));
@@ -1245,6 +1247,8 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TargetNode", dumpInfo_.targetNode.c_str());
     json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
     json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
+    json->Put("ShowInSubWindow", std::to_string(dumpInfo_.showInSubWindow).c_str());
+    json->Put("CanExpandCurrentWindow", std::to_string(dumpInfo_.canExpandCurrentWindow).c_str());
     json->Put("MenuWindowRect", dumpInfo_.menuWindowRect.ToString().c_str());
     json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());
     json->Put("PreviewBeginScale", std::to_string(dumpInfo_.previewBeginScale).c_str());

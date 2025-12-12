@@ -123,11 +123,13 @@ public:
     void TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData) override;
 #endif
 
+protected:
+    WeakPtr<CanvasPattern> weakPattern_;
+
 private:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
-    WeakPtr<CanvasPattern> weakPattern_;
     bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModelNG);
 };

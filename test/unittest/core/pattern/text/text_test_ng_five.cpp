@@ -144,16 +144,13 @@ HWTEST_F(TextTestNgFive, TextAccessibilityPropertyGetText001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(CREATE_VALUE_W);
     EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
-
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_U16CONTENT;
-
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
@@ -1014,20 +1011,26 @@ HWTEST_F(TextTestNgFive, TextDecorationToJsonValue001, TestSize.Level1)
     text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
+
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
+
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
+
     std::string decorationStr = json->GetValue("decoration")->GetString();
     auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+
     ASSERT_NE(decorationJson, nullptr);
     EXPECT_TRUE(decorationJson->Contains("type"));
     EXPECT_TRUE(decorationJson->GetValue("type")->GetString() ==

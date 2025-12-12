@@ -794,6 +794,11 @@ void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::op
     TextFieldModelNG::SetSelectAllValue(frameNode, isSelectAllValue.value_or(false));
 }
 
+void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
 void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -914,6 +919,25 @@ void TextFieldModelStatic::SetCustomKeyboard(FrameNode* frameNode, const std::fu
         textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
         textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
     }
+}
+
+void TextFieldModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetIncludeFontPadding(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

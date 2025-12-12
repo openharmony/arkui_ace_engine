@@ -34,8 +34,7 @@ public:
     bool CleanPageStack() override;
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true) override;
 
-    bool OnPrimaryPageDetected(const RefPtr<FrameNode>& primaryPage, LoadPlaceHolderPageCallback&& callback,
-        const std::list<WeakPtr<FrameNode>>& pageStack);
+    bool OnPrimaryPageDetected(const RefPtr<FrameNode>& primaryPage, const std::list<WeakPtr<FrameNode>>& pageStack);
     void RemoveSecondaryPagesOfPrimaryHomePage();
     int32_t UpdateSecondaryPageNeedRemoved(bool needClearSecondaryPage);
 
@@ -98,6 +97,8 @@ public:
         return isTopFullScreenPage_;
     }
 
+    RefPtr<FrameNode> GetRelatedOrPlaceHolderPage();
+
 private:
     class StageOptScope {
     public:
@@ -118,7 +119,8 @@ private:
     RefPtr<FrameNode> GetLastPrimaryPage();
 
     void FirePageHideOnPushPage(RouterPageType newPageType, const RefPtr<FrameNode>& lastPage,
-        const RefPtr<FrameNode>& topPhPage, PageTransitionType hideTransitionType);
+        const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& prePrimaryPage,
+        PageTransitionType hideTransitionType);
     void FirePageShowOnPushPage(const RefPtr<FrameNode>& newTopPage,
         const RefPtr<ParallelPagePattern>& newTopPattern, PageTransitionType showTransitionType);
     bool PushPageInSplitMode(
@@ -133,27 +135,25 @@ private:
         PageTransitionType showTransitionType);
     bool PopPageInSplitMode(bool needShowNext, bool needTransition);
 
-    bool GetPageNumberExcludePlaceHolderPage(int32_t& pageNumber);
+    bool GetPageNumberExcludeRelatedOrPlaceHolderPage(int32_t& pageNumber);
     bool FirePageHideOnPopPageToIndex(int32_t popSize);
     bool FirePageShowOnPopPageToIndex(const RefPtr<ParallelStagePattern>& stagePattern,
-        const RefPtr<FrameNode>& toPage, bool& addNewPhPage, PageTransitionType showTransitionType);
+        const RefPtr<FrameNode>& toPage, bool& addRelatedOrPhPage, PageTransitionType showTransitionType);
     bool PopPageToIndexInSplitMode(int32_t index, bool needShowNext, bool needTransition);
 
     bool CleanPageStackInSplitMode(const RefPtr<ParallelStagePattern>& stagePattern);
 
-    RefPtr<FrameNode> RefreshAndGetLastPrimaryPage();
     void FirePageHideOnMovePageToFront(
         RouterPageType newTopPageType, const RefPtr<FrameNode>& preLastPage, PageTransitionType hideTransitionType);
     void FirePageShowOnMovePageToFront(
         const RefPtr<FrameNode>& preTopPage, const RefPtr<ParallelPagePattern>& preTopPattern,
         const RefPtr<FrameNode>& newTopPage, const RefPtr<ParallelPagePattern>& newTopPattern,
         PageTransitionType showTransitionType);
-    RefPtr<FrameNode> GetPrePrimaryPage(const RefPtr<FrameNode>& preTopPage);
     bool MovePageToFrontInSplitMode(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
 
-    bool RemovePlaceHolderPageIfExist(RefPtr<FrameNode>& phPage, bool needHidePlaceHolder = true);
-    void MountAndShowPlaceHolderPageIfNeeded(
-        const RefPtr<FrameNode>& phPage, PageTransitionType showTransitionType);
+    bool RemoveRelatedOrPlaceHolderPageIfExist(RefPtr<FrameNode>& page, bool needHidePage = true);
+    void MountAndShowRelatedOrPlaceHolderPageIfNeeded(
+        const RefPtr<FrameNode>& page, PageTransitionType showTransitionType);
     bool IsEmptyInSplitMode();
 
     void FireParallelPageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus = true);

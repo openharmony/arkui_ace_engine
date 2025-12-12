@@ -66,6 +66,8 @@ public:
     static int GetFlexAlignContent(FrameNode* frameNode);
     static void SetMainSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetCrossSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static double GetFlexMainSpace(FrameNode* frameNode);
+    static double GetFlexCrossSpace(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

@@ -86,6 +86,8 @@ public:
     int32_t mode_ = 0;
     bool needDelete_ = false;
     std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
+    bool isForceSet_ = false;
+    bool isFromSingleToNMoved_ = false;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -130,8 +132,24 @@ public:
         onPop_ = tsPathInfo->GetOnPop();
     }
 
+    void SetNavDestinationPopCallback(const std::function<void(Opt_Object)>&& popCallback)
+    {
+        navDestinationPopCallback_ = popCallback;
+    }
+
+    std::function<void(Opt_Object)> GetNavDestinationPopCallback() const
+    {
+        return navDestinationPopCallback_;
+    }
+
+    bool IsStatic() override
+    {
+        return true;
+    }
+
     ParamType param_;
     OnPopCallback onPop_;
+    std::function<void(Opt_Object)> navDestinationPopCallback_;
 };
 
 using PopResultType = ExternalData;
@@ -184,14 +202,15 @@ public:
         const std::optional<NavigationOptions>& optionParam);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
-    PathInfo Pop(bool isAnimated);
-    PathInfo Pop(bool isAnimated, Ark_Object result);
+    bool Pop(bool isAnimated, PathInfo& info);
+    bool Pop(bool isAnimated, Ark_Object result, PathInfo& info);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result);
     void PopToIndex(size_t index, const std::optional<bool>& animated);
     void PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result);
-    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
+    void PopToInternal(
+        std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, bool needFireOnResult = true);
     void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, Ark_Object result);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
@@ -218,6 +237,20 @@ public:
     {
         onPopCallback_ = popCallback;
     }
+
+    std::vector<PathInfo> GetAllPathInfo()
+    {
+        return pathArray_;
+    }
+
+    void SetPathInfo(std::vector<PathInfo>& pathArray, bool animated = true);
+
+    void RegisterOnResultCallback(const std::function<void(Opt_Object)>&& onResultCallback)
+    {
+        onResultCallback_ = onResultCallback;
+    }
+
+    void InvokeOnStateChanged();
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -229,9 +262,9 @@ protected:
     std::function<void()> onStateChangedCallback_;
     std::function<void(const std::string)> onPopCallback_;
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
-    void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);
     const PathInfo* GetPathInfo(size_t index) const;
+    std::function<void(Opt_Object)> onResultCallback_;
 };
 
 // this repeats the functionality of JSNavigationStack, interacts with PathStack
@@ -324,11 +357,21 @@ public:
         nodes_.clear();
     }
     ParamType GetParamByIndex(int32_t index) const;
+    void RegisterOnResultCallback();
+
+    bool IsTopFromSingletonMoved() override;
+
+    void SetNavDestinationBuilder(std::function<RefPtr<NG::UINode>(int32_t)>&& navDestBuilder)
+    {
+        navDestBuilder_ = navDestBuilder;
+    }
+    std::string GetNameByIndex(int32_t index) const;
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
     std::function<RefPtr<NG::UINode>(int32_t)> createNavDestinationCallback_;
+    std::function<RefPtr<NG::UINode>(int32_t)> navDestBuilder_;
 
 private:
     void SetIsReplace(int32_t value)
@@ -336,7 +379,6 @@ private:
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
     int32_t GetSize() const override;
-    std::string GetNameByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;
@@ -347,6 +389,8 @@ private:
         const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
     std::string ErrorToMessage(int32_t code);
     void FirePromise(PathInfo*, int32_t errorCode);
+    void ExecutePopCallbackInStack(Opt_Object param);
+    bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, Opt_Object param);
     void* staticStackPtr_ = nullptr;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext

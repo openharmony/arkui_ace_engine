@@ -114,11 +114,10 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     config.svgFillColor_ = renderProps->GetSvgFillColor();
     config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
     config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
-
+    config.antiAlias_ = renderProps->GetAntiAliasValue(false);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
-
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_.colorFilterMatrix_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
@@ -131,13 +130,11 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     if (renderCtx) {
         config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
     }
-
     if (renderProps->HasHdrBrightness() && canvasImage_->IsHdrPixelMap() && renderCtx) {
         renderCtx->SetImageHDRBrightness(renderProps->GetHdrBrightnessValue(DEFAULT_HDR_BRIGHTNESS));
         renderCtx->SetImageHDRPresent(true);
         config.dynamicMode = DynamicRangeMode::HIGH;
     }
-
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }

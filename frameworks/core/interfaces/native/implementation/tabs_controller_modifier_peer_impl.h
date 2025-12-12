@@ -29,6 +29,16 @@ public:
     void SetTargetController(const WeakPtr<TabsControllerNG> &controller)
     {
         CHECK_NULL_VOID(!controller.Invalid());
+        auto oldTabsController = controllerWeakPtr_.Upgrade();
+        if (oldTabsController) {
+            // old controller bind another tabs.
+            oldTabsController->StartShowTabBar();
+            oldTabsController->SetOnChangeImpl(nullptr);
+        }
+        auto tabsController = controller.Upgrade();
+        if (tabsController) {
+            tabsController->SetOnChangeImpl(onChangeImpl_);
+        }
         controllerWeakPtr_ = controller;
     }
 
@@ -73,8 +83,23 @@ public:
         CHECK_NULL_VOID(controller);
         controller->SetPreloadFinishCallback(preloadFinishCallback);
     }
+    Ace::WeakPtr<TabsControllerNG> GetControllerWeakPtr() const
+    {
+        return controllerWeakPtr_;
+    }
+
+    void SetOnChangeImpl(const OnChangeFunc& onChangeImpl)
+    {
+        onChangeImpl_ = onChangeImpl;
+        auto tabsController = controllerWeakPtr_.Upgrade();
+        if (tabsController) {
+            tabsController->SetOnChangeImpl(onChangeImpl);
+        }
+    }
+
 private:
     Ace::WeakPtr<TabsControllerNG> controllerWeakPtr_;
+    OnChangeFunc onChangeImpl_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

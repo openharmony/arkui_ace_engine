@@ -37,6 +37,6 @@ export declare class NavExtender {
 export type NavExtender_OnUpdateStack = () => void;
 
 export declare class ArkComponentRootPeer extends PeerNode {
-    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0);
+    constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0);
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponentRootPeer;
 }

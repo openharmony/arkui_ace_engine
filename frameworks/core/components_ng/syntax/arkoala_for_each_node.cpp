@@ -28,6 +28,14 @@ void ArkoalaForEachNode::FinishRender()
     if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
     }
+    FlushUpdateAndMarkDirty();
+}
+
+void ArkoalaForEachNode::FlushUpdateAndMarkDirty()
+{
+    // mark parent dirty to flush measure.
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void ArkoalaForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)

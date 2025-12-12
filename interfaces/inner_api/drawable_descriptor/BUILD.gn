@@ -19,6 +19,7 @@ config("drawable_config") {
   include_dirs = [
     "$ace_root/interfaces/inner_api",
     "$ace_root/interfaces/inner_api/drawable_descriptor",
+    "$ace_root/frameworks/core/interfaces/drawable",
   ]
   if (current_os != "ohos") {
     include_dirs += [
@@ -45,6 +46,7 @@ if (is_arkui_x) {
       "${ace_root}/interfaces/napi/kits/utils",
       "${ace_root}/interfaces/inner_api/drawable_descriptor",
       "${ace_root}/interfaces/napi/kits/drawabledescriptor",
+      "${ace_root}/frameworks/core/interfaces/drawable",
       "${graphic_2d_path}/utils/color_manager/export",
       "${ace_root}/frameworks/core/interfaces/native/svg",
     ]

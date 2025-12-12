@@ -426,7 +426,7 @@ export struct FoldSplitContainer {
   private isHoverMode: boolean | undefined = undefined;
 
   aboutToAppear() {
-    this.listener?.on('change', (result) => {
+    this.listener?.onChange((result) => {
       this.isSmallScreen = result.matches;
     });
 
@@ -486,7 +486,7 @@ export struct FoldSplitContainer {
 
   aboutToDisappear() {
     if (this.listener) {
-      this.listener?.off('change');
+      this.listener?.offChange();
       this.listener = undefined;
     }
     try {

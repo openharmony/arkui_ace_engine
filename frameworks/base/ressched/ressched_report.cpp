@@ -332,21 +332,21 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
     std::unordered_map<std::string, std::string>& reply)
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
-    return reply["result"] == "\"true\"" ? true : false;
+    return reply["result"] == "\"true\"";
 }
 
 bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
     std::unordered_map<std::string, std::string>& reply)
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 1, payload, reply);
-    return reply["result"] == "\"true\"" ? true : false;
+    return reply["result"] == "\"true\"";
 }
 
 bool ResSchedReport::AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
     std::unordered_map<std::string, std::string>& reply)
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, RSS_TAIHANG_APP_WHITE_LIST_TYPE, payload, reply);
-    return reply["result"] == "\"true\"" ? true : false;
+    return reply["result"] == "\"true\"";
 }
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)

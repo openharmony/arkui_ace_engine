@@ -312,6 +312,16 @@ public:
         ViewAbstract::SetCompositingFilter(compositingFilter);
     }
 
+    void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override
+    {
+        ViewAbstract::SetMaterialFilter(materialFilter);
+    }
+
+    void SetSystemMaterial(const UiMaterial* material) override
+    {
+        ViewAbstract::SetSystemMaterial(material);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -926,14 +936,19 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetExcludeFromRenderGroup(bool exclude) override
+    {
+        ViewAbstract::SetExcludeFromRenderGroup(exclude);
+    }
+
     void SetRenderFit(RenderFit renderFit) override
     {
         ViewAbstract::SetRenderFit(renderFit);
     }
 
-    void SetCornerApplyType(CornerApplyType cornerApplyType) override
+    void SetRenderStrategy(RenderStrategy renderStrategy) override
     {
-        ViewAbstract::SetCornerApplyType(cornerApplyType);
+        ViewAbstract::SetRenderStrategy(renderStrategy);
     }
 
     void SetFlexBasis(const Dimension& value) override
@@ -1638,7 +1653,10 @@ public:
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override;
+
+    void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
@@ -1696,6 +1714,8 @@ public:
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions) override;
+    void ResetAccessibilityActionOptions() override;
     void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions) override;
@@ -1705,6 +1725,7 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
+    void SetAccessibilityStateDescription(const std::string& stateDescription) override;
     void RemoveResObj(const std::string& key) override
     {
         ViewAbstract::RemoveResObj(key);
@@ -1937,13 +1958,14 @@ public:
     {
         ViewAbstract::SetMonopolizeEvents(frameNode, monopolizeEvents);
     }
-
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
     static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
+    static void SetAccessibilityActionOptions(FrameNode* frameNode, AccessibilityActionOptions actionOptions);
+    static void ResetAccessibilityActionOptions(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
@@ -1956,6 +1978,7 @@ public:
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
     static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
+    static void SetAccessibilityStateDescription(FrameNode* frameNode, const std::string& stateDescription);
     static void RegisterRadiusesResObj(
         const std::string& key, NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& resObj);
     static void RegisterLocationPropsEdgesResObj(
@@ -2003,6 +2026,8 @@ public:
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
     static void RemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
+        MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty = false);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

@@ -1,0 +1,40 @@
+{
+  "integer": [
+    {
+      "name": "integer_value_5",
+      "value": 1
+    },
+    {
+      "name": "integer_value_10",
+      "value": 15
+    },
+    {
+      "name": "integer_value_20",
+      "value": 25
+    },
+    {
+      "name": "integer_value_30",
+      "value": 35
+    },
+    {
+      "name": "integer_value_40",
+      "value": 45
+    },
+    {
+      "name": "sizeOptions1",
+      "value": 20
+    },
+    {
+      "name": "sizeOptions2",
+      "value": 10
+    },
+    {
+      "name": "select_select20",
+      "value": 20
+    },
+    {
+      "name": "integer_1",
+      "value": 100
+    }
+  ]
+}

@@ -148,6 +148,7 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
 {
     std::vector<Color> symbolColor;
     if (SystemProperties::ConfigChangePerform()) {
+        UnRegisterResource("symbolColor");
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
         if (!ParseJsSymbolColor(info[0], symbolColor, true, resObjArr)) {
             return;
@@ -155,8 +156,6 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
         if (!resObjArr.empty()) {
             SymbolModel::GetInstance()->RegisterSymbolFontColorResource("symbolColor",
                 symbolColor, resObjArr);
-        } else {
-            UnRegisterResource("symbolColor");
         }
         SymbolModel::GetInstance()->SetFontColor(symbolColor);
         return;
@@ -439,9 +438,6 @@ void JSSymbol::ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolS
     }
 
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::RADIUS), symbolShadow.radius);
-    if (std::isnan(symbolShadow.radius) || std::isinf(symbolShadow.radius)) {
-        symbolShadow.radius = 0.0f;
-    }
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_X), symbolShadow.offset.first);
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_Y), symbolShadow.offset.second);
 }

@@ -279,9 +279,9 @@ bool NavigationModelNG::CreatePrimaryContentIfNeeded(const RefPtr<NavigationGrou
     CHECK_NULL_RETURN(navigationGroupNode, false);
     auto context = navigationGroupNode->GetContext();
     CHECK_NULL_RETURN(context, false);
-    auto manager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(manager, false);
-    if (!manager->IsForceSplitSupported()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
         return true;
     }
     if (navigationGroupNode->GetPrimaryContentNode()) {
@@ -305,7 +305,10 @@ bool NavigationModelNG::CreateForceSplitPlaceHolderIfNeeded(const RefPtr<Navigat
     CHECK_NULL_RETURN(context, false);
     auto manager = context->GetNavigationManager();
     CHECK_NULL_RETURN(manager, false);
-    if (!manager->IsForceSplitSupported() || manager->IsPlaceholderDisabled()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (!forceSplitMgr->IsForceSplitSupported(false) ||
+        manager->IsPlaceholderDisabled() || forceSplitMgr->HasRelatedPage()) {
         return true;
     }
     if (navigationGroupNode->GetForceSplitPlaceHolderNode()) {
@@ -3244,5 +3247,22 @@ void NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(FrameNode* 
     auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableVisibilityLifecycleWithContentCover(isEnable);
+}
+
+void NavigationModelNG::SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
+                                                   const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    NavigationTitleUtil::SetAccessibility(backButtonNode, text);
+    NavigationTitleUtil::SetBackButtonText(titleBarNode, text, "navigation.backButtonIcon.accessibilityText",
+                                           resObj);
 }
 } // namespace OHOS::Ace::NG

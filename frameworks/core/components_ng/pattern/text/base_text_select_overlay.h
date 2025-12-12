@@ -274,6 +274,7 @@ public:
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
+    void UpdateAIMenu();
     virtual std::optional<Color> GetHandleColor()
     {
         return std::nullopt;
@@ -325,6 +326,7 @@ public:
     }
     bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
     void UpdateIsSingleHandle(bool isSingleHandle);
+    void AddTaskAfterShowOverlay(std::function<void()>&& task);
 
 protected:
     RectF MergeSelectedBoxes(
@@ -381,6 +383,7 @@ protected:
         enableContainerModal_ = true;
     }
     bool IsNeedMenuTranslate();
+    void HandleOnAutoFill(OptionMenuType type);
     void HandleOnTranslate();
     bool IsNeedMenuSearch();
     void HandleOnSearch();
@@ -410,6 +413,7 @@ protected:
     RectF ConvertWindowToScreenDomain(RectF rect);
     EdgeF ConvertWindowToScreenDomain(EdgeF edge);
     std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
+    void FlushAfterOverlayShowTask();
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
@@ -446,6 +450,7 @@ private:
      */
     bool isHostNodeEnableSubWindowMenu_ = true;
     bool isSuperFoldDisplayDevice_ = false;
+    std::vector<std::function<void()>> afterShowTasks_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -56,6 +56,7 @@ public:
     static void SetDefaultTextStyle(
         FrameNode* frameNode, const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value);
     static void SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value);
+    static void SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
     static void SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);

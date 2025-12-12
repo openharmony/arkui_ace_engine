@@ -289,6 +289,7 @@ export struct SubHeader {
   @BuilderParam titleBuilder?: () => void;
   @Prop contentMargin: LocalizedMargin;
   @Prop contentPadding: LocalizedPadding;
+  @Prop titleAccessibilityText: ResourceStr;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
     end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
@@ -421,6 +422,13 @@ export struct SubHeader {
     return true;
   }
 
+  private getTitleAccessibilityText(): string | undefined {
+    if (!this.select && this.titleAccessibilityText) {
+      return this.titleAccessibilityText as string;
+    }
+    return '';
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -439,7 +447,8 @@ export struct SubHeader {
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -460,7 +469,8 @@ export struct SubHeader {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();

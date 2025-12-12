@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookRatingContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRatingPeer, StarStyleOptions, OnRatingChangeCallback, RatingConfiguration, RatingAttribute } from "./component/rating"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RatingModifier extends CommonMethodModifier implements RatingAttribute,AttributeModifier<RatingAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,7 +44,10 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     _starStyle_0_0value?: StarStyleOptions | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRatingChangeCallback | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<RatingConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRatingPeer;
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -117,9 +122,28 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookRatingContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<RatingConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookRatingContentModifier(peer, (undefined as ContentModifier<RatingConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RatingModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stars_0_flag) {
@@ -172,6 +196,19 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<RatingConfiguration> | undefined));
+                }
+            }
+        }
     }
     stars(value: int32 | undefined): this {
         if (((this._stars_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stars_0_0value) !== (value)))
@@ -214,6 +251,17 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

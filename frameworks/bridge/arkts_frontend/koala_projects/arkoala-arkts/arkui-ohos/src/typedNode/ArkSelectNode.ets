@@ -25,6 +25,7 @@ import {
 } from "../framework";
 import { Resource } from "global.resource";
 import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
+import { hookSelectContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {
@@ -165,6 +166,7 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        hookSelectContentModifier(this.getPeer(), value);
         this.markDirty();
         return this;
     }
@@ -212,6 +214,18 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     menuOutline(value: MenuOutlineOptions | undefined): this {
         const value_casted = value as ( MenuOutlineOptions | undefined);
         this.getPeer()?.setMenuOutlineAttribute(value_casted); 
+        this.markDirty();
+        return this;
+    }
+    setShowInSubWindow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.setShowInSubWindowAttribute(value_casted);
+        this.markDirty();
+        return this;
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted);
         this.markDirty();
         return this;
     }

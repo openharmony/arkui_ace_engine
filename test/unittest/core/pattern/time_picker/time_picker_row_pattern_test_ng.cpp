@@ -48,6 +48,7 @@ const std::string AM = "AM ";
 const std::string PM = "PM ";
 const double OFFSET_X = 6.0;
 const float EXTRA_WIDTH = 50.0f;
+const Dimension PICKER_PRESS_RADIUS = 3.0_vp;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 const uint32_t DEFAULT_YEAR = 1;
@@ -1346,5 +1347,108 @@ HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPattern031, TestSize.Level0)
     timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(frameNode->children_.size(), CHILD_WITH_AMPM_SIZE);
     EXPECT_TRUE(timePickerRowPattern->amPmId_.has_value());
+}
+
+/**
+ * @tc.name: TimePickerRowPattern033
+ * @tc.desc: Test TimePickerRowPattern InitOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPattern033, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    timePickerRowPattern->InitOnKeyEvent(focusHub);
+    auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
+    timePickerRowPattern->useButtonFocusArea_ = true;
+    RoundRect paintRect;
+    getInnerFocusRectFunc(paintRect);
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).y,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y,
+        static_cast<RSScalar>((theme->GetSelectorItemRadius() + PICKER_PRESS_RADIUS).ConvertToPx()));
+}
+
+/**
+ * @tc.name: TimePickerRowPattern034
+ * @tc.desc: Test TimePickerRowPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPattern034, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    frameNode->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
+    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    DirtySwapConfig config;
+    config.frameSizeChange = true;
+    timePickerRowPattern->useButtonFocusArea_ = true;
+    EXPECT_TRUE(timePickerRowPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+}
+
+/**
+ * @tc.name: TimePickerDialogViewUpdateCancelButtonTextLayoutProperty001
+ * @tc.desc: Test TimePickerDialogView UpdateCancelButtonTextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerDialogViewUpdateCancelButtonTextLayoutProperty001, TestSize.Level1)
+{
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textCancelLayoutProperty, nullptr);
+    TimePickerDialogView::useButtonFocusArea_ = true;
+    TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
+    EXPECT_EQ(textCancelLayoutProperty->GetTextColor(), pickerTheme->GetTitleStyle().GetTextColor());
+}
+
+/**
+ * @tc.name: TimePickerDialogViewUpdateConfirmButtonTextLayoutProperty001
+ * @tc.desc: Test TimePickerDialogView UpdateConfirmButtonTextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerDialogViewUpdateConfirmButtonTextLayoutProperty001, TestSize.Level1)
+{
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textConfirmNode, nullptr);
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    TimePickerDialogView::useButtonFocusArea_ = true;
+    TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), pickerTheme->GetTitleStyle().GetTextColor());
 }
 } // namespace OHOS::Ace::NG

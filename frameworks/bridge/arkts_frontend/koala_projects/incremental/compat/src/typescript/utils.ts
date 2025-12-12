@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-export function errorAsString(error: Error): string {
-    return error.stack ?? error.toString()
+import { AtomicRef } from './atomic'
+
+export function errorAsString(error: unknown): string {
+    if (error instanceof Error) {
+        return error.stack ?? error.toString()
+    }
+    return JSON.stringify(error)
 }
 
 export function unsafeCast<T>(value: unknown): T {
-    return value as unknown as T
+    return value as T
 }
 
 export function scheduleCoroutine(): void {}
@@ -35,12 +40,45 @@ export function launchJob(job: () => void): Promise<void> {
     )
 }
 
-export class CoroutineLocalValue<T> {
-    private value: T | undefined = undefined
-    get(): T | undefined {
-        return this.value
+export class WorkerLocalValue<T> {
+    private ref?: AtomicRef<T>
+
+    /**
+     * @param init - a factory function to provide initial worker-local value if needed
+     */
+    constructor(private init?: () => T) {}
+
+    /**
+     * @returns the worker-local value for current worker
+     * @throws `Error` when value not initialized and no `init` function provided
+     */
+    get(): T {
+        const ref = this.ref
+        if (ref) return ref.value
+        const init = this.init
+        if (!init) { throw new Error('WorkerLocalValue not initialized: call set() first or provide init() function.') }
+        const value = init()
+        this.ref = new AtomicRef<T>(value)
+        return value
     }
-    set(value: T | undefined) {
-        this.value = value
+
+    /**
+     * Updates the worker-local value for current worker.
+     * @param value - new value to store
+     */
+    set(value: T) {
+        const ref = this.ref
+        if (ref) {
+            ref.value = value
+        } else {
+            this.ref = new AtomicRef<T>(value)
+        }
+    }
+
+    /**
+     * Deletes the worker-local value for current worker.
+     */
+    delete(): void {
+        this.ref = undefined
     }
 }

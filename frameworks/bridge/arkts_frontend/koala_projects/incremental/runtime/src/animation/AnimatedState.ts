@@ -13,26 +13,23 @@
  * limitations under the License.
  */
 
-import { int64, refEqual } from "@koalaui/common"
-import { getAnimationTimer } from "./GlobalTimer"
-import { TimeAnimation, constAnimation } from "./TimeAnimation"
-import { Disposable } from "../states/Disposable"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, MutableState } from "../states/State"
-import { ReadableState as State, StateContext } from 'arkui.incremental.runtime.state';
+import { int64 } from '@koalaui/common'
+import { getAnimationTimer } from './GlobalTimer'
+import { TimeAnimation, constAnimation } from './TimeAnimation'
+import { Disposable } from '../states/Disposable'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { ComputableState, MutableState } from '../states/State'
+import { ReadableState, StateContext } from 'arkui.incremental.runtime.state'
 
 
 /**
  * This interface represents a pauseable animated state,
  * which value is changed according to the given animation.
  */
-export interface AnimatedState<Value> extends State<Value> {
-    getAnimation(): TimeAnimation<Value>
-    setAnimation(value: TimeAnimation<Value>): void
+export interface AnimatedState<Value> extends ReadableState<Value> {
+    animation: TimeAnimation<Value>
     readonly running: boolean
-    getPaused(): boolean
-    setPaused(value: boolean): void
-
+    paused: boolean
 }
 
 /**
@@ -55,8 +52,7 @@ export function animatedState<V>(animation: TimeAnimation<V>, startNow: boolean 
  * to change the current value to the target one.
  */
 export interface MutableAnimatedState<Value> extends MutableState<Value> {
-    getAnimation(): TimeAnimation<Value>
-    setAnimation(value: TimeAnimation<Value>): void
+    animation: TimeAnimation<Value>
     readonly running: boolean
 }
 
@@ -120,7 +116,7 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
     private valueState: ComputableState<Value>
     private myAnimation: TimeAnimation<Value>
 
-    dispose() {
+    dispose(): void {
         this.runningState.dispose()
         this.pausedState.dispose()
         this.valueState.dispose()
@@ -142,33 +138,33 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
         return this.runningState.value
     }
 
-    getPaused(): boolean {
+    get paused(): boolean {
         return this.pausedState.value
     }
 
-    setPaused(paused: boolean) {
+    set paused(paused: boolean) {
         this.pausedState.value = paused
     }
 
-    getAnimation(): TimeAnimation<Value> {
+    get animation(): TimeAnimation<Value> {
         return this.myAnimation
     }
 
-    setAnimation(animation: TimeAnimation<Value>): void {
-        if (this.myAnimation === animation) return // nothing to change
+    set animation(animation: TimeAnimation<Value>) {
+        if (this.myAnimation === animation) { return } // nothing to change
         this.myAnimation = animation
-        if (!this.getPaused()) animation.onStart(this.timeProvider())
+        if (!this.paused) { animation.onStart(this.timeProvider()) }
     }
 
-    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider: (() => int64)|undefined) {
+    constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider: (() => int64) | undefined) {
         const manager = GlobalStateManager.instance
         if (timeProvider) {
             this.timeProvider = timeProvider
         } else {
             this.timeProvider = (): int64 => {
                 const timer = getAnimationTimer(manager)
-                if (timer) return timer.value
-                console.log("global animation timer is not specified yet")
+                if (timer) { return timer.value }
+                console.log('global animation timer is not specified yet')
                 return 0
             }
         }
@@ -181,22 +177,22 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
                 const paused = this.pausedState.value
                 if (this.pausedState.modified) {
                     if (paused) {
-                        this.getAnimation().onPause(time)
+                        this.animation.onPause(time)
                     } else {
-                        this.getAnimation().onStart(time)
+                        this.animation.onStart(time)
                     }
                 }
                 // compute value from the time provided
-                let newValue = this.getAnimation().getValue(time)
+                let newValue = this.animation.getValue(time)
                 this.action?.(newValue)
                 return newValue
             } finally {
                 // update running state if needed
-                this.runningState.value = this.getAnimation().running
+                this.runningState.value = this.animation.running
             }
         })
         if (startNow) {
-            this.getAnimation().onStart(this.timeProvider())
+            this.animation.onStart(this.timeProvider())
         }
     }
 
@@ -234,19 +230,19 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     set value(value: Value) {
-        this.animatedState.setAnimation(this.animationProvider(this.animatedState.value, value))
+        this.animatedState.animation = this.animationProvider(this.animatedState.value, value)
     }
 
     get running(): boolean {
         return this.animatedState.running
     }
 
-    getAnimation(): TimeAnimation<Value> {
-        return this.animatedState.getAnimation()
+    get animation(): TimeAnimation<Value> {
+        return this.animatedState.animation
     }
 
-    setAnimation(animation: TimeAnimation<Value>): void {
-        this.animatedState.setAnimation(animation)
+    set animation(animation: TimeAnimation<Value>) {
+        this.animatedState.animation = animation
     }
 }
 
@@ -267,9 +263,9 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     set parameter(parameter: P) {
-        if (refEqual(this.parameterState.value, parameter)) return // nothing to change
+        if (this.parameterState.value === parameter) { return } // nothing to change
         this.parameterState.value = parameter
-        this.animatedState.setAnimation(this.animationProvider(parameter, this.animatedState.value))
+        this.animatedState.animation = this.animationProvider(parameter, this.animatedState.value)
     }
 
     get value(): V {

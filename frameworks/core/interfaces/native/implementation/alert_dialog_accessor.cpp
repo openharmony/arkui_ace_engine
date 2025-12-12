@@ -544,7 +544,8 @@ void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
     OHOS::Ace::NG::AlertDialogModelNG model;
     model.SetShowDialog(dialogProps);
 }
-void ShowImpl(const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* value)
+void ShowImpl(
+    const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* value)
 {
     using DialogParamsVariant = std::variant<
         Ark_AlertDialogParamWithConfirm,

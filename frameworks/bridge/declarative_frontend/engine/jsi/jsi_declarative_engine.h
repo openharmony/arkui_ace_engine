@@ -46,6 +46,13 @@ struct NamedRouterProperty {
     std::string ohmUrl;
 };
 
+// ArkTsCard load config
+enum class FormJsXNodeLoadMode {
+    NONE,
+    LITE,
+    FULL
+};
+
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType);
 public:
@@ -211,6 +218,7 @@ public:
     // ArkTsCard start
     static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
+    static void LoadJsXNodeForm(void* runtime, FormJsXNodeLoadMode mode);
     // ArkTsCard end
     static bool IsPlugin();
     static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);

@@ -20,7 +20,6 @@
 
 #include "transaction/rs_interfaces.h"
 
-#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,6 +27,7 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_layout_wrapper.h"
 #include "core/components_ng/pattern/form/form_special_style.h"
 #include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
@@ -45,6 +45,9 @@ struct SerializedGesture;
 struct AccessibilityParentRectInfo;
 
 namespace NG {
+namespace {
+    constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
+}
 enum class FormChildNodeType : int32_t {
     /**
      * Arkts card node type
@@ -107,7 +110,7 @@ enum class FormChildNodeType : int32_t {
     DUE_CONTROL_IMAGE_NODE,
 };
 
-class FormPattern : public Pattern {
+class FormPattern : public Pattern, public FormLayoutWrapper {
     DECLARE_ACE_TYPE(FormPattern, Pattern);
 
 public:
@@ -169,6 +172,11 @@ public:
         isFormObscured_ = isObscured;
     }
 
+    void SetColorMode(int32_t colorMode)
+    {
+        formColorMode_ = colorMode;
+    }
+
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
@@ -200,6 +208,9 @@ public:
     {
         return accessibilityState_.load();
     }
+
+    // FormLayoutWrapper functions
+    void ProcessCheckForm() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -246,7 +257,8 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
-    void DelayRemoveFormChildNode(FormChildNodeType formChildNodeType);
+    void DelayRemoveFormChildNode(FormChildNodeType formChildNodeType,
+        uint32_t delay = STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE);
     void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
@@ -264,6 +276,7 @@ private:
     void LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh = false);
     void RemoveDisableFormStyle(const RequestFormInfo& info);
     void RemoveFormChildNode(FormChildNodeType formChildNodeType);
+    void SwitchRenderGroup(bool isRenderGroup);
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateRowNode(FormChildNodeType formChildNodeType);
@@ -286,7 +299,7 @@ private:
     double GetTimeLimitFontSize();
     bool IsMaskEnableForm(const RequestFormInfo &info);
     void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
-    void SnapshotSurfaceNode();
+    void SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallback> callback);
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
@@ -323,6 +336,7 @@ private:
         const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
     void InitFormRenderDiedCallback();
     void RequestRender();
+    void UpdateColorMode(int32_t colorMode);
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -349,7 +363,6 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
-    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
@@ -364,6 +377,7 @@ private:
     std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
     std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
     float formViewScale_ = 1.0f;
+    int32_t formColorMode_ = -1; // -1: MODE_AUTO
     enum {
         VALUE_TYPE_INT = 5,
         VALUE_TYPE_DOUBLE = 8,

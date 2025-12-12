@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "native_type.h"
+#include "node_extened.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +58,23 @@ struct ArkUI_TextSelectionMenuOptions {
     void* onMenuHide;
     void* onMenuHideUserData;
 };
+
+struct ArkUI_TextMarqueeOptions {
+    bool start;
+    float step;
+    float spacing;
+    int32_t loop;
+    bool fromStart;
+    int32_t delay;
+    bool fadeout;
+    ArkUI_MarqueeStartPolicy marqueeStartPolicy;
+    ArkUI_MarqueeUpdatePolicy marqueeUpdatePolicy;
+};
+
+struct ArkUI_SelectedDragPreviewStyle {
+    ArkUI_OptionalUint color;
+};
+
 #ifdef __cplusplus
 }
 #endif

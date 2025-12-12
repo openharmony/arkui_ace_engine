@@ -213,7 +213,7 @@
     },
     "my-MM":{
         "error_video_000002":"ဗီဒီယိုဖိုင်ကို ဖွင့်၍ မရနိုင်ပါ။",
-        "error_video_000001":"ဗီဒီယို Player ကို စတင်၍ မရနိုင်ပါ။"
+        "error_video_000001":"ဗီဒီယိုဖွင့်စက်ကို စတင်၍ မရနိုင်ပါ။"
     },
     "da":{
         "error_video_000002":"Videofilen kan ikke åbnes.",
@@ -288,8 +288,8 @@
         "error_video_000001":"ভিডিও প্লেয়ার চালু করা যাচ্ছে না।"
     },
     "fr":{
-        "error_video_000002":"L\\'ouverture du fichier vidéo a échoué.",
-        "error_video_000001":"L\\'initialisation du lecteur vidéo a échoué."
+        "error_video_000002":"L'ouverture du fichier vidéo a échoué.",
+        "error_video_000001":"L'initialisation du lecteur vidéo a échoué."
     },
     "zh-HK":{
         "error_video_000002":"影片檔案無法開啟。",

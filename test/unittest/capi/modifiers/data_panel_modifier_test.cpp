@@ -436,8 +436,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestDefaultValues, TestSi
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f),
+    { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f),
         Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
@@ -664,7 +664,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setValueColorsTestNumberValidValues, Te
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
@@ -1340,7 +1340,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValue
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);

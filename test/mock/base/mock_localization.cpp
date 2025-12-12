@@ -148,4 +148,9 @@ std::string Localization::NumberFormat(double number)
 {
     return std::to_string(number);
 }
+
+bool Localization::LocalizeNumber(std::string &inputOutputNum, const int32_t precision)
+{
+    return true;
+}
 } // namespace OHOS::Ace

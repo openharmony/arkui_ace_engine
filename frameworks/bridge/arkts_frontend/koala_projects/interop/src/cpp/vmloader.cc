@@ -344,7 +344,8 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
         return -1;
     }
 
-    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s userFilesDir=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
+    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s userFilesDir=%" LOG_PUBLIC "s native=%"
+        LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
 
     std::string libPath =
 #if USE_SYSTEM_ARKVM
@@ -505,26 +506,6 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
     }
 #endif
 
-#ifdef KOALA_KOTLIN
-    if (vmKind == KOTLIN_KIND) {
-        g_vmEntry.vmKind = vmKind;
-        (void)vm;
-
-        kotlin_exported_symbols_t kotlin_exported_symbols = (kotlin_exported_symbols_t)findSymbol(handle, "kotlin_koala_symbols");
-        env = kotlin_exported_symbols();
-
-        set_user_view_factory_t set_user_view_factory = (set_user_view_factory_t)findSymbol(handle, "set_user_view_factory");
-        set_user_view_factory();
-
-        g_vmEntry.create = findSymbol(handle, "application_create");
-        g_vmEntry.start = findSymbol(handle, "application_start");
-        g_vmEntry.enter = findSymbol(handle, "application_enter");
-        g_vmEntry.emitEvent = findSymbol(handle, "application_emit_event");
-
-        result = 0;
-    }
-#endif
-
     if (result != 0) {
         LOGE("Error creating a VM of kind %" LOG_PUBLIC "d: %" LOG_PUBLIC "d\n", vmKind, result);
         return result;
@@ -598,7 +579,8 @@ const AppInfo harnessAppInfo = {
 const AppInfo harnessAniAppInfo = {
     "@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication",
     "createApplication",
-    "C{std.core.String}C{std.core.String}C{std.core.String}zi:C{@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication}",
+    "C{std.core.String}C{std.core.String}C{std.core.String}zi:"
+        "C{@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication}",
     "start",
     "li:l",
     "enter",
@@ -787,7 +769,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
         ani_boolean useNativeLog = ANI_FALSE;
         ani_string appUrlString {};
-        status = env->String_NewUTF8(appUrl, interop_strlen(appUrl), &appUrlString);
+        status = env->String_NewUTF8(appUrl, strlen(appUrl), &appUrlString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -801,7 +783,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_string appParamsString {};
-        status = env->String_NewUTF8(appParams, interop_strlen(appParams), &appParamsString);
+        status = env->String_NewUTF8(appParams, strlen(appParams), &appParamsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -1063,9 +1045,9 @@ extern "C" DLL_EXPORT const char* EmitEvent(const KInt type, const KInt target, 
         application_emit_event_t application_emit_event = (application_emit_event_t)g_vmEntry.emitEvent;
         const char *kotlinString = application_emit_event(app, type, target, arg0, arg1);
 
-        size_t bufferSize = interop_strlen(kotlinString) + 1;
+        size_t bufferSize = strlen(kotlinString) + 1;
         char *result = (char*)malloc(bufferSize);
-        interop_strcpy(result, bufferSize, kotlinString);
+        InteropStringCopy(result, bufferSize, kotlinString);
 
         kotlin_ExportedSymbols *env = reinterpret_cast<kotlin_ExportedSymbols*>(g_vmEntry.env);
         env->DisposeString(kotlinString);
@@ -1123,7 +1105,7 @@ extern "C" DLL_EXPORT void RestartWith(const char* page)
             return;
         }
         ani_string pageString {};
-        auto status = env->String_NewUTF8(page, interop_strlen(page), &pageString);
+        auto status = env->String_NewUTF8(page, strlen(page), &pageString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return;
@@ -1147,12 +1129,12 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
             return strdup("Cannot find loadView() method");
         }
         ani_string classNameString {};
-        auto status = env->String_NewUTF8(className, interop_strlen(className), &classNameString);
+        auto status = env->String_NewUTF8(className, strlen(className), &classNameString);
         if (status != ANI_OK) {
             return strdup("Cannot make ANI string");
         }
         ani_string paramsString {};
-        status = env->String_NewUTF8(params, interop_strlen(params), &paramsString);
+        status = env->String_NewUTF8(params, strlen(params), &paramsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return strdup("Cannot make ANI string");

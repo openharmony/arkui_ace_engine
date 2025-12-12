@@ -57,9 +57,12 @@ export class ObjectLinkDecoratedVariable<T>
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${this.getTraceInfo()}`);
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
-        const value = this.backing_.get(this.shouldAddRef());
-        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        uiUtils.builtinContainersAddRefAnyKey(value);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+            uiUtils.builtinContainersAddRefAnyKey(value);
+        }
         return value;
     }
 

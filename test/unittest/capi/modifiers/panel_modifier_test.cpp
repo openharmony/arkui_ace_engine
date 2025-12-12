@@ -314,8 +314,8 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestDefaultValues, TestSiz
 // Valid values for attribute 'backgroundMaskColor' of method 'backgroundMask'
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> backgroundMaskColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
+    { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f),
         Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },

@@ -61,7 +61,7 @@ HWTEST_F(TextModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSi
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1134,7 +1134,7 @@ HWTEST_F(TextModifierTest, DISABLED_setDecorationTestDecorationColorValidValues,
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1565,7 +1565,7 @@ HWTEST_F(TextModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.Le
  */
 HWTEST_F(TextModifierTest, DISABLED_setDraggableTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2260,7 +2260,7 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvali
  */
 HWTEST_F(TextModifierTest, DISABLED_setTextIndentTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

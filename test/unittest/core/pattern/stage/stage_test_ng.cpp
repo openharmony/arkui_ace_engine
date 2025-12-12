@@ -104,7 +104,11 @@ public:
     {
         flag = 0;
     }
-    void TearDown() {}
+
+    void TearDown()
+    {
+        ::testing::Mock::VerifyAndClearExpectations(UiSessionManager::GetInstance());
+    }
 };
 
 /**

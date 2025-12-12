@@ -963,4 +963,29 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeHandleAcceptDisposalTest006, TestSi
     gestureReferee.HandleAcceptDisposal(clickRecognizerPtr2);
     EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
 }
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest035
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest035, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    ASSERT_NE(panRecognizer, nullptr);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
+    auto test = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(test, nullptr);
+    auto Ngg = AceType::DynamicCast<NG::NGGestureRecognizer>(test);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    ASSERT_NE(gestureScope, nullptr);
+    gestureScope->recognizers_.emplace_back(Ngg);
+    gestureScope->recognizers_.emplace_back(nullptr);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    gesture->lastIsAxis_ = true;
+    size_t id = 1;
+    gesture->gestureScopes_.try_emplace(id, gestureScope);
+    gesture->CleanRedundanceScope();
+}
 } // namespace OHOS::Ace::NG

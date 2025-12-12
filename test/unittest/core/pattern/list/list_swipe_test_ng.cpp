@@ -1715,6 +1715,47 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ClickJudge007
+ * @tc.desc: Test ClickJudge with UpdatePaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, ClickJudge007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and swipeItem
+     */
+    auto listModelNG = CreateList();
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(nullptr, endFunc, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+
+    /**
+     * @tc.steps: step2. Expand endNode
+     * @tc.expected: return true
+     */
+    EXPECT_TRUE(DragSwiperItem(item_, -END_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_END));
+
+    /**
+     * @tc.steps: step3. Update PaintRect
+     */
+    auto renderContext = item_->GetRenderContext();
+    ASSERT_NE(renderContext, false);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    renderContext->UpdatePaintRect(RectF(rect.GetX(), rect.GetY() + 100.f, rect.Width(), rect.Height()));
+
+    /**
+     * @tc.steps: step4. Click listItem
+     * @tc.expected: Click not at endNode would return true
+     */
+    rect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = rect.GetOffset();
+    EXPECT_EQ(offset.GetY(), 100.f);
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f + offset.GetY())));
+    EXPECT_FALSE(itemPattern_->ClickJudge(PointF(WIDTH - 10.f, 10.f + offset.GetY())));
+    EXPECT_TRUE(itemPattern_->ClickJudge(PointF(WIDTH + 10.f, 10.f + offset.GetY())));
+}
+
+/**
  * @tc.name: SetBuilderComponent01
  * @tc.desc: Test BuilderComponent of start in swipeAction.
  * @tc.type: FUNC

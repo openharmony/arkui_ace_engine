@@ -21,7 +21,9 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -40,8 +42,6 @@ namespace {
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
-constexpr int32_t LONG_PRESS_DURATION = 800;
-constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 constexpr float DEFAULT_BIAS = 0.5f;
@@ -52,11 +52,16 @@ void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& m
         VibratorUtils::StartViratorDirectly(menuHapticFeedback);
         return;
     }
-    if (isMenu) {
-        return;
-    }
-    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
-        VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO) {
+        if (menuParam.maskEnable.has_value()) {
+            if (menuParam.maskEnable.value()) {
+                VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+            }
+            return;
+        }
+        if (!isMenu && menuParam.previewMode != MenuPreviewMode::NONE) {
+            VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+        }
     }
 }
 
@@ -72,6 +77,19 @@ void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetIsShowFromUser(isShow);
+}
+
+NG::OffsetF UpdateMenuPostion(
+    const NG::OffsetF& menuPosition, const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, menuPosition);
+    if (menuParam.anchorPosition.has_value()) {
+        NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
+
+        return { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() + targetNodePosition.GetX(),
+            menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() + targetNodePosition.GetY() };
+    }
+    return menuPosition;
 }
 } // namespace
 
@@ -96,7 +114,8 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
+            NG::ViewAbstract::BindMenuWithItems(
+                std::move(params), targetNode, UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
         };
     } else if (buildFunc) {
         showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
@@ -114,8 +133,8 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             std::function<void()> previewBuildFunc;
-            NG::ViewAbstract::BindMenuWithCustomNode(
-                std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+            NG::ViewAbstract::BindMenuWithCustomNode(std::move(builderFunc), targetNode,
+                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
         };
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
@@ -223,12 +242,14 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
         StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+        NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
         if (!params.empty()) {
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+            NG::ViewAbstract::BindMenuWithItems(
+                std::move(params), targetNode, UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
         } else if (buildFunc) {
             std::function<void()> previewBuildFunc;
-            NG::ViewAbstract::BindMenuWithCustomNode(
-                std::move(buildFunc), targetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+            NG::ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), targetNode,
+                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
         }
     }
     if (isBuildFuncNull) {
@@ -292,8 +313,9 @@ void ViewAbstractModelStatic::CreateCustomMenuWithPreview(FrameNode* targetNode,
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-    NG::ViewAbstract::BindMenuWithCustomNode(
-        std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+    NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
+    NG::ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), refTargetNode,
+        UpdateMenuPostion(menuPosition, menuParam, refTargetNode), menuParam, std::move(previewBuildFunc));
 }
 
 void ViewAbstractModelStatic::BindContextMenuSingle(FrameNode* targetNode,
@@ -346,7 +368,7 @@ void ViewAbstractModelStatic::BindContextMenuSingle(FrameNode* targetNode,
 }
 
 void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
-    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
+    std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
 {
     CHECK_NULL_VOID(targetNode);
     FREE_NODE_CHECK(targetNode, BindContextMenuStatic, targetNode, type, std::move(buildFunc), menuParam,
@@ -410,8 +432,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
                             auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
                             CHECK_NULL_VOID(menuTheme);
                             StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-                            NG::ViewAbstract::BindMenuWithCustomNode(
-                                std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+                            NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
+                                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
+                                std::move(previewBuildFunc));
                         }
                     },
                     TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
@@ -420,45 +443,7 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
             CHECK_NULL_VOID(inputHub);
             inputHub->BindContextMenu(std::move(event));
         } else if (type == ResponseType::LONG_PRESS) {
-            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->SetPreviewMode(menuParam.previewMode);
-            // create or show menu on long press
-            auto event =
-                [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
-                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-                auto containerId = Container::CurrentId();
-                auto taskExecutor = Container::CurrentTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
-                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
-                        auto targetNode = weakTarget.Upgrade();
-                        CHECK_NULL_VOID(targetNode);
-                        auto pipelineContext = targetNode->GetContext();
-                        CHECK_NULL_VOID(pipelineContext);
-                        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
-                            auto context = targetNode->GetRenderContext();
-                            CHECK_NULL_VOID(context);
-                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-                            CHECK_NULL_VOID(gestureHub);
-                            auto pixelMap = context->GetThumbnailPixelMap();
-                            gestureHub->SetPixelMap(pixelMap);
-                        }
-                        NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                            info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-                        CHECK_NULL_VOID(menuTheme);
-                        StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-                        NG::ViewAbstract::BindMenuWithCustomNode(
-                            std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
-                    },
-                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
-            };
-            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
-            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
+            ViewAbstractModelNG::BindContextMenuWithLongPress(targetNode, buildFunc, menuParam, previewBuildFunc, true);
         } else {
             return;
         }
@@ -949,6 +934,21 @@ void ViewAbstractModelStatic::BindBackground(FrameNode* frameNode,
     }
 }
 
+void ViewAbstractModelStatic::ResetBackground(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IsTransitionBackground, true, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BuilderBackgroundFlag, false, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundAlign, Alignment::CENTER, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, LAYOUT_SAFE_AREA_EDGE_ALL, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("customBackgroundColor");
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, Color::TRANSPARENT, frameNode);
+}
+
 void ViewAbstractModelStatic::SetFlexGrow(FrameNode* frameNode, float value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1030,6 +1030,12 @@ void ViewAbstractModelStatic::SetAlignSelf(FrameNode* frameNode, FlexAlign value
     ViewAbstract::SetAlignSelf(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetLayoutGravity(FrameNode* frameNode, Alignment value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutGravity(frameNode, value);
+}
+
 void ViewAbstractModelStatic::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1058,6 +1064,12 @@ void ViewAbstractModelStatic::SetBorderRadius(FrameNode *frameNode, const Border
 {
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBorderRadius(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetRenderStrategy(FrameNode* frameNode, const RenderStrategy& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderStrategy(frameNode, type);
 }
 
 void ViewAbstractModelStatic::SetBorderImage(
@@ -1108,6 +1120,13 @@ void ViewAbstractModelStatic::SetAlign(FrameNode* frameNode, Alignment alignment
 {
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetAlign(frameNode, alignment);
+}
+
+void ViewAbstractModelStatic::SetAlign(FrameNode* frameNode, std::string localizedAlignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlign(frameNode, localizedAlignment);
+    ViewAbstract::SetIsMirrorable(frameNode, true);
 }
 
 void ViewAbstractModelStatic::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -1190,6 +1209,12 @@ void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, con
 {
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 
 void ViewAbstractModelStatic::SetAlignRules(FrameNode* frameNode,
@@ -1466,7 +1491,14 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
         focusHub->GetFocusBox().SetStyle(paintStyle);
         return;
     }
-    focusHub->GetFocusBox().SetStyle(style.value());
+    auto paintStyle = style.value();
+    if (paintStyle.strokeWidth.has_value() && paintStyle.strokeWidth.value().Unit() == DimensionUnit::PERCENT) {
+        paintStyle.strokeWidth.value().SetUnit(DimensionUnit::FP);
+    }
+    if (paintStyle.margin.has_value() && paintStyle.margin.value().Unit() == DimensionUnit::PERCENT) {
+        paintStyle.margin.value().SetUnit(DimensionUnit::FP);
+    }
+    focusHub->GetFocusBox().SetStyle(paintStyle);
 }
 
 void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
@@ -1523,9 +1555,19 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
 void ViewAbstractModelStatic::SetUseEffect(
     FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    auto useEffect = useEffectOpt.value_or(false);
-    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
-    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (useEffectOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, *useEffectOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+    if (effectTypeOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffectType, *effectTypeOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffectType, frameNode);
+    }
 }
 
 void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
@@ -1727,6 +1769,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
 void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
+}
+
+void ViewAbstractModelStatic::SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect, frameNode);
 }
 
 int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)

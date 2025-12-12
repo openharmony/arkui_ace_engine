@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -23,6 +24,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -33,6 +35,7 @@ import { Length } from "./units"
 import { Resource } from "global.resource"
 import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
@@ -47,6 +50,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setListItemOptionsAttribute(value?: ListItemOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -243,7 +247,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookListItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -293,7 +299,7 @@ export class SwipeActionItem_serializer {
         if (valueHolderForBuilderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBuilderComponentTmpValue  = valueHolderForBuilderComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForBuilderComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -305,10 +311,10 @@ export class SwipeActionItem_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx0  = valueHolderForActionAreaDistanceTmpValue as string
                 valueSerializer.writeString(valueHolderForActionAreaDistanceTmpValueForIdx0)
-            } else if (valueHolderForActionAreaDistanceTmpValue instanceof number) {
+            } else if (valueHolderForActionAreaDistanceTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForActionAreaDistanceTmpValueForIdx1)
+                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForActionAreaDistanceTmpValueForIdx1)
             } else if (valueHolderForActionAreaDistanceTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx2  = valueHolderForActionAreaDistanceTmpValue as Resource
@@ -372,24 +378,24 @@ export class SwipeActionItem_serializer {
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builderComponentTmpBuf : ComponentContent | undefined = undefined
         if ((builderComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            builderComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            builderComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const builderComponentTmpResult : ComponentContent | undefined = builderComponentTmpBuf
         const actionAreaDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let actionAreaDistanceTmpBuf : Length | undefined = undefined
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const actionAreaDistanceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let actionAreaDistanceTmpBuf_ : string | number | Resource | undefined
+            let actionAreaDistanceTmpBuf_ : string | double | Resource | undefined
             if (actionAreaDistanceTmpBuf_UnionSelector == (0).toByte()) {
                 actionAreaDistanceTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toByte()) {
-                actionAreaDistanceTmpBuf_ = (valueDeserializer.readNumber() as number)
+                actionAreaDistanceTmpBuf_ = valueDeserializer.readFloat64()
             } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toByte()) {
                 actionAreaDistanceTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for actionAreaDistanceTmpBuf_ has to be chosen through deserialisation.")
             }
-            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | number | Resource)
+            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | double | Resource)
         }
         const actionAreaDistanceTmpResult : Length | undefined = actionAreaDistanceTmpBuf
         const onActionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookDataPanelContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -28,6 +29,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class DataPanelModifier extends CommonMethodModifier implements DataPanelAttribute,AttributeModifier<DataPanelAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,10 +48,11 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeWidth_0_0value?: Length | undefined
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _trackShadow_0_0value?: DataPanelShadowOptions | undefined
+    _trackShadow_0_0value?: DataPanelShadowOptions | null | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkDataPanelPeer;
         if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -128,7 +131,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             switch (this._trackShadow_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | null | undefined));
                     this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -138,7 +141,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
                 default: {
                     this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }
@@ -163,6 +166,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     }
     mergeModifier(modifier: DataPanelModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._closeEffect_0_flag) {
@@ -224,7 +228,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                     break;
                 }
                 default: {
-                    this.trackShadow((undefined as DataPanelShadowOptions | undefined));
+                    this.trackShadow((undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }
@@ -286,7 +290,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         }
         return this
     }
-    trackShadow(value: DataPanelShadowOptions | undefined): this {
+    trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         if (((this._trackShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE

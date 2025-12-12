@@ -16,11 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
+import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
 import { SelectionOptions_serializer, SelectionOptions } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { ResourceStr, ResourceColor, Length } from "./units"
@@ -29,8 +31,10 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
-    getLineCount(): int32
-    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
+    getLineCount(): int32 | undefined
+    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getLineMetrics(lineNumber: int32): text.LineMetrics | undefined
+    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -53,28 +57,80 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         return new LayoutManagerInternal(ptr)
     }
-    public getLineCount(): int32 {
+    public getLineCount(): int32 | undefined {
         return this.getLineCount_serialize()
     }
-    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity {
+    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined {
         const x_casted = x as (double)
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
-    getLineCount_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
-        return retval
+    public getLineMetrics(lineNumber: int32): text.LineMetrics | undefined {
+        const lineNumber_casted = lineNumber as (int32)
+        return this.getLineMetrics_serialize(lineNumber_casted)
     }
-    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity {
+    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
+        const range_casted = range as (TextRange)
+        const widthStyle_casted = widthStyle as (text.RectWidthStyle)
+        const heightStyle_casted = heightStyle as (text.RectHeightStyle)
+        return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
+    }
+    getLineCount_serialize(): int32 | undefined {
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
+    }
+    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PositionWithAffinity | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PositionWithAffinity | undefined = buffer
+        return returnResult
+    }
+    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics | undefined {
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : text.LineMetrics | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = text_LineMetrics_serializer.read(retvalDeserializer)
+        }
+        const returnResult : text.LineMetrics | undefined = buffer
+        return returnResult
+    }
+    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, range)
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<text.TextBox> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<text.TextBox> = new Array<text.TextBox>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
+        }
+        const returnResult : Array<text.TextBox> | undefined = buffer
         return returnResult
     }
 }
 export interface StyledStringController {
     setStyledString(styledString: StyledString): void
-    getStyledString(): MutableStyledString
+    getStyledString(): MutableStyledString | undefined
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
     peer?: Finalizable | undefined = undefined
@@ -102,22 +158,28 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         this.setStyledString_serialize(styledString_casted)
         return
     }
-    public getStyledString(): MutableStyledString {
+    public getStyledString(): MutableStyledString | undefined {
         return this.getStyledString_serialize()
     }
     setStyledString_serialize(styledString: StyledString): void {
         ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
-    getStyledString_serialize(): MutableStyledString {
+    getStyledString_serialize(): MutableStyledString | undefined {
         const retval  = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MutableStyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
+        }
+        const returnResult : MutableStyledString | undefined = buffer
+        return returnResult
     }
 }
 export interface TextBaseController {
     setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions | undefined): void
     closeSelectionMenu(): void
-    getLayoutManager(): LayoutManager
+    getLayoutManager(): LayoutManager | undefined
 }
 export class TextBaseControllerInternal implements MaterializedBase,TextBaseController {
     peer?: Finalizable | undefined = undefined
@@ -151,7 +213,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         this.closeSelectionMenu_serialize()
         return
     }
-    public getLayoutManager(): LayoutManager {
+    public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
     }
     setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
@@ -169,10 +231,16 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextBaseController_closeSelectionMenu(this.peer!.ptr)
     }
-    getLayoutManager_serialize(): LayoutManager {
+    getLayoutManager_serialize(): LayoutManager | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
-        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LayoutManager | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
+        }
+        const returnResult : LayoutManager | undefined = buffer
+        return returnResult
     }
 }
 export class TextMenuItemIdInternal {
@@ -195,6 +263,7 @@ export class TextMenuItemId implements MaterializedBase {
     static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
     static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
+    static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextMenuItemId.getFinalizer())
     }
@@ -274,6 +343,11 @@ export class TextMenuItemId implements MaterializedBase {
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
+    private static getAutoFill_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getAutoFill()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
     public static of(id: ResourceStr): TextMenuItemId {
         const id_casted = id as (ResourceStr)
         return TextMenuItemId.of_serialize(id_casted)
@@ -311,6 +385,9 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getSHARE(): TextMenuItemId {
         return TextMenuItemId.getSHARE_serialize()
+    }
+    private static getAutoFill(): TextMenuItemId {
+        return TextMenuItemId.getAutoFill_serialize()
     }
     equals_serialize(id: TextMenuItemId): boolean {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
@@ -374,7 +451,13 @@ export interface StyledStringChangeValue {
 }
 export interface PositionWithAffinity {
     position: int32;
+    affinity: text.Affinity;
 }
+export type Affinity = text.Affinity;
+export type LineMetrics = text.LineMetrics;
+export type RectWidthStyle = text.RectWidthStyle;
+export type RectHeightStyle = text.RectHeightStyle;
+export type TextBox = text.TextBox;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
@@ -423,6 +506,20 @@ export enum KeyboardAppearance {
     LIGHT_IMMERSIVE = 2,
     DARK_IMMERSIVE = 3
 }
+export interface AccessibilitySpanOptions {
+    accessibilityText?: ResourceStr;
+    accessibilityDescription?: ResourceStr;
+    accessibilityLevel?: string;
+}
+export enum TextDirection {
+    LTR = 0,
+    RTL = 1,
+    DEFAULT = 2,
+    AUTO = 3
+}
+export interface SelectedDragPreviewStyle {
+    color?: ResourceColor;
+}
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
         let valueSerializer : SerializerBase = buffer
@@ -432,19 +529,6 @@ export class LayoutManager_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutManagerInternal.fromPtr(ptr)
-    }
-}
-export class PositionWithAffinity_serializer {
-    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForPosition  = value.position
-        valueSerializer.writeInt32(valueHolderForPosition)
-    }
-    public static read(buffer: DeserializerBase): PositionWithAffinity {
-        let valueDeserializer : DeserializerBase = buffer
-        const positionTmpResult : int32 = valueDeserializer.readInt32()
-        let value : PositionWithAffinity = ({position: positionTmpResult} as PositionWithAffinity)
-        return value
     }
 }
 export class StyledStringController_serializer {
@@ -627,6 +711,22 @@ export class InsertValue_serializer {
         return value
     }
 }
+export class PositionWithAffinity_serializer {
+    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPosition  = value.position
+        valueSerializer.writeInt32(valueHolderForPosition)
+        const valueHolderForAffinity  = value.affinity
+        valueSerializer.writeInt32(valueHolderForAffinity.valueOf())
+    }
+    public static read(buffer: DeserializerBase): PositionWithAffinity {
+        let valueDeserializer : DeserializerBase = buffer
+        const positionTmpResult : int32 = valueDeserializer.readInt32()
+        const affinityTmpResult : text.Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
+        let value : PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
+        return value
+    }
+}
 export class PreviewText_serializer {
     public static write(buffer: SerializerBase, value: PreviewText): void {
         let valueSerializer : SerializerBase = buffer
@@ -773,6 +873,92 @@ export class TextRange_serializer {
         return value
     }
 }
+export class AccessibilitySpanOptions_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilitySpanOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAccessibilityText  = value.accessibilityText
+        if (valueHolderForAccessibilityText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityTextTmpValue  = valueHolderForAccessibilityText!
+            if (valueHolderForAccessibilityTextTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx0  = valueHolderForAccessibilityTextTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityTextTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityTextTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx1  = valueHolderForAccessibilityTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityDescription  = value.accessibilityDescription
+        if (valueHolderForAccessibilityDescription !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityDescriptionTmpValue  = valueHolderForAccessibilityDescription!
+            if (valueHolderForAccessibilityDescriptionTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx0  = valueHolderForAccessibilityDescriptionTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityDescriptionTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx1  = valueHolderForAccessibilityDescriptionTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityLevel  = value.accessibilityLevel
+        if (valueHolderForAccessibilityLevel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityLevelTmpValue  = valueHolderForAccessibilityLevel!
+            valueSerializer.writeString(valueHolderForAccessibilityLevelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AccessibilitySpanOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const accessibilityTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityTextTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityTextTmpBuf_ : string | Resource | undefined
+            if (accessibilityTextTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityTextTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityTextTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityTextTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityTextTmpBuf = (accessibilityTextTmpBuf_ as string | Resource)
+        }
+        const accessibilityTextTmpResult : ResourceStr | undefined = accessibilityTextTmpBuf
+        const accessibilityDescriptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityDescriptionTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityDescriptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityDescriptionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityDescriptionTmpBuf_ : string | Resource | undefined
+            if (accessibilityDescriptionTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityDescriptionTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityDescriptionTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityDescriptionTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityDescriptionTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBuf_ as string | Resource)
+        }
+        const accessibilityDescriptionTmpResult : ResourceStr | undefined = accessibilityDescriptionTmpBuf
+        const accessibilityLevelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityLevelTmpBuf : string | undefined = undefined
+        if ((accessibilityLevelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityLevelTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const accessibilityLevelTmpResult : string | undefined = accessibilityLevelTmpBuf
+        let value : AccessibilitySpanOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult} as AccessibilitySpanOptions)
+        return value
+    }
+}
 export class DecorationStyleResult_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleResult): void {
         let valueSerializer : SerializerBase = buffer
@@ -783,10 +969,10 @@ export class DecorationStyleResult_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
-        } else if (valueHolderForColor instanceof number) {
+        } else if (valueHolderForColor instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForColorForIdx1  = valueHolderForColor as number
-            valueSerializer.writeNumber(valueHolderForColorForIdx1)
+            const valueHolderForColorForIdx1  = valueHolderForColor as int32
+            valueSerializer.writeInt32(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
@@ -809,11 +995,11 @@ export class DecorationStyleResult_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
         const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let colorTmpBuf : Color | number | string | Resource | undefined
+        let colorTmpBuf : Color | int32 | string | Resource | undefined
         if (colorTmpBufUnionSelector == (0).toChar()) {
             colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (colorTmpBufUnionSelector == (1).toChar()) {
-            colorTmpBuf = (valueDeserializer.readNumber() as number)
+            colorTmpBuf = valueDeserializer.readInt32()
         } else if (colorTmpBufUnionSelector == (2).toChar()) {
             colorTmpBuf = (valueDeserializer.readString() as string)
         } else if (colorTmpBufUnionSelector == (3).toChar()) {
@@ -821,7 +1007,7 @@ export class DecorationStyleResult_serializer {
         } else {
             throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
         }
-        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
+        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | int32 | string | Resource)
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let styleTmpBuf : TextDecorationStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -829,6 +1015,59 @@ export class DecorationStyleResult_serializer {
         }
         const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
         let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleResult)
+        return value
+    }
+}
+export class SelectedDragPreviewStyle_serializer {
+    public static write(buffer: SerializerBase, value: SelectedDragPreviewStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SelectedDragPreviewStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        let value : SelectedDragPreviewStyle = ({color: colorTmpResult} as SelectedDragPreviewStyle)
         return value
     }
 }
@@ -990,10 +1229,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof number) {
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
@@ -1010,10 +1249,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1033,28 +1272,28 @@ export class CaretStyle_serializer {
         let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | number | Resource | undefined
+            let widthTmpBuf_ : string | double | Resource | undefined
             if (widthTmpBuf_UnionSelector == (0).toChar()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                widthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
                 widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
         const widthTmpResult : Length | undefined = widthTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1062,7 +1301,7 @@ export class CaretStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         let value : CaretStyle = ({width: widthTmpResult, color: colorTmpResult} as CaretStyle)
@@ -1141,10 +1380,10 @@ export class TextDataDetectorConfig_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1201,11 +1440,11 @@ export class TextDataDetectorConfig_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1213,7 +1452,7 @@ export class TextDataDetectorConfig_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1227,11 +1466,11 @@ export class TextDataDetectorConfig_serializer {
     }
 }
 export interface TextEditControllerEx {
-    isEditing(): boolean
+    isEditing(): boolean | undefined
     stopEditing(): void
-    setCaretOffset(offset: number): boolean
-    getCaretOffset(): number
-    getPreviewText(): PreviewText
+    setCaretOffset(offset: number): boolean | undefined
+    getCaretOffset(): number | undefined
+    getPreviewText(): PreviewText | undefined
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
     constructor(peerPtr: KPointer) {
@@ -1250,42 +1489,68 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
         return new TextEditControllerExInternal(ptr)
     }
-    public isEditing(): boolean {
+    public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
     }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
     }
-    public setCaretOffset(offset: number): boolean {
+    public setCaretOffset(offset: number): boolean | undefined {
         const offset_casted = offset as (number)
         return this.setCaretOffset_serialize(offset_casted)
     }
-    public getCaretOffset(): number {
+    public getCaretOffset(): number | undefined {
         return this.getCaretOffset_serialize()
     }
-    public getPreviewText(): PreviewText {
+    public getPreviewText(): PreviewText | undefined {
         return this.getPreviewText_serialize()
     }
-    isEditing_serialize(): boolean {
+    isEditing_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
     stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
     }
-    setCaretOffset_serialize(offset: number): boolean {
+    setCaretOffset_serialize(offset: number): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
-    getCaretOffset_serialize(): number {
+    getCaretOffset_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : number | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : number | undefined = buffer
+        return returnResult
     }
-    getPreviewText_serialize(): PreviewText {
+    getPreviewText_serialize(): PreviewText | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PreviewText = PreviewText_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PreviewText | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PreviewText_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PreviewText | undefined = buffer
         return returnResult
     }
 }

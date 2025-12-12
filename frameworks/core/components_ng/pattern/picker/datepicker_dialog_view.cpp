@@ -47,13 +47,11 @@ constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
-constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension LUNAR_SWITCH_MIN_FONT_SIZE = 1.0_vp;
 constexpr uint32_t LUNAR_SWITCH_MAX_LINES = 1;
-constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
-constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
+constexpr Dimension LUNAR_TEXT_PADDING_RIGHT = 32.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t RATIO_SEVEN = 7;
@@ -76,10 +74,21 @@ bool DatePickerDialogView::switchDatePickerFlag_ = false;
 bool DatePickerDialogView::isShowTime_ = false;
 bool DatePickerDialogView::isUserSetFont_ = false;
 bool DatePickerDialogView::isEnableHapticFeedback_ = true;
+bool DatePickerDialogView::useButtonFocusArea_ = false;
 DatePickerMode DatePickerDialogView::datePickerMode_ = DatePickerMode::DATE;
 Dimension DatePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
 Dimension DatePickerDialogView::normalTextStyleFont_ = 32.0_fp;
 Dimension DatePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
+Dimension DatePickerDialogView::checkboxSize_ = 24.0_vp;
+Dimension DatePickerDialogView::lunarSwitchHeight_ = 48.0_vp;
+Dimension DatePickerDialogView::checkboxPaddingLeft_ = 24.0_vp;
+Dimension DatePickerDialogView::checkboxPaddingRight_ = 8.0_vp;
+Dimension DatePickerDialogView::titlePaddingHorizontal_ = 16.0_vp;
+Dimension DatePickerDialogView::titleMarginTop_ = 8.0_vp;
+Dimension DatePickerDialogView::titleMarginBottom_ = 8.0_vp;
+Dimension DatePickerDialogView::pickerDialogMargin_ = 24.0_vp;
+Dimension DatePickerDialogView::pickerTitleHeight_ = 32.0_vp;
+Color DatePickerDialogView::buttonColor_ = Color::TRANSPARENT;
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
     const DatePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -198,6 +207,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     textLayoutProperty->UpdateLayoutWeight(RATIO_ONE);
     textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
+    if (useButtonFocusArea_) {
+        MarginProperty margin;
+        margin.right = CalcLength(LUNAR_TEXT_PADDING_RIGHT);
+        textLayoutProperty->UpdateMargin(margin);
+    }
     textNode->MarkModifyDone();
     return textNode;
 }
@@ -298,9 +312,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
         buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     } else {
         buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(pickerTitleHeight_)));
         titleButtonRow->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(pickerTitleHeight_)));
     }
     textTitleNode->MountToParent(titleButtonRow);
     titleButtonRow->MountToParent(buttonTitleNode);
@@ -803,7 +817,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
-    buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -825,12 +839,24 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     return buttonConfirmNode;
 }
 
+void UpdateButtonTextColor(const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
+    bool useButtonFocusArea)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
+}
+
 void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    UpdateButtonTextColor(textLayoutProperty, pickerTheme, useButtonFocusArea_);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -844,7 +870,7 @@ void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
-    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    UpdateButtonTextColor(textCancelLayoutProperty, pickerTheme, useButtonFocusArea_);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -1265,7 +1291,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     }
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
-    buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -1306,8 +1332,8 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
         layoutProps->UpdateMargin(margin);
     }
     layoutProps->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(LUNARSWITCH_HEIGHT)));
-
+        CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(lunarSwitchHeight_)));
+    UpdateLinearMargin(layoutProps);
     auto checkbox = FrameNode::CreateFrameNode(
         V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
     CHECK_NULL_VOID(checkbox);
@@ -1323,12 +1349,10 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    marginCheckbox.left = isRtl ? CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON)
-                                : CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    marginCheckbox.right = isRtl ? CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE)
-                                 : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+    marginCheckbox.left = isRtl ? CalcLength(checkboxPaddingRight_) : CalcLength(checkboxPaddingLeft_);
+    marginCheckbox.right = isRtl ? CalcLength(checkboxPaddingLeft_) : CalcLength(checkboxPaddingRight_);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
-    checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
+    checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(checkboxSize_), CalcLength(checkboxSize_)));
     checkboxLayoutProps->UpdateLayoutWeight(RATIO_ZERO);
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
@@ -1342,6 +1366,16 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
+}
+
+void DatePickerDialogView::UpdateLinearMargin(const RefPtr<LinearLayoutProperty>& layoutProps)
+{
+    CHECK_NULL_VOID(layoutProps);
+    if (useButtonFocusArea_) {
+        MarginProperty margin;
+        margin.top = CalcLength(PICKER_MARGIN_FROM_CHECK_BOX);
+        layoutProps->UpdateMargin(margin);
+    }
 }
 
 void DatePickerDialogView::SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value)
@@ -1611,12 +1645,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
         auto layoutProps = buttonTitleNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(layoutProps, nullptr);
         PaddingProperty padding;
-        padding.left = CalcLength(TITLE_PADDING_HORIZONTAL);
-        padding.right = CalcLength(TITLE_PADDING_HORIZONTAL);
+        padding.left = CalcLength(titlePaddingHorizontal_);
+        padding.right = CalcLength(titlePaddingHorizontal_);
         layoutProps->UpdatePadding(padding);
         MarginProperty margin;
-        margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
-        margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+        margin.top = CalcLength(titleMarginTop_);
+        margin.bottom = CalcLength(titleMarginBottom_);
         layoutProps->UpdateMargin(margin);
         layoutProps->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
@@ -1984,8 +2018,8 @@ void DatePickerDialogView::UpdateContentPadding(const RefPtr<FrameNode>& content
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         PaddingProperty contentPadding;
-        contentPadding.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-        contentPadding.right = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+        contentPadding.left = CalcLength(pickerDialogMargin_);
+        contentPadding.right = CalcLength(pickerDialogMargin_);
         contentColumn->GetLayoutProperty()->UpdatePadding(contentPadding);
     }
 }
@@ -2288,6 +2322,17 @@ void DatePickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+    checkboxSize_ = pickerTheme->GetCheckboxSize();
+    lunarSwitchHeight_ = pickerTheme->GetLunarSwitchHeight();
+    checkboxPaddingLeft_ = pickerTheme->GetCheckboxPaddingLeft();
+    checkboxPaddingRight_ = pickerTheme->GetCheckboxPaddingRight();
+    titlePaddingHorizontal_ = pickerTheme->GetTitlePaddingHorizontal();
+    titleMarginTop_ = pickerTheme->GetTitleMarginTop();
+    titleMarginBottom_ = pickerTheme->GetTitleMarginBottom();
+    pickerDialogMargin_ = pickerTheme->GetPickerDialogMargin();
+    buttonColor_ = pickerTheme->GetButtonColor();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
+    pickerTitleHeight_ = pickerTheme->GetPickerTitleHeight();
 }
 
 DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,

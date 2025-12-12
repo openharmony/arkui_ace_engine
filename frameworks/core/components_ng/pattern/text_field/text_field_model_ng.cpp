@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -1185,6 +1186,34 @@ void TextFieldModelNG::SetTextIndent(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
 }
 
+void TextFieldModelNG::SetTextDirection(TextDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDirection, value);
+}
+
+void TextFieldModelNG::ResetTextDirection()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextFieldModelNG::SetTextDirection(FrameNode* frameNode, TextDirection value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDirection, value, frameNode);
+}
+
+void TextFieldModelNG::ResetTextDirection(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+}
+
+TextDirection TextFieldModelNG::GetTextDirection(FrameNode* frameNode)
+{
+    TextDirection value = TextDirection::INHERIT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextDirection, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
@@ -1444,48 +1473,6 @@ void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
     pattern->ResetSelectDetectEnable();
 }
 
-void TextFieldModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-std::vector<TextDataDetectType> TextFieldModelNG::GetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, std::vector<TextDataDetectType>());
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
-    return pattern->GetSelectDetectConfig();
-}
-
-void TextFieldModelNG::ResetSelectDetectConfig()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
-void TextFieldModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
 {
     if (value.caretWidth.has_value()) {
@@ -1715,6 +1702,14 @@ void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::
     CHECK_NULL_VOID(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldLayoutProperty->UpdatePlaceholder(placeholder);
+}
+
+void TextFieldModelNG::ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnScrollToVisible({ .start = start, .end = end });
 }
 
 void TextFieldModelNG::StopTextFieldEditing(FrameNode* frameNode)
@@ -2750,6 +2745,62 @@ bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetCompressLeadingPunctuation(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CompressLeadingPunctuation, enabled);
+}
+
+void TextFieldModelNG::SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CompressLeadingPunctuation, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, CompressLeadingPunctuation, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetIncludeFontPadding(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled);
+}
+
+void TextFieldModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, IncludeFontPadding, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled);
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, FallbackLineSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2796,6 +2847,42 @@ Color TextFieldModelNG::GetTextAreaScrollBarColor(FrameNode* frameNode)
 void TextFieldModelNG::ResetTextAreaScrollBarColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, frameNode);
+}
+
+void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleOnDelete(true);
+}
+
+void TextFieldModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void TextFieldModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color TextFieldModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

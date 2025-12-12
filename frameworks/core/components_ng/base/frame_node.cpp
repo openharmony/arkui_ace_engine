@@ -894,6 +894,12 @@ void FrameNode::DumpExtensionHandlerInfo()
 
 void FrameNode::DumpCommonInfo()
 {
+    if (DumpLog::GetInstance().IsDumpAllNodes()) {
+        DumpLog::GetInstance().AddDesc("IsFrameDisappear: " + std::to_string(IsFrameDisappear()));
+        DumpLog::GetInstance().AddDesc("IsActive: " + std::to_string(isActive_));
+        DumpLog::GetInstance().AddDesc("AccessibilityVisible: " + std::to_string(accessibilityVisible_));
+        DumpLog::GetInstance().AddDesc("HasAccessibilityVirtualNode: " + std::to_string(hasAccessibilityVirtualNode_));
+    }
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
@@ -975,7 +981,8 @@ void FrameNode::DumpCommonInfo()
                             ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                             : "NA"));
     }
-    if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+    DumpLog::GetInstance().AddDesc(std::string("IsOnMaintree: ").append(std::to_string(IsOnMainTree())));
+    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
     }
@@ -1311,6 +1318,8 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
         responseRegionMap = gestureEventHub->GetResponseRegionMap();
+        responseRegion = gestureEventHub->GetResponseRegion();
+        mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->PutExtAttr("touchable", touchable, filter);
@@ -2016,6 +2025,8 @@ RectF FrameNode::GetRectWithRender()
 void FrameNode::TriggerOnSizeChangeCallback()
 {
     if (!IsActive()) {
+        CHECK_NULL_VOID(eventHub_);
+        eventHub_->SetCompensateOnSizeChangeEvent(true);
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -2372,6 +2383,10 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         pattern_->OnActive();
         isActive_ = true;
         activeChanged = true;
+        if (eventHub_ && eventHub_->IsCompensateOnSizeChangeEvent()) {
+            TriggerOnSizeChangeCallback();
+            eventHub_->SetCompensateOnSizeChangeEvent(false);
+        }
     }
     if (!active && isActive_) {
         pattern_->OnInActive();
@@ -2735,7 +2750,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
-    if (isDeleteRsNode_ == RsNodeDeleteFlag::ALLOWED) {
+    if (isDeleteRsNode_) {
         auto parentFrameNode = GetParentFrameNode();
         if (parentFrameNode) {
             parentFrameNode->MarkNeedSyncRenderTree();
@@ -2899,10 +2914,11 @@ RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
 }
 
 void FrameNode::NotifyFillRequestSuccess(
-    RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+    RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+    AceAutoFillTriggerType triggerType)
 {
     if (pattern_) {
-        pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
+        pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, triggerType);
     }
 }
 
@@ -3536,6 +3552,7 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
     if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+        responseRegionResult.emplace_back(rect);
         return;
     }
     if (width.value() < 0.0 || height.value() < 0.0) {
@@ -3587,6 +3604,9 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         for (const auto& region : responseRegionMap[ResponseRegionSupportedTool::ALL]) {
             ParseRegionAndAdd(region, scaleProperty, rect, responseRegionResult);
         }
+    }
+    if (responseRegionResult.empty()) {
+        responseRegionResult.emplace_back(rect);
     }
     return responseRegionResult;
 }
@@ -3915,7 +3935,15 @@ void FrameNode::AnimateHoverEffect(bool isHovered) const
         renderContext->AnimateHoverEffectScale(isHovered);
     } else if (animationType == HoverEffectType::BOARD) {
         renderContext->AnimateHoverEffectBoard(isHovered);
+        OnHoverWithHightLight(isHovered);
     }
+}
+
+void FrameNode::OnHoverWithHightLight(bool isHover) const
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnHoverWithHightLight(isHover);
 }
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
@@ -4392,6 +4420,34 @@ OffsetF FrameNode::ConvertPoint(OffsetF position, const RefPtr<FrameNode>& targe
         historyNodes.pop_back();
     }
     return OffsetF(targetNodePoint.GetX(), targetNodePoint.GetY());
+}
+
+OffsetF FrameNode::ConvertPositionToWindow(OffsetF position, bool fromWindow)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    Point point = Point(position.GetX(), position.GetY());
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->CheckTopWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        if (fromWindow) {
+            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        } else {
+            point = point - Offset(parentOffset.GetX(), parentOffset.GetY());
+        }
+        point = parentMatrix * point;
+        if (parent->tag_ == V2::ROOT_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    return OffsetF(point.GetX(), point.GetY());
 }
 
 std::vector<Point> GetRectPoints(SizeF& frameSize)
@@ -6081,7 +6137,7 @@ void FrameNode::RecordExposureInner()
         }
     };
     std::vector<double> ratios = { exposureProcessor_->GetRatio() };
-    pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
+    pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false, true);
     exposureProcessor_->SetListenState(true);
 }
 
@@ -6503,7 +6559,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto renderContext = GetRenderContext();
-        if (isDeleteRsNode_ != RsNodeDeleteFlag::ALLOWED && renderContext) {
+        if (!isDeleteRsNode_ && renderContext) {
             renderContext->SetRSUIContext(context);
         }
     }
@@ -6992,29 +7048,36 @@ void FrameNode::TriggerShouldParallelInnerWith(
     std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
 
     for (const auto& item : responseLinkRecognizers) {
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (item.Invalid()) {
+            continue;
+        }
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item.Upgrade());
         if (!recognizer) {
             continue;
         }
         auto type = recognizer->GetRecognizerType();
-        sortedResponseLinkRecognizers[type].emplace_back(item);
+        sortedResponseLinkRecognizers[type].emplace_back(recognizer);
     }
 
     for (const auto& item : currentRecognizers) {
-        if (!item->IsSystemGesture() || item->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+        if (item.Invalid()) {
             continue;
         }
-        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(item);
+        auto recognizer = item.Upgrade();
+        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+            continue;
+        }
+        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
         if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
             continue;
         }
-        auto iter = sortedResponseLinkRecognizers.find(item->GetRecognizerType());
+        auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;
         }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(item, iter->second);
+        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
         if (result && item != result) {
-            item->SetBridgeMode(true);
+            recognizer->SetBridgeMode(true);
             result->AddBridgeObj(item);
         }
     }
@@ -7788,5 +7851,19 @@ void FrameNode::MountToParent(const RefPtr<UINode>& parent,
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
+}
+
+void FrameNode::OnContentChangeRegister(const ContentChangeConfig& config)
+{
+    if (pattern_) {
+        pattern_->OnContentChangeRegister(config);
+    }
+}
+
+void FrameNode::OnContentChangeUnregister()
+{
+    if (pattern_) {
+        pattern_->OnContentChangeUnregister();
+    }
 }
 } // namespace OHOS::Ace::NG

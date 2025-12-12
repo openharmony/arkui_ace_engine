@@ -153,6 +153,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnScreenCaptureRequest, void);
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
+    ACE_WEB_EVENT_PROPERTY(OnWindowNewExt, void);
     ACE_WEB_EVENT_PROPERTY(OnActivateContent, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
     ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
@@ -179,11 +180,14 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnLoadStarted, void);
     ACE_WEB_EVENT_PROPERTY(OnLoadFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnDetectedBlankScreen, void);
+    ACE_WEB_EVENT_PROPERTY(OnFirstScreenPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfScrollAtBottom, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckFinish, void);
     ACE_WEB_EVENT_PROPERTY(OnVerifyPinRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnCameraCaptureStateChanged, void);
+    ACE_WEB_EVENT_PROPERTY(OnMicrophoneCaptureStateChanged, void);
+    ACE_WEB_EVENT_PROPERTY(OnTextSelectionChange, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

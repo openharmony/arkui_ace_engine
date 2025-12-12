@@ -15,6 +15,8 @@
 
 import { AsyncCallback } from 'arkui/base';
 import { PixelMap } from "#external";
+import { DynamicRangeMode } from 'arkui/component/image';
+import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 
 export declare namespace componentSnapshot {
     export interface SnapshotRegion {
@@ -30,10 +32,20 @@ export declare namespace componentSnapshot {
         bottom: double;
     }
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
+    export interface ColorModeOptions {
+        colorSpace?: colorSpaceManager.ColorSpace;
+        isAuto?: boolean;
+    }
+    export interface DynamicRangeModeOptions {
+        dynamicRangeMode?: DynamicRangeMode;
+        isAuto?: boolean;
+    }
     export interface SnapshotOptions {
         scale?: double;
         waitUntilRenderFinished?: boolean;
         region?: SnapshotRegionType;
+        colorMode?: ColorModeOptions;
+        dynamicRangeMode?: DynamicRangeModeOptions;
     }
     export function get(callbackId: string, callback: AsyncCallback<PixelMap>, options?: SnapshotOptions): void;
     export function get(promiseId: string, options?: SnapshotOptions): Promise<PixelMap> | null;

@@ -42,6 +42,7 @@ public:
     static void SetMinFontScale(const JSCallbackInfo& info);
     static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetTextDirection(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
@@ -109,13 +110,16 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
-    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void SetSearchButtonOptions(const JSCallbackInfo& info);
     static void UnregisterResource(const std::string& key);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

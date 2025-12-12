@@ -279,7 +279,7 @@ HWTEST_F(TextClockModifierTest, DISABLED_setFontColorTestFontColorValidValues, T
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1308,6 +1308,6 @@ HWTEST_F(TextClockModifierTest, DISABLED_setFontFeatureTestFontFeatureInvalidVal
  */
 HWTEST_F(TextClockModifierTest, DISABLED_setDateTimeOptionsTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 } // namespace OHOS::Ace::NG

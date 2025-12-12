@@ -21,8 +21,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkComponentRootPeer, ComponentRoot } from "./component/idlize"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class ComponentRootModifier implements ComponentRoot,AttributeModifier<ComponentRoot> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -33,9 +35,11 @@ export class ComponentRootModifier implements ComponentRoot,AttributeModifier<Co
     applyDisabledAttribute(instance: ComponentRoot): void { }
     applySelectedAttribute(instance: ComponentRoot): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkComponentRootPeer;
     }
     mergeModifier(modifier: ComponentRootModifier): void {
+        this._state = modifier._state;
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
         throw new Error("Not implemented")

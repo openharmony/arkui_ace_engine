@@ -819,7 +819,12 @@ private:
 
     void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
+    void SendEventToAccessibilityWithNodeInnerAfterRender(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
+
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
+    void SendAccessibilityAsyncEventInnerAfterRender(const AccessibilityEvent& accessibilityEvent);
+
     int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
 
     void GetCurrentWindowPages(

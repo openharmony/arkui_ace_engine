@@ -29,6 +29,11 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+namespace Converter {
+// Defined in custom_span_accessor.cpp
+template<> CustomSpanMetrics Convert(const Ark_CustomSpanMetrics& src);
+} // namespace Converter
+
 namespace {
 class MockFrameNode : public FrameNode {
 public:
@@ -78,9 +83,9 @@ HWTEST_F(CustomSpanAccessorTest, OnMeasureTest, TestSize.Level1)
         .fontSize = Converter::ArkValue<Ark_Float64>(expectedValue)
     };
     auto checkData = CallbackHelper(checkCallback).
-        InvokeWithObtainResult<Ark_CustomSpanMetrics, Callback_CustomSpanMetrics_Void>(inputData);
-    EXPECT_FLOAT_EQ(Converter::Convert<float>(checkData.width), expectedValue);
-    EXPECT_FALSE(Converter::OptConvert<float>(checkData.height).has_value());
+        InvokeWithConvertResult<CustomSpanMetrics, Ark_CustomSpanMetrics, Callback_CustomSpanMetrics_Void>(inputData);
+    EXPECT_FLOAT_EQ(checkData.width, expectedValue);
+    EXPECT_FALSE(checkData.height.has_value());
 }
 
 /**

@@ -18,6 +18,8 @@ import { ArkUIAniModule } from "arkui.ani"
 
 export class WebHandWritten {
     static hookJavaScriptProxyImpl(component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
-        ArkUIAniModule._Web_SetJavaScriptProxyController(component.getPeer().peer.ptr, value);
+        if (value !== undefined) {
+            ArkUIAniModule._Web_SetJavaScriptProxyController(component.getPeer().peer.ptr, value)
+        }
     }
 }

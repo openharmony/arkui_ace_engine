@@ -65,5 +65,6 @@ build_component_ng("manager_ng") {
     "shared_overlay/shared_overlay_manager.cpp",
     "shared_overlay/shared_transition_effect.cpp",
     "toolbar/toolbar_manager.cpp",
+    "content_change_manager/content_change_manager.cpp",
   ]
 }

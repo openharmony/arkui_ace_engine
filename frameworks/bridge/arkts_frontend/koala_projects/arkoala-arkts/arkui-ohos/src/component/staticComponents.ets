@@ -27,6 +27,9 @@ import { ArkUIAniModule, ArkUIAniCustomNodeModule } from "arkui.ani"
 import { int32, int64, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { IExtendableComponent } from './extendableComponent';
+import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
+import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { ArkUINativeModule } from '#components';
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -54,6 +57,8 @@ export class ArkComponentRootPeer extends PeerNode {
 }
 export class ArkCustomComponentRootPeer extends PeerNode {
     private component?: IExtendableComponent;
+    private childPeerPtr: KPointer = nullptr;
+    private buildFunc?: () => Long;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
     }
@@ -87,8 +92,21 @@ export class ArkCustomComponentRootPeer extends PeerNode {
          }
     }
     dispose() {
+        if (this.childPeerPtr !== nullptr) {
+            destroyUiDetachedRoot(this.childPeerPtr, (this.component!.getUIContext() as UIContextImpl).getInstanceId());
+            this.childPeerPtr = nullptr;
+        }
         this.component?.__removeChildWhenDispose__IExtendableComponent_Internal();
         super.dispose();
+    }
+
+    setBuildFunction(buildFunc: () => Long): void {
+        this.buildFunc = buildFunc;
+        ArkUIAniCustomNodeModule._CustomNode_SetBuildFunction(this.peer.ptr, buildFunc);
+    }
+
+    setChildPeerPtr(childPeerPtr: KPointer): void {
+        this.childPeerPtr = childPeerPtr;
     }
 }
 export interface Root {

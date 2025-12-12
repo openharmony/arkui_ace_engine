@@ -1322,4 +1322,37 @@ void SelectModelNG::SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool is
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateSelectedOptionBgColorSetByUser(isValidValue);
 }
+
+void SelectModelNG::SetKeyboardAvoidMode(const std::optional<MenuKeyboardAvoidMode>& mode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetKeyboardAvoidMode(frameNode, mode);
+}
+
+void SelectModelNG::SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<MenuKeyboardAvoidMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (mode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MenuKeyboardAvoidMode, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MenuKeyboardAvoidMode, frameNode);
+    }
+}
+
+void SelectModelNG::SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetMinKeyboardAvoidDistance(frameNode, distance);
+}
+
+void SelectModelNG::SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std::optional<Dimension>& distance)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (distance.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MinKeyboardAvoidDistance, distance.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MinKeyboardAvoidDistance, frameNode);
+    }
+}
+
 } // namespace OHOS::Ace::NG

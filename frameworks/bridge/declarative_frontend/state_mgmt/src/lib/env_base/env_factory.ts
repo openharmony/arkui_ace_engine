@@ -24,6 +24,10 @@
  */
 interface EnvTypeMap {
   'system.arkui.breakpoint': WindowSizeLayoutBreakpoint;
+  'system.window.size': WindowSizeVpEnv;
+  'system.window.size.px': WindowSizePxEnv;
+  'system.window.avoidarea': WindowAvoidAreaVpEnv;
+  'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
 }
 
 /**
@@ -50,5 +54,37 @@ const envFactoryMap: {
     }
     stateMgmtConsole.debug(`create WindowSizeLayoutBreakpoint.`);
     return new WindowSizeLayoutBreakpoint(context);
-  }
+  },
+  'system.window.size': (context: UIContext) => {
+    const WindowSizeVpEnv = requireNapi('window.windowsizeenv').WindowSizeVpEnv;
+    if (typeof WindowSizeVpEnv !== 'function') {
+      throw new Error('WindowSizeVpEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowSizeVpEnv.`);
+    return new WindowSizeVpEnv(context);
+  },
+  'system.window.size.px': (context: UIContext) => {
+    const WindowSizePxEnv = requireNapi('window.windowsizeenv').WindowSizePxEnv;
+    if (typeof WindowSizePxEnv !== 'function') {
+      throw new Error('WindowSizePxEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowSizePxEnv.`);
+    return new WindowSizePxEnv(context);
+  },
+  'system.window.avoidarea': (context: UIContext) => {
+    const WindowAvoidAreaVpEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaVpEnv;
+    if (typeof WindowAvoidAreaVpEnv !== 'function') {
+      throw new Error('WindowAvoidAreaVpEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowAvoidAreaVpEnv.`);
+    return new WindowAvoidAreaVpEnv(context);
+  },
+  'system.window.avoidarea.px': (context: UIContext) => {
+    const WindowAvoidAreaPxEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaPxEnv;
+    if (typeof WindowAvoidAreaPxEnv !== 'function') {
+      throw new Error('WindowAvoidAreaPxEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
+    return new WindowAvoidAreaPxEnv(context);
+  },
 };

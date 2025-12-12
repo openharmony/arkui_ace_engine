@@ -53,6 +53,8 @@
 #include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 #include "visual_effect/visual_effect_module.h"
+#include "security_component/paste_button_module.h"
+#include "security_component/save_button_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -122,6 +124,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Image_ColorFilter_TransferDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
+        },
+        ani_native_function {
+            "_Image_SetOnErrorCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Image_SetOnErrorCallback)
         },
         ani_native_function {
             "_Extractors_ToWebviewWebviewControllerPtr",
@@ -499,6 +506,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
+            "_UpdateWaterFlowSection",
+            "lC{arkui.component.waterFlow.SectionChangeInfo}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UpdateWaterFlowSection)
+        },
+        ani_native_function {
             "_SetWaterFlowFooterContent",
             "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooterContent)
@@ -659,6 +671,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOpacity)
         },
         ani_native_function {
+            "_UiMaterial_ConstructMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConstructMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_DestroyMaterial",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
+        },
+        ani_native_function {
             "_CreateViewStackProcessor",
             ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
@@ -804,9 +826,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
         },
         ani_native_function {
-            "_Video_Transfer_PixelMap",
-            "lC{@ohos.multimedia.image.image.PixelMap}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoPixelMap)
+            "_Video_SetVoidCallback",
+            "lC{std.core.Function0}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoOnErrorVoidCallback)
+        },
+        ani_native_function {
+            "_Video_SetErrorCallback",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoOnErrorErrorCallback)
         },
         ani_native_function {
             "_Shape_Transfer_PixelMap",
@@ -942,6 +969,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
         ani_native_function {
+            "_ConditionScope_Mark_Dirty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConditionScopeMarkDirty)
+        },
+        ani_native_function {
             "_Common_vp2px",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Vp2px)
@@ -975,6 +1007,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_getWindowName",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
+        },
+        ani_native_function {
+            "_Common_getWindowId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowId)
         },
         ani_native_function {
             "_Common_getWindowWidthBreakpoint",
@@ -1421,6 +1458,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
         },
         ani_native_function {
+            "_Extractors_ToUiMaterialMaterialPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiMaterialMaterialPtr)
+        },
+        ani_native_function {
             "_Extractors_ToDrawContextPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawContextPtr)
@@ -1470,6 +1512,41 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyThemeScopeId)
         },
+        ani_native_function {
+            "_SaveButton_SetOnClickCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SaveButton_SetOnClickCallback)
+        },
+        ani_native_function {
+            "_PasteButton_SetOnClickCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PasteButton_SetOnClickCallback)
+        },
+        ani_native_function {
+            "_BaseEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetBaseEventModifierKeyState)
+        },
+        ani_native_function {
+            "_DragEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetDragEventModifierKeyState)
+        },
+        ani_native_function {
+            "_KeyEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetKeyEventModifierKeyState)
+        },
+        ani_native_function {
+            "_ClickEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickEventPreventDefault)
+        },
+        ani_native_function {
+            "_TouchEvent_preventDefault",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetTouchEventPreventDefault)
+        }
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

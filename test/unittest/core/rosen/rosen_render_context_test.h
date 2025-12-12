@@ -26,6 +26,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/properties/ui_material.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/render/adapter/background_modifier.h"

@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RowSplitModifier extends CommonMethodModifier implements RowSplitAttribute,AttributeModifier<RowSplitAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,6 +39,7 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _resizeable_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRowSplitPeer;
         if (this._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -60,6 +63,7 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     }
     mergeModifier(modifier: RowSplitModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._resizeable_0_flag) {

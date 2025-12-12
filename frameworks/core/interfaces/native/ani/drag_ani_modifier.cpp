@@ -15,8 +15,9 @@
 
 #include "drag_ani_modifier.h"
 
-#include "base/log/log.h"
+#include "securec.h"
 
+#include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
@@ -213,6 +214,56 @@ ani_long GetUnifiedData(ani_long peer)
     return reinterpret_cast<ani_long>(unifiedDataPtr);
 }
 
+void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
+{
+    CHECK_NULL_VOID(nativePtr);
+    auto accessor = reinterpret_cast<Ark_DragEvent>(nativePtr);
+    CHECK_NULL_VOID(accessor && accessor->dragInfo);
+    CHECK_NULL_VOID(keys && length);
+    auto eventKeys = accessor->dragInfo->GetPressedKeyCodes();
+    auto size = static_cast<int32_t>(eventKeys.size());
+    if (size <= 0) {
+        return;
+    }
+    *length = size;
+    *keys = new char* [size];
+    for (auto index = 0; index < size; index++) {
+        std::string keyStr;
+        switch (eventKeys[index]) {
+            case KeyCode::KEY_CTRL_LEFT:
+            case KeyCode::KEY_CTRL_RIGHT:
+                keyStr = "ctrl";
+                break;
+            case KeyCode::KEY_SHIFT_LEFT:
+            case KeyCode::KEY_SHIFT_RIGHT:
+                keyStr = "shift";
+                break;
+            case KeyCode::KEY_ALT_LEFT:
+            case KeyCode::KEY_ALT_RIGHT:
+                keyStr = "alt";
+                break;
+            case KeyCode::KEY_FN:
+                keyStr = "fn";
+                break;
+            default:
+                keyStr = "";
+                break;
+        }
+        (*keys)[index] = new char[keyStr.length() + 1];
+        auto result = strcpy_s((*keys)[index], keyStr.length() + 1, keyStr.c_str());
+        if (result != 0) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "Drag GetPressedModifierKey error: strcpy_s with error code: %d", result);
+            for (int i = 0; i <= index; i++) {
+                delete[](*keys)[i];
+            }
+            delete[] * keys;
+            *keys = nullptr;
+            *length = 0;
+            return;
+        }
+    }
+}
+
 const ArkUIAniDragModifier* GetDragAniModifier()
 {
     static const ArkUIAniDragModifier impl = {
@@ -228,7 +279,8 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragPreviewOptions = OHOS::Ace::NG::SetDragPreviewOptions,
         .getUdKey = OHOS::Ace::NG::GetUdKey,
         .createUnifiedDataPeer = OHOS::Ace::NG::CreateUnifiedDataPeer,
-        .getUnifiedData = OHOS::Ace::NG::GetUnifiedData
+        .getUnifiedData = OHOS::Ace::NG::GetUnifiedData,
+        .getPressedModifierKey = OHOS::Ace::NG::GetPressedModifierKey
     };
     return &impl;
 }

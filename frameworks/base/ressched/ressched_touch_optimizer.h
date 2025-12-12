@@ -106,6 +106,7 @@ private:
     bool isTpFlushFrameDisplayPeriod_ = false;
     bool isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool vsyncFlushed_ = false;
+    bool rvsSignalEnable_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H

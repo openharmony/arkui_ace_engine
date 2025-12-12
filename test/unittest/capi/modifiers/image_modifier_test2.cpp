@@ -84,10 +84,8 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     std::string expectedStr = CHECK_RESOURCE_LOCAL_STR;
-    auto inputStr = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
-        Converter::ArkValue<Ark_String>(expectedStr));
-    auto optInputStr = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputStr);
-    modifier_->setAlt(frameNode, &optInputStr);
+    auto inputStr = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt, Ark_String>(expectedStr);
+    modifier_->setAlt(frameNode, &inputStr);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
     EXPECT_EQ(resultStr, expectedStr);
@@ -106,9 +104,9 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
 
     std::string expectedStr = CHECK_RESOURCE_THEME_STR;
     auto expectedArkResource = Converter::ArkCreate<Ark_Resource>(IMAGE_RES_ID, ResourceType::STRING);
-    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(expectedArkResource);
-    auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputArkResource);
-    modifier_->setAlt(frameNode, &optInputArkResource);
+    auto inputArkResource = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt,
+        Ark_Resource>(expectedArkResource);
+    modifier_->setAlt(frameNode, &inputArkResource);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
     EXPECT_EQ(resultStr, expectedStr);
@@ -129,7 +127,7 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
     Ark_image_PixelMap expectedPixelMap = &pixelMapPeer;
-    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap,
+    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt,
         Ark_image_PixelMap>(expectedPixelMap);
     modifier_->setAlt(frameNode, &optInputArkPixelMap);
 
@@ -145,12 +143,28 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setImageMatrixTestDefualtValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest2, setImageMatrixTestDefualtValue, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(property, nullptr);
+    auto result = property->GetImageMatrix();
+    ASSERT_FALSE(result);
+}
+
+/**
  * @tc.name: setImageMatrixTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest2, setImageMatrixTest, TestSize.Level1)
 {
+    ASSERT_TRUE(modifier_->setImageMatrix);
     Matrix4 matrix4transit = Matrix4::CreateScale(11.0, 7.0, 1.0);
     auto matrix4transitPeer = reinterpret_cast<Ark_matrix4_Matrix4Transit>(&matrix4transit);
     auto optValue = Converter::ArkValue<Opt_matrix4_Matrix4Transit>(matrix4transitPeer);

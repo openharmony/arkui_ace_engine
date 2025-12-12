@@ -18,6 +18,7 @@
 
 #ifndef ACE_UNITTEST
 #include "draw/canvas.h"
+#include "draw/clip.h"
 #include "draw/shadow.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_path.h"
@@ -162,6 +163,7 @@ using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
 using RSCMSTransferFuncType = Rosen::Drawing::CMSTransferFuncType;
 using RSCMSMatrixType = Rosen::Drawing::CMSMatrixType;
 using RSClamp = Rosen::Drawing::Clamp;
+using RSClipOp = Rosen::Drawing::ClipOp;
 struct RSDataWrapper {
     std::shared_ptr<RSData> data;
 };

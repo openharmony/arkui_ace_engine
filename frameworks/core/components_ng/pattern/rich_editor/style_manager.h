@@ -205,6 +205,7 @@ public:
         spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
         spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
         spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+        spanNode->UpdateTextDirection(style.textDirection.value_or(TextDirection::INHERIT));
         if (style.paragraphSpacing.has_value()) {
             spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
         } else {
@@ -458,6 +459,7 @@ public:
         spanParagraphStyle.leadingMargin = typingParagraphStyle.leadingMargin;
         spanParagraphStyle.paragraphSpacing = typingParagraphStyle.paragraphSpacing;
         spanParagraphStyle.textVerticalAlign = typingParagraphStyle.textVerticalAlign;
+        spanParagraphStyle.textDirection = typingParagraphStyle.textDirection;
         spans.push_back(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, length));
     }
 

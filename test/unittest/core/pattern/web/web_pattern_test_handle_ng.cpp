@@ -30,6 +30,7 @@
 
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1037,6 +1038,35 @@ HWTEST_F(WebPatternTestHandle, HandleBlurEvent003, TestSize.Level1)
     webPattern->isActive_ = true;
     webPattern->HandleBlurEvent(BlurReason::WINDOW_BLUR);
     EXPECT_FALSE(webPattern->IsDialogNested());
+#endif
+}
+
+/**
+ * @tc.name: HandleBlurEvent004
+ * @tc.desc: HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, HandleBlurEvent004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->isDragStartFromWeb_ = false;
+    webPattern->selectPopupMenuShowing_ = false;
+    webPattern->isMenuShownFromWeb_ = true;
+    webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::FOCUS_SWITCH);
+    webPattern->isMenuShownFromWeb_ = false;
+    webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
 #endif
 }
 

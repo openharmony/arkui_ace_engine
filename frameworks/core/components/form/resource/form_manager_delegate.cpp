@@ -133,6 +133,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
+    if (ret == ERR_APPEXECFWK_FORM_NOT_SUPPORTED) {
+        ProcessFormUninstall(info.id);
+        TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, unsupported card");
+        return;
+    }
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         TAG_LOGW(AceLogTag::ACE_FORM, "Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
@@ -1004,6 +1009,13 @@ void FormManagerDelegate::SetObscured(bool isObscured)
     formRendererDispatcher->SetObscured(isObscured);
 }
 
+void FormManagerDelegate::SetColorMode(int32_t colorMode)
+{
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->SetColorMode(colorMode);
+}
+
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
@@ -1226,6 +1238,7 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_COLOR_MODE_KEY, info.colorMode);
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();
@@ -1328,6 +1341,24 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
     formMajorInfo.formName = formName;
     formMajorInfo.dimension = dimension;
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(formMajorInfo, isDisablePolicy);
+}
+
+void FormManagerDelegate::ProcessCheckForm()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessCheckForm formId:%{public}" PRId64, runningCardId_);
+    auto form = formPattern_.Upgrade();
+    if (!form) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formPattern_ is null");
+        return;
+    }
+    form->ProcessCheckForm();
+}
+
+void FormManagerDelegate::SendNonTransparencyRatio(int32_t ratio)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "SendNonTransparencyRatio ratio:%{public}d formId:%{public}" PRId64, ratio,
+        runningCardId_);
+    OHOS::AppExecFwk::FormMgr::GetInstance().SendNonTransparencyRatio(runningCardId_, ratio);
 }
 #endif
 } // namespace OHOS::Ace

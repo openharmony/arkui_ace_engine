@@ -21,6 +21,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_I32_serializer } from "./common"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { ComponentBase } from "./../ComponentBase"
@@ -30,6 +31,7 @@ import { Resource } from "global.resource"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
 import { default as curves } from "@ohos.curves"
 import { extractors, AttributeModifier, hookTabsAttributeModifier, AttributeUpdater, hookTabsApplyAttributesFinish } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { TabsExtender } from '#generated'
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -141,8 +143,8 @@ export class TabsController implements MaterializedBase {
         this.changeIndex_serialize(value_casted)
         return
     }
-    public preloadItems(indices: KInt32ArrayPtr | undefined): Promise<void> {
-        const indices_casted = indices as (KInt32ArrayPtr | undefined)
+    public preloadItems(indices: Array<int32> | undefined): Promise<void> {
+        const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
     public setTabBarTranslate(translate: TranslateOptions): void {
@@ -158,7 +160,7 @@ export class TabsController implements MaterializedBase {
     changeIndex_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._TabsController_changeIndex(this.peer!.ptr, value)
     }
-    preloadItems_serialize(indices: KInt32ArrayPtr | undefined): Promise<void> {
+    preloadItems_serialize(indices: Array<int32> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (indices !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -199,6 +201,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTabsOptionsAttribute(options?: TabsOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -255,10 +258,10 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -455,10 +458,10 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -586,10 +589,10 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const heightTmpValueForIdx0  = heightTmpValue as string
                 thisSerializer.writeString(heightTmpValueForIdx0)
-            } else if (heightTmpValue instanceof number) {
+            } else if (heightTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const heightTmpValueForIdx1  = heightTmpValue as number
-                thisSerializer.writeNumber(heightTmpValueForIdx1)
+                const heightTmpValueForIdx1  = heightTmpValue as double
+                thisSerializer.writeFloat64(heightTmpValueForIdx1)
             } else if (heightTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const heightTmpValueForIdx2  = heightTmpValue as Resource
@@ -1191,7 +1194,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabsAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTabsAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

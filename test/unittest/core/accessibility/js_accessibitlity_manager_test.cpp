@@ -24,6 +24,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
@@ -40,7 +41,35 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
-    const int32_t NUMTWO = 2;
+const int32_t NUMTWO = 2;
+
+class MockFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
+
+public:
+    MockFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+
+    ~MockFrameNode() override = default;
+
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool) override
+    {
+        return mockResponseRegionList_;
+    }
+
+public:
+    std::vector<RectF> mockResponseRegionList_;
+};
+
+RefPtr<MockFrameNode> CreateMockFrameNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+{
+    auto frameNode = AceType::MakeRefPtr<MockFrameNode>(tag, nodeId, pattern);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
 } // namespace
 
 class MockAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
@@ -126,6 +155,23 @@ public:
     {
         return NUMTWO;
     }
+};
+
+class MockAccessibilityNodeManager : public Framework::AccessibilityNodeManager {
+    DECLARE_ACE_TYPE(MockAccessibilityNodeManager, AccessibilityNodeManager);
+    void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        int64_t uiExtensionOffset) override {}
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const int64_t uiExtensionOffset = 0) override {}
+    void FindFocusedElementInfoNG(int64_t elementId, int32_t focusType,
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const int64_t uiExtensionOffset = 0) override {}
+    void FocusMoveSearchNG(int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override {}
+    bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override { return false; }
 };
 
 class JsAccessibilityManagerTest : public testing::Test {
@@ -4178,6 +4224,49 @@ HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestS
 }
 
 /**
+ * @tc.name: UpdateAccessibilityNodeRect001
+ * @tc.desc: UpdateAccessibilityNodeRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateAccessibilityNodeRect001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    AccessibilityWorkMode accessibilityWorkMode { .isTouchExplorationEnabled = true };
+    EXPECT_CALL(*jsAccessibilityManager,
+        GenerateAccessibilityWorkMode()).WillRepeatedly(::testing::Return(accessibilityWorkMode));
+
+    auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(node, nullptr);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect(100, 100, 100, 100);
+    mockRenderContext->UpdatePaintRect(rect);
+    mockRenderContext->SetPaintRectWithTransform(rect);
+    RectF responseRect(99, 99, 102, 102);
+    node->mockResponseRegionList_.emplace_back(responseRect);
+    auto result = accessibilityProperty->IsMatchAccessibilityResponseRegion(false);
+    EXPECT_TRUE(result);
+    // not focus， not drawTop
+    jsAccessibilityManager->UpdateAccessibilityNodeRect(node);
+    // not focus， drawTop
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    jsAccessibilityManager->UpdateAccessibilityNodeRect(node);
+    // focus， drawTop
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    accessibilityProperty->SetAccessibilityFocusState(true);
+    jsAccessibilityManager->UpdateAccessibilityNodeRect(node);
+    // focus， not drawTop
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::SELF));
+    accessibilityProperty->SetAccessibilityFocusState(true);
+    jsAccessibilityManager->UpdateAccessibilityNodeRect(node);
+    ASSERT_EQ(accessibilityProperty->GetAccessibilityFocusState(), true);
+}
+
+/**
  * @tc.name: JsAccessibilityManager021
  * @tc.desc: dump event test  DumpProcessEventParameters
  * @tc.type: FUNC
@@ -4227,5 +4316,23 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
     frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
     ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: NeedChangeToReadableNodeTest001
+ * @tc.desc: NeedChangeToReadableNode get false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, NeedChangeToReadableNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityManager = AceType::MakeRefPtr<MockAccessibilityNodeManager>();
+    ASSERT_NE(accessibilityManager, nullptr);
+
+    RefPtr<FrameNode> frameNode2;
+    // vitural function need return false
+    auto ret = accessibilityManager->NeedChangeToReadableNode(frameNode, frameNode2);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG

@@ -446,6 +446,8 @@ struct EditableTitleBarMenuSection {
                 attribute: ItemType.Icon,
                 imageMenuItemId: `ImageMenuItem_${this.parentUniqueId}_${index}`
               })
+            }, (item: EditableTitleBarMenuItem, index: int) => {
+              return JSON.stringify(item.value + '_' + index)
             })
         }
         if (this.isSaveEnabled) {
@@ -803,7 +805,7 @@ struct ImageMenuItem {
         .focusable(false)
         .enabled(this.item.isEnabled)
         .objectFit(ImageFit.Cover)
-      Button({ type: ButtonType.Circle } as ButtonOptions)
+      Button('', { type: ButtonType.Circle } as ButtonOptions)
         .width($r('sys.float.titlebar_icon_background_width'))
         .height($r('sys.float.titlebar_icon_background_height'))
         .focusable(this.item.isEnabled)

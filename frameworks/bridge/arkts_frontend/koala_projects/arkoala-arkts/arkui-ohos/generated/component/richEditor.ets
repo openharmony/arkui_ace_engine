@@ -18,11 +18,13 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, DecorationStyleResult, TextRange_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { VoidCallback, ResourceColor, ResourceStr, Font, Length, Dimension, Padding, BorderRadiuses, Font_serializer, Padding_serializer, BorderRadiuses_serializer } from "./units"
@@ -30,11 +32,13 @@ import { CopyOptions, Color, BarState, ResponseType, FontStyle, FontWeight, Text
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./textInput"
 import { AttributeModifier, extractors, hookRichEditorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
+import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal } from "./styledString"
+import { DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, StyledString, StyledStringInternal, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from "./styledString"
 import { TextBackgroundStyle, TextBackgroundStyle_serializer } from "./span"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
@@ -68,10 +72,10 @@ export class RichEditorBaseController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RichEditorBaseController_getFinalizer()
     }
-    public getCaretOffset(): int32 {
+    public getCaretOffset(): int32 | undefined {
         return this.getCaretOffset_serialize()
     }
-    public setCaretOffset(offset: int32): boolean {
+    public setCaretOffset(offset: int32): boolean | undefined {
         const offset_casted = offset as (int32)
         return this.setCaretOffset_serialize(offset_casted)
     }
@@ -79,7 +83,7 @@ export class RichEditorBaseController implements MaterializedBase {
         this.closeSelectionMenu_serialize()
         return
     }
-    public getTypingStyle(): RichEditorTextStyle {
+    public getTypingStyle(): RichEditorTextStyle | undefined {
         return this.getTypingStyle_serialize()
     }
     public setTypingStyle(value: RichEditorTextStyle): void {
@@ -94,37 +98,60 @@ export class RichEditorBaseController implements MaterializedBase {
         this.setSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
     }
-    public isEditing(): boolean {
+    public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
+    }
+    public deleteBackward(): void {
+        this.deleteBackward_serialize()
+        return
     }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
     }
-    public getLayoutManager(): LayoutManager {
+    public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
     }
-    public getPreviewText(): PreviewText {
+    public getPreviewText(): PreviewText | undefined {
         return this.getPreviewText_serialize()
     }
     public getCaretRect(): RectResult | undefined {
         return this.getCaretRect_serialize()
     }
-    getCaretOffset_serialize(): int32 {
+    getCaretOffset_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretOffset(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    setCaretOffset_serialize(offset: int32): boolean {
+    setCaretOffset_serialize(offset: int32): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_setCaretOffset(this.peer!.ptr, offset)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_closeSelectionMenu(this.peer!.ptr)
     }
-    getTypingStyle_serialize(): RichEditorTextStyle {
+    getTypingStyle_serialize(): RichEditorTextStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RichEditorTextStyle = RichEditorTextStyle_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RichEditorTextStyle | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = RichEditorTextStyle_serializer.read(retvalDeserializer)
+        }
+        const returnResult : RichEditorTextStyle | undefined = buffer
         return returnResult
     }
     setTypingStyle_serialize(value: RichEditorTextStyle): void {
@@ -145,22 +172,40 @@ export class RichEditorBaseController implements MaterializedBase {
         ArkUIGeneratedNativeModule._RichEditorBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    isEditing_serialize(): boolean {
+    isEditing_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_isEditing(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
     stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_stopEditing(this.peer!.ptr)
     }
-    getLayoutManager_serialize(): LayoutManager {
+    getLayoutManager_serialize(): LayoutManager | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getLayoutManager(this.peer!.ptr)
-        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LayoutManager | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
+        }
+        const returnResult : LayoutManager | undefined = buffer
+        return returnResult
     }
-    getPreviewText_serialize(): PreviewText {
+    getPreviewText_serialize(): PreviewText | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PreviewText = PreviewText_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PreviewText | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PreviewText_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PreviewText | undefined = buffer
         return returnResult
     }
     getCaretRect_serialize(): RectResult | undefined {
@@ -173,6 +218,9 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult : RectResult | undefined = buffer
         return returnResult
+    }
+    deleteBackward_serialize(): void {
+        ArkUIGeneratedNativeModule._RichEditorBaseController_deleteBackward(this.peer!.ptr)
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
@@ -188,6 +236,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRichEditorOptionsAttribute(options: RichEditorOptions | RichEditorStyledStringOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options instanceof RichEditorOptions) {
             thisSerializer.writeInt8((0).toByte())
@@ -366,10 +415,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -394,10 +443,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -593,6 +642,42 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (spanType !== undefined) {
@@ -634,12 +719,20 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCustomKeyboardAttribute(value: CustomBuilder | undefined, options?: KeyboardOptions): void {
+    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+            if (valueTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof ComponentContent) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ComponentContent
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -726,6 +819,7 @@ export interface RichEditorParagraphStyle {
     wordBreak?: WordBreak;
     lineBreakStrategy?: LineBreakStrategy;
     paragraphSpacing?: double;
+    textDirection?: TextDirection;
 }
 export interface PasteEvent {
     preventDefault(): void
@@ -864,6 +958,7 @@ export interface RichEditorBuilderSpanOptions {
     offset?: int32;
     dragBackgroundColor?: ColorMetrics;
     isDragShadowNeeded?: boolean;
+    accessibilitySpanOptions?: AccessibilitySpanOptions;
 }
 export interface PlaceholderStyle {
     font?: Font;
@@ -1021,10 +1116,19 @@ export interface RichEditorAttribute extends CommonMethod {
     stopBackPress(value: boolean | undefined): this {
         throw new Error("Unimplemented method stopBackPress")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error("Unimplemented method bindSelectionMenu")
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1065,6 +1169,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: int32 | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined
     setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
         return this
@@ -1159,10 +1266,19 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     stopBackPress(value: boolean | undefined): this {
         return this
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        return this
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         return this
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1501,6 +1617,30 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         if (this.checkPriority("bindSelectionMenu")) {
             const spanType_casted = spanType as (RichEditorSpanType | undefined)
@@ -1512,9 +1652,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    public customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | ComponentContent | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
             return this
@@ -1531,7 +1671,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichEditorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRichEditorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -2000,13 +2142,21 @@ export class RichEditorBuilderSpanOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForAccessibilitySpanOptions  = value.accessibilitySpanOptions
+        if (valueHolderForAccessibilitySpanOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilitySpanOptionsTmpValue  = valueHolderForAccessibilitySpanOptions!
+            AccessibilitySpanOptions_serializer.write(valueSerializer, valueHolderForAccessibilitySpanOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorBuilderSpanOptions {
         let valueDeserializer : DeserializerBase = buffer
         const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetTmpBuf : int32 | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            offsetTmpBuf = (valueDeserializer.readInt32() as int32)
+            offsetTmpBuf = valueDeserializer.readInt32()
         }
         const offsetTmpResult : int32 | undefined = offsetTmpBuf
         const dragBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2021,7 +2171,13 @@ export class RichEditorBuilderSpanOptions_serializer {
             isDragShadowNeededTmpBuf = valueDeserializer.readBoolean()
         }
         const isDragShadowNeededTmpResult : boolean | undefined = isDragShadowNeededTmpBuf
-        let value : RichEditorBuilderSpanOptions = ({offset: offsetTmpResult, dragBackgroundColor: dragBackgroundColorTmpResult, isDragShadowNeeded: isDragShadowNeededTmpResult} as RichEditorBuilderSpanOptions)
+        const accessibilitySpanOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilitySpanOptionsTmpBuf : AccessibilitySpanOptions | undefined = undefined
+        if ((accessibilitySpanOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilitySpanOptionsTmpBuf = AccessibilitySpanOptions_serializer.read(valueDeserializer)
+        }
+        const accessibilitySpanOptionsTmpResult : AccessibilitySpanOptions | undefined = accessibilitySpanOptionsTmpBuf
+        let value : RichEditorBuilderSpanOptions = ({offset: offsetTmpResult, dragBackgroundColor: dragBackgroundColorTmpResult, isDragShadowNeeded: isDragShadowNeededTmpResult, accessibilitySpanOptions: accessibilitySpanOptionsTmpResult} as RichEditorBuilderSpanOptions)
         return value
     }
 }
@@ -2108,10 +2264,10 @@ export class RichEditorSymbolSpanStyle_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx0  = valueHolderForFontColorTmpValueTmpElement as Color
                     valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueHolderForFontColorTmpValueTmpElement instanceof number) {
+                } else if (valueHolderForFontColorTmpValueTmpElement instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as number
-                    valueSerializer.writeNumber(valueHolderForFontColorTmpValueTmpElementForIdx1)
+                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as int32
+                    valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx1)
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx2  = valueHolderForFontColorTmpValueTmpElement as string
@@ -2188,11 +2344,11 @@ export class RichEditorSymbolSpanStyle_serializer {
             let fontColorTmpBuf_ : Array<ResourceColor> = new Array<ResourceColor>(fontColorTmpBuf_Length)
             for (let fontColorTmpBuf_BufCounterI = 0; fontColorTmpBuf_BufCounterI < fontColorTmpBuf_Length; fontColorTmpBuf_BufCounterI++) {
                 const fontColorTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                let fontColorTmpBuf_TempBuf : Color | number | string | Resource | undefined
+                let fontColorTmpBuf_TempBuf : Color | int32 | string | Resource | undefined
                 if (fontColorTmpBuf_TempBufUnionSelector == (0).toChar()) {
                     fontColorTmpBuf_TempBuf = Color.values()[valueDeserializer.readInt32()]
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (1).toChar()) {
-                    fontColorTmpBuf_TempBuf = (valueDeserializer.readNumber() as number)
+                    fontColorTmpBuf_TempBuf = valueDeserializer.readInt32()
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (2).toChar()) {
                     fontColorTmpBuf_TempBuf = (valueDeserializer.readString() as string)
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (3).toChar()) {
@@ -2200,7 +2356,7 @@ export class RichEditorSymbolSpanStyle_serializer {
                 } else {
                     throw new Error("One of the branches for fontColorTmpBuf_TempBuf has to be chosen through deserialisation.")
                 }
-                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | number | string | Resource)
+                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | int32 | string | Resource)
             }
             fontColorTmpBuf = fontColorTmpBuf_
         }
@@ -2588,10 +2744,10 @@ export class PlaceholderStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -2617,11 +2773,11 @@ export class PlaceholderStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2629,7 +2785,7 @@ export class PlaceholderStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         let value : PlaceholderStyle = ({font: fontTmpResult, fontColor: fontColorTmpResult} as PlaceholderStyle)
@@ -2817,6 +2973,14 @@ export class RichEditorParagraphStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorParagraphStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -2870,7 +3034,13 @@ export class RichEditorParagraphStyle_serializer {
             paragraphSpacingTmpBuf = (valueDeserializer.readFloat64() as double)
         }
         const paragraphSpacingTmpResult : double | undefined = paragraphSpacingTmpBuf
-        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as RichEditorParagraphStyle)
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
+        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as RichEditorParagraphStyle)
         return value
     }
 }
@@ -3102,10 +3272,10 @@ export class RichEditorTextStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -3277,11 +3447,11 @@ export class RichEditorTextStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -3289,7 +3459,7 @@ export class RichEditorTextStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3435,10 +3605,10 @@ export class RichEditorTextStyleResult_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForFontColorForIdx0  = valueHolderForFontColor as Color
             valueSerializer.writeInt32(valueHolderForFontColorForIdx0.getOrdinal())
-        } else if (valueHolderForFontColor instanceof number) {
+        } else if (valueHolderForFontColor instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as number
-            valueSerializer.writeNumber(valueHolderForFontColorForIdx1)
+            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as int32
+            valueSerializer.writeInt32(valueHolderForFontColorForIdx1)
         } else if (valueHolderForFontColor instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForFontColorForIdx2  = valueHolderForFontColor as string
@@ -3514,11 +3684,11 @@ export class RichEditorTextStyleResult_serializer {
     public static read(buffer: DeserializerBase): RichEditorTextStyleResult {
         let valueDeserializer : DeserializerBase = buffer
         const fontColorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let fontColorTmpBuf : Color | number | string | Resource | undefined
+        let fontColorTmpBuf : Color | int32 | string | Resource | undefined
         if (fontColorTmpBufUnionSelector == (0).toChar()) {
             fontColorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (fontColorTmpBufUnionSelector == (1).toChar()) {
-            fontColorTmpBuf = (valueDeserializer.readNumber() as number)
+            fontColorTmpBuf = valueDeserializer.readInt32()
         } else if (fontColorTmpBufUnionSelector == (2).toChar()) {
             fontColorTmpBuf = (valueDeserializer.readString() as string)
         } else if (fontColorTmpBufUnionSelector == (3).toChar()) {
@@ -3526,7 +3696,7 @@ export class RichEditorTextStyleResult_serializer {
         } else {
             throw new Error("One of the branches for fontColorTmpBuf has to be chosen through deserialisation.")
         }
-        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | number | string | Resource)
+        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | int32 | string | Resource)
         const fontSizeTmpResult : double = (valueDeserializer.readFloat64() as double)
         const fontStyleTmpResult : FontStyle = FontStyle.fromValue(valueDeserializer.readInt32())
         const fontWeightTmpResult : int32 = (valueDeserializer.readInt32() as int32)
@@ -4017,22 +4187,22 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RichEditorController_getFinalizer()
     }
-    public addTextSpan(content: ResourceStr, options?: RichEditorTextSpanOptions): int32 {
+    public addTextSpan(content: ResourceStr, options?: RichEditorTextSpanOptions): int32 | undefined {
         const content_casted = content as (ResourceStr)
         const options_casted = options as (RichEditorTextSpanOptions | undefined)
         return this.addTextSpan_serialize(content_casted, options_casted)
     }
-    public addImageSpan(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 {
+    public addImageSpan(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 | undefined {
         const value_casted = value as (image.PixelMap | ResourceStr)
         const options_casted = options as (RichEditorImageSpanOptions | undefined)
         return this.addImageSpan_serialize(value_casted, options_casted)
     }
-    public addBuilderSpan(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 {
+    public addBuilderSpan(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 | undefined {
         const value_casted = value as (CustomBuilder)
         const options_casted = options as (RichEditorBuilderSpanOptions | undefined)
         return this.addBuilderSpan_serialize(value_casted, options_casted)
     }
-    public addSymbolSpan(value: Resource, options?: RichEditorSymbolSpanOptions): int32 {
+    public addSymbolSpan(value: Resource, options?: RichEditorSymbolSpanOptions): int32 | undefined {
         const value_casted = value as (Resource)
         const options_casted = options as (RichEditorSymbolSpanOptions | undefined)
         return this.addSymbolSpan_serialize(value_casted, options_casted)
@@ -4052,26 +4222,26 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         this.deleteSpans_serialize(value_casted)
         return
     }
-    public getSpans(value?: RichEditorRange): Array<RichEditorImageSpanResult | RichEditorTextSpanResult> {
+    public getSpans(value?: RichEditorRange): Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined {
         const value_casted = value as (RichEditorRange | undefined)
         return this.getSpans_serialize(value_casted)
     }
-    public getParagraphs(value?: RichEditorRange): Array<RichEditorParagraphResult> {
+    public getParagraphs(value?: RichEditorRange): Array<RichEditorParagraphResult> | undefined {
         const value_casted = value as (RichEditorRange | undefined)
         return this.getParagraphs_serialize(value_casted)
     }
-    public getSelection(): RichEditorSelection {
+    public getSelection(): RichEditorSelection | undefined {
         return this.getSelection_serialize()
     }
-    public fromStyledString(value: StyledString): Array<RichEditorSpan> {
+    public fromStyledString(value: StyledString): Array<RichEditorSpan> | undefined {
         const value_casted = value as (StyledString)
         return this.fromStyledString_serialize(value_casted)
     }
-    public toStyledString(value: RichEditorRange): StyledString {
+    public toStyledString(value: RichEditorRange): StyledString | undefined {
         const value_casted = value as (RichEditorRange)
         return this.toStyledString_serialize(value_casted)
     }
-    addTextSpan_serialize(content: ResourceStr, options?: RichEditorTextSpanOptions): int32 {
+    addTextSpan_serialize(content: ResourceStr, options?: RichEditorTextSpanOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
             thisSerializer.writeInt8((0).toByte())
@@ -4091,9 +4261,16 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_addTextSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    addImageSpan_serialize(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 {
+    addImageSpan_serialize(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toByte())
@@ -4121,9 +4298,16 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_addImageSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    addBuilderSpan_serialize(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 {
+    addBuilderSpan_serialize(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value))
         if (options !== undefined) {
@@ -4135,9 +4319,16 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_addBuilderSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    addSymbolSpan_serialize(value: Resource, options?: RichEditorSymbolSpanOptions): int32 {
+    addSymbolSpan_serialize(value: Resource, options?: RichEditorSymbolSpanOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         Resource_serializer.write(thisSerializer, value)
         if (options !== undefined) {
@@ -4149,7 +4340,14 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_addSymbolSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
     updateSpanStyle_serialize(value: RichEditorUpdateTextSpanStyleOptions | RichEditorUpdateImageSpanStyleOptions | RichEditorUpdateSymbolSpanStyleOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -4187,7 +4385,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         ArkUIGeneratedNativeModule._RichEditorController_deleteSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getSpans_serialize(value?: RichEditorRange): Array<RichEditorImageSpanResult | RichEditorTextSpanResult> {
+    getSpans_serialize(value?: RichEditorRange): Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4199,24 +4397,29 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBufUnionSelector : int32 = retvalDeserializer.readInt8()
-            let bufferTempBuf : RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
-            if (bufferTempBufUnionSelector == (0).toChar()) {
-                bufferTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
-            } else if (bufferTempBufUnionSelector == (1).toChar()) {
-                bufferTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
-            } else {
-                throw new Error("One of the branches for bufferTempBuf has to be chosen through deserialisation.")
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                const buffer_TempBufUnionSelector : int32 = retvalDeserializer.readInt8()
+                let buffer_TempBuf : RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
+                if (buffer_TempBufUnionSelector == (0).toChar()) {
+                    buffer_TempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
+                } else if (buffer_TempBufUnionSelector == (1).toChar()) {
+                    buffer_TempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
+                } else {
+                    throw new Error("One of the branches for buffer_TempBuf has to be chosen through deserialisation.")
+                }
+                buffer_[buffer_BufCounterI] = (buffer_TempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
             }
-            buffer[bufferBufCounterI] = (bufferTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+            buffer = buffer_
         }
-        const returnResult : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = buffer
+        const returnResult : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = buffer
         return returnResult
     }
-    getParagraphs_serialize(value?: RichEditorRange): Array<RichEditorParagraphResult> {
+    getParagraphs_serialize(value?: RichEditorRange): Array<RichEditorParagraphResult> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4228,47 +4431,68 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = RichEditorParagraphResult_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<RichEditorParagraphResult> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = RichEditorParagraphResult_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<RichEditorParagraphResult> = buffer
+        const returnResult : Array<RichEditorParagraphResult> | undefined = buffer
         return returnResult
     }
-    getSelection_serialize(): RichEditorSelection {
+    getSelection_serialize(): RichEditorSelection | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSelection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RichEditorSelection = RichEditorSelection_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RichEditorSelection | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = RichEditorSelection_serializer.read(retvalDeserializer)
+        }
+        const returnResult : RichEditorSelection | undefined = buffer
         return returnResult
     }
-    fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> {
+    fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, toPeerPtr(value))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<RichEditorSpan> = new Array<RichEditorSpan>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBufUnionSelector : int32 = retvalDeserializer.readInt8()
-            let bufferTempBuf : RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
-            if (bufferTempBufUnionSelector == (0).toChar()) {
-                bufferTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
-            } else if (bufferTempBufUnionSelector == (1).toChar()) {
-                bufferTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
-            } else {
-                throw new Error("One of the branches for bufferTempBuf has to be chosen through deserialisation.")
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<RichEditorSpan> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<RichEditorSpan> = new Array<RichEditorSpan>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                const buffer_TempBufUnionSelector : int32 = retvalDeserializer.readInt8()
+                let buffer_TempBuf : RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
+                if (buffer_TempBufUnionSelector == (0).toChar()) {
+                    buffer_TempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
+                } else if (buffer_TempBufUnionSelector == (1).toChar()) {
+                    buffer_TempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
+                } else {
+                    throw new Error("One of the branches for buffer_TempBuf has to be chosen through deserialisation.")
+                }
+                buffer_[buffer_BufCounterI] = (buffer_TempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
             }
-            buffer[bufferBufCounterI] = (bufferTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+            buffer = buffer_
         }
-        const returnResult : Array<RichEditorSpan> = buffer
+        const returnResult : Array<RichEditorSpan> | undefined = buffer
         return returnResult
     }
-    toStyledString_serialize(value: RichEditorRange): StyledString {
+    toStyledString_serialize(value: RichEditorRange): StyledString | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         RichEditorRange_serializer.write(thisSerializer, value)
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_toStyledString(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : StyledString = StyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : StyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
+        }
+        const returnResult : StyledString | undefined = buffer
+        return returnResult
     }
 }
 export class RichEditorStyledStringControllerInternal {
@@ -4295,10 +4519,10 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         this.setStyledString_serialize(styledString_casted)
         return
     }
-    public getStyledString(): MutableStyledString {
+    public getStyledString(): MutableStyledString | undefined {
         return this.getStyledString_serialize()
     }
-    public getSelection(): RichEditorRange {
+    public getSelection(): RichEditorRange | undefined {
         return this.getSelection_serialize()
     }
     public onContentChanged(listener: StyledStringChangedListener): void {
@@ -4309,15 +4533,26 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
     setStyledString_serialize(styledString: StyledString): void {
         ArkUIGeneratedNativeModule._RichEditorStyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
-    getStyledString_serialize(): MutableStyledString {
+    getStyledString_serialize(): MutableStyledString | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getStyledString(this.peer!.ptr)
-        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MutableStyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
+        }
+        const returnResult : MutableStyledString | undefined = buffer
+        return returnResult
     }
-    getSelection_serialize(): RichEditorRange {
+    getSelection_serialize(): RichEditorRange | undefined {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RichEditorRange = RichEditorRange_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RichEditorRange | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = RichEditorRange_serializer.read(retvalDeserializer)
+        }
+        const returnResult : RichEditorRange | undefined = buffer
         return returnResult
     }
     onContentChanged_serialize(listener: StyledStringChangedListener): void {

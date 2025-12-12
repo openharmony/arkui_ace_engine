@@ -433,19 +433,19 @@ void GridModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& 
 
 void GridModelStatic::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& columnsGap)
 {
-    if (columnsGap && GreatOrEqual(columnsGap.value().Value(), 0.0f)) {
+    if (columnsGap) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, ColumnsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
 void GridModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& rowsGap)
 {
-    if (rowsGap && GreatOrEqual(rowsGap.value().Value(), 0.0f)) {
+    if (rowsGap) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

@@ -15,6 +15,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "ui/properties/ui_material.h"
+
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 

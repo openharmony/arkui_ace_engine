@@ -13,40 +13,32 @@
  * limitations under the License.
  */
 
-import { CoroutineLocalValue, KoalaCallsiteKey } from "@koalaui/common"
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { ArrayState, Equivalent, MutableState, StateManager, StateManagerLocal, ValueTracker, createStateManager } from './State'
 
 /**
  * This class provides an access to the global state manager of the application.
  * @internal
  */
 export class GlobalStateManager {
-    private static localManager = new CoroutineLocalValue<StateManager>()
-    private static sharedManager: StateManager | undefined = undefined
-
-    private static get current(): StateManager | undefined {
-        return GlobalStateManager.GetLocalManager() ?? GlobalStateManager.sharedManager
-    }
-
     /**
-     * The current instance of a global state manager.
-     * Note that it will be recreated after reset.
+     * Returns the state manager for the current worker.
+     * If it is undefined, it is automatically created.
      */
     static get instance(): StateManager {
-        let current = GlobalStateManager.current
+        let current = StateManagerLocal.get()
         if (current === undefined) {
             current = createStateManager()
-            GlobalStateManager.sharedManager = current
+            StateManagerLocal.set(current)
         }
         return current
     }
 
     /**
-     * Drops the current instance to recreate a global state manager.
+     * Resets the state manager for the current worker.
      * @internal
      */
-    static reset() {
-        GlobalStateManager.current?.reset()
+    static reset(): void {
+        StateManagerLocal.get()?.reset()
     }
 
     /**
@@ -54,7 +46,7 @@ export class GlobalStateManager {
      * @internal
      */
     static GetLocalManager(): StateManager | undefined {
-        return GlobalStateManager.localManager.get()
+        return StateManagerLocal.get()
     }
 
     /**
@@ -62,15 +54,7 @@ export class GlobalStateManager {
      * @internal
      */
     static SetLocalManager(manager: StateManager | undefined): void {
-        GlobalStateManager.localManager.set(manager)
-    }
-
-    /**
-     * @return callsite key for a current context or `undefined` for global context
-     * @internal
-     */
-    public static getCurrentScopeId(): KoalaCallsiteKey | undefined {
-        return GlobalStateManager.instance.currentScopeId
+        StateManagerLocal.set(manager)
     }
 }
 
@@ -101,8 +85,10 @@ export function callScheduledCallbacks(manager: StateManager = GlobalStateManage
  * (before the next recomposition and after the current one).
  * @param callback - a function to perform between recompositions
  */
-export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance) {
-    if (callback) manager.scheduleCallback(callback)
+export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance): void {
+    if (callback) {
+        manager.scheduleCallback(callback)
+    }
 }
 
 /**
@@ -130,4 +116,16 @@ export function mutableState<T>(value: T, equivalent?: Equivalent<T>, tracker?: 
  */
 export function arrayState<T>(array?: ReadonlyArray<T>, equivalent?: Equivalent<T>): ArrayState<T> {
     return GlobalStateManager.instance.arrayState<T>(array, undefined, equivalent)
+}
+
+/**
+ * Creates new mutable state in the global state manager.
+ * This state is valid until it is manually detached from the manager.
+ * Note that this state will not be automatically disconnected,
+ * even if this function is called in memo-context.
+ * Always call {@link Disposable.dispose} when the state is not needed to prevent memory leaks.
+ * @see #mutableState
+ */
+export function globalMutableState<T>(value: T): MutableState<T> {
+    return GlobalStateManager.instance.mutableState<T>(value, true)
 }

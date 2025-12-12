@@ -169,6 +169,7 @@ public:
     {
         return false;
     }
+    virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
 
@@ -192,6 +193,10 @@ public:
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
+    }
+    bool ScrollBarIdle()
+    {
+        return !scrollBarProxy_ || scrollBarProxy_->Idle();
     }
     void SetScrollEnabled(bool enabled)
     {
@@ -439,7 +444,8 @@ public:
     {
         auto canOverScroll =
             (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
-                (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+                (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ ||
+                    source == SCROLL_FROM_BAR_OVER_DRAG));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -933,6 +939,7 @@ public:
     {
         return isInitialized_;
     }
+    void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
     void SetCanOverScroll(bool val);
 
@@ -1053,6 +1060,7 @@ private:
     virtual void OnScrollEndCallback() {};
 
     void RegisterScrollBarEventTask();
+    void RegisterScrollBarOverDragEventTask();
     bool OnScrollPosition(double& offset, int32_t source);
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
@@ -1069,7 +1077,7 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
-        const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers);
+        const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
 

@@ -490,7 +490,7 @@ class RenderNode extends Disposable {
       return;
     }
 
-    if (cptrVal == 0) {
+    if (cptrVal === 0) {
       this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     } else {
       this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
@@ -714,12 +714,12 @@ class RenderNode extends Disposable {
     if (this.childrenList.findIndex(element => element === node) !== -1) {
       return;
     }
-    this.childrenList.push(node);
-    node.parentRenderNode = new WeakRef(this);
     let result = getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
+    this.childrenList.push(node);
+    node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null): void{
@@ -730,22 +730,23 @@ class RenderNode extends Disposable {
     if (indexOfNode !== -1) {
       return;
     }
-    child.parentRenderNode = new WeakRef(this);
     let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
     if (indexOfSibling === -1) {
       sibling === null;
     }
     let result = 0;
+    let childrenListStartPosition = 0;
     if (sibling === undefined || sibling === null) {
-      this.childrenList.splice(0, 0, child);
       result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
     } else {
-      this.childrenList.splice(indexOfSibling + 1, 0, child);
+      childrenListStartPosition = indexOfSibling + 1;
       result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
+    this.childrenList.splice(childrenListStartPosition, 0, child);
+    child.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
   removeChild(node: RenderNode) {

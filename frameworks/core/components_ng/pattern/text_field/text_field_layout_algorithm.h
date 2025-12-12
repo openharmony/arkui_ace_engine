@@ -84,7 +84,8 @@ public:
         return inlineMeasureItem_;
     }
 
-    static TextDirection GetTextDirection(const std::u16string& content, TextDirection direction = TextDirection::AUTO);
+    static TextDirection GetTextDirection(const std::u16string& content, TextDirection direction = TextDirection::AUTO,
+        TextDirection textDirection = TextDirection::INHERIT);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -171,6 +172,7 @@ protected:
     bool showPlaceHolder_ = false;
     float preferredHeight_ = 0.0f;
     TextDirection direction_ = TextDirection::AUTO;
+    TextDirection textDirection_ = TextDirection::INHERIT;
 
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
@@ -204,7 +206,7 @@ private:
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
         TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern);
     static void UpdatePlaceholderTextStyleSetTextColor(
-        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& frameNode,
         TextStyle& textStyle, bool isDisabled, bool isTextColorByUser);
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,

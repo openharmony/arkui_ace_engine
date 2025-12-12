@@ -63,8 +63,7 @@ Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
     const auto keyCode = info->GetKeyCode();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(keyCode));
 }
-void SetKeyCodeImpl(Ark_KeyEvent peer,
-                    const Ark_Int32* keyCode)
+void SetKeyCodeImpl(Ark_KeyEvent peer, Ark_Int32 keyCode)
 {
     LOGW("ARKOALA KeyEventAccessor::SetKeyCodeImpl doesn't have sense.");
 }
@@ -99,12 +98,10 @@ Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
     auto id = GetBaseEventAccessor()->getDeviceId(peer);
     return Converter::GetOpt(id).value_or(Converter::ArkValue<Ark_Int32>(-1));
 }
-void SetDeviceIdImpl(Ark_KeyEvent peer,
-                     const Ark_Int32* deviceId)
+void SetDeviceIdImpl(Ark_KeyEvent peer, Ark_Int32 deviceId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(deviceId);
-    peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
+    peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(deviceId));
 }
 Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
 {
@@ -114,29 +111,26 @@ Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
     const auto metaKey = info->GetMetaKey();
     return Converter::ArkValue<Ark_Int32>(metaKey);
 }
-void SetMetaKeyImpl(Ark_KeyEvent peer,
-                    const Ark_Int32* metaKey)
+void SetMetaKeyImpl(Ark_KeyEvent peer, Ark_Int32 metaKey)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(metaKey);
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    const auto convMetaKey = Converter::Convert<int32_t>(*metaKey);
+    const auto convMetaKey = Converter::Convert<int32_t>(metaKey);
     info->SetMetaKey(convMetaKey);
 }
 Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
 {
     return GetBaseEventAccessor()->getTimestamp(peer);
 }
-void SetTimestampImpl(Ark_KeyEvent peer,
-                      const Ark_Int64* timestamp)
+void SetTimestampImpl(Ark_KeyEvent peer, Ark_Int64 timestamp)
 {
     GetBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
         KeyEventInfo* info = peer->GetEventInfo();
         CHECK_NULL_VOID(info);
         info->SetStopPropagation(true);
@@ -167,7 +161,7 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
     CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetBaseInfo();
     CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
             std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
             (const Array_String keys, const Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();

@@ -312,6 +312,12 @@ bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
 {
     return false;
 }
+AcceptFileTypeLists FileSelectorParamOhos::GetAccepts()
+{
+    AcceptFileTypeLists result;
+
+    return result;
+}
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result) {}
 void WebPermissionRequestOhos::Deny() const {}
 std::string WebPermissionRequestOhos::GetOrigin() const
@@ -715,7 +721,7 @@ void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
 void WebDelegate::LoadUrl() {}
-void WebDelegate::OnInactive() {}
+void WebDelegate::OnInactive(bool isOfflineWebOffMainTree) {}
 void WebDelegate::OnActive() {}
 void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
@@ -918,6 +924,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 #else
 #endif
 }
+void WebDelegate::OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventInfo> dataInfo) {}
 void WebDelegate::OnActivateContent() {}
 void WebDelegate::OnWindowExit() {}
 void WebDelegate::OnPageVisible(const std::string& url) {}
@@ -1078,7 +1085,8 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
     }
     return -1;
 }
-void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
+void WebDelegate::NotifyAutoFillViewData(
+    const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
@@ -1197,6 +1205,7 @@ void WebDelegate::JavaScriptOnDocumentEnd() {}
 
 void WebDelegate::SetJavaScriptItemsByOrder(
     const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems,
     const ScriptItemType& type,
     const ScriptItemsByOrder& scriptItemsByOrder) {}
 void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
@@ -1348,6 +1357,10 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& conte
 {
     return "";
 }
+bool WebDelegate::ProcessAutoFillOnPaste()
+{
+    return false;
+}
 bool WebDelegate::CloseImageOverlaySelection()
 {
     return false;
@@ -1449,6 +1462,7 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}
@@ -1457,6 +1471,8 @@ bool WebDelegate::IsPcMode()
 {
     return g_setReturnStatus == STATUS_TRUE;
 }
+void WebDelegate::OnTextSelectionChange(const std::string& selectionTex, bool isFromOverlay) {}
+std::string WebDelegate::GetLastSelectionText() const { return ""; }
 void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,

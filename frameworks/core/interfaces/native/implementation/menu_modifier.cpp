@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -48,32 +49,6 @@ template<>
 BorderRadiusesType Convert(const Ark_BorderRadiuses& src)
 {
     return Converter::Convert<BorderRadiusProperty>(src);
-}
-
-template<>
-V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
-{
-    auto dst = V2::ItemDivider{}; // this struct is initialized by default
-    auto colorOpt = OptConvert<Color>(src.color);
-    if (colorOpt.has_value()) {
-        dst.color = colorOpt.value();
-    }
-    auto strokeWidth = OptConvert<Dimension>(src.strokeWidth);
-    Validator::ValidateNonNegative(strokeWidth);
-    if (strokeWidth.has_value()) {
-        dst.strokeWidth = strokeWidth.value();
-    }
-    auto startMargin = OptConvert<Dimension>(src.startMargin);
-    Validator::ValidateNonNegative(startMargin);
-    if (startMargin.has_value()) {
-        dst.startMargin = startMargin.value();
-    }
-    auto endMargin = OptConvert<Dimension>(src.endMargin);
-    Validator::ValidateNonNegative(endMargin);
-    if (endMargin.has_value()) {
-        dst.endMargin = endMargin.value();
-    }
-    return dst;
 }
 
 template<>
@@ -146,14 +121,56 @@ void SetRadiusImpl(Ark_NativePointer node,
         }
     }
 }
+
+Dimension ResetItemDividerDimension(DividerMode mode)
+{
+    CalcDimension val;
+    val.Reset();
+    val.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
+    return val;
+}
+Dimension ResetItemGroupDividerDimension()
+{
+    CalcDimension val;
+    val.Reset();
+    val.SetUnit(DimensionUnit::INVALID);
+    return val;
+}
+V2::ItemDivider ConvertDivider(const Ark_DividerStyleOptions& src, DividerMode mode, bool isGroupDivider)
+{
+    auto dst = isGroupDivider
+        ? V2::ItemDivider {
+            .strokeWidth = Dimension(0.0f, DimensionUnit::INVALID),
+            .color = Color::FOREGROUND,
+        }
+        : V2::ItemDivider{}; // this struct is initialized by default
+    auto colorOpt = Converter::OptConvert<Color>(src.color);
+    if (colorOpt.has_value()) {
+        dst.color = colorOpt.value();
+    }
+    auto defaultDimension = isGroupDivider
+        ? ResetItemGroupDividerDimension()
+        : ResetItemDividerDimension(mode);
+    auto strokeWidth = Converter::OptConvert<Dimension>(src.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    dst.strokeWidth = strokeWidth.value_or(defaultDimension);
+    auto startMargin = Converter::OptConvert<Dimension>(src.startMargin);
+    Validator::ValidateNonNegative(startMargin);
+    dst.startMargin = startMargin.value_or(defaultDimension);
+    auto endMargin = Converter::OptConvert<Dimension>(src.endMargin);
+    Validator::ValidateNonNegative(endMargin);
+    dst.endMargin = endMargin.value_or(defaultDimension);
+    return dst;
+}
+
 void SetMenuItemDividerImpl(Ark_NativePointer node,
                             const Opt_DividerStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
     auto mode = Converter::OptConvert<DividerMode>(*value);
+    auto divider = ConvertDivider(value->value, mode.value_or(DividerMode::FLOATING_ABOVE_MENU), false);
     MenuModelStatic::SetItemDivider(frameNode, divider, mode);
 }
 void SetMenuItemGroupDividerImpl(Ark_NativePointer node,
@@ -162,8 +179,8 @@ void SetMenuItemGroupDividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
     auto mode = Converter::OptConvert<DividerMode>(*value);
+    auto divider = ConvertDivider(value->value, mode.value_or(DividerMode::FLOATING_ABOVE_MENU), true);
     MenuModelStatic::SetItemGroupDivider(frameNode, divider, mode);
 }
 void SetSubMenuExpandingModeImpl(Ark_NativePointer node,
@@ -172,6 +189,18 @@ void SetSubMenuExpandingModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvertPtr<SubMenuExpandingMode>(value));
+}
+void SetSubMenuExpandSymbolImpl(Ark_NativePointer node, const Opt_SymbolGlyphModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto expandSymbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
+    if (expandSymbol && *expandSymbol) {
+        MenuModelStatic::SetExpandSymbol(frameNode, (*expandSymbol)->symbolApply);
+        PeerUtils::DestroyPeer(*expandSymbol);
+    } else {
+        MenuModelStatic::SetExpandSymbol(frameNode, nullptr);
+    }
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()
@@ -185,6 +214,7 @@ const GENERATED_ArkUIMenuModifier* GetMenuModifier()
         MenuAttributeModifier::SetMenuItemDividerImpl,
         MenuAttributeModifier::SetMenuItemGroupDividerImpl,
         MenuAttributeModifier::SetSubMenuExpandingModeImpl,
+        MenuAttributeModifier::SetSubMenuExpandSymbolImpl,
     };
     return &ArkUIMenuModifierImpl;
 }

@@ -74,6 +74,13 @@ enum class ViewportFit {
     COVER,
 };
 
+enum class NavigationPolicy {
+    NEW_POPUP = 0,
+    NEW_WINDOW = 1,
+    NEW_BACKGROUND_TAB = 2,
+    NEW_FOREGROUND_TAB = 3,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType);
 public:
@@ -127,6 +134,13 @@ private:
     int source_ = 0;
 };
 
+struct AcceptFileType {
+    std::string mimeType;
+    std::vector<std::string> acceptType;
+};
+using AcceptFileTypeList = std::vector<AcceptFileType>;
+using AcceptFileTypeLists = std::vector<AcceptFileTypeList>;
+
 class WebFileSelectorParam : public AceType {
     DECLARE_ACE_TYPE(WebFileSelectorParam, AceType);
 public:
@@ -142,6 +156,7 @@ public:
     virtual std::string GetDefaultPath() = 0;
     virtual std::vector<std::string> GetDescriptions() = 0;
     virtual bool IsAcceptAllOptionExcluded() = 0;
+    virtual AcceptFileTypeLists GetAccepts() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {
@@ -932,6 +947,24 @@ private:
     std::string url_;
 };
 
+class ACE_EXPORT TextSelectionChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextSelectionChangedEvent, BaseEventInfo);
+
+public:
+    explicit TextSelectionChangedEvent(const std::string& selectionText)
+        : BaseEventInfo("TextSelectionChangedEvent"), selectionText_(selectionText)
+    {}
+    ~TextSelectionChangedEvent() = default;
+
+    const std::string& GetselectionText() const
+    {
+        return selectionText_;
+    }
+
+private:
+    std::string selectionText_;
+};
+
 class ACE_EXPORT DetectedBlankScreenEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(DetectedBlankScreenEvent, BaseEventInfo);
 
@@ -960,8 +993,40 @@ public:
 
 private:
     std::string url_;
-    int32_t blankScreenReason_ = 0;
-    int32_t detectedContentfulNodesCount_ = 0;
+    int32_t blankScreenReason_;
+    int32_t detectedContentfulNodesCount_;
+};
+
+class ACE_EXPORT FirstScreenPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstScreenPaintEvent, BaseEventInfo);
+
+public:
+    FirstScreenPaintEvent(
+        const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime)
+        : BaseEventInfo("FirstScreenPaintEvent"), url_(url), navigationStartTime_(navigationStartTime),
+          firstScreenPaintTime_(firstScreenPaintTime)
+    {}
+    ~FirstScreenPaintEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetFirstScreenPaintTime() const
+    {
+        return firstScreenPaintTime_;
+    }
+
+private:
+    std::string url_;
+    int64_t navigationStartTime_;
+    int64_t firstScreenPaintTime_;
 };
 
 class ACE_EXPORT PdfLoadEvent : public BaseEventInfo {
@@ -1784,6 +1849,77 @@ private:
     RefPtr<WebWindowNewHandler> handler_;
 };
 
+class ACE_EXPORT WebWindowNewExtEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebWindowNewExtEvent, BaseEventInfo);
+
+public:
+    WebWindowNewExtEvent(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+        const RefPtr<WebWindowNewHandler>& handler, int x, int y, int width, int height,
+        NavigationPolicy navigationPolicy)
+        : BaseEventInfo("WebWindowNewExtEvent"), targetUrl_(targetUrl), isAlert_(isAlert),
+          isUserTrigger_(isUserTrigger), handler_(handler), x_(x), y_(y), width_(width), height_(height),
+          navigationPolicy_(navigationPolicy)
+    {}
+
+    ~WebWindowNewExtEvent() = default;
+
+    const std::string& GetTargetUrl() const
+    {
+        return targetUrl_;
+    }
+
+    bool IsAlert() const
+    {
+        return isAlert_;
+    }
+
+    bool IsUserTrigger() const
+    {
+        return isUserTrigger_;
+    }
+
+    const RefPtr<WebWindowNewHandler>& GetWebWindowNewHandler() const
+    {
+        return handler_;
+    }
+
+    int GetHeight() const
+    {
+        return height_;
+    }
+
+    int GetWidth() const
+    {
+        return width_;
+    }
+
+    int GetX() const
+    {
+        return x_;
+    }
+
+    int GetY() const
+    {
+        return y_;
+    }
+
+    NavigationPolicy GetNavigationPolicy() const
+    {
+        return navigationPolicy_;
+    }
+
+private:
+    std::string targetUrl_;
+    bool isAlert_;
+    bool isUserTrigger_;
+    RefPtr<WebWindowNewHandler> handler_;
+    int x_;
+    int y_;
+    int width_;
+    int height_;
+    NavigationPolicy navigationPolicy_;
+};
+
 class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebWindowExitEvent, BaseEventInfo);
 
@@ -2348,6 +2484,27 @@ private:
     int32_t newState_ = 0;
 };
 
+class ACE_EXPORT MicrophoneCaptureStateEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(MicrophoneCaptureStateEvent, BaseEventInfo);
+
+public:
+    explicit MicrophoneCaptureStateEvent(int32_t originalState, int32_t newState) :
+        BaseEventInfo("MicrophoneCaptureState"), originalState_(originalState), newState_(newState) {}
+    ~MicrophoneCaptureStateEvent() = default;
+
+    int32_t GetOriginalMicrophoneCaptureState() const
+    {
+        return originalState_;
+    }
+
+    int32_t GetNewMicrophoneCaptureState() const
+    {
+        return newState_;
+    }
+private:
+    int32_t originalState_ = 0;
+    int32_t newState_ = 0;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

@@ -42,8 +42,8 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetTextDirection(const JSCallbackInfo& info);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
-    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetCaretStyle(const JSCallbackInfo& info);
@@ -152,16 +152,19 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void ParseOnIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
     static void ParseOffIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
     static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
-    static void UnregisterResource(const std::string& key);
     static void SetScrollBarColor(const JSCallbackInfo& info);
     static Local<JSValueRef> JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info);
     static IMEAttachCallback ParseAndCreateAttachCallback(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

@@ -933,6 +933,21 @@ void ResetBindToNestedScrollable(ArkUINodeHandle node)
     NavDestinationModelNG::UpdateBindingWithScrollable(frameNode, std::move(unbindFunc));
 }
 
+void SetNavDestinationBackButtonText(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr textResource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto resource = AceType::Claim(reinterpret_cast<ResourceObject*>(textResource));
+    NavDestinationModelNG::SetBackButtonTextResource(frameNode, text, resource);
+}
+
+void ResetNavDestinationBackButtonText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::ResetResObj(frameNode, NavDestinationPatternType::TITLE_BAR,
+        "navDestination.backButtonIcon.accessibilityText");
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -1012,6 +1027,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetBindToScrollable = ResetBindToScrollable,
         .setBindToNestedScrollable = SetBindToNestedScrollable,
         .resetBindToNestedScrollable = ResetBindToNestedScrollable,
+        .setNavDestinationBackButtonText = SetNavDestinationBackButtonText,
+        .resetNavDestinationBackButtonText = ResetNavDestinationBackButtonText,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -411,7 +411,7 @@ HWTEST_F(GaugeModifierTest, setColorsTestDefaultValues, TestSize.Level1)
 
 namespace {
 const auto COLORS_ENUM_RED = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED);
-const auto COLORS_NUMBER_GREEN = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xF000FF00);
+const auto COLORS_NUMBER_GREEN = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xF000FF00);
 const auto COLORS_STRING_BLUE = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("rgba(0, 0, 255, 0.5)");
 const auto COLORS_RES_BY_NAME = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(
     CreateResource(RES_COLOR_NAME));
@@ -1194,15 +1194,5 @@ HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestInvalidValues, TestSize.Level
         expectedStr = ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
-}
-
-/*
- * @tc.name: setContentModifierTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GaugeModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
-{
-    // CustomObjects is not implemented yet!
 }
 } // namespace OHOS::Ace::NG

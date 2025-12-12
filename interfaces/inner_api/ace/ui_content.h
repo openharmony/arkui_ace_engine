@@ -57,7 +57,7 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSNode;
-class RSCanvasNode;
+class RSWindowKeyFrameNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
@@ -101,6 +101,7 @@ class IRemoteObject;
 
 namespace OHOS::Ace {
 struct AccessibilityParentRectInfo;
+struct NavigateChangeInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Platform {
@@ -132,7 +133,7 @@ public:
     static UIContent* GetUIContent(int32_t instanceId);
     static std::string GetCurrentUIStackInfo();
     static std::unique_ptr<UIContent> CreateWithAniEnv(OHOS::AbilityRuntime::Context* context, ani_env* env);
-
+    static int32_t GetUIContentWindowID(int32_t instanceId);
     virtual ~UIContent() = default;
 
     // UI content life-cycles
@@ -514,10 +515,10 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) {}
+    virtual void SetForceSplitEnable(bool isForceSplit) {}
 
-    virtual void SetForceSplitConfig(const std::string& configJsonStr) {}
+    virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                                     const std::optional<AppForceSplitConfig>& appConfig) {}
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 
@@ -586,10 +587,10 @@ public:
     virtual void EnableContainerModalCustomGesture(bool enable) {};
 
     virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
-    virtual void AddKeyFrameCanvasNodeCallback(const std::function<
-        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+    virtual void AddKeyFrameNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
-    virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
+    virtual void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>&) {};
 
     // intent framework
     virtual void SetIntentParam(const std::string& intentInfoSerialized,
@@ -600,6 +601,11 @@ public:
         return "";
     }
     virtual void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) {}
+    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo& from,
+        const NavigateChangeInfo& to)>&& callback)
+    {
+        return -1;
+    }
     virtual UIContentErrorCode InitializeWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
     {
@@ -635,6 +641,7 @@ public:
     {
         return UIContentErrorCode::NO_ERRORS;
     }
+
 };
 
 } // namespace OHOS::Ace

@@ -265,7 +265,8 @@ public:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
 
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
@@ -619,6 +620,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
 
     bool IsFocus() const
     {
@@ -635,6 +637,9 @@ public:
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void RegisterMenuLifeCycleCallback();
+    void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
+    void UninitMenuLifeCycleCallback();
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void OnQuickMenuDismissed();
@@ -692,6 +697,7 @@ public:
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
+    bool RequestAutoFill(bool& isPopup, bool isNewPassWord, const AceAutoFillTriggerType& triggerType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
@@ -710,13 +716,13 @@ public:
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     void UpdateJavaScriptOnDocumentStartByOrder();
     void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void UpdateJavaScriptOnHeadReadyByOrder();
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -1000,6 +1006,10 @@ public:
     void OnStatusBarClick() override;
     void OnBackToTopUpdate(bool isBackToTop);
 
+    bool IsTextSelectionEnable()
+    {
+        return isTextSelectionEnable_;
+    }
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1014,6 +1024,7 @@ private:
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
 
+    void FakePageNodeInfo();
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     napi_env CreateEnv();
     bool CreatePip(int status, napi_env env, bool& init, uint32_t &pipController, const PipInfo &pipInfo);
@@ -1048,6 +1059,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void CleanupWebPatternResource(int32_t webId);
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -1129,6 +1141,7 @@ private:
     void OnRotateRenderEffectUpdate(WebRotateEffect effect);
     void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
+    void OnEnableAutoFillUpdate(bool isEnabled);
 
     int GetWebId();
 
@@ -1278,6 +1291,8 @@ private:
     bool IsDialogNested();
     void SelectCancel() const;
     bool IsSelectInfoValid();
+    bool CheckShouldBlockMouseEvent(const MouseInfo& info);
+    void SupplementMouseEventsIfNeeded(const MouseInfo& info, int32_t clickNum, std::vector<int32_t> pressedCodes);
     std::optional<RectF> GetViewPort() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -1450,6 +1465,9 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;
+    std::optional<ScriptRegexItems> onDocumentStartScriptRegexItems_;
+    std::optional<ScriptRegexItems> onDocumentEndScriptRegexItems_;
+    std::optional<ScriptRegexItems> onHeadReadyScriptRegexItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
@@ -1457,6 +1475,7 @@ private:
     bool isAttachedToMainTree_ = false;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
+    int32_t offlineWebNodeId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     TouchEventInfo touchEventInfo_{"touchEvent"};
@@ -1563,6 +1582,15 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    bool isTextSelectionEnable_ = false;
+    bool isMenuShownFromWeb_ = false;
+    bool isLastEventMenuClose_ = false;
+    bool isHoverNWeb_ = false;
+    bool isUpSupplementDown_ = false;
+    bool isSupplementMouseLeave_ = false;
+
+    OHNativeWindow* pipNativeWindow_ = nullptr;
+    std::mutex pipNativeWindowMutex_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

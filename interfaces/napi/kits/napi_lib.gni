@@ -24,6 +24,7 @@ common_napi_libs = [
   "arkui/observer",
   "arkui/performancemonitor",
   "arkui/text_menu_controller",
+  "arkui/ui_material",
   "configuration",
   "device",
   "font",

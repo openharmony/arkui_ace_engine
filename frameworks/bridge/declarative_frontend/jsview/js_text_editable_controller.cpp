@@ -31,12 +31,14 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentLineCount", &JSTextEditableController::GetTextContentLinesNum);
     JSClass<JSTextEditableController>::CustomMethod("addText", &JSTextEditableController::AddText);
+    JSClass<JSTextEditableController>::CustomMethod("scrollToVisible", &JSTextEditableController::ScrollToVisible);
     JSClass<JSTextEditableController>::CustomMethod(
         "setStyledPlaceholder", &JSTextEditableController::SetPlaceholderStyledString);
     JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
     JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
     JSClass<JSTextEditableController>::CustomMethod("clearPreviewText", &JSTextEditableController::ClearPreviewText);
     JSClass<JSTextEditableController>::CustomMethod("getText", &JSTextEditableController::GetText);
+    JSClass<JSTextEditableController>::Method("deleteBackward", &JSTextEditableController::DeleteBackward);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
     JSClass<JSTextEditableController>::Bind(
         globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
@@ -298,6 +300,32 @@ void JSTextEditableController::GetText(const JSCallbackInfo& info)
     }
 }
 
+void JSTextEditableController::ScrollToVisible(const JSCallbackInfo& info)
+{
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+    if (info.Length() == 1) {
+        const auto& optionVal = info[0];
+        if (optionVal->IsObject()) {
+            JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(optionVal);
+            JSRef<JSVal> startVal = optionObj->GetProperty("start");
+            if (startVal->IsNumber()) {
+                start = startVal->ToNumber<int32_t>();
+            }
+            JSRef<JSVal> endVal = optionObj->GetProperty("end");
+            if (endVal->IsNumber()) {
+                end = endVal->ToNumber<int32_t>();
+            }
+        }
+    }
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->ScrollToVisible({ .start = start, .end = end });
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "ScrollToVisible: The JSTextEditableController is NULL");
+    }
+}
+
 void JSTextEditableController::StopEditing()
 {
     auto controller = controllerWeak_.Upgrade();
@@ -336,4 +364,15 @@ void JSTextEditableController::ClearPlaceholderStyledString()
 {
     placeholderStyledString_ = nullptr;
 }
+
+void JSTextEditableController::DeleteBackward()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->DeleteBackward();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "DeleteBackward: The JSTextEditableController is null");
+    }
+}
+
 } // namespace OHOS::Ace::Framework

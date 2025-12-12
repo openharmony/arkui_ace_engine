@@ -38,7 +38,9 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -2761,6 +2763,15 @@ void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
     gestureHub->SetNodeClickDistance(clickDistance);
 }
 
+double ViewAbstract::GetClickDistance(FrameNode* frameNode)
+{
+    auto defaultValue = std::numeric_limits<double>::infinity();
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultValue);
+    return gestureHub->GetClickDistance();
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -3128,9 +3139,19 @@ void ViewAbstract::SetIsMirrorable(bool isMirrorable)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable);
 }
 
+void ViewAbstract::SetIsMirrorable(FrameNode* frameNode, bool isMirrorable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable, frameNode);
+}
+
 void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
+
+void ViewAbstract::SetAlign(FrameNode* frameNode, std::string localizedAlignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LocalizedAlignment, localizedAlignment, frameNode);
 }
 
 void ViewAbstract::SetLayoutGravity(FrameNode* frameNode, Alignment alignment)
@@ -4824,10 +4845,6 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -5589,6 +5606,75 @@ void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen:
     target->UpdateCompositingFilter(compositingFilter);
 }
 
+void ViewAbstract::SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilter);
+}
+
+void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
+}
+
+void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetSystemMaterial(frameNode, material);
+}
+
+void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+    if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
+        auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
+        auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+        auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+            if (!materialTheme) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
+                return;
+            }
+            auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+            if (!params) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
+                return;
+            }
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        };
+        if (SystemProperties::ConfigChangePerform()) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            updateFunc(nullptr);
+            if (materialType != MaterialType::NONE) {
+                RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+                pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+            } else {
+                pattern->RemoveResObj("viewAbstract.uiMaterial");
+            }
+            return;
+        }
+        updateFunc(nullptr);
+    }
+}
+
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5848,6 +5934,11 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    if (strategy == ForegroundColorStrategy::CONTRAST) {
+        BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::CONTRAST, 500);
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true); // to prevent inheriting from other foreground strategy
+        return;
+    }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
@@ -5983,6 +6074,15 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
+void ViewAbstract::SetExcludeFromRenderGroup(bool exclude)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, exclude);
+}
+
 void ViewAbstract::SetRenderFit(RenderFit renderFit)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5991,12 +6091,25 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 
-void ViewAbstract::SetCornerApplyType(CornerApplyType cornerApplyType)
+void ViewAbstract::SetRenderStrategy(RenderStrategy renderStrategy)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(CornerApplyType, cornerApplyType);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_RENDER_CONTEXT(RenderStrategy, renderStrategy);
+}
+
+void ViewAbstract::SetRenderStrategy(FrameNode* frameNode, RenderStrategy renderStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderStrategy, renderStrategy, frameNode);
+}
+
+bool ViewAbstract::IsRenderStrategyValid(RenderStrategy renderStrategy)
+{
+    return renderStrategy >= RenderStrategy::FAST && renderStrategy < RenderStrategy::MAX;
 }
 
 void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
@@ -6465,6 +6578,9 @@ void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr
 
 void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)
 {
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
@@ -6539,10 +6655,6 @@ void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gr
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -6757,6 +6869,11 @@ void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderGroup, isRenderGroup, frameNode);
     CHECK_NULL_VOID(frameNode);
     frameNode->SetApplicationRenderGroupMarked(true);
+}
+
+void ViewAbstract::SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ExcludeFromRenderGroup, exclude, frameNode);
 }
 
 void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
@@ -7026,6 +7143,7 @@ void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
 void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetFocusable, frameNode, focusable);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
@@ -7905,6 +8023,15 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
         CalcDimensionRect responseRect(responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
         responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
     }
+    if (responseRegions.empty()) {
+        auto toolType = NG::ResponseRegionSupportedTool::ALL;
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+        responseRegionMap[toolType].push_back(dimenRect);
+    }
     SetResponseRegionList(frameNode, responseRegionMap);
 }
 
@@ -7996,6 +8123,13 @@ void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEven
     gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
+bool ViewAbstract::GetMonopolizeEvents(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    return gestureHub->GetMonopolizeEvents();
+}
+
 void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -8017,6 +8151,14 @@ void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEff
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEffect(hoverEffect);
+}
+
+HoverEffectType ViewAbstract::GetHoverEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::HoverEffectType::AUTO);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_RETURN(eventHub, OHOS::Ace::HoverEffectType::AUTO);
+    return eventHub->GetHoverEffect();
 }
 
 void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
@@ -9616,6 +9758,42 @@ void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focu
     focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
+std::string ViewAbstract::GetFocusScopeId(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, "");
+    auto focusId = focusHub->GetFocusScopeId();
+    return focusId;
+}
+
+bool ViewAbstract::GetIsGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, 0);
+    auto isGroup = focusHub->GetIsFocusGroup();
+    return isGroup;
+}
+
+bool ViewAbstract::GetArrowKeyStepOut(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, 1);
+    auto arrowKeyStepOut = focusHub->GetArrowKeyStepOut();
+    return arrowKeyStepOut;
+}
+
+uint32_t ViewAbstract::GetFocusScopePriority(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, -1);
+    auto scopePriority = static_cast<uint32_t>(focusHub->GetFocusPriority());
+    return scopePriority;
+}
+
 void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
     const uint32_t focusPriority)
 {
@@ -9685,9 +9863,25 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
+}
+
+void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -9703,9 +9897,25 @@ void ViewAbstract::ResetMarkAnchorStart()
     layoutProperty->ResetMarkAnchorStart();
 }
 
+void ViewAbstract::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
+}
+
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -10189,4 +10399,60 @@ void ViewAbstract::CheckMainThread()
     }
 }
 
+ChainWeightPair ViewAbstract::GetChainWeight(FrameNode* frameNode)
+{
+    ChainWeightPair chainWeightPair(0.0f, 0.0f);
+    CHECK_NULL_RETURN(frameNode, chainWeightPair);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, chainWeightPair);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, chainWeightPair);
+    chainWeightPair = flexItemProperty->GetChainWeight().value_or(chainWeightPair);
+    return chainWeightPair;
+}
+
+Alignment ViewAbstract::GetLayoutGravity(FrameNode* frameNode)
+{
+    Alignment value = Alignment::CENTER;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetPositionProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetLayoutGravity();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+BorderWidthProperty ViewAbstract::GetDashGap(FrameNode* frameNode)
+{
+    Dimension defaultDimension(-1);
+    BorderWidthProperty dashGap = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    CHECK_NULL_RETURN(frameNode, dashGap);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, dashGap);
+    return target->GetDashGapValue(dashGap);
+}
+
+BorderWidthProperty ViewAbstract::GetDashWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimension(-1);
+    BorderWidthProperty dashWidth = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    CHECK_NULL_RETURN(frameNode, dashWidth);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, dashWidth);
+    return target->GetDashWidthValue(dashWidth);
+}
+
+RenderStrategy ViewAbstract::GetRenderStrategy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RenderStrategy::FAST);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, RenderStrategy::FAST);
+    return target->GetRenderStrategyValue(RenderStrategy::FAST);
+}
 } // namespace OHOS::Ace::NG

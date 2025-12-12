@@ -179,6 +179,7 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
         }
         DisableLayoutPolicy(child);
         auto adjustedChildConstraint = GetChildConstrain(layoutWrapper, childConstraint, index);
+        index++;
         if (IsChildMatchParent(child)) {
             layoutPolicyChildren_.emplace_back(child, adjustedChildConstraint);
             continue;
@@ -190,7 +191,6 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
         crossSize += childHeight;
         childMaxWidth = childWidth > childMaxWidth ? childWidth : childMaxWidth;
         childMaxHeight = childHeight > childMaxHeight ? childHeight : childMaxHeight;
-        index++;
     }
 
     const auto splitHeightFloat = static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -707,7 +707,7 @@ void LinearSplitLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* la
         }
         child->Measure(layoutConstraint);
     }
-    if (host && host->GetContext() && GetNeedPostponeForIgnore() && !bundle.first.empty()) {
+    if (host && host->GetContext() && !bundle.first.empty()) {
         auto context = host->GetContext();
         host->SetDelaySelfLayoutForIgnore();
         bundle.second = host;

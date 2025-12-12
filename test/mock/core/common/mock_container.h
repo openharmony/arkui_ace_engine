@@ -23,7 +23,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-class MockContainer final : public Container {
+class MockContainer : public Container {
     DECLARE_ACE_TYPE(MockContainer, Container);
 
 public:
@@ -139,7 +139,8 @@ public:
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
 
     ResourceConfiguration GetResourceConfiguration() const override
     {
@@ -147,6 +148,11 @@ public:
     }
 
     static bool IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node);
+
+    bool IsHostMainWindow() const override
+    {
+        return true;
+    }
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
@@ -169,6 +175,8 @@ public:
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
+    MOCK_METHOD(void, LoadCompleteManagerStartCollect, (const std::string& url), (override));
+    MOCK_METHOD(void, LoadCompleteManagerStopCollect, (), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 

@@ -23,6 +23,8 @@ import { SizeOptions } from 'arkui/framework';
 import { AnimateParam } from 'arkui/framework';
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
 import { Context, PointerStyle, PixelMap } from '#external';
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
@@ -33,11 +35,11 @@ import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { default as mediaquery } from '@ohos/mediaquery';
+import { default as mediaquery } from '@ohos.mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
-import { TextPickerDialogOptions } from 'arkui/framework';
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
 import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
@@ -54,6 +56,8 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { int32, int64 } from "@koalaui/common";
 import { KPointer } from '@koalaui/interop';
+import { TabsController } from 'arkui/component/tabs';
+import { Scroller } from 'arkui/component/scroll';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -220,6 +224,9 @@ export class FocusController {
     }
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
         throw Error("setKeyProcessingMode not implemented in FocusController!")
+    }
+    public isActive(): boolean {
+        throw Error('isActive not implemented in FocusController!')
     }
 }
 
@@ -577,8 +584,8 @@ export class UIContext {
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         throw Error("setFrameCallback not implemented in UIContext!")
     }
     runScopedTask(callback: () => void): void {
@@ -590,7 +597,7 @@ export class UIContext {
     postFrameCallback(frameCallback: FrameCallback): void {
         throw Error("postFrameCallback not implemented in UIContext!")
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         throw Error("postDelayedFrameCallback not implemented in UIContext!")
     }
     public getUIInspector(): UIInspector {
@@ -629,7 +636,7 @@ export class UIContext {
         throw Error("showTimePickerDialog not implemented in UIContext!")
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
         throw Error("showTextPickerDialog not implemented in UIContext!")
     }
 
@@ -637,7 +644,7 @@ export class UIContext {
         throw Error("showDatePickerDialog not implemented in UIContext!")
     }
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
@@ -653,28 +660,31 @@ export class UIContext {
     public getWindowName(): string | undefined {
         throw Error("getWindowName not implemented in UIContext!")
     }
+    public getWindowId(): int32 | undefined {
+        return undefined;
+    }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
         throw Error("vp2px not implemented in UIContext!")
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
         throw Error("px2vp not implemented in UIContext!")
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
         throw Error("fp2px not implemented in UIContext!")
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
         throw Error("px2fp not implemented in UIContext!")
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
         throw Error("lpx2px not implemented in UIContext!")
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
         throw Error("px2lpx not implemented in UIContext!")
     }
 
@@ -683,6 +693,12 @@ export class UIContext {
     }
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
+    }
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        return UIContextImpl.createUIContextWithoutWindow(context)
+    }
+    static destroyUIContextWithoutWindow() {
+        UIContextImpl.destroyUIContextWithoutWindow()
     }
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
@@ -714,10 +730,32 @@ export class UIContext {
     public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
         throw Error("closeBindSheet not implemented in UIContext!")
     }
+
+    public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("bindTabsToScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("unbindTabsFromScrollable not implemented in UIContext!")
+    }
+
+    public bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("bindTabsToNestedScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
+    }
+    
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
-    onFrame(frameTimeInNano: number): void {}
-    onIdle(timeLeftInNano: number): void {}
+    onFrame(frameTimeInNano: long): void {}
+    onIdle(timeLeftInNano: long): void {}
 }
 
 export class UIObserver {
@@ -938,7 +976,10 @@ export class UIObserver {
         }
     }
 }
-export interface PageInfo {}
+export interface PageInfo {
+        routerPageInfo?: uiObserver.RouterPageInfo;
+        navDestinationInfo?: uiObserver.NavDestinationInfo;
+}
 export interface ContentCoverController {}
 export class DynamicSyncScene {
     private range: ExpectedFrameRateRange;

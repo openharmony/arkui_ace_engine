@@ -26,6 +26,20 @@
 namespace OHOS::Ace::NG {
 namespace {
 struct SelectOverlayRightClickMenuLayoutHelper {
+    static bool IsAdjustLayoutConstraints(RefPtr<MenuPattern>& outterMenuPattern, RefPtr<FrameNode>& menuWrapperNode,
+        const RefPtr<LayoutWrapper>& child)
+    {
+        bool rightClickMenuNeedAdjust = menuWrapperNode->GetInspectorIdValue("") == SelectOverlayRrightClickMenuWrapper
+            && outterMenuPattern->IsSelectOverlayRightClickMenu() &&
+            child->GetHostTag() == V2::RELATIVE_CONTAINER_ETS_TAG;
+        bool extensionMenuNeedAdjust = outterMenuPattern->IsSelectOverlayExtensionMenu() &&
+            child->GetHostTag() == V2::RELATIVE_CONTAINER_ETS_TAG;
+
+        if (rightClickMenuNeedAdjust || extensionMenuNeedAdjust) {
+            return true;
+        }
+        return false;
+    }
     static void AdjustLayoutConstraints(LayoutConstraintF& constrainMinWidth,
         const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
     {
@@ -41,9 +55,7 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         CHECK_NULL_VOID(menuWrapperNode);
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
-        if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
-            !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
-            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+        if (!IsAdjustLayoutConstraints(outterMenuPattern, menuWrapperNode, child)) {
             return;
         }
         childLayoutProperty->UpdateUserDefinedIdealSize(
@@ -80,9 +92,7 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         CHECK_NULL_VOID(menuWrapperNode);
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
-        if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
-            !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
-            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+        if (!IsAdjustLayoutConstraints(outterMenuPattern, menuWrapperNode, child)) {
             return;
         }
         childLayoutProperty->UpdateUserDefinedIdealSize(
@@ -503,7 +513,8 @@ bool MultiMenuLayoutAlgorithm::UpdateSelectOverlayMenuMinWidth(
     CHECK_NULL_RETURN(pattern, false);
     auto mainMenuPattern = pattern->GetMainMenuPattern();
     CHECK_NULL_RETURN(mainMenuPattern, false);
-    CHECK_NULL_RETURN(mainMenuPattern->IsSelectOverlayRightClickMenu(), false);
+    CHECK_NULL_RETURN(mainMenuPattern->IsSelectOverlayRightClickMenu() ||
+        mainMenuPattern->IsSelectOverlayExtensionMenu(), false);
     auto menuWrapper = pattern->GetMenuWrapper();
     CHECK_NULL_RETURN(menuWrapper, false);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();

@@ -220,9 +220,26 @@ void PagePattern::OnAttachToMainTree()
     if (delegate) {
         index = delegate->GetCurrentPageIndex();
         GetPageInfo()->SetPageIndex(index);
+    } else {
+        SetPageIndexForStatic();
     }
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+}
+
+void PagePattern::SetPageIndexForStatic()
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    if (delegate->GetType() != FrontendType::ARK_TS) {
+        return;
+    }
+    int32_t index = delegate->GetCurrentPageIndex();
+    auto pageInfo = GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    pageInfo->SetPageIndex(index);
 }
 
 void PagePattern::OnDetachFromMainTree()
@@ -888,7 +905,11 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
-    if (!CheckEnableCustomNodeDel()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->IsCustomNodeDeleteInTransition()) {
         return;
     }
 

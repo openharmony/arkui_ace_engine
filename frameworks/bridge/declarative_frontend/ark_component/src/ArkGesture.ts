@@ -35,6 +35,7 @@ class GestureHandler {
 class TapGestureHandler extends GestureHandler {
     fingers?: number;
     count?: number;
+    distanceThreshold?: number;
     limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
@@ -45,6 +46,7 @@ class TapGestureHandler extends GestureHandler {
         if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.count = options.count;
+            this.distanceThreshold = options.distanceThreshold;
             this.limitFingerCount = options.isFingerCountLimited;
         }
     }

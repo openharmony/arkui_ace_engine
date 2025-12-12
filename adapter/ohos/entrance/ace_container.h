@@ -731,7 +731,8 @@ public:
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
@@ -1006,6 +1007,11 @@ private:
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
+
+    void LoadCompleteManagerStartCollect(const std::string& url) override;
+    void LoadCompleteManagerStopCollect() override;
+
+    void InitForceSplitManager();
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

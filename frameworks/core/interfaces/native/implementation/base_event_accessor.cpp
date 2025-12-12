@@ -75,12 +75,10 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
-void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Int64* timestamp)
+void SetTimestampImpl(Ark_BaseEvent peer, Ark_Int64 timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(timestamp);
-    int64_t value = Converter::Convert<int64_t>(*timestamp);
+    int64_t value = Converter::Convert<int64_t>(timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
@@ -132,46 +130,55 @@ void SetAxisVerticalImpl(Ark_BaseEvent peer,
 Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Float64>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
+    if (peer->pressure_.has_value()) {
+        return peer->pressure_.value();
+    }
+    auto pressure = Converter::ArkValue<Ark_Float64>(peer->GetBaseInfo()->GetForce());
+    peer->pressure_ = pressure;
+    return pressure;
 }
-void SetPressureImpl(Ark_BaseEvent peer,
-                     const Ark_Float64* pressure)
+void SetPressureImpl(Ark_BaseEvent peer, Ark_Float64 pressure)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(pressure);
-    peer->GetBaseInfo()->SetForce(Converter::Convert<float>(*pressure));
+    CHECK_NULL_VOID(peer);
+    peer->pressure_ = pressure;
 }
 Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    if (peer->tiltX_.has_value()) {
+        return peer->tiltX_.value();
+    }
     auto value = peer->GetBaseInfo()->GetTiltX();
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
+    auto tiltX = Converter::ArkValue<Ark_Float64>(value.value_or(0));
+    peer->tiltX_ = tiltX;
+    return tiltX;
 }
-void SetTiltXImpl(Ark_BaseEvent peer,
-                  const Ark_Float64* tiltX)
+void SetTiltXImpl(Ark_BaseEvent peer, Ark_Float64 tiltX)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(tiltX);
-    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltX));
+    CHECK_NULL_VOID(peer);
+    peer->tiltX_ = tiltX;
 }
 Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    if (peer->tiltY_.has_value()) {
+        return peer->tiltY_.value();
+    }
     auto value = peer->GetBaseInfo()->GetTiltY();
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
+    auto tiltY = Converter::ArkValue<Ark_Float64>(value.value_or(0));
+    peer->tiltY_ = tiltY;
+    return tiltY;
 }
-void SetTiltYImpl(Ark_BaseEvent peer,
-                  const Ark_Float64* tiltY)
+void SetTiltYImpl(Ark_BaseEvent peer, Ark_Float64 tiltY)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(tiltY);
-    peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
+    CHECK_NULL_VOID(peer);
+    peer->tiltY_ = tiltY;
 }
 Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    return Converter::ArkValue<Opt_Float64>(peer->GetBaseInfo()->GetRollAngle());
+    return Converter::ArkValue<Opt_Float64>(peer->GetBaseInfo()->GetRollAngle().value_or(0.0f));
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
                       const Opt_Float64* rollAngle)
@@ -201,7 +208,7 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetBaseInfo();
     CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
             std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
             (const Array_String keys, const Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();

@@ -112,12 +112,6 @@ private:
     class FrameProxy;
 
 public:
-    enum class RsNodeDeleteFlag : uint8_t {
-        UNKNOWN,    // Deletion status is undefined or not initialized
-        ALLOWED,    // Explicitly permits deletion of the node
-        PROHIBITED  // Explicitly forbids deletion of the node
-    };
-
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
@@ -582,6 +576,8 @@ public:
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
     OffsetF ConvertPoint(OffsetF position, const RefPtr<FrameNode>& parent);
+
+    OffsetF ConvertPositionToWindow(OffsetF position, bool fromWindow);
 
     friend RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
 
@@ -1078,7 +1074,8 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();
@@ -1241,13 +1238,11 @@ public:
         return changeInfoFlag_;
     }
 
-    void SetDeleteRsNode(RsNodeDeleteFlag deleteFlag)
-    {
-        isDeleteRsNode_ = deleteFlag;
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode_ = isDelete;
     }
 
-    RsNodeDeleteFlag GetIsDelete() const
-    {
+    bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
 
@@ -1494,6 +1489,9 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
 
+    void OnContentChangeRegister(const ContentChangeConfig& config);
+    void OnContentChangeUnregister();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1669,6 +1667,7 @@ private:
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
+    void OnHoverWithHightLight(bool isHover) const;
     bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1770,7 +1769,7 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
-    RsNodeDeleteFlag isDeleteRsNode_ = RsNodeDeleteFlag::UNKNOWN;
+    bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;

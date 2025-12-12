@@ -540,7 +540,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
         .radius = ArkValue<Ark_Float64>(123.45f),
         .saturation = ArkValue<Opt_Float64>(0.123f),
         .brightness = ArkValue<Opt_Float64>(100),
-        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
+        .color = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
         .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = ArkCreate<Opt_BlurOptions>(20., 30.),
         .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
@@ -558,7 +558,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -634,7 +634,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValu
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -644,7 +644,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidVa
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -654,7 +654,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -664,7 +664,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, Te
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -674,7 +674,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -684,7 +684,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -694,7 +694,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Le
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -704,7 +704,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -714,7 +714,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -724,7 +724,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -734,7 +734,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -744,7 +744,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -754,7 +754,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -764,7 +764,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, Tes
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -899,9 +899,9 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+            ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+            ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f)), "#00000000" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(

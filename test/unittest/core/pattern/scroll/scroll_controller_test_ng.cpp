@@ -204,6 +204,39 @@ HWTEST_P(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
     EXPECT_FALSE(pattern_->GetCanStayOverScroll());
 }
 
+/**
+ * @tc.name: ScrollPage002
+ * @tc.desc: Test ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollControllerTestNg, ScrollPage002, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. ScrollPage down with animation
+     * @tc.expected: Scroll down with animation
+     */
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto propertyCallback = [](float offset) {};
+    scrollable->springOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    pattern_->scrollAbort_ = false;
+    ASSERT_NE(pattern_->scrollableEvent_, nullptr);
+    pattern_->scrollableEvent_->scrollable_ = scrollable;
+
+    /**
+     * @tc.steps: step2. Test ScrollPage
+     * @tc.expected: Verify the scrollAbort_ status
+     */
+    pattern_->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
+    EXPECT_TRUE(pattern_->scrollAbort_);
+}
+
 INSTANTIATE_TEST_SUITE_P(Smooth, ScrollControllerTestNg, testing::Bool());
 
 /**

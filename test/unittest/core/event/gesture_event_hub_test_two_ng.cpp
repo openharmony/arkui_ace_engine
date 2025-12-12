@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -343,7 +344,7 @@ HWTEST_F(GestureEventHubTestNg, GestureRecognizerJudgeFunc001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
-                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
+                    const std::list<WeakPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
 
     guestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     EXPECT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
@@ -940,8 +941,41 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest035, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     auto touchTestDoneFunc = [](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) {};
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {};
     gestureEventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     EXPECT_TRUE(gestureEventHub->GetOnTouchTestDoneCallback());
+}
+
+/**
+ * @tc.name: SetResponseRegionMap001
+ * @tc.desc: Test SetResponseRegionMap and GetResponseRegionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestFiveNg, SetResponseRegionMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and guestureEventHub.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    guestureEventHub->SetResponseRegionMap(regionMap);
+    auto region = guestureEventHub->GetResponseRegionMap();
+    EXPECT_FALSE(region.empty());
+    EXPECT_EQ(region[toolType].size(), 1);
+
+    regionMap[toolType].push_back(CalcDimensionRect());
+    guestureEventHub->SetResponseRegionMap(regionMap);
+    auto touchRegions = guestureEventHub->GetFingerResponseRegionFromMap();
+    EXPECT_EQ(touchRegions.size(), 2);
 }
 } // namespace OHOS::Ace::NG

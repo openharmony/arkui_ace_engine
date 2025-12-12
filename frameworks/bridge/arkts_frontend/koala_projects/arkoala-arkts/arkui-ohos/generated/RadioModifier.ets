@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, hookRadioContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute } from "./component/radio"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class RadioModifier extends CommonMethodModifier implements RadioAttribute,AttributeModifier<RadioAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,7 +42,10 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     _onChange_0_0value?: OnRadioChangeCallback | undefined
     _radioStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radioStyle_0_0value?: RadioStyle | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<RadioConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRadioPeer;
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -97,9 +102,28 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookRadioContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<RadioConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookRadioContentModifier(peer, (undefined as ContentModifier<RadioConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RadioModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._checked_0_flag) {
@@ -139,6 +163,19 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
                 }
             }
         }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<RadioConfiguration> | undefined));
+                }
+            }
+        }
     }
     checked(value: boolean | Bindable<boolean> | undefined): this {
         if (((this._checked_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -170,6 +207,17 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         } else
         {
             this._radioStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

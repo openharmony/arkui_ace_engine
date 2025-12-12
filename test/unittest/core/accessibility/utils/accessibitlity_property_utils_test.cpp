@@ -259,6 +259,14 @@ HWTEST_F(AccessibilityPropertyUtilsTest, GetComponentType001, TestSize.Level1)
     accessibilityProperty->SetAccessibilityCustomRole(testTag2);
     result = AccessibilityPropertyUtils::GetComponentType(frameNode, accessibilityProperty);
     EXPECT_EQ(result, testTag2);
+    // 4. ResetAccessibilityCustomRole, equals to AccessibilityRole
+    accessibilityProperty->ResetAccessibilityCustomRole();
+    result = AccessibilityPropertyUtils::GetComponentType(frameNode, accessibilityProperty);
+    EXPECT_EQ(result, testTag1);
+    // 5. ResetAccessibilityRole , equals to tag
+    accessibilityProperty->ResetAccessibilityRole();
+    result = AccessibilityPropertyUtils::GetComponentType(frameNode, accessibilityProperty);
+    EXPECT_EQ(result, testTag);
 }
 
 /**

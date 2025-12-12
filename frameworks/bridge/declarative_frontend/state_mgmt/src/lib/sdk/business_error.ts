@@ -19,8 +19,8 @@
  * 
  */
 class BusinessError extends Error {
-    code: string;
-    constructor(code: string, message: string) {
+    code: number | string;
+    constructor(code: number | string, message: string) {
         super(message);
         this.code = code;
         this.name = 'BusinessError';
@@ -30,6 +30,7 @@ class BusinessError extends Error {
 const ADD_MONITOR_FAIL_TARGET_ILLEGAL: string = '130000';
 const ADD_MONITOR_FAIL_PATH_ILLEGAL: string = '130001';
 const ADD_MONITOR_FAIL_FUNC_ILLEGAL: string = '130002';
-const UNSUPPORTED_KEY_IN_ENV: string = '140000';
-const FUNC_CALLED_IN_COMPUTED_ILLEGAL: string = '140001';
-const FUNC_CALLED_IN_MONITOR_ILLEGAL: string = '140002';
+const SYNC_MONITOR_FAIL_PATH_ILLEGAL: number = 130001;
+const UNSUPPORTED_KEY_IN_ENV: number = 140000;
+const FUNC_CALLED_IN_COMPUTED_ILLEGAL: number = 140001;
+const FUNC_CALLED_IN_MONITOR_ILLEGAL: number = 140002;

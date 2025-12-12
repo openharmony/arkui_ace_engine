@@ -259,13 +259,8 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {
         auto arkValue = Converter::ArkValue<Ark_Int32>(selected);
-        std::vector<std::string> result;
-        auto handler = [&result](const void* rawResultPtr) {
-            auto arkResultPtr = reinterpret_cast<const Array_String*>(rawResultPtr);
-            result = Converter::Convert<std::vector<std::string>>(*arkResultPtr);
-        };
-        CallbackKeeper::InvokeWithResultHandler<Array_String, Callback_Array_String_Void>(handler, callback, arkValue);
-        return result;
+        return callback.InvokeWithConvertResult<std::vector<std::string>, Array_String,
+            Callback_Array_String_Void>(arkValue);
     };
     IndexerModelStatic::SetOnRequestPopupData(frameNode, std::move(onEvent));
 }

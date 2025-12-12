@@ -207,9 +207,39 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool sup
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+    pattern->SetCustomKeyboard(std::move(func));
+}
+
+void RichEditorModelNG::SetCustomKeyboard(
+    FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboard(std::move(buildFunc));
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+}
+
+void RichEditorModelNG::SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+    pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+}
+
+void RichEditorModelNG::SetCustomKeyboardWithNode(
+    FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
-        pattern->SetCustomKeyboard(std::move(func));
     }
 }
 
@@ -626,6 +656,36 @@ void RichEditorModelNG::SetEnableAutoSpacing(bool enabled)
     pattern->SetEnableAutoSpacing(enabled);
 }
 
+void RichEditorModelNG::SetCompressLeadingPunctuation(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CompressLeadingPunctuation, enabled);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetIncludeFontPadding(bool isIncludeFontPadding)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(bool isFallbackLineSpacing)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFallbackLineSpacing(isFallbackLineSpacing);
+}
+
 void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -660,6 +720,33 @@ void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
     pattern->SetEnableAutoSpacing(enabled);
 }
 
+void RichEditorModelNG::SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CompressLeadingPunctuation, enabled, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool isIncludeFontPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool isFallbackLineSpacing)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetFallbackLineSpacing(isFallbackLineSpacing);
+}
+
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
 {
     CHECK_NULL_VOID(frameNode);
@@ -687,6 +774,16 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->UpdateScrollBarColor(value, true);
+}
+
+void RichEditorModelNG::SetSingleLine(bool isEnable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable);
+}
+
+void RichEditorModelNG::SetSingleLine(FrameNode* frameNode, bool isEnable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable, frameNode);
 }
 
 void RichEditorModelNG::SetSelectDetectEnable(const bool value)

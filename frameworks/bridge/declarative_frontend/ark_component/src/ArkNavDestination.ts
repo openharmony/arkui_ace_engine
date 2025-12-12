@@ -40,14 +40,19 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationTitleModifier, arkNavigationTitle);
     return this;
   }
-  menus(value: Array<NavigationMenuItem> | undefined): this {
+  menus(value: Array<NavigationMenuItem> | undefined, options?: NavigationMenuOptions): this {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
         NavDestinationMenusModifier, undefined);
       return this;
     }
+    let config: ArkNavigationMenu = new ArkNavigationMenu();
+    config.menu = value;
+    if (!isNull(options)) {
+      config.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
-        NavDestinationMenusModifier, value);
+        NavDestinationMenusModifier, config);
     return this;
   }
   hideTitleBar(isHide: boolean, animated?: boolean): this {
@@ -92,7 +97,12 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
-  backButtonIcon(value: any): this {
+  backButtonIcon(value: any, text?: ResourceStr): this {
+    let config: ArkNavBackButton = new ArkNavBackButton();
+    config.text = value;
+    if (!isNull(text)) {
+      config.text = text;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
     return this;
@@ -107,11 +117,11 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationSystemTransitionModifier, value);
     return this;
   }
-  onShown(callback: () => void): this {
+  onShown(callback: (reason: VisibilityChangeReason) => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnShownModifier.identity, NavDestinationOnShownModifier, callback);
     return this;
   }
-  onHidden(callback: () => void): this {
+  onHidden(callback: (reason: VisibilityChangeReason) => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnHiddenModifier.identity, NavDestinationOnHiddenModifier, callback);
     return this;
   }
@@ -263,8 +273,8 @@ class NavDestinationTitleModifier extends ModifierWithKey<ArkNavigationTitle | u
   }
 }
 
-class NavDestinationMenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefined> {
-  constructor(value: Array<NavigationMenuItem> | undefined) {
+class NavDestinationMenusModifier extends ModifierWithKey<ArkNavigationMenu> {
+  constructor(value: ArkNavigationMenu) {
     super(value);
   }
   static identity: Symbol = Symbol('menus');
@@ -273,7 +283,7 @@ class NavDestinationMenusModifier extends ModifierWithKey<Array<NavigationMenuIt
     if (reset) {
       getUINativeModule().navDestination.resetMenus(node);
     } else {
-      getUINativeModule().navDestination.setMenus(node, this.value);
+      getUINativeModule().navDestination.setMenus(node, this.value.menu, this.value.options);
     }
   }
   checkObjectDiff(): boolean {
@@ -345,8 +355,8 @@ class NavDestinationBackgroundColorModifier extends ModifierWithKey<ResourceColo
   }
 }
 
-class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class NavDestinationBackButtonIconModifier extends ModifierWithKey<ArkNavBackButton> {
+  constructor(value: ArkNavBackButton) {
     super(value);
   }
   static identity: Symbol = Symbol('backButtonIcon');
@@ -354,7 +364,7 @@ class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
     if (reset) {
       getUINativeModule().navDestination.resetBackButtonIcon(node);
     } else {
-      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value.icon, this.value.text);
     }
   }
 }

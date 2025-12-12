@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 const auto IMAGE_FLAG_0 = 0;
 const auto IMAGE_FLAG_1 = 1;
 const auto IMAGE_FLAG_2 = 2;
+enum class ParamType { DEFAULT, INT32, STRING, COLOR, CANVAS_GRADIENT, CANVAS_PATTERN };
 class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
     enum class SizeParam {
@@ -94,7 +95,6 @@ public:
     void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
     void GetImageData(const ImageSize& imageSize, uint8_t* buffer);
     RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
-    void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
     void PutImageData(const Ace::ImageData& imageData);
     std::vector<double> GetLineDash();
     void SetLineDash(const std::vector<double>& segments);
@@ -125,13 +125,13 @@ public:
     void SetFillStyle(const std::string& colorStr);
     void SetFillStyle(const std::optional<Color>& color);
     void SetFillStyle(const uint32_t colorNum);
-    void SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient);
-    void SetFillStyle(const int32_t id);
+    void SetFillStyle(CanvasGradientPeer* gradientPeer);
+    void SetFillStyle(CanvasPatternPeer* canvasPatternPeer);
     void SetStrokeStyle(const std::string& colorStr);
     void SetStrokeStyle(const std::optional<Color>& color);
     void SetStrokeStyle(const uint32_t colorNum);
-    void SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient);
-    void SetStrokeStyle(const int32_t id);
+    void SetStrokeStyle(CanvasGradientPeer* gradientPeer);
+    void SetStrokeStyle(CanvasPatternPeer* canvasPatternPeer);
     void SetFilter(const std::string& filterStr);
     void SetImageSmoothingEnabled(bool enabled);
     void SetImageSmoothingQuality(const std::string& quality);
@@ -221,6 +221,141 @@ public:
         renderingContext2DModel_ = renderingContext2DModel;
     }
 
+    ParamType GetFillStyleType() const
+    {
+        return fillStyleType_;
+    }
+
+    std::string GetFillStyleString() const
+    {
+        return fillStyleString_;
+    }
+
+    CanvasGradientPeer* GetFillStyleGradient() const
+    {
+        return fillStyleGradient_;
+    }
+
+    CanvasPatternPeer* GetFillStylePattern() const
+    {
+        return fillStylePattern_;
+    }
+
+    ParamType GetStrokeStyleType() const
+    {
+        return strokeStyleType_;
+    }
+
+    std::string GetStrokeStyleString() const
+    {
+        return strokeStyleString_;
+    }
+
+    CanvasGradientPeer* GetStrokeStyleGradient() const
+    {
+        return strokeStyleGradient_;
+    }
+
+    CanvasPatternPeer* GetStrokeStylePattern() const
+    {
+        return strokeStylePattern_;
+    }
+
+    const Dimension& GetLetterSpacing() const
+    {
+        return letterSpacing_;
+    }
+
+    double GetGlobalAlpha() const
+    {
+        return globalAlpha_;
+    }
+
+    std::string GetGlobalCompositeOperation() const
+    {
+        return globalCompositeOperation_;
+    }
+
+    std::string GetFilter() const
+    {
+        return filter_;
+    }
+
+    bool GetImageSmoothingEnabled() const
+    {
+        return imageSmoothingEnabled_;
+    }
+
+    std::string GetImageSmoothingQuality() const
+    {
+        return imageSmoothingQuality_;
+    }
+
+    std::string GetLineCap() const
+    {
+        return lineCap_;
+    }
+
+    double GetLineDashOffset() const
+    {
+        return lineDashOffset_;
+    }
+
+    std::string GetLineJoin() const
+    {
+        return lineJoin_;
+    }
+
+    double GetLineWidth() const
+    {
+        return lineWidth_;
+    }
+
+    double GetMiterLimit() const
+    {
+        return miterLimit_;
+    }
+
+    double GetShadowBlur() const
+    {
+        return shadowBlur_;
+    }
+
+    std::string GetShadowColor() const
+    {
+        return shadowColor_;
+    }
+
+    double GetShadowOffsetX() const
+    {
+        return shadowOffsetX_;
+    }
+
+    double GetShadowOffsetY() const
+    {
+        return shadowOffsetY_;
+    }
+
+    std::string GetDirection() const
+    {
+        return direction_;
+    }
+
+    std::string GetFont() const
+    {
+        return font_;
+    }
+
+    std::string GetTextAlign() const
+    {
+        return textAlign_;
+    }
+
+    std::string GetTextBaseline() const
+    {
+        return textBaseline_;
+    }
+
     std::function<void*()> wrapAnalyzerConfigImpl = nullptr;
 
 protected:
@@ -246,6 +381,34 @@ private:
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
     int32_t densityCallbackId_ = 0;
+
+    ParamType fillStyleType_ = ParamType::DEFAULT;
+    ParamType strokeStyleType_ = ParamType::DEFAULT;
+    bool imageSmoothingEnabled_ = false;
+    double globalAlpha_ = 1.0;
+    double lineDashOffset_ = 0.0;
+    double lineWidth_;
+    double miterLimit_;
+    double shadowBlur_ = 0.0;
+    double shadowOffsetX_ = 0.0;
+    double shadowOffsetY_ = 0.0;
+    std::string fillStyleString_ = "";
+    std::string strokeStyleString_ = "";
+    std::string globalCompositeOperation_ = "source-over";
+    std::string filter_ = "none";
+    std::string imageSmoothingQuality_ = "low";
+    std::string lineCap_ = "butt";
+    std::string lineJoin_ = "miter";
+    std::string shadowColor_ = "#00000000";
+    std::string direction_ = "inherit";
+    std::string font_ = "normal normal 14px sans-serif";
+    std::string textAlign_ = "left";
+    std::string textBaseline_ = "alphabetic";
+    Dimension letterSpacing_ = Dimension(0.0, DimensionUnit::VP);
+    CanvasGradientPeer* fillStyleGradient_ = nullptr;
+    CanvasGradientPeer* strokeStyleGradient_ = nullptr;
+    CanvasPatternPeer* fillStylePattern_ = nullptr;
+    CanvasPatternPeer* strokeStylePattern_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

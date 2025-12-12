@@ -86,6 +86,7 @@ constexpr float LARG_PROGRESS_COMPONENT_HEIGHT = 2000.0f;
 constexpr float PROGRESS_STROKE_WIDTH = 10.0f;
 constexpr float PROGRESS_LARGE_STROKE_WIDTH = 200.0f;
 constexpr float PROGRESS_MODIFIER_VALUE = 100.0f;
+constexpr float PROGRESS_MODIFIER_VALUE2 = 10.0f;
 constexpr float PROGRESS_MODIFIER_LARGE_VALUE = 200.0f;
 constexpr float PROGRESS_MODIFIER_MAX_VALUE = 10000.0f;
 constexpr float CONTEXT_WIDTH = 100.0f;

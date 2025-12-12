@@ -252,8 +252,7 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThirdInner(
             Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT);
     }
     if ((currentHoveringId != INVALID_NODE_ID) && (currentHoveringId != lastHoveringId)) {
-        jsThirdProviderOperator->SendAccessibilityAsyncEventForThird(currentHoveringId,
-            Accessibility::EventType::TYPE_VIEW_HOVER_ENTER_EVENT);
+        jsThirdProviderOperator->CheckAndSendHoverEnterByReadableRules(currentHoveringId);
     }
     hoverForThirdState_.nodesHovering = std::move(currentNodesHovering);
     hoverForThirdState_.time = config.time;

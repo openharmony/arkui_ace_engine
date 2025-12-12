@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ConstraintSizeOptions_serializer, ConstraintSizeOptions, Length, Dimension, Padding, Padding_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
@@ -30,6 +31,7 @@ import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookWaterFlowAttributeModifier, AttributeUpdater, hookWaterFlowOptionsImpl } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -50,6 +52,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setWaterFlowOptionsAttribute(options?: WaterFlowOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -106,10 +109,10 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -130,10 +133,10 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -238,7 +241,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export type GetItemMainSizeByIndex = (index: int32) => double;
-export interface SectionOptions {
+export class SectionOptions {
     itemsCount: int32;
     crossCount?: int32 | undefined;
     onGetItemMainSizeByIndex?: GetItemMainSizeByIndex | undefined;
@@ -472,7 +475,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWaterFlowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWaterFlowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

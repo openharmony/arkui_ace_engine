@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -26,6 +27,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonSha
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookRectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -45,6 +47,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setRectOptionsAttribute(options?: RectOptions | RoundedRectOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -263,7 +266,9 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
         return this
     }
     public attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -561,45 +566,45 @@ export class RectOptions_serializer {
             let radiusTmpBuf_ : Length | Array<RadiusItem> | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
                 const radiusTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let radiusTmpBuf_BufU : string | number | Resource | undefined
+                let radiusTmpBuf_BufU : string | double | Resource | undefined
                 if (radiusTmpBuf_BufUUnionSelector == (0).toChar()) {
                     radiusTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (radiusTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    radiusTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    radiusTmpBuf_BufU = valueDeserializer.readFloat64()
                 } else if (radiusTmpBuf_BufUUnionSelector == (2).toChar()) {
                     radiusTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
                 } else {
                     throw new Error("One of the branches for radiusTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                radiusTmpBuf_ = (radiusTmpBuf_BufU as string | number | Resource)
+                radiusTmpBuf_ = (radiusTmpBuf_BufU as string | double | Resource)
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 const radiusTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
                 let radiusTmpBuf_BufU : Array<RadiusItem> = new Array<RadiusItem>(radiusTmpBuf_BufULength)
                 for (let radiusTmpBuf_BufUBufCounterI = 0; radiusTmpBuf_BufUBufCounterI < radiusTmpBuf_BufULength; radiusTmpBuf_BufUBufCounterI++) {
                     const radiusTmpBuf_BufUTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                    let radiusTmpBuf_BufUTempBufValue0TempBuf : string | number | Resource | undefined
+                    let radiusTmpBuf_BufUTempBufValue0TempBuf : string | double | Resource | undefined
                     if (radiusTmpBuf_BufUTempBufValue0TempBufUnionSelector == (0).toChar()) {
                         radiusTmpBuf_BufUTempBufValue0TempBuf = (valueDeserializer.readString() as string)
                     } else if (radiusTmpBuf_BufUTempBufValue0TempBufUnionSelector == (1).toChar()) {
-                        radiusTmpBuf_BufUTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+                        radiusTmpBuf_BufUTempBufValue0TempBuf = valueDeserializer.readFloat64()
                     } else if (radiusTmpBuf_BufUTempBufValue0TempBufUnionSelector == (2).toChar()) {
                         radiusTmpBuf_BufUTempBufValue0TempBuf = Resource_serializer.read(valueDeserializer)
                     } else {
                         throw new Error("One of the branches for radiusTmpBuf_BufUTempBufValue0TempBuf has to be chosen through deserialisation.")
                     }
-                    const radiusTmpBuf_BufUTempBufValue0 : Length = (radiusTmpBuf_BufUTempBufValue0TempBuf as string | number | Resource)
+                    const radiusTmpBuf_BufUTempBufValue0 : Length = (radiusTmpBuf_BufUTempBufValue0TempBuf as string | double | Resource)
                     const radiusTmpBuf_BufUTempBufValue1TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                    let radiusTmpBuf_BufUTempBufValue1TempBuf : string | number | Resource | undefined
+                    let radiusTmpBuf_BufUTempBufValue1TempBuf : string | double | Resource | undefined
                     if (radiusTmpBuf_BufUTempBufValue1TempBufUnionSelector == (0).toChar()) {
                         radiusTmpBuf_BufUTempBufValue1TempBuf = (valueDeserializer.readString() as string)
                     } else if (radiusTmpBuf_BufUTempBufValue1TempBufUnionSelector == (1).toChar()) {
-                        radiusTmpBuf_BufUTempBufValue1TempBuf = (valueDeserializer.readNumber() as number)
+                        radiusTmpBuf_BufUTempBufValue1TempBuf = valueDeserializer.readFloat64()
                     } else if (radiusTmpBuf_BufUTempBufValue1TempBufUnionSelector == (2).toChar()) {
                         radiusTmpBuf_BufUTempBufValue1TempBuf = Resource_serializer.read(valueDeserializer)
                     } else {
                         throw new Error("One of the branches for radiusTmpBuf_BufUTempBufValue1TempBuf has to be chosen through deserialisation.")
                     }
-                    const radiusTmpBuf_BufUTempBufValue1 : Length = (radiusTmpBuf_BufUTempBufValue1TempBuf as string | number | Resource)
+                    const radiusTmpBuf_BufUTempBufValue1 : Length = (radiusTmpBuf_BufUTempBufValue1TempBuf as string | double | Resource)
                     radiusTmpBuf_BufU[radiusTmpBuf_BufUBufCounterI] = ([radiusTmpBuf_BufUTempBufValue0, radiusTmpBuf_BufUTempBufValue1] as RadiusItem)
                 }
                 radiusTmpBuf_ = radiusTmpBuf_BufU

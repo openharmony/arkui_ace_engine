@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -26,6 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { ResourceStr, Dimension } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, extractors, hookComponent3DAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -47,6 +49,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setComponent3DOptionsAttribute(sceneOptions?: SceneOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (sceneOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -358,7 +361,9 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookComponent3DAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookComponent3DAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

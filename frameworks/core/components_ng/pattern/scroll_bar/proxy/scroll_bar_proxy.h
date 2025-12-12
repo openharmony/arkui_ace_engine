@@ -63,7 +63,7 @@ public:
      * @param distance absolute distance that scroll bar has scrolled.
      */
     void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar,
-        bool isMouseWheelScroll = false) const;
+        bool isMouseWheelScroll = false, bool originOffset = false) const;
 
     /*
      * Notify scrollable node to callback scrollStart, called by scroll bar.
@@ -87,12 +87,13 @@ public:
     /*
      * Stop animation of ScrollBar, and show ScrollBar if needed, when scrollable node is scrolling.
      */
-    void StopScrollBarAnimator() const;
+    void StopScrollBarAnimator(bool isStopDisappearAnimator = true) const;
 
     /*
      * Notify scrollable node to snap scroll, called by scroll bar.
      */
-    bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
+    bool NotifySnapScroll(
+        float delta, float velocity, float barScrollableDistance, float dragDistance, bool isTouchScreen = false) const;
 
     bool NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const;
 
@@ -142,6 +143,12 @@ public:
     {
         return isScrollableNodeScrolling_;
     }
+    /*
+     * Notify scroll bar to over scroll with velocity, called by scrollable node.
+     */
+    void NotifyScrollOverDrag(float velocity);
+    bool CanOverScrollWithDelta(double delta) const;
+    bool Idle();
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.

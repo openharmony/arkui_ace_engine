@@ -49,12 +49,14 @@ public:
     static void SetAlign(const JSCallbackInfo& info);
     static void SetTextContentAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetTextDirection(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetLineHeightMultiply(const JSCallbackInfo& info);
     static void SetMinimumLineHeight(const JSCallbackInfo& info);
     static void SetMaximumLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static void SetShaderStyle(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
@@ -82,7 +84,6 @@ public:
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
-    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
@@ -104,6 +105,9 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetTextVerticalAlign(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();
@@ -147,6 +151,7 @@ public:
 
     void CloseSelectionMenu();
 
+    void SetTextSelection(const JSCallbackInfo& info);
     void SetStyledString(const JSCallbackInfo& info);
     void GetLayoutManager(const JSCallbackInfo& args);
 private:

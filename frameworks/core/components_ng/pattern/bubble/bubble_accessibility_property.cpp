@@ -16,16 +16,22 @@
 #include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 
 #include "core/components_ng/base/ui_node.h"
-
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-#include "accessibility_element_info.h"
-#endif
+#include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/components_ng/property/accessibility_property_helper.h"
 
 namespace OHOS::Ace::NG {
 void BubbleAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
 {
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
     extraElementInfo.SetExtraElementInfo("SideBarContainerStates", showedState_);
-#endif
+    extraElementInfo.SetExtraElementInfo("isModal", IsAccessibilityModal());
+}
+
+bool BubbleAccessibilityProperty::IsAccessibilityModal() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, true);
+    auto bubbleLayoutProperty = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_RETURN(bubbleLayoutProperty, true);
+    return bubbleLayoutProperty->GetIsModal().value_or(true);
 }
 } // namespace OHOS::Ace::NG

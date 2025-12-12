@@ -24,7 +24,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
 import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
+import { SectionChangeInfo, WaterFlowSections, OverlayOptions, ImageErrorCallback } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
 import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
@@ -41,8 +41,12 @@ import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.sha
 import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 import { DrawModifier } from "#handwritten"
 import { JavaScriptProxy } from '#generated';
+import { ErrorCallback } from '@ohos.base';
+import { int32 } from '@koalaui/compat';
+import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 
 export class ArkUIAniModule {
     static {
@@ -65,6 +69,7 @@ export class ArkUIAniModule {
     native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
     native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
+    native static _Extractors_ToUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer;
     native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
     native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
     native static _Extractors_ToWebviewWebviewControllerPtr(value: webview.WebviewController): KPointer;
@@ -76,6 +81,7 @@ export class ArkUIAniModule {
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
     native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
+    native static _Image_SetOnErrorCallback(ptr: KPointer, value: ImageErrorCallback | undefined): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(key: KInt): common.Context
@@ -118,7 +124,8 @@ export class ArkUIAniModule {
     native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
-    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
+    native static _UpdateWaterFlowSection(ptr: KPointer, changeInfo: SectionChangeInfo): void
+    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize | undefined): void
     native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
@@ -130,6 +137,11 @@ export class ArkUIAniModule {
     native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
     native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
     native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
+    native static _BaseEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _DragEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _KeyEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _ClickEvent_preventDefault(ptr: KPointer): void
+    native static _TouchEvent_preventDefault(ptr: KPointer): void
 
     // for web
     native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
@@ -233,6 +245,9 @@ export class ArkUIAniModule {
     native static _Animation_PageTransitionSetScale(value: ScaleOptions): void
     native static _Animation_PageTransitionSetOpacity(value: number): void
 
+    native static _UiMaterial_ConstructMaterial(value: uiMaterial.MaterialOptions | undefined): long
+    native static _UiMaterial_DestroyMaterial(value: long): void
+
     native static _CreateViewStackProcessor(): KPointer
 
     native static _PopViewStackProcessor(): KPointer
@@ -265,7 +280,8 @@ export class ArkUIAniModule {
     native static _RequireArkoalaNodeId(capacity: KInt): KInt
 
     // for Video
-    native static _Video_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+    native static _Video_SetVoidCallback(ptr: KPointer, callback: () => void): void;
+    native static _Video_SetErrorCallback(ptr: KPointer, callback: ErrorCallback): void;
 
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
@@ -306,14 +322,16 @@ export class ArkUIAniModule {
         getAllCustomPropertiesCallback: () => string): void
     native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+    native static _ConditionScope_Mark_Dirty(ptr: KPointer): void;
 
-    native static _Common_vp2px(value:number, instanceId: KInt): number
-    native static _Common_px2vp(value:number, instanceId: KInt): number
-    native static _Common_fp2px(value:number, instanceId: KInt): number
-    native static _Common_px2fp(value:number, instanceId: KInt): number
-    native static _Common_lpx2px(value:number, instanceId: KInt): number
-    native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_vp2px(value:double, instanceId: KInt): double
+    native static _Common_px2vp(value:double, instanceId: KInt): double
+    native static _Common_fp2px(value:double, instanceId: KInt): double
+    native static _Common_px2fp(value:double, instanceId: KInt): double
+    native static _Common_lpx2px(value:double, instanceId: KInt): double
+    native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
+    native static _Common_getWindowId(instanceId: KInt): int32 | undefined
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
 
@@ -408,4 +426,8 @@ export class ArkUIAniModule {
     native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
 
     native static _ApplyThemeScopeId(self: KPointer, themeScopeId: KInt): void
+
+    // for SecurityComponent
+    native static _SaveButton_SetOnClickCallback(ptr: KPointer, value: SaveButtonCallback | undefined): void
+    native static _PasteButton_SetOnClickCallback(ptr: KPointer, value: PasteButtonCallback | undefined): void
 }

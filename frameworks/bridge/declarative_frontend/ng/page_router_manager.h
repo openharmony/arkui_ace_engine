@@ -268,6 +268,8 @@ public:
     RefPtr<FrameNode> CreatePage(int32_t pageId, const RouterPageInfo& target);
     RefPtr<FrameNode> CreateDynamicPage(int32_t pageId, const RouterPageInfo& target);
 
+    void FireNavigateChangeCallback(const std::string& to);
+
 protected:
     class RouterOptScope {
     public:
@@ -381,6 +383,8 @@ protected:
     RouterIntentInfo ParseRouterIntentInfo(const std::string& intentInfoSerialized);
     // only for @normalized ohmUrl
     std::string ParseUrlNameFromOhmUrl(const std::string& ohmUrl);
+    void LoadCompleteManagerStopCollect();
+    std::string GetBackTargetName();
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 

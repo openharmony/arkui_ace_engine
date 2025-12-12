@@ -385,7 +385,10 @@ Opt_NavPathInfo Pop0Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
-    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated);
+    NavigationContext::PathInfo info;
+    if (!navStack->NavigationContext::PathStack::Pop(isAnimated, info)) {
+        return invalidVal;
+    }
     auto arkInfo = Converter::ArkValue<Ark_NavPathInfo>(info);
     CHECK_NULL_RETURN(arkInfo, invalidVal);
     Opt_NavPathInfo retVal = {
@@ -405,7 +408,10 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
-    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated, *result);
+    NavigationContext::PathInfo info;
+    if (!navStack->NavigationContext::PathStack::Pop(isAnimated, *result, info)) {
+        return invalidVal;
+    }
     auto arkInfo = Converter::ArkValue<Ark_NavPathInfo>(info);
     CHECK_NULL_RETURN(arkInfo, invalidVal);
     Opt_NavPathInfo retVal = {
@@ -595,7 +601,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
     NavigationContext::InterceptionType result = new NavigationContext::Interception();
     if (interception->modeChange.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         result->modeChange = [callback = CallbackHelper(interception->modeChange.value)](NG::NavigationMode mode) {
-            callback.Invoke(Converter::ArkValue<Ark_NavigationMode>(mode));
+            callback.InvokeSync(Converter::ArkValue<Ark_NavigationMode>(mode));
         };
     }
     if (interception->willShow.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -617,7 +623,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             } else {
                 tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
             }
-            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+            callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
         };
     }
@@ -640,7 +646,7 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             } else {
                 tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
             }
-            callback.Invoke(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
+            callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
         };
     }
@@ -648,12 +654,30 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
 }
 Array_NavPathInfo GetPathStackImpl(Ark_NavPathStack peer)
 {
-    return {};
+    Array_NavPathInfo invalid = {
+        .length = 0
+    };
+    CHECK_NULL_RETURN(peer, invalid);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(pathStack, invalid);
+    auto pathArray = pathStack->NavigationContext::PathStack::GetAllPathInfo();
+    Array_NavPathInfo result = Converter::ArkValue<Array_NavPathInfo>(pathArray, Converter::FC);
+    return result;
 }
 void SetPathStackImpl(Ark_NavPathStack peer,
                       const Array_NavPathInfo* pathStack,
                       const Opt_Boolean* animated)
 {
+    CHECK_NULL_VOID(peer && pathStack);
+    auto navPathStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navPathStack);
+    std::vector<NavigationContext::PathInfo> pathArray;
+    for (int32_t i = 0; i < pathStack->length; i++) {
+        NavigationContext::PathInfo info = Converter::Convert<NavigationContext::PathInfo>(pathStack->array[i]);
+        pathArray.push_back(info);
+    }
+    bool convertAnimate = Converter::OptConvertPtr<bool>(animated).value_or(true);
+    navPathStack->SetPathInfo(pathArray, convertAnimate);
 }
 } // NavPathStackAccessor
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()

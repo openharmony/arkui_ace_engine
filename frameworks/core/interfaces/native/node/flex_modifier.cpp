@@ -152,6 +152,22 @@ void SetMainSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
     FlexModelNG::SetMainSpace(frameNode, CalcDimension(value, (DimensionUnit)unit));
 }
 
+void ResetFlexSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FlexModelNG::SetCrossSpace(frameNode, CalcDimension(NUM_0, DimensionUnit::VP));
+    FlexModelNG::SetMainSpace(frameNode, CalcDimension(NUM_0, DimensionUnit::VP));
+}
+
+void GetFlexSpace(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[NUM_0] = static_cast<ArkUI_Float32>(FlexModelNG::GetFlexMainSpace(frameNode));
+    (*values)[NUM_1] = static_cast<ArkUI_Float32>(FlexModelNG::GetFlexCrossSpace(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
@@ -162,6 +178,8 @@ const ArkUIFlexModifier* GetFlexModifier()
         .getFlexOptions = GetFlexOptions,
         .setFlexCrossSpace = setFlexCrossSpace,
         .setFlexMainSpace = SetMainSpace,
+        .resetFlexSpace = ResetFlexSpace,
+        .getFlexSpace = GetFlexSpace,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

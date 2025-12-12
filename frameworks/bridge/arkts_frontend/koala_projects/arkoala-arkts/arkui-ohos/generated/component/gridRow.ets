@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -24,6 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ItemAlign } from "./enums"
 import { AttributeModifier, hookGridRowAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -46,6 +48,7 @@ export class ArkGridRowPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGridRowOptionsAttribute(option?: GridRowOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (option !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -189,7 +192,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridRowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGridRowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -371,10 +376,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXsTmpValueForIdx0  = valueHolderForXsTmpValue as string
                 valueSerializer.writeString(valueHolderForXsTmpValueForIdx0)
-            } else if (valueHolderForXsTmpValue instanceof number) {
+            } else if (valueHolderForXsTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForXsTmpValueForIdx1  = valueHolderForXsTmpValue as number
-                valueSerializer.writeNumber(valueHolderForXsTmpValueForIdx1)
+                const valueHolderForXsTmpValueForIdx1  = valueHolderForXsTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXsTmpValueForIdx1)
             } else if (valueHolderForXsTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXsTmpValueForIdx2  = valueHolderForXsTmpValue as Resource
@@ -391,10 +396,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSmTmpValueForIdx0  = valueHolderForSmTmpValue as string
                 valueSerializer.writeString(valueHolderForSmTmpValueForIdx0)
-            } else if (valueHolderForSmTmpValue instanceof number) {
+            } else if (valueHolderForSmTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSmTmpValueForIdx1  = valueHolderForSmTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSmTmpValueForIdx1)
+                const valueHolderForSmTmpValueForIdx1  = valueHolderForSmTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSmTmpValueForIdx1)
             } else if (valueHolderForSmTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSmTmpValueForIdx2  = valueHolderForSmTmpValue as Resource
@@ -411,10 +416,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMdTmpValueForIdx0  = valueHolderForMdTmpValue as string
                 valueSerializer.writeString(valueHolderForMdTmpValueForIdx0)
-            } else if (valueHolderForMdTmpValue instanceof number) {
+            } else if (valueHolderForMdTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMdTmpValueForIdx1  = valueHolderForMdTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMdTmpValueForIdx1)
+                const valueHolderForMdTmpValueForIdx1  = valueHolderForMdTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMdTmpValueForIdx1)
             } else if (valueHolderForMdTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMdTmpValueForIdx2  = valueHolderForMdTmpValue as Resource
@@ -431,10 +436,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLgTmpValueForIdx0  = valueHolderForLgTmpValue as string
                 valueSerializer.writeString(valueHolderForLgTmpValueForIdx0)
-            } else if (valueHolderForLgTmpValue instanceof number) {
+            } else if (valueHolderForLgTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForLgTmpValueForIdx1  = valueHolderForLgTmpValue as number
-                valueSerializer.writeNumber(valueHolderForLgTmpValueForIdx1)
+                const valueHolderForLgTmpValueForIdx1  = valueHolderForLgTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForLgTmpValueForIdx1)
             } else if (valueHolderForLgTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForLgTmpValueForIdx2  = valueHolderForLgTmpValue as Resource
@@ -451,10 +456,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXlTmpValueForIdx0  = valueHolderForXlTmpValue as string
                 valueSerializer.writeString(valueHolderForXlTmpValueForIdx0)
-            } else if (valueHolderForXlTmpValue instanceof number) {
+            } else if (valueHolderForXlTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForXlTmpValueForIdx1  = valueHolderForXlTmpValue as number
-                valueSerializer.writeNumber(valueHolderForXlTmpValueForIdx1)
+                const valueHolderForXlTmpValueForIdx1  = valueHolderForXlTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXlTmpValueForIdx1)
             } else if (valueHolderForXlTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXlTmpValueForIdx2  = valueHolderForXlTmpValue as Resource
@@ -471,10 +476,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXxlTmpValueForIdx0  = valueHolderForXxlTmpValue as string
                 valueSerializer.writeString(valueHolderForXxlTmpValueForIdx0)
-            } else if (valueHolderForXxlTmpValue instanceof number) {
+            } else if (valueHolderForXxlTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForXxlTmpValueForIdx1  = valueHolderForXxlTmpValue as number
-                valueSerializer.writeNumber(valueHolderForXxlTmpValueForIdx1)
+                const valueHolderForXxlTmpValueForIdx1  = valueHolderForXxlTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXxlTmpValueForIdx1)
             } else if (valueHolderForXxlTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXxlTmpValueForIdx2  = valueHolderForXxlTmpValue as Resource
@@ -490,102 +495,102 @@ export class GridRowSizeOption_serializer {
         let xsTmpBuf : Length | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xsTmpBuf_ : string | number | Resource | undefined
+            let xsTmpBuf_ : string | double | Resource | undefined
             if (xsTmpBuf_UnionSelector == (0).toChar()) {
                 xsTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (xsTmpBuf_UnionSelector == (1).toChar()) {
-                xsTmpBuf_ = (valueDeserializer.readNumber() as number)
+                xsTmpBuf_ = valueDeserializer.readFloat64()
             } else if (xsTmpBuf_UnionSelector == (2).toChar()) {
                 xsTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for xsTmpBuf_ has to be chosen through deserialisation.")
             }
-            xsTmpBuf = (xsTmpBuf_ as string | number | Resource)
+            xsTmpBuf = (xsTmpBuf_ as string | double | Resource)
         }
         const xsTmpResult : Length | undefined = xsTmpBuf
         const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let smTmpBuf : Length | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const smTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let smTmpBuf_ : string | number | Resource | undefined
+            let smTmpBuf_ : string | double | Resource | undefined
             if (smTmpBuf_UnionSelector == (0).toChar()) {
                 smTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (smTmpBuf_UnionSelector == (1).toChar()) {
-                smTmpBuf_ = (valueDeserializer.readNumber() as number)
+                smTmpBuf_ = valueDeserializer.readFloat64()
             } else if (smTmpBuf_UnionSelector == (2).toChar()) {
                 smTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for smTmpBuf_ has to be chosen through deserialisation.")
             }
-            smTmpBuf = (smTmpBuf_ as string | number | Resource)
+            smTmpBuf = (smTmpBuf_ as string | double | Resource)
         }
         const smTmpResult : Length | undefined = smTmpBuf
         const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mdTmpBuf : Length | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const mdTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let mdTmpBuf_ : string | number | Resource | undefined
+            let mdTmpBuf_ : string | double | Resource | undefined
             if (mdTmpBuf_UnionSelector == (0).toChar()) {
                 mdTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (mdTmpBuf_UnionSelector == (1).toChar()) {
-                mdTmpBuf_ = (valueDeserializer.readNumber() as number)
+                mdTmpBuf_ = valueDeserializer.readFloat64()
             } else if (mdTmpBuf_UnionSelector == (2).toChar()) {
                 mdTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for mdTmpBuf_ has to be chosen through deserialisation.")
             }
-            mdTmpBuf = (mdTmpBuf_ as string | number | Resource)
+            mdTmpBuf = (mdTmpBuf_ as string | double | Resource)
         }
         const mdTmpResult : Length | undefined = mdTmpBuf
         const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lgTmpBuf : Length | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const lgTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let lgTmpBuf_ : string | number | Resource | undefined
+            let lgTmpBuf_ : string | double | Resource | undefined
             if (lgTmpBuf_UnionSelector == (0).toChar()) {
                 lgTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (lgTmpBuf_UnionSelector == (1).toChar()) {
-                lgTmpBuf_ = (valueDeserializer.readNumber() as number)
+                lgTmpBuf_ = valueDeserializer.readFloat64()
             } else if (lgTmpBuf_UnionSelector == (2).toChar()) {
                 lgTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for lgTmpBuf_ has to be chosen through deserialisation.")
             }
-            lgTmpBuf = (lgTmpBuf_ as string | number | Resource)
+            lgTmpBuf = (lgTmpBuf_ as string | double | Resource)
         }
         const lgTmpResult : Length | undefined = lgTmpBuf
         const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xlTmpBuf : Length | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xlTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xlTmpBuf_ : string | number | Resource | undefined
+            let xlTmpBuf_ : string | double | Resource | undefined
             if (xlTmpBuf_UnionSelector == (0).toChar()) {
                 xlTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (xlTmpBuf_UnionSelector == (1).toChar()) {
-                xlTmpBuf_ = (valueDeserializer.readNumber() as number)
+                xlTmpBuf_ = valueDeserializer.readFloat64()
             } else if (xlTmpBuf_UnionSelector == (2).toChar()) {
                 xlTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for xlTmpBuf_ has to be chosen through deserialisation.")
             }
-            xlTmpBuf = (xlTmpBuf_ as string | number | Resource)
+            xlTmpBuf = (xlTmpBuf_ as string | double | Resource)
         }
         const xlTmpResult : Length | undefined = xlTmpBuf
         const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xxlTmpBuf : Length | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xxlTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xxlTmpBuf_ : string | number | Resource | undefined
+            let xxlTmpBuf_ : string | double | Resource | undefined
             if (xxlTmpBuf_UnionSelector == (0).toChar()) {
                 xxlTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (xxlTmpBuf_UnionSelector == (1).toChar()) {
-                xxlTmpBuf_ = (valueDeserializer.readNumber() as number)
+                xxlTmpBuf_ = valueDeserializer.readFloat64()
             } else if (xxlTmpBuf_UnionSelector == (2).toChar()) {
                 xxlTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for xxlTmpBuf_ has to be chosen through deserialisation.")
             }
-            xxlTmpBuf = (xxlTmpBuf_ as string | number | Resource)
+            xxlTmpBuf = (xxlTmpBuf_ as string | double | Resource)
         }
         const xxlTmpResult : Length | undefined = xxlTmpBuf
         let value : GridRowSizeOption = ({xs: xsTmpResult, sm: smTmpResult, md: mdTmpResult, lg: lgTmpResult, xl: xlTmpResult, xxl: xxlTmpResult} as GridRowSizeOption)
@@ -606,10 +611,10 @@ export class GutterOption_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx0  = valueHolderForXTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForXTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForXTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForXTmpValueForIdx0 instanceof double) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForXTmpValueForIdx0ForIdx1  = valueHolderForXTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForXTmpValueForIdx0ForIdx1)
+                    const valueHolderForXTmpValueForIdx0ForIdx1  = valueHolderForXTmpValueForIdx0 as double
+                    valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForXTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx2  = valueHolderForXTmpValueForIdx0 as Resource
@@ -634,10 +639,10 @@ export class GutterOption_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx0  = valueHolderForYTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForYTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForYTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForYTmpValueForIdx0 instanceof double) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForYTmpValueForIdx0ForIdx1  = valueHolderForYTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForYTmpValueForIdx0ForIdx1)
+                    const valueHolderForYTmpValueForIdx0ForIdx1  = valueHolderForYTmpValueForIdx0 as double
+                    valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForYTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx2  = valueHolderForYTmpValueForIdx0 as Resource
@@ -661,17 +666,17 @@ export class GutterOption_serializer {
             let xTmpBuf_ : Length | GridRowSizeOption | undefined
             if (xTmpBuf_UnionSelector == (0).toChar()) {
                 const xTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let xTmpBuf_BufU : string | number | Resource | undefined
+                let xTmpBuf_BufU : string | double | Resource | undefined
                 if (xTmpBuf_BufUUnionSelector == (0).toChar()) {
                     xTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (xTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    xTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    xTmpBuf_BufU = valueDeserializer.readFloat64()
                 } else if (xTmpBuf_BufUUnionSelector == (2).toChar()) {
                     xTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
                 } else {
                     throw new Error("One of the branches for xTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                xTmpBuf_ = (xTmpBuf_BufU as string | number | Resource)
+                xTmpBuf_ = (xTmpBuf_BufU as string | double | Resource)
             } else if (xTmpBuf_UnionSelector == (1).toChar()) {
                 xTmpBuf_ = GridRowSizeOption_serializer.read(valueDeserializer)
             } else {
@@ -687,17 +692,17 @@ export class GutterOption_serializer {
             let yTmpBuf_ : Length | GridRowSizeOption | undefined
             if (yTmpBuf_UnionSelector == (0).toChar()) {
                 const yTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let yTmpBuf_BufU : string | number | Resource | undefined
+                let yTmpBuf_BufU : string | double | Resource | undefined
                 if (yTmpBuf_BufUUnionSelector == (0).toChar()) {
                     yTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (yTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    yTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    yTmpBuf_BufU = valueDeserializer.readFloat64()
                 } else if (yTmpBuf_BufUUnionSelector == (2).toChar()) {
                     yTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
                 } else {
                     throw new Error("One of the branches for yTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                yTmpBuf_ = (yTmpBuf_BufU as string | number | Resource)
+                yTmpBuf_ = (yTmpBuf_BufU as string | double | Resource)
             } else if (yTmpBuf_UnionSelector == (1).toChar()) {
                 yTmpBuf_ = GridRowSizeOption_serializer.read(valueDeserializer)
             } else {
@@ -724,10 +729,10 @@ export class GridRowOptions_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx0  = valueHolderForGutterTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForGutterTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForGutterTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForGutterTmpValueForIdx0 instanceof double) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForGutterTmpValueForIdx0ForIdx1  = valueHolderForGutterTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForGutterTmpValueForIdx0ForIdx1)
+                    const valueHolderForGutterTmpValueForIdx0ForIdx1  = valueHolderForGutterTmpValueForIdx0 as double
+                    valueSerializer.writeFloat64(valueHolderForGutterTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForGutterTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx2  = valueHolderForGutterTmpValueForIdx0 as Resource
@@ -783,17 +788,17 @@ export class GridRowOptions_serializer {
             let gutterTmpBuf_ : Length | GutterOption | undefined
             if (gutterTmpBuf_UnionSelector == (0).toChar()) {
                 const gutterTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let gutterTmpBuf_BufU : string | number | Resource | undefined
+                let gutterTmpBuf_BufU : string | double | Resource | undefined
                 if (gutterTmpBuf_BufUUnionSelector == (0).toChar()) {
                     gutterTmpBuf_BufU = (valueDeserializer.readString() as string)
                 } else if (gutterTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    gutterTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                    gutterTmpBuf_BufU = valueDeserializer.readFloat64()
                 } else if (gutterTmpBuf_BufUUnionSelector == (2).toChar()) {
                     gutterTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
                 } else {
                     throw new Error("One of the branches for gutterTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                gutterTmpBuf_ = (gutterTmpBuf_BufU as string | number | Resource)
+                gutterTmpBuf_ = (gutterTmpBuf_BufU as string | double | Resource)
             } else if (gutterTmpBuf_UnionSelector == (1).toChar()) {
                 gutterTmpBuf_ = GutterOption_serializer.read(valueDeserializer)
             } else {

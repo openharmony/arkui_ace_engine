@@ -385,17 +385,19 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     bool detectFlag = !isSelectAll_;
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showTranslate = false;
     if (!queryWord.empty()) {
         selectInfo.menuInfo.showSearch = true;
         selectInfo.menuInfo.showTranslate = true;
-    } else {
-        selectInfo.menuInfo.showSearch = false;
-        selectInfo.menuInfo.showTranslate = false;
     }
-    selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
-        (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
     bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
-                     (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+    selectInfo.menuInfo.showAIWrite = false;
+    if (pattern->IsShowAIWrite() && canCopyOut &&
+        (selectInfo.isSingleHandle || (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT))) {
+        selectInfo.menuInfo.showAIWrite = true;
+    }
     selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
     canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) && !queryWord.empty();
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
@@ -1067,6 +1069,7 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->SetOverlayCreating(false);
         delegate->HandleTouchCancel();
     }
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     UpdateTouchHandleForOverlay(true);
     if (!IsShowMenu()) {
         ChangeVisibilityOfQuickMenu();
@@ -1099,6 +1102,9 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     }
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
+    auto delegate = pattern->delegate_;
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     aiMenuType_ = TextDataDetectType::INVALID;

@@ -26,6 +26,7 @@ void SetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_
 void ResetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 void SetWaterFlowScroller(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long scroller);
 void SetWaterFlowLayoutMode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int mode);
+void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object changeInfo);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_WATER_FLOW_MODULE

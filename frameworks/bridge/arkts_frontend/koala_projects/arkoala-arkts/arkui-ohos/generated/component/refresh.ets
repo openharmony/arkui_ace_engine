@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
 import { AttributeModifier, hookRefreshAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -30,10 +32,11 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ResourceStr } from "./units"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { RefreshModifier } from "./../RefreshModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     attributeSet?: RefreshModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -47,6 +50,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRefreshOptionsAttribute(value: RefreshOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         RefreshOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._RefreshInterface_setRefreshOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -100,6 +104,18 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullToRefresh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+        setPullUpToCancelRefreshAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RefreshAttribute_setPullUpToCancelRefresh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnOffsetChangeAttribute(value: ((value0: double) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -141,7 +157,7 @@ export interface RefreshOptions {
     refreshing: boolean | Bindable<boolean>;
     promptText?: ResourceStr;
     builder?: CustomBuilder;
-    refreshingContent?: ComponentContent;
+    refreshingContent?: ComponentContentBase;
 }
 export interface RefreshAttribute extends CommonMethod {
     setRefreshOptions(value: RefreshOptions): this {
@@ -159,6 +175,9 @@ export interface RefreshAttribute extends CommonMethod {
     pullToRefresh(value: boolean | undefined): this {
         throw new Error("Unimplemented method pullToRefresh")
     }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
+        throw new Error("Unimplemented method pullUpToCancelRefresh")
+    }
     onOffsetChange(value: ((value0: double) => void) | undefined): this {
         throw new Error("Unimplemented method onOffsetChange")
     }
@@ -174,6 +193,7 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     onRefreshing_value?: (() => void) | undefined
     refreshOffset_value?: double | undefined
     pullToRefresh_value?: boolean | undefined
+    pullUpToCancelRefresh_value?: boolean | undefined
     onOffsetChange_value?: ((value0: double) => void) | undefined
     pullDownRatio_value?: double | undefined
     attributeModifier_value?: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -190,6 +210,9 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
         return this
     }
     pullToRefresh(value: boolean | undefined): this {
+        return this
+    }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
         return this
     }
     onOffsetChange(value: ((value0: double) => void) | undefined): this {
@@ -251,6 +274,14 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         }
         return this
     }
+    public pullUpToCancelRefresh(value: boolean | undefined): this {
+        if (this.checkPriority("pullUpToCancelRefresh")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setPullUpToCancelRefreshAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onOffsetChange(value: ((value0: double) => void) | undefined): this {
         if (this.checkPriority("onOffsetChange")) {
             const value_casted = value as (((value0: double) => void) | undefined)
@@ -268,7 +299,9 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         return this
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRefreshAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRefreshAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -339,7 +372,7 @@ export class RefreshOptions_serializer {
         if (valueHolderForRefreshingContent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRefreshingContentTmpValue  = valueHolderForRefreshingContent!
-            valueSerializer.holdAndWriteObject(valueHolderForRefreshingContentTmpValue)
+            ComponentContentBase_serializer.write(valueSerializer, valueHolderForRefreshingContentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -389,11 +422,11 @@ export class RefreshOptions_serializer {
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const refreshingContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let refreshingContentTmpBuf : ComponentContent | undefined = undefined
+        let refreshingContentTmpBuf : ComponentContentBase | undefined = undefined
         if ((refreshingContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            refreshingContentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            refreshingContentTmpBuf = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
         }
-        const refreshingContentTmpResult : ComponentContent | undefined = refreshingContentTmpBuf
+        const refreshingContentTmpResult : ComponentContentBase | undefined = refreshingContentTmpBuf
         let value : RefreshOptions = ({refreshing: refreshingTmpResult, promptText: promptTextTmpResult, builder: builderTmpResult, refreshingContent: refreshingContentTmpResult} as RefreshOptions)
         return value
     }

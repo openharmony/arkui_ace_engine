@@ -73,9 +73,10 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/utils/multi_thread.h"
+#include "ui/properties/ui_material.h"
+#include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -546,7 +547,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::SURFACE: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
             break;
         }
@@ -565,7 +567,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::COMPOSITE_COMPONENT: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
             break;
         }
@@ -597,7 +600,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode, .isSync = true };
-    surfaceNodeConfig.isSkipCheckInMultiInstance = param->isSkipCheckInMultiInstance;
+    surfaceNodeConfig.isSkipCheckInMultiInstance = true;
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     if (rsUIContext) {
         surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
@@ -622,7 +625,8 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
     const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-        .isTextureExportNode = isTextureExportNode };
+        .isTextureExportNode = isTextureExportNode,
+        .isSkipCheckInMultiInstance = true };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
 }
@@ -1477,26 +1481,33 @@ void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 
 void RosenRenderContext::UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
-    CHECK_NULL_VOID(visualEffect);
+    CHECK_NULL_VOID(rsNode_ && visualEffect);
     rsNode_->SetVisualEffect(visualEffect);
 }
 
 void RosenRenderContext::UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
-    CHECK_NULL_VOID(backgroundFilter);
+    CHECK_NULL_VOID(rsNode_ && backgroundFilter);
     rsNode_->SetUIBackgroundFilter(backgroundFilter);
 }
 
 void RosenRenderContext::UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
 {
-    CHECK_NULL_VOID(foregroundFilter);
+    CHECK_NULL_VOID(rsNode_ && foregroundFilter);
     rsNode_->SetUIForegroundFilter(foregroundFilter);
 }
 
 void RosenRenderContext::UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    CHECK_NULL_VOID(compositingFilter);
+    CHECK_NULL_VOID(rsNode_ && compositingFilter);
     rsNode_->SetUICompositingFilter(compositingFilter);
+}
+
+void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIMaterialFilter(materialFilter);
+    RequestNextFrame();
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
@@ -4152,6 +4163,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
+    FREE_NODE_CHECK(uiNode, OnZIndexUpdate, parent);
     auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
         auto parent = weak.Upgrade();
         CHECK_NULL_VOID(parent);
@@ -4517,7 +4529,7 @@ void RosenRenderContext::SetDrawNode()
 bool RosenRenderContext::AddNodeToRsTree()
 {
     auto node = GetHost();
-    if (!node || node->GetIsDelete() != FrameNode::RsNodeDeleteFlag::ALLOWED) {
+    if (!node || !node->GetIsDelete()) {
         return true;
     }
     if (SystemProperties::GetDebugEnabled()) {
@@ -4540,7 +4552,7 @@ bool RosenRenderContext::AddNodeToRsTree()
         rsNode->AddChild(childRsNode, rsNodeIndex);
         rsNodeIndex++;
     }
-    node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
+    node->SetDeleteRsNode(false);
     // rebuild parent node
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
@@ -4565,9 +4577,6 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetRsNodeByFrame(const RefPtr
 bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
 {
     CHECK_NULL_RETURN(node, false);
-    if (node->GetIsDelete() == FrameNode::RsNodeDeleteFlag::PROHIBITED) {
-        return false;
-    }
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
     std::list <RefPtr<FrameNode>> childChildrenList;
@@ -4577,7 +4586,6 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
         || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
         || node->GetTag() == V2::STAGE_ETS_TAG || node->GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
-        node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
         return false;
     }
     return true;
@@ -4597,7 +4605,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(child->GetId());
             }
         } else {
-            child->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
+            child->SetDeleteRsNode(true);
             GetLiveChildren(child, childNodes);
         }
     }
@@ -4618,7 +4626,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(overlayNode->GetId());
             }
         } else {
-            overlayNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
+            overlayNode->SetDeleteRsNode(true);
             GetLiveChildren(overlayNode, childNodes);
         }
     }
@@ -4628,7 +4636,7 @@ void RosenRenderContext::AddRsNodeForCapture()
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (host && host->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
+    if (host && host->GetIsDelete()) {
         rsNode_->SetDrawNode();
         auto pipeline = host->GetContext();
         if (pipeline) {
@@ -4651,25 +4659,12 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto childNodesNew = children;
     if (SystemProperties::GetContainerDeleteFlag()) {
         auto frameNode = GetHost();
-        if (!frameNode || frameNode->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
-            return;
-        }
-        if (CanNodeBeDeleted(frameNode)) {
-            frameNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
-            if (auto parentFrameNode = frameNode->GetParentFrameNode()) {
-                parentFrameNode->MarkNeedSyncRenderTree();
-                parentFrameNode->RebuildRenderContextTree();
-            }
+        if (!frameNode || frameNode->GetIsDelete()) {
             return;
         }
         childNodesNew.clear();
         GetLiveChildren(frameNode, childNodesNew);
     }
-    ReCreateRsNodeTreeInner(childNodesNew);
-}
-
-void RosenRenderContext::ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew)
-{
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
@@ -5918,10 +5913,10 @@ void RosenRenderContext::SetRenderFit(RenderFit renderFit)
     }
 }
 
-void RosenRenderContext::OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType)
+void RosenRenderContext::OnRenderStrategyUpdate(RenderStrategy renderStrategy)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(cornerApplyType));
+    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(renderStrategy));
 }
 
 void RosenRenderContext::ClearDrawCommands()
@@ -6251,6 +6246,10 @@ void RosenRenderContext::DumpInfo()
             + progressMaskPropertyPtr->GetColor().ToString() + " enableBreathe:"
             + std::to_string(progressMaskPropertyPtr->GetEnableBreathe())
         );
+    }
+
+    if (GetExcludeFromRenderGroupValue(false)) {
+        DumpLog::GetInstance().AddDesc(std::string("excludeRenderGroup:1"));
     }
 }
 
@@ -6793,6 +6792,13 @@ void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bo
     rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
 }
 
+void RosenRenderContext::OnExcludeFromRenderGroupUpdate(bool exclude)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ExcludedFromNodeGroup(exclude);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnNodeNameUpdate(const std::string& id)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -6845,7 +6851,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 #endif
 #if defined(IOS_PLATFORM)
 #if defined(PLATFORM_VIEW_SUPPORTED)
-    if (patternType_ == PatternType::PLATFORM_VIEW) {
+    if (patternType_ == PatternType::PLATFORM_VIEW || patternType_ == PatternType::XCOM) {
         RSSurfaceExtConfig config = {
             .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
             .additionalData = nativeWindow,
@@ -7651,24 +7657,25 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
     }
 }
 
-void RosenRenderContext::FreezeCanvasNode(bool freezeFlag)
+void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 {
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
-        canvasNode_->SetFreeze(freezeFlag);
+    if (keyFrameNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode: %{public}d", freezeFlag);
+        keyFrameNode_->SetFreeze(freezeFlag);
     }
 }
 
-void RosenRenderContext::RemoveCanvasNode()
+void RosenRenderContext::RemoveKeyFrameNode()
 {
     if (reDraggingFlag_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
         reDraggingFlag_ = false;
         return;
     }
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
-        canvasNode_->RemoveFromTree();
-        canvasNode_ = nullptr;
+    if (keyFrameNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: removed");
+        keyFrameNode_->RemoveFromTree();
+        keyFrameNode_ = nullptr;
     }
 }
 
@@ -7681,19 +7688,19 @@ void RosenRenderContext::CheckAnimationParametersValid(int32_t& animationParam)
     }
 }
 
-bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
+bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
 {
     static bool animationFlag = false;
     if (animationFlag) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "animationFlag is true.");
         return false;
     }
-    if (!canvasNode_) {
+    if (!keyFrameNode_) {
         return true;
     }
 
-    FreezeCanvasNode(true);
-    canvasNode_->SetAlpha(1.0f);
+    FreezeKeyFrameNode(true);
+    keyFrameNode_->SetAlpha(1.0f);
     FlushImplicitTransaction();
 
     CheckAnimationParametersValid(duration);
@@ -7704,18 +7711,18 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
     option.SetCurve(Curves::EASE_OUT);
     AnimationUtils::Animate(option,
         [this]() {
-            if (canvasNode_) {
+            if (keyFrameNode_) {
                 animationFlag = true;
-                canvasNode_->SetAlpha(0.0f);
+                keyFrameNode_->SetAlpha(0.0f);
             }
         },
         [this, isDragEnd]() {
-            if (canvasNode_) {
-                canvasNode_->SetAlpha(1.0f);
+            if (keyFrameNode_) {
+                keyFrameNode_->SetAlpha(1.0f);
             }
-            FreezeCanvasNode(false);
+            FreezeKeyFrameNode(false);
             if (isDragEnd) {
-                RemoveCanvasNode();
+                RemoveKeyFrameNode();
             }
             if (callbackAnimateEnd_) {
                 callbackAnimateEnd_();
@@ -7746,36 +7753,36 @@ void RosenRenderContext::FlushImplicitTransaction()
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
-void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
+void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& rootNode)
 {
-    if (canvasNode_ && rootNode) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
+    if (keyFrameNode_ && rootNode) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "LinkKeyFrameNodeToRootNode");
         auto renderContext = rootNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        canvasNode_->SetLinkedRootNodeId(renderContext->GetNodeId());
+        keyFrameNode_->SetLinkedNodeId(renderContext->GetNodeId());
         FlushImplicitTransaction();
     }
 }
 
-void RosenRenderContext::CreateCanvasNode()
+void RosenRenderContext::CreateKeyFrameNode()
 {
-    if (!canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
+    if (!keyFrameNode_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "CreateKeyFrameNode");
         if (!SystemProperties::GetMultiInstanceEnabled()) {
-            canvasNode_ = Rosen::RSCanvasNode::Create();
+            keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create();
             Rosen::RSTransaction::FlushImplicitTransaction();
         } else {
             auto pipeline = GetPipelineContext();
             auto rsUIContext = GetRSUIContext(pipeline);
-            canvasNode_ = Rosen::RSCanvasNode::Create(false, false, rsUIContext);
+            keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create(false, false, rsUIContext);
             FlushImplicitTransaction();
         }
     }
 }
 
-std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode() const
+std::shared_ptr<Rosen::RSWindowKeyFrameNode> RosenRenderContext::GetKeyFrameNode() const
 {
-    return canvasNode_;
+    return keyFrameNode_;
 }
 
 void RosenRenderContext::SetColorGamut(uint32_t colorGamut)

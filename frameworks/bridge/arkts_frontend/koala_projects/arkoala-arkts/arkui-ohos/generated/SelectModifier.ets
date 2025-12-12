@@ -17,7 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier, extractors, hookSelectSetDividerMethod } from "#handwritten"
+import { ModifierState } from './CommonModifier'
+import { AttributeModifier, ContentModifier, extractors, hookSelectSetDividerMethod, hookSelectContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
@@ -32,6 +33,7 @@ import { TextModifier } from "arkui.TextModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute,AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -93,12 +95,19 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _avoidance_0_0value?: AvoidanceMode | undefined
     _menuOutline_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuOutline_0_0value?: MenuOutlineOptions | undefined
+    _showInSubWindow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showInSubWindow_0_0value?: boolean | undefined
+    _showDefaultSelectedIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showDefaultSelectedIcon_0_0value?: boolean | undefined
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundColor_0_0value?: ResourceColor | undefined
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<MenuItemConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSelectPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -569,6 +578,42 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._showInSubWindow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showInSubWindow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowInSubWindowAttribute((this._showInSubWindow_0_0value as boolean | undefined));
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowInSubWindowAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._showDefaultSelectedIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showDefaultSelectedIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowDefaultSelectedIconAttribute((this._showDefaultSelectedIcon_0_0value as boolean | undefined));
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowDefaultSelectedIconAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._backgroundColor_0_flag) {
@@ -605,9 +650,28 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSelectContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<MenuItemConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSelectContentModifier(peer, (undefined as ContentModifier<MenuItemConfiguration> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: SelectModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selected_0_flag) {
@@ -946,6 +1010,32 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._showInSubWindow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showInSubWindow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showInSubWindow(modifier._showInSubWindow_0_0value);
+                    break;
+                }
+                default: {
+                    this.showInSubWindow((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._showDefaultSelectedIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showDefaultSelectedIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showDefaultSelectedIcon(modifier._showDefaultSelectedIcon_0_0value);
+                    break;
+                }
+                default: {
+                    this.showDefaultSelectedIcon((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._backgroundColor_0_flag) {
@@ -969,6 +1059,19 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
                 default: {
                     this.menuAlign((undefined as MenuAlignType | undefined), (undefined as Offset | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuItemContentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuItemContentModifier((undefined as ContentModifier<MenuItemConfiguration> | undefined));
                 }
             }
         }
@@ -1259,6 +1362,28 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         }
         return this
     }
+    showInSubWindow(value: boolean | undefined): this {
+        if (((this._showInSubWindow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showInSubWindow_0_0value) !== (value)))
+        {
+            this._showInSubWindow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showInSubWindow_0_0value = value
+        } else
+        {
+            this._showInSubWindow_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        if (((this._showDefaultSelectedIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showDefaultSelectedIcon_0_0value) !== (value)))
+        {
+            this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showDefaultSelectedIcon_0_0value = value
+        } else
+        {
+            this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     backgroundColor(value: ResourceColor | undefined): this {
         if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1279,6 +1404,17 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._menuAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

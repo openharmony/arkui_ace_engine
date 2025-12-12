@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
     AccessibilitySamePageMode::FULL_SILENT };
+const std::string DEFAULT_STATE_DESCRIPTION = "";
 }
 
 void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
@@ -111,6 +112,17 @@ void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
     if (autoEventPair.first) {
         ViewAbstractModel::GetInstance()->SetAutoEventParam(autoEventPair.second);
     }
+}
+
+void JSViewAbstract::JsAccessibilityStateDescription(const JSCallbackInfo& info)
+{
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string stateDescription;
+    if (!ParseJsString(jsValue, stateDescription)) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityStateDescription(DEFAULT_STATE_DESCRIPTION);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityStateDescription(stateDescription);
 }
 
 void JSViewAbstract::ParseAccessibilityDescriptionJson(const std::string& description,
@@ -332,5 +344,25 @@ void JSViewAbstract::JsOnAccessibilityHoverTransparent(const JSCallbackInfo& arg
         func->Execute(info);
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityHoverTransparent(std::move(onHoverTransparentFunc));
+}
+
+void JSViewAbstract::JsAccessibilityActionOptions(const JSCallbackInfo& args)
+{
+    NG::AccessibilityActionOptions options;
+    if (args.Length() == 0 || args[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityActionOptions();
+        return;
+    }
+    if (args.Length() > 0 && args[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(args[0]);
+        auto scrollStepVal = obj->GetProperty("scrollStep");
+        if (scrollStepVal->IsNumber()) {
+            int32_t stepCount = scrollStepVal->ToNumber<int32_t>();
+            options.scrollStep = (stepCount >= 1) ? stepCount : 1;
+        }
+        ViewAbstractModel::GetInstance()->SetAccessibilityActionOptions(options);
+    } else {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityActionOptions();
+    }
 }
 }

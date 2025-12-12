@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT IndicatorModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
     static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
     static void SetIndicatorType(FrameNode* frameNode, const std::optional<SwiperIndicatorType>& indicatorType);

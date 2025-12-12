@@ -34,6 +34,7 @@ public:
     static void SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static void ReSetDescription(FrameNode* frameNode);
     static void SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue);
     static void SetGradientColors(FrameNode* frameNode, const std::vector<LinearGradientColorSteps>& colors,
         const std::vector<float>& values, const GaugeType& type);

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32 } from "@koalaui/common"
@@ -26,6 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookHyperlinkAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -45,6 +47,7 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setHyperlinkOptionsAttribute(address: string | Resource | undefined, content?: string | Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (address !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -159,7 +162,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookHyperlinkAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookHyperlinkAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

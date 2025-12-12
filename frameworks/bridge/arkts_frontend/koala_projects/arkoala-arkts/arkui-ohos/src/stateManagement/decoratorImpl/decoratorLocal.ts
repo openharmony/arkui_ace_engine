@@ -28,8 +28,11 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implement
 
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Local ${this.getTraceInfo()}`);
-        const value = this.backing_.get(this.shouldAddRef());
-        uiUtils.builtinContainersAddRefLength(value);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 

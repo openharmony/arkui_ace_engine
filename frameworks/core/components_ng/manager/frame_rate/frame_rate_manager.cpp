@@ -26,8 +26,7 @@ uint32_t GetRateTypeOfScene(const std::string& scene)
         { "picker_drag_scene", PICKER_DRAG_FRAME_RATE_TYPE },
         { "scrollable_multi_task_scene", SCROLLABLE_MULTI_TASK_FRAME_RATE_TYPE },
     };
-    auto iter = sceneRateTypeMap.find(scene);
-    if (iter != sceneRateTypeMap.end()) {
+    if (auto iter = sceneRateTypeMap.find(scene); iter != sceneRateTypeMap.end()) {
         return iter->second;
     }
     return UNKNOWN_FRAME_RATE_TYPE;

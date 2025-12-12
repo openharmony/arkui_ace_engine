@@ -139,6 +139,7 @@ void UIExtensionModelNG::CreateDynamicComponent(const UIExtensionConfig& config)
     auto pattern = frameNode->GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBackgroundTransparent(config.backgroundTransparent);
+    pattern->SetAllowCrossProcessNesting(config.allowCrossProcessNesting);
     stack->Push(frameNode);
 }
 

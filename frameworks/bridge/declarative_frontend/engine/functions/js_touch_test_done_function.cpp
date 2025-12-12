@@ -26,7 +26,7 @@
 namespace OHOS::Ace::Framework {
 
 bool JsTouchTestDoneFunction::Execute(
-    const std::shared_ptr<BaseGestureEvent>& info, const std::list<RefPtr<NG::NGGestureRecognizer>>& others)
+    const std::shared_ptr<BaseGestureEvent>& info, const std::list<WeakPtr<NG::NGGestureRecognizer>>& others)
 {
     CHECK_NULL_RETURN(info, false);
     auto obj = CreateGestureEventObject(info);
@@ -36,7 +36,10 @@ bool JsTouchTestDoneFunction::Execute(
     JSRef<JSArray> othersArr = JSRef<JSArray>::New();
     uint32_t othersIdx = 0;
     for (const auto& item : others) {
-        auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item);
+        if (item.Invalid()) {
+            continue;
+        }
+        auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item.Upgrade());
         othersArr->SetValueAt(othersIdx++, othersObj);
     }
     params[1] = othersArr;

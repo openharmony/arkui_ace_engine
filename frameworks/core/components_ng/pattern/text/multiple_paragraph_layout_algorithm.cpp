@@ -133,6 +133,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetLineHeightMultiply(textLayoutProperty->GetLineHeightMultiply());
     textStyle.SetMinimumLineHeight(textLayoutProperty->GetMinimumLineHeight());
     textStyle.SetMaximumLineHeight(textLayoutProperty->GetMaximumLineHeight());
+    textStyle.SetIncludeFontPadding(textLayoutProperty->GetIncludeFontPaddingValue(false));
+    textStyle.SetFallbackLineSpacing(textLayoutProperty->GetFallbackLineSpacingValue(false));
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
@@ -600,7 +602,7 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
             spanTextStyle = child->GetTextStyle().value();
         }
         if (index == 0) {
-            auto direction = ParagraphUtil::GetTextDirection(child->content, layoutWrapper);
+            auto direction = ParagraphUtil::GetSpanTextDirection(layoutWrapper, child->content, std::nullopt, spans);
             spanTextStyle.SetTextDirection(direction);
             spanTextStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
             paraStyle = ParagraphUtil::GetParagraphStyle(spanTextStyle);
@@ -800,7 +802,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         }
         RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
-            ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle);
+            ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle, group);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());

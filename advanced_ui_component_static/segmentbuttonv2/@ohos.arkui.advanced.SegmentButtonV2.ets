@@ -1130,14 +1130,15 @@ export struct MultiCapsuleSegmentButtonV2 {
       topEnd: noneBorderRadius,
       bottomEnd: noneBorderRadius,
     };
+    let borderRadius: LengthMetrics = LengthMetrics.resource(this.theme.itemBorderRadius);
+    if (this.itemBorderRadius && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemBorderRadius!) ) {
+      borderRadius = this.itemBorderRadius!;
+    }
     if (repeatItem.index === 0) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
       borderRadiuses.topStart = borderRadius;
       borderRadiuses.bottomStart = borderRadius;
-
     }
     if (repeatItem.index === items.length - 1) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
       borderRadiuses.topEnd = borderRadius;
       borderRadiuses.bottomEnd = borderRadius;
     }

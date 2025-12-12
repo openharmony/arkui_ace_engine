@@ -30,6 +30,7 @@ namespace OHOS::Ace {
 enum class ForegroundColorStrategy : char {
     NONE,
     INVERT,
+    CONTRAST, // uses new ColorPicker API to extract contrast color
 };
 
 namespace StringUtils {

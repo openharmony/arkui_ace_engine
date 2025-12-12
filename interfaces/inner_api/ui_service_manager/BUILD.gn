@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,6 +59,7 @@ ohos_shared_library("ui_service_mgr") {
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_xcollie.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_statistic_event.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
   output_values = get_target_outputs(":uiservice_manager_interface")
@@ -111,6 +112,7 @@ ohos_shared_library("uiservice_manager_interface_set") {
   output_values = get_target_outputs(":uiservice_manager_interface")
   sources = filter_include(output_values, [ "*_proxy.cpp" ])
   sources += filter_include(output_values, [ "*_stub.cpp" ])
+  sources += [ "$ace_root/adapter/ohos/services/uiservice/src/ui_service_statistic_event.cpp", ]
   deps = [ ":uiservice_manager_interface" ]
   external_deps = [
     "ability_base:want",

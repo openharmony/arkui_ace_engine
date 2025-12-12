@@ -14,7 +14,7 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IProvideDecoratedVariable, IVariableOwner } from '../decorator';
+import { IProvideDecoratedVariable, IVariableOwner, ConsumeOptions } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
@@ -22,43 +22,51 @@ import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { ProvideDecoratedVariable } from './decoratorProvide';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
-    sourceProvide_: IProvideDecoratedVariable<T> | undefined;
-    constructor(owningView: IVariableOwner, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
+    sourceProvide_: ProvideDecoratedVariable<T> | undefined;
+    checkFake: boolean = false;
+    constructor(owningView: IVariableOwner, varName: string, provideAliasName: string, watchFunc?: WatchFuncType, consumeOptions?: ConsumeOptions<T>) {
         super('@Consume', owningView, varName, watchFunc);
         this.provideAliasName = provideAliasName;
-        this.sourceProvide_ = owningView.__findProvide__Internal<T>(provideAliasName);
-        if (this.sourceProvide_ === undefined) {
-            throw new Error('no Provide found for Consume');
+        this.sourceProvide_ = owningView.__findProvide__Internal<T>(provideAliasName) as ProvideDecoratedVariable<T> | undefined;
+        if (!this.sourceProvide_) {
+            if (consumeOptions) {
+                this.checkFake = true;
+                // use fake Provide source
+                this.sourceProvide_ = new ProvideDecoratedVariable<T>(varName, uiUtils.makeV1Observed(consumeOptions!.defaultValue) as T);
+                this.registerWatchForObservedObjectChanges(this.sourceProvide_!.get(false));
+            } else {
+                throw new Error(`Can not initialize @Consume. @Consume ${varName} has no default value or @Provide source!`);
+            }
+        } else {
+            this.sourceProvide_!.registerWatchToSource(this);
         }
-        if (this.sourceProvide_) {
-            // check type
-        }
-        const initValue = this.sourceProvide_!.get();
-        this.registerWatchForObservedObjectChanges(initValue);
-        this.sourceProvide_!.registerWatchToSource(this);
     }
-    
+
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
-        const value = this.sourceProvide_!.get();
-        uiUtils.builtinContainersAddRefAnyKey(value);
-        return value;
+        return this.sourceProvide_!.get();
     }
 
     public set(newValue: T): void {
-        const oldValue = this.sourceProvide_!.get();
+        const oldValue = this.sourceProvide_!.get(false);
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${oldValue === newValue} ${this.setTraceInfo()}`);
-        if (oldValue !== newValue) {
-            const value = uiUtils.makeV1Observed(newValue);
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(value);
-            this.sourceProvide_!.set(value);
+        if (oldValue === newValue) {
+            return;
         }
+        if (!this.checkFake) {
+            this.sourceProvide_!.set(newValue);
+            return;
+        }
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.sourceProvide_!.set(newValue, false);
+        this.registerWatchForObservedObjectChanges(this.sourceProvide_!.get(false));
+        this.execWatchFuncs();
     }
 
     public getSource(): IProvideDecoratedVariable<T> {
-        return this.sourceProvide_!;
+        return this.sourceProvide_! as IProvideDecoratedVariable<T>;
     }
 }

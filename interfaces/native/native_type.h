@@ -119,6 +119,60 @@ typedef struct {
 } ArkUI_GridItemRect;
 
 /**
+
+ * @brief Enumerates the selected indicator type of picker.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** background. */
+    ARKUI_PICKER_INDICATOR_BACKGROUND = 0,
+    /** divider. */
+    ARKUI_PICKER_INDICATOR_DIVIDER = 1,
+} ArkUI_PickerIndicatorType;
+
+/**
+ * @brief style parameters of background indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /**  background color, in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t backgroundColor;
+    /** radius of the top left corner. */
+    float topLeftRadius;
+    /** radius of the top right corner */
+    float topRightRadius;
+    /** radius of the bottom left corner */
+    float bottomLeftRadius;
+    /** radius of the bottom right corner. */
+    float bottomRightRadius;
+} ArkUI_PickerIndicatorBackground;
+
+/**
+ * @brief style parameters of divider indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /** stroke width */
+    float strokeWidth;
+    /** divider color,in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t dividerColor;
+    /** the distance between the divider and the beginning of the side of the picker, unit vp. */
+    float startMargin;
+    /** the distance between the divider and the end of the side of the picker (unit: vp). */
+    float endMargin;
+} ArkUI_PickerIndicatorDivider;
+
+/**
+ * @brief Definition of indicator style.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_PickerIndicatorStyle ArkUI_PickerIndicatorStyle;
+
+/**
  * @brief Defines the <b>Grid</b> layout options.
  *
  * @since 21
@@ -314,6 +368,13 @@ typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
 typedef struct ArkUI_ShowCounterConfig ArkUI_ShowCounterConfig;
 
 /**
+ * @brief Defines the text content base controller.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextContentBaseController ArkUI_TextContentBaseController;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -368,13 +429,6 @@ typedef enum {
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
-
-/**
- * @brief Defines the selected text recognition configuration.
- *
- * @since 22
- */
-typedef struct ArkUI_SelectedDataDetectorConfig ArkUI_SelectedDataDetectorConfig;
 
 /**
  * @brief Enumerates the font styles.
@@ -440,6 +494,14 @@ typedef enum {
     ARKUI_TEXT_ALIGNMENT_END,
     /** Aligned with both margins. */
     ARKUI_TEXT_ALIGNMENT_JUSTIFY,
+    /** Aligned with left to right.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_LEFT_TO_RIGHT = 4,
+    /** Aligned with right to left.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_RIGHT_TO_LEFT = 5,
 } ArkUI_TextAlignment;
 
 /**
@@ -471,6 +533,22 @@ typedef enum {
     /** 底部对齐。 */
     ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
 } ArkUI_TextContentAlign;
+
+/**
+ * @brief Enumerates the text text direction.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The text direction is left to right. */
+    ARKUI_TEXT_DIRECTION_LTR = 0,
+    /** The text direction is right to left. */
+    ARKUI_TEXT_DIRECTION_RTL = 1,
+    /** The text direction follows the component layout. */
+    ARKUI_TEXT_DIRECTION_DEFAULT = 2,
+    /** The text direction follows the actual text. */
+    ARKUI_TEXT_DIRECTION_AUTO = 3,
+} ArkUI_TextDirection;
 
 /**
  * @brief Enumerates the types of the Enter key for a single-line text box.
@@ -2362,6 +2440,36 @@ typedef enum {
     ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
 } ArkUI_AnimationDirection;
 
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default effect. */
+    ARKUI_HOVER_EFFECT_AUTO = 0,
+    /** Zoom in and out effect. */
+    ARKUI_HOVER_EFFECT_SCALE,
+    /** Highlight effect. */
+    ARKUI_HOVER_EFFECT_HIGHLIGHT,
+    /** None effect. */
+    ARKUI_HOVER_EFFECT_NONE,
+} ArkUI_HoverEffect;
+
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default priority. */
+    ARKUI_FOCUS_PRIORITY_AUTO = 0,
+    /** Prior priority. */
+    ARKUI_FOCUS_PRIORITY_PRIOR = 2000,
+    /** Previous focus priority. */
+    ARKUI_FOCUS_PRIORITY_PREVIOUS = 3000,
+} ArkUI_FocusPriority;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/
@@ -2460,6 +2568,16 @@ typedef enum {
      * @since 15
      */
     ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
+    /**
+     * @error The provided color space or dynamic range mode is not supported.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED = 160003,
+    /**
+     * @error The isAuto parameter of the color space or dynamic range mode is set to true for offscreen node snapshot.
+     * @since 23
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED = 160004,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
@@ -2801,6 +2919,20 @@ typedef enum {
 } ArkUI_PixelRoundCalcPolicy;
 
 /**
+ * @brief Menu pop-up strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Determine whether to pop up the menu according to the underlying default logic. */
+    ARKUI_MENU_POLICY_DEFAULT = 0,
+    /** Never pop up the menu. */
+    ARKUI_MENU_POLICY_HIDE = 1,
+    /** Always pop up the menu. */
+    ARKUI_MENU_POLICY_SHOW = 2,
+} ArkUI_MenuPolicy;
+
+/**
  * @brief Define the direction to expand the swipe action.
  *
  * @since 21
@@ -2839,6 +2971,22 @@ typedef enum {
 } ArkUI_ItemFillPolicy;
 
 /**
+ * @brief Define the event tool type that support response region settings.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** All source tool type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL = 0,
+    /** The Finger type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_FINGER = 1,
+    /** The pen type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_PEN = 2,
+    /** The mouse type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_MOUSE = 3,
+} ArkUI_ResponseRegionSupportedTool;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
@@ -2865,6 +3013,60 @@ typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArr
    * @since 19
    */
 typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
+
+/**
+  * @brief Defines the selection options.
+  *
+  * @since 23
+  */
+typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
+
+/**
+ * @brief Create the ArkUI_PickerIndicatorStyle instance.
+ *
+ * @param ArkUI_PickerIndictorType, enumeration type.
+ * @return  ArkUI_PickerIndicatorStyle instance. If the instance returns a null pointer,
+ *         it indicates creation failure, and the reason for the failure may be that the address space is full or
+ *         the type not supported.
+ * @since 23
+*/
+ArkUI_PickerIndicatorStyle* OH_ArkUI_PickerIndicatorStyle_Create(ArkUI_PickerIndicatorType type);
+
+/**
+* @brief Destroy the ArkUI_PickerIndicatorStyle instance.
+*
+* @param ArkUI_PickerIndicatorStyle instance to be destroyed.
+* @since 23
+*/
+void OH_ArkUI_PickerIndicatorStyle_Dispose(ArkUI_PickerIndicatorStyle* style);
+
+/**
+* @brief Set the parameters of background style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of background style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "background".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorBackground* background);
+
+/**
+* @brief Set the parameters of divider style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of divider style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "divider".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorDivider* divider);
 
 typedef struct {
     float x;
@@ -2914,6 +3116,77 @@ typedef enum {
     /** Hover or press style. */
     GRID_ITEM_STYLE_PLAIN = 1,
 } ArkUI_GridItemStyle;
+
+/**
+ * @brief Define the types for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default non-safe area of the system, including the status bar and navigation bar. */
+    ARKUI_LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1,
+} ArkUI_LayoutSafeAreaType;
+/**
+ * @brief Define the edges for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP = 1,
+    /** Bottom edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Start edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_START = 1 << 2,
+    /** End edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_END = 1 << 3,
+    /** Vertical edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP | ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+    /** Horizontal edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_START | ARKUI_LAYOUT_SAFE_AREA_EDGE_END,
+    /** All edges of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_ALL = ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL | ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+} ArkUI_LayoutSafeAreaEdge;
+
+/**
+ * @brief Enumerates the localizedAlignment modes.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top start. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_START = 0,
+    /** Top center. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP,
+    /** Top end. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_END,
+    /** Vertically centered start. */
+    ARKUI_LOCALIZED_ALIGNMENT_START,
+    /** Horizontally and vertically centered. */
+    ARKUI_LOCALIZED_ALIGNMENT_CENTER,
+    /** Vertically centered end. */
+    ARKUI_LOCALIZED_ALIGNMENT_END,
+    /** Bottom start. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_START,
+    /** Horizontally centered on the bottom. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM,
+    /** Bottom end. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_END,
+} ArkUI_LocalizedAlignment;
+/**
+ * @brief Enumerates the graphics rendering strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The current component and its child components will be drawn directly onto the screen canvas. */
+    ARKUI_RENDERSTRATEGY_FAST = 0,
+    /**
+    * The current component and its child components will first be drawn onto an off-screen canvas,
+    *     then undergo some graphic rendering operations, and finally be drawn onto the main canvas.
+    */
+    ARKUI_RENDERSTRATEGY_OFFSCREEN,
+} ArkUI_RenderStrategy;
 
 /**
  * @brief defines the measure info of the custom span.
@@ -5325,6 +5598,44 @@ void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
 int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 
 /**
+ * @brief Defines the color mode used for current snapshot taking.
+ * By default, the system draws snapshot in sRGB mode. Therefore, snapshot for components with wide color display
+ * mode enabled will lose some effect. If you know the color space used in the component to be taken snapshot,
+ * you can specify the colorSpace parameter and set isAuto to false, for achieving the expected screenshot effect.
+ * But it is difficult to know which color space is used by the component to be taken. Therefore, in general,
+ * you can just set isAuto to true for letting the system to determine the color space to use based on the actual
+ * situation automaticly. When isAuto is set to true, value set by the colorSpace parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param colorSpace One specific color space which want to be used, you can refer the {@link ColorSpaceName} enum
+ *    in native_color_space_manager.h.
+ * @param isAuto Indicate that if the system should decide the color space automaticlly.
+ *    If set this to true, the one specificed by colorSpace parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetColorMode(ArkUI_SnapshotOptions* snapshotOptions, int32_t colorSpace, bool isAuto);
+
+/**
+ * @brief Defines the dynamic range mode used for current snapshot taking.
+ * By default, the system draws snapshot in STANDARD mode. You can set the dynamicRangeMode parameter
+ * and set isAuto to false, for using one specific dynamic range mode.
+ * Also you can just set isAuto to true for letting the system to determine the dynamic range mode automaticly.
+ * When isAuto is set to true, value set by the dynamicRangeMode parameter will be ignored.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param dynamicRangeMode One specific dynamic range mode defined in {@link ArkUI_DynamicRangeMode}.
+ * @param isAuto Indicate that if the system should decide the dynamic range mode automaticlly.
+ *    If set this to true, the one specificed by dynamicRangeMode parameter will be ignored.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if invalid snapshotOptions passed in.
+ * @since 23
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
+    ArkUI_SnapshotOptions* snapshotOptions, int32_t dynamicRangeMode, bool isAuto);
+
+/**
  * @brief Create a cross-language option instance.
  *
  * @return Returns a cross-language option instance. If the result is a null pointer, it may be out of memory.
@@ -5883,49 +6194,39 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig*
 uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config);
 
 /**
- * @brief Creates a configuration object for selected text recognition.
+ * @brief Create selection options.
  *
- * @return A pointer to the configuration object.
- * @since 22
+ * @return A pointer to the selection options object.
+ * @since 23
  */
-ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create();
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create();
 
 /**
- * @brief Disposes a configuration object for selected text recognition.
+ * @brief Dispose selection options object.
  *
- * @param config Pointer to the configuration object to be disposed.
- * @since 22
+ * @param options Pointer to the selection options object. to be disposed.
+ * @since 23
  */
-void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config);
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options);
 
 /**
- * @brief Sets the recognition types of a configuration object for selected text recognition.
+ * @brief Sets the menu policy for selection options.
  *
- * @param config Pointer to the configuration object to be modified.
- * @param types Array of entity types, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
- * @since 22
+ * @param options Pointer to the selection options.
+ * @param menuPolicy The menu policy.
+ * @since 23
  */
-void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(
+    ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy);
 
 /**
- * @brief Gets the recognition types of a configuration object for selected text recognition.
+ * @brief Gets the menu policy of selection options.
  *
- * @param config Pointer to the configuration object.
- * @param types Array of entity types to take the result, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
- *         If an error code is returned, it may be due to a failure in parameter validation;
- *         the parameter must not be null.
- * @since 22
+ * @param options Pointer to the selection options object.
+ * @return Returns the menu policy.
+ * @since 23
  */
-int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
-
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options);
 /**
  * @brief Defines the text menu item for edit menu item.
  *
@@ -6582,6 +6883,288 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData));
+
+/**
+ * @brief Create an object of the text content base controller.
+ *
+ * @return A pointer to the controller object.
+ * @since 23
+ */
+ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create();
+
+/**
+ * @brief Dispose an object of the text content base controller.
+ *
+ * @param controller Pointer to the controller object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController* controller);
+
+/**
+ * @brief Delete the last character of the input field component.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller);
+
+/**
+ * @brief Scroll the input field component to make the specified content visible.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_ScrollToVisible(
+    ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
+
+/**    
+ * @brief Enumerates the MarqueeStartPolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Start marquee in any case. This is the default policy. */
+    ARKUI_MARQUEESTARTPOLICY_DEFAULT = 0,
+    /** Start marquee only when get focus. */
+    ARKUI_MARQUEESTARTPOLICY_ONFOCUS = 1
+} ArkUI_MarqueeStartPolicy;
+
+/**
+ * @brief Enumerates the MarqueeUpdatePolicy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Reset scroll position and restart scroll. */
+    ARKUI_MARQUEEUPDATEPOLICY_DEFAULT = 0,
+    /** Preserve scroll position, just change to new text. */
+    ARKUI_MARQUEEUPDATEPOLICY_PRESERVEPOSITION = 1
+} ArkUI_MarqueeUpdatePolicy;
+
+/**
+ * @brief Defines the marquee options of text.
+ *
+ * @since 22
+ */
+typedef struct ArkUI_TextMarqueeOptions ArkUI_TextMarqueeOptions;
+
+/**
+ * @brief Create a option object for marquee animation of text.
+ *
+ * @return A pointer to the option object.
+ * @since 23
+ */
+ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create();
+
+/**
+ * @brief Dispose a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_Dispose(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param start Flag of is need to start marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStart(ArkUI_TextMarqueeOptions* option, bool start);
+
+/**
+ * @brief Gets the start flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param step The step size of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStep(ArkUI_TextMarqueeOptions* option, float step);
+
+/**
+ * @brief Gets the step size of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the step size of the marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetStep(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param spacing The spacing between two rounds of marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetSpacing(ArkUI_TextMarqueeOptions* option, float spacing);
+
+/**
+ * @brief Gets the spacing between two rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the spacing between two rounds of marquee.
+ * @since 23
+ */
+float OH_ArkUI_TextMarqueeOptions_GetSpacing(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param loop The rounds of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetLoop(ArkUI_TextMarqueeOptions* option, int32_t loop);
+
+/**
+ * @brief Gets the rounds of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the rounds of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetLoop(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fromStart The running direction of the marquee, true means running from start.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFromStart(ArkUI_TextMarqueeOptions* option, bool fromStart);
+
+/**
+ * @brief Gets the fromStart flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fromStart flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFromStart(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param delay The delay time between each round of the marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetDelay(ArkUI_TextMarqueeOptions* option, int32_t delay);
+
+/**
+ * @brief Gets the delay time between each round of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the delay time between each round of the marquee.
+ * @since 23
+ */
+int32_t OH_ArkUI_TextMarqueeOptions_GetDelay(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fadeout The flag of whether the text is faded out.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetFadeout(ArkUI_TextMarqueeOptions* option, bool fadeout);
+
+/**
+ * @brief Gets the fadeout flag of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the fadeout flag.
+ * @since 23
+ */
+bool OH_ArkUI_TextMarqueeOptions_GetFadeout(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The start policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetStartPolicy(ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeStartPolicy startPolicy);
+
+/**
+ * @brief Gets the start policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the start policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Sets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param startPolicy The update policy for marquee.
+ * @since 23
+ */
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
+    ArkUI_MarqueeUpdatePolicy updatePolicy);
+
+/**
+ * @brief Gets the update policy of a option object for marquee animation of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the update policy for marquee.
+ * @since 23
+ */
+ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
+
 #ifdef __cplusplus
 };
 #endif

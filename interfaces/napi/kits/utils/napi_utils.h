@@ -29,7 +29,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
-#include "securec.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -120,6 +119,8 @@ bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& styl
 bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
 bool HasGetter(napi_env env, napi_value value, const std::string& key);
 int32_t GetStringFormatStartIndex(bool hasGetter);
+int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext);
+std::string GetLocalizedParamStr(const std::string& paramStr, const std::string& type);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

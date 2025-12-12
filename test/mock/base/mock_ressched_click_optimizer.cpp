@@ -16,10 +16,6 @@
 #include "base/ressched/ressched_click_optimizer.h"
 
 namespace OHOS::Ace {
-ResSchedClickOptimizer::ResSchedClickOptimizer()
-{
-}
-
 void ResSchedClickOptimizer::Init()
 {
 }

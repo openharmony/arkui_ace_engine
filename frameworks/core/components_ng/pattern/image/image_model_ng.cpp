@@ -105,6 +105,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
     }
     SetImageFillSetByUser(false);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, IsYUVDecode, true);
 }
 
 void ImageModelNG::ResetImage()
@@ -174,6 +175,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateImageSourceInfo(srcInfo);
+    layoutProperty->UpdateIsYUVDecode(true);
     return frameNode;
 }
 
@@ -1434,6 +1436,25 @@ void ImageModelNG::ResetImageAltError(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImageError();
+}
+
+void ImageModelNG::SetAntiAlias(bool antiAlias)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias);
+}
+
+void ImageModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias, frameNode);
+}
+
+bool ImageModelNG::GetAntiAlias(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), false);
+    return paintProperty->GetImagePaintStyle()->GetAntiAlias().value_or(false);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

@@ -61,8 +61,12 @@ public:
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
-    static void JavaScriptOnHeadEnd(
-        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
         FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
@@ -219,6 +223,7 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetBackToTop(FrameNode* frameNode, bool isEnabled);
     static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);

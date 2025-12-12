@@ -30,7 +30,7 @@ public:
 
 /**
  * @tc.name: TextPattern001
- * @tc.desc: Test TextPattern UpdateCaretRect.
+ * @tc.desc: Test TextPattern UpdateCaretRect
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
@@ -49,7 +49,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern002
- * @tc.desc: Test TextPattern CheckSelectAreaVisible.
+ * @tc.desc: Test TextPattern CheckSelectAreaVisible
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction.
+ * @tc.desc: Test TextPattern HandleExtendAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent.
+ * @tc.desc: Test TextPattern HandleBlurEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -197,7 +197,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern008
- * @tc.desc: Test TextPattern CheckAutoFillType
+ * @tc.desc: Test TextPattern CheckAutoFillType.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern008, TestSize.Level1)
@@ -212,7 +212,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern008, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->CheckAutoFillType(AceAutoFillType::ACE_UNSPECIFIED, true);
+    pattern->CheckAutoFillType(AceAutoFillType::ACE_UNSPECIFIED);
 }
 
 /**
@@ -597,7 +597,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern022, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern023
- * @tc.desc: Test TextPattern CloseKeyboard
+ * @tc.desc: Test TextPattern CloseKeyboard.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern023, TestSize.Level1)
@@ -624,7 +624,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern023, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern024
- * @tc.desc: Test TextPattern AutoFillValueChanged
+ * @tc.desc: Test TextPattern AutoFillValueChanged.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
@@ -644,7 +644,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern025
- * @tc.desc: Test TextPattern HandleLongPress
+ * @tc.desc: Test TextPattern HandleLongPress.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
@@ -693,7 +693,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern026
- * @tc.desc: Test TextPattern InitEditingValueText
+ * @tc.desc: Test TextPattern InitEditingValueText.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern026, TestSize.Level1)
@@ -714,7 +714,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern026, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern027
- * @tc.desc: Test TextPattern InitValueText
+ * @tc.desc: Test TextPattern InitValueText.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern027, TestSize.Level1)
@@ -737,7 +737,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern027, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern028
- * @tc.desc: Test TextPattern HandleRightMouseEvent
+ * @tc.desc: Test TextPattern HandleRightMouseEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern028, TestSize.Level1)
@@ -3158,5 +3158,26 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
     responseArea->hostPattern_.Reset();
     offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
     EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
+}
+
+/**
+ * @tc.name: TextPatternGetWindowIdFromPipeline001
+ * @tc.desc: Test TextPattern GetWindowIdFromPipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
+    ASSERT_NE(windowId, nullptr);
 }
 } // namespace OHOS::Ace::NG

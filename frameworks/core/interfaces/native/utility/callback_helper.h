@@ -30,21 +30,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
+RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode);
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-}
 
 namespace GeneratedApiImpl {
     ExtensionCompanionNode* GetCompanion(Ark_NodeHandle nodePtr);
@@ -106,13 +94,14 @@ public:
     template <typename ArkResultType, typename ContinuationType, typename... Params>
     ArkResultType InvokeWithObtainResult(Params&&... args) const
     {
+        static_assert(!std::is_class_v<ArkResultType>,
+            "Can't return complex type. Use other Invoke functions or process result within custom callback!");
         ArkResultType retValue {};
-        CallbackKeeper::AnyResultHandlerType handler = [&retValue](const void *valuePtr) {
-            retValue = *(reinterpret_cast<const ArkResultType *>(valuePtr));
+        auto handler = [&retValue](ArkResultType value) {
+            retValue = value;
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
-        InvokeSync(std::forward<Params>(args)..., continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        auto continuation = CallbackKeeper::Claim<ContinuationType>(std::move(handler));
+        InvokeSync(std::forward<Params>(args)..., continuation.ArkValue());
         return retValue;
     }
 
@@ -121,26 +110,35 @@ public:
     std::unique_ptr<CallbackHelper<ArkResultType>> InvokeWithObtainCallback(Params&&... args) const
     {
         std::unique_ptr<CallbackHelper<ArkResultType>> retValue = nullptr;
-        CallbackKeeper::AnyResultHandlerType handler = [&retValue](const void *valuePtr) {
-            retValue = std::make_unique<CallbackHelper<ArkResultType>>(*(
-                reinterpret_cast<const ArkResultType *>(valuePtr)));
+        auto handler = [&retValue](ArkResultType value) {
+            retValue = std::make_unique<CallbackHelper<ArkResultType>>(value);
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
-        InvokeSync(std::forward<Params>(args)..., continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        auto continuation = CallbackKeeper::Claim<ContinuationType>(std::move(handler));
+        InvokeSync(std::forward<Params>(args)..., continuation.ArkValue());
         return std::move(retValue);
+    }
+
+    template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
+    ResultType InvokeWithConvertResult(Params&&... args) const
+    {
+        ResultType retValue {};
+        auto handler = [&retValue](ArkResultType value) {
+            retValue = Converter::Convert<ResultType>(value);
+        };
+        auto continuation = CallbackKeeper::Claim<ContinuationType>(std::move(handler));
+        InvokeSync(std::forward<Params>(args)..., continuation.ArkValue());
+        return retValue;
     }
 
     template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
     std::optional<ResultType> InvokeWithOptConvertResult(Params&&... args) const
     {
         std::optional<ResultType> retValueOpt = std::nullopt;
-        CallbackKeeper::AnyResultHandlerType handler = [&retValueOpt](const void *valuePtr) {
-            retValueOpt = Converter::OptConvert<ResultType>(*(reinterpret_cast<const ArkResultType *>(valuePtr)));
+        auto handler = [&retValueOpt](ArkResultType value) {
+            retValueOpt = Converter::OptConvert<ResultType>(value);
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
-        InvokeSync(std::forward<Params>(args)..., continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        auto continuation = CallbackKeeper::Claim<ContinuationType>(std::move(handler));
+        InvokeSync(std::forward<Params>(args)..., continuation.ArkValue());
         return retValueOpt;
     }
 
@@ -159,10 +157,9 @@ public:
     template <typename... Params>
     void BuildAsync(const std::function<void(const RefPtr<UINode>&)>&& builderHandler, Params&&... args) const
     {
-        CallbackKeeper::AnyResultHandlerType handler =
-            [builderHandler = std::move(builderHandler)](const void *valuePtr) {
+        auto handler =
+            [builderHandler = std::move(builderHandler)](Ark_NativePointer retValue) {
             CHECK_NULL_VOID(builderHandler);
-            auto retValue = *(reinterpret_cast<const Ark_NativePointer *>(valuePtr));
             auto node = Referenced::Claim(reinterpret_cast<UINode*>(retValue));
             CHECK_NULL_VOID(node);
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
@@ -171,9 +168,8 @@ public:
             builderHandler(node);
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<Callback_Pointer_Void>(handler);
-        Invoke(std::forward<Params>(args)..., continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        auto continuation = CallbackKeeper::Claim<Callback_Pointer_Void>(std::move(handler));
+        Invoke(std::forward<Params>(args)..., continuation.ArkValue());
     }
 
     bool IsValid() const

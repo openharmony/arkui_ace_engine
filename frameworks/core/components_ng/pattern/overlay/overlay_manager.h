@@ -512,6 +512,15 @@ public:
         std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
+    void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
+        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext = false);
     void CloseSheet(const SheetKey& sheetKey);
     void InitSheetMask(
         const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
@@ -585,6 +594,7 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
+    bool ChangeBindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
     void UpdateCustomKeyboardPosition();
 
@@ -775,18 +785,10 @@ public:
     {
         return menuLifeCycleCallbackMap_[targetId];
     }
+    bool CheckTargetIdIsValid(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
-    void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
-        std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange,
-        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext = false);
     void SetSheetProperty(
         const RefPtr<FrameNode>& sheetPageNode,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -799,7 +801,6 @@ private:
     void SaveSheetPageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
-    bool CheckTargetIdIsValid(int32_t targetId);
     void UpdateSheetRender(
         const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
@@ -985,7 +986,7 @@ private:
     void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
     void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
-    void SetDragNodeNeedClean();
+    void SetDragNodeNeedClean(bool needClean = true);
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
@@ -1070,6 +1071,8 @@ private:
     std::set<int32_t> curSessionIds_;
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
+    WeakPtr<FrameNode> customKeyboardNode_;
+    int32_t oldTargetId_ = -1;
     std::unordered_set<int32_t> onDisappearFilterIds_;
     std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
 };

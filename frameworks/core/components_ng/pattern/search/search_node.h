@@ -229,16 +229,6 @@ public:
         return cancelSymbolIconColor_;
     }
 
-    Color& GetSearchImageIconColor()
-    {
-        return searchImageIconOptions_.GetColor().value();
-    }
-
-    Color& GetCancelImageIconColor()
-    {
-        return cancelImageIconOptions_.GetColor().value();
-    }
-
     IconOptions& GetSearchImageIconOptions()
     {
         return searchImageIconOptions_;

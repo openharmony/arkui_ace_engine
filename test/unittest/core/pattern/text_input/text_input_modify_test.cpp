@@ -1405,7 +1405,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
     /**
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
-    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType, AceAutoFillTriggerType::AUTO_REQUEST);
     EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 0);
 }
 
@@ -1510,13 +1510,13 @@ HWTEST_F(TextFieldModifyTest, CheckTextAlignByDirection, TestSize.Level1)
      */
     auto direction = TextDirection::RTL;
     auto textAlign = TextAlign::START;
-    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    textAlign = pattern_->CheckTextAlignByDirection(textAlign, direction);
     EXPECT_EQ(textAlign, TextAlign::END);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     textAlign = TextAlign::END;
-    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    textAlign = pattern_->CheckTextAlignByDirection(textAlign, direction);
     EXPECT_EQ(textAlign, TextAlign::START);
 }
 

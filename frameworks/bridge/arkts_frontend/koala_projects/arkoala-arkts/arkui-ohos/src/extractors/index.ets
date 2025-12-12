@@ -1,10 +1,11 @@
 import { int32 } from "@koalaui/common";
-import { KPointer } from "@koalaui/interop";
+import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial';
 import { default as drawing } from "@ohos.graphics.drawing";
 import { default as uiEffect } from "@ohos.graphics.uiEffect";
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel";
@@ -80,6 +81,7 @@ import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
 import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
+import { ComponentContent } from 'arkui.ComponentContent';
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -232,6 +234,13 @@ export namespace extractors {
   }
   export function fromUiEffectFilterPtr(ptr: KPointer): uiEffect.Filter {
     throw new Error("fromUiEffectFilterPtr is not implemented.")
+  }
+
+  export function toUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer {
+    return ArkUIAniModule._Extractors_ToUiMaterialMaterialPtr(value);
+  }
+  export function fromUiMaterialMaterialPtr(ptr: KPointer): uiMaterial.Material {
+    throw new Error("fromUiMaterialMaterialPtr is not implemented.")
   }
 
   export function toUiEffectVisualEffectPtr(
@@ -581,5 +590,18 @@ export namespace extractors {
   export function fromEnvironmentPtr(ptr: KPointer): Environment {
     const x: Object = {};
     return x as Environment;
+  }
+
+  export function toComponentContentPtr(value: ComponentContent): KPointer {
+    const pointer = value.getNodePtr();
+    if (pointer === undefined) {
+      return nullptr;
+    }
+    return pointer;
+  }
+
+  export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
+    const x: Object = {};
+    return x as ComponentContent;
   }
 }

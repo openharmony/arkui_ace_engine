@@ -499,20 +499,6 @@ HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction006, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnMenuItemAction007
- * @tc.desc: test OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction007, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::MOUSE_MENU);
-    EXPECT_NE(richEditorPattern->aiWriteAdapter_, nullptr);
-}
-
-/**
  * @tc.name: SelectionMenuOptionsTest001
  * @tc.desc: test SelectionMenuOptions
  * @tc.type: FUNC
@@ -1310,4 +1296,47 @@ HWTEST_F(RichEditorMenuTestNg, CheckEditorTypeChange001, TestSize.Level0)
     EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
 }
 
+/**
+ * @tc.name: SetPreviewMenuParam002
+ * @tc.desc: test SetPreviewMenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, SetPreviewMenuParam002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::function<void()> tempFunc = []() {};
+    std::function<void()>& func = tempFunc;
+    SelectMenuParam menuParam;
+    richEditorModel.SetPreviewMenuParam(TextSpanType::MIXED, func, menuParam);
+    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
+}
+
+/**
+ * @tc.name: SetPreviewMenuParam003
+ * @tc.desc: test SetPreviewMenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, SetPreviewMenuParam003, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::function<void()> tempFunc = []() {};
+    std::function<void()>& func = tempFunc;
+    SelectMenuParam menuParam;
+    richEditorModel.SetPreviewMenuParam(richEditorNode, TextSpanType::MIXED, func, menuParam);
+    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
+}
 }

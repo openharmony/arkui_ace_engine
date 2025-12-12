@@ -13,9 +13,17 @@
  * limitations under the License.
  */
 
-import { UID, Unique, UniqueMap, UniqueSet } from "../common/Unique"
+import { UID, Unique, UniqueMap, UniqueSet } from '../common/Unique'
 
 let uidCounter: UID = 0
+
+/** This interface represents an object that may depend on some other dependencies. */
+export interface Dependent {
+    /** @return `true` if this object has at least one dependency */
+    hasDependencies(): boolean
+    /** @return a string representation of this object, useful for debugging */
+    toString(): string
+}
 
 /** This interface represents an unique observer that can be notified that some changes. */
 export interface Dependency {
@@ -37,12 +45,12 @@ export class StateToScopes implements Unique {
     }
 
     /** @param dependency - a dependency to add */
-    add(dependency: ScopeToStates) {
+    add(dependency: ScopeToStates): void {
         this.dependencies.add(dependency)
     }
 
     /** @param dependency - a dependency to remove */
-    remove(dependency: ScopeToStates) {
+    remove(dependency: ScopeToStates): void {
         this.dependencies.delete(dependency)
     }
 
@@ -54,18 +62,18 @@ export class StateToScopes implements Unique {
     }
 
     /** Iterates through all dependecies and invalidates them. */
-    invalidate() {
+    invalidate(): void {
         this.dependencies.forEach(invalidateScope)
     }
 
-    invalidateIf(predicate: (element: ScopeToStates) => boolean) {
+    invalidateIf(predicate: (element: ScopeToStates) => boolean): void {
         this.dependencies.forEach((dependency: ScopeToStates) => {
-            if (predicate(dependency)) dependency.invalidate()
+            if (predicate(dependency)) { dependency.invalidate() }
         })
     }
 
     /** @param dependency - a dependency to register */
-    register(dependency?: Dependency) {
+    register(dependency?: Dependency): void {
         const that = dependency?.states
         if (that) {
             this.add(that)
@@ -91,12 +99,12 @@ export class ScopeToStates implements Unique {
     }
 
     /** @param dependency - a dependency to add */
-    add(dependency: StateToScopes) {
+    add(dependency: StateToScopes): void {
         this.dependencies.set(dependency, this.marker)
     }
 
     /** @param dependency - a dependency to remove */
-    remove(dependency: StateToScopes) {
+    remove(dependency: StateToScopes): void {
         this.dependencies.delete(dependency)
     }
 
@@ -108,17 +116,17 @@ export class ScopeToStates implements Unique {
     }
 
     /** Removes all dependecies, which were not used since previous call. */
-    reset() {
+    reset(): void {
         const current = this.marker
         this.marker = !current
         this.dependencies.deleteIf((dependency: StateToScopes, marker: Boolean) => {
-            if (current == marker) return false
+            if (current === marker) { return false }
             dependency.remove(this)
             return true
         })
     }
 }
 
-function invalidateScope(dependency: ScopeToStates) {
+function invalidateScope(dependency: ScopeToStates): void {
     dependency.invalidate()
 }

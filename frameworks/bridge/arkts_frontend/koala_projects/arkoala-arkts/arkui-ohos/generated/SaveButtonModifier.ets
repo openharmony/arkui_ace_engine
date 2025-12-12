@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier, extractors, hookSaveButtonOnClick } from '#handwritten'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSaveButtonPeer, SaveButtonCallback, SaveButtonOnClickResult, SaveButtonAttribute } from "./component/saveButton"
@@ -27,8 +27,10 @@ import { ClickEvent } from "./component/common"
 import { BusinessError } from "@ohos.base"
 import { Resource } from "global.resource"
 import { Dimension, SizeOptions, BorderRadiuses } from "./component/units"
+import { ModifierState } from './CommonModifier'
 export class SaveButtonModifier extends SecurityComponentMethodModifier implements SaveButtonAttribute,AttributeModifier<SaveButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -51,13 +53,14 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stateEffect_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSaveButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onClick_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClickAttribute((this._onClick_0_0value as SaveButtonCallback | undefined));
+                    hookSaveButtonOnClick(peer, (this._onClick_0_0value as SaveButtonCallback | undefined));
                     this._onClick_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -67,7 +70,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
                 }
                 default: {
                     this._onClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClickAttribute((undefined as SaveButtonCallback | undefined));
+                    hookSaveButtonOnClick(peer, (undefined as SaveButtonCallback | undefined));
                 }
             }
         }
@@ -164,6 +167,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     }
     mergeModifier(modifier: SaveButtonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_0_flag) {

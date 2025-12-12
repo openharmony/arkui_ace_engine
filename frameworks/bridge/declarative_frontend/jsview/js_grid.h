@@ -59,6 +59,7 @@ public:
     static void SetFocusWrapMode(const JSCallbackInfo& args);
     static void SetAlignItems(const JSCallbackInfo& info);
     static void SetSyncLoad(const JSCallbackInfo& info);
+    static void SetSupportLazyLoadingEmptyBranch(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);

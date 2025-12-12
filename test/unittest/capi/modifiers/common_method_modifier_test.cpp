@@ -715,8 +715,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundColorTest, TestSize.Lev
     const std::string expectedResourceColor = Color::RED.ToString();
     const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Opt_ResourceColor>(RES_NAME), expectedResourceColor},
@@ -1337,7 +1337,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestValidValues, Te
     // color stops
     std::vector<ColorStep> colorSteps {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), 0.1 },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), 0.25 },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), 0.25 },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), 0.5 },
     };
     inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
@@ -1711,7 +1711,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestRepeatValidVa
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestPixelmapValues, TestSize.Level1)
 {
-    // pixelmap attribute is not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -1985,7 +1985,7 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setClipShapeValues, TestSize.Level1)
 {
-    // Ark_CircleAttribute, Ark_EllipseAttribute, Ark_PathAttribute, Ark_RectAttribute are not supported yet!
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -2488,6 +2488,6 @@ HWTEST_F(CommonMethodModifierTest, setAnimationInvalidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, TestSize.Level1)
 {
-    // OnFinishEvent does not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 } // namespace OHOS::Ace::NG

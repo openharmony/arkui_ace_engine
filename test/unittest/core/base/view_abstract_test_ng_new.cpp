@@ -17,6 +17,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/event/key_event.h"
 #include "test/mock/base/mock_system_properties.h"
 
@@ -24,6 +25,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
+} // namespace
 /**
  * @tc.name: ViewAbstractTest031
  * @tc.desc: Test the operation of View_Abstract
@@ -1493,5 +1497,32 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseByFrameNodeTest, TestSize.L
      */
     ViewAbstract::DisableOnMouse(AceType::RawPtr(node));
     EXPECT_EQ(callback, nullptr);
+}
+
+/**
+ * @tc.name: BindContextMenuWithLongPress001
+ * @tc.desc: Test the BindContextMenuWithLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BindContextMenuWithLongPress001, TestSize.Level1)
+{
+    std::function<void()> buildFunc = []() {};
+    std::function<void()> previewBuildFunc = []() {};
+    NG::MenuParam menuParam;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverScaleInterruption = true;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+
+    viewAbstractModelNG.BindContextMenuWithLongPress(targetNode, buildFunc, menuParam, previewBuildFunc, true);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub, nullptr);
+    auto longPressEventActuator = gestureHub->longPressEventActuator_;
+    EXPECT_NE(longPressEventActuator, nullptr);
+    EXPECT_NE(longPressEventActuator->longPressEvent_, nullptr);
+    EXPECT_EQ(longPressEventActuator->longPressRecognizer_->duration_, HOVER_IMAGE_LONG_PRESS_DURATION);
 }
 } // namespace OHOS::Ace::NG

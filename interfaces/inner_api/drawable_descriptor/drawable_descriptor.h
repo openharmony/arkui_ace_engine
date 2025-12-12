@@ -138,6 +138,7 @@ public:
     {
         InitialResource(resourceMgr);
         jsonBuf_.reset();
+        InitBlendMode();
     }
 
     LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, std::string path,
@@ -147,6 +148,7 @@ public:
     {
         InitialResource(resourceMgr);
         jsonBuf_.reset();
+        InitBlendMode();
     }
 
     LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, std::string path,
@@ -157,6 +159,7 @@ public:
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
         jsonBuf_.reset();
+        InitBlendMode();
     }
 
     LayeredDrawableDescriptor(size_t len, std::string path, uint32_t iconType, DataInfo& foregroundInfo,
@@ -168,6 +171,7 @@ public:
         SetDecodeSize(decoderSize.first, decoderSize.second);
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
+        InitBlendMode();
     }
 
     ~LayeredDrawableDescriptor() override = default;
@@ -201,6 +205,8 @@ public:
     bool GetCompositePixelMapWithBadge(
         const SharedPixelMap layeredPixelMap, const SharedPixelMap badgedPixelMap, SharedPixelMap& compositePixelMap);
 
+    void SetBlendMode(int32_t mode);
+
 private:
     DrawableItem PreGetDrawableItem(const SharedResourceManager& resourceMgr, const char* item);
 
@@ -224,6 +230,8 @@ private:
 
     void TransformToPixelMap(const RSBitmap& bitmap, const RSImageInfo& imageInfo);
 
+    void InitBlendMode();
+
     UINT8 defaultMaskData_;
     size_t defaultMaskDataLength_ = 0;
     DrawableItem backgroundItem_;
@@ -239,6 +247,7 @@ private:
     OptionalPixelMap layeredPixelMap_;
     bool customized_ = false;
     bool foregroundOverBackground_ = false; // default: foreground uses SRC_OVER mode
+    int32_t blendMode_ = -1;
 };
 
 class DRAWABLE_FORCE_EXPORT DrawableDescriptorFactory {

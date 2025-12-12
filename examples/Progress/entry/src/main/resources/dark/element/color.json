@@ -1,0 +1,94 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFEE6666"
+    },
+    {
+      "name": "start_white",
+      "value": "#FFF89037"
+    },
+    {
+      "name": "start_red",
+      "value": "#FFFFE53E"
+    },
+    {
+      "name": "start_yellow",
+      "value": "#FFA4FF3C"
+    },
+    {
+      "name": "start_blue",
+      "value": "#FFE14CEC"
+    },
+    {
+      "name": "start_green",
+      "value": "#FF3782DE"
+    },
+    {
+      "name": "orange",
+      "value": "#FF6F7475"
+    },
+    {
+      "name": "grey",
+      "value": "#FFEACFF8"
+    },
+    {
+      "name": "purple",
+      "value": "#FF301ED7"
+    },
+    {
+      "name": "black",
+      "value": "#FFC9F1E3"
+    },
+    {
+      "name": "pink",
+      "value": "#FF1A6E8F"
+    },
+
+    {
+      "name": "Pink",
+      "value": "#003f3f"
+    },
+    {
+      "name": "ColorRed",
+      "value": "#00FFFF"
+    },
+    {
+      "name": "ColorBlue",
+      "value": "#FFFF00"
+    },
+    {
+      "name": "ColorBrown",
+      "value": "#5aD5D5"
+    },
+    {
+      "name": "ColorBlack",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "ColorGrassGreen",
+      "value": "#FF00FF"
+    },
+    {
+      "name": "ColorGreen",
+      "value": "#FF7F7F"
+    },
+    {
+      "name": "ColorOrange",
+      "value": "#00FFA5"
+    },
+    {
+      "name": "ColorYellow",
+      "value": "#0000FF"
+    },
+    {
+      "name": "ColorPink",
+      "value": "#003f3f"
+    },
+    {
+      "name": "ColorWhite",
+      "value": "#000000"
+    }
+
+  ]
+}

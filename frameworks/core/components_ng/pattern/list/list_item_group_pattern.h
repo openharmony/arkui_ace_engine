@@ -19,10 +19,11 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
+#include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -146,6 +147,11 @@ public:
             }
         }
         header_ = header;
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(GetHeaderNode());
+        CHECK_NULL_VOID(frameNode);
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetIsHeaderOrFooter(true);
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
@@ -176,6 +182,11 @@ public:
             }
         }
         footer_ = footer;
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(GetFooterNode());
+        CHECK_NULL_VOID(frameNode);
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetIsHeaderOrFooter(true);
     }
 
     void RemoveHeader()
@@ -323,12 +334,25 @@ public:
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
     }
 
-    void SetItemPressed(bool isPressed, int32_t id)
+    void SetItemState(ItemState itemState, int32_t id)
     {
-        if (isPressed) {
-            pressedItem_.emplace(id);
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            noDividerItems_[id] = itemState;
         } else {
-            pressedItem_.erase(id);
+            item->second |= itemState;
+        }
+    }
+
+    void ResetItemState(ItemState itemState, int32_t id)
+    {
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            return;
+        }
+        item->second &= ~itemState;
+        if (item->second == ITEM_STATE_NORMAL) {
+            noDividerItems_.erase(id);
         }
     }
 
@@ -485,7 +509,7 @@ private:
     float_t footerMainSize_ = 0.0f;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
-    std::set<int32_t> pressedItem_;
+    std::map<int32_t, uint32_t> noDividerItems_;
     bool layouted_ = false;
 
     bool reCache_ = false;

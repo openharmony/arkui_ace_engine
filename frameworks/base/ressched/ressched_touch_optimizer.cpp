@@ -405,7 +405,7 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool resampleEnable, TouchEvent
         resultPoint = point;
     }
 
-    if (!RVSEnableCheck()) {
+    if (!RVSEnableCheck() || !rvsSignalEnable_) {
         return;
     }
 
@@ -756,7 +756,7 @@ void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(c
 
 TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point)
 {
-    if (RVSEnableCheck()) {
+    if (RVSEnableCheck() && rvsSignalEnable_) {
         std::list<TouchEvent> touchEvents;
         touchEvents.push_back(point);
         RVSQueueUpdate(touchEvents);
@@ -777,5 +777,6 @@ void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
     vsyncFlushed_ = false;
     isTpFlushFrameDisplayPeriod_ = false;
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
 }
 }

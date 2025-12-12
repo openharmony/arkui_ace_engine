@@ -36,7 +36,6 @@ public:
     void ResetCaretColor() override;
     void SetSearchIconSize(const Dimension& value) override;
     void SetSearchIconColor(const Color& color) override;
-    void ResetSearchIconColor() override;
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
@@ -47,9 +46,7 @@ public:
     void SetCancelImageIcon(NG::IconOptions& iconOptions) override;
     void SetRightIconSrcPath(const std::string& src) override;
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
-    void SetCancelIconSize(const Dimension& value) override;
     void SetCancelIconColor(const Color& color) override;
-    void ResetCancelIconColor() override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
     void ResetSearchButtonFontColor() override;
@@ -59,9 +56,7 @@ public:
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
     void SetSelectDetectEnable(bool value) override;
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void ResetSelectDetectEnable() override;
-    void ResetSelectDetectConfig() override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
@@ -124,8 +119,15 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetUserMargin() override;
+    void SetTextDirection(TextDirection value) override;
+    void ResetTextDirection() override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -146,7 +148,6 @@ public:
         FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
-    static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
     static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
@@ -166,8 +167,6 @@ public:
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
-    static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
-    static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
@@ -202,9 +201,6 @@ public:
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
-    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
-    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
-    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
     static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
@@ -227,9 +223,21 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetUserMargin(FrameNode* frameNode);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
+    static void SetTextDirection(FrameNode* frameNode, TextDirection value);
+    static void ResetTextDirection(FrameNode* frameNode);
+    static TextDirection GetTextDirection(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

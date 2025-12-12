@@ -71,13 +71,13 @@ Ark_NativePointer GetDestroyImpl()
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
 void SetBackgroundColorImpl(Ark_RenderNode peer,
-                            const Ark_Number* backgroundColor)
+                            Ark_Int32 backgroundColor)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetBackgroundColor !");
         return;
     }
-    auto colorValue = Converter::Convert<uint32_t>(*backgroundColor);
+    auto colorValue = Converter::Convert<uint32_t>(backgroundColor);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -103,13 +103,13 @@ void SetClipToFrameImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 }
 void SetOpacityImpl(Ark_RenderNode peer,
-                    const Ark_Number* opacity)
+                    Ark_Float64 opacity)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetOpacity !");
         return;
     }
-    auto opacityValue = Converter::Convert<float>(*opacity);
+    auto opacityValue = Converter::Convert<float>(opacity);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -268,13 +268,13 @@ void SetTransformImpl(Ark_RenderNode peer,
     NG::ViewAbstractModelStatic::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
 }
 void SetShadowColorImpl(Ark_RenderNode peer,
-                        const Ark_Number* shadowColor)
+                        Ark_Int32 shadowColor)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetShadowColor !");
         return;
     }
-    auto colorValue = Converter::Convert<uint32_t>(*shadowColor);
+    auto colorValue = Converter::Convert<uint32_t>(shadowColor);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -320,13 +320,13 @@ void SetLabelImpl(Ark_RenderNode peer,
     pattern->SetLabel(std::string(labelValue));
 }
 void SetShadowAlphaImpl(Ark_RenderNode peer,
-                        const Ark_Number* shadowAlpha)
+                        Ark_Float64 shadowAlpha)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetShadowAlpha !");
         return;
     }
-    auto alphaValue = Converter::Convert<float>(*shadowAlpha);
+    auto alphaValue = Converter::Convert<float>(shadowAlpha);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -336,13 +336,13 @@ void SetShadowAlphaImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 }
 void SetShadowElevationImpl(Ark_RenderNode peer,
-                            const Ark_Number* shadowElevation)
+                            Ark_Float64 shadowElevation)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetShadowElevation !");
         return;
     }
-    auto elevationValue = Converter::Convert<float>(*shadowElevation);
+    auto elevationValue = Converter::Convert<float>(shadowElevation);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -352,13 +352,13 @@ void SetShadowElevationImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 }
 void SetShadowRadiusImpl(Ark_RenderNode peer,
-                         const Ark_Number* shadowRadius)
+                         Ark_Float64 shadowRadius)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetShadowRadius !");
         return;
     }
-    auto radiusValue = Converter::Convert<float>(*shadowRadius);
+    auto radiusValue = Converter::Convert<float>(shadowRadius);
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -382,7 +382,7 @@ void SetBorderStyleImpl(Ark_RenderNode peer,
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, borderStyleProperty, frameNode);
 }
 void SetBorderWidthImpl(Ark_RenderNode peer,
-                        const Ark_EdgeNumber* borderWidth,
+                        const Ark_EdgeF64* borderWidth,
                         Ark_Int32 unitValue)
 {
     if (!peer) {
@@ -410,7 +410,7 @@ void SetBorderWidthImpl(Ark_RenderNode peer,
     renderContext->SetBorderWidth(borderWidthProperty);
 }
 void SetBorderColorImpl(Ark_RenderNode peer,
-                        const Ark_EdgeNumber* borderColor)
+                        const Ark_EdgeI32* borderColor)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetBorderColor !");
@@ -777,6 +777,24 @@ Ark_Int32 InsertChildAfterImpl(Ark_RenderNode peer,
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     return ERROR_CODE_NO_ERROR;
 }
+
+Ark_Int32 InsertChildImpl(Ark_RenderNode peer,
+                          Ark_RenderNode child)
+{
+    if (!peer || !child) {
+        LOGW("This renderNode or child is nullptr when InsertChildAfter !");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto currentNode = peer->GetFrameNode();
+    auto childNode = child->GetFrameNode();
+    if (childNode && childNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
+    currentNode->AddChild(childNode, 0);
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    return ERROR_CODE_NO_ERROR;
+}
+
 void RemoveChildImpl(Ark_RenderNode peer,
                      Ark_RenderNode node)
 {
@@ -858,6 +876,7 @@ const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
         RenderNodeExtenderAccessor::SetPathClipImpl,
         RenderNodeExtenderAccessor::AppendChildImpl,
         RenderNodeExtenderAccessor::InsertChildAfterImpl,
+        RenderNodeExtenderAccessor::InsertChildImpl,
         RenderNodeExtenderAccessor::RemoveChildImpl,
         RenderNodeExtenderAccessor::ClearChildrenImpl,
         RenderNodeExtenderAccessor::InvalidateImpl,

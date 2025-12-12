@@ -989,6 +989,51 @@ void ResetAvoidance(ArkUINodeHandle node)
     SelectModelNG::SetAvoidance(frameNode, AvoidanceMode::COVER_TARGET);
 }
 
+void SetMenuKeyboardAvoidMode(ArkUINodeHandle node, ArkUI_Int32 modeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<MenuKeyboardAvoidMode> mode = std::nullopt;
+    switch (modeValue) {
+        case static_cast<ArkUI_Int32>(MenuKeyboardAvoidMode::NONE):
+            mode = MenuKeyboardAvoidMode::NONE;
+            break;
+        case static_cast<ArkUI_Int32>(MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE):
+            mode = MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+            break;
+        default:
+            break;
+    }
+    SelectModelNG::SetKeyboardAvoidMode(frameNode, mode);
+}
+
+void ResetMenuKeyboardAvoidMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetKeyboardAvoidMode(frameNode, std::nullopt);
+}
+
+void SetMinKeyboardAvoidDistance(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::INVALID) {
+        SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, std::nullopt);
+    } else {
+        std::optional<Dimension> distance = CalcDimension(value, unitEnum);
+        SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, distance);
+    }
+}
+
+void ResetMinKeyboardAvoidDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, std::nullopt);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -1066,6 +1111,10 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectBackgroundColorWithColorSpace = SetSelectBackgroundColorWithColorSpace,
         .resetSelectBackgroundColor = ResetSelectBackgroundColor,
         .setSelectBackgroundColorWithColorSpacePtr = SetSelectBackgroundColorWithColorSpacePtr,
+        .setMenuKeyboardAvoidMode = SetMenuKeyboardAvoidMode,
+        .resetMenuKeyboardAvoidMode = ResetMenuKeyboardAvoidMode,
+        .setMinKeyboardAvoidDistance = SetMinKeyboardAvoidDistance,
+        .resetMinKeyboardAvoidDistance = ResetMinKeyboardAvoidDistance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -22,6 +22,7 @@
 #include "locale_info.h"
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -31,20 +32,19 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
+#include "core/components_ng/pattern/form/form_snapshot_check.h"
+#include "core/components_ng/pattern/form/form_snapshot_util.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
 #endif
-
-#include "core/common/udmf/udmf_client.h"
-#include "form_util.h"
 
 static const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
@@ -55,8 +55,8 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 200;
-constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
+constexpr uint32_t DELAY_TIME_FOR_RM_IMG_WHEN_UPDATING_SIZE = 60;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -94,7 +94,6 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 constexpr char NO_FORM_DUMP[] = "-noform";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
-constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr char COLUMN_ROLE[] = "column";
 
 // Relationship between form styles and resource text content
@@ -384,6 +383,34 @@ void FormPattern::HandleEnableForm(const bool enable)
     HandleFormStyleOperation(newFormSpecialStyle);
 }
 
+void FormPattern::ProcessCheckForm()
+{
+    if (isSnapshot_) {
+        auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        if (!pixelMap) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm pixelMap_ is null");
+            return;
+        }
+        if (!formManagerBridge_) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm formManagerBridge_ is null");
+            return;
+        }
+        int32_t ratio = FormSnapshotUtil::GetNonTransparentRatio(pixelMap);
+        formManagerBridge_->SendNonTransparencyRatio(ratio);
+        return;
+    }
+
+    ContainerScope scope(scopeId_);
+    PostUITask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->formManagerBridge_);
+            pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCheck>(pattern->formManagerBridge_));
+        },
+        "ArkUIFormSnapshotSurfaceNodeForChecking");
+}
+
 void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isFrsNodeDetached_) {
@@ -414,7 +441,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
             TAG_LOGW(AceLogTag::ACE_FORM, "IsAccessibilityState, static form not recycled");
             return;
         }
-        SnapshotSurfaceNode();
+        SnapshotSurfaceNode(std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
         return;
     }
     UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
@@ -430,12 +457,12 @@ void FormPattern::TakeSurfaceCaptureForUI()
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SnapshotSurfaceNode();
+            pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCallback>(weak));
         },
         DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA, "ArkUIFormDelaySnapshotSurfaceNode");
 }
 
-void FormPattern::SnapshotSurfaceNode()
+void FormPattern::SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallback> callback)
 {
     auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalContext);
@@ -443,7 +470,7 @@ void FormPattern::SnapshotSurfaceNode()
     CHECK_NULL_VOID(rsNode);
     externalContext->AddRsNodeForCapture();
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, callback);
 }
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -458,7 +485,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         return;
     }
 
-    if (!isDynamic_ && FormUtil::IsTransparent(pixelMap)) {
+    if (!isDynamic_ && FormSnapshotUtil::IsTransparent(pixelMap)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is transparent");
         needSnapshotAgain_ = true;
         return;
@@ -756,6 +783,7 @@ void FormPattern::OnModifyDone()
     if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
         isBeenLayout_ = false;
     }
+    info.colorMode = formColorMode_;
     GetWantParam(info);
     HandleFormComponent(info);
 
@@ -792,6 +820,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= formSpecialStyle_.IsForbidden() || formSpecialStyle_.IsLocked();
+    info.colorMode = formColorMode_;
     UpdateBackgroundColorWhenUnTrustForm();
     GetWantParam(info);
     HandleFormComponent(info);
@@ -843,8 +872,7 @@ float FormPattern::CalculateViewScale(float width, float height, float layoutWid
     float widthScale = NearEqual(layoutWidth, width) ? DEFAULT_VIEW_SCALE : layoutWidth / width;
     float heightScale = NearEqual(layoutHeight, height) ?  DEFAULT_VIEW_SCALE : layoutHeight / height;
     float viewScale = (widthScale >= heightScale) ? widthScale : heightScale;
-    viewScale = (viewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((viewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : viewScale);
+    viewScale = LessOrEqual(viewScale, 0.0f) ? DEFAULT_VIEW_SCALE : viewScale;
     return viewScale;
 }
 
@@ -1043,6 +1071,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     }
     UpdateSpecialStyleCfg();
     UpdateConfiguration();
+    UpdateColorMode(info.colorMode);
 }
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
@@ -1638,6 +1667,7 @@ void FormPattern::InitFormManagerDelegate()
     }
     int32_t instanceID = context->GetInstanceId();
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
+    formManagerBridge_->SetFormLayoutWrapper(WeakClaim(this));
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
                                                    const std::string& path,
                                                    const std::string& module, const std::string& data,
@@ -1709,13 +1739,14 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
         DelayDeleteImageNode(want.GetBoolParam(
             OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, false)) {
-        RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+        DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE,
+            DELAY_TIME_FOR_RM_IMG_WHEN_UPDATING_SIZE);
     } else {
         DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     }
 }
 
-void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
+void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType, uint32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1729,7 +1760,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
         },
-        STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE, "DelayRemoveFormChildNode" + nodeIdStr);
+        delay, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
@@ -2184,6 +2215,16 @@ void FormPattern::UpdateConfiguration()
     }
 }
 
+void FormPattern::UpdateColorMode(int32_t colorMode)
+{
+    if (cardInfo_.colorMode != colorMode) {
+        cardInfo_.colorMode = colorMode;
+        if (formManagerBridge_) {
+            formManagerBridge_->SetColorMode(colorMode);
+        }
+    }
+}
+
 void FormPattern::OnLanguageConfigurationUpdate()
 {
     RefPtr<FrameNode> textNode = nullptr;
@@ -2282,6 +2323,17 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
     formChildrenNodeMap_.erase(formChildNodeType);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void FormPattern::SwitchRenderGroup(bool isRenderGroup)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    ACE_SCOPED_TRACE("%s id:%d isRenderGroup:%d", __func__, host->GetId(), isRenderGroup);
+    renderContext->UpdateRenderGroup(isRenderGroup);
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> FormPattern::GetFormChildNode(FormChildNodeType formChildNodeType) const
@@ -2466,10 +2518,13 @@ void FormPattern::DoSkeletonAnimation()
         return;
     }
 
+    // Switch off render group of the form node before doing animation
+    SwitchRenderGroup(false);
     std::function<void()> finishCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+        pattern->SwitchRenderGroup(true);
         TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
     };
 

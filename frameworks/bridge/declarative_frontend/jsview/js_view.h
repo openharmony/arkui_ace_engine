@@ -455,9 +455,11 @@ public:
 
     void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
 
-    void SetLastestInstanceId(const int32_t instanceId);
+    void SetLatestInstanceId(const int32_t instanceId);
 
-    int32_t GetLastestInstanceId() const;
+    JSRef<JSVal> GetJsContext();
+
+    int32_t GetLatestInstanceId() const;
 private:
     void MarkNeedUpdate() override;
 
@@ -494,7 +496,7 @@ private:
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
-    int32_t lastestInstanceId_ = -1;
+    int32_t latestInstanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -23,7 +23,7 @@ import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBegin
 import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
-import { ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
+import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
 import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
 import { TouchTestInfo, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
@@ -44,6 +44,8 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
+import { hookCustomPropertyImpl } from '#handwritten';
+import { CustomProperty } from '#generated';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
@@ -74,6 +76,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        return this
+    }
+    public responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        this.getPeer().setResponseRegionListAttribute(value);
         return this
     }
 
@@ -577,7 +583,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
+        hookCustomPropertyImpl(this, name, value);
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -86,7 +87,7 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
                 stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
             }
         }
-        MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
+        MarqueeModelStatic::SetScrollAmount(frameNode, stepOpt);
     }
     if (marqueeOptions.loop) {
         std::optional<int32_t> loopOpt;
@@ -120,7 +121,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> convValue = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(value->value, DimensionUnit::FP);
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);

@@ -44,6 +44,7 @@ public:
     static void FireOnBind(int32_t containerId);
     static void FireOnUnbind(int32_t containerId);
     static void JSBind(BindingTarget globalObj);
+    static void BindFunc(const JSCallbackInfo& info, const RefPtr<NG::FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::Framework

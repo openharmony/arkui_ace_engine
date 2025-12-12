@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 config("container_scope_config") {
@@ -33,6 +34,14 @@ ohos_shared_library("ace_container_scope") {
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
+  
+  if (is_ohos && is_clang && target_cpu == "arm64" && defined(build_ext_path)) {
+    ldflags = [ 
+      "-Wl,--emit-relocs",
+      "-Wl,--no-relax", 
+      "-mno-fix-cortex-a53-843419" 
+    ]
+  }
 }
 
 ohos_static_library("ace_container_scope_static") {
@@ -150,6 +159,7 @@ template("ace_core_source_set") {
       "common/resource/resource_parse_utils.cpp",
       "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
+      "common/statistic_event_reporter.cpp",
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
       "common/task_runner_adapter_factory.cpp",
@@ -793,6 +803,7 @@ template("ace_core_ng_source_set") {
       "common/resource/resource_parse_utils.cpp",
       "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
+      "common/statistic_event_reporter.cpp",
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
       "common/task_runner_adapter_factory.cpp",
@@ -894,8 +905,10 @@ template("ace_core_ng_source_set") {
       "components/common/properties/shadow_config.cpp",
       "components/common/properties/text_style.cpp",
       "components/common/properties/text_style_parser.cpp",
+      "components/common/properties/ui_material.cpp",
 
       # layout
+      "components/common/layout/common_text_constants.cpp",
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",
@@ -931,6 +944,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
+      "components/theme/ui_material_theme.cpp",
       "components/video/resource/player.cpp",
 
       # v2 inspector

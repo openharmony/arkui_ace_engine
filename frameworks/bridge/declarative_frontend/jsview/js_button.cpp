@@ -112,6 +112,7 @@ bool ParseAllBorderRadius(const JSRef<JSObject>& object, std::optional<CalcDimen
 } // namespace
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
@@ -208,6 +209,8 @@ void JSButton::SetButtonStyle(const JSCallbackInfo& info)
     auto buttonStyleMode = static_cast<ButtonStyleMode>(value);
     if (!JSButtonTheme::ApplyTheme(buttonStyleMode, isLabelButton_)) {
         ButtonModel::GetInstance()->SetButtonStyle(buttonStyleMode);
+    } else {
+        ButtonModel::GetInstance()->SetButtonStyleOnly(buttonStyleMode);
     }
 }
 
@@ -235,6 +238,8 @@ void JSButton::SetRole(const JSCallbackInfo& info)
     auto buttonRole = static_cast<ButtonRole>(value);
     if (!JSButtonTheme::ApplyTheme(buttonRole, isLabelButton_)) {
         ButtonModel::GetInstance()->SetRole(buttonRole);
+    } else {
+        ButtonModel::GetInstance()->SetRoleOnly(buttonRole);
     }
 }
 
@@ -347,6 +352,18 @@ void JSButton::CompleteParameters(ButtonParameters& buttonParameters)
     }
 }
 
+bool JSButton::SetTextAlign(JSRef<JSVal>& textAlign, ButtonParameters& buttonParameters)
+{
+    if (!textAlign->IsNull() && textAlign->IsNumber()) {
+        auto textAlignValue = textAlign->ToNumber<int32_t>();
+        if (textAlignValue >= 0 && textAlignValue < static_cast<int32_t>(TEXT_ALIGN.size())) {
+            buttonParameters.textAlign = TEXT_ALIGN[textAlignValue];
+            return true;
+        }
+    }
+    return false;
+}
+
 void JSButton::SetLableStyle(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -385,6 +402,11 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
 
     JSRef<JSVal> font = obj->GetProperty("font");
     GetFontContent(font, buttonParameters);
+
+    JSRef<JSVal> textAlign = obj->GetProperty("textAlign");
+    if (!SetTextAlign(textAlign, buttonParameters)) {
+        ButtonModel::GetInstance()->ResetTextAlign();
+    }
 
     CompleteParameters(buttonParameters);
     ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
@@ -696,11 +718,8 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
-    if (!NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
     JsRadius(info[0]);
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
 }
 
 void JSButton::JsRadius(const JSRef<JSVal>& jsValue)

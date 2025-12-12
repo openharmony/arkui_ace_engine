@@ -50,6 +50,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_placeholder_span_test_ng.cpp",
     "rich_editor_preview_text_test_ng.cpp",
     "rich_editor_resource_test.cpp",
+    "rich_editor_scroll_controller_test.cpp",
     "rich_editor_scroll_test_ng.cpp",
     "rich_editor_select_action_test_ng.cpp",
     "rich_editor_select_overlay_test_ng.cpp",
@@ -58,6 +59,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_span_node_test_ng.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_string_undo_callback_test_ng.cpp",
+    "rich_editor_string_undo_drag_test_ng.cpp",
     "rich_editor_string_undo_test_ng.cpp",
     "rich_editor_style_change_test_ng.cpp",
     "rich_editor_style_test_ng.cpp",
@@ -72,5 +74,6 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_typing_style_test.cpp",
     "rich_editor_undo_redo_test.cpp",
     "rich_editor_url_style_test.cpp",
+    "rich_editor_model_static_test_ng.cpp",
   ]
 }

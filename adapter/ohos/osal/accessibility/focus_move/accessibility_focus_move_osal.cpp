@@ -81,7 +81,10 @@ FocusMoveResultType FocusStrategyOsal::HandleFocusMoveSearchResult(
         finalResult = FocusMoveResultType::SEARCH_FAIL_IN_SCROLL;
     } else if (result == AceFocusMoveResult::FIND_FAIL_LOST_NODE) {
         finalResult = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
+    } else if (result == AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE) {
+        finalResult = FocusMoveResultType::SEARCH_FAIL;
     }
+
     if (useFinalNode && finalNode) {
         if (!UpdateElementInfo(finalNode, info)) {
             finalResult = FocusMoveResultType::SEARCH_FAIL;
@@ -162,7 +165,8 @@ FocusMoveResult FocusStrategyOsal::ProcessGetScrollAncestor(
     CHECK_NULL_RETURN(checkNode, errorResult);
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
     AccessibilityFocusStrategy strategy;
-    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    auto bypassSelf = param.condition == DetailCondition::CHECK_SELF ? false : true;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = bypassSelf, .bypassDescendants = false};
     if (param.direction == FocusMoveDirection::GET_BACKWARD_SCROLL_ANCESTOR) {
         strategy.FindBackwardScrollAncestor(condition, checkNode, targetNodes);
     } else if (param.direction == FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR) {
@@ -215,6 +219,59 @@ bool FocusStrategyOsal::IsProcessDetectFocusable(const Accessibility::Accessibil
             break;
     }
     return result;
+}
+
+bool FocusStrategyOsal::CheckIsRootType(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isHit = false;
+    auto checkResult = client->CheckNodeIsSpecificType(
+        checkNode, Accessibility::ReadableSpecificType::ROOT_TYPE, isHit);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isHit;
+}
+
+bool FocusStrategyOsal::CheckIsReadable(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isReadable = false;
+    auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isReadable;
+}
+
+bool FocusStrategyOsal::CheckIsReadableRulesEnable()
+{
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isScreenReaderRulesEnabled = false;
+    auto result = client->IsScreenReaderRulesEnabled(isScreenReaderRulesEnabled);
+    CHECK_NE_RETURN(result, Accessibility::RET_OK, false);
+    return isScreenReaderRulesEnabled;
+}
+
+bool FocusStrategyOsal::NeedChangeToReadableNodeThroughAncestor(
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode)
+{
+    auto result = CheckIsReadableRulesEnable();
+    CHECK_NE_RETURN(result, true, false);
+    CHECK_NULL_RETURN(checkNode, false);
+    auto targetCheckNode = checkNode;
+    while (targetCheckNode) {
+        if (CheckIsRootType(targetCheckNode)) {
+            break;
+        }
+        if (CheckIsReadable(targetCheckNode)) {
+            targetNode = targetCheckNode;
+            return true;
+        }
+        targetCheckNode = targetCheckNode->GetAceParent();
+    }
+    return true;
 }
 
 void JsAccessibilityManager::DetectElementInfoFocusableThroughAncestor(

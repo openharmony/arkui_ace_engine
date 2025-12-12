@@ -252,6 +252,10 @@ class ArrayProxyHandler {
 class SetMapProxyHandler {
 
     public static readonly OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
+    // Map, Set delete function does not fire OB_MAP_SET_ANY_PROPERTY,
+    // this might be a bug, but one we can not fix so easily.
+    // add another pseudo property just for delete instead.
+    public static readonly OB_MAP_SET_MONITOR_ANY_PROPERTY = '___ob_map_set_monitor_any_change';
 
     private isMakeObserved_: boolean;
 
@@ -394,6 +398,7 @@ class SetMapProxyHandler {
                     } else if (target.get(prop) !== val) {
                         target.set(prop, val);
                         ObserveV2.getObserve().fireChange(conditionalTarget, prop);
+                        ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_MONITOR_ANY_PROPERTY);
                     }
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     return receiver;

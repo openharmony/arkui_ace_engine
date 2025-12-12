@@ -99,8 +99,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    divider(value: ListDividerOptions | undefined): this {
-        const value_casted = value as (ListDividerOptions | undefined)
+    divider(value: ListDividerOptions | null | undefined): this {
+        const value_casted = value as (ListDividerOptions | null | undefined)
         this.getPeer()?.setDividerAttribute(value_casted)
         this.markDirty()
         return this
@@ -305,8 +305,12 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> |
-        AttributeModifier<CommonMethod> | undefined): this {
+    attributeModifier(
+        value: AttributeModifier<ListAttribute> |
+        AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> |
+        undefined
+    ): this {
         throw new Error('Unimplemented method attributeModifier')
     }
 }

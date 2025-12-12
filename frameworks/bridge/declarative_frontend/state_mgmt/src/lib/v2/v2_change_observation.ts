@@ -60,6 +60,7 @@ class ObserveV2 {
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
   public static readonly ADD_MONITOR_REFS = Symbol('___add_monitor_refs_');
+  public static readonly SYNC_MONITOR_REFS = Symbol('___sync_monitor_refs_');
   public static readonly COMPUTED_REFS = Symbol('___computed_refs_');
 
   public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
@@ -159,17 +160,17 @@ class ObserveV2 {
   // return true given value is @ObservedV2 object
   // return true when including @Trace, but exclude @Monitor and @Computed
   public static IsObservedObjectV2(value: any): boolean {
-    return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    return !!(value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
 
   // return true if given value is proxied observed object, either makeObserved or autoProxyObject
   public static IsProxiedObservedV2(value: any): boolean {
-    return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
+    return !!(value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
   }
 
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
-    return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
+    return !!(value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
   public static getCurrentRecordedId(): number {
@@ -571,10 +572,30 @@ class ObserveV2 {
       throw new Error(error);
     }
 
+    let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
     // enable this trace marker for more fine grained tracing of the update pipeline
     // note: two (!) end markers need to be enabled
-    let changedIdSet = target[ObserveV2.SYMBOL_REFS][attrName];
-    if (changedIdSet instanceof Set === false) {
+
+    let changedIdSet: Set<number> | undefined = undefined;
+    if (targetSymbolRefs[attrName] != undefined) {
+      changedIdSet = targetSymbolRefs[attrName];
+    }
+    // Ignore for SynMonitor
+    // Map/Set always fire in pairs SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY and  ObserveV2.OB_LENGTH
+    // Condition below will ignore all attrs for Map and Set with the exception of
+    // OB_LENGTH and OB_MAP_SET_MONITOR_ANY_PROPERTY
+    // For Map and Set we trigger SyncMonitors only two attribures:
+    // ObserveV2.OB_LENGTH and OB_MAP_SET_MONITOR_ANY_PROPERTY
+    if ((targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) &&
+      (attrName === ObserveV2.OB_LENGTH ||
+      attrName === SetMapProxyHandler.OB_MAP_SET_MONITOR_ANY_PROPERTY ||
+      (!(target instanceof Map) && !(target instanceof Set)))) {
+      if (changedIdSet === undefined) {
+        changedIdSet = new Set<number>();
+      }
+      targetSymbolRefs[MonitorV2.OB_ANY].forEach(item => changedIdSet!.add(item))
+    }
+    if (changedIdSet === undefined || changedIdSet.size === 0) {
       return;
     }
 
@@ -628,7 +649,7 @@ class ObserveV2 {
     // execute the AddMonitor synchronous function
     while (this.monitorSyncIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0) {
       if (this.monitorSyncIdsChangedForAddMonitor_.size) {
-        stateMgmtConsole.debug(`AddMonitor API monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitor_.size}`)
+        stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitor_.size}`)
         const monitorId: Set<number> = this.monitorSyncIdsChangedForAddMonitor_;
         this.monitorSyncIdsChangedForAddMonitor_ = new Set<number>();
         // update the value and dependency for each path and get the MonitorV2 id needs to be execute
@@ -967,7 +988,7 @@ class ObserveV2 {
   }
 
   public runMonitorFunctionsForAddMonitor(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}. AddMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    stateMgmtConsole.debug(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}. AddMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceDebugTrace.begin(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}`);
 
     let monitor: MonitorV2 | undefined;
@@ -983,20 +1004,20 @@ class ObserveV2 {
 
 
   public updateDirtyMonitorPath(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitors.size} addMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor`);
+    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor`);
 
     let ret: number = 0;
-    monitors.forEach((watchId) => {
-      const monitor = this.id2Others_[watchId]?.deref();
+    monitors.forEach((monitorId) => {
+      const monitor = this.id2Others_[monitorId]?.deref();
       if (monitor instanceof MonitorV2) {
         const monitorTarget = monitor.getTarget();
         if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
-          monitorTarget.addDelayedMonitorIds(watchId)
+          monitorTarget.addDelayedMonitorIds(monitorId)
         } else {
           // find the path MonitorValue and record dependency again
           // get path owning MonitorV2 id
-          ret = monitor.notifyChangeForEachPath(watchId);
+          ret = monitor.notifyChangeForEachPath(monitorId);
         }
       }
 
@@ -1111,26 +1132,59 @@ class ObserveV2 {
     } // if target[watchProp]
   }
 
-  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
+  public constructSyncMonitors(owningObject: Object, owningObjectName: string): void {
+    let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + owningObjectName);
+    if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
+      Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
+        if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+            this.AddMonitorPath(owningObject, pathString,
+                monitorFunc as MonitorCallback, {isSynchronous: true}, true, owningObjectName);
+        }
+      });
+      delete owningObject[watchProp];
+    }
+  }
+
+  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions,
+    decorator: boolean = false, owningObjectName: string = ''): void {
     const funcName = monitorFunc.name;
-    const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
-    let monitor = refs[funcName];
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
+    const refs_sym = (isSync && decorator) ? ObserveV2.SYNC_MONITOR_REFS : ObserveV2.ADD_MONITOR_REFS;
+    const refs = target[refs_sym] ??= {};
+    let monitor = refs[funcName] as MonitorV2;
+
+    // 'monitor' is a @SyncMonitor MonitorV2
+    if (monitor && monitor instanceof MonitorV2 && monitor.isSyncDecorator()) {
+      if (!decorator) {
+        // Attempt to redefine @SyncMonitor vai API addMonitor call, ignore
+        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} in ${owningObjectName} has already register as @SyncMonitor, cannot add path(s)`);
+        return;
+      }
+      // Derived class defines @SyncMonitor for the function with the same name
+      // as in the base class. Deleting MonitorV2 object of the base class here.
+      ObserveV2.getObserve().clearWatch(monitor.getWatchId());
+      delete refs[funcName];
+      monitor = undefined;
+      stateMgmtConsole.warn(`@SyncMonitor ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
+        The new ${funcName} will override the previous one, and the old one will no longer take effect.`);
+    }
+
+    // 'monitor' is a AddMonitor API created MonitorV2
     if (monitor && monitor instanceof MonitorV2) {
       if (isSync !== monitor.isSync()) {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
         return;
       }
-      paths.forEach(item => {
-        monitor.addPath(item);
+      paths.forEach(path => {
+        monitor.addPath(path);
       });
       monitor.InitRun();
       return;
     }
 
-    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, false, isSync);
+    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, decorator, isSync);
     monitor.InitRun();
     // store a reference inside target
     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2 to prevent the MonitorV2 is GC
@@ -1213,7 +1267,7 @@ class ObserveV2 {
       this.clearBinding(id);
       return;
     }
-    // addMonitor
+    // addMonitor, @SyncMonitor
     const monitor: MonitorV2 = this.id2Others_[id]?.deref();
     if (monitor instanceof MonitorV2) {
       monitor.getValues().forEach((monitorValueV2: MonitorValueV2<unknown>) => {
@@ -1419,6 +1473,7 @@ class ObserveV2 {
 
   // Runs a task and processes all resulting updates immediately
   public applySync<T>(task: () => T): T {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);
@@ -1471,6 +1526,7 @@ class ObserveV2 {
 
   // Immediately processes all updates
   public flushUpdates(): void {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);
@@ -1490,6 +1546,7 @@ class ObserveV2 {
 
   // Update all UINodes that currently need update
   public flushUIUpdates(): void {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);

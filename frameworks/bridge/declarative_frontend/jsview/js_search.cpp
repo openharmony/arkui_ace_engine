@@ -31,7 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -63,7 +63,6 @@ SearchModel* SearchModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -105,6 +104,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
     JSClass<JSSearch>::StaticMethod("textAlign", &JSSearch::SetTextAlign, opt);
+    JSClass<JSSearch>::StaticMethod("textDirection", &JSSearch::SetTextDirection, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
     JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
@@ -140,6 +140,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("strokeWidth", &JSSearch::SetStrokeWidth);
     JSClass<JSSearch>::StaticMethod("strokeColor", &JSSearch::SetStrokeColor);
     JSClass<JSSearch>::StaticMethod("margin", &JSSearch::JsMargin);
+    JSClass<JSSearch>::StaticMethod("selectedDragPreviewStyle", &JSSearch::SetSelectedDragPreviewStyle);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -175,6 +176,9 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
     JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
+    JSClass<JSSearch>::StaticMethod("compressLeadingPunctuation", &JSSearch::SetCompressLeadingPunctuation);
+    JSClass<JSSearch>::StaticMethod("includeFontPadding", &JSSearch::SetIncludeFontPadding);
+    JSClass<JSSearch>::StaticMethod("fallbackLineSpacing", &JSSearch::SetFallbackLineSpacing);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -215,28 +219,6 @@ void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
         auto enabled = info[0]->ToBoolean();
         SearchModel::GetInstance()->SetSelectDetectEnable(enabled);
     }
-}
-
-void JSSearch::SetSelectDetectConfig(const JSCallbackInfo& info)
-{
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        SearchModel::GetInstance()->ResetSelectDetectConfig();
-        return;
-    }
-    CHECK_NULL_VOID(info[0]->IsObject());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getTypes = paramObject->GetProperty("types");
-    CHECK_NULL_VOID(getTypes->IsArray());
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    CHECK_NULL_VOID(array->IsArray());
-    std::vector<TextDataDetectType> typesList;
-    for (size_t i = 0; i < array->Length(); ++i) {
-        JSRef<JSVal> type = array->GetValueAt(i);
-        if (type->IsNumber()) {
-            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
-        }
-    }
-    SearchModel::GetInstance()->SetSelectDetectConfig(typesList);
 }
 
 void JSSearch::Create(const JSCallbackInfo& info)
@@ -536,10 +518,8 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
-        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
         cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, bundleName, moduleName);
     } else {
-        SearchModel::GetInstance()->ResetCancelIconColor();
         cancelIconOptions = NG::IconOptions(iconSize, iconSrc, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {
@@ -607,10 +587,8 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal, colorObject)) {
-        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
         searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
     } else {
-        SearchModel::GetInstance()->ResetSearchIconColor();
         searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {
@@ -942,9 +920,26 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
 
 void JSSearch::SetTextAlign(int32_t value)
 {
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size()) &&
+        value != static_cast<int32_t>(TextAlign::JUSTIFY)) {
         SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSSearch::SetTextDirection(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        SearchModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        SearchModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    SearchModel::GetInstance()->SetTextDirection(TEXT_DIRECTIONS[index]);
 }
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)
@@ -1084,7 +1079,7 @@ void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
 
 void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     auto jsValue = info[0];
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -1798,6 +1793,33 @@ void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSSearch::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
+}
+
+void JSSearch::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSSearch::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetFallbackLineSpacing(enabled);
+}
+
 void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)
 {
     auto onWillAttachIME = JSTextField::ParseAndCreateAttachCallback(info);
@@ -1833,5 +1855,30 @@ void JSSearch::JsMargin(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsMargin(info);
     SearchModel::GetInstance()->SetUserMargin();
+}
+
+void JSSearch::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    UnregisterResource("selectedDragPreviewStyle");
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        SearchModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColor(param, color, resourceObject)) {
+        SearchModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
+    }
+    SearchModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 } // namespace OHOS::Ace::Framework

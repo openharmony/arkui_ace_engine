@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { DrawContext } from "arkui.Graphics"
+import { Bindable, Callback } from "#generated"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -13,6 +14,7 @@ export interface AttributeModifier<T> {
     applyFocusedAttribute(instance: T): void {}
     applyDisabledAttribute(instance: T): void {}
     applySelectedAttribute(instance: T): void {}
+    monitoredStates(): int32 { return 0; }
 }
 
 export interface AnimatableArithmetic<T> {
@@ -35,6 +37,8 @@ export class DrawModifier {
     public drawFront(drawContext: DrawContext): void { }
 
     public drawForeground(drawContext: DrawContext): void { }
+    
+    public drawOverlay(drawContext: DrawContext): void { }
 
     public invalidate(): void {
         let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();
@@ -160,7 +164,7 @@ export class KeyEventTransfer {
         retValue.setProperty('metaKey', objectInternal.metaKey);
         retValue.setProperty('unicode', objectInternal.unicode);
         retValue.setProperty('timestamp', objectInternal.timestamp);
-        retValue.setProperty('intentionCode', objectInternal.intentionCode);
+        retValue.setProperty('intentionCode', TypeChecker.IntentionCode_ToNumeric(objectInternal.intentionCode));
         return retValue;
     }
 }
@@ -1115,4 +1119,8 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
 export interface DynamicNode {
     onMove(handler?: OnMoveHandler): this;
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
+
+export function makeBindable<T>(value: T, onChange: Callback<T>): Bindable<T> {
+    return { value, onChange } as Bindable<T>;
 }

@@ -982,6 +982,10 @@ void ContainerModalPatternEnhance::RemoveButtonsRectChangeListener(int32_t id)
 void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect)
 {
     for (auto& pair : rectChangeListeners_) {
+        if (GetFloatingTitleVisible()) {
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "floating tile is show, not notify rect change.");
+            break;
+        }
         if (pair.second) {
             pair.second(containerModal, buttonsRect);
         }

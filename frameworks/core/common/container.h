@@ -547,7 +547,8 @@ public:
     virtual int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST)
     {
         return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
     }
@@ -803,6 +804,19 @@ public:
         return srcEntrance_;
     }
 
+    void SetExtensionHostParams(const std::string& params)
+    {
+        extensionHostParams_ = params;
+    }
+
+    std::string GetExtensionHostParams() const
+    {
+        return extensionHostParams_;
+    }
+
+    virtual void LoadCompleteManagerStartCollect(const std::string& url) {};
+    virtual void LoadCompleteManagerStopCollect() {};
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);
@@ -844,6 +858,7 @@ private:
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
     ColorMode colorMode_ = ColorMode::LIGHT;
+    std::string extensionHostParams_ = "";
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

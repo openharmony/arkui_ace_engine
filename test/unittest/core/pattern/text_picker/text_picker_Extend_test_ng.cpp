@@ -1469,4 +1469,40 @@ HWTEST_F(TextPickerExTestNg, TextPickerAccessibilityPropertyTest002, TestSize.Le
     textPickerAccessibilityProperty_->SetSpecificSupportAction();
     EXPECT_NE(preActions, textPickerAccessibilityProperty_->supportActions_);
 }
+
+/**
+ * @tc.name: TextPickerPaintPaintDefaultDividerLines001
+ * @tc.desc: Test PaintDefaultDividerLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerExTestNg, TextPickerPaintPaintDefaultDividerLines001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    theme->gradientHeight_ = Dimension(10.0);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    textPickerPattern->SetIsShowInDialog(true);
+    auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AnyNumber());
+    canvasDrawFunction(rsCanvas);
+}
 } // namespace OHOS::Ace::NG

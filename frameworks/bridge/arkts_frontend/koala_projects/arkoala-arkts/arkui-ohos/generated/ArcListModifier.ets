@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -30,6 +31,7 @@ import { VoidCallback } from "./component/units"
 import { ScrollState } from "./component/list"
 export class ArcListModifier extends CommonMethodModifier implements ArcListAttribute,AttributeModifier<ArcListAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -78,6 +80,7 @@ export class ArcListModifier extends CommonMethodModifier implements ArcListAttr
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDidScroll_0_0value?: OnScrollCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkArcListPeer;
         if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -425,6 +428,7 @@ export class ArcListModifier extends CommonMethodModifier implements ArcListAttr
     }
     mergeModifier(modifier: ArcListModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._digitalCrownSensitivity_0_flag) {

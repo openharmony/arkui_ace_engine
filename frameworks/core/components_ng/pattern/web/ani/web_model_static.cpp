@@ -348,14 +348,31 @@ void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptI
     webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
-void WebModelStatic::JavaScriptOnHeadEnd(
-    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+void WebModelStatic::JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    webPatternStatic->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+}
+
+void WebModelStatic::JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+}
+
+void WebModelStatic::JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
@@ -1442,6 +1459,14 @@ void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool is
     webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
+void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableImageAnalyzer(isEnabled);
+}
+
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
@@ -1539,6 +1564,9 @@ void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
 
 void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetJavaScriptProxy");
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetJsProxyCallback(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

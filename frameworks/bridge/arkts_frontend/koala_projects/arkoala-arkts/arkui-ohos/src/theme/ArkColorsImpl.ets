@@ -267,11 +267,11 @@ export class ArkColorsImpl implements Colors {
                     argbColor = ArkUIAniModule._GetStringColorValue(brandColorValue) as int32;
                 }
                 result.primary = argbColor;
-                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6);
-                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4);
-                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2);
-                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1);
-                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05);
+                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6) as int32;
+                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4) as int32;
+                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2) as int32;
+                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1) as int32;
+                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05) as int32;
             }
         }
         return result;

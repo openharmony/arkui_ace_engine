@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -27,6 +28,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookStepperItemAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { StepperItemModifier } from "./../StepperItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkStepperItemPeer extends ArkCommonMethodPeer {
@@ -42,6 +44,7 @@ export class ArkStepperItemPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setStepperItemOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._StepperItemInterface_setStepperItemOptions(this.peer.ptr)
     }
     setPrevLabelAttribute(value: string | undefined): void {
@@ -169,7 +172,9 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookStepperItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookStepperItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -38,79 +38,63 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ArcImpl(Ark_CanvasPath peer,
-             const Ark_Number* x,
-             const Ark_Number* y,
-             const Ark_Number* radius,
-             const Ark_Number* startAngle,
-             const Ark_Number* endAngle,
+             Ark_Float64 x,
+             Ark_Float64 y,
+             Ark_Float64 radius,
+             Ark_Float64 startAngle,
+             Ark_Float64 endAngle,
              const Opt_Boolean* counterclockwise)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(radius);
-    CHECK_NULL_VOID(startAngle);
-    CHECK_NULL_VOID(endAngle);
     CanvasPathPeerImpl::ArcParam params = {
-        .x = static_cast<double>(Converter::Convert<float>(*x)),
-        .y = static_cast<double>(Converter::Convert<float>(*y)),
-        .radius = static_cast<double>(Converter::Convert<float>(*radius)),
-        .startAngle = static_cast<double>(Converter::Convert<float>(*startAngle)),
-        .endAngle = static_cast<double>(Converter::Convert<float>(*endAngle)),
+        .x = Converter::Convert<double>(x),
+        .y = Converter::Convert<double>(y),
+        .radius = Converter::Convert<double>(radius),
+        .startAngle = Converter::Convert<double>(startAngle),
+        .endAngle = Converter::Convert<double>(endAngle),
         .anticlockwise = Converter::OptConvertPtr<bool>(counterclockwise),
     };
     peerImpl->Path2DArc(params);
 }
 void ArcToImpl(Ark_CanvasPath peer,
-               const Ark_Number* x1,
-               const Ark_Number* y1,
-               const Ark_Number* x2,
-               const Ark_Number* y2,
-               const Ark_Number* radius)
+               Ark_Float64 x1,
+               Ark_Float64 y1,
+               Ark_Float64 x2,
+               Ark_Float64 y2,
+               Ark_Float64 radius)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x1);
-    CHECK_NULL_VOID(y1);
-    CHECK_NULL_VOID(x2);
-    CHECK_NULL_VOID(y2);
-    CHECK_NULL_VOID(radius);
     CanvasPathPeerImpl::ArcToParam params = {
-        .x1 = static_cast<double>(Converter::Convert<float>(*x1)),
-        .y1 = static_cast<double>(Converter::Convert<float>(*y1)),
-        .x2 = static_cast<double>(Converter::Convert<float>(*x2)),
-        .y2 = static_cast<double>(Converter::Convert<float>(*y2)),
-        .radius = static_cast<double>(Converter::Convert<float>(*radius)),
+        .x1 = Converter::Convert<double>(x1),
+        .y1 = Converter::Convert<double>(y1),
+        .x2 = Converter::Convert<double>(x2),
+        .y2 = Converter::Convert<double>(y2),
+        .radius = Converter::Convert<double>(radius),
     };
     peerImpl->Path2DArcTo(params);
 }
 void BezierCurveToImpl(Ark_CanvasPath peer,
-                       const Ark_Number* cp1x,
-                       const Ark_Number* cp1y,
-                       const Ark_Number* cp2x,
-                       const Ark_Number* cp2y,
-                       const Ark_Number* x,
-                       const Ark_Number* y)
+                       Ark_Float64 cp1x,
+                       Ark_Float64 cp1y,
+                       Ark_Float64 cp2x,
+                       Ark_Float64 cp2y,
+                       Ark_Float64 x,
+                       Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(cp1x);
-    CHECK_NULL_VOID(cp1y);
-    CHECK_NULL_VOID(cp2x);
-    CHECK_NULL_VOID(cp2y);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
     CanvasPathPeerImpl::BezierCurveToParam params = {
-        .cp1x = static_cast<double>(Converter::Convert<float>(*cp1x)),
-        .cp1y = static_cast<double>(Converter::Convert<float>(*cp1y)),
-        .cp2x = static_cast<double>(Converter::Convert<float>(*cp2x)),
-        .cp2y = static_cast<double>(Converter::Convert<float>(*cp2y)),
-        .x = static_cast<double>(Converter::Convert<float>(*x)),
-        .y = static_cast<double>(Converter::Convert<float>(*y)),
+        .cp1x = Converter::Convert<double>(cp1x),
+        .cp1y = Converter::Convert<double>(cp1y),
+        .cp2x = Converter::Convert<double>(cp2x),
+        .cp2y = Converter::Convert<double>(cp2y),
+        .x = Converter::Convert<double>(x),
+        .y = Converter::Convert<double>(y),
     };
     peerImpl->Path2DBezierCurveTo(params);
 }
@@ -122,99 +106,80 @@ void ClosePathImpl(Ark_CanvasPath peer)
     peerImpl->Path2DClosePath();
 }
 void EllipseImpl(Ark_CanvasPath peer,
-                 const Ark_Number* x,
-                 const Ark_Number* y,
-                 const Ark_Number* radiusX,
-                 const Ark_Number* radiusY,
-                 const Ark_Number* rotation,
-                 const Ark_Number* startAngle,
-                 const Ark_Number* endAngle,
+                 Ark_Float64 x,
+                 Ark_Float64 y,
+                 Ark_Float64 radiusX,
+                 Ark_Float64 radiusY,
+                 Ark_Float64 rotation,
+                 Ark_Float64 startAngle,
+                 Ark_Float64 endAngle,
                  const Opt_Boolean* counterclockwise)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(radiusX);
-    CHECK_NULL_VOID(radiusY);
-    CHECK_NULL_VOID(rotation);
-    CHECK_NULL_VOID(startAngle);
-    CHECK_NULL_VOID(endAngle);
     CanvasPathPeerImpl::EllipseParam params = {
-        .x = static_cast<double>(Converter::Convert<float>(*x)),
-        .y = static_cast<double>(Converter::Convert<float>(*y)),
-        .radiusX = static_cast<double>(Converter::Convert<float>(*radiusX)),
-        .radiusY = static_cast<double>(Converter::Convert<float>(*radiusY)),
-        .rotation = static_cast<double>(Converter::Convert<float>(*rotation)),
-        .startAngle = static_cast<double>(Converter::Convert<float>(*startAngle)),
-        .endAngle = static_cast<double>(Converter::Convert<float>(*endAngle)),
+        .x = Converter::Convert<double>(x),
+        .y = Converter::Convert<double>(y),
+        .radiusX = Converter::Convert<double>(radiusX),
+        .radiusY = Converter::Convert<double>(radiusY),
+        .rotation = Converter::Convert<double>(rotation),
+        .startAngle = Converter::Convert<double>(startAngle),
+        .endAngle = Converter::Convert<double>(endAngle),
         .anticlockwise = Converter::OptConvertPtr<bool>(counterclockwise),
     };
     peerImpl->Path2DEllipse(params);
 }
 void LineToImpl(Ark_CanvasPath peer,
-                const Ark_Number* x,
-                const Ark_Number* y)
+                Ark_Float64 x,
+                Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    auto cx = static_cast<double>(Converter::Convert<float>(*x));
-    auto cy = static_cast<double>(Converter::Convert<float>(*y));
+    auto cx = Converter::Convert<double>(x);
+    auto cy = Converter::Convert<double>(y);
     peerImpl->Path2DLineTo(cx, cy);
 }
 void MoveToImpl(Ark_CanvasPath peer,
-                const Ark_Number* x,
-                const Ark_Number* y)
+                Ark_Float64 x,
+                Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    auto cx = static_cast<double>(Converter::Convert<float>(*x));
-    auto cy = static_cast<double>(Converter::Convert<float>(*y));
+    auto cx = Converter::Convert<double>(x);
+    auto cy = Converter::Convert<double>(y);
     peerImpl->Path2DMoveTo(cx, cy);
 }
 void QuadraticCurveToImpl(Ark_CanvasPath peer,
-                          const Ark_Number* cpx,
-                          const Ark_Number* cpy,
-                          const Ark_Number* x,
-                          const Ark_Number* y)
+                          Ark_Float64 cpx,
+                          Ark_Float64 cpy,
+                          Ark_Float64 x,
+                          Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(cpx);
-    CHECK_NULL_VOID(cpy);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    auto pcpx = static_cast<double>(Converter::Convert<float>(*cpx));
-    auto pcpy = static_cast<double>(Converter::Convert<float>(*cpy));
-    auto px = static_cast<double>(Converter::Convert<float>(*x));
-    auto py = static_cast<double>(Converter::Convert<float>(*y));
+    auto pcpx = Converter::Convert<double>(cpx);
+    auto pcpy = Converter::Convert<double>(cpy);
+    auto px = Converter::Convert<double>(x);
+    auto py = Converter::Convert<double>(y);
     peerImpl->Path2DQuadraticCurveTo(pcpx, pcpy, px, py);
 }
 void RectImpl(Ark_CanvasPath peer,
-              const Ark_Number* x,
-              const Ark_Number* y,
-              const Ark_Number* w,
-              const Ark_Number* h)
+              Ark_Float64 x,
+              Ark_Float64 y,
+              Ark_Float64 w,
+              Ark_Float64 h)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(x);
-    CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(w);
-    CHECK_NULL_VOID(h);
-    auto px = static_cast<double>(Converter::Convert<float>(*x));
-    auto py = static_cast<double>(Converter::Convert<float>(*y));
-    auto pw = static_cast<double>(Converter::Convert<float>(*w));
-    auto ph = static_cast<double>(Converter::Convert<float>(*h));
+    auto px = Converter::Convert<double>(x);
+    auto py = Converter::Convert<double>(y);
+    auto pw = Converter::Convert<double>(w);
+    auto ph = Converter::Convert<double>(h);
     peerImpl->Path2DRect(px, py, pw, ph);
 }
 } // CanvasPathAccessor

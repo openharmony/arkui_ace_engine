@@ -28,7 +28,7 @@ RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPt
 }
 
 RefPtr<Paragraph> Paragraph::CreateRichEditorParagraph(
-    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
+    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode)
 {
     return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
 }

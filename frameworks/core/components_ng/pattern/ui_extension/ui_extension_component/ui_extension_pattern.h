@@ -96,6 +96,14 @@ struct SessionViewportConfig {
             (transform_ == other.transform_);
     }
 };
+
+struct DelayTaskRecord {
+    std::string taskName;
+    int64_t lastTaskTime = 0;
+    int64_t currentTaskTime = 0;
+    SingleTaskExecutor::CancelableTask taskMutex;
+};
+
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
@@ -248,6 +256,12 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
     int32_t GetInstanceIdFromHost() const;
+    void DispatchDisplayArea(bool isForce = false);
+    void DispatchDisplayAreaWithDelay(uint32_t delayMs);
+    void UpdateLastTime(int64_t lastTime)
+    {
+        dispatchDisplayAreaTaskTime_.lastTaskTime = lastTime;
+    };
     bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
     bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
@@ -344,7 +358,6 @@ private:
     bool DispatchKeyEventSync(const KeyEvent& event);
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
-    void DispatchDisplayArea(bool isForce = false);
     void LogoutModalUIExtension();
     bool IsMoving();
     void UnRegisterEvent(int32_t instanceId);
@@ -410,6 +423,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
 
+    DelayTaskRecord dispatchDisplayAreaTaskTime_;
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;

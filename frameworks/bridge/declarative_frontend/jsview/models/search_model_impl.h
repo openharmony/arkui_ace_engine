@@ -34,8 +34,6 @@ public:
     void SetCaretColor(const Color& color) override {}
     void ResetCaretColor() override {}
     void SetSearchIconSize(const Dimension& value) override {}
-    void SetSearchIconColor(const Color& color) override {}
-    void ResetSearchIconColor() override {}
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override {}
     void SetRightIconSrcPath(const std::string& src) override {}
@@ -46,9 +44,6 @@ public:
     void SetCancelDefaultIcon() override{}
     void SetCancelImageIcon(NG::IconOptions& iconOptions) override{}
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
-    void SetCancelIconSize(const Dimension& value) override {}
-    void SetCancelIconColor(const Color& color) override {}
-    void ResetCancelIconColor() override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
     void ResetSearchButtonFontColor() override {}
@@ -72,9 +67,7 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
     void SetSelectDetectEnable(bool value) override;
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void ResetSelectDetectEnable() override;
-    void ResetSelectDetectConfig() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
     void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override {};
@@ -103,6 +96,7 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
+    void SetCompressLeadingPunctuation(bool enabled) override {};
     void SetOnWillAttachIME(IMEAttachCallback&& func) override {};
 
 private:

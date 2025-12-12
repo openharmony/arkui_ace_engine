@@ -161,6 +161,7 @@ public:
 
 protected:
     void UpdateSessionInstanceId(int32_t instanceId);
+    void Initialize();
     void InitializeAccessibility() override;
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
@@ -201,6 +202,7 @@ protected:
     bool hasMountToParent_ = false;
     bool hasAttachContext_ = false;
     bool needReNotifyForeground_ = false;
+    bool hasInitialized_ = false;
 
     bool isTransferringCaller_ = false;
     bool isWindowModeFollowHost_ = false;

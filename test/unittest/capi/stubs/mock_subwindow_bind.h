@@ -81,6 +81,8 @@ public:
     MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_METHOD0(RequestFocus, void());
     MOCK_METHOD0(IsFocused, bool());
+    MOCK_METHOD1(SetReceiveDragEventEnabled, bool(bool enabled));
+    MOCK_METHOD0(GetIsReceiveDragEventEnabled, bool());
     MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
     MOCK_METHOD2(CloseCustomDialog, void(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback));

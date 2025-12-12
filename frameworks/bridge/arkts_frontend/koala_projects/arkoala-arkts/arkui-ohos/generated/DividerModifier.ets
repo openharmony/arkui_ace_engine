@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -28,6 +29,7 @@ import { Color, LineCapStyle } from "./component/enums"
 import { Resource } from "global.resource"
 export class DividerModifier extends CommonMethodModifier implements DividerAttribute,AttributeModifier<DividerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,6 +48,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
     _lineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineCap_0_0value?: LineCapStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkDividerPeer;
         if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -123,6 +126,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
     }
     mergeModifier(modifier: DividerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._vertical_0_flag) {

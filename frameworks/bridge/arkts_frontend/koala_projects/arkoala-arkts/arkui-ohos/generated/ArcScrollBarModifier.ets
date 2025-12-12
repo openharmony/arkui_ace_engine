@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { ArcScrollBarAttribute } from "@ohos.arkui.ArcScrollBar"
 export class ArcScrollBarModifier extends CommonMethodModifier implements ArcScrollBarAttribute,AttributeModifier<ArcScrollBarAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,11 +38,13 @@ export class ArcScrollBarModifier extends CommonMethodModifier implements ArcScr
     applyDisabledAttribute(instance: ArcScrollBarAttribute): void { }
     applySelectedAttribute(instance: ArcScrollBarAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkArcScrollBarPeer;
     }
     mergeModifier(modifier: ArcScrollBarModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
     }
     public attributeModifier(value: AttributeModifier<ArcScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

@@ -28,3 +28,13 @@ ace_unittest("flex_test_ng") {
     "old_cases/flex_wrap_layout_algorithm_test.cpp",
   ]
 }
+
+ace_unittest("flex_overflow_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = ""
+  sources = [
+    "flex_overflow_test_ng.cpp",
+    "flex_base_test_ng.cpp",
+  ]
+}

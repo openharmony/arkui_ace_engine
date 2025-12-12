@@ -67,7 +67,7 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
 {
     NG::IconOptions options;
     auto iconColor = Converter::OptConvert<Color>(src.color);
-    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
+    auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
     auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
         options.UpdateSrc(iconSrc->content, iconSrc->moduleName, iconSrc->bundleName);
@@ -87,7 +87,7 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 {
     SearchButtonOptions buttonOptions;
     buttonOptions.color = OptConvert<Color> (src.fontColor);
-    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.fontSize);
+    buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.fontSize);
     buttonOptions.autoDisable = OptConvert<bool> (src.autoDisable);
     return buttonOptions;
 }
@@ -676,6 +676,8 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
+    SearchModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -721,11 +723,43 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     SearchModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    SearchModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
 void SetDividerColorImpl(Ark_NativePointer node, const Opt_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    SearchModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetSearchButtonImpl(Ark_NativePointer node,
                          const Opt_String* value,
@@ -830,7 +864,11 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetStopBackPressImpl,
         SearchAttributeModifier::SetOnWillChangeImpl,
         SearchAttributeModifier::SetKeyboardAppearanceImpl,
+        SearchAttributeModifier::SetCompressLeadingPunctuationImpl,
         SearchAttributeModifier::SetDividerColorImpl,
+        SearchAttributeModifier::SetIncludeFontPaddingImpl,
+        SearchAttributeModifier::SetFallbackLineSpacingImpl,
+        SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,

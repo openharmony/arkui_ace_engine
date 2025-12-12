@@ -41,9 +41,9 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/components_ng/property/layout_policy_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -185,7 +185,9 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
+    virtual void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
+    virtual void SetSystemMaterial(const UiMaterial* material) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
@@ -267,8 +269,9 @@ public:
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
+    virtual void SetExcludeFromRenderGroup(bool exclude) {}
     virtual void SetRenderFit(RenderFit renderFit) = 0;
-    virtual void SetCornerApplyType(CornerApplyType cornerApplyType) = 0;
+    virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;
@@ -473,7 +476,9 @@ public:
     virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -498,6 +503,7 @@ public:
     virtual void SetAccessibilityText(const std::string& text) = 0;
     virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
+    virtual void SetAccessibilityStateDescription(const std::string& stateDescription) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
@@ -515,6 +521,8 @@ public:
     virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;
     virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
+    virtual void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) = 0;
+    virtual void ResetAccessibilityActionOptions() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

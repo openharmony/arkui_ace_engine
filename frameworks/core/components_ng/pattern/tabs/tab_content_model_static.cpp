@@ -36,10 +36,10 @@ const auto IMAGE_INDICATOR_COUNT = 1;
 }
 void TabContentModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
-    // CHECK_NULL_VOID(frameNodePattern);
-    // frameNodePattern->SetShallowBuilder(std::move(shallowBuilder));
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetShallowBuilder(std::move(shallowBuilder));
 }
 
 void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt)

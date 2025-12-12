@@ -228,6 +228,7 @@ public:
     void PropagateForegroundColorToChildren()
     {
         auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
@@ -430,7 +431,8 @@ public:
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {
@@ -855,6 +857,10 @@ public:
     {
         return nullptr;
     }
+    virtual void OnHoverWithHightLight(bool isHover) {}
+    virtual void OnPaintFocusState(bool isFocus) {}
+    virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
+    virtual void OnContentChangeUnregister() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

@@ -48,6 +48,16 @@ void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPo
 }
 
 template<>
+void AssignCast(std::optional<MarqueeUpdatePolicy>& dst, const Ark_MarqueeUpdatePolicy& src)
+{
+    switch (src) {
+        case ARK_MARQUEE_UPDATE_POLICY_DEFAULT: dst = MarqueeUpdatePolicy::DEFAULT; break;
+        case ARK_MARQUEE_UPDATE_POLICY_PRESERVE_POSITION: dst = MarqueeUpdatePolicy::PRESERVE_POSITION; break;
+        default: LOGE("Unexpected enum value in Ark_MarqueeUpdatePolicy: %{public}d", src);
+    }
+}
+
+template<>
 inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
 {
     FontSettingOptions options;
@@ -103,6 +113,15 @@ TextMarqueeOptions Convert(const Ark_TextMarqueeOptions& src)
         options.UpdateTextMarqueeStartPolicy(optStartPolicy.value());
     }
 
+    auto optUpdatePolicy = OptConvert<MarqueeUpdatePolicy>(src.marqueeUpdatePolicy);
+    if (optUpdatePolicy) {
+        options.UpdateTextMarqueeUpdatePolicy(optUpdatePolicy.value());
+    }
+
+    auto optSpacing = OptConvert<CalcDimension>(src.spacing);
+    if (optSpacing && !optSpacing.value().IsNegative()) {
+        options.UpdateTextMarqueeSpacing(optSpacing.value());
+    }
     return options;
 }
 
@@ -435,7 +454,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> indent = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(value->value, DimensionUnit::FP);
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
@@ -641,6 +660,38 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -783,6 +834,10 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetEditMenuOptionsImpl,
         TextAttributeModifier::SetHalfLeadingImpl,
         TextAttributeModifier::SetEnableHapticFeedbackImpl,
+        TextAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAttributeModifier::SetIncludeFontPaddingImpl,
+        TextAttributeModifier::SetFallbackLineSpacingImpl,
+        TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

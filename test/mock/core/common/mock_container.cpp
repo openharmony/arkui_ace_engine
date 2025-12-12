@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/interfaces/ipc_single/iremote_object.h"
 
@@ -101,12 +103,12 @@ bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<s
 
 void MockContainer::SetUp()
 {
-    container_ = AceType::MakeRefPtr<MockContainer>();
+    container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>();
 }
 
 void MockContainer::SetUp(RefPtr<PipelineBase> pipelineContext)
 {
-    container_ = AceType::MakeRefPtr<MockContainer>(pipelineContext);
+    container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>(pipelineContext);
 }
 
 void MockContainer::TearDown()
@@ -146,7 +148,8 @@ ColorMode MockContainer::GetMockColorMode()
 
 int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
         isPopup = true; // if TextInputType::USER_NAME

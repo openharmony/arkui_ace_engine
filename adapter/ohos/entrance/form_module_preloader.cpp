@@ -38,6 +38,18 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime, co
     Framework::JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime, formModuleList);
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LoadJsXNodeForm(void* runtime, int32_t mode)
+{
+    Framework::FormJsXNodeLoadMode loadMode = Framework::FormJsXNodeLoadMode::NONE;
+    if (mode >= 0 && mode <= static_cast<int32_t>(Framework::FormJsXNodeLoadMode::FULL)) {
+        loadMode = static_cast<Framework::FormJsXNodeLoadMode>(mode);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "LoadJsXNodeForm mode is invalid.");
+        return;
+    }
+    Framework::JsiDeclarativeEngineInstance::LoadJsXNodeForm(runtime, loadMode);
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, const char* bundleName,
     const void* hapPathMap)
 {

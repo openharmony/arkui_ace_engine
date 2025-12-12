@@ -2582,8 +2582,8 @@ HWTEST_F(ImagePatternTestNg, GetContentTransitionParam003, TestSize.Level0)
      * @tc.steps: step2. call GetContentTransitionParam.
      */
     EXPECT_EQ(ImageModelNG::GetContentTransition(AceType::RawPtr(frameNode)), ContentTransitionType::OPACITY);
-    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::OPACITY);
-    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::OPACITY);
+    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
+    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
 }
 
 /**
@@ -2893,5 +2893,57 @@ HWTEST_F(ImagePatternTestNg, ImageConfigurationChange001, TestSize.Level0)
     EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
     imagePattern->OnConfigurationUpdate();
     EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
+
+/**
+ * @tc.name: TestImagePatternLoadImageTest001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImagePatternLoadImageTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ;
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call callbacks.
+     * @tc.expected:
+     */
+    imagePattern->isImageReloadNeeded_ = true;
+    imagePattern->isOrientationChange_ = true;
+    imagePattern->renderedImageInfo_.renderSuccess = true;
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
+    EXPECT_FALSE(imagePattern->isImageReloadNeeded_);
+    EXPECT_FALSE(imagePattern->isOrientationChange_);
+    EXPECT_FALSE(imagePattern->renderedImageInfo_.renderSuccess);
+}
+
+/**
+ * @tc.name: ImagePatternLoadImageDataIfNeed001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageModelNG image;
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+    imagePattern->LoadAltErrorImage(altImageSourceInfo);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    imagePattern->LoadImageDataIfNeed();
 }
 } // namespace OHOS::Ace::NG

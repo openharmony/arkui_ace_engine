@@ -1127,12 +1127,24 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+JSRef<JSVal> JSViewPartialUpdate::GetJsContext()
+{
+    ContainerScope scope(GetInstanceId());
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, JSRef<JSVal>());
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, JSRef<JSVal>());
+    auto context = frontend->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    return jsVal;
+}
+
 void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 {
     auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        auto jsContext = GetJsContext();
         obj->SetPropertyObject("context", jsContext);
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetProperty<std::string>("name", result->name);
@@ -1164,7 +1176,9 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
         if (navigationStackExtend) {
             auto navPathStackVal =
                 JsConverter::ConvertNapiValueToJsVal(navigationStackExtend->GetNavPathStackExtendObj());
-            navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+            if (navPathStackVal->IsObject()) {
+                navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+            }
         }
     } else {
         // ArkTS dynamic
@@ -1357,7 +1371,7 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     instance->SetContext(context);
     instance->SetJSViewName(viewName);
     const int32_t instanceId = instance->GetInstanceId();
-    instance->SetLastestInstanceId(instanceId);
+    instance->SetLatestInstanceId(instanceId);
 
     //  The JS object owns the C++ object:
     // make sure the C++ is not destroyed when RefPtr thisObj goes out of scope
@@ -1382,10 +1396,10 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->GetLastestInstanceId() == instanceId) {
+        if (self->GetLatestInstanceId() == instanceId) {
             return;
         }
-        self->SetLastestInstanceId(instanceId);
+        self->SetLatestInstanceId(instanceId);
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
         func->ExecuteJS(1, param);
@@ -1394,14 +1408,14 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         std::move(updateInstanceForEnvValueFunc));
 }
 
-void JSViewPartialUpdate::SetLastestInstanceId(const int32_t instanceId)
+void JSViewPartialUpdate::SetLatestInstanceId(const int32_t instanceId)
 {
-    lastestInstanceId_ = instanceId;
+    latestInstanceId_ = instanceId;
 }
 
-int32_t JSViewPartialUpdate::GetLastestInstanceId() const
+int32_t JSViewPartialUpdate::GetLatestInstanceId() const
 {
-    return lastestInstanceId_;
+    return latestInstanceId_;
 }
 
 void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
@@ -1465,5 +1479,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     info.SetReturnValue(targetView);
     return;
 }
-
 } // namespace OHOS::Ace::Framework

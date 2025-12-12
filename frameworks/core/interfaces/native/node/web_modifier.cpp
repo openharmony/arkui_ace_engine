@@ -46,6 +46,7 @@ constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
 constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
 constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
+constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
@@ -412,6 +413,36 @@ void ResetOnRequestSelectedCallBack(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetOnRequestFocus(frameNode, nullptr);
+}
+
+void SetOnFirstScreenPaint(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onFirstScreenPaintCallBackPtr =
+            reinterpret_cast<std::function<void(const FirstScreenPaintEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onFirstScreenPaintCallBackPtr);
+        auto onFirstScreenPaintCallBack = *onFirstScreenPaintCallBackPtr;
+        auto callback = [onFirstScreenPaintCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto firstScreenPaint = static_cast<const FirstScreenPaintEvent*>(event);
+            if (firstScreenPaint) {
+                auto& nonConstEvent = const_cast<FirstScreenPaintEvent&>(*firstScreenPaint);
+                onFirstScreenPaintCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnFirstScreenPaint(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnFirstScreenPaint(frameNode, nullptr);
+    }
+}
+
+void ResetOnFirstScreenPaint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [](const BaseEventInfo* info) {};
+    WebModelNG::SetOnFirstScreenPaint(frameNode, callback);
 }
 
 void SetOnContextMenuHideCallBack(ArkUINodeHandle node, void* extraParam)
@@ -1499,6 +1530,32 @@ void ResetOnWindowNew(ArkUINodeHandle node)
     WebModelNG::SetWindowNewEvent(frameNode, nullptr);
 }
 
+void SetOnWindowNewExt(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onWindowNewExt = static_cast<WebWindowNewExtEvent*>(event.get());
+            if (onWindowNewExt != nullptr) {
+                originalCallback(*onWindowNewExt);
+            }
+        };
+        WebModelNG::SetWindowNewExtEvent(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetWindowNewExtEvent(frameNode, nullptr);
+    }
+}
+
+void ResetOnWindowNewExt(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWindowNewExtEvent(frameNode, nullptr);
+}
+
 void SetOnPermissionRequest(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1714,6 +1771,36 @@ void ResetOnShowFileSelector(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetOnShowFileSelector(frameNode, nullptr);
+}
+
+void SetOnTextSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onTextSelectionChangeCallBackPtr =
+            reinterpret_cast<std::function<void(const TextSelectionChangedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onTextSelectionChangeCallBackPtr);
+        auto onTextSelectionChangeCallBack = *onTextSelectionChangeCallBackPtr;
+        auto callback = [onTextSelectionChangeCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto textSelectionChangedEvent = static_cast<const TextSelectionChangedEvent*>(event);
+            if (textSelectionChangedEvent) {
+                auto& nonConstEvent = const_cast<TextSelectionChangedEvent&>(*textSelectionChangedEvent);
+                onTextSelectionChangeCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnTextSelectionChange(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [](const BaseEventInfo* info) {};
+    WebModelNG::SetOnTextSelectionChange(frameNode, callback);
 }
 
 void SetOnDetectedBlankScreen(ArkUINodeHandle node, void* extraParam)
@@ -2392,6 +2479,20 @@ void ResetEnableImageAnalyzer(ArkUINodeHandle node)
     WebModelNG::SetEnableImageAnalyzer(frameNode, DEFAULT_ENABLE_IMAGE_ANALYZER);
 }
 
+void SetEnableAutoFill(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableAutoFill(frameNode, value);
+}
+
+void ResetEnableAutoFill(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableAutoFill(frameNode, DEFAULT_AUTO_FILL_ENABLED);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2448,6 +2549,35 @@ void ResetOnCameraCaptureStateChanged(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetCameraCaptureStateChangedId(frameNode, nullptr);
+}
+
+void SetOnMicrophoneCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onMicrophoneCaptureStateChangedCallBackPtr =
+            reinterpret_cast<std::function<void(const MicrophoneCaptureStateEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onMicrophoneCaptureStateChangedCallBackPtr);
+        auto onMicrophoneCaptureStateChangedCallBack = *onMicrophoneCaptureStateChangedCallBackPtr;
+        auto callback = [onMicrophoneCaptureStateChangedCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto microphoneCaptureStateEvent = static_cast<const MicrophoneCaptureStateEvent*>(event);
+            if (microphoneCaptureStateEvent) {
+                auto& nonConstEvent = const_cast<MicrophoneCaptureStateEvent&>(*microphoneCaptureStateEvent);
+                onMicrophoneCaptureStateChangedCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnMicrophoneCaptureStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, nullptr);
 }
 
 namespace NodeModifier {
@@ -2605,6 +2735,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnRenderProcessRespondingCallBack = ResetOnRenderProcessRespondingCallBack,
         .setOnWindowNew = SetOnWindowNew,
         .resetOnWindowNew = ResetOnWindowNew,
+        .setOnWindowNewExt = SetOnWindowNewExt,
+        .resetOnWindowNewExt = ResetOnWindowNewExt,
         .setOnGeolocationShow = SetOnGeolocationShow,
         .resetOnGeolocationShow = ResetOnGeolocationShow,
         .setOnPermissionRequest = SetOnPermissionRequest,
@@ -2623,10 +2755,14 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnTextSelectionChange = SetOnTextSelectionChange,
+        .resetOnTextSelectionChange = ResetOnTextSelectionChange,
         .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setOnFirstScreenPaint = SetOnFirstScreenPaint,
+        .resetOnFirstScreenPaint = ResetOnFirstScreenPaint,
         .setEnableImageAnalyzer = SetEnableImageAnalyzer,
         .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
@@ -2681,6 +2817,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetBackToTop = ResetBackToTop,
         .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
         .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
+        .setOnMicrophoneCaptureStateChanged = SetOnMicrophoneCaptureStateChanged,
+        .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
+        .setEnableAutoFill = SetEnableAutoFill,
+        .resetEnableAutoFill = ResetEnableAutoFill,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2840,6 +2980,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnRenderProcessRespondingCallBack = ResetOnRenderProcessRespondingCallBack,
         .setOnWindowNew = SetOnWindowNew,
         .resetOnWindowNew = ResetOnWindowNew,
+        .setOnWindowNewExt = SetOnWindowNewExt,
+        .resetOnWindowNewExt = ResetOnWindowNewExt,
         .setOnGeolocationShow = SetOnGeolocationShow,
         .resetOnGeolocationShow = ResetOnGeolocationShow,
         .setOnPermissionRequest = SetOnPermissionRequest,
@@ -2858,10 +3000,14 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnTextSelectionChange = SetOnTextSelectionChange,
+        .resetOnTextSelectionChange = ResetOnTextSelectionChange,
         .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setOnFirstScreenPaint = SetOnFirstScreenPaint,
+        .resetOnFirstScreenPaint = ResetOnFirstScreenPaint,
         .setEnableImageAnalyzer = SetEnableImageAnalyzer,
         .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
@@ -2916,6 +3062,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetBackToTop = ResetBackToTop,
         .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
         .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
+        .setOnMicrophoneCaptureStateChanged = SetOnMicrophoneCaptureStateChanged,
+        .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
+        .setEnableAutoFill = SetEnableAutoFill,
+        .resetEnableAutoFill = ResetEnableAutoFill,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

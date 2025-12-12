@@ -220,6 +220,7 @@ export class ParallelNode<T> {
     }
 
     dispose(): void {
+        this.__needAttach?.dispose();
         this.manager?.terminate<PeerNode>(this.rootState!)
     }
 }
@@ -319,6 +320,9 @@ class ParallelizeUIAdapterNode<V, T> implements AdapterNode {
     }
 
     dispose() {
+        this.items.forEach((node, key, map) => {
+            node?.dispose()
+        })
         adapterUpdateSet.delete(this)
     }
 

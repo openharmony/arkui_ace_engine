@@ -93,6 +93,13 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
     }
 }
 
+void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& buttonStyle)
+{
+    if (buttonStyle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
+    }
+}
+
 void ButtonModelNG::ParseButtonResColor(
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
@@ -420,6 +427,13 @@ void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonRole.value());
         BackgroundColor(bgColor, true);
         SetFontColor(textColor);
+    }
+}
+
+void ButtonModelNG::SetRoleOnly(const std::optional<ButtonRole>& buttonRole)
+{
+    if (buttonRole.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value());
     }
 }
 
@@ -874,6 +888,28 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
     if (buttonParameters.fontStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
     }
+    if (buttonParameters.textAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, buttonParameters.textAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    }
+}
+
+void ButtonModelNG::ResetTextAlign()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetTextAlign(frameNode);
+}
+
+void ButtonModelNG::ResetTextAlign(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetTextAlign();
 }
 
 void ButtonModelNG::SetSize(

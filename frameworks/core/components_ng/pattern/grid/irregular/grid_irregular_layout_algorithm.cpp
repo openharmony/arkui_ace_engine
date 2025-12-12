@@ -373,13 +373,13 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     if (info_.scrollAlign_ == ScrollAlign::START && !NearZero(info_.contentStartOffset_)) {
-        info_.currentOffset_ += info_.contentStartOffset_;
         info_.prevOffset_ = info_.currentOffset_;
+        info_.currentOffset_ += info_.contentStartOffset_;
         MeasureOnOffset(mainSize);
     }
     if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
-        info_.currentOffset_ -= info_.contentEndOffset_;
         info_.prevOffset_ = info_.currentOffset_;
+        info_.currentOffset_ -= info_.contentEndOffset_;
         MeasureOnOffset(mainSize);
     }
 }

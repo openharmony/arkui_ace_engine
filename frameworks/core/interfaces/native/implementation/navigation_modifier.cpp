@@ -74,8 +74,9 @@ void SetNavigationOptionsImpl(Ark_NativePointer node,
     auto pathStack = pathInfos->value;
     CHECK_NULL_VOID(pathStack);
     auto navigationStack = pathStack->GetNavPathStack();
-    navigationPattern->SetNavigationStack(navigationStack);
-    navigationStack->SetOnStateChangedCallback(nullptr);
+    navigationPattern->SetNavigationStack(navigationStack, false);
+    // update path stack need to sync stack immediately
+    navigationStack->InvokeOnStateChanged();
 }
 } // namespace NavigationInterfaceModifier
 
@@ -233,7 +234,7 @@ void SetOnTitleModeChangeImpl(Ark_NativePointer node,
     }
     auto titleChange = [titleCallback = CallbackHelper(*optValue)](NavigationTitleMode titleMode) {
         Ark_NavigationTitleMode mode = static_cast<Ark_NavigationTitleMode>(titleMode);
-        titleCallback.Invoke(mode);
+        titleCallback.InvokeSync(mode);
     };
     auto eventChange = [eventChange = CallbackHelper(*optValue)](const BaseEventInfo* info) {
         auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(info);
@@ -244,7 +245,7 @@ void SetOnTitleModeChangeImpl(Ark_NativePointer node,
         if (eventInfo->IsMiniBar()) {
             titleMode = Ark_NavigationTitleMode::ARK_NAVIGATION_TITLE_MODE_MINI;
         }
-        eventChange.Invoke(titleMode);
+        eventChange.InvokeSync(titleMode);
     };
     auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -264,7 +265,7 @@ void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
     }
     auto stateCallback = [changeCallback = CallbackHelper(*optValue)](bool isVisible) {
         auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
-        changeCallback.Invoke(visible);
+        changeCallback.InvokeSync(visible);
     };
     eventHub->SetOnNavBarStateChange(stateCallback);
 }
@@ -280,7 +281,7 @@ void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
     }
     auto modeCallback = [changeCallback = CallbackHelper(*optValue)](NavigationMode mode) {
         auto navigationMode = Converter::ArkValue<Ark_NavigationMode>(mode);
-        changeCallback.Invoke(navigationMode);
+        changeCallback.InvokeSync(navigationMode);
     };
     auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);

@@ -24,6 +24,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -131,6 +132,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
+    textStyle.SetIncludeFontPadding(textFieldLayoutProperty->GetIncludeFontPaddingValue(false));
+    textStyle.SetFallbackLineSpacing(textFieldLayoutProperty->GetFallbackLineSpacingValue(false));
     // use for modifier.
     auto contentModifier = pattern->GetContentModifier();
     CHECK_NULL_VOID(contentModifier);
@@ -833,10 +837,13 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& frameNode, TextStyle& textStyle,
     bool isDisabled, bool isTextColorByUser)
 {
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
     if (isTextColorByUser) {
         auto textColor = layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor());
@@ -851,6 +858,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
             auto placeholderTextColor = theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor();
             layoutProperty->UpdatePlaceholderTextColor(placeholderTextColor);
             textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(placeholderTextColor));
+            std::string info = "TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle";
+            textFieldPattern->SetPlaceholderColorInfo(info);
         }
     }
 }
@@ -871,7 +880,11 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(PlaceholderItalicFontStyle, ItalicFontStyle);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(TextAlign, TextAlign);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(EnableAutoSpacing, EnableAutoSpacing);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(IncludeFontPadding, IncludeFontPadding);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(FallbackLineSpacing, FallbackLineSpacing);
     textLayoutProperty->UpdateLayoutDirection(direction_);
+    textLayoutProperty->UpdateTextDirection(textDirection_);
     if (!isInlineFocus_) {
         auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
         textLayoutProperty->UpdateLayoutPolicyProperty(widthPolicy, true);
@@ -959,7 +972,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
 
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight()));
-    UpdatePlaceholderTextStyleSetTextColor(layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
+    UpdatePlaceholderTextStyleSetTextColor(layoutProperty, frameNode, textStyle, isDisabled, isTextColorByUser);
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
@@ -1061,7 +1074,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::u16string& content, const float fontSize) const
 {
     return {
-        .direction = GetTextDirection(content, direction_),
+        .direction = GetTextDirection(content, direction_, textDirection_),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
@@ -1070,7 +1083,10 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .includeFontPadding = textStyle.GetIncludeFontPadding(),
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
     };
 }
 
@@ -1115,7 +1131,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing() };
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .includeFontPadding = textStyle.GetIncludeFontPadding(),
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }
@@ -1193,24 +1212,10 @@ void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyl
     paragraph_->Build();
 }
 
-TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::u16string& content, TextDirection direction)
+TextDirection TextFieldLayoutAlgorithm::GetTextDirection(
+    const std::u16string& content, TextDirection direction, TextDirection textDirection)
 {
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    for (const auto& charOfShowingText : content) {
-        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
-            return TextDirection::LTR;
-        }
-        if (TextLayoutadapter::IsRightToLeft(charOfShowingText) ||
-            TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
-            return TextDirection::RTL;
-        }
-    }
-    return textDirection;
+    return ParagraphUtil::GetTextOwnDirection(content, direction, textDirection);
 }
 
 RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const

@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -23,7 +24,8 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { extractors, hookPasteButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, hookPasteButtonAttributeModifier, AttributeModifier, AttributeUpdater, hookPasteButtonOnClick } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -45,6 +47,7 @@ export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
         return _peer
     }
     setPasteButtonOptionsAttribute(options?: PasteButtonOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -127,14 +130,15 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
     }
     public onClick(value: PasteButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
-            const value_casted = value as (PasteButtonCallback | undefined)
-            this.getPeer()?.setOnClickAttribute(value_casted)
+            hookPasteButtonOnClick(this, value)
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookPasteButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPasteButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

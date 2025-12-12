@@ -33,7 +33,7 @@ protected:
 public:
     void SetOptions(double width, double height, const std::optional<RenderingContextSettingsPeer*>& optSettings);
     void RemoveOptions();
-    ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
+    ImageBitmapPeer* TransferToImageBitmap();
     static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);

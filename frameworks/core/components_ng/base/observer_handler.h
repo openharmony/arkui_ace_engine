@@ -102,29 +102,27 @@ struct ScrollEventInfo {
 
 struct NavDestinationSwitchInfo {
     // UIContext
-    napi_value context;
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation;
 
-    NavDestinationSwitchInfo(napi_value ctx, std::optional<NavDestinationInfo>&& fromInfo,
-        std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
-        : context(ctx), from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+    NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo, std::optional<NavDestinationInfo>&& toInfo,
+        NavigationOperation op)
+        : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
           to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
     {}
 };
 
 struct RouterPageInfoNG {
-    napi_value context;
     int32_t index;
     std::string name;
     std::string path;
     RouterPageState state;
     std::string pageId;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+    RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
         std::string pageId)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+        : index(index), name(std::move(name)), path(std::move(path)), state(state),
           pageId(std::move(pageId))
     {}
 };
@@ -230,6 +228,8 @@ public:
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
+    void NotifyNavDestinationSwitchForAni(std::optional<NavDestinationInfo>& from,
+        std::optional<NavDestinationInfo>& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
     bool IsSwiperContentObserverEmpty();
@@ -242,6 +242,7 @@ public:
     using DrawCommandSendHandleFunc = std::function<void()>;
     using LayoutDoneHandleFunc = std::function<void()>;
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFuncForAni = std::function<void(NavDestinationSwitchInfo&)>;
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
@@ -260,6 +261,7 @@ public:
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
     using SwiperContentObservrEmptyFunc = bool (*)();
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
+    NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
@@ -278,6 +280,7 @@ public:
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
+    void SetHandleNavDestinationSwitchFuncForAni(NavDestinationSwitchHandleFuncForAni func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
@@ -315,6 +318,7 @@ private:
     WinSizeLayoutBreakpointHandleFunc winSizeLayoutBreakpointHandleFunc_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFuncForAni navDestinationSwitchHandleFuncForAni_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;

@@ -201,6 +201,7 @@ private:
     Dimension ringProgressLeftPadding_ = 0.0_vp;
     WeakPtr<FrameNode> host_;
     WeakPtr<Pattern> pattern_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

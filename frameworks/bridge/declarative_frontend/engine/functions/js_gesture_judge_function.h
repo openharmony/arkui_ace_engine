@@ -45,7 +45,7 @@ public:
         const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info);
 
     GestureJudgeResult Execute(const std::shared_ptr<BaseGestureEvent>& info,
-        const RefPtr<NG::NGGestureRecognizer>& current, const std::list<RefPtr<NG::NGGestureRecognizer>>& others);
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::list<WeakPtr<NG::NGGestureRecognizer>>& others);
 
 private:
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);

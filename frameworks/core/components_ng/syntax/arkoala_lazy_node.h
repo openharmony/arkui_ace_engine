@@ -127,6 +127,8 @@ public:
     void DumpInfo() override;
 
 private:
+    RefPtr<UINode> GetFrameChildByIndexImpl(int32_t index, bool needBuild, bool isCache, bool addToRenderTree);
+    void RebuildCache();
     bool IsInActiveRange(int32_t index, const ActiveRangeParam& param) const;
     bool IsInCacheRange(int32_t index, const ActiveRangeParam& param) const;
     void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
@@ -151,6 +153,7 @@ private:
      * cbFunction is NOT allowed to add to or remove items from L1
      */
     void ForEachL1Node(const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const;
+    void ForEachL1NodeWithOnMove(const std::function<void(const RefPtr<UINode>& node)>& cbFunc) const;
 
     std::string DumpUINode(const RefPtr<UINode>& node) const;
 

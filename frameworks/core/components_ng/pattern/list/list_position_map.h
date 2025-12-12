@@ -138,6 +138,10 @@ public:
 
     std::pair<int32_t, float> GetEndIndexAndPos() const;
 
+    int32_t GetEntryAtOrBeforeIndex(int32_t index) const;
+
+    int32_t GetEntryAtOrAfterIndex(int32_t index) const;
+
     void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize);
 
     void SetChainOffsetCallback(std::function<float(int32_t)> func)

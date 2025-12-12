@@ -33,6 +33,7 @@ public:
     // Implement Clipboard
     void SetData(
         const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) override;
+    void GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode = false) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override;
     void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) override;
     void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;
@@ -54,11 +55,13 @@ public:
     void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
         bool syncMode = false) override;
-
+    void GetSpanStringData(
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+        bool syncMode = false) override;
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
-    void GetDataSync(const std::function<void(const std::string&)>& callback);
-    void GetDataAsync(const std::function<void(const std::string&)>& callback);
+    void GetDataSync(const std::function<void(const std::string&, bool)>& callback);
+    void GetDataAsync(const std::function<void(const std::string&, bool)>& callback);
     void GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback);
@@ -66,14 +69,16 @@ private:
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback);
     void ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
-        std::string& resText, bool& hasPlainRecord);
+        std::string& resText, bool& hasPlainRecord, bool& isFromAutoFill);
+    bool IsPasteFromAutoFill(const std::set<std::string>& mimeTypes, const std::string& autoFillPackageName);
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetSpanStringDataHelper(
-        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
         bool syncMode = false);
     void ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
-        const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord);
+        const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord,
+        bool& isFromAutoFill);
     const std::string GetMimeType(
         std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap);
 #endif

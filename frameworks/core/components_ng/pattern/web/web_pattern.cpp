@@ -418,6 +418,9 @@ void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surf
         }
         if (pip.pipWebPattern.Upgrade()) {
             pip.pipWebPattern.Upgrade()->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "pipWebPattern.Upgrade failed.");
+            OH_NativeWindow_DestroyNativeWindow(window);
         }
     }
 }
@@ -628,10 +631,12 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
-    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
+    int webId = GetWebId();
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", webId);
+    CleanupWebPatternResource(webId);
     UninitTouchEventListener();
     if (setWebDetachCallback_) {
-        auto setWebDetachTask = [callback = setWebDetachCallback_, webId = GetWebId()]() {
+        auto setWebDetachTask = [callback = setWebDetachCallback_, webId]() {
             CHECK_NULL_VOID(callback);
             callback(webId);
         };
@@ -648,7 +653,6 @@ WebPattern::~WebPattern()
         observer_->NotifyDestory();
     }
     if (isActive_) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         SetActiveStatusInner(false, true);
     }
     if (imageAnalyzerManager_) {
@@ -668,7 +672,14 @@ WebPattern::~WebPattern()
         }
         pipController_.clear();
     }
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+        }
+    }
     UninitRotationEventCallback();
+    UninitMenuLifeCycleCallback();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -1145,6 +1156,53 @@ bool WebPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
     selectInfo.menuCallback.onMenuShow = selectMenuParams->onMenuShow;
     selectInfo.menuCallback.onMenuHide = selectMenuParams->onMenuHide;
     return true;
+}
+
+void WebPattern::RegisterMenuLifeCycleCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web register contextMenu life cycle callback.");
+    overlayManager->RegisterMenuLifeCycleCallback(
+        host->GetId(), [weak = WeakClaim(this)](const MenuLifeCycleEvent& menuLifeCycleEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->NotifyMenuLifeCycleEvent(menuLifeCycleEvent);
+        });
+}
+
+void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d.",
+        static_cast<int>(menuLifeCycleEvent));
+    if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
+        isMenuShownFromWeb_ = true;
+        isLastEventMenuClose_ = false;
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
+        isMenuShownFromWeb_ = false;
+        isLastEventMenuClose_ = true;
+        if (!isFocus_) {
+            CHECK_NULL_VOID(delegate_);
+            delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
+            delegate_->OnBlur();
+        }
+        UninitMenuLifeCycleCallback();
+    }
+}
+
+void WebPattern::UninitMenuLifeCycleCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UnRegisterMenuLifeCycleCallback(host->GetId());
 }
 
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
@@ -2140,6 +2198,14 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         WebRequestFocus();
     }
 
+    if (info.GetAction() == MouseAction::PRESS) {
+        isTextSelectionEnable_ = true;
+    }
+
+    if (info.GetAction() == MouseAction::RELEASE) {
+        isTextSelectionEnable_ = false;
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText(), true);
+    }
     // set touchup false when using mouse
     isTouchUpEvent_ = false;
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
@@ -2149,6 +2215,9 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             return;
         }
         ResetDragAction();
+    }
+    if (CheckShouldBlockMouseEvent(info)) {
+        return;
     }
     isHoverExit_ = false;
     if (info.GetAction() == MouseAction::HOVER_EXIT) {
@@ -2176,20 +2245,103 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
 void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 {
-    if (delegate_->IsFileSelectorShow() && info.GetAction() == MouseAction::HOVER_EXIT) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent blocked when FileSelector show.");
-        return;
-    }
     std::vector<int32_t> pressedCodes {};
     std::vector<KeyCode> keyCode = info.GetPressedKeyCodes();
     for (auto pCode : keyCode) {
         pressedCodes.push_back(static_cast<int32_t>(pCode));
     }
+    SupplementMouseEventsIfNeeded(info, clickNum, pressedCodes);
 
+    if (info.GetAction() == MouseAction::HOVER_EXIT) {
+        isHoverNWeb_ = false;
+    } else if (info.GetAction() == MouseAction::HOVER) {
+        isHoverNWeb_ = true;
+        isSupplementMouseLeave_ = false;
+    }
     std::shared_ptr<NWebMouseEventImpl> mouseEvent = std::make_shared<NWebMouseEventImpl>(
         info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
         static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()), clickNum, pressedCodes);
     delegate_->WebOnMouseEvent(mouseEvent);
+}
+
+bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
+{
+    if (isMenuShownFromWeb_) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            // When menu is showing ,the action down will be costed,
+            isUpSupplementDown_ = true;
+        }
+        if (info.GetAction() == MouseAction::HOVER_EXIT) {
+            isSupplementMouseLeave_ = true;
+        }
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "WebSendMouseEvent stopped because BindedMenu is showing. isUpSupplementDown_:%{public}d, "
+            "isSupplementMouseLeave_: %{public}d ", isUpSupplementDown_, isSupplementMouseLeave_);
+        return true;
+    }
+
+    if (delegate_ && delegate_->IsFileSelectorShow() && (info.GetAction() == MouseAction::HOVER_EXIT)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebSendMouseEvent stopped because fileselector showing");
+        return true;
+    }
+
+    if (isDragging_ && (info.GetAction() == MouseAction::HOVER_EXIT)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebSendMouseEvent stopped because mouse is dragging");
+        isSupplementMouseLeave_ = true;
+        return true;
+    }
+    return false;
+}
+
+void WebPattern::SupplementMouseEventsIfNeeded(
+    const MouseInfo &info, int32_t clickNum, std::vector<int32_t> pressedCodes)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER) {
+        // When the menu is closed and the mouse is inside the menu, a mouseMove event needs to be supplemented.
+        isSupplementMouseLeave_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "LastEvent is bindMenu close, WINDOW_ENTER only supplement mouseMove");
+        std::shared_ptr<NWebMouseEventImpl> mouseMoveEvent = std::make_shared<NWebMouseEventImpl>(mouseHoveredX_,
+            mouseHoveredY_,
+            MOUSE_EVENT_MAX_SIZE,
+            MOUSE_EVENT_MAX_SIZE,
+            static_cast<int32_t>(MouseButton::NONE_BUTTON),
+            static_cast<int32_t>(MouseAction::MOVE),
+            1,
+            std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseMoveEvent);
+    }
+    isLastEventMenuClose_ = false;
+
+    if (isUpSupplementDown_ && (info.GetAction() == MouseAction::RELEASE)) {
+        // When the menu is closed and the mouse is outside the menu, a mouseMove and mouseDown event needs to be
+        // supplemented.
+        isUpSupplementDown_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent supplement mouseMove And mouseDown when mouseUp");
+        std::shared_ptr<NWebMouseEventImpl> mouseMoveEvent = std::make_shared<NWebMouseEventImpl>(mouseHoveredX_,
+            mouseHoveredY_, MOUSE_EVENT_MAX_SIZE, MOUSE_EVENT_MAX_SIZE, static_cast<int32_t>(MouseButton::NONE_BUTTON),
+            static_cast<int32_t>(MouseAction::MOVE), 1, std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseMoveEvent);
+
+        std::shared_ptr<NWebMouseEventImpl> mouseDownEvent =
+            std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(),
+                info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
+                static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(MouseAction::PRESS),
+                clickNum, pressedCodes);
+        delegate_->WebOnMouseEvent(mouseDownEvent);
+    }
+
+    if (isHoverNWeb_ && info.GetAction() == MouseAction::HOVER && isSupplementMouseLeave_) {
+        // Nweb not receive HOVER_EXIT, but HOVER is coming, need to supplement a HOVER_EXIT.
+        // isSupplementMouseLeave_ is true means the case what need supplement mouseleave.
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent supplement mouseLeave when HOVER");
+        std::shared_ptr<NWebMouseEventImpl> mouseLeaveEvent =
+            std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(),
+                info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
+                static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(MouseAction::HOVER_EXIT),
+                1, std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseLeaveEvent);
+    }
 }
 
 void WebPattern::ResetDragAction()
@@ -3077,6 +3229,11 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     isFocus_ = false;
 
     if (isDragStartFromWeb_) {
+        return;
+    }
+    if (isMenuShownFromWeb_) {
+        TAG_LOGI(
+            AceLogTag::ACE_WEB, "ContextMenu intercept web blur blurReason:%{public}d", static_cast<int>(blurReason));
         return;
     }
     if (!selectPopupMenuShowing_) {
@@ -3973,7 +4130,9 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     int32_t nodeId = host->GetId();
     UninitializeAccessibility();
     UnInitSurfaceDensityCallback(context);
-    context->RemoveWindowStateChangedCallback(nodeId);
+    if (!offlineWebInited_) {
+        context->RemoveWindowStateChangedCallback(nodeId);
+    }
     context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
     context->RemoveVisibleAreaChangeNode(nodeId);
@@ -4239,10 +4398,9 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateInitialScale(GetInitialScale().value());
         }
         if (GetBlankScreenDetectionConfig()) {
-            delegate_->UpdateBlankScreenDetectionConfig(GetBlankScreenDetectionConfig().value().enable,
-                GetBlankScreenDetectionConfig().value().detectionTiming,
-                GetBlankScreenDetectionConfig().value().detectionMethods,
-                GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
+            auto config = GetBlankScreenDetectionConfig().value();
+            delegate_->UpdateBlankScreenDetectionConfig(
+                config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
         }
         delegate_->UpdateEnableImageAnalyzer(GetEnableImageAnalyzerValue(true));
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
@@ -4261,6 +4419,7 @@ void WebPattern::OnModifyDone()
         }
         UpdateScrollBarWithBorderRadius();
         OnBackToTopUpdate(backToTop_);
+        delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -4433,6 +4592,10 @@ void WebPattern::InitInOfflineMode()
     isVisible_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
+    offlineWebNodeId_ = host->GetId();
     int width = 0;
     int height = 0;
     auto layoutProperty = host->GetLayoutProperty();
@@ -5104,6 +5267,13 @@ void WebPattern::OnEnableImageAnalyzerUpdate(bool isEnabled)
     }
 }
 
+void WebPattern::OnEnableAutoFillUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->SetEnableAutoFill(isEnabled);
+    }
+}
+
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
     const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
@@ -5231,8 +5401,22 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
     viewDataWrap->SetOtherAccount(viewDataCommon_->IsOtherAccount());
 }
 
+OHOS::NWeb::NWebAutoFillTriggerType ConvertAceAutoFillTriggerType(const AceAutoFillTriggerType& type)
+{
+    switch (type) {
+        case AceAutoFillTriggerType::AUTO_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::AUTO_REQUEST;
+        case AceAutoFillTriggerType::MANUAL_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::MANUAL_REQUEST;
+        case AceAutoFillTriggerType::PASTE_REQUEST:
+            return OHOS::NWeb::NWebAutoFillTriggerType::PASTE_REQUEST;
+        default:
+            return OHOS::NWeb::NWebAutoFillTriggerType::UNSPECIFIED;
+    }
+}
+
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called");
     CHECK_NULL_VOID(viewDataWrap);
@@ -5244,8 +5428,9 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             continue;
         }
         auto type = nodeInfoWrap->GetAutoFillType();
-        // white list check
-        if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
+        if (triggerType == AceAutoFillTriggerType::PASTE_REQUEST) {
+            jsonNode->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
+        } else if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {  // white list check
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
             if (nodeInfoWrap->GetMetadata() != IS_HINT_TYPE) {
                 jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
@@ -5264,7 +5449,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
     auto otherAccount = viewDataWrap->GetOtherAccount();
     jsonNode->Put(AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT.c_str(), otherAccount);
-    delegate_->NotifyAutoFillViewData(jsonNode->ToString());
+    delegate_->NotifyAutoFillViewData(jsonNode->ToString(), ConvertAceAutoFillTriggerType(triggerType));
 
     // shift focus after autofill
     if (focusType != AceAutoFillType::ACE_UNSPECIFIED && !isPasswordFill_) {
@@ -5569,6 +5754,66 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+void WebPattern::FakePageNodeInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<PageNodeInfoWrap> nodeInfo = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    CHECK_NULL_VOID(nodeInfo);
+    pageNodeInfo_.clear();
+    nodeInfo->SetId(host->GetId());
+    nodeInfo->SetDepth(host->GetDepth());
+    nodeInfo->SetTag(host->GetTag());
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    NG::RectF pageNodeRect;
+    pageNodeRect.SetRect(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
+    nodeInfo->SetPageNodeRect(pageNodeRect);
+    nodeInfo->SetIsFocus(true);
+    pageNodeInfo_.emplace_back(nodeInfo);
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+}
+
+bool WebPattern::RequestAutoFill(bool& isPopup, bool isNewPassWord,
+    const AceAutoFillTriggerType& triggerType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "ProCessAutoFillOnPaste RequestAutoFill");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    if (container == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Get current container is nullptr.");
+        return false;
+    }
+
+    FakePageNodeInfo();
+
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_WEB, "onUIExtNodeDestroy called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(false);
+    };
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_WEB, "onUIExtNodeBindingCompleted called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(true);
+    };
+    AceAutoFillType autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
+    isAutoFillClosing_ = false;
+    auto resultCode = container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup,
+        autoFillSessionId_, false, onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
+    return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
 std::string WebPattern::GetAllTextInfo() const
@@ -6541,8 +6786,19 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow WebId : %{public}d", GetWebId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int webId = GetWebId();
+    NodeStatus nodeStatus = host->GetNodeStatus();
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowShow WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
+        webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
+    if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        if (OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
+            delegate_->OnActive();
+        }
+        return;
+    }
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
 
@@ -6550,8 +6806,6 @@ void WebPattern::OnWindowShow()
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     componentVisibility_ = layoutProperty->GetVisibility().value_or(VisibleType::GONE);
@@ -6567,8 +6821,16 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide WebId : %{public}d", GetWebId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    NodeStatus nodeStatus = host->GetNodeStatus();
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowHide WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
+        GetWebId(), offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
+    if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        delegate_->OnInactive(true);
+        return;
+    }
     delegate_->OnRenderToBackground();
 
     if (!isWindowShow_) {
@@ -6576,7 +6838,7 @@ void WebPattern::OnWindowHide()
     }
 
     CHECK_NULL_VOID(delegate_);
-    SetActiveStatusInner(false);
+    SetActiveStatusInner(false, offlineWebInited_ && !isActive_);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
     needOnFocus_ = false;
@@ -7578,9 +7840,10 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 }
 
 void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
         UpdateJavaScriptOnDocumentStartByOrder();
@@ -7589,9 +7852,10 @@ void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems
 }
 
 void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
@@ -7601,9 +7865,10 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 }
 
 void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
         UpdateJavaScriptOnHeadReadyByOrder();
@@ -7632,30 +7897,39 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
 
 void WebPattern::UpdateJavaScriptOnDocumentStartByOrder()
 {
-    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START,
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptRegexItems_.has_value() &&
+        onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(),
+            onDocumentStartScriptRegexItems_.value(), ScriptItemType::DOCUMENT_START,
             onDocumentStartScriptItemsByOrder_.value());
         onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptRegexItems_ = std::nullopt;
         onDocumentStartScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
 {
-    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END,
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptRegexItems_.has_value() &&
+        onDocumentEndScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(),
+            onDocumentEndScriptRegexItems_.value(), ScriptItemType::DOCUMENT_END,
             onDocumentEndScriptItemsByOrder_.value());
         onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptRegexItems_ = std::nullopt;
         onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
 {
-    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
+    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptRegexItems_.has_value() &&
+        onHeadReadyScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(),
+            onHeadReadyScriptRegexItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
             onHeadReadyScriptItemsByOrder_.value());
         onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptRegexItems_ = std::nullopt;
         onHeadReadyScriptItemsByOrder_ = std::nullopt;
     }
 }
@@ -9156,6 +9430,11 @@ void WebPattern::OnPip(int status,
 
 void WebPattern::SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window)
 {
+    std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+    if (pipNativeWindow_ != nullptr) {
+        OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+    }
+    pipNativeWindow_ = static_cast<OHNativeWindow*>(window);
     if (delegate_) {
         delegate_->SetPipNativeWindow(delegateId, childId, frameRoutingId, window);
     }
@@ -9376,6 +9655,15 @@ void WebPattern::EnablePip(uint32_t pipController)
 
 bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "StopPip. delegateId:%{public}d, childId:%{public}d frameRoutingId:%{public}d",
+        delegateId, childId, frameRoutingId);
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+            pipNativeWindow_ = nullptr;
+        }
+    }
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
         auto pip = it.second;
@@ -9400,6 +9688,15 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 
 bool WebPattern::PageClosePip(int delegateId, int childId, int frameRoutingId)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "PageClosePip. delegateId:%{public}d, childId:%{public}d frameRoutingId:%{public}d",
+        delegateId, childId, frameRoutingId);
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+            pipNativeWindow_ = nullptr;
+        }
+    }
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
         auto pip = it.second;
@@ -9592,6 +9889,17 @@ void WebPattern::OnStatusBarClick()
         isBackToTopRunning_ = true;
         delegate_->WebScrollStopFling();
         delegate_->OnStatusBarClick();
+    }
+}
+
+void WebPattern::CleanupWebPatternResource(int32_t webId)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::CleanupWebPatternResource");
+    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(webId);
+    if (offlineWebInited_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RemoveWindowStateChangedCallback(offlineWebNodeId_);
     }
 }
 
