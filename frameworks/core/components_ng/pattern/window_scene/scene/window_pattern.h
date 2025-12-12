@@ -136,7 +136,7 @@ private:
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndHandleRestartApp();
     bool CheckAndAddStartingWindowAboveLocked();
-    bool CheckSnapshotWindow(uint32_t key);
+    bool CheckSnapshotWindow();
     bool CheckAndAddStartingWindowForPrelaunch();
     void HideStartingWindow();
     void AddBackgroundColorDelayed();
