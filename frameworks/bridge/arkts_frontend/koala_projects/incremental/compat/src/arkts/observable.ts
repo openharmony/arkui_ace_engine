@@ -331,13 +331,13 @@ class ObservableArray<T> extends Array<T> {
         super.$_set(index, value)
     }
 
-    override copyWithin(target: int, start: int, end: int): this {
+    override copyWithin(target: int, start: int, end?: int): this {
         this.handler?.onModify()
         super.copyWithin(target, start, end)
         return this
     }
 
-    override fill(value: T, start: int, end: int): this {
+    override fill(value: T, start?: int, end?: int): this {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -414,7 +414,7 @@ class ObservableArray<T> extends Array<T> {
 
     // === methods with uncompatible implementation ===
 
-    override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+    override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         this.handler?.onAccess()
         return super.filter(predicate)
     }
@@ -424,7 +424,7 @@ class ObservableArray<T> extends Array<T> {
         return super.flat<U>(depth)
     }
 
-    override flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
+    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
         this.handler?.onAccess()
         return super.flatMap<U>(fn)
     }
@@ -436,7 +436,7 @@ class ObservableArray<T> extends Array<T> {
         return super.concat(...items)
     }
 
-    override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
+    override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.handler?.onAccess()
         return super.find(predicate)
     }
@@ -446,17 +446,17 @@ class ObservableArray<T> extends Array<T> {
         return super.findIndex(predicate)
     }
 
-    override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
+    override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.handler?.onAccess()
         return super.findLast(predicate)
     }
 
-    override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.handler?.onAccess()
         return super.every(predicate)
     }
 
-    override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.handler?.onAccess()
         return super.some(predicate)
     }
@@ -466,32 +466,32 @@ class ObservableArray<T> extends Array<T> {
         return super.findLastIndex(predicate)
     }
 
-    override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.handler?.onAccess()
         return super.reduce(callbackfn)
     }
 
-    override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         this.handler?.onAccess()
         return super.reduce<U>(callbackfn, initialValue)
     }
 
-    override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.handler?.onAccess()
         return super.reduceRight(callbackfn)
     }
 
-    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         this.handler?.onAccess()
         return super.reduceRight<U>(callbackfn, initialValue)
     }
 
-    override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
+    override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         this.handler?.onAccess()
         super.forEach(callbackfn)
     }
 
-    override slice(start: int, end: int): Array<T> {
+    override slice(start?: int, end?: int): Array<T> {
         this.handler?.onAccess()
         return super.slice(start, end)
     }
@@ -516,7 +516,7 @@ class ObservableArray<T> extends Array<T> {
         return super.toSpliced(start, delete, ...items)
     }
 
-    override includes(val: T, fromIndex?: Number): boolean {
+    override includes(val: T, fromIndex?: int): boolean {
         this.handler?.onAccess()
         return super.includes(val, fromIndex)
     }
@@ -556,7 +556,7 @@ class ObservableArray<T> extends Array<T> {
         return super.entries()
     }
 
-    override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
+    override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         this.handler?.onAccess()
         return super.map<U>(callbackfn)
     }

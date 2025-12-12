@@ -142,7 +142,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of new added elements.
      * @param initialValue initial value of new elements.
      */
-    public override extendTo(arrayLength: number, initialValue: T): void {
+    public override extendTo(arrayLength: int, initialValue: T): void {
         this.store_.extendTo(arrayLength, initialValue);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -154,7 +154,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @param arrayLength length at which to shrink.
      */
-    public override shrinkTo(arrayLength: number): void {
+    public override shrinkTo(arrayLength: int): void {
         this.store_.shrinkTo(arrayLength);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -302,25 +302,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     overload push { push, pushOne, pushArray }
 
     /**
-<<<<<<< HEAD
-=======
-     * Adds the specified elements to the end of an array and returns the new length of the array.
-     *
-     * @returns new length
-     */
-    public override pushECMA(...val: T[]): int {
-        const ret = this.store_.pushECMA(...val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('pushECMA');
-
-        return ret;
-    }
-
-    /**
->>>>>>> push,splice,unshift,findIndex,findLastIndex number2int
      * Changes the contents of an array by removing or replacing existing elements
      * and/or adding new elements in place.
      *
@@ -335,7 +316,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
-<<<<<<< HEAD
 
         return ret;
     }
@@ -347,15 +327,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param start index
      * @returns an Array with deleted elements from start to the last element of the current instance
      */
-    public override splice(start: number): Array<T> {
+    public override splice(start: int): Array<T> {
         const ret = this.store_.splice(start);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
-=======
->>>>>>> push,splice,unshift,findIndex,findLastIndex number2int
 
         return ret;
     }
@@ -415,21 +393,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.filter(predicate);
-    }
-
-    /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
-     *
-     * @param depth
-     * @returns a flattened Array with respect to depth (not WrappedArray !)
-     */
-    public override flat<U>(depth: number): Array<U> {
-        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        return this.store_.flat<U>(depth);
     }
 
     /**
@@ -458,27 +424,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fn a function to apply
      * @return new Array after map and than flat
      */
-    public override flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
+    public override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.flatMap(fn);
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers. Negative integers count back
-     * from the last item in the array.
-     *
-     * @param index Zero-based index of the array element to be returned.
-     * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
-     * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
-     */
-    public override at(index: number): T | undefined {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_LENGTH);
-            this.meta_.addRef(String(index as Object | undefined | null));
-        }
-        return this.store_.at(index);
     }
 
     /**
@@ -507,29 +455,10 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end index at which to end copying elements from
      * @returns this array after transformation
      */
-    public override copyWithin(target: number, start: number, end?: Number): this {
+    public override copyWithin(target: int, start: int, end?: int): this {
         this.store_.copyWithin(target, start, end);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('copyWithin');
-
-        return this;
-    }
-
-    /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     * @param start index at which to start copying elements from
-     * @param end index at which to end copying elements from
-     * @returns this array after transformation
-     */
-    public copyWithin(target: int, start: int, end: int): this {
-        this.store_.copyWithin(target, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('copyWithin');
 
@@ -579,26 +508,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end index at which to end filling, but not including
      * @returns this array after transformation
      */
-    public override fill(value: T, start?: Number, end?: Number): this {
-        this.store_.fill(value, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('fill');
-
-        return this;
-    }
-
-    /**
-     * Changes all elements in the Array to a static value, from a start index to an end index
-     *
-     * @param value to fill the array with
-     * @param start index at which to start filling
-     * @param end index at which to end filling, but not including
-     * @returns this array after transformation
-     */
-    public override fill(value: T, start: int, end: int): this {
+    public override fill(value: T, start?: int, end?: int): this {
         this.store_.fill(value, start, end);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -618,7 +528,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * immediately returns that element value. Otherwise, find returns undefined.
      * @returns the value of the first element in the array or undefined
      */
-    public override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.find(predicate);
     }
@@ -632,11 +542,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      * @returns found element index or -1 otherwise
      */
-<<<<<<< HEAD
-    public override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
-=======
     public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
->>>>>>> push,splice,unshift,findIndex,findLastIndex number2int
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findIndex(predicate);
     }
@@ -648,7 +554,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate testing function
      * @returns found element or undefined otherwise
      */
-    public override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findLast(predicate);
     }
@@ -661,7 +567,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * which is coercible to the Boolean value false, or until the end of the array.
      * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.every(predicate);
     }
@@ -674,7 +580,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * which is coercible to the Boolean value true, or until the end of the array.
      * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.some(predicate);
     }
@@ -698,7 +604,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduce(callbackfn);
     }
@@ -711,7 +617,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduce<U = T>(
-        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U,
         initialValue: U
     ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -725,7 +631,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduceRight(
-        callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T
+        callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T
     ): T {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduceRight(callbackfn);
@@ -739,7 +645,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns a result after applying callbackfn over all elements of the Array
      */
     public override reduceRight<U>(
-        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U,
         initialValue: U
     ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -751,14 +657,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      */
-    public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
+    public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         // same V2, forEach triggers this addRef!
         const shouldAddRef = this.shouldAddRef();
         if (shouldAddRef) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         // Similar to V2!
-        const observedCb = (value: T, index: number, array: Array<T>) => {
+        const observedCb = (value: T, index: int, array: Array<T>) => {
             if (shouldAddRef) {
                 this.meta_.addRef(String(index as Object | undefined | null));
             }
@@ -775,22 +681,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public override slice(start?: Number, end?: Number): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.slice(start, end);
-    }
-
-    /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
-     *
-     * @param start zero-based index at which to start extraction
-     * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
-     * @returns `Array` instance, constructed from extracted elements of `this` instance.
-     */
-    public override slice(start: int, end: int): Array<T> {
+    public override slice(start?: int, end?: int): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
@@ -905,18 +796,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param delete number of items after start index
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public override toSpliced(start?: Number, deleteIdx?: Number): Array<T> {
+    public override toSpliced(start?: int, deleteIdx?: int): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.toSpliced(start, deleteIdx);
-    }
-
-    public override toSpliced(start: number, delete: number, ...items: FixedArray<T>): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.toSpliced(start, delete, ...items);
     }
 
     public override toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
@@ -947,7 +831,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fromIndex start index
      * @returns true if val is in Array
      */
-    public override includes(val: T, fromIndex?: Number): boolean {
+    public override includes(val: T, fromIndex?: int): boolean {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
@@ -1041,21 +925,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param value new value
      * @returns a new Array with the element at the given index replaced with the given value
      */
-    public override with(index: number, value: T): Array<T> {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.with(index, value);
-    }
-
-    /**
-     * Copying version of using the bracket notation to change the value of a given index.
-     * It returns a new Array with the element at the given index replaced with the given value.
-     *
-     * @param index to replace
-     * @param value new value
-     * @returns a new Array with the element at the given index replaced with the given value
-     */
     public override with(index: int, value: T): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -1087,7 +956,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
