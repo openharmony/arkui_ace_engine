@@ -13,49 +13,52 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (o5, p5, q5, r5) {
-    var s5 = arguments.length, t5 = s5 < 3 ? p5 : r5 === null ? r5 = Object.getOwnPropertyDescriptor(p5, q5) : r5, u5;
+var __decorate = (this && this.__decorate) || function (u9, v9, w9, x9) {
+    var y9 = arguments.length, z9 = y9 < 3 ? v9 : x9 === null ? x9 = Object.getOwnPropertyDescriptor(v9, w9) : x9, a10;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        t5 = Reflect.decorate(o5, p5, q5, r5);
+        z9 = Reflect.decorate(u9, v9, w9, x9);
     else
-        for (var v5 = o5.length - 1; v5 >= 0; v5--)
-            if (u5 = o5[v5])
-                t5 = (s5 < 3 ? u5(t5) : s5 > 3 ? u5(p5, q5, t5) : u5(p5, q5)) || t5;
-    return s5 > 3 && t5 && Object.defineProperty(p5, q5, t5), t5;
+        for (var b10 = u9.length - 1; b10 >= 0; b10--)
+            if (a10 = u9[b10])
+                z9 = (y9 < 3 ? a10(z9) : y9 > 3 ? a10(v9, w9, z9) : a10(v9, w9)) || z9;
+    return y9 > 3 && z9 && Object.defineProperty(v9, w9, z9), z9;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import promptAction from "@ohos.promptAction";
+import { ImageGenerateState } from "../types/Declaration";
 export class HomeTitle extends ViewV2 {
-    constructor(i5, j5, k5, l5 = -1, m5, n5) {
-        super(i5, l5, n5);
-        this.initParam("titleName", (j5 && "titleName" in j5) ? j5.titleName : '__NA__');
+    constructor(o9, p9, q9, r9 = -1, s9, t9) {
+        super(o9, r9, t9);
+        this.initParam("titleName", (p9 && "titleName" in p9) ? p9.titleName : '__NA__');
+        this.initParam("currentGenerateState", (p9 && "currentGenerateState" in p9) ? p9.currentGenerateState : ImageGenerateState.CONFIGURATION);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(h5) {
-        this.resetParam("titleName", (h5 && "titleName" in h5) ? h5.titleName : '__NA__');
+    resetStateVarsOnReuse(n9) {
+        this.resetParam("titleName", (n9 && "titleName" in n9) ? n9.titleName : '__NA__');
+        this.resetParam("currentGenerateState", (n9 && "currentGenerateState" in n9) ? n9.currentGenerateState : ImageGenerateState.CONFIGURATION);
     }
     initialRender() {
-        this.observeComponentCreation2((f5, g5) => {
+        this.observeComponentCreation2((l9, m9) => {
             Column.create();
             Column.height(64);
             Column.width('100%');
             Column.padding({ left: 16, right: 16, top: 8 });
         }, Column);
-        this.observeComponentCreation2((d5, e5) => {
+        this.observeComponentCreation2((j9, k9) => {
             Row.create();
             Row.height(56);
             Row.width(618);
         }, Row);
-        this.observeComponentCreation2((b5, c5) => {
+        this.observeComponentCreation2((h9, i9) => {
             Row.create();
             Row.height('100%');
             Row.width('50%');
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.Start);
         }, Row);
-        this.observeComponentCreation2((z4, a5) => {
+        this.observeComponentCreation2((f9, g9) => {
             Text.create(this.titleName);
             Text.fontFamily("HarmonyHeiTi");
             Text.fontColor("#000000");
@@ -64,51 +67,63 @@ export class HomeTitle extends ViewV2 {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((x4, y4) => {
+        this.observeComponentCreation2((d9, e9) => {
             Row.create();
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.End);
             Row.height('100%');
             Row.width('50%');
         }, Row);
-        this.observeComponentCreation2((v4, w4) => {
-            __Common__.create();
-            __Common__.margin({ right: 8 });
-        }, __Common__);
+        this.observeComponentCreation2((v8, w8) => {
+            If.create();
+            if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((b9, c9) => {
+                        __Common__.create();
+                        __Common__.margin({ right: 8 });
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((x8, y8) => {
+                            if (y8) {
+                                let z8 = new TitleMenu(this, { name: 'menu one' }, undefined, x8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 41, col: 13 });
+                                ViewV2.create(z8);
+                                let a9 = () => {
+                                    return {
+                                        name: 'menu one'
+                                    };
+                                };
+                                z8.paramsGenerator_ = a9;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(x8, {
+                                    name: 'menu one'
+                                });
+                            }
+                        }, { name: "TitleMenu" });
+                    }
+                    __Common__.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
         {
-            this.observeComponentCreation2((r4, s4) => {
-                if (s4) {
-                    let t4 = new TitleMenu(this, { name: 'menu one' }, undefined, r4, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 23, col: 11 });
-                    ViewV2.create(t4);
-                    let u4 = () => {
-                        return {
-                            name: 'menu one'
-                        };
-                    };
-                    t4.paramsGenerator_ = u4;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(r4, {
-                        name: 'menu one'
-                    });
-                }
-            }, { name: "TitleMenu" });
-        }
-        __Common__.pop();
-        {
-            this.observeComponentCreation2((n4, o4) => {
-                if (o4) {
-                    let p4 = new TitleMenu(this, { name: 'x_icon' }, undefined, n4, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 25, col: 11 });
-                    ViewV2.create(p4);
-                    let q4 = () => {
+            this.observeComponentCreation2((r8, s8) => {
+                if (s8) {
+                    let t8 = new TitleMenu(this, { name: 'x_icon' }, undefined, r8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 44, col: 11 });
+                    ViewV2.create(t8);
+                    let u8 = () => {
                         return {
                             name: 'x_icon'
                         };
                     };
-                    p4.paramsGenerator_ = q4;
+                    t8.paramsGenerator_ = u8;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(n4, {
+                    this.updateStateVarsOfChildByElmtId(r8, {
                         name: 'x_icon'
                     });
                 }
@@ -118,12 +133,15 @@ export class HomeTitle extends ViewV2 {
         Row.pop();
         Column.pop();
     }
-    updateStateVars(m4) {
-        if (m4 === undefined) {
+    updateStateVars(q8) {
+        if (q8 === undefined) {
             return;
         }
-        if ("titleName" in m4) {
-            this.updateParam("titleName", m4.titleName);
+        if ("titleName" in q8) {
+            this.updateParam("titleName", q8.titleName);
+        }
+        if ("currentGenerateState" in q8) {
+            this.updateParam("currentGenerateState", q8.currentGenerateState);
         }
     }
     rerender() {
@@ -133,17 +151,20 @@ export class HomeTitle extends ViewV2 {
 __decorate([
     Param
 ], HomeTitle.prototype, "titleName", void 0);
+__decorate([
+    Param
+], HomeTitle.prototype, "currentGenerateState", void 0);
 class TitleMenu extends ViewV2 {
-    constructor(g4, h4, i4, j4 = -1, k4, l4) {
-        super(g4, j4, l4);
-        this.initParam("name", (h4 && "name" in h4) ? h4.name : '__NA__');
+    constructor(k8, l8, m8, n8 = -1, o8, p8) {
+        super(k8, n8, p8);
+        this.initParam("name", (l8 && "name" in l8) ? l8.name : '__NA__');
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(f4) {
-        this.resetParam("name", (f4 && "name" in f4) ? f4.name : '__NA__');
+    resetStateVarsOnReuse(j8) {
+        this.resetParam("name", (j8 && "name" in j8) ? j8.name : '__NA__');
     }
     initialRender() {
-        this.observeComponentCreation2((d4, e4) => {
+        this.observeComponentCreation2((h8, i8) => {
             Image.create('');
             Image.width(40);
             Image.height(40);
@@ -156,12 +177,12 @@ class TitleMenu extends ViewV2 {
             });
         }, Image);
     }
-    updateStateVars(c4) {
-        if (c4 === undefined) {
+    updateStateVars(g8) {
+        if (g8 === undefined) {
             return;
         }
-        if ("name" in c4) {
-            this.updateParam("name", c4.name);
+        if ("name" in g8) {
+            this.updateParam("name", g8.name);
         }
     }
     rerender() {

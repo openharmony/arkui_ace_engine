@@ -12,24 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+var __decorate = (this && this.__decorate) || function (y7, z7, a8, b8) {
+    var c8 = arguments.length, d8 = c8 < 3 ? z7 : b8 === null ? b8 = Object.getOwnPropertyDescriptor(z7, a8) : b8, e8;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        d8 = Reflect.decorate(y7, z7, a8, b8);
+    else
+        for (var f8 = y7.length - 1; f8 >= 0; f8--)
+            if (e8 = y7[f8])
+                d8 = (c8 < 3 ? e8(d8) : c8 > 3 ? e8(z7, a8, d8) : e8(z7, a8)) || d8;
+    return c8 > 3 && d8 && Object.defineProperty(z7, a8, d8), d8;
+};
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
+import { ImageGenerateState } from "../types/Declaration";
 export class TextInputArea extends ViewV2 {
-    constructor(w3, x3, y3, z3 = -1, a4, b4) {
-        super(w3, z3, b4);
+    constructor(r7, s7, t7, u7 = -1, v7, w7) {
+        super(r7, u7, w7);
+        this.changeGenerateState = "changeGenerateState" in s7 ? s7.changeGenerateState : (x7) => { };
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(v3) {
+    resetStateVarsOnReuse(p7) {
+        this.changeGenerateState = "changeGenerateState" in p7 ? p7.changeGenerateState : (q7) => { };
     }
     initialRender() {
-        this.observeComponentCreation2((t3, u3) => {
+        this.observeComponentCreation2((n7, o7) => {
             Row.create();
             Row.width('100%');
             Row.height(45);
         }, Row);
-        this.observeComponentCreation2((r3, s3) => {
+        this.observeComponentCreation2((l7, m7) => {
             Column.create();
             Column.height(40);
             Column.width(510);
@@ -38,13 +50,16 @@ export class TextInputArea extends ViewV2 {
             Column.borderWidth(0.5);
         }, Column);
         Column.pop();
-        this.observeComponentCreation2((p3, q3) => {
+        this.observeComponentCreation2((j7, k7) => {
             Column.create();
             Column.borderRadius(31.11);
             Column.borderWidth(0.5);
             Column.height(40);
             Column.width(96);
             Column.margin({ top: 3, bottom: 2, right: 16 });
+            Column.onClick(() => {
+                this.changeGenerateState(ImageGenerateState.GENERATING);
+            });
         }, Column);
         Column.pop();
         Row.pop();
@@ -53,3 +68,6 @@ export class TextInputArea extends ViewV2 {
         this.updateDirtyElements();
     }
 }
+__decorate([
+    Event
+], TextInputArea.prototype, "changeGenerateState", void 0);

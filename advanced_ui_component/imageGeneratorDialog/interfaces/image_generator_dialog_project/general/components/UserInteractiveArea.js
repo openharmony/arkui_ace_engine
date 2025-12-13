@@ -18,14 +18,14 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 import { FunctionAreaPlaceholder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
 export class LandscapeSelectFuncArea extends ViewV2 {
-    constructor(q8, r8, s8, t8 = -1, u8, v8) {
-        super(q8, t8, v8);
+    constructor(w12, x12, y12, z12 = -1, a13, b13) {
+        super(w12, z12, b13);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(p8) {
+    resetStateVarsOnReuse(v12) {
     }
     initialRender() {
-        this.observeComponentCreation2((n8, o8) => {
+        this.observeComponentCreation2((t12, u12) => {
             Tabs.create();
             Tabs.barHeight(284);
             Tabs.scrollable(false);
@@ -34,20 +34,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
             Tabs.width(118);
             Tabs.height(386);
         }, Tabs);
-        this.observeComponentCreation2((h8, i8) => {
+        this.observeComponentCreation2((n12, o12) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((j8, k8) => {
-                        if (k8) {
-                            let l8 = new FunctionAreaPlaceholder(this, {}, undefined, j8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 8, col: 9 });
-                            ViewV2.create(l8);
-                            let m8 = () => {
+                    this.observeComponentCreation2((p12, q12) => {
+                        if (q12) {
+                            let r12 = new FunctionAreaPlaceholder(this, {}, undefined, p12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 23, col: 9 });
+                            ViewV2.create(r12);
+                            let s12 = () => {
                                 return {};
                             };
-                            l8.paramsGenerator_ = m8;
+                            r12.paramsGenerator_ = s12;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(j8, {});
+                            this.updateStateVarsOfChildByElmtId(p12, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -57,20 +57,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((b8, c8) => {
+        this.observeComponentCreation2((h12, i12) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((d8, e8) => {
-                        if (e8) {
-                            let f8 = new FunctionAreaPlaceholder(this, {}, undefined, d8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 13, col: 9 });
-                            ViewV2.create(f8);
-                            let g8 = () => {
+                    this.observeComponentCreation2((j12, k12) => {
+                        if (k12) {
+                            let l12 = new FunctionAreaPlaceholder(this, {}, undefined, j12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 28, col: 9 });
+                            ViewV2.create(l12);
+                            let m12 = () => {
                                 return {};
                             };
-                            f8.paramsGenerator_ = g8;
+                            l12.paramsGenerator_ = m12;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(d8, {});
+                            this.updateStateVarsOfChildByElmtId(j12, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -80,20 +80,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((v7, w7) => {
+        this.observeComponentCreation2((b12, c12) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((x7, y7) => {
-                        if (y7) {
-                            let z7 = new FunctionAreaPlaceholder(this, {}, undefined, x7, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 18, col: 9 });
-                            ViewV2.create(z7);
-                            let a8 = () => {
+                    this.observeComponentCreation2((d12, e12) => {
+                        if (e12) {
+                            let f12 = new FunctionAreaPlaceholder(this, {}, undefined, d12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 33, col: 9 });
+                            ViewV2.create(f12);
+                            let g12 = () => {
                                 return {};
                             };
-                            z7.paramsGenerator_ = a8;
+                            f12.paramsGenerator_ = g12;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(x7, {});
+                            this.updateStateVarsOfChildByElmtId(d12, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -103,20 +103,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((p7, q7) => {
+        this.observeComponentCreation2((v11, w11) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((r7, s7) => {
-                        if (s7) {
-                            let t7 = new FunctionAreaPlaceholder(this, {}, undefined, r7, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 23, col: 9 });
-                            ViewV2.create(t7);
-                            let u7 = () => {
+                    this.observeComponentCreation2((x11, y11) => {
+                        if (y11) {
+                            let z11 = new FunctionAreaPlaceholder(this, {}, undefined, x11, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 38, col: 9 });
+                            ViewV2.create(z11);
+                            let a12 = () => {
                                 return {};
                             };
-                            t7.paramsGenerator_ = u7;
+                            z11.paramsGenerator_ = a12;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(r7, {});
+                            this.updateStateVarsOfChildByElmtId(x11, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }

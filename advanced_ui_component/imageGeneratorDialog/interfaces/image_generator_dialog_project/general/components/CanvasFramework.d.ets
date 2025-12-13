@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import { CanvasMode } from "../types/Declaration";
+import { CanvasMode, ImageGenerateState } from "../types/Declaration";
 @ComponentV2
 export declare struct CanvasHome {
     @Local
     titleName: string;
     @Local
     currentCanvasMode: CanvasMode;
+    @Local
+    currentGenerateState: ImageGenerateState;
     @Builder
     homeTitleBuilder(): void;
     build(): void;

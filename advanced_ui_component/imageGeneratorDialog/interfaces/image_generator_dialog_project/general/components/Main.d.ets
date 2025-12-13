@@ -23,7 +23,7 @@ export declare struct ImageGeneratorDialog {
     @Local
     height_: Dimension;
     @Builder
-    pageMap(s2: string): void;
+    pageMap(i6: string): void;
     aboutToAppear(): void;
     build(): void;
 }

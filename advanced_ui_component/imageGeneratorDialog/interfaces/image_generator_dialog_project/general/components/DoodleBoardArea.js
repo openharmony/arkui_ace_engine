@@ -17,14 +17,14 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 export class DoodleBoardArea extends ViewV2 {
-    constructor(i2, j2, k2, l2 = -1, m2, n2) {
-        super(i2, l2, n2);
+    constructor(c6, d6, e6, f6 = -1, g6, h6) {
+        super(c6, f6, h6);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(h2) {
+    resetStateVarsOnReuse(b6) {
     }
     initialRender() {
-        this.observeComponentCreation2((f2, g2) => {
+        this.observeComponentCreation2((z5, a6) => {
             Column.create();
             Column.width(386);
             Column.height(386);
