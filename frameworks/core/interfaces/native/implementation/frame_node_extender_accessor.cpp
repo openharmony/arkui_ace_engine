@@ -1171,6 +1171,14 @@ Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(renderContext, false);
     return renderContext->IsOnRenderTree();
 }
+void ApplyAttributesFinishImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+}
 Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1252,6 +1260,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
         FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
         FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
+        FrameNodeExtenderAccessor::ApplyAttributesFinishImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }
