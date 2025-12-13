@@ -861,6 +861,11 @@ public:
     virtual void OnPaintFocusState(bool isFocus) {}
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
     virtual void OnContentChangeUnregister() {}
+    virtual void ContentChangeByDetaching(PipelineContext*) {}
+    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
+    {
+        return nullptr;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

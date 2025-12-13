@@ -185,6 +185,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -212,6 +213,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -234,6 +236,7 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -825,6 +828,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
+    if (contentChangeMgr_) {
+        contentChangeMgr_->OnVsyncStart();
+    }
     if (touchOptimizer_) {
         touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
     }
@@ -998,6 +1004,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         RequestFrame();
     }
     FireFrameMetricsCallBack(frameMetrics);
+    if (contentChangeMgr_) {
+        contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
+    }
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
@@ -7187,7 +7196,7 @@ const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteMana
     return loadCompleteMgr_;
 }
 
-const RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager() const
+RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
 }

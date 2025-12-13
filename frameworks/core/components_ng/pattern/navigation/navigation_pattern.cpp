@@ -30,6 +30,7 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -2950,6 +2951,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             }
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
+            pattern->ContentChangeReport(topDestination);
         };
         auto finishCallback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
             auto pattern = weakNavigation.Upgrade();
@@ -3839,6 +3841,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
                 auto topDestination = weakTopDestination.Upgrade();
                 navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
                 navigationPattern->LoadCompleteManagerStopCollect();
+                navigationPattern->ContentChangeReport(topDestination);
             });
         return;
     }
@@ -3864,6 +3867,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
             navigationPattern->prePrimaryNodes_.clear();
             navigationPattern->primaryNodesToBeRemoved_.clear();
             navigationPattern->RemoveRedundantPrimaryNavDestination();
+            navigationPattern->ContentChangeReport(topDestination);
             return;
         }
 
@@ -4322,6 +4326,7 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         pattern->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
         pattern->RemoveProxyById(proxyId);
+        pattern->ContentChangeReport(topDestination);
     };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto pattern = weakNavigation.Upgrade();
@@ -6179,6 +6184,15 @@ void NavigationPattern::LoadCompleteManagerStopCollect()
     if (pipeline) {
         pipeline->GetLoadCompleteManager()->StopCollect();
     }
+}
+
+void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnPageTransitionEnd(keyNode);
 }
 
 void NavigationPattern::FireNavigateChangeCallback()

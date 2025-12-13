@@ -39,6 +39,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
@@ -219,6 +220,14 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCachedCount(GetCachedCount());
     algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     return algo;
+}
+
+RefPtr<FrameNode> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto currIndex = GetLoopIndex(currentIndex_);
+    return DynamicCast<FrameNode>(host->GetChildByIndex(currIndex));
 }
 
 void SwiperPattern::OnIndexChange(bool isInLayout)
@@ -7895,8 +7904,12 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
 void SwiperPattern::LoadCompleteManagerStopCollect()
 {
     auto pipeline = GetContext();
-    if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StopCollect();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->GetLoadCompleteManager()->StopCollect();
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    if (!IsAutoPlay()) {
+        mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
     }
 }
 } // namespace OHOS::Ace::NG

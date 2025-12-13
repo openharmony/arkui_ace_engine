@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -2664,6 +2665,20 @@ void TextPattern::ResetMouseLeftPressedState()
 {
     isMousePressed_ = false;
     leftMousePressed_ = false;
+}
+
+void TextPattern::ContentChangeByDetaching(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto contentChangeManager = context->GetContentChangeManager();
+    CHECK_NULL_VOID(contentChangeManager);
+    if (!contentChangeManager->IsTextAABBCollecting()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    contentChangeManager->OnTextChangeEnd(rect);
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
