@@ -30,7 +30,7 @@ static void AniThrow(ani_env* env, const std::string& errMsg, int32_t errorCode)
 {
     CHECK_NULL_VOID(env);
     ani_class errCls;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
+    if (ANI_OK != env->FindClass("@ohos.base.BusinessError", &errCls)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass BusinessError failed.");
         return;
     }

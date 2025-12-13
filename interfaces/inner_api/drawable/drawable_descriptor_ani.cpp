@@ -30,8 +30,8 @@
 
 namespace OHOS::Ace::Ani {
 namespace {
-constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
-constexpr char LAYERED_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/LayeredDrawableDescriptor;";
+constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
+constexpr char LAYERED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.LayeredDrawableDescriptor";
 constexpr char BACKGROUND_KEY[] = "background";
 constexpr char FOREGROUND_KEY[] = "foreground";
 constexpr char DEFAULT_MASK[] = "ohos_icon_mask";
