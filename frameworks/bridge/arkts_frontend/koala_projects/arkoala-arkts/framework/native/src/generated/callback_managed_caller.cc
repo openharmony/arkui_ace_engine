@@ -8204,6 +8204,28 @@ void callManagedTextPickerScrollStopCallbackSync(Ark_VMContext vmContext, Ark_In
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedTextSelectionChangeCallback(Ark_Int32 resourceId, Ark_String selectionText)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_TextSelectionChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(selectionText);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedTextSelectionChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String selectionText)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_TextSelectionChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(selectionText);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedTextTimerModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_TextTimerConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8813,6 +8835,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_TextFieldValueCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextFieldValueCallback);
         case Kind_TextPickerEnterSelectedAreaCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextPickerEnterSelectedAreaCallback);
         case Kind_TextPickerScrollStopCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextPickerScrollStopCallback);
+        case Kind_TextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextSelectionChangeCallback);
         case Kind_TextTimerModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedTextTimerModifierBuilder);
         case Kind_TimerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTimerCallback);
         case Kind_ToggleModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedToggleModifierBuilder);
@@ -9141,6 +9164,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_TextFieldValueCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextFieldValueCallbackSync);
         case Kind_TextPickerEnterSelectedAreaCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextPickerEnterSelectedAreaCallbackSync);
         case Kind_TextPickerScrollStopCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextPickerScrollStopCallbackSync);
+        case Kind_TextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTextSelectionChangeCallbackSync);
         case Kind_TextTimerModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedTextTimerModifierBuilderSync);
         case Kind_TimerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTimerCallbackSync);
         case Kind_ToggleModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedToggleModifierBuilderSync);

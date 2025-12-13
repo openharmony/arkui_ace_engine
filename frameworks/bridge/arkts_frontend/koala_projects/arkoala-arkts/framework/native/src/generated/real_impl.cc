@@ -8301,6 +8301,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Opt_Boolean* value)
     {
     }
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_TextSelectionChangeCallback* value)
+    {
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
     {
@@ -10770,6 +10774,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+            WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,

@@ -21713,6 +21713,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_TextSelectionChangeCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnTextSelectionChange(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
     {
@@ -24321,6 +24333,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+            WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
