@@ -291,7 +291,7 @@ void SetDraggableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ImageModelNG::SetDraggable(frameNode, false);
+        ImageModelStatic::ResetDraggable(frameNode);
         return;
     }
     ImageModelNG::SetDraggable(frameNode, *convValue);
