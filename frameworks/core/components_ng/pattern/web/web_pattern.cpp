@@ -1190,7 +1190,6 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
             delegate_->OnBlur();
         }
-        UninitMenuLifeCycleCallback();
     }
 }
 
