@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -265,7 +266,14 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
     EXPECT_NE(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+
     ssm_->preLoadStartingWindowMap_.clear();
+    sceneSession_->SetPreloadingStartingWindow(true);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), true);
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
+    auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 }
 
 /**

@@ -647,7 +647,7 @@ void WindowPattern::CreateStartingWindow()
         sourceInfo = ImageSourceInfo(pixelMap);
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
-    } else {
+    } else if (!session_->GetPreloadingStartingWindow()) {
         sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
             sessionInfo.moduleName_);
     }
