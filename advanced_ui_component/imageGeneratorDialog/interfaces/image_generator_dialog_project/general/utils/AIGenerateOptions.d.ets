@@ -14,7 +14,8 @@
  */
 
 import common2D from "@ohos.graphics.common2D";
-import imageGeneration from '@ohos.arkui.intelligence.imageGeneration'
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import image from '@ohos.multimedia.image';
 export declare class AIGenerateOptions {
     action: number;
     userPrompt: string;
@@ -23,18 +24,18 @@ export declare class AIGenerateOptions {
     shapePath: Array<common2D.Point> | undefined;
     style: string | undefined;
     type: number;
-    resolution: string;
+    resolution: image.Size;
     ratio: string;
     version: string;
     private static instance;
     static getInstance(): AIGenerateOptions;
-    setImages(c10: Array<imageGeneration.ImageItem>): void;
-    updateRelativeLayout(a10: boolean): void;
-    updateUserPrompt(z9: string): void;
-    updateShapePath(y9: Array<common2D.Point>): void;
-    updateStyle(x9: string): void;
-    updateResolution(w9: string): void;
-    updateRatio(v9: string): void;
-    updateType(u9: number): void;
-    updateVersion(t9: string): void;
+    setImages(f18: Array<imageGeneration.ImageItem>): void;
+    updateRelativeLayout(d18: boolean): void;
+    updateUserPrompt(c18: string): void;
+    updateShapePath(b18: Array<common2D.Point>): void;
+    updateStyle(a18: string): void;
+    updateResolution(z17: image.Size): void;
+    updateRatio(y17: string): void;
+    updateType(x17: number): void;
+    updateVersion(w17: string): void;
 }

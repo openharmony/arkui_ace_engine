@@ -13,17 +13,7 @@
  * limitations under the License.
  */
 
-import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 @ComponentV2
-export declare struct ImageGeneratorDialog {
-    stack: NavPathStack;
-    options?: imageGeneration.GeneratorDialogOptions;
-    @Local
-    width_: Dimension;
-    @Local
-    height_: Dimension;
-    @Builder
-    pageMap(k6: string): void;
-    aboutToAppear(): void;
+export declare struct TextTouchUpComponent {
     build(): void;
 }

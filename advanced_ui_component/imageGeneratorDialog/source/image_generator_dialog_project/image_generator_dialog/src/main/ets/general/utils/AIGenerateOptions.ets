@@ -15,6 +15,7 @@
 
 import { common2D } from '@kit.ArkGraphics2D';
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration'
+import image from '@ohos.multimedia.image'
 
 let TAG: string = '[AIGenerateOptions]'
 
@@ -26,7 +27,7 @@ export class AIGenerateOptions {
   public shapePath: Array<common2D.Point> | undefined;
   public style: string | undefined;
   public type: number = 0;
-  public resolution: string = '2K';
+  public resolution: image.Size = {width: 100, height: 100};
   public ratio: string = '1:1';
   public version: string = '1.0.0';
 
@@ -74,7 +75,7 @@ export class AIGenerateOptions {
     this.style = style;
   }
 
-  public updateResolution(resolution: string): void {
+  public updateResolution(resolution: image.Size): void {
     this.resolution = resolution;
   }
 

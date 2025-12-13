@@ -14,9 +14,54 @@
  */
 
 import { ImageGenerateState } from "../types/Declaration";
+import { MeasureUtils } from "@ohos.arkui.UIContext";
 @ComponentV2
 export declare struct TextInputArea {
     @Event
     changeGenerateState: (state: ImageGenerateState) => void;
+    @Local
+    isTextEdit: boolean;
+    @Local
+    inputText: string;
+    @Local
+    userPrompt: string;
+    @Local
+    inputController: TextAreaController;
+    private textAreaPadding;
+    private setMaxLines;
+    @Local
+    originText: string;
+    @Local
+    uiContext: UIContext;
+    @Local
+    uiContextMeasure: MeasureUtils;
+    textSize: SizeOptions;
+    @Local
+    textMaxLines: number;
+    @Local
+    textOverflow: TextOverflow;
+    private patchesStr;
+    private keepLayoutStr;
+    @Local
+    isSelectedPatches: boolean;
+    @Local
+    isClickKeepLayout: boolean;
+    @Local
+    inputHeight: Length;
+    @Local
+    imgCounts: number;
+    @Local
+    isEnableTouchUp: boolean;
+    @Local
+    isShowTouchUp: boolean;
+    @Local
+    stack: NavPathStack | undefined;
+    @Local
+    updateInputText: string;
+    @Monitor('imgCounts', 'isClickKeepLayout', 'updateInputText', 'isSelectedPatches')
+    watchKeepLayout(v8: IMonitor): void;
+    @Monitor('userPrompt')
+    watchUserPromptChange(u8: IMonitor): void;
+    aboutToAppear(): void;
     build(): void;
 }

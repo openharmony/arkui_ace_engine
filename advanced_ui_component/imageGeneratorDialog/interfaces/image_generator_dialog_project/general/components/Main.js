@@ -13,57 +13,77 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (b7, c7, d7, e7) {
-    var f7 = arguments.length, g7 = f7 < 3 ? c7 : e7 === null ? e7 = Object.getOwnPropertyDescriptor(c7, d7) : e7, h7;
+var __decorate = (this && this.__decorate) || function (d7, e7, f7, g7) {
+    var h7 = arguments.length, i7 = h7 < 3 ? e7 : g7 === null ? g7 = Object.getOwnPropertyDescriptor(e7, f7) : g7, j7;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        g7 = Reflect.decorate(b7, c7, d7, e7);
+        i7 = Reflect.decorate(d7, e7, f7, g7);
     else
-        for (var i7 = b7.length - 1; i7 >= 0; i7--)
-            if (h7 = b7[i7])
-                g7 = (f7 < 3 ? h7(g7) : f7 > 3 ? h7(c7, d7, g7) : h7(c7, d7)) || g7;
-    return f7 > 3 && g7 && Object.defineProperty(c7, d7, g7), g7;
+        for (var k7 = d7.length - 1; k7 >= 0; k7--)
+            if (j7 = d7[k7])
+                i7 = (h7 < 3 ? j7(i7) : h7 > 3 ? j7(e7, f7, i7) : j7(e7, f7)) || i7;
+    return h7 > 3 && i7 && Object.defineProperty(e7, f7, i7), i7;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { CanvasHome } from "./CanvasFramework";
+import { TextTouchUpComponent } from "./TextTouchUp";
 export class ImageGeneratorDialog extends ViewV2 {
-    constructor(v6, w6, x6, y6 = -1, z6, a7) {
-        super(v6, y6, a7);
+    constructor(x6, y6, z6, a7 = -1, b7, c7) {
+        super(x6, a7, c7);
         this.stack = new NavPathStack();
         this.options = undefined;
         this.width_ = 650;
         this.height_ = 560;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(u6) {
+    resetStateVarsOnReuse(w6) {
         this.width_ = 650;
         this.height_ = 560;
     }
-    pageMap(m6, n6 = null) {
-        this.observeComponentCreation2((o6, p6) => {
+    pageMap(k6, l6 = null) {
+        this.observeComponentCreation2((m6, n6) => {
             If.create();
-            if (m6 === 'home') {
+            if (k6 === 'home') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((q6, r6) => {
-                            if (r6) {
-                                let s6 = new CanvasHome(this, {}, undefined, q6, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 29, col: 7 });
-                                ViewV2.create(s6);
-                                let t6 = () => {
+                        this.observeComponentCreation2((s6, t6) => {
+                            if (t6) {
+                                let u6 = new CanvasHome(this, {}, undefined, s6, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 30, col: 7 });
+                                ViewV2.create(u6);
+                                let v6 = () => {
                                     return {};
                                 };
-                                s6.paramsGenerator_ = t6;
+                                u6.paramsGenerator_ = v6;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(q6, {});
+                                this.updateStateVarsOfChildByElmtId(s6, {});
                             }
                         }, { name: "CanvasHome" });
                     }
                 });
             }
-            else {
+            else if (k6 === 'textTouchUp') {
                 this.ifElseBranchUpdateFunction(1, () => {
+                    {
+                        this.observeComponentCreation2((o6, p6) => {
+                            if (p6) {
+                                let q6 = new TextTouchUpComponent(this, {}, undefined, o6, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 32, col: 7 });
+                                ViewV2.create(q6);
+                                let r6 = () => {
+                                    return {};
+                                };
+                                q6.paramsGenerator_ = r6;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(o6, {});
+                            }
+                        }, { name: "TextTouchUpComponent" });
+                    }
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(2, () => {
                 });
             }
         }, If);
@@ -73,13 +93,13 @@ export class ImageGeneratorDialog extends ViewV2 {
         this.stack.pushPath({ name: 'home' });
     }
     initialRender() {
-        this.observeComponentCreation2((k6, l6) => {
+        this.observeComponentCreation2((i6, j6) => {
             Scroll.create();
             Scroll.width('100%');
             Scroll.height('100%');
             Scroll.scrollable(ScrollDirection.FREE);
         }, Scroll);
-        this.observeComponentCreation2((i6, j6) => {
+        this.observeComponentCreation2((g6, h6) => {
             Navigation.create(this.stack, { moduleName: "__harDefaultModuleName__", pagePath: "", isUserCreateStack: true });
             Navigation.navDestination({ builder: this.pageMap.bind(this) });
             Navigation.hideNavBar(true);
@@ -89,6 +109,7 @@ export class ImageGeneratorDialog extends ViewV2 {
             Navigation.mode(NavigationMode.Stack);
             Navigation.clip(true);
             Navigation.alignSelf(ItemAlign.Center);
+            Navigation.expandSafeArea([SafeAreaType.SYSTEM, SafeAreaType.CUTOUT]);
         }, Navigation);
         Navigation.pop();
         Scroll.pop();

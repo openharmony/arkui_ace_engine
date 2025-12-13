@@ -25,161 +25,161 @@ export class AIGenerateImpl {
         return AIGenerateImpl.instance;
     }
     ;
-    setSelfTextGenerateModal(s9) {
-        this.TextModal = s9;
+    setSelfTextGenerateModal(v17) {
+        this.TextModal = v17;
     }
     ;
-    setSelfImageGenerateModal(r9) {
-        this.ImageModal = r9;
+    setSelfImageGenerateModal(u17) {
+        this.ImageModal = u17;
     }
     ;
     delay() {
-        return new Promise(q9 => setTimeout(q9, 1000));
+        return new Promise(t17 => setTimeout(t17, 1000));
     }
-    async TextAIGenerate(h9) {
+    async TextAIGenerate(p17) {
         this.stopTask = false;
-        let i9 = this.sessionId;
+        let q17 = this.sessionId;
         this.sessionId++;
         if (this.TextModal !== undefined) {
             console.info(TAG, `Complete the text polishing task using a user-defined model.`);
-            let n9 = (p9) => {
-                if (p9.partialFail !== undefined) {
-                    console.error(TAG, `Error in requestTextGeneration: ${p9.partialFail}.`);
-                    h9.onError();
+            let r17 = (s17) => {
+                if (s17.partialFail !== undefined) {
+                    console.error(TAG, `Error in requestTextGeneration: ${s17.partialFail}.`);
+                    p17.onError();
                 }
                 else {
-                    if (h9.onResult) {
-                        h9.onResult(p9);
+                    if (p17.onResult) {
+                        p17.onResult(s17);
                     }
                 }
             };
-            this.TextModal.requestTextGeneration(i9, AIGenerateOptions.getInstance().userPrompt, n9);
-            h9.onReady();
+            this.TextModal.requestTextGeneration(q17, AIGenerateOptions.getInstance().userPrompt, r17);
+            p17.onReady();
         }
         else {
             console.info(TAG, `Complete the text polishing task using Celia model.`);
-            this.mockPoolingTask(h9);
+            this.mockPoolingTask(p17);
         }
-        return i9;
+        return q17;
     }
     ;
-    async mockPoolingTask(r2) {
-        let s2 = ['mockThink：', 'mockResult：'];
-        let t2 = {
+    async mockPoolingTask(k17) {
+        let l17 = ['mockThink：', 'mockResult：'];
+        let m17 = {
             type: 0,
             reasoningContent: undefined,
             content: undefined,
         };
-        r2.onReady();
+        k17.onReady();
         setTimeout(async () => {
-            for (let v2 = 0; v2 < 10; v2++) {
+            for (let o17 = 0; o17 < 10; o17++) {
                 if (this.stopTask) {
                     return;
                 }
-                t2.reasoningContent = s2[0] +
+                m17.reasoningContent = l17[0] +
                     AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
-                if (r2.onResult) {
-                    r2.onResult(t2);
+                if (k17.onResult) {
+                    k17.onResult(m17);
                 }
                 await this.delay();
             }
-            t2.type = 1;
-            t2.reasoningContent = undefined;
-            t2.content = undefined;
+            m17.type = 1;
+            m17.reasoningContent = undefined;
+            m17.content = undefined;
             console.info(TAG, `The thinking process of the text polishing task has been completed.`);
-            if (r2.onResult) {
-                r2.onResult(t2);
+            if (k17.onResult) {
+                k17.onResult(m17);
             }
-            t2.type = 0;
-            for (let u2 = 0; u2 < 5; u2++) {
+            m17.type = 0;
+            for (let n17 = 0; n17 < 5; n17++) {
                 if (this.stopTask) {
                     return;
                 }
-                t2.content = s2[1] +
+                m17.content = l17[1] +
                     AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
-                if (r2.onResult) {
-                    r2.onResult(t2);
+                if (k17.onResult) {
+                    k17.onResult(m17);
                 }
                 await this.delay();
             }
-            t2.type = 1;
-            t2.reasoningContent = undefined;
-            t2.content = undefined;
+            m17.type = 1;
+            m17.reasoningContent = undefined;
+            m17.content = undefined;
             console.info(TAG, `The text polishing task generation process has been completed.`);
-            if (r2.onResult) {
-                r2.onResult(t2);
+            if (k17.onResult) {
+                k17.onResult(m17);
             }
         }, 1000);
         return;
     }
-    async ImageAIGenerate(z8) {
-        let a9 = this.sessionId;
+    async ImageAIGenerate(d17) {
+        let e17 = this.sessionId;
         this.sessionId++;
-        let b9;
+        let f17;
         if (this.ImageModal !== undefined) {
             console.info(TAG, `Complete the image generation task using a user-defined model.`);
-            let d9 = {
+            let h17 = {
                 images: AIGenerateOptions.getInstance().images,
                 positionImage: AIGenerateOptions.getInstance().layoutImage?.image,
                 selectPath: AIGenerateOptions.getInstance().shapePath,
                 prompt: AIGenerateOptions.getInstance().userPrompt,
                 style: AIGenerateOptions.getInstance().style,
-                size: AIGenerateOptions.getInstance().resolution,
+                imageSize: AIGenerateOptions.getInstance().resolution,
             };
-            let e9 = (g9) => {
-                if (g9.partialFail !== undefined) {
-                    console.error(TAG, `Error in requestImageGeneration: ${g9.partialFail}.`);
-                    z8.onError();
+            let i17 = (j17) => {
+                if (j17.partialFail !== undefined) {
+                    console.error(TAG, `Error in requestImageGeneration: ${j17.partialFail}.`);
+                    d17.onError();
                 }
                 else {
-                    if (g9.type === imageGeneration.PartialResultType.PARTIAL) {
+                    if (j17.type === imageGeneration.PartialResultType.PARTIAL) {
                         console.info(TAG, `The image generation task returns an image.`);
-                        b9.push(g9.imageData);
+                        f17.push(j17.imageData);
                     }
-                    else if (g9.type === imageGeneration.PartialResultType.COMPLETED) {
-                        b9.push(g9.imageData);
+                    else if (j17.type === imageGeneration.PartialResultType.COMPLETED) {
+                        f17.push(j17.imageData);
                         console.info(TAG, `The task of generating the image has been completed.`);
-                        if (z8.onComplete) {
-                            z8.onComplete(b9);
+                        if (d17.onComplete) {
+                            d17.onComplete(f17);
                         }
                     }
                 }
             };
-            this.ImageModal.requestImageGeneration(a9, d9, e9);
-            z8.onReady();
+            this.ImageModal.requestImageGeneration(e17, h17, i17);
+            d17.onReady();
         }
         else {
             console.info(TAG, `Complete the image generation task using Celia model.`);
-            z8.onReady();
-            AIGenerateOptions.getInstance().images?.forEach(async (c9) => {
-                b9.push(c9.url.toString());
+            d17.onReady();
+            AIGenerateOptions.getInstance().images?.forEach(async (g17) => {
+                f17.push(g17.url.toString());
                 console.info(TAG, `The image generation task returns an image.`);
                 await this.delay();
             });
             setTimeout(() => {
                 console.info(TAG, `The task of generating the image has been completed.`);
-                if (z8.onComplete) {
-                    z8.onComplete(b9);
+                if (d17.onComplete) {
+                    d17.onComplete(f17);
                 }
             }, 10000);
         }
-        return a9;
+        return e17;
     }
     ;
-    async cancelTextGenerateTask(y8) {
-        console.info(TAG, `Text task sessionId: ${y8} cancel.`);
+    async cancelTextGenerateTask(c17) {
+        console.info(TAG, `Text task sessionId: ${c17} cancel.`);
         if (this.TextModal !== undefined) {
-            this.TextModal.cancelTextGeneration(Number(y8));
+            this.TextModal.cancelTextGeneration(Number(c17));
         }
         else {
             this.stopTask = true;
         }
     }
     ;
-    async cancelImageGenerateTask(x8) {
-        console.info(TAG, `Image task sessionId: ${x8} cancel.`);
+    async cancelImageGenerateTask(b17) {
+        console.info(TAG, `Image task sessionId: ${b17} cancel.`);
         if (this.ImageModal !== undefined) {
-            this.ImageModal.cancelImageGeneration(Number(x8));
+            this.ImageModal.cancelImageGeneration(Number(b17));
         }
         else {
         }
