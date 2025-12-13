@@ -31,6 +31,12 @@ public:
     static ObserverProcess& GetInstance();
     napi_value ProcessRegister(napi_env env, napi_callback_info info, std::string type = "");
     napi_value ProcessUnRegister(napi_env env, napi_callback_info info, std::string type = "");
+    napi_value ProcessRouterPageSizeChangeRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessRouterPageSizeChangeUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSizeChangeRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSizeChangeUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSizeChangeByUniqueIdRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessNavDestinationSizeChangeByUniqueIdUnRegister(napi_env env, napi_callback_info info);
 private:
     napi_value ProcessNavigationRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNavigationRegisterByUniqueId(napi_env env, napi_callback_info info);
@@ -91,6 +97,9 @@ private:
     bool isDestinationSwitchHandleFuncSetted_ = false;
     bool isTextChangeEventHandleFuncSetted_ = false;
     bool isSwiperContentUpdateHandleFuncSetted_ = false;
+    bool isRouterPageSizeChangeHandleFuncSetted_ = false;
+    bool isNavDestinationSizeChangeHandleFuncSetted_ = false;
+    bool isNavDestinationSizeChangeByUniqueIdHandleFuncSetted_ = false;
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };

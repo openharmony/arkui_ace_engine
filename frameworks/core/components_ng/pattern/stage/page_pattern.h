@@ -337,6 +337,11 @@ public:
         }
     }
 
+    const std::optional<SizeF>& GetCurrentPageSize() const
+    {
+        return currentPageSize_;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -387,6 +392,8 @@ protected:
     void RecordPageEvent(bool isShow);
 
     void SetPageIndexForStatic();
+    void NotifyRouterPageSizeChange();
+    void OnVisibleChange(bool isVisible) override;
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
@@ -422,6 +429,8 @@ protected:
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
     std::shared_ptr<AnimationUtils::Animation> currCustomAnimation_;
+    std::optional<SizeF> currentPageSize_;
+    bool needNotifySizeChangeWhenVisible_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

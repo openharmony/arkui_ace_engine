@@ -59,6 +59,8 @@ public:
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context);
     void OnTextChangeEvent(const NG::TextChangeEventInfo& info);
+    void OnRouterPageSizeChange(const NG::RouterPageInfoNG& info, napi_value context = nullptr);
+    void OnNavDestinationSizeChange(const NG::NavDestinationInfo& info);
     void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
@@ -66,6 +68,7 @@ public:
 private:
     napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
+    napi_value CreateRouterPageInfoObj(const NG::RouterPageInfoNG& info, napi_value context);
     napi_value GetNapiCallback();
     napi_value GetFrameNodeObject(const RefPtr<NG::FrameNode>& frameNode);
     static napi_valuetype GetValueType(napi_env env, napi_value value);

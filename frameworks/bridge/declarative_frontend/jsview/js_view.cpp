@@ -1123,6 +1123,12 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
             obj->SetProperty<int32_t>("mode", static_cast<int32_t>(result->mode));
             obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
         }
+        if (result->size.has_value()) {
+            JSRef<JSObject> objSize = JSRef<JSObject>::New();
+            objSize->SetProperty<double>("width", result->size.value().Width());
+            objSize->SetProperty<double>("height", result->size.value().Height());
+            obj->SetPropertyObject("size", objSize);
+        }
         info.SetReturnValue(obj);
     }
 }
@@ -1152,6 +1158,12 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
         obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
         obj->SetProperty<std::string>("pageId", result->pageId);
         info.SetReturnValue(obj);
+        if (result->size.has_value()) {
+            JSRef<JSObject> objSize = JSRef<JSObject>::New();
+            objSize->SetProperty<double>("width", result->size.value().Width());
+            objSize->SetProperty<double>("height", result->size.value().Height());
+            obj->SetPropertyObject("size", objSize);
+        }
     }
 }
 

@@ -170,6 +170,15 @@ public:
         return uniqueId_;
     }
 
+    void SetCurrentSize(const SizeF& size)
+    {
+        curSize_ = size;
+    }
+    const std::optional<SizeF>& GetCurrentSize() const
+    {
+        return curSize_;
+    }
+
     void SetNavDestinationPattern(const WeakPtr<NavDestinationPattern>& pattern);
     RefPtr<NavDestinationPattern> GetNavDestinationPattern() const;
 
@@ -183,6 +192,7 @@ protected:
     WeakPtr<NavigationStack> navigationStack_;
     WeakPtr<NavDestinationPattern> navDestinationPattern_;
     int32_t uniqueId_ = -1;
+    std::optional<SizeF> curSize_;
 };
 } // namespace OHOS::Ace::NG
 

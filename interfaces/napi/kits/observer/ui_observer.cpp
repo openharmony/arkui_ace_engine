@@ -100,6 +100,11 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedSwiperCont
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedSwiperContentListeners_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::routerPageSizeChangeListeners_;
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavDestinationSizeChangeListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedNavDestinationSizeChangeListeners_;
+
 template<typename ListenerList, typename... Args>
 void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
 {
@@ -551,7 +556,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
             NG::RouterPageInfoNG abilityPageInfo(
-                pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
+                pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId, pageInfo.size);
             auto holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnRouterPageStateChange(abilityPageInfo, abilityContext);
@@ -2134,6 +2139,124 @@ void UIObserver::HandleSwiperContentUpdate(const NG::SwiperContentInfo& info)
     auto holder = iter->second;
     for (const auto& listener : holder) {
         listener->HandleSwiperContentUpdate(info);
+    }
+}
+
+void UIObserver::RegisterRouterPageSizeChangeCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(routerPageSizeChangeListeners_.begin(), routerPageSizeChangeListeners_.end(), listener) !=
+        routerPageSizeChangeListeners_.end()) {
+        return;
+    }
+    routerPageSizeChangeListeners_.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterRouterPageSizeChangeCallback(napi_value callback)
+{
+    if (callback == nullptr) {
+        routerPageSizeChangeListeners_.clear();
+        return;
+    }
+    routerPageSizeChangeListeners_.erase(
+        std::remove_if(routerPageSizeChangeListeners_.begin(), routerPageSizeChangeListeners_.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        routerPageSizeChangeListeners_.end());
+}
+
+void UIObserver::HandleRouterPageSizeChange(const NG::RouterPageInfoNG& info)
+{
+    auto env = GetCurrentNapiEnv();
+    CHECK_NULL_VOID(env);
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    auto context = GetContextValue();
+    auto listener = routerPageSizeChangeListeners_;
+    for (const auto& listener : listener) {
+        listener->OnRouterPageSizeChange(info, context);
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterNavDestinationSizeChangeCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(unspecifiedNavDestinationSizeChangeListeners_.begin(),
+        unspecifiedNavDestinationSizeChangeListeners_.end(), listener) !=
+        unspecifiedNavDestinationSizeChangeListeners_.end()) {
+        return;
+    }
+    unspecifiedNavDestinationSizeChangeListeners_.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterNavDestinationSizeChangeCallback(napi_value callback)
+{
+    if (callback == nullptr) {
+        unspecifiedNavDestinationSizeChangeListeners_.clear();
+        return;
+    }
+    unspecifiedNavDestinationSizeChangeListeners_.erase(
+        std::remove_if(unspecifiedNavDestinationSizeChangeListeners_.begin(),
+            unspecifiedNavDestinationSizeChangeListeners_.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        unspecifiedNavDestinationSizeChangeListeners_.end());
+}
+
+void UIObserver::HandleNavDestinationSizeChange(const NG::NavDestinationInfo& info)
+{
+    auto listeners = unspecifiedNavDestinationSizeChangeListeners_;
+    for (const auto& listener : listeners) {
+        listener->OnNavDestinationSizeChange(info);
+    }
+}
+
+void UIObserver::RegisterNavDestinationSizeChangeByUniqueIdCallback(
+    int32_t navigationUniqueId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedNavDestinationSizeChangeListeners_.find(navigationUniqueId);
+    if (iter == specifiedNavDestinationSizeChangeListeners_.end()) {
+        specifiedNavDestinationSizeChangeListeners_.emplace(
+            navigationUniqueId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterNavDestinationSizeChangeByUniqueIdCallback(int32_t navigationUniqueId, napi_value callback)
+{
+    auto iter = specifiedNavDestinationSizeChangeListeners_.find(navigationUniqueId);
+    if (iter == specifiedNavDestinationSizeChangeListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+            return registeredListener->NapiEqual(callback);
+        }),
+        holder.end());
+}
+
+void UIObserver::HandleNavDestinationSizeChangeByUniqueId(const NG::NavDestinationInfo& info)
+{
+    auto navigationdUniqueIdIter = specifiedNavDestinationSizeChangeListeners_.find(info.navigationUniqueId);
+    if (navigationdUniqueIdIter != specifiedNavDestinationSizeChangeListeners_.end()) {
+        auto holder = navigationdUniqueIdIter->second;
+        for (const auto& listener : holder) {
+            listener->OnNavDestinationSizeChange(info);
+        }
     }
 }
 
