@@ -14,6 +14,11 @@
  */
 
 import { CanvasMode, ImageGenerateState } from "../types/Declaration";
+import image from "@ohos.multimedia.image";
+export declare class styleItem {
+    name: ResourceStr;
+    resourceAddr?: image.PixelMap | ResourceStr;
+}
 @ComponentV2
 export declare struct CanvasHome {
     @Local

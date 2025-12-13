@@ -31,6 +31,11 @@ import { TextInputArea } from "./TextInputArea";
 import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
 import { GeneratingArea } from './CanvasGenerate';
+export class styleItem {
+    constructor() {
+        this.name = 'NA';
+    }
+}
 export class CanvasHome extends ViewV2 {
     constructor(j2, k2, l2, m2 = -1, n2, o2) {
         super(j2, m2, o2);
@@ -51,7 +56,7 @@ export class CanvasHome extends ViewV2 {
                     let g2 = new HomeTitle(this, {
                         titleName: this.titleName,
                         currentGenerateState: this.currentGenerateState
-                    }, undefined, e2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 31, col: 5 });
+                    }, undefined, e2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 37, col: 5 });
                     ViewV2.create(g2);
                     let h2 = () => {
                         return {
@@ -83,7 +88,7 @@ export class CanvasHome extends ViewV2 {
                                         let a2 = new LandscapeLayout(this, {
                                             currentGenerateState: this.currentGenerateState,
                                             $currentGenerateState: c2 => { this.currentGenerateState = c2; }
-                                        }, undefined, y1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 40, col: 9 });
+                                        }, undefined, y1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 46, col: 9 });
                                         ViewV2.create(a2);
                                         let b2 = () => {
                                             return {
@@ -158,7 +163,7 @@ class LandscapeLayout extends ViewV2 {
         {
             this.observeComponentCreation2((b1, c1) => {
                 if (c1) {
-                    let d1 = new DoodleBoardArea(this, {}, undefined, b1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 60, col: 9 });
+                    let d1 = new DoodleBoardArea(this, {}, undefined, b1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 66, col: 9 });
                     ViewV2.create(d1);
                     let e1 = () => {
                         return {};
@@ -182,7 +187,7 @@ class LandscapeLayout extends ViewV2 {
                     {
                         this.observeComponentCreation2((v, w) => {
                             if (w) {
-                                let x = new LandscapeSelectFuncArea(this, {}, undefined, v, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 63, col: 11 });
+                                let x = new LandscapeSelectFuncArea(this, {}, undefined, v, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 69, col: 11 });
                                 ViewV2.create(x);
                                 let y = () => {
                                     return {};
@@ -219,7 +224,7 @@ class LandscapeLayout extends ViewV2 {
                                     changeGenerateState: (q) => {
                                         this.$currentGenerateState(q);
                                     }
-                                }, undefined, l, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 71, col: 9 });
+                                }, undefined, l, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 77, col: 9 });
                                 ViewV2.create(n);
                                 let o = () => {
                                     return {
@@ -257,7 +262,7 @@ class LandscapeLayout extends ViewV2 {
                                     changeGenerateState: (i) => {
                                         this.$currentGenerateState(i);
                                     }
-                                }, undefined, d, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 80, col: 9 });
+                                }, undefined, d, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 86, col: 9 });
                                 ViewV2.create(f);
                                 let g = () => {
                                     return {

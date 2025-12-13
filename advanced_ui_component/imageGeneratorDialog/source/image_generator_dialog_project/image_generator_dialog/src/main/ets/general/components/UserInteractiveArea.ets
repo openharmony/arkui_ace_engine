@@ -13,10 +13,23 @@
  * limitations under the License.
  */
 
-import { FunctionAreaPlaceholder, UserInteractiveTabBarBuilder } from "./UserFunctionArea"
+import { FunctionAreaPlaceholder, StyleSelectBuilder, StyleSelectTabBarBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea"
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { styleItem } from "./CanvasFramework"
 
 @ComponentV2
 export struct LandscapeSelectFuncArea {
+  @Local styles?: Array<imageGeneration.ImageStyle> = undefined
+  private tabBarDefaultBgColor: ResourceColor = 'rgba(0,0,0,0.05)'
+  @Local tabBarStyleBgColor: ResourceColor = this.tabBarDefaultBgColor
+  @Local styleItems: Array<styleItem> = []
+
+  aboutToAppear(): void {
+    for (let i = 0; this.styles && i < this.styles?.length; ++i) {
+      this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon})
+    }
+  }
+
   build() {
     Tabs() {
       TabContent() {
@@ -25,9 +38,15 @@ export struct LandscapeSelectFuncArea {
       .tabBar(UserInteractiveTabBarBuilder('图像'))
 
       TabContent() {
-        FunctionAreaPlaceholder()
+        StyleSelectBuilder(this.styleItems)
       }
-      .tabBar(UserInteractiveTabBarBuilder('风格'))
+      .tabBar(StyleSelectTabBarBuilder({name: '风格', icon: {bundleName: "", moduleName: "", id: 0}, bgColor: this.tabBarStyleBgColor}))
+      .onWillShow(()=>{
+        this.tabBarStyleBgColor = Color.White
+      })
+      .onWillHide(()=>{
+        this.tabBarStyleBgColor = this.tabBarDefaultBgColor
+      })
 
       TabContent() {
         FunctionAreaPlaceholder()

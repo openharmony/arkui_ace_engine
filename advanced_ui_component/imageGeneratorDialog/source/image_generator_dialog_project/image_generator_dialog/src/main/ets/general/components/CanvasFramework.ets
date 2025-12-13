@@ -19,6 +19,12 @@ import { TextInputArea } from "./TextInputArea";
 import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
 import { GeneratingArea } from './CanvasGenerate';
+import { image } from "@kit.ImageKit";
+
+export class styleItem {
+  name: ResourceStr = 'NA'
+  resourceAddr?: image.PixelMap | ResourceStr
+}
 
 @ComponentV2
 export struct CanvasHome {
