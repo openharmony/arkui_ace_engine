@@ -5018,6 +5018,8 @@ typedef enum Ark_HitTestMode {
     ARK_HIT_TEST_MODE_BLOCK = 1,
     ARK_HIT_TEST_MODE_TRANSPARENT = 2,
     ARK_HIT_TEST_MODE_NONE = 3,
+    ARK_HIT_TEST_MODE_BLOCK_HIERARCHY = 4,
+    ARK_HIT_TEST_MODE_BLOCK_DESCENDANTS = 5,
 } Ark_HitTestMode;
 typedef struct Opt_HitTestMode {
     Ark_Tag tag;
