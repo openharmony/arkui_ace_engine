@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/// <reference path="./i_monitor.d.ts" />
 class UIUtilsImpl {
     private static instance_: UIUtilsImpl = undefined;
 

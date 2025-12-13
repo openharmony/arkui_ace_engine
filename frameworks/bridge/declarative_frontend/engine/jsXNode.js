@@ -18,21 +18,6 @@ var LogTag;
 (function (LogTag) {
     LogTag[LogTag["ARK_COMPONENT"] = 1] = "ARK_COMPONENT";
 })(LogTag || (LogTag = {}));
-
-const ERROR_CODE_NO_ERROR = 0;
-const ERROR_CODE_NODE_IS_ADOPTED = 106206;
-const ERROR_CODE_NODE_HAS_PARENT = 106207;
-const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
-const ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
-const ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
-
-const errorMap_ = new Map();
-errorMap_.set(ERROR_CODE_NODE_IS_ADOPTED, "The parameter 'child' is invalid: the node has already been adopted.");
-errorMap_.set(ERROR_CODE_NODE_HAS_PARENT, "The parameter 'child' is invalid: the child already has a parent node.");
-errorMap_.set(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "The parameter 'child' is invalid: the node cannot be adopted.");
-errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the node cannot adopt children.');
-errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
-
 class JSXNodeLogConsole {
     static warn(...args) {
         aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
@@ -279,7 +264,8 @@ class JSBuilderNode extends BaseNode {
         this.inheritFreeze = enable;
         if (enable) {
             this.setAllowFreezeWhenInactive(this.getParentAllowFreeze());
-        } else {
+        }
+        else {
             this.setAllowFreezeWhenInactive(false);
         }
     }
@@ -439,7 +425,8 @@ class JSBuilderNode extends BaseNode {
             this.activeCount_ += active ? 1 : -1;
             if (this.isBuilderNodeActive()) {
                 this.isFreeze = false;
-            } else {
+            }
+            else {
                 this.isFreeze = this.allowFreezeWhenInactive;
             }
             if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
@@ -610,8 +597,7 @@ class JSBuilderNode extends BaseNode {
         }
         this.disposable_.dispose();
         if (this.nodePtr_) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-                'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
         }
         this.frameNode_?.dispose();
     }
@@ -678,8 +664,7 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
     }
     buildWithNestingBuilder(builder, supportLazyBuild) {
         if (this.isArray(this.params_)) {
-            this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_,
-            this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     __isReactiveBuilderNode__ViewBuildNodeBase__Internal() {
@@ -745,8 +730,7 @@ class NodeAdapter extends Disposable {
     dispose() {
         super.dispose();
         if (this.nativePtr_) {
-            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-                'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
+            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
         }
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
@@ -1000,20 +984,7 @@ class NodeController {
         }
     }
 }
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/// <reference path="./disposable.ts" />
 var ExpandMode;
 (function (ExpandMode) {
     ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
@@ -1023,11 +994,23 @@ var ExpandMode;
 var UIState;
 (function (UIState) {
     UIState[UIState["NORMAL"] = 0] = "NORMAL";
-    UIState[UIState["PRESSED"] = 1 << 0] = "PRESSED";
-    UIState[UIState["FOCUSED"] = 1 << 1] = "FOCUSED";
-    UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
-    UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
+    UIState[UIState["PRESSED"] = 1] = "PRESSED";
+    UIState[UIState["FOCUSED"] = 2] = "FOCUSED";
+    UIState[UIState["DISABLED"] = 4] = "DISABLED";
+    UIState[UIState["SELECTED"] = 8] = "SELECTED";
 })(UIState || (UIState = {}));
+const ERROR_CODE_NO_ERROR = 0;
+const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+const ERROR_CODE_NODE_HAS_PARENT = 106207;
+const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
+const ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
+const ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
+const errorMap_ = new Map();
+errorMap_.set(ERROR_CODE_NODE_IS_ADOPTED, "The parameter 'child' is invalid: the node has already been adopted.");
+errorMap_.set(ERROR_CODE_NODE_HAS_PARENT, "The parameter 'child' is invalid: the child already has a parent node.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "The parameter 'child' is invalid: the node cannot be adopted.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the node cannot adopt children.');
+errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
 function getFrameNodeRawPtr(frameNode) {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
@@ -1135,7 +1118,8 @@ class FrameNode extends Disposable {
         const node = this.getNodePtr();
         if (node === null) {
             throw Error('The FrameNode has been disposed!');
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -1145,8 +1129,7 @@ class FrameNode extends Disposable {
         }
         super.dispose();
         if (this.nodePtr_) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-                'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
         }
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -1637,7 +1620,8 @@ class FrameNode extends Disposable {
         let result = getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uiStates, this.statesChangeHandler_, excludeInner);
         if (result === true) {
             this.supportedStates_ |= uiStates;
-        } else {
+        }
+        else {
             JSXNodeLogConsole.warn('add supported uistates fail');
         }
         __JSScopeUtil__.restoreInstanceId();
@@ -1650,7 +1634,8 @@ class FrameNode extends Disposable {
             if (this.supportedStates_ === UIState.NORMAL) {
                 this.statesChangeHandler_ = undefined;
             }
-        } else {
+        }
+        else {
             JSXNodeLogConsole.warn('remove supported uistates fail');
         }
         __JSScopeUtil__.restoreInstanceId();
@@ -1695,8 +1680,7 @@ class FrameNode extends Disposable {
             throw { message: 'The current FrameNode has been disposed.', code: 10026 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
-            this.getNodePtr(), positionByLocal.x, positionByLocal.y);
+        const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(this.getNodePtr(), positionByLocal.x, positionByLocal.y);
         __JSScopeUtil__.restoreInstanceId();
         if (offsetPosition[0] === 2) {
             throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
@@ -1717,8 +1701,7 @@ class FrameNode extends Disposable {
             throw { message: 'The current FrameNode has been disposed.', code: 10026 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
-            this.getNodePtr(), positionByWindow.x, positionByWindow.y);
+        const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(this.getNodePtr(), positionByWindow.x, positionByWindow.y);
         __JSScopeUtil__.restoreInstanceId();
         if (offsetPosition[0] === 2) {
             throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
@@ -2398,8 +2381,7 @@ const __attributeMap__ = new Map([
         return node._componentAttribute;
     }]
 ]);
-const __eventMap__ = new Map(
-    [
+const __eventMap__ = new Map([
       ['List', (node) => {
         if (node._scrollableEvent) {
           return node._scrollableEvent;
@@ -2448,10 +2430,8 @@ const __eventMap__ = new Map(
         node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
         return node._scrollableEvent;
       }]
-    ]
-  )
-const __bindControllerCallbackMap__ = new Map(
-    [
+]);
+const __bindControllerCallbackMap__ = new Map([
         ['Swiper', (node, controller) => {
             getUINativeModule().swiper.setSwiperInitialize(node.getNodePtr(), controller);
         }],
@@ -2476,8 +2456,7 @@ const __bindControllerCallbackMap__ = new Map(
         ['TextArea', (node, controller) => {
             getUINativeModule().textArea.setController(node.getNodePtr(), controller);
         }]
-    ]
-)
+]);
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -2514,7 +2493,8 @@ class typeNode {
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
             if (nodeType === undefined || nodeType === null || nodeType === 'Scroll') {
                 throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
-            } else {
+            }
+            else {
                 throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
             }
         }
@@ -2863,7 +2843,8 @@ class RenderNode extends Disposable {
         }
         if (cptrVal === 0 || cptrVal === null || cptrVal === undefined) {
             this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
-        } else {
+        }
+        else {
             this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
         }
         this.nodePtr = this._nativeRef?.getNativeHandle();
@@ -3218,8 +3199,7 @@ class RenderNode extends Disposable {
         }
         super.dispose();
         if (this.nodePtr) {
-            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-                'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
         }
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
@@ -3445,6 +3425,7 @@ class Content {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="./content.ts" />
 class ComponentContentCommonBase extends Content {
     constructor() {
         super();
@@ -3479,8 +3460,7 @@ class ComponentContentCommonBase extends Content {
     }
     dispose() {
         if (this.getNodePtr()) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
-                'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
         }
         this.disposable_.dispose();
         this.detachFromParent();
@@ -3566,7 +3546,8 @@ class NodeContent extends Content {
         let result = getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_);
         if (result === 0) {
             this.nodeArray_.push(node);
-        } else if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+        }
+        else if (result === ERROR_CODE_NODE_IS_ADOPTED) {
             throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
         }
     }

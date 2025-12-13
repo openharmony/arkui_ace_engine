@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="./content.ts" />
 class ComponentContentCommonBase extends Content implements IDisposable {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   protected builderNode_: BuilderNode | ReactiveBuilderNode;
@@ -52,17 +53,17 @@ class ComponentContentCommonBase extends Content implements IDisposable {
     this.builderNode_.onRecycleWithBindObject();
   }
   public dispose(): void {
-    this.disposable_.dispose();
     if (this.getNodePtr()) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
     }
+    this.disposable_.dispose();
     this.detachFromParent();
     this.attachNodeRef_?.dispose();
     this.builderNode_?.dispose();
   }
 
   public isDisposed(): boolean {
-    return this.disposable_.isDisposed() && (this.builderNode_ ? this.builderNode_.isDisposed() : true);
+    return this.disposable_.isDisposed() && (this.builderNode_?.isDisposed() ?? true);
   }
 
   public detachFromParent() {

@@ -81,7 +81,7 @@ class FrameNode extends Disposable {
   protected renderNode_: RenderNode;
   protected baseNode_: BaseNode;
   protected builderNode_: JSBuilderNode;
-  protected uiContext_: UIContext | undefined | null;
+  public uiContext_: UIContext | undefined | null;
   public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
@@ -745,7 +745,7 @@ class FrameNode extends Disposable {
   addSupportedUIStates(uiStates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.statesChangeHandler_ = (currentUIStates: number) => {
-      if (statesChangeHandler !== undefined && statesChangeHandler !== null) {
+      if (statesChangeHandler !== null && statesChangeHandler !== undefined) {
         statesChangeHandler(this, currentUIStates);
       }
     }
@@ -775,9 +775,6 @@ class FrameNode extends Disposable {
     if (this.getNodePtr()) {
       getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
     }
-  }
-  isTransferred(): boolean {
-    return false;
   }
   convertPosition(position, targetNode): Position {
     if (targetNode === null) {
@@ -812,7 +809,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: "The current FrameNode has been disposed.", code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
@@ -822,7 +819,7 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: "The current FrameNode is not on the main tree.", code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
@@ -834,7 +831,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: "The current FrameNode has been disposed.", code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
@@ -844,25 +841,28 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: "The current FrameNode is not on the main tree.", code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
+  isTransferred(): boolean {
+    return false;
+  }
   adoptChild(child: FrameNode): void {
     if (child === undefined || child === null) {
-      return;
+      throw { message: "The parameter 'child' is invalid: the child node is undefined or null.", code: 100025 };
     }
     if (this.isDisposed()) {
       throw { message: 'The current node has been disposed.', code: 100026 };
     }
-    if (!this.checkValid() || !this.isModifiable()) {
+    if (!this.isModifiable()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    if (!child.checkValid() || !child.isModifiable()) {
-      throw { message: 'The child node is not modifiable.', code: 100021 };
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+      throw { message: "The parameter 'child' is invalid: the child node is not modifiable.", code: 100025 };
     }
     if (child.isDisposed()) {
-      throw { message: 'The child node has been disposed.', code: 100026 };
+      throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let result = getUINativeModule().frameNode.adoptChild(this.getNodePtr(), child.getNodePtr());
@@ -874,19 +874,19 @@ class FrameNode extends Disposable {
   }
   removeAdoptedChild(child: FrameNode): void {
     if (child === undefined || child === null) {
-      return;
+      throw { message: "The parameter 'child' is invalid: the child node is undefined or null.", code: 100025 };
     }
     if (this.isDisposed()) {
       throw { message: 'The current node has been disposed.', code: 100026 };
     }
-    if (!this.checkValid() || !this.isModifiable()) {
+    if (!this.isModifiable()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    if (!child.checkValid() || !child.isModifiable()) {
-      throw { message: 'The child node is not modifiable.', code: 100021 };
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+      throw { message: "The parameter 'child' is invalid: the child node is not modifiable.", code: 100025 };
     }
     if (child.isDisposed()) {
-      throw { message: 'The child node has been disposed.', code: 100026 };
+      throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let result = getUINativeModule().frameNode.removeAdoptedChild(this.getNodePtr(), child.getNodePtr());
@@ -1550,8 +1550,8 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return undefined;
       }
       node._scrollableEvent = new UIListEvent(node.getNodePtr());
-      node._scrollableEvent.setNodePtr(node);
-      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      node._scrollableEvent.setNodePtr(node.getNodePtr());
+      node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
       return node._scrollableEvent;
     }],
     ['Scroll', (node: FrameNode): UIScrollEvent => {
@@ -1562,8 +1562,8 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return undefined;
       }
       node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
-      node._scrollableEvent.setNodePtr(node);
-      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      node._scrollableEvent.setNodePtr(node.getNodePtr());
+      node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
       return node._scrollableEvent;
     }],
     ['Grid', (node: FrameNode): UIGridEvent => {
@@ -1574,8 +1574,8 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return undefined;
       }
       node._scrollableEvent = new UIGridEvent(node.getNodePtr());
-      node._scrollableEvent.setNodePtr(node);
-      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      node._scrollableEvent.setNodePtr(node.getNodePtr());
+      node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
       return node._scrollableEvent;
     }],
     ['WaterFlow', (node: FrameNode): UIWaterFlowEvent => {
@@ -1586,8 +1586,8 @@ const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
         return undefined;
       }
       node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
-      node._scrollableEvent.setNodePtr(node);
-      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      node._scrollableEvent.setNodePtr(node.getNodePtr());
+      node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
       return node._scrollableEvent;
     }]
   ]
