@@ -29,6 +29,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewTextStyle, std::string, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SingleLine, bool, PROPERTY_UPDATE_MEASURE);
 
     // placeholder
@@ -49,6 +50,8 @@ public:
     {
         TextLayoutProperty::ToJsonValue(json, filter);
         json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+        json->PutExtAttr(
+            "selectedDragPreviewStyle", GetSelectedDragPreviewStyleValue().ColorToString().c_str(), filter);
     }
 
     void UpdateScrollBarColor(const std::optional<Color>& color)

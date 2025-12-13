@@ -420,6 +420,23 @@ class RichEditorMaxLinesModifier extends ModifierWithKey<number | undefined> {
   }
 }
 
+class RichEditorSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('richEditorSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().richEditor.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+    }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+
 class RichEditorCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
   constructor(value: ArkCustomKeyboard) {
     super(value);
@@ -635,6 +652,13 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute {
     throw new Error('Method not implemented.');
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedDragPreviewStyleModifier.identity,
+        RichEditorSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
   }
   customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): RichEditorAttribute {
     let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();

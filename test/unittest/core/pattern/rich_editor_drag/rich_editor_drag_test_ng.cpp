@@ -514,6 +514,58 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CreateDragNode005
+ * @tc.desc: test CreateDragNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode005, TestSize.Level0)
+{
+    auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    auto richPattern = hostNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageChildren.push_back(imageNode);
+    imageChildren.push_back(imageNode1);
+    richPattern->placeholderIndex_ = { 1, 2, 3 };
+    richPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f), RectF(20.0f, 20.0f, 200.0f, 200.0f),
+        RectF(0.0f, 0.0f, 50.0f, 50.0f) };
+    richPattern->textSelector_.baseOffset = 0;
+    richPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(10, 10, 250, 250));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    richPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    richPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo1);
+    TextDragInfo info;
+    info.isDragShadowNeeded = true;
+    info.dragBackgroundColor = Color::RED;
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    ASSERT_NE(dragNode, nullptr);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    EXPECT_TRUE(richEditorDragPattern->info_->dragBackgroundColor.has_value());
+    EXPECT_TRUE(richEditorDragPattern->info_->isDragShadowNeeded);
+}
+
+/**
  * @tc.name: InitDragShadow001
  * @tc.desc: test InitDragShadow
  * @tc.type: FUNC

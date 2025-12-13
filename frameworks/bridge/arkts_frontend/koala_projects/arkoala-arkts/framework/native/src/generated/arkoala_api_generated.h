@@ -24502,6 +24502,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_Union_ResponseType_RichEditorResponseType* responseType,
                                  const Opt_SelectionMenuOptions* options);
+    void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
+                                        const Opt_SelectedDragPreviewStyle* value);
     void (*setCustomKeyboard)(Ark_NativePointer node,
                               const Opt_Union_CustomBuilder_ComponentContent* value,
                               const Opt_KeyboardOptions* options);

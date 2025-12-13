@@ -1065,7 +1065,7 @@ export class SelectedDragPreviewStyle_serializer {
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {

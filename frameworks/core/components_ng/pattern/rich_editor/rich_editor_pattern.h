@@ -1597,6 +1597,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
     RefPtr<UINode> GetChildByIndex(int32_t index) const override;

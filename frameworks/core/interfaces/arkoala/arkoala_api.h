@@ -7349,6 +7349,9 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
     void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color);
     void (*resetRichEditorScrollBarColor)(ArkUINodeHandle node);
+    void (*setRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
