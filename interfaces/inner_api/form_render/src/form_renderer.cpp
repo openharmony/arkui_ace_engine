@@ -637,7 +637,7 @@ void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
     auto rsSurfaceNode = GetSurfaceNode();
     if (!rsSurfaceNode) {
         HILOG_ERROR("SetRenderGroupEnableFlag rsSurfaceNode is nullptr.");
-        return ;
+        return;
     }
 
     HILOG_INFO("SetRenderGroupEnableFlag isEnable:%{public}d", isEnable);
