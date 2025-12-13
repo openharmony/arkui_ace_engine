@@ -240,6 +240,35 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CreateStartingWindow
+ * @tc.desc: CreateStartingWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE;
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
+
+    sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::DEFAULT;
+    ssm_->preLoadStartingWindowMap_.clear();
+    windowScene_->WindowPattern::CreateStartingWindow();
+    auto sessionInfo = sceneSession_->GetSessionInfo();
+    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    ssm_->preLoadStartingWindowMap_.emplace(std::pair<std::string, std::shared_ptr<Media::PixelMap>>(key, pixelMap));
+    EXPECT_NE(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+    ssm_->preLoadStartingWindowMap_.clear();
+}
+
+/**
  * @tc.name: TransformOrientationForMatchSnapshot
  * @tc.desc: TransformOrientationForMatchSnapshot Test
  * @tc.type: FUNC
