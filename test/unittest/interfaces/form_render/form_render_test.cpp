@@ -61,6 +61,8 @@ public:
     {
         NG::MockPipelineContext::TearDown();
     }
+
+    std::shared_ptr<FormRenderer> CreateFormRenderer(const std::string &test);
 };
 
 std::shared_ptr<FormRenderer> GetInstance(std::string eventName)
@@ -847,5 +849,162 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     formJsInfo.formId = 10;
     formRenderer->OnSurfaceCreate(formJsInfo, want);
     EXPECT_EQ(newFormJsInfo.formData, "");
+}
+
+std::shared_ptr<FormRenderer> FormRenderTest::CreateFormRenderer(const std::string &threadName)
+{
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create(threadName);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRenderer = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+    return formRenderer;
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty001
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty001, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty001");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(0);
+    OHOS::AAFwk::Want want;
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty002
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty002, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty002");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    formRenderer->renderingMode_ = AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(Exactly(1));
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    OHOS::AAFwk::Want want;
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty003
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty003, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty003");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    formRenderer->enableBlurBackground_ = true;
+    formRenderer->deleteBackgroundImage_ = true;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(Exactly(1));
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    OHOS::AAFwk::Want want;
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty004
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty004, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty004");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    formRenderer->enableBlurBackground_ = true;
+    formRenderer->deleteBackgroundImage_ = false;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(Exactly(1));
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    OHOS::AAFwk::Want want;
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty005
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty005, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty005");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    formRenderer->enableBlurBackground_ = false;
+    formRenderer->deleteBackgroundImage_ = true;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(Exactly(1));
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    OHOS::AAFwk::Want want;
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty006
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty006, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty006");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    OHOS::AAFwk::Want want;
+    std::string transparentColor = "#00000000";
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
+    formRenderer->renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    formRenderer->enableBlurBackground_ = false;
+    formRenderer->deleteBackgroundImage_ = true;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(Exactly(1));
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    formRenderer->SetUIContentProperty(want);
+}
+
+/**
+ * @tc.name: FormRenderTestSetUIContentProperty007
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty007, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTestSetUIContentProperty007");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    OHOS::AAFwk::Want want;
+    std::string transparentColor = "#00000000";
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
+    formRenderer->renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    formRenderer->enableBlurBackground_ = false;
+    formRenderer->deleteBackgroundImage_ = false;
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormRenderingMode(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormEnableBlurBackground(_)).Times(0);
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
+    formRenderer->SetUIContentProperty(want);
 }
 } // namespace OHOS::Ace
