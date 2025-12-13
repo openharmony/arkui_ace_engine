@@ -96,7 +96,7 @@ void SheetView::InitSheetKey(const RefPtr<FrameNode>& sheetNode, int32_t builder
     auto overlayRootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(overlayRootNode);
     SheetKey sheetKey;
-    if (!isValidTarget && NearEqual(targetId, overlayRootNode->GetId())) {
+    if (!isValidTarget && targetId == overlayRootNode->GetId()) {
         sheetKey = SheetKey(isValidTarget, builderId, targetId);
     }
     sheetPattern->SetSheetKey(sheetKey);
