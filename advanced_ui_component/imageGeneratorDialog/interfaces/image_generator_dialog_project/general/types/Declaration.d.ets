@@ -18,6 +18,13 @@ export declare enum CanvasMode {
     GENERAL_MODE = 0,
     DOODLE_MODE = 1
 }
+export declare enum ImageGenerateState {
+    CONFIGURATION = 0,
+    GENERATING = 1,
+    BEFORE_GENERATED = 2,
+    GENERATED = 3,
+    MINIMIZED = 4
+}
 export interface AIGenerateCallBack {
     onReady: () => void;
     onError: () => void;

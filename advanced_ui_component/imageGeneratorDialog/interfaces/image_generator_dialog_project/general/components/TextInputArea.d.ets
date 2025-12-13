@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+import { ImageGenerateState } from "../types/Declaration";
 @ComponentV2
 export declare struct TextInputArea {
+    @Event
+    changeGenerateState: (state: ImageGenerateState) => void;
     build(): void;
 }

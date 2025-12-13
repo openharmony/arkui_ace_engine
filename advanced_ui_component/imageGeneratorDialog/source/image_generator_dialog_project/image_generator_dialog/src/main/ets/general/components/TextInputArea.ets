@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+import { ImageGenerateState } from "../types/Declaration";
+
 @ComponentV2
 export struct TextInputArea {
+  @Event changeGenerateState: (state: ImageGenerateState) => void = (state: ImageGenerateState) => {};
+
   build() {
     Row() {
       Column()
@@ -30,6 +34,9 @@ export struct TextInputArea {
         .height(40)
         .width(96)
         .margin({ top: 3, bottom: 2, right: 16 })
+        .onClick(() => {
+          this.changeGenerateState(ImageGenerateState.GENERATING)
+        })
     }
     .width('100%')
     .height(45)

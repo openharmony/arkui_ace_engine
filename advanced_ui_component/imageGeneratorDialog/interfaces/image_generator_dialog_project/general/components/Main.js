@@ -13,50 +13,50 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (h3, i3, j3, k3) {
-    var l3 = arguments.length, m3 = l3 < 3 ? i3 : k3 === null ? k3 = Object.getOwnPropertyDescriptor(i3, j3) : k3, n3;
+var __decorate = (this && this.__decorate) || function (b7, c7, d7, e7) {
+    var f7 = arguments.length, g7 = f7 < 3 ? c7 : e7 === null ? e7 = Object.getOwnPropertyDescriptor(c7, d7) : e7, h7;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        m3 = Reflect.decorate(h3, i3, j3, k3);
+        g7 = Reflect.decorate(b7, c7, d7, e7);
     else
-        for (var o3 = h3.length - 1; o3 >= 0; o3--)
-            if (n3 = h3[o3])
-                m3 = (l3 < 3 ? n3(m3) : l3 > 3 ? n3(i3, j3, m3) : n3(i3, j3)) || m3;
-    return l3 > 3 && m3 && Object.defineProperty(i3, j3, m3), m3;
+        for (var i7 = b7.length - 1; i7 >= 0; i7--)
+            if (h7 = b7[i7])
+                g7 = (f7 < 3 ? h7(g7) : f7 > 3 ? h7(c7, d7, g7) : h7(c7, d7)) || g7;
+    return f7 > 3 && g7 && Object.defineProperty(c7, d7, g7), g7;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { CanvasHome } from "./CanvasFramework";
 export class ImageGeneratorDialog extends ViewV2 {
-    constructor(b3, c3, d3, e3 = -1, f3, g3) {
-        super(b3, e3, g3);
+    constructor(v6, w6, x6, y6 = -1, z6, a7) {
+        super(v6, y6, a7);
         this.stack = new NavPathStack();
         this.options = undefined;
         this.width_ = 650;
         this.height_ = 560;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(a3) {
+    resetStateVarsOnReuse(u6) {
         this.width_ = 650;
         this.height_ = 560;
     }
-    pageMap(s2, t2 = null) {
-        this.observeComponentCreation2((u2, v2) => {
+    pageMap(m6, n6 = null) {
+        this.observeComponentCreation2((o6, p6) => {
             If.create();
-            if (s2 === 'home') {
+            if (m6 === 'home') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((w2, x2) => {
-                            if (x2) {
-                                let y2 = new CanvasHome(this, {}, undefined, w2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 29, col: 7 });
-                                ViewV2.create(y2);
-                                let z2 = () => {
+                        this.observeComponentCreation2((q6, r6) => {
+                            if (r6) {
+                                let s6 = new CanvasHome(this, {}, undefined, q6, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 29, col: 7 });
+                                ViewV2.create(s6);
+                                let t6 = () => {
                                     return {};
                                 };
-                                y2.paramsGenerator_ = z2;
+                                s6.paramsGenerator_ = t6;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(w2, {});
+                                this.updateStateVarsOfChildByElmtId(q6, {});
                             }
                         }, { name: "CanvasHome" });
                     }
@@ -73,14 +73,14 @@ export class ImageGeneratorDialog extends ViewV2 {
         this.stack.pushPath({ name: 'home' });
     }
     initialRender() {
-        this.observeComponentCreation2((q2, r2) => {
+        this.observeComponentCreation2((k6, l6) => {
             Scroll.create();
             Scroll.width('100%');
             Scroll.height('100%');
             Scroll.scrollable(ScrollDirection.FREE);
         }, Scroll);
-        this.observeComponentCreation2((o2, p2) => {
-            Navigation.create(this.stack, { moduleName: "image_generator_dialog", pagePath: "", isUserCreateStack: true });
+        this.observeComponentCreation2((i6, j6) => {
+            Navigation.create(this.stack, { moduleName: "__harDefaultModuleName__", pagePath: "", isUserCreateStack: true });
             Navigation.navDestination({ builder: this.pageMap.bind(this) });
             Navigation.hideNavBar(true);
             Navigation.height(this.height_);

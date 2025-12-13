@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+import { ImageGenerateState } from "../types/Declaration";
 @ComponentV2
 export declare struct HomeTitle {
     @Param
     readonly titleName: string;
+    @Param
+    readonly currentGenerateState: ImageGenerateState;
     build(): void;
 }

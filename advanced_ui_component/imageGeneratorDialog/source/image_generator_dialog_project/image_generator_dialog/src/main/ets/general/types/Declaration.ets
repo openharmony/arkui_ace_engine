@@ -20,6 +20,14 @@ export enum CanvasMode {
   DOODLE_MODE = 1
 }
 
+export enum ImageGenerateState {
+  CONFIGURATION = 0,
+  GENERATING = 1,
+  BEFORE_GENERATED = 2,
+  GENERATED = 3,
+  MINIMIZED = 4
+}
+
 export interface AIGenerateCallBack {
   onReady: () => void,
   onError: () => void,
