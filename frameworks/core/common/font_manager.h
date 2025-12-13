@@ -85,7 +85,7 @@ struct FormLoadFontCallbackInfo {
     uint64_t formRuntimeId = 0;
 };
 
-class FontManager : public virtual AceType {
+class ACE_FORCE_EXPORT FontManager : public virtual AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
 
 public:

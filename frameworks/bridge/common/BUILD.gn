@@ -26,7 +26,6 @@ template("bridge_common") {
 
     sources = [
       # dom
-      "dom/dom_badge.cpp",
       "dom/dom_button.cpp",
       "dom/dom_calendar.cpp",
       "dom/dom_canvas.cpp",
@@ -47,7 +46,6 @@ template("bridge_common") {
       "dom/dom_list.cpp",
       "dom/dom_list_item.cpp",
       "dom/dom_list_item_group.cpp",
-      "dom/dom_marquee.cpp",
       "dom/dom_navigation_bar.cpp",
       "dom/dom_node.cpp",
       "dom/dom_panel.cpp",

@@ -24,7 +24,8 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/marquee/marquee_model.h"
@@ -44,8 +45,9 @@ MarqueeModel* MarqueeModel::GetInstance()
         static NG::MarqueeModelNG instance;
         return &instance;
     } else {
-        static Framework::MarqueeModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("marquee");
+        static MarqueeModel* instance = loader ? reinterpret_cast<MarqueeModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }

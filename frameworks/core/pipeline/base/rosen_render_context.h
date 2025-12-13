@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 
+#include "base/utils/macros.h"
 #include "base/geometry/rect.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/pipeline/base/render_context.h"
@@ -24,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class RosenRenderContext : public RenderContext {
+class ACE_FORCE_EXPORT RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, RenderContext);
 
 public:

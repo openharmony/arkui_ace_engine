@@ -580,6 +580,21 @@ std::optional<RadialSizeType> ParseRadialGradientSize(const std::string& value)
     }
     return std::nullopt;
 }
+
+TextAlign ConvertStrToTextAlign(const std::string& align)
+{
+    static const LinearMapNode<TextAlign> textAlignTable[] = {
+        { DOM_CENTER, TextAlign::CENTER },
+        { DOM_END, TextAlign::END },
+        { DOM_LEFT, TextAlign::LEFT },
+        { DOM_RIGHT, TextAlign::RIGHT },
+        { DOM_START, TextAlign::START },
+    };
+
+    auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), align.c_str());
+    return index < 0 ? TextAlign::CENTER : textAlignTable[index].value;
+}
+
 #ifndef FUZZTEST
 // ObjectPosition
 ImageObjectPosition ParseImageObjectPosition(const std::string& value)

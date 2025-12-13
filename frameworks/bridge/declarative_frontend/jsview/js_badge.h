@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BADGE_H
 
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "core/components/badge/badge_component.h"
 #include "core/components_ng/pattern/badge/badge_data.h"
 
 namespace OHOS::Ace::Framework {

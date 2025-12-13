@@ -19,13 +19,14 @@
 #include <functional>
 
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/macros.h"
 #include "core/gestures/multi_fingers_recognizer.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/gestures/click_info.h"
 
 namespace OHOS::Ace {
 
-class ClickRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
 
 public:

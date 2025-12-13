@@ -35,7 +35,6 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
     std::string nameStr(name);
     static std::unordered_map<std::string, std::function<ComponentLoader*()>> sLoaderMap = {
         { "badge", []() -> ComponentLoader* { return new BadgeLoader(); } },
-        { "canvas", []() -> ComponentLoader* { return new CanvasLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } }
     };
     auto loaderIter = sLoaderMap.find(nameStr);

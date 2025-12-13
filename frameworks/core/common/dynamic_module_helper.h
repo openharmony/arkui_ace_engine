@@ -19,15 +19,21 @@
 #include <memory>
 #include <string>
 
+#include "compatible/components/component_loader.h"
+#include "interfaces/inner_api/ace/utils.h"
+
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "compatible/components/component_loader.h"
 
 namespace OHOS::Ace {
 
 using ComponentLoaderFunc = ComponentLoader* (*)(const char* name);
 using CanvasLoaderFunc = void* (*)(bool offscreen);
 using CanvasBridgeFunc = void* (*)(CanvasBridgeParams& params);
+
+const std::string COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
+const std::string COMPATIABLE_CANVAS_RENDERING_CONTEXT = "OHOS_ACE_Compatible_GetCanvasRenderingContext";
+const std::string COMPATIABLE_CANVAS_BRIDGE = "OHOS_ACE_Compatible_CreateCanvasBridge";
 
 class ACE_EXPORT DynamicModuleHelper final {
 public:
@@ -39,11 +45,11 @@ public:
 private:
     DynamicModuleHelper();
     ~DynamicModuleHelper();
-    bool LoadLibrary();
+    bool DynamicLoadLibrary();
     void CloseLibrary();
     void* LoadSymbol(const char* symName);
 
-    void* compatibleLibHandle_ = nullptr;
+    LIBHANDLE compatibleLibHandle_ = nullptr;
     bool compatibleLibLoaded_ = false;
 
     ComponentLoaderFunc componentLoaderFunc_ = nullptr;

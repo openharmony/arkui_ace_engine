@@ -123,6 +123,225 @@ DOMNode::~DOMNode()
     }
 }
 
+std::string DOMNode::GetNodeIdForEvent() const
+{
+    return isRootNode_ ? DOM_DEFAULT_ROOT_NODE_ID : std::to_string(GetNodeId());
+}
+
+Dimension DOMNode::GetHeight() const
+{
+    Dimension height = Dimension(-1.0, DimensionUnit::PX);
+    if (declaration_) {
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            height = sizeStyle.height;
+        }
+    }
+    return height;
+}
+
+CalcDimension DOMNode::GetCalcHeight() const
+{
+    CalcDimension height = Dimension(-1.0, DimensionUnit::PX);
+    if (declaration_) {
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            height = sizeStyle.height;
+        }
+    }
+    return height;
+}
+
+Dimension DOMNode::GetWidth() const
+{
+    Dimension width = Dimension(-1.0, DimensionUnit::PX);
+    if (declaration_) {
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            width = sizeStyle.width;
+        }
+    }
+    return width;
+}
+
+CalcDimension DOMNode::GetCalcWidth() const
+{
+    CalcDimension width = Dimension(-1.0, DimensionUnit::PX);
+    if (declaration_) {
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            width = sizeStyle.width;
+        }
+    }
+    return width;
+}
+
+const EventMarker& DOMNode::GetClickId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.click.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDoubleClickId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.doubleClick.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragStartId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragStart.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.drag.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragEndId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragEnd.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragEnterId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragEnter.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragOverId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragOver.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragLeaveId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragLeave.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetDragDropId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.dragDrop.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetLongPressId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.longPress.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetPinchStartId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.pinchStart.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetPinchUpdateId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.pinchUpdate.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetPinchEndId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.pinchEnd.eventMarker : defaultMarker;
+}
+
+const EventMarker& DOMNode::GetPinchCancelId()
+{
+    static EventMarker defaultMarker;
+    auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
+    return gestureEvent.IsValid() ? gestureEvent.pinchCancel.eventMarker : defaultMarker;
+}
+
+EventMarker& DOMNode::GetSwipeId(uint32_t action, uint32_t stage)
+{
+    static EventMarker defaultMarker;
+    if (!declaration_) {
+        return defaultMarker;
+    }
+    auto& swipeEvent = declaration_->MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
+    if (!swipeEvent.IsValid()) {
+        return defaultMarker;
+    }
+    if (action == EventAction::ON && stage == EventStage::CAPTURE) {
+        return swipeEvent.captureSwipe.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE) {
+        return swipeEvent.catchBubbleSwipe.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::BUBBLE) {
+        return swipeEvent.swipe.eventMarker;
+    }
+    return defaultMarker;
+}
+
+// Confirm declaration exist and support raw event before call GetTouchId.
+EventMarker& DOMNode::GetTouchId(uint32_t action, uint32_t stage, uint32_t type)
+{
+    static EventMarker defaultMarker;
+    if (!declaration_) {
+        return defaultMarker;
+    }
+
+    auto& rawEvent = declaration_->MaybeResetEvent<CommonRawEvent>(EventTag::COMMON_RAW_EVENT);
+    if (!rawEvent.IsValid()) {
+        return defaultMarker;
+    }
+    if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
+        return rawEvent.captureTouchCancel.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
+        return rawEvent.captureTouchEnd.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
+        return rawEvent.captureTouchMove.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
+        return rawEvent.captureTouchStart.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
+        return rawEvent.catchBubbleTouchCancel.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
+        return rawEvent.catchBubbleTouchEnd.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
+        return rawEvent.catchBubbleTouchMove.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
+        return rawEvent.catchBubbleTouchStart.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
+        return rawEvent.catchCaptureTouchCancel.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
+        return rawEvent.catchCaptureTouchEnd.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
+        return rawEvent.catchCaptureTouchMove.eventMarker;
+    } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
+        return rawEvent.catchCaptureTouchStart.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
+        return rawEvent.touchCancel.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
+        return rawEvent.touchEnd.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
+        return rawEvent.touchMove.eventMarker;
+    } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
+        return rawEvent.touchStart.eventMarker;
+    }
+    return defaultMarker;
+}
+
 void DOMNode::Mount(int32_t slot)
 {
     auto parentNode = parentNode_.Upgrade();
