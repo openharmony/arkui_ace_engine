@@ -2246,30 +2246,38 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
     if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        const auto normalStyle = pickerTheme->GetOptionStyle(false, false);
         pickerProperty->UpdateColor(
             GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     }
 
     if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        const auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
         pickerProperty->UpdateDisappearColor(
             GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     }
-    if (isPicker_) {
-        return;
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        const auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     }
+    
+    CHECK_EQUAL_VOID(isPicker_, true);
+
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto buttonTitleNode = buttonTitleNode_.Upgrade();
     CHECK_NULL_VOID(buttonTitleNode);
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
     auto childText = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childText);
     auto textTitleNode = DynamicCast<FrameNode>(childText);
@@ -2277,6 +2285,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+
     auto contentRowNode = contentRowNode_.Upgrade();
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
