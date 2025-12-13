@@ -208,7 +208,7 @@ void SearchModelStatic::SetSearchButtonFontColor(FrameNode* frameNode, const std
     CHECK_NULL_VOID(buttonFrameNode);
     auto searchTheme = SearchModelStatic::GetTheme(frameNode);
     CHECK_NULL_VOID(searchTheme);
-    SearchModelNG::SetSearchButtonFontColor(frameNode, searchTheme->GetSearchButtonTextColor());
+    SearchModelNG::SetSearchButtonFontColor(frameNode, searchTheme->GetSearchButtonTextColor(), true);
 }
 
 void SearchModelStatic::SetSearchButtonAutoDisable(FrameNode* frameNode, const std::optional<bool>& needToDisable)

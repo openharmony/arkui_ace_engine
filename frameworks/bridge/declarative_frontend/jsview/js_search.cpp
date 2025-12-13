@@ -365,7 +365,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     Color fontColor = theme->GetSearchButtonTextColor();
     if (info.Length() < 2 || !info[1]->IsObject()) { // 2 : args num
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
-        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor, true);
         return;
     }
     
@@ -391,7 +391,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     UnregisterResource("searchButtonFontColor");
     if (fontColorProp->IsUndefined() || fontColorProp->IsNull() ||
         !ParseJsColor(fontColorProp, fontColor, colorObject)) {
-        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor, true);
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     }

@@ -356,14 +356,14 @@ void ResetSearchSearchIcon(ArkUINodeHandle node)
 }
 
 void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-                           ArkUIImageIconRes* imageIconRes)
+                           ArkUIImageIconRes* imageIconRes, bool isThemeColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchButton(frameNode, value->value);
     SearchModelNG::SetSearchButtonFontSize(frameNode, CalcDimension(value->sizeValue,
         static_cast<DimensionUnit>(value->sizeUnit)));
-    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
+    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor), isThemeColor);
     SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);

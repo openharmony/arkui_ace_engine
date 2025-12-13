@@ -1092,6 +1092,12 @@ HWTEST_F(SearchTestNg, SetSearchButtonFontSize001, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontSize(), 14.0_vp);
     searchModelInstance.SetSearchButtonFontColor(Color::RED);
     EXPECT_EQ(buttonLayoutProperty->GetFontColor(), Color::RED);
+
+    // test SetSearchButtonFontColor isTheme true
+    searchModelInstance.SetSearchButtonFontColor(Color::BLUE, true);
+
+    // test SetSearchButtonFontColor isTheme false
+    searchModelInstance.SetSearchButtonFontColor(Color::GREEN, false);
 }
 
 /**

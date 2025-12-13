@@ -2210,10 +2210,11 @@ void SearchPattern::UpdateTextFieldColor()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        if (!buttonLayoutProperty->HasFontColor()) {
-            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        if (IsSearchButtonUsingThemeColor()) {
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

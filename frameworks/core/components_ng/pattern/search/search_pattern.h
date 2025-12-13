@@ -152,6 +152,16 @@ public:
         return buttonSize_;
     }
 
+    void SetIsSearchButtonUsingThemeColor(bool isSearchButtonUsingThemeColor)
+    {
+        isSearchButtonUsingThemeColor_ = isSearchButtonUsingThemeColor;
+    }
+
+    bool IsSearchButtonUsingThemeColor() const
+    {
+        return isSearchButtonUsingThemeColor_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
     void OnIconColorConfigrationUpdate(const RefPtr<SearchTheme>& searchTheme);
@@ -359,6 +369,7 @@ private:
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
     bool isNotifyChildAction_ = false;
+    bool isSearchButtonUsingThemeColor_ = false;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 
