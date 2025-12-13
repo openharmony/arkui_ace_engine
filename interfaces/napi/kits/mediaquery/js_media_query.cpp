@@ -180,6 +180,7 @@ public:
         }
         auto jsEngine = listener->GetJsEngine();
         if (!jsEngine) {
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         jsEngine->RegisterMediaUpdateCallback(NapiCallback);
