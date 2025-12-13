@@ -871,6 +871,31 @@ ArkUI_Bool GetListSyncLoad(ArkUINodeHandle node)
     return ListModelNG::GetListSyncLoad(frameNode);
 }
 
+void SetListEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    ListModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void ResetListEditModeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    ListModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void GetListEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions options = ListModelNG::GetEditModeOptions(frameNode);
+    (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+}
+
 void SetListFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -1055,6 +1080,9 @@ const ArkUIListModifier* GetListModifier()
         .setListSyncLoad = SetListSyncLoad,
         .resetListSyncLoad = ResetListSyncLoad,
         .getListSyncLoad = GetListSyncLoad,
+        .setEditModeOptions = SetListEditModeOptions,
+        .resetEditModeOptions = ResetListEditModeOptions,
+        .getEditModeOptions = GetListEditModeOptions,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,

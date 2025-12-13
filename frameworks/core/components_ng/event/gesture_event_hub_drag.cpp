@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "gesture_event_hub.h"
+
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
@@ -22,6 +23,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -31,11 +33,10 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -557,11 +558,7 @@ void GestureEventHub::HandleDragThroughMouse(const RefPtr<FrameNode> frameNode)
     }
     auto size = GetSelectItemSize();
     if (size) {
-        auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
-        CHECK_NULL_VOID(fatherNode);
-        auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
-        CHECK_NULL_VOID(scrollPattern);
-        auto children = scrollPattern->GetVisibleSelectedItems();
+        auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
         dragframeNodeInfo_.gatherFrameNode = children;
         for (const auto& itemFrameNode : children) {
             DragAnimationHelper::DoDragStartGrayedAnimation(itemFrameNode);
@@ -1403,11 +1400,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ClearGatherPixelMap();
     CHECK_NULL_VOID(dragEventActuator_);
-    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
-    CHECK_NULL_VOID(fatherNode);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollPattern);
-    auto children = scrollPattern->GetVisibleSelectedItems();
+    auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
     int cnt = 0;
     for (const auto& itemFrameNode : children) {
         if (itemFrameNode == frameNode) {
@@ -1466,11 +1459,8 @@ int32_t GestureEventHub::GetSelectItemSize()
     if (!dragEventActuator_->IsNeedGather()) {
         return 0;
     }
-    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(GetFrameNode());
-    CHECK_NULL_RETURN(fatherNode, 0);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN(scrollPattern, 0);
-    auto children = scrollPattern->GetVisibleSelectedItems();
+
+    auto children = SelectableUtils::GetVisibleSelectedItems(GetFrameNode());
     return children.size();
 }
 

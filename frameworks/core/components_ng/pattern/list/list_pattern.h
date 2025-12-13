@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -53,11 +53,14 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
+class ListPattern : public SelectableContainerPattern {
+    DECLARE_ACE_TYPE(ListPattern, SelectableContainerPattern);
 
 public:
-    ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
+    ListPattern() : SelectableContainerPattern()
+    {
+        SetEdgeEffect(EdgeEffect::SPRING, false);
+    }
     ~ListPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -495,6 +498,16 @@ public:
         return listSnapSpeed_;
     }
 
+    void SetEditModeOptions(EditModeOptions& editModeOptions)
+    {
+        editModeOptions_ = editModeOptions;
+    }
+
+    EditModeOptions GetEditModeOptions() const override
+    {
+        return editModeOptions_;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -712,6 +725,8 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
+
+    EditModeOptions editModeOptions_;
 };
 } // namespace OHOS::Ace::NG
 

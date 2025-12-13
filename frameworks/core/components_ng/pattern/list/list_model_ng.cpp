@@ -1017,6 +1017,29 @@ bool ListModelNG::GetListSyncLoad(FrameNode* frameNode)
     return value;
 }
 
+void ListModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEditModeOptions(frameNode, editModeOptions);
+}
+
+void ListModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
+EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
+{
+    EditModeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, options);
+    return pattern->GetEditModeOptions();
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);

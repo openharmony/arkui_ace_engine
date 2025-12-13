@@ -26,6 +26,7 @@ COMMON_SRC = [
   "grid_test_ng.cpp",
   "grid_cache_layout_test_ng.cpp",
   "grid_pattern_test_ng.cpp",
+  "selectable_item_test.cpp",
 ]
 
 ace_unittest("grid_test_regular") {

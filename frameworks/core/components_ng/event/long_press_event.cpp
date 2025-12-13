@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "core/components_ng/event/long_press_event.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -67,5 +67,18 @@ void LongPressEventActuator::SetLongPressEventType(GestureTypeName typeName)
     CHECK_NULL_VOID(gestureInfo);
     gestureInfo->SetType(typeName);
     gestureInfo->SetIsSystemGesture(true);
+}
+
+void LongPressEventActuatorWithMultiSelect::OnCollectTouchTarget(const OffsetF& coordinateOffset,
+    const TouchRestrict& touchRestrict, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+    ResponseLinkResult& responseLinkResult)
+{
+    LongPressEventActuator::OnCollectTouchTarget(
+        coordinateOffset, touchRestrict, getEventTargetImpl, result, responseLinkResult);
+
+    if (multiSelectHandler_) {
+        auto recognizer = GetLongPressRecognizer();
+        multiSelectHandler_(recognizer);
+    }
 }
 } // namespace OHOS::Ace::NG

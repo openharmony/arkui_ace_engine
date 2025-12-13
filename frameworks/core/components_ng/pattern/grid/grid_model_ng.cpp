@@ -1019,6 +1019,29 @@ bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
     return result;
 }
 
+void GridModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEditModeOptions(frameNode, editModeOptions);
+}
+
+void GridModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
+EditModeOptions GridModelNG::GetEditModeOptions(FrameNode* frameNode)
+{
+    EditModeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, options);
+    return pattern->GetEditModeOptions();
+}
+
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

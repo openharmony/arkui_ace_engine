@@ -62,6 +62,7 @@ public:
     void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetStackFromEnd(bool enabled) override;
     void SetSyncLoad(bool enabled) override;
+    void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -156,6 +157,8 @@ public:
     static bool GetListStackFromEnd(FrameNode* frameNode);
     static void SetListSyncLoad(FrameNode* frameNode, bool enabled);
     static bool GetListSyncLoad(FrameNode* frameNode);
+    static void SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions);
+    static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

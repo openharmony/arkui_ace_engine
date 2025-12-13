@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -86,7 +86,7 @@ void GridItemModelStatic::SetColumnEnd(FrameNode* frameNode, int32_t columnEnd)
 void GridItemModelStatic::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateGridItemStyle(gridItemStyle);
 }
