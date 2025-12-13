@@ -97,7 +97,7 @@ const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.s
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
-std::mutex g_mutexFormRenderFontFamily;
+std::mutex g_mutexFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 constexpr int32_t DARK_RES_DUMP_MIN_SIZE = 3;
@@ -3409,13 +3409,8 @@ void AceContainer::CheckAndSetFontFamily()
     for (const auto& fontFamilyName : fontFamilyNames) {
         fullPath.push_back(path + fontFamilyName);
     }
-    if (isFormRender_) {
-        // Resolve garbled characters caused by FRS multi-thread async
-        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    } else {
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    }
+    std::lock_guard<std::mutex> lock(g_mutexFontFamily);
+    fontManager->SetFontFamily(familyName.c_str(), fullPath);
 }
 
 void AceContainer::SetFontScaleAndWeightScale(int32_t instanceId)
