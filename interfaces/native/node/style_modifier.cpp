@@ -8127,9 +8127,11 @@ int32_t SetTextInputShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     }
     auto* config = reinterpret_cast<ArkUI_ShowCounterConfig*>(item->object);
     if (config && config->counterTextColor.isSet) {
+        showCountOptions.counterTextColorIsSet = config->counterTextColor.isSet;
         showCountOptions.counterTextColor = config->counterTextColor.value;
     }
     if (config && config->counterTextOverflowColor.isSet) {
+        showCountOptions.counterTextOverflowColorIsSet = config->counterTextOverflowColor.isSet;
         showCountOptions.counterTextOverflowColor = config->counterTextOverflowColor.value;
     }
     ArkUIShowCountOptions* options = &showCountOptions;
@@ -8162,14 +8164,8 @@ const ArkUI_AttributeItem* GetTextAreaShowCounter(ArkUI_NodeHandle node)
     // highlightBorder
     g_numberValues[NUM_2].i32 = options.highlightBorder;
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
-    if (options.counterTextColor != -1) {
-        config->counterTextColor.value = options.counterTextColor;
-        config->counterTextColor.isSet = 1;
-    }
-    if (options.counterTextOverflowColor != -1) {
-        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
-        config->counterTextOverflowColor.isSet = 1;
-    }
+    config->counterTextColor.value = options.counterTextColor;
+    config->counterTextOverflowColor.value = options.counterTextOverflowColor;
     g_attributeItem.object = config;
     return &g_attributeItem;
 }
@@ -8186,14 +8182,8 @@ const ArkUI_AttributeItem* GetTextInputShowCounter(ArkUI_NodeHandle node)
     // highlightBorder
     g_numberValues[NUM_2].i32 = options.highlightBorder;
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
-    if (options.counterTextColor != -1) {
-        config->counterTextColor.value = options.counterTextColor;
-        config->counterTextColor.isSet = 1;
-    }
-    if (options.counterTextOverflowColor != -1) {
-        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
-        config->counterTextOverflowColor.isSet = 1;
-    }
+    config->counterTextColor.value = options.counterTextColor;
+    config->counterTextOverflowColor.value = options.counterTextOverflowColor;
     g_attributeItem.object = config;
     return &g_attributeItem;
 }

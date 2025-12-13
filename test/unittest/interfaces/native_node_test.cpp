@@ -11523,4 +11523,33 @@ HWTEST_F(NativeNodeTest, NativeNodeConvertFromWindowTest001, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
+/**
+ * @tc.name: ShowCounterConfigTest002
+ * @tc.desc: Test ShowCounterConfig function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ShowCounterConfigTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto textinput = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr, true});
+    auto textarea = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr, true});
+    auto config = OH_ArkUI_ShowCounterConfig_Create();
+    OH_ArkUI_ShowCounterConfig_SetCounterTextColor(config, 0xFF0000FF);
+    OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(config, 0xFFFFFF00);
+    ArkUI_NumberValue showCounterArray[] = {{.i32 = true},  // 显示计数器
+                                               {.f32 = 50.0f}, // 计数器阈值（百分比）
+                                               {.i32 = true}};
+    ArkUI_AttributeItem item = {.value = showCounterArray, .size = 3, .object = config};
+    nodeAPI->setAttribute(textinput, NODE_TEXT_INPUT_SHOW_COUNTER, &item);
+    nodeAPI->setAttribute(textarea, NODE_TEXT_AREA_SHOW_COUNTER, &item);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0xFF0000FF);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0xFFFFFF00);
+    OH_ArkUI_ShowCounterConfig_Dispose(config);
+    nodeAPI->disposeNode(textinput);
+    nodeAPI->disposeNode(textarea);
+}
 } // namespace OHOS::Ace
