@@ -4117,11 +4117,11 @@
     },
     {
         "first_introduced": "23",
-        "name": "OH_ArkUI_NaviteModule_ConvertPositionToWindow"
+        "name": "OH_ArkUI_NativeModule_ConvertPositionToWindow"
     },
     {
         "first_introduced": "23",
-        "name": "OH_ArkUI_NaviteModule_ConvertPositionFromWindow"
+        "name": "OH_ArkUI_NativeModule_ConvertPositionFromWindow"
     },
     {
         "first_introduced": "21",

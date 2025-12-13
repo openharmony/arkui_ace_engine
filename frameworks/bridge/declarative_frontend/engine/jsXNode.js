@@ -1684,6 +1684,50 @@ class FrameNode extends Disposable {
         }
         return { x: offsetPosition[1], y: offsetPosition[2] };
     }
+    convertPositionToWindow(positionByLocal) {
+        if (positionByLocal === undefined) {
+            throw { message: "The parameter 'positionByLocal' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 401 };
+        }
+        if (positionByLocal === null) {
+            throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
+        }
+        if (this.isDisposed()) {
+            throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
+            this.getNodePtr(), positionByLocal.x, positionByLocal.y);
+        __JSScopeUtil__.restoreInstanceId();
+        if (offsetPosition[0] === 2) {
+            throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
+        }
+        if (offsetPosition[0] === 0) {
+            throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+        }
+        return { x: offsetPosition[1], y: offsetPosition[2] };
+    }
+    convertPositionFromWindow(positionByWindow) {
+        if (positionByWindow === undefined) {
+            throw { message: "The parameter 'positionByWindow' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 401 };
+        }
+        if (positionByWindow === null) {
+            throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
+        }
+        if (this.isDisposed()) {
+            throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
+            this.getNodePtr(), positionByWindow.x, positionByWindow.y);
+        __JSScopeUtil__.restoreInstanceId();
+        if (offsetPosition[0] === 2) {
+            throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
+        }
+        if (offsetPosition[0] === 0) {
+            throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+        }
+        return { x: offsetPosition[1], y: offsetPosition[2] };
+    }
     isTransferred() {
         return false;
     }

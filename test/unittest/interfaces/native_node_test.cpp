@@ -11501,9 +11501,9 @@ HWTEST_F(NativeNodeTest, NativeNodeConvertToWindowTest001, TestSize.Level1)
     auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
     ArkUI_IntOffset position = {10, 30};
     ArkUI_IntOffset pos1;
-    auto ret = OH_ArkUI_NaviteModule_ConvertPositionToWindow(node, position, &pos1);
+    auto ret = OH_ArkUI_NativeModule_ConvertPositionToWindow(node, position, &pos1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
-    ret = OH_ArkUI_NaviteModule_ConvertPositionToWindow(nullptr, position, &pos1);
+    ret = OH_ArkUI_NativeModule_ConvertPositionToWindow(nullptr, position, &pos1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -11517,9 +11517,9 @@ HWTEST_F(NativeNodeTest, NativeNodeConvertFromWindowTest001, TestSize.Level1)
     auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
     ArkUI_IntOffset position = {10, 30};
     ArkUI_IntOffset pos1;
-    auto ret = OH_ArkUI_NaviteModule_ConvertPositionFromWindow(node, position, &pos1);
+    auto ret = OH_ArkUI_NativeModule_ConvertPositionFromWindow(node, position, &pos1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
-    ret = OH_ArkUI_NaviteModule_ConvertPositionFromWindow(nullptr, position, &pos1);
+    ret = OH_ArkUI_NativeModule_ConvertPositionFromWindow(nullptr, position, &pos1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
