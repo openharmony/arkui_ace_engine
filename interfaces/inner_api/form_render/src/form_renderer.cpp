@@ -640,7 +640,7 @@ void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
         return ;
     }
 
-    HILOG_INFO("SetRenderGroupEnableFlag isEnable:%{public}d",isEnable);
+    HILOG_INFO("SetRenderGroupEnableFlag isEnable:%{public}d", isEnable);
     if (!isEnable) {
         rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
         return;
