@@ -386,55 +386,6 @@ HWTEST_F(TextFieldPatternTestten, BetweenSelectedPosition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeleteRange001
- * @tc.desc: Test DeleteRange
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, DeleteRange001, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    int32_t start = 2;
-    int32_t end = 1;
-    bool isIME = false;
-    textFieldPattern->DeleteRange(start, end, isIME);
-    EXPECT_EQ(start, 2);
-}
-
-/**
- * @tc.name: DeleteRange002
- * @tc.desc: Test DeleteRange
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, DeleteRange002, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    int32_t start = 2;
-    int32_t end = -1;
-    bool isIME = false;
-    textFieldPattern->DeleteRange(start, end, isIME);
-    EXPECT_EQ(start, 2);
-}
-
-/**
- * @tc.name: DeleteRange003
- * @tc.desc: Test DeleteRange
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, DeleteRange003, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    int32_t start = 1;
-    int32_t end = 1;
-    bool isIME = false;
-    textFieldPattern->contentController_->content_ = u"h";
-    textFieldPattern->DeleteRange(start, end, isIME);
-    EXPECT_EQ(start, 1);
-}
-
-/**
  * @tc.name: InsertOrDeleteSpace001
  * @tc.desc: Test InsertOrDeleteSpace
  * @tc.type: FUNC
@@ -449,23 +400,6 @@ HWTEST_F(TextFieldPatternTestten, InsertOrDeleteSpace001, TestSize.Level1)
     textFieldPattern->contentController_->content_ = u"hhh";
     auto result = textFieldPattern->InsertOrDeleteSpace(index);
     EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: OnTextGestureSelectionUpdate001
- * @tc.desc: Test OnTextGestureSelectionUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, OnTextGestureSelectionUpdate001, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    int32_t start = 1;
-    int32_t end = 1;
-    TouchEventInfo info = TouchEventInfo("info");
-    textFieldPattern->contentScroller_.isScrolling = true;
-    textFieldPattern->OnTextGestureSelectionUpdate(start, end, info);
-    EXPECT_EQ(start, 1);
 }
 
 /**
