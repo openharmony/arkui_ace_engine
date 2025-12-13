@@ -854,6 +854,9 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
 std::shared_ptr<FormRenderer> FormRenderTest::CreateFormRenderer(const std::string &threadName)
 {
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create(threadName);
+    if (!eventRunner) {
+        return nullptr;
+    }
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRenderer = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
     return formRenderer;
@@ -973,7 +976,7 @@ HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty006, TestSize.Level0)
     EXPECT_TRUE(formRenderer->uiContent_);
 
     OHOS::AAFwk::Want want;
-    std::string transparentColor = "#00000000";
+    const std::string transparentColor = "#00000000";
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
     formRenderer->renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     formRenderer->enableBlurBackground_ = false;
@@ -997,7 +1000,7 @@ HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty007, TestSize.Level0)
     EXPECT_TRUE(formRenderer->uiContent_);
 
     OHOS::AAFwk::Want want;
-    std::string transparentColor = "#00000000";
+    const std::string transparentColor = "#00000000";
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
     formRenderer->renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     formRenderer->enableBlurBackground_ = false;
