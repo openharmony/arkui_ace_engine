@@ -88,13 +88,13 @@ void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
     }
-    if (enableBlurBackground_ || formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+    if (enableBlurBackground_ || deleteBackgroundImage_) {
         uiContent_->SetFormEnableBlurBackground(true);
     }
  
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
-        formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        deleteBackgroundImage_) {
         HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     } else if (!backgroundColor_.empty()) {
@@ -102,10 +102,11 @@ void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
     }
  
     HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
-        "backgroundColor_:%{public}s",
+        "deleteBackgroundImage_:%{public}d, backgroundColor_:%{public}s",
         static_cast<int32_t>(renderingMode_),
         static_cast<int32_t>(enableBlurBackground_),
         static_cast<int32_t>(formLocation_),
+        static_cast<int32_t>(deleteBackgroundImage_),
         backgroundColor_.c_str());
 }
 
@@ -167,6 +168,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
+    deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
 }
 
 int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -610,7 +612,8 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         backgroundColor_ = backgroundColor;
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
+        deleteBackgroundImage_) {
         HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     }

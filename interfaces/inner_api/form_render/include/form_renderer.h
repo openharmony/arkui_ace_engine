@@ -91,6 +91,7 @@ private:
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     bool enableBlurBackground_ = false;
+    bool deleteBackgroundImage_ = false;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
