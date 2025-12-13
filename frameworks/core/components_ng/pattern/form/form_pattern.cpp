@@ -2078,16 +2078,19 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "event action is invalid.");
         return;
     }
 
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action type is invalid.");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message" && type != "call") {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action type: %{public}s is error.", type.c_str());
         return;
     }
 
@@ -2098,7 +2101,7 @@ void FormPattern::OnActionEvent(const std::string& action)
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
         if ("router" == type && !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
+            TAG_LOGW(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }
     }
