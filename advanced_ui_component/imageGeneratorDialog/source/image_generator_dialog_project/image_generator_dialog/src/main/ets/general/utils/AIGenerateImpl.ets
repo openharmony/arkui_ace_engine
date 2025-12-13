@@ -90,7 +90,7 @@ export class AIGenerateImpl {
           return;
         }
         mockReturn.reasoningContent = mockString[0] +
-          AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
+        AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
         if (callback.onResult) {
           callback.onResult(mockReturn);
         }
@@ -111,7 +111,7 @@ export class AIGenerateImpl {
           return;
         }
         mockReturn.content = mockString[1] +
-          AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
+        AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
         if (callback.onResult) {
           callback.onResult(mockReturn);
         }
@@ -144,7 +144,7 @@ export class AIGenerateImpl {
         selectPath: AIGenerateOptions.getInstance().shapePath,
         prompt: AIGenerateOptions.getInstance().userPrompt,
         style: AIGenerateOptions.getInstance().style,
-        size: AIGenerateOptions.getInstance().resolution,
+        imageSize: AIGenerateOptions.getInstance().resolution,
         // imageCount: ,
       }
 

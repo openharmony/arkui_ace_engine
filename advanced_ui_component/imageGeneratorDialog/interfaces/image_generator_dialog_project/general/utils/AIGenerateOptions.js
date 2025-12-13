@@ -19,26 +19,26 @@ export class AIGenerateOptions {
         this.action = 0;
         this.userPrompt = '';
         this.type = 0;
-        this.resolution = '2K';
+        this.resolution = { width: 100, height: 100 };
         this.ratio = '1:1';
         this.version = '1.0.0';
     }
     static getInstance() {
         return AIGenerateOptions.instance;
     }
-    setImages(c10) {
-        if (c10.length === 0) {
+    setImages(f18) {
+        if (f18.length === 0) {
             this.action = 1;
         }
         else {
             this.action = 0;
         }
-        console.info(TAG, `Update the number of images from ${this.images?.length} to ${c10.length}.`);
-        this.images = c10;
+        console.info(TAG, `Update the number of images from ${this.images?.length} to ${f18.length}.`);
+        this.images = f18;
     }
-    updateRelativeLayout(a10) {
-        if (a10) {
-            let b10 = {
+    updateRelativeLayout(d18) {
+        if (d18) {
+            let e18 = {
                 image: undefined,
                 url: undefined,
                 rect: undefined,
@@ -46,32 +46,32 @@ export class AIGenerateOptions {
                 zIndex: 0,
                 isHandwrite: false
             };
-            this.layoutImage = b10;
+            this.layoutImage = e18;
         }
         else {
             this.layoutImage = undefined;
         }
     }
-    updateUserPrompt(z9) {
-        this.userPrompt = z9;
+    updateUserPrompt(c18) {
+        this.userPrompt = c18;
     }
-    updateShapePath(y9) {
-        this.shapePath = y9;
+    updateShapePath(b18) {
+        this.shapePath = b18;
     }
-    updateStyle(x9) {
-        this.style = x9;
+    updateStyle(a18) {
+        this.style = a18;
     }
-    updateResolution(w9) {
-        this.resolution = w9;
+    updateResolution(z17) {
+        this.resolution = z17;
     }
-    updateRatio(v9) {
-        this.ratio = v9;
+    updateRatio(y17) {
+        this.ratio = y17;
     }
-    updateType(u9) {
-        this.type = u9;
+    updateType(x17) {
+        this.type = x17;
     }
-    updateVersion(t9) {
-        this.version = t9;
+    updateVersion(w17) {
+        this.version = w17;
     }
 }
 AIGenerateOptions.instance = new AIGenerateOptions();

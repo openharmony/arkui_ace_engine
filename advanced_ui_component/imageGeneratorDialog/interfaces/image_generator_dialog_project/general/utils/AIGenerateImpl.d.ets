@@ -22,12 +22,12 @@ export declare class AIGenerateImpl {
     private ImageModal;
     private static instance;
     static getInstance(): AIGenerateImpl;
-    setSelfTextGenerateModal(s9: imageGeneration.TextGenerationModel | undefined): void;
-    setSelfImageGenerateModal(r9: imageGeneration.ImageGenerationModel | undefined): void;
+    setSelfTextGenerateModal(v17: imageGeneration.TextGenerationModel | undefined): void;
+    setSelfImageGenerateModal(u17: imageGeneration.ImageGenerationModel | undefined): void;
     private delay;
-    TextAIGenerate(h9: AIGenerateCallBack): Promise<number>;
+    TextAIGenerate(p17: AIGenerateCallBack): Promise<number>;
     private mockPoolingTask;
-    ImageAIGenerate(z8: AIGenerateCallBack): Promise<number>;
-    cancelTextGenerateTask(y8: number): Promise<void>;
-    cancelImageGenerateTask(x8: number): Promise<void>;
+    ImageAIGenerate(d17: AIGenerateCallBack): Promise<number>;
+    cancelTextGenerateTask(c17: number): Promise<void>;
+    cancelImageGenerateTask(b17: number): Promise<void>;
 }

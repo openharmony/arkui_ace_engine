@@ -15,6 +15,7 @@
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { CanvasHome } from "./CanvasFramework";
+import { TextTouchUpComponent } from "./TextTouchUp"
 
 @ComponentV2
 export struct ImageGeneratorDialog {
@@ -27,6 +28,8 @@ export struct ImageGeneratorDialog {
   pageMap(name: string) {
     if (name === 'home') {
       CanvasHome()
+    } else if (name === 'textTouchUp') {
+      TextTouchUpComponent()
     }
   }
 
@@ -47,6 +50,7 @@ export struct ImageGeneratorDialog {
       .mode(NavigationMode.Stack)
       .clip(true)
       .alignSelf(ItemAlign.Center)
+      .expandSafeArea([SafeAreaType.SYSTEM, SafeAreaType.CUTOUT])
     }
     .width('100%')
     .height('100%')
