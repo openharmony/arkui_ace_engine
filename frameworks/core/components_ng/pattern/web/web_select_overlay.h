@@ -200,6 +200,7 @@ public:
     void InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void SetDefaultDownPaint(MenuAvoidStrategyMember& member);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);

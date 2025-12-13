@@ -1563,12 +1563,22 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMembe
     member.avoidPositionY = GreatNotEqual(avoidPositionY, defaultAvoidY) ? avoidPositionY : defaultAvoidY;
 }
 
+void WebSelectOverlay::SetDefaultDownPaint(MenuAvoidStrategyMember& member)
+{
+    RectF fixDownPaint = RectF(0, member.selectionBottom, 0, 0);
+    member.downPaint =
+        NearEqual(member.downPaint.Top(), member.downPaint.Bottom()) ? fixDownPaint : member.downPaint;
+}
+
 void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
 {
+    SetDefaultDownPaint(member);
     if (member.fixWrongNewAvoid) {
         double fixY = member.upPaint.Top() - member.avoidFromText - member.menuHeight;
         if (GreatNotEqual(fixY, member.topArea)) {
             menuOffset.SetY(fixY);
+        } else {
+            menuOffset.SetY(member.downPaint.Bottom() + member.avoidFromText);
         }
     }
     if (GreatNotEqual(menuOffset.GetY(), member.upPaint.Top())) {
