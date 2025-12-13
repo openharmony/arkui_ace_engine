@@ -5108,13 +5108,3 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.LAST_FOREGROUND = 4] = 'LAST_FOREGROUND';
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
-
-let ThreatType;
-(function (ThreatType) {
-  ThreatType[ThreatType.THREAT_ILLEGAL = 0] = 'THREAT_ILLEGAL';
-  ThreatType[ThreatType.THREAT_FRAUD = 1] = 'THREAT_FRAUD';
-  ThreatType[ThreatType.THREAT_RISK = 2] = 'THREAT_RISK';
-  ThreatType[ThreatType.THREAT_WARNING = 3] = 'THREAT_WARNING';
-  ThreatType[ThreatType.THREAT_NONE = 4] = 'THREAT_NONE';
-  ThreatType[ThreatType.THREAT_UNPROCESSED = 5] = 'THREAT_UNPROCESSED';
-})(ThreatType || (ThreatType = {}));
