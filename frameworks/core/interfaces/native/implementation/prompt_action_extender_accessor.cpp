@@ -449,11 +449,13 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
+    Validator::ValidateNonPercent(outlineWidthOpt);
     if (outlineWidthOpt.has_value()) {
         popupParam->SetOutlineWidth(outlineWidthOpt.value());
     }
     auto borderWidthOpt = Converter::OptConvert<CalcDimension>(src.borderWidth);
     Validator::ValidateNonNegative(borderWidthOpt);
+    Validator::ValidateNonPercent(borderWidthOpt);
     if (borderWidthOpt.has_value()) {
         popupParam->SetInnerBorderWidth(borderWidthOpt.value());
     }
