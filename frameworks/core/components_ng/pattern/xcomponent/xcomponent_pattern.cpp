@@ -357,7 +357,7 @@ void XComponentPattern::RegisterRenderContextCallBack()
     handlingSurfaceRenderContext_ = renderContextForSurface_;
     renderSurfaceWeakPtr_ = renderSurface_;
 
-    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
+    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) {
         auto xcPattern = weak.Upgrade();
         CHECK_NULL_VOID(xcPattern);
         if (auto renderSurface = xcPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
@@ -366,7 +366,7 @@ void XComponentPattern::RegisterRenderContextCallBack()
     };
     renderContextForSurface_->AddAttachCallBack(OnAttachCallBack);
 
-    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
+    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) {
         auto xcPattern = weak.Upgrade();
         CHECK_NULL_VOID(xcPattern);
         if (auto renderSurface = xcPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
@@ -376,7 +376,7 @@ void XComponentPattern::RegisterRenderContextCallBack()
     renderContextForSurface_->AddUpdateCallBack(OnUpdateCallBack);
 
 #ifdef IOS_PLATFORM
-    auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) mutable {
+    auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->renderSurface_) {
@@ -1847,8 +1847,8 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
-    } else {
 #ifdef RENDER_EXTRACT_SUPPORTED
+    } else {
         RefPtr<FrameNode> host;
         if (!frameNode) {
             host = GetHost();
