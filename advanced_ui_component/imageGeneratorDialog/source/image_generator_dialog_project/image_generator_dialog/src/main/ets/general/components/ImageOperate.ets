@@ -318,10 +318,10 @@ class delegate<T extends (...argArray: ESObject[]) => void>
   functions: T[] = []
 }
 
-class globalThis{
-  public static getInstance(): globalThis
+class ImageOperateGlobalThis{
+  public static getInstance(): ImageOperateGlobalThis
   {
-    return globalThis.instance
+    return ImageOperateGlobalThis.instance
   }
 
   public getImageOperatorClickDelegate(): delegate<()=> void>
@@ -331,7 +331,7 @@ class globalThis{
 
   imageOperatorClickDelegate: delegate<()=> void> = new delegate<()=> void>()
 
-  static instance: globalThis = new globalThis();
+  static instance: ImageOperateGlobalThis = new ImageOperateGlobalThis();
 }
 
 @ComponentV2
@@ -389,7 +389,7 @@ export struct ImageOperate {
   aboutToAppear(): void {
     this.matrix = this.preTransform
 
-    globalThis.getInstance().getImageOperatorClickDelegate().add(()=>{
+    ImageOperateGlobalThis.getInstance().getImageOperatorClickDelegate().add(()=>{
       this.imageClick = false
     })
   }
@@ -708,7 +708,7 @@ export struct ImageOperate {
         this.toWindowPos = { x: newValue.globalPosition.x as number ?? 0, y: newValue.globalPosition.y as number ?? 0 }
       })
       .onClick(()=>{
-        globalThis.getInstance().getImageOperatorClickDelegate().invoke()
+        ImageOperateGlobalThis.getInstance().getImageOperatorClickDelegate().invoke()
         this.imageClick = !this.imageClick
       })
       .onTouch((event: TouchEvent)=>{
