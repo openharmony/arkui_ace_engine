@@ -22,8 +22,12 @@ export declare struct ImageGeneratorDialog {
     width_: Dimension;
     @Local
     height_: Dimension;
+    private MAX_IMAGE_COUNT;
+    @Local
+    imageInfoArr: Array<imageGeneration.ImageItem>;
     @Builder
-    pageMap(k6: string): void;
+    pageMap(x15: string): void;
+    private initImageInfoArr;
     aboutToAppear(): void;
     build(): void;
 }

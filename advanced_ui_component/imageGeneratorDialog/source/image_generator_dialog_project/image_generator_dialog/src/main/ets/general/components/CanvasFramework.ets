@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { CanvasMode, ImageGenerateState } from "../types/Declaration";
 import { DoodleBoardArea } from "./DoodleBoardArea";
 import { TextInputArea } from "./TextInputArea";
@@ -20,6 +21,7 @@ import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
 import { GeneratingArea } from './CanvasGenerate';
 import { image } from "@kit.ImageKit";
+import { calcAABB } from './ImageOperate';
 
 export class styleItem {
   name: ResourceStr = 'NA'
@@ -31,7 +33,7 @@ export struct CanvasHome {
   @Local titleName: string = '灵感画布'
   @Local currentCanvasMode: CanvasMode = CanvasMode.GENERAL_MODE;
   @Local currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
-
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Builder
   homeTitleBuilder() {
     HomeTitle({
@@ -44,7 +46,8 @@ export struct CanvasHome {
     NavDestination() {
       if (this.currentCanvasMode === CanvasMode.GENERAL_MODE) {
         LandscapeLayout({
-          currentGenerateState: this.currentGenerateState!!
+          currentGenerateState: this.currentGenerateState!!,
+          imageInfoArr: this.imageInfoArr
         })
       } else if (this.currentCanvasMode === CanvasMode.DOODLE_MODE) {
 
@@ -58,15 +61,62 @@ export struct CanvasHome {
 @ComponentV2
 struct LandscapeLayout {
   @Param currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
-  @Event $currentGenerateState: (state: ImageGenerateState) => void = (state: ImageGenerateState) => {};
+  @Event $currentGenerateState: (state: ImageGenerateState) => void = (state: ImageGenerateState) => {
+  };
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Local imageMatrixArr: number[][] =
+    [[
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ]]
+
+  private initImageMatrix(): void {
+    let input: imageGeneration.ImageItem[] = [];
+    for (let i = 0; i < this.imageInfoArr.length; i++) {
+      if (this.imageInfoArr[i].rect) {
+        input.push(this.imageInfoArr[i]);
+      }
+    }
+
+    let res: number[][] = calcAABB(input, this.getUIContext().vp2px(386),
+      this.getUIContext().vp2px(386));
+    for (let i = 0; i < res.length; i++) {
+      this.imageMatrixArr[i] = res[i];
+    }
+  }
+
+  aboutToAppear(): void {
+    this.initImageMatrix();
+  }
+
   build() {
     Column() {
       // doodle area
       Row() {
-        DoodleBoardArea()
+        DoodleBoardArea({
+          imageInfoArr: this.imageInfoArr,
+          imageMatrixArr: this.imageMatrixArr
+        })
           .margin({ left: 69, right: 54 })
         if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
-          LandscapeSelectFuncArea()
+          LandscapeSelectFuncArea({ imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
             .margin({ right: 16 })
         }
 

@@ -14,24 +14,27 @@
  */
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
-import { CanvasMode, ImageGenerateState } from "../types/Declaration";
-import image from "@ohos.multimedia.image";
-export declare class styleItem {
-    name: ResourceStr;
-    resourceAddr?: image.PixelMap | ResourceStr;
-}
 @ComponentV2
-export declare struct CanvasHome {
-    @Local
-    titleName: string;
-    @Local
-    currentCanvasMode: CanvasMode;
-    @Local
-    currentGenerateState: ImageGenerateState;
+export declare struct PhotoSelect {
+    private static DEFAULT_COUNT;
     @Param
     @Require
     readonly imageInfoArr: Array<imageGeneration.ImageItem>;
+    @Param
+    @Require
+    readonly imageMatrixArr: number[][];
+    private getSelectPhotoLength;
+    private openPhotoPicker;
+    private deleteImageInfo;
+    private moveImageInfo;
+    private resortImageList;
+    private enablePhotoPicker;
+    private getMaxZIndex;
+    private handleSelectedUri;
+    private invalidImageInfo;
     @Builder
-    homeTitleBuilder(): void;
+    previewImageInfo(e19: number): void;
+    @Builder
+    MyMagicCanvasSquaredBuilder(a18: number): void;
     build(): void;
 }

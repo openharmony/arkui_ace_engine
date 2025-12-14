@@ -14,6 +14,7 @@
  */
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { Constants } from '../common/CommonConstants';
 import { CanvasHome } from "./CanvasFramework";
 import { TextTouchUpComponent } from "./TextTouchUp"
 
@@ -23,17 +24,38 @@ export struct ImageGeneratorDialog {
   options?: imageGeneration.GeneratorDialogOptions;
   @Local width_: Dimension = 650;
   @Local height_: Dimension = 560;
+  private MAX_IMAGE_COUNT: number = 4;
+  @Local imageInfoArr: Array<imageGeneration.ImageItem> = [];
 
   @Builder
   pageMap(name: string) {
     if (name === 'home') {
-      CanvasHome()
+      CanvasHome({ imageInfoArr: this.imageInfoArr})
     } else if (name === 'textTouchUp') {
       TextTouchUpComponent()
     }
   }
+  private initImageInfoArr(): void {
+    if (this.options && this.options.images) {
+      let initZIndex: number = 1;
+      for (let index = 0; index < this.options.images.length && index < this.MAX_IMAGE_COUNT; index++) {
+        if (this.options.images[index].zIndex === undefined) {
+          this.options.images[index].zIndex = initZIndex;
+          initZIndex++;
+        }
+        this.imageInfoArr.push(this.options.images[index]);
+      }
+      this.imageInfoArr.sort((a, b) => {
+        return (a.zIndex ?? 0) - (b.zIndex ?? 0);
+      })
+    }
 
+    while (this.imageInfoArr.length < this.MAX_IMAGE_COUNT) {
+      this.imageInfoArr.push({ image: undefined, url: Constants.NOT_SELECTED_NAME })
+    }
+  }
   aboutToAppear(): void {
+    this.initImageInfoArr();
     this.stack.pushPath({name: 'home'})
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,13 @@
  * limitations under the License.
  */
 
-import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
-@ComponentV2
-export declare struct DoodleBoardArea {
-    private static DEFAULT_COUNT;
-    @Param
-    @Require
-    readonly imageInfoArr: Array<imageGeneration.ImageItem>;
-    @Param
-    @Require
-    readonly imageMatrixArr: number[][];
-    private invalidImageInfo;
-    private getImageAspectRito;
-    private getImageWidth;
-    private setMatrix;
-    @Builder
-    ImageBuilder(j7: number): void;
-    build(): void;
+export class Constants {
+  /**
+   * File buffer size
+   */
+  public static readonly FILE_BUFFER_SIZE: number = 4096;
+  /**
+   * Photo picker default placeholder
+   */
+  public static readonly NOT_SELECTED_NAME: string = 'notSelectedPic';
 }
