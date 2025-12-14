@@ -789,6 +789,7 @@ public:
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
+    static std::optional<MotionPathOption> GetMotionPath(FrameNode* frameNode);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);

@@ -142,6 +142,13 @@ struct RangeContent {
     ArkUI_CharPtr text;
 };
 
+struct ArkUI_MotionPathOptions {
+    ArkUI_CharPtr path;
+    ArkUI_Float32 from;
+    ArkUI_Float32 to;
+    ArkUI_Bool rotatable;
+};
+
 struct ArkUI_TextPickerRangeContentArray {
     RangeContent* rangeContent;
     int32_t rangeContentArraySize;
@@ -3144,6 +3151,7 @@ struct ArkUICommonModifier {
     void (*resetAllowForceDark)(ArkUINodeHandle node);
     ArkUI_Bool (*getAllowForceDark)(ArkUINodeHandle node);
     ArkUI_Bool (*getPixelRound)(ArkUINodeHandle node, ArkUI_Int32* result);
+    ArkUI_Bool (*getMotionPath)(ArkUINodeHandle node, ArkUI_MotionPathOptions* options);
     void (*setRenderStrategy)(ArkUINodeHandle node, const ArkUI_Int32 renderStrategy);
     void (*setSystemMaterial)(ArkUINodeHandle node, void* material);
     void (*resetSystemMaterial)(ArkUINodeHandle node);

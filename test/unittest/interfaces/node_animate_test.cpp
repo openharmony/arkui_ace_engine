@@ -381,4 +381,216 @@ HWTEST_F(NodeAnimateTest, NodeAnimateTest008, TestSize.Level1)
         ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_AnimatorOption_Dispose(animatorOption);
 }
+
+/**
+ * @tc.name: MotionPathOptionsCreate001
+ * @tc.desc: Test creation of MotionPathOptions instance, verify default values and path initialization
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsCreate001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    ASSERT_NE(options->path, nullptr);
+    EXPECT_STREQ(options->path, "");
+    float fromVal = -1.0f;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetFrom(options, &fromVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(fromVal, 0.0f);
+    float toVal = -1.0f;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetTo(options, &toVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(toVal, 1.0f);
+    bool rotatableVal = true;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetRotatable(options, &rotatableVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(rotatableVal, false);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsDispose001
+ * @tc.desc: Test disposal of MotionPathOptions instance, cover null pointer and valid pointer with path branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsDispose001, TestSize.Level1)
+{
+    OH_ArkUI_MotionPathOptions_Dispose(nullptr);
+    ArkUI_MotionPathOptions* tempOptions = OH_ArkUI_MotionPathOptions_Create();
+    OH_ArkUI_MotionPathOptions_SetPath(tempOptions, "M10,10");
+    OH_ArkUI_MotionPathOptions_Dispose(tempOptions);
+}
+
+/**
+ * @tc.name: MotionPathOptionsSetPath001
+ * @tc.desc: Test setting path of MotionPathOptions, cover all parameter and execution branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsSetPath001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetPath(nullptr, "M0,0"), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetPath(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_STREQ(options->path, "");
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetPath(options, ""), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_STREQ(options->path, "");
+    const char* validPath = "M0,0 L100,100 Z";
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetPath(options, validPath), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_STREQ(options->path, validPath);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsGetPath001
+ * @tc.desc: Test getting path of MotionPathOptions, cover all parameter and buffer branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsGetPath001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    const char* testPath = "M0,0 L200,200 Z";
+    OH_ArkUI_MotionPathOptions_SetPath(options, testPath);
+    int32_t writeLen = -1;
+    char buffer[50] = { 0 };
+    EXPECT_EQ(
+        OH_ArkUI_MotionPathOptions_GetPath(nullptr, buffer, sizeof(buffer), &writeLen), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetPath(options, nullptr, sizeof(buffer), &writeLen),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetPath(options, buffer, 0, &writeLen), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetPath(options, buffer, -10, &writeLen), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(
+        OH_ArkUI_MotionPathOptions_GetPath(options, buffer, sizeof(buffer), nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    int32_t srcLen = static_cast<int32_t>(strlen(testPath));
+    EXPECT_EQ(
+        OH_ArkUI_MotionPathOptions_GetPath(options, buffer, srcLen, &writeLen), ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR);
+    EXPECT_EQ(writeLen, srcLen + 1);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsSetFrom001
+ * @tc.desc: Test setting from value of MotionPathOptions, cover all parameter validation branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsSetFrom001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(nullptr, 0.5f), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(options, -0.1f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(options, 1.1f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    OH_ArkUI_MotionPathOptions_SetTo(options, 0.3f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(options, 0.5f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(options, 0.2f), ARKUI_ERROR_CODE_NO_ERROR);
+    float fromVal = -1.0f;
+    OH_ArkUI_MotionPathOptions_GetFrom(options, &fromVal);
+    EXPECT_FLOAT_EQ(fromVal, 0.2f);
+    OH_ArkUI_MotionPathOptions_SetTo(options, 1.0f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetFrom(options, 1.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_MotionPathOptions_GetFrom(options, &fromVal);
+    EXPECT_FLOAT_EQ(fromVal, 1.0f);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsGetFrom001
+ * @tc.desc: Test getting from value of MotionPathOptions, cover null and valid options branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsGetFrom001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    float fromVal = -1.0f;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetFrom(nullptr, &fromVal), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetFrom(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_FLOAT_EQ(fromVal, -1.0f);
+    OH_ArkUI_MotionPathOptions_SetFrom(options, 0.7f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetFrom(options, &fromVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(fromVal, 0.7f);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsSetTo001
+ * @tc.desc: Test setting to value of MotionPathOptions, cover all parameter validation branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsSetTo001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(nullptr, 0.5f), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(options, -0.2f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(options, 1.2f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    OH_ArkUI_MotionPathOptions_SetFrom(options, 0.6f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(options, 0.4f), ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(options, 0.8f), ARKUI_ERROR_CODE_NO_ERROR);
+    float toVal = -1.0f;
+    OH_ArkUI_MotionPathOptions_GetTo(options, &toVal);
+    EXPECT_FLOAT_EQ(toVal, 0.8f);
+    OH_ArkUI_MotionPathOptions_SetFrom(options, 0.0f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetTo(options, 0.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_MotionPathOptions_GetTo(options, &toVal);
+    EXPECT_FLOAT_EQ(toVal, 0.0f);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsGetTo001
+ * @tc.desc: Test getting to value of MotionPathOptions, cover null and valid options branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsGetTo001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    float toVal = -1.0f;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetTo(nullptr, &toVal), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetTo(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_FLOAT_EQ(toVal, -1.0f);
+    OH_ArkUI_MotionPathOptions_SetTo(options, 0.4f);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetTo(options, &toVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(toVal, 0.4f);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsSetRotatable001
+ * @tc.desc: Test setting rotatable property of MotionPathOptions, cover null and valid options branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsSetRotatable001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetRotatable(nullptr, true), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetRotatable(options, true), ARKUI_ERROR_CODE_NO_ERROR);
+    bool rotatableVal = false;
+    OH_ArkUI_MotionPathOptions_GetRotatable(options, &rotatableVal);
+    EXPECT_EQ(rotatableVal, true);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_SetRotatable(options, false), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_MotionPathOptions_GetRotatable(options, &rotatableVal);
+    EXPECT_EQ(rotatableVal, false);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptionsGetRotatable001
+ * @tc.desc: Test getting rotatable property of MotionPathOptions, cover null and valid options branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptionsGetRotatable001, TestSize.Level1)
+{
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    bool rotatableVal = true;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetRotatable(nullptr, &rotatableVal), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetRotatable(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(rotatableVal, true);
+    OH_ArkUI_MotionPathOptions_SetRotatable(options, true);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetRotatable(options, &rotatableVal), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(rotatableVal, true);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
 } // namespace OHOS::Ace

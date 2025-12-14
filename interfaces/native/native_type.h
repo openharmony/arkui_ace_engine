@@ -6917,6 +6917,148 @@ void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseCont
 void OH_ArkUI_TextContentBaseController_ScrollToVisible(
     ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
 
+/**
+ * @brief Defines the motion path options for path animation.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_MotionPathOptions ArkUI_MotionPathOptions;
+
+/**
+ * @brief Create an object of the motion path options for path animation.
+ *        In the newly created ArkUI_MotionPathOptions, the "path" value is an empty string, the "from" value is 0,
+ *        the "to" value is 1, and the "rotatable" value is false.
+ *
+ * @return A pointer to the ArkUI_MotionPathOptions.
+ * @since 23
+ */
+ArkUI_MotionPathOptions* OH_ArkUI_MotionPathOptions_Create();
+
+/**
+ * @brief Dispose the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_MotionPathOptions_Dispose(ArkUI_MotionPathOptions* options);
+
+/**
+ * @brief Sets the the motion path for the animation using an SVG path string. The path supports using "start" and
+ *        "end" as placeholders for the starting and ending points, for example:
+ *        "Mstart.x start.y L50 50 Lend.x end.y Z". Refer to the SVG path format for the path string.
+ *        When set to an empty string, it is equivalent to not setting a path animation.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param svgPath The motion path for the path animation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* options, const char* svgPath);
+
+/**
+ * @brief Gets the motion path string in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param svgPathBuffer Buffer pointer to the motion path string.
+ * @param bufferSize The buffer size of the svgPathBuffer parameter.
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the buffer size is less than the minimum buffer size.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(const ArkUI_MotionPathOptions* options, char* svgPathBuffer,
+    const int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Sets the starting progress in the ArkUI_MotionPathOptions. Progress refers to the ratio of the length of the
+ *        path that has been traveled to the total length of the entire path. The value range is [0.0, 1.0], and the
+ *        "from" value should be less than or equal to the "to" value; otherwise, an ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE
+ *        error code will be returned.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param from The starting progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE} if the "from" value is out of range or the "from" value
+ *                 is greater than the "to" value.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetFrom(ArkUI_MotionPathOptions* options, const float from);
+
+/**
+ * @brief Gets the starting progress in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param from The starting progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetFrom(const ArkUI_MotionPathOptions* options, float* from);
+
+/**
+ * @brief Sets the endpoint progress in the ArkUI_MotionPathOptions. Progress refers to the ratio of the length of the
+ *        path that has been traveled to the total length of the entire path. The value range is [0.0, 1.0], and the
+ *        "from" value should be less than or equal to the "to" value; otherwise, an ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE
+ *        error code will be returned.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param to The endpoint progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE} if the "to" value is out of range or the "to" value
+ *                 is less than the "from" value.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetTo(ArkUI_MotionPathOptions* options, const float to);
+
+/**
+ * @brief Gets the endpoint progress in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param to The endpoint progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetTo(const ArkUI_MotionPathOptions* options, float* to);
+
+/**
+ * @brief Sets the rotatable parameter in the ArkUI_MotionPathOptions. It indicates whether to rotate along the path.
+ *        True means rotating along the path, while false means not rotating along the path.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param rotatable The rotatable parameter in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetRotatable(ArkUI_MotionPathOptions* options, const bool rotatable);
+
+/**
+ * @brief Gets the rotatable parameter in the ArkUI_MotionPathOptions.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param rotatable The rotatable parameter in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetRotatable(const ArkUI_MotionPathOptions* options, bool* rotatable);
+
 /**    
  * @brief Enumerates the MarqueeStartPolicy.
  *

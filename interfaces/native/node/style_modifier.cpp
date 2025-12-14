@@ -1847,6 +1847,29 @@ void ResetPixelRound(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetPixelRound(node->uiNodeHandle);
 }
 
+int32_t SetMotionPath(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!node || !item || !node->uiNodeHandle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* options = reinterpret_cast<ArkUI_MotionPathOptions*>(item->object);
+    CHECK_NULL_RETURN(options, ERROR_CODE_PARAM_INVALID);
+    const char* path = options->path;
+    ArkUI_Float32 from = options->from;
+    ArkUI_Float32 to = options->to;
+    ArkUI_Bool rotatable = options->rotatable;
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setMotionPath(node->uiNodeHandle, path, from, to, rotatable);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMotionPath(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetMotionPath(node->uiNodeHandle);
+}
+
 void FillPolicyFromVec(int32_t* vec, int32_t offset, ArkUI_OptionalCalcPolicy& calcPolicy)
 {
     if (vec[offset] == -1) {
@@ -1870,6 +1893,29 @@ const ArkUI_AttributeItem* GetPixelRound(ArkUI_NodeHandle node)
     FillPolicyFromVec(values, NUM_2, policy->end);
     FillPolicyFromVec(values, NUM_3, policy->bottom);
     g_attributeItem.object = policy;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetMotionPath(ArkUI_NodeHandle node)
+{
+    static ArkUI_MotionPathOptions motionPathOptions { nullptr, 0.0f, 1.0f, false };
+    if (motionPathOptions.path != nullptr) {
+        delete[] motionPathOptions.path;
+        motionPathOptions.path = nullptr;
+    }
+    g_attributeItem.size = NUM_0;
+    auto* fullImpl = GetFullImpl();
+    if (!fullImpl->getNodeModifiers()->getCommonModifier()->getMotionPath(node->uiNodeHandle, &motionPathOptions)) {
+        auto optionPath = new (std::nothrow) char[1];
+        optionPath[0] = '\0';
+        motionPathOptions.path = optionPath;
+        motionPathOptions.from = 0.0f;
+        motionPathOptions.to = 1.0f;
+        motionPathOptions.rotatable = false;
+        g_attributeItem.object = &motionPathOptions;
+        return &g_attributeItem;
+    }
+    g_attributeItem.object = &motionPathOptions;
     return &g_attributeItem;
 }
 
@@ -18872,7 +18918,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAllowForceDark,
         SetPixelRound,
         nullptr,
-        nullptr,
+        SetMotionPath,
         SetHoverEffect,
         SetFocusScopeId,
         SetFocusScopePriority,
@@ -19007,7 +19053,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAllowForceDark,
         GetPixelRound,
         nullptr,
-        nullptr,
+        GetMotionPath,
         GetHoverEffect,
         GetFocusScopeId,
         GetFocusPriority,
@@ -19146,7 +19192,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAllowForceDark,
         ResetPixelRound,
         nullptr,
-        nullptr,
+        ResetMotionPath,
         ResetHoverEffect,
         ResetFocusScopeId,
         ResetFocusScopePriority,

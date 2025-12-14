@@ -4649,6 +4649,46 @@
     },
     {
         "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetPath"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetPath"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetFrom"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetFrom"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetTo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetTo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetRotatable"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetRotatable"
+    },
+    {
+        "first_introduced": "23",
         "name": "OH_ArkUI_TextMarqueeOptions_Create"
     },
     {
