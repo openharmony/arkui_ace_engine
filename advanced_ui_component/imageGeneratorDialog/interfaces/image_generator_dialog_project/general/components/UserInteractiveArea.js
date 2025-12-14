@@ -13,19 +13,41 @@
  * limitations under the License.
  */
 
+var __decorate = (this && this.__decorate) || function (r15, s15, t15, u15) {
+    var v15 = arguments.length, w15 = v15 < 3 ? s15 : u15 === null ? u15 = Object.getOwnPropertyDescriptor(s15, t15) : u15, x15;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        w15 = Reflect.decorate(r15, s15, t15, u15);
+    else
+        for (var y15 = r15.length - 1; y15 >= 0; y15--)
+            if (x15 = r15[y15])
+                w15 = (v15 < 3 ? x15(w15) : v15 > 3 ? x15(s15, t15, w15) : x15(s15, t15)) || w15;
+    return v15 > 3 && w15 && Object.defineProperty(s15, t15, w15), w15;
+};
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { FunctionAreaPlaceholder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
+import { FunctionAreaPlaceholder, StyleSelectBuilder, StyleSelectTabBarBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
 export class LandscapeSelectFuncArea extends ViewV2 {
-    constructor(w12, x12, y12, z12 = -1, a13, b13) {
-        super(w12, z12, b13);
+    constructor(l15, m15, n15, o15 = -1, p15, q15) {
+        super(l15, o15, q15);
+        this.styles = undefined;
+        this.tabBarDefaultBgColor = 'rgba(0,0,0,0.05)';
+        this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
+        this.styleItems = [];
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(v12) {
+    resetStateVarsOnReuse(k15) {
+        this.styles = undefined;
+        this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
+        this.styleItems = [];
+    }
+    aboutToAppear() {
+        for (let j15 = 0; this.styles && j15 < this.styles?.length; ++j15) {
+            this.styleItems.push({ name: this.styles[j15].name, resourceAddr: this.styles[j15].icon });
+        }
     }
     initialRender() {
-        this.observeComponentCreation2((t12, u12) => {
+        this.observeComponentCreation2((h15, i15) => {
             Tabs.create();
             Tabs.barHeight(284);
             Tabs.scrollable(false);
@@ -34,20 +56,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
             Tabs.width(118);
             Tabs.height(386);
         }, Tabs);
-        this.observeComponentCreation2((n12, o12) => {
+        this.observeComponentCreation2((b15, c15) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((p12, q12) => {
-                        if (q12) {
-                            let r12 = new FunctionAreaPlaceholder(this, {}, undefined, p12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 23, col: 9 });
-                            ViewV2.create(r12);
-                            let s12 = () => {
+                    this.observeComponentCreation2((d15, e15) => {
+                        if (e15) {
+                            let f15 = new FunctionAreaPlaceholder(this, {}, undefined, d15, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 36, col: 9 });
+                            ViewV2.create(f15);
+                            let g15 = () => {
                                 return {};
                             };
-                            r12.paramsGenerator_ = s12;
+                            f15.paramsGenerator_ = g15;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(p12, {});
+                            this.updateStateVarsOfChildByElmtId(d15, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -57,43 +79,35 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((h12, i12) => {
+        this.observeComponentCreation2((z14, a15) => {
             TabContent.create(() => {
-                {
-                    this.observeComponentCreation2((j12, k12) => {
-                        if (k12) {
-                            let l12 = new FunctionAreaPlaceholder(this, {}, undefined, j12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 28, col: 9 });
-                            ViewV2.create(l12);
-                            let m12 = () => {
-                                return {};
-                            };
-                            l12.paramsGenerator_ = m12;
-                        }
-                        else {
-                            this.updateStateVarsOfChildByElmtId(j12, {});
-                        }
-                    }, { name: "FunctionAreaPlaceholder" });
-                }
+                StyleSelectBuilder.bind(this)(this.styleItems);
             });
             TabContent.tabBar({ builder: () => {
-                    UserInteractiveTabBarBuilder.call(this, '风格');
+                    StyleSelectTabBarBuilder.call(this, makeBuilderParameterProxy("StyleSelectTabBarBuilder", { name: () => '风格', icon: () => ({ bundleName: "", moduleName: "", id: 0 }), bgColor: () => (this["__tabBarStyleBgColor"] ? this["__tabBarStyleBgColor"] : this["tabBarStyleBgColor"]) }));
                 } });
+            TabContent.onWillShow(() => {
+                this.tabBarStyleBgColor = Color.White;
+            });
+            TabContent.onWillHide(() => {
+                this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
+            });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((b12, c12) => {
+        this.observeComponentCreation2((t14, u14) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((d12, e12) => {
-                        if (e12) {
-                            let f12 = new FunctionAreaPlaceholder(this, {}, undefined, d12, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 33, col: 9 });
-                            ViewV2.create(f12);
-                            let g12 = () => {
+                    this.observeComponentCreation2((v14, w14) => {
+                        if (w14) {
+                            let x14 = new FunctionAreaPlaceholder(this, {}, undefined, v14, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 52, col: 9 });
+                            ViewV2.create(x14);
+                            let y14 = () => {
                                 return {};
                             };
-                            f12.paramsGenerator_ = g12;
+                            x14.paramsGenerator_ = y14;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(d12, {});
+                            this.updateStateVarsOfChildByElmtId(v14, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -103,20 +117,20 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((v11, w11) => {
+        this.observeComponentCreation2((n14, o14) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((x11, y11) => {
-                        if (y11) {
-                            let z11 = new FunctionAreaPlaceholder(this, {}, undefined, x11, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 38, col: 9 });
-                            ViewV2.create(z11);
-                            let a12 = () => {
+                    this.observeComponentCreation2((p14, q14) => {
+                        if (q14) {
+                            let r14 = new FunctionAreaPlaceholder(this, {}, undefined, p14, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 57, col: 9 });
+                            ViewV2.create(r14);
+                            let s14 = () => {
                                 return {};
                             };
-                            z11.paramsGenerator_ = a12;
+                            r14.paramsGenerator_ = s14;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(x11, {});
+                            this.updateStateVarsOfChildByElmtId(p14, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
@@ -132,3 +146,12 @@ export class LandscapeSelectFuncArea extends ViewV2 {
         this.updateDirtyElements();
     }
 }
+__decorate([
+    Local
+], LandscapeSelectFuncArea.prototype, "styles", void 0);
+__decorate([
+    Local
+], LandscapeSelectFuncArea.prototype, "tabBarStyleBgColor", void 0);
+__decorate([
+    Local
+], LandscapeSelectFuncArea.prototype, "styleItems", void 0);
