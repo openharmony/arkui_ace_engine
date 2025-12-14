@@ -13,21 +13,7 @@
  * limitations under the License.
  */
 
-import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
-@ComponentV2
-export declare struct DoodleBoardArea {
-    private static DEFAULT_COUNT;
-    @Param
-    @Require
-    readonly imageInfoArr: Array<imageGeneration.ImageItem>;
-    @Param
-    @Require
-    readonly imageMatrixArr: number[][];
-    private invalidImageInfo;
-    private getImageAspectRito;
-    private getImageWidth;
-    private setMatrix;
-    @Builder
-    ImageBuilder(j7: number): void;
-    build(): void;
+export class Constants {
 }
+Constants.FILE_BUFFER_SIZE = 4096;
+Constants.NOT_SELECTED_NAME = 'notSelectedPic';

@@ -24,6 +24,12 @@ export declare struct LandscapeSelectFuncArea {
     tabBarStyleBgColor: ResourceColor;
     @Local
     styleItems: Array<styleItem>;
+    @Param
+    @Require
+    readonly imageInfoArr: Array<imageGeneration.ImageItem>;
+    @Param
+    @Require
+    readonly imageMatrixArr: number[][];
     aboutToAppear(): void;
     build(): void;
 }

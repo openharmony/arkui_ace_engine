@@ -16,6 +16,7 @@
 import { FunctionAreaPlaceholder, StyleSelectBuilder, StyleSelectTabBarBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea"
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { styleItem } from "./CanvasFramework"
+import { PhotoSelect } from "./PhotoSelect";
 
 @ComponentV2
 export struct LandscapeSelectFuncArea {
@@ -23,7 +24,8 @@ export struct LandscapeSelectFuncArea {
   private tabBarDefaultBgColor: ResourceColor = 'rgba(0,0,0,0.05)'
   @Local tabBarStyleBgColor: ResourceColor = this.tabBarDefaultBgColor
   @Local styleItems: Array<styleItem> = []
-
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Param @Require imageMatrixArr: number[][];
   aboutToAppear(): void {
     for (let i = 0; this.styles && i < this.styles?.length; ++i) {
       this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon})
@@ -33,7 +35,7 @@ export struct LandscapeSelectFuncArea {
   build() {
     Tabs() {
       TabContent() {
-        FunctionAreaPlaceholder()
+        PhotoSelect({imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
       }
       .tabBar(UserInteractiveTabBarBuilder('图像'))
 

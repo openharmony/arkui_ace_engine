@@ -12,15 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __decorate = (this && this.__decorate) || function (p2, q2, r2, s2) {
-    var t2 = arguments.length, u2 = t2 < 3 ? q2 : s2 === null ? s2 = Object.getOwnPropertyDescriptor(q2, r2) : s2, v2;
+
+var __decorate = (this && this.__decorate) || function (s2, t2, u2, v2) {
+    var w2 = arguments.length, x2 = w2 < 3 ? t2 : v2 === null ? v2 = Object.getOwnPropertyDescriptor(t2, u2) : v2, y2;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        u2 = Reflect.decorate(p2, q2, r2, s2);
+        x2 = Reflect.decorate(s2, t2, u2, v2);
     else
-        for (var w2 = p2.length - 1; w2 >= 0; w2--)
-            if (v2 = p2[w2])
-                u2 = (t2 < 3 ? v2(u2) : t2 > 3 ? v2(q2, r2, u2) : v2(q2, r2)) || u2;
-    return t2 > 3 && u2 && Object.defineProperty(q2, r2, u2), u2;
+        for (var z2 = s2.length - 1; z2 >= 0; z2--)
+            if (y2 = s2[z2])
+                x2 = (w2 < 3 ? y2(x2) : w2 > 3 ? y2(t2, u2, x2) : y2(t2, u2)) || x2;
+    return w2 > 3 && x2 && Object.defineProperty(t2, u2, x2), x2;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -31,43 +32,46 @@ import { TextInputArea } from "./TextInputArea";
 import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
 import { GeneratingArea } from './CanvasGenerate';
+import { calcAABB } from './ImageOperate';
 export class styleItem {
     constructor() {
         this.name = 'NA';
     }
 }
 export class CanvasHome extends ViewV2 {
-    constructor(j2, k2, l2, m2 = -1, n2, o2) {
-        super(j2, m2, o2);
+    constructor(m2, n2, o2, p2 = -1, q2, r2) {
+        super(m2, p2, r2);
         this.titleName = '灵感画布';
         this.currentCanvasMode = CanvasMode.GENERAL_MODE;
         this.currentGenerateState = ImageGenerateState.CONFIGURATION;
+        this.initParam("imageInfoArr", (n2 && "imageInfoArr" in n2) ? n2.imageInfoArr : undefined);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(i2) {
+    resetStateVarsOnReuse(l2) {
         this.titleName = '灵感画布';
         this.currentCanvasMode = CanvasMode.GENERAL_MODE;
         this.currentGenerateState = ImageGenerateState.CONFIGURATION;
+        this.resetParam("imageInfoArr", (l2 && "imageInfoArr" in l2) ? l2.imageInfoArr : undefined);
     }
-    homeTitleBuilder(d2 = null) {
+    homeTitleBuilder(g2 = null) {
         {
-            this.observeComponentCreation2((e2, f2) => {
-                if (f2) {
-                    let g2 = new HomeTitle(this, {
+            this.observeComponentCreation2((h2, i2) => {
+                if (i2) {
+                    let j2 = new HomeTitle(this, {
                         titleName: this.titleName,
                         currentGenerateState: this.currentGenerateState
-                    }, undefined, e2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 37, col: 5 });
-                    ViewV2.create(g2);
-                    let h2 = () => {
+                    }, undefined, h2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 39, col: 5 });
+                    ViewV2.create(j2);
+                    let k2 = () => {
                         return {
                             titleName: this.titleName,
                             currentGenerateState: this.currentGenerateState
                         };
                     };
-                    g2.paramsGenerator_ = h2;
+                    j2.paramsGenerator_ = k2;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(e2, {
+                    this.updateStateVarsOfChildByElmtId(h2, {
                         titleName: this.titleName,
                         currentGenerateState: this.currentGenerateState
                     });
@@ -76,30 +80,33 @@ export class CanvasHome extends ViewV2 {
         }
     }
     initialRender() {
-        this.observeComponentCreation2((u1, v1) => {
+        this.observeComponentCreation2((x1, y1) => {
             NavDestination.create(() => {
-                this.observeComponentCreation2((w1, x1) => {
+                this.observeComponentCreation2((z1, a2) => {
                     If.create();
                     if (this.currentCanvasMode === CanvasMode.GENERAL_MODE) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             {
-                                this.observeComponentCreation2((y1, z1) => {
-                                    if (z1) {
-                                        let a2 = new LandscapeLayout(this, {
+                                this.observeComponentCreation2((b2, c2) => {
+                                    if (c2) {
+                                        let d2 = new LandscapeLayout(this, {
                                             currentGenerateState: this.currentGenerateState,
-                                            $currentGenerateState: c2 => { this.currentGenerateState = c2; }
-                                        }, undefined, y1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 46, col: 9 });
-                                        ViewV2.create(a2);
-                                        let b2 = () => {
+                                            imageInfoArr: this.imageInfoArr,
+                                            $currentGenerateState: f2 => { this.currentGenerateState = f2; }
+                                        }, undefined, b2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 48, col: 9 });
+                                        ViewV2.create(d2);
+                                        let e2 = () => {
                                             return {
-                                                currentGenerateState: this.currentGenerateState
+                                                currentGenerateState: this.currentGenerateState,
+                                                imageInfoArr: this.imageInfoArr
                                             };
                                         };
-                                        a2.paramsGenerator_ = b2;
+                                        d2.paramsGenerator_ = e2;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(y1, {
-                                            currentGenerateState: this.currentGenerateState
+                                        this.updateStateVarsOfChildByElmtId(b2, {
+                                            currentGenerateState: this.currentGenerateState,
+                                            imageInfoArr: this.imageInfoArr
                                         });
                                     }
                                 }, { name: "LandscapeLayout" });
@@ -116,11 +123,19 @@ export class CanvasHome extends ViewV2 {
                     }
                 }, If);
                 If.pop();
-            }, { moduleName: "__harDefaultModuleName__", pagePath: "" });
+            }, { moduleName: "image_generator_dialog", pagePath: "" });
             NavDestination.hideBackButton(true);
             NavDestination.title({ builder: this.homeTitleBuilder.bind(this) });
         }, NavDestination);
         NavDestination.pop();
+    }
+    updateStateVars(w1) {
+        if (w1 === undefined) {
+            return;
+        }
+        if ("imageInfoArr" in w1) {
+            this.updateParam("imageInfoArr", w1.imageInfoArr);
+        }
     }
     rerender() {
         this.updateDirtyElements();
@@ -135,67 +150,145 @@ __decorate([
 __decorate([
     Local
 ], CanvasHome.prototype, "currentGenerateState", void 0);
+__decorate([
+    Param
+], CanvasHome.prototype, "imageInfoArr", void 0);
 class LandscapeLayout extends ViewV2 {
-    constructor(n1, o1, p1, q1 = -1, r1, s1) {
-        super(n1, q1, s1);
-        this.initParam("currentGenerateState", (o1 && "currentGenerateState" in o1) ? o1.currentGenerateState : ImageGenerateState.CONFIGURATION);
-        this.$currentGenerateState = "$currentGenerateState" in o1 ? o1.$currentGenerateState : (t1) => { };
+    constructor(p1, q1, r1, s1 = -1, t1, u1) {
+        super(p1, s1, u1);
+        this.initParam("currentGenerateState", (q1 && "currentGenerateState" in q1) ? q1.currentGenerateState : ImageGenerateState.CONFIGURATION);
+        this.$currentGenerateState = "$currentGenerateState" in q1 ? q1.$currentGenerateState : (v1) => {
+        };
+        this.initParam("imageInfoArr", (q1 && "imageInfoArr" in q1) ? q1.imageInfoArr : undefined);
+        this.imageMatrixArr = [[
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]];
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(l1) {
-        this.resetParam("currentGenerateState", (l1 && "currentGenerateState" in l1) ? l1.currentGenerateState : ImageGenerateState.CONFIGURATION);
-        this.$currentGenerateState = "$currentGenerateState" in l1 ? l1.$currentGenerateState : (m1) => { };
+    resetStateVarsOnReuse(n1) {
+        this.resetParam("currentGenerateState", (n1 && "currentGenerateState" in n1) ? n1.currentGenerateState : ImageGenerateState.CONFIGURATION);
+        this.$currentGenerateState = "$currentGenerateState" in n1 ? n1.$currentGenerateState : (o1) => {
+        };
+        this.resetParam("imageInfoArr", (n1 && "imageInfoArr" in n1) ? n1.imageInfoArr : undefined);
+        this.imageMatrixArr = [[
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ], [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]];
+    }
+    initImageMatrix() {
+        let j1 = [];
+        for (let m1 = 0; m1 < this.imageInfoArr.length; m1++) {
+            if (this.imageInfoArr[m1].rect) {
+                j1.push(this.imageInfoArr[m1]);
+            }
+        }
+        let k1 = calcAABB(j1, this.getUIContext().vp2px(386), this.getUIContext().vp2px(386));
+        for (let l1 = 0; l1 < k1.length; l1++) {
+            this.imageMatrixArr[l1] = k1[l1];
+        }
+    }
+    aboutToAppear() {
+        this.initImageMatrix();
     }
     initialRender() {
-        this.observeComponentCreation2((j1, k1) => {
+        this.observeComponentCreation2((h1, i1) => {
             Column.create();
             Column.height('100%');
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((h1, i1) => {
+        this.observeComponentCreation2((f1, g1) => {
             Row.create();
             Row.margin({ top: 21, bottom: 28 });
         }, Row);
-        this.observeComponentCreation2((f1, g1) => {
+        this.observeComponentCreation2((d1, e1) => {
             __Common__.create();
             __Common__.margin({ left: 69, right: 54 });
         }, __Common__);
         {
-            this.observeComponentCreation2((b1, c1) => {
-                if (c1) {
-                    let d1 = new DoodleBoardArea(this, {}, undefined, b1, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 66, col: 9 });
-                    ViewV2.create(d1);
-                    let e1 = () => {
-                        return {};
+            this.observeComponentCreation2((z, a1) => {
+                if (a1) {
+                    let b1 = new DoodleBoardArea(this, {
+                        imageInfoArr: this.imageInfoArr,
+                        imageMatrixArr: this.imageMatrixArr
+                    }, undefined, z, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 113, col: 9 });
+                    ViewV2.create(b1);
+                    let c1 = () => {
+                        return {
+                            imageInfoArr: this.imageInfoArr,
+                            imageMatrixArr: this.imageMatrixArr
+                        };
                     };
-                    d1.paramsGenerator_ = e1;
+                    b1.paramsGenerator_ = c1;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(b1, {});
+                    this.updateStateVarsOfChildByElmtId(z, {
+                        imageInfoArr: this.imageInfoArr,
+                        imageMatrixArr: this.imageMatrixArr
+                    });
                 }
             }, { name: "DoodleBoardArea" });
         }
         __Common__.pop();
-        this.observeComponentCreation2((t, u) => {
+        this.observeComponentCreation2((x, y) => {
             If.create();
             if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z, a1) => {
+                    this.observeComponentCreation2((u3, v3) => {
                         __Common__.create();
                         __Common__.margin({ right: 16 });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((v, w) => {
-                            if (w) {
-                                let x = new LandscapeSelectFuncArea(this, {}, undefined, v, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 69, col: 11 });
-                                ViewV2.create(x);
-                                let y = () => {
-                                    return {};
+                        this.observeComponentCreation2((q3, r3) => {
+                            if (r3) {
+                                let s3 = new LandscapeSelectFuncArea(this, { imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr }, undefined, q3, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 119, col: 11 });
+                                ViewV2.create(s3);
+                                let t3 = () => {
+                                    return {
+                                        imageInfoArr: this.imageInfoArr,
+                                        imageMatrixArr: this.imageMatrixArr
+                                    };
                                 };
-                                x.paramsGenerator_ = y;
+                                s3.paramsGenerator_ = t3;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(v, {});
+                                this.updateStateVarsOfChildByElmtId(q3, {
+                                    imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr
+                                });
                             }
                         }, { name: "LandscapeSelectFuncArea" });
                     }
@@ -209,34 +302,34 @@ class LandscapeLayout extends ViewV2 {
         }, If);
         If.pop();
         Row.pop();
-        this.observeComponentCreation2((j, k) => {
+        this.observeComponentCreation2((g3, h3) => {
             If.create();
             if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((r, s) => {
+                    this.observeComponentCreation2((o3, p3) => {
                         __Common__.create();
                         __Common__.margin({ bottom: 14 });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((l, m) => {
-                            if (m) {
-                                let n = new TextInputArea(this, {
-                                    changeGenerateState: (q) => {
-                                        this.$currentGenerateState(q);
+                        this.observeComponentCreation2((i3, j3) => {
+                            if (j3) {
+                                let k3 = new TextInputArea(this, {
+                                    changeGenerateState: (n3) => {
+                                        this.$currentGenerateState(n3);
                                     }
-                                }, undefined, l, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 77, col: 9 });
-                                ViewV2.create(n);
-                                let o = () => {
+                                }, undefined, i3, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 127, col: 9 });
+                                ViewV2.create(k3);
+                                let l3 = () => {
                                     return {
-                                        changeGenerateState: (p) => {
-                                            this.$currentGenerateState(p);
+                                        changeGenerateState: (m3) => {
+                                            this.$currentGenerateState(m3);
                                         }
                                     };
                                 };
-                                n.paramsGenerator_ = o;
+                                k3.paramsGenerator_ = l3;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(l, {});
+                                this.updateStateVarsOfChildByElmtId(i3, {});
                             }
                         }, { name: "TextInputArea" });
                     }
@@ -249,33 +342,33 @@ class LandscapeLayout extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((b, c) => {
+        this.observeComponentCreation2((j, k) => {
             If.create();
             if (this.currentGenerateState === ImageGenerateState.GENERATING ||
                 this.currentGenerateState === ImageGenerateState.BEFORE_GENERATED) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((d, e) => {
-                            if (e) {
-                                let f = new GeneratingArea(this, {
+                        this.observeComponentCreation2((a3, b3) => {
+                            if (b3) {
+                                let c3 = new GeneratingArea(this, {
                                     currentGenerateState: this.currentGenerateState,
-                                    changeGenerateState: (i) => {
-                                        this.$currentGenerateState(i);
+                                    changeGenerateState: (f3) => {
+                                        this.$currentGenerateState(f3);
                                     }
-                                }, undefined, d, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 86, col: 9 });
-                                ViewV2.create(f);
-                                let g = () => {
+                                }, undefined, a3, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 136, col: 9 });
+                                ViewV2.create(c3);
+                                let d3 = () => {
                                     return {
                                         currentGenerateState: this.currentGenerateState,
-                                        changeGenerateState: (h) => {
-                                            this.$currentGenerateState(h);
+                                        changeGenerateState: (e3) => {
+                                            this.$currentGenerateState(e3);
                                         }
                                     };
                                 };
-                                f.paramsGenerator_ = g;
+                                c3.paramsGenerator_ = d3;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(d, {
+                                this.updateStateVarsOfChildByElmtId(a3, {
                                     currentGenerateState: this.currentGenerateState
                                 });
                             }
@@ -298,6 +391,9 @@ class LandscapeLayout extends ViewV2 {
         if ("currentGenerateState" in a) {
             this.updateParam("currentGenerateState", a.currentGenerateState);
         }
+        if ("imageInfoArr" in a) {
+            this.updateParam("imageInfoArr", a.imageInfoArr);
+        }
     }
     rerender() {
         this.updateDirtyElements();
@@ -309,3 +405,9 @@ __decorate([
 __decorate([
     Event
 ], LandscapeLayout.prototype, "$currentGenerateState", void 0);
+__decorate([
+    Param
+], LandscapeLayout.prototype, "imageInfoArr", void 0);
+__decorate([
+    Local
+], LandscapeLayout.prototype, "imageMatrixArr", void 0);

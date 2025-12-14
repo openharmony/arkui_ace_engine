@@ -1,0 +1,211 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { image } from '@kit.ImageKit';
+import { fileUri, fileIo as fs } from '@kit.CoreFileKit';
+import { Constants } from '../common/CommonConstants';
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+
+export class FileUtils {
+  public static readonly tag: string = 'FileUtils';
+  public static readonly qualityValue: number = 98;
+  public static readonly formatValue: string = 'image/jpeg';
+  public static readonly extensionValue: string = 'jpg';
+
+  /**
+   * Copy file to destination address
+   *
+   * @param sourceUri source uri
+   * @param destination destination address
+   */
+  static copyFileToDestination(sourceUri: string, destination: string) {
+    try {
+      let buf = new ArrayBuffer(Constants.FILE_BUFFER_SIZE);
+      let readSize = 0;
+      let file = fs.openSync(sourceUri, fs.OpenMode.READ_ONLY);
+      let readLen = fs.readSync(file.fd, buf, { offset: readSize });
+      let destinationDistribute =
+        fs.openSync(`${destination}/${file.name}`, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      while (readLen > 0) {
+        readSize += readLen;
+        fs.writeSync(destinationDistribute.fd, buf);
+        readLen = fs.readSync(file.fd, buf, { offset: readSize });
+      }
+      fs.closeSync(file);
+      fs.closeSync(destinationDistribute);
+    } catch (err) {
+      console.error(FileUtils.tag, `copyFileToDestination failed. Code: ${err.code}, message: ${err.message}`);
+    }
+  }
+
+  /**
+   * create pixelMap by uri
+   *
+   * @param uri file uri
+   * @returns imageInfo
+   */
+  static createPixelMap(uri: string): imageGeneration.ImageItem | undefined {
+    let imageInfo: imageGeneration.ImageItem | undefined;
+    let imageResource: image.ImageSource | undefined = undefined;
+    let file: fs.File | undefined = undefined;
+    try {
+      file = fs.openSync(uri, fs.OpenMode.READ_ONLY);
+      imageResource = image.createImageSource(file.fd);
+      let imageSize = imageResource.getImageInfoSync().size;
+      let decodingOptions = FileUtils.getDecodingOptions(imageSize);
+      let pixelMap = imageResource.createPixelMapSync(decodingOptions);
+      try {
+        let orientation: string = imageResource.getImagePropertySync(image.PropertyKey.ORIENTATION);
+        FileUtils.matrixPixelMap(pixelMap, orientation);
+      } catch (error) {
+        // do nothing
+      }
+
+      imageInfo = { image: pixelMap, url: uri };
+      fs.closeSync(file);
+      imageResource.release();
+    } catch (error) {
+      fs?.close(file);
+      imageResource?.release();
+      console.error(FileUtils.tag, `createPixelMap error: ${JSON.stringify(error)}`);
+    }
+    return imageInfo;
+  }
+
+  private static getDecodingOptions(size: image.Size): image.DecodingOptions {
+    let width: number = size.width;
+    let height: number = size.height;
+    if (width > height * 3) {
+      let x: number = (width - 3 * height) / 2;
+      let y: number = 0;
+
+      let desiredWidth: number = Math.max(3 * vp2px(480), 3 * height);
+      let desireHeight: number = Math.max(vp2px(480), height);
+      let decodingOptions: image.DecodingOptions = {
+        index: 0,
+        editable: false,
+        desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
+        desiredSize: { width: desiredWidth, height: desireHeight },
+        desiredRegion: {
+          x: x,
+          y: y,
+          size: {
+            width: 3 * height,
+            height: height
+          }
+        },
+        cropAndScaleStrategy: image.CropAndScaleStrategy.CROP_FIRST
+      };
+      return decodingOptions;
+    }
+
+    if (height > width * 3) {
+      let y: number = (height - 3 * width) / 2;
+      let x: number = 0;
+
+      let desiredWidth: number = Math.max(vp2px(480), width);
+      let desireHeight: number = Math.max(3 * vp2px(480), 3 * width);
+      let decodingOptions: image.DecodingOptions = {
+        index: 0,
+        editable: false,
+        desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
+        desiredSize: { width: desiredWidth, height: desireHeight },
+        desiredRegion: {
+          x: x,
+          y: y,
+          size: {
+            width: width,
+            height: 3 * width
+          }
+        },
+        cropAndScaleStrategy: image.CropAndScaleStrategy.CROP_FIRST
+      };
+      return decodingOptions;
+    }
+
+    if (width * height <= 1024 * 1024 * 2) {
+      let decodingOptions: image.DecodingOptions = {
+        index: 0,
+        editable: false,
+        desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
+        desiredSize: { width: width, height: height }
+      };
+      return decodingOptions;
+    }
+
+    let widthScale = width / vp2px(480);
+    let heightScale = height / vp2px(480);
+    if (widthScale > heightScale) {
+      let decodingOptions: image.DecodingOptions = {
+        index: 0,
+        editable: false,
+        desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
+        desiredSize: { width: width / heightScale, height: height / heightScale } as image.Size
+      };
+      return decodingOptions;
+    } else {
+      let decodingOptions: image.DecodingOptions = {
+        index: 0,
+        editable: false,
+        desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
+        desiredSize: { width: width / widthScale, height: height / widthScale } as image.Size
+      };
+      return decodingOptions;
+    }
+  }
+
+  static matrixPixelMap(pixelMap: image.PixelMap, orientation: string) {
+    if (orientation == 'Top-right') {
+      pixelMap.flipSync(true, false);
+    } else if (orientation == 'Bottom-right') {
+      pixelMap.rotateSync(180);
+    } else if (orientation == 'Bottom-left') {
+      pixelMap.flipSync(false, true);
+    } else if (orientation == 'Left-top') {
+      pixelMap.flipSync(true, false);
+      pixelMap.rotateSync(270);
+    } else if (orientation == 'Right-top') {
+      pixelMap.rotateSync(90);
+    } else if (orientation == 'Right-bottom') {
+      pixelMap.flipSync(true, false);
+      pixelMap.rotateSync(90);
+    } else if (orientation == 'Left-bottom') {
+      pixelMap.rotateSync(270);
+    } else if (orientation == 'Top-left') {
+      // do nothing
+    }
+  }
+
+  /**
+   * save file by buffer
+   *
+   * @param context context
+   * @param buffer ArrayBuffer
+   * @returns uri
+   */
+  static saveFile(context: Context, buffer: ArrayBuffer): string {
+    let filesDir: string = context.filesDir;
+    let photoUri: string = fileUri.getUriFromPath(`${filesDir}/${Date.now().toString()}.${FileUtils.extensionValue}`);
+    try {
+      let file = fs.openSync(photoUri, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      fs.writeSync(file.fd, buffer);
+      console.debug(FileUtils.tag, `saveFile uri: ${photoUri}}`);
+      fs.closeSync(file);
+    } catch (error) {
+      console.error(FileUtils.tag, `saveFile error: ${JSON.stringify(error)}`);
+    }
+    return photoUri;
+  }
+}
+
