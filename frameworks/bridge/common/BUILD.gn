@@ -39,7 +39,6 @@ template("bridge_common") {
       "dom/dom_image.cpp",
       "dom/dom_image_animator.cpp",
       "dom/dom_input.cpp",
-      "dom/dom_label.cpp",
       "dom/dom_list.cpp",
       "dom/dom_list_item.cpp",
       "dom/dom_list_item_group.cpp",

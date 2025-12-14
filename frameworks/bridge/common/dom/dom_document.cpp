@@ -25,7 +25,7 @@
 #include "frameworks/bridge/common/dom/dom_divider.h"
 #include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/dom_image.h"
-#include "frameworks/bridge/common/dom/dom_label.h"
+#include "frameworks/compatible/components/label/modifier/label_modifier.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
@@ -144,7 +144,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
         { DOM_NODE_TAG_IMAGE_ANIMATOR, &DOMNodeCreator<DOMImageAnimator> },
         { DOM_NODE_TAG_INPUT, &DOMNodeCreator<DOMInput> },
-        { DOM_NODE_TAG_LABEL, &DOMNodeCreator<DOMLabel> },
         { DOM_NODE_TAG_LINE, &DOMNodeCreator<DOMSvgLine> },
         { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
@@ -387,10 +386,11 @@ void DOMDocument::HandleComponentPostBinding()
 
             auto component = targetNode->GetSpecializedComponent();
             if (AceType::InstanceOf<TouchListenerComponent>(component)) {
-                auto labelNode = AceType::DynamicCast<DOMLabel>(targetNode);
-                if (labelNode) {
-                    labelNode->SetTargetNode(idNode);
-                }
+                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("label");
+                CHECK_NULL_VOID(loader);
+                auto* modifier = reinterpret_cast<const ArkUILabelModifierCompatible*>(loader->GetCustomModifier());
+                CHECK_NULL_VOID(modifier);
+                modifier->setTargetNode(targetNode, idNode);
 #ifndef WEARABLE_PRODUCT
             } else if (AceType::InstanceOf<PopupComponent>(component)) {
                 auto popupNode = AceType::DynamicCast<DOMPopup>(targetNode);

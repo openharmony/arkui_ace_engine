@@ -39,7 +39,7 @@ enum class TextShadowSettings {
     OFFSET_BLUR_CLOR,
 };
 
-class TextDeclaration : public Declaration {
+class ACE_FORCE_EXPORT TextDeclaration : public Declaration {
     DECLARE_ACE_TYPE(TextDeclaration, Declaration);
 
 public:

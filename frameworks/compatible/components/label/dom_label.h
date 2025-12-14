@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_LABEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_LABEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_LABEL_DOM_LABEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_LABEL_DOM_LABEL_H
 
 #include "base/utils/label_target.h"
 #include "core/components/text/text_component.h"
@@ -68,4 +68,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_LABEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_LABEL_DOM_LABEL_H

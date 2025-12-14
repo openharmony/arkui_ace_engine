@@ -53,6 +53,10 @@ public:
         return nullptr;
     }
     virtual void UpdateDomConfig(const RefPtr<Framework::DOMNode>& node, void* config) {}
+    virtual const void* GetCustomModifier(const std::string& tag = "")
+    {
+        return nullptr;
+    }
 
     static ComponentLoader* GetLoaderByName(const char* name);
 };
