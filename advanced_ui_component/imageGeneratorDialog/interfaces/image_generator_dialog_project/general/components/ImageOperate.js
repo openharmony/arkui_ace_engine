@@ -314,18 +314,18 @@ class delegate {
         }
     }
 }
-class globalThis {
+class ImageOperateGlobalThis {
     constructor() {
         this.imageOperatorClickDelegate = new delegate();
     }
     static getInstance() {
-        return globalThis.instance;
+        return ImageOperateGlobalThis.instance;
     }
     getImageOperatorClickDelegate() {
         return this.imageOperatorClickDelegate;
     }
 }
-globalThis.instance = new globalThis();
+ImageOperateGlobalThis.instance = new ImageOperateGlobalThis();
 export class ImageOperate extends ViewV2 {
     constructor(b11, c11, d11, e11 = -1, f11, g11) {
         super(b11, e11, g11);
@@ -400,7 +400,7 @@ export class ImageOperate extends ViewV2 {
     }
     aboutToAppear() {
         this.matrix = this.preTransform;
-        globalThis.getInstance().getImageOperatorClickDelegate().add(() => {
+        ImageOperateGlobalThis.getInstance().getImageOperatorClickDelegate().add(() => {
             this.imageClick = false;
         });
     }
@@ -586,7 +586,7 @@ export class ImageOperate extends ViewV2 {
                 this.toWindowPos = { x: z9.globalPosition.x ?? 0, y: z9.globalPosition.y ?? 0 };
             });
             RelativeContainer.onClick(() => {
-                globalThis.getInstance().getImageOperatorClickDelegate().invoke();
+                ImageOperateGlobalThis.getInstance().getImageOperatorClickDelegate().invoke();
                 this.imageClick = !this.imageClick;
             });
             RelativeContainer.onTouch((w9) => {
