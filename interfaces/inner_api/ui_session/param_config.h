@@ -23,6 +23,7 @@ struct ParamConfig {
     bool interactionInfo = false;
     bool accessibilityInfo = false;
     bool cacheNodes = true;
+    bool withWeb = false;
 };
 
 enum class ChangeType {

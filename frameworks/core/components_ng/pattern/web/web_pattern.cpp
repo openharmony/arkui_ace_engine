@@ -4541,6 +4541,13 @@ char* HandleWebMessage(const char** params, int32_t size)
 }
 }
 
+void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
+    std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    ACE_SCOPED_TRACE("WebPattern::DumpSimplifyInfoOnlyForParamConfig");
+    TAG_LOGI(AceLogTag::ACE_WEB, "web-dom-tree config.withWeb:%{public}d", config.withWeb);
+}
+
 void WebPattern::RecordWebEvent(bool isInit)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)

@@ -23,6 +23,7 @@
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
@@ -194,8 +195,13 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
     return NO_ERROR;
 }
 
@@ -424,8 +430,13 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetVisibleInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetVisibleInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetVisibleInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
     return NO_ERROR;
 }
 
