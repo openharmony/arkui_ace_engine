@@ -425,7 +425,13 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
             }
         }
     }
-    option.options.material = imageContext->GetSystemMaterial();
+    auto material = imageContext->GetSystemMaterial();
+    CHECK_NULL_VOID(material);
+    if (Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Not support uiMaterial.");
+        return;
+    }
+    option.options.material = material;
 }
 
 void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option, bool isMultiSelectionEnabled)
