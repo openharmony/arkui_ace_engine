@@ -37579,7 +37579,7 @@ class SwiperDisplayCountModifier extends ModifierWithKey {
     }
     else if (typeof this.stageValue.value === 'object' &&
       typeof this.value.value === 'object') {
-      return this.stageValue.value.minSize !== this.value.value.minSize;
+      return this.stageValue.value !== this.value.value;
     }
     else {
       return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);

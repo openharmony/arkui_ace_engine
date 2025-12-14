@@ -211,6 +211,11 @@ public:
             return false;
         }
         int32_t fillType = property->GetFillTypeValue(0);
+        if (!InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+                static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), fillType)) {
+            fillType = 0;
+        }
+
         WidthBreakpoint breakpoint = GetWidthBreakpoint(property, contentWidth);
         auto calculatedCount = 1;
         // BREAKPOINT_DEFAULT = 0, BREAKPOINT_SM1MD2LG3= 1, BREAKPOINT_SM2MD3LG5= 2
