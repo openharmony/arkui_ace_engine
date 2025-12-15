@@ -5163,6 +5163,8 @@ void WebPattern::CloseSelectOverlay()
             HideMagnifier();
         }
         touchOverlayInfo_.clear();
+    } else if (webSelectOverlay_ && webSelectOverlay_->SelectOverlayIsOn()) {
+        webSelectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 

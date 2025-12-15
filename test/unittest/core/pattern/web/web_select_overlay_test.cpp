@@ -6211,6 +6211,40 @@ HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptionsTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CloseSelectOverlay_001
+ * @tc.desc: CloseSelectOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, CloseSelectOverlay_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    g_isEnable = true;
+    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
+    bool result = webPattern->RunQuickMenu(params, callback);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->webSelectOverlay_->SetIsShowHandle(false);
+    webPattern->CloseSelectOverlay();
+    EXPECT_FALSE(result);
+    g_isEnable = false;
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
  * @tc.name: UpdateTouchHandleForOverlayTestSelectAll
  * @tc.desc: Test OnTouchSelectionChanged.
  * @tc.type: FUNC
