@@ -53,7 +53,7 @@ public:
     void SetIsThemeColorAvailable(bool isDark, int32_t index, bool isColorAvailable);
 
     void SetIsThemeColorSetByUser(int32_t themeId, bool isDark, int32_t index, bool isColorSetByUser);
-    void InitDarkThemeIdMap(int32_t themeId, bool isDark);
+    void InitDarkThemeMapWithoutUserSet(int32_t themeId, bool isDark);
 
 private:
     static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
