@@ -922,6 +922,7 @@ void SetImageCacheCount(ani_int value, ani_int instanceId)
         return;
     }
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -936,6 +937,7 @@ void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
         return;
     }
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
