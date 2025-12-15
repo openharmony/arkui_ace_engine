@@ -787,6 +787,7 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     ButtonModelNG::SetBuilderFunc(frameNode, [vm, frameNode, obj = std::move(obj), containerId](
             ButtonConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             const char* keyOfButton[] = { "label", "pressed", "enabled", "triggerClick" };
             Local<JSValueRef> valuesOfButton[] = { panda::StringRef::NewFromUtf8(vm, config.label_.c_str()),
@@ -797,7 +798,6 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             button->SetNativePointerFieldCount(vm, 1);
             button->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[CALL_ARG_2] = { context, button };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
