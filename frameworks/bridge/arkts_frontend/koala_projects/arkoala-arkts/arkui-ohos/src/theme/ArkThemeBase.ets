@@ -15,8 +15,8 @@
 
 import { CustomTheme, Colors, CustomColors } from '@ohos/arkui/theme';
 import { ArkThemeCache } from './ArkThemeCache';
-import { ArkColorsImpl } from './ArkColorsImpl';
 import { Shapes, Typography } from './index';
+import { ArkColorsImpl } from './ArkColorsImpl';
 import { ThemeColorMode } from 'arkui/component/common';
 import { int32 } from "@koalaui/common";
 import { ThemeInternal, CustomThemeInternal } from './index';
@@ -78,7 +78,7 @@ export class ArkThemeBase implements ThemeInternal {
      * @param customTheme instance of CustomTheme used to create current theme
      * @param colorMode local colorm mode used for current theme
      * @param colors colors tokens
-     *  
+     * @param darkColors darkColors tokens
      * @param shapes shapes tokens
      * @param typography typography tokens
      */
