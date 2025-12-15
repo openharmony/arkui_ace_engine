@@ -248,7 +248,7 @@ template("declarative_js_engine") {
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
-      ":x_node",
+      "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
 
@@ -839,7 +839,7 @@ template("declarative_js_engine_ng") {
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
-      ":x_node",
+      "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
 
@@ -1338,15 +1338,6 @@ ohos_abc("windowsizelayoutbreakpoint") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [ ":run_ark_breakpoint_build" ]
-}
-
-ohos_abc("x_node") {
-  sources = [ "engine/jsXNode.js" ]
-  output_name = "node"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 }
 
 ohos_abc("prefetcher") {
