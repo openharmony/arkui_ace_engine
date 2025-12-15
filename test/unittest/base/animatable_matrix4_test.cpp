@@ -64,6 +64,21 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AnimatableInitializeTest
+ * @tc.desc: Test the function reload operator=
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimatableMatrix4Test, AnimatableInitializeTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: initialize parameters.
+    */
+   AnimatableMatrix4 animatableMatrix4Obj1;
+   Matrix4 endValue = Matrix4::CreateIdentity();
+   EXPECT_TRUE(animatableMatrix4Obj1.isFirstAssign_);
+}
+
+/**
  * @tc.name: AnimatableMatrix4Test002
  * @tc.desc: Test the function AnimateTo of the class AnimatableMatrix4.
  * @tc.type: FUNC
