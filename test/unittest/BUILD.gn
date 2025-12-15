@@ -801,6 +801,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_decoder.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
