@@ -3915,6 +3915,9 @@ struct ArkUIListModifier {
     void (*createWithResourceObjLaneConstrain)(
         ArkUINodeHandle node, void* resObjMinLengthValue, void* resObjMaxLengthValue);
     void (*createWithResourceObjScrollBarColor)(ArkUINodeHandle node, void* resObj);
+
+    void (*setSupportEmptyBranchInLazyLoading)(ArkUINodeHandle node, ArkUI_Bool enable);
+    ArkUI_Bool (*getSupportEmptyBranchInLazyLoading)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {

@@ -1238,7 +1238,7 @@ ArkUINativeModuleValue GridBridge::SetSupportLazyLoadingEmptyBranch(ArkUIRuntime
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
 
     GetArkUINodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
-        nativeNode, arg_support->IsBoolean() ? arg_support->ToBoolean(vm)->Value() : true);
+        nativeNode, arg_support->IsBoolean() ? arg_support->ToBoolean(vm)->Value() : false);
 
     return panda::JSValueRef::Undefined(vm);
 }
