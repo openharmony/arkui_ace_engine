@@ -440,6 +440,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("splitPlaceholder", &JSNavigation::SetSplitPlaceholder);
     JSClass<JSNavigation>::StaticMethod("enableVisibilityLifecycleWithContentCover",
         &JSNavigation::SetEnableVisibilityLifecycleWithContentCover);
+    JSClass<JSNavigation>::StaticMethod("divider", &JSNavigation::SetDivider);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1218,5 +1219,51 @@ void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
     }
     auto enableDragBar = info[0]->ToBoolean();
     NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
+}
+
+void JSNavigation::SetDivider(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->UpdateDefineColor(false);
+        NavigationModel::GetInstance()->UpdateDividerStartMargin(CalcDimension(0.0f), nullptr);
+        NavigationModel::GetInstance()->UpdateDividerEndMargin(CalcDimension(0.0f), nullptr);
+        return;
+    }
+    if (info[0]->IsNull()) {
+        NavigationModel::GetInstance()->UpdateDividerVisibility(false);
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    NavigationModel::GetInstance()->UpdateDividerVisibility(true);
+    JSRef<JSObject> style = JSRef<JSObject>::Cast(info[0]);
+    auto jsColor = style->GetProperty("color");
+    RefPtr<ResourceObject> colorRes;
+    Color color;
+    if (ParseJsColor(jsColor, color, colorRes)) {
+        NavigationModel::GetInstance()->UpdateDefineColor(true);
+        NavigationModel::GetInstance()->UpdateDividerColor(color, colorRes);
+    } else {
+        // set divider default color
+        NavigationModel::GetInstance()->UpdateDefineColor(false);
+    }
+    auto jsStart = style->GetProperty("startMargin");
+    CalcDimension start = Dimension(0.0f);
+    RefPtr<ResourceObject> startRes;
+    if (!ParseJsDimensionVp(jsStart, start, startRes)) {
+        start = Dimension(0.0f);
+    }
+    NavigationModel::GetInstance()->UpdateDividerStartMargin(start, startRes);
+    auto jsEnd = style->GetProperty("endMargin");
+    CalcDimension end = Dimension(0.0f);
+    RefPtr<ResourceObject> endRes;
+    if (!ParseJsDimensionVp(jsEnd, end, endRes)) {
+        end = Dimension(0.0f);
+    }
+    NavigationModel::GetInstance()->UpdateDividerEndMargin(end, endRes);
 }
 } // namespace OHOS::Ace::Framework

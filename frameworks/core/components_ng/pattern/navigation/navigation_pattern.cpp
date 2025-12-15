@@ -3086,11 +3086,19 @@ void NavigationPattern::UpdateDividerBackgroundColor()
 {
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationGroupNode);
-    auto dividerNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
+    auto layoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto colorDefined = layoutProperty->GetDefinedDividerColor();
     auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    Color defaultColor = theme->GetNavigationDividerColor();
+    Color dividerColor = defaultColor;
+    if (colorDefined) {
+        dividerColor = layoutProperty->GetDividerColor().value_or(defaultColor);
+    }
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(dividerColor);
     dividerNode->MarkDirtyNode();
 }
 

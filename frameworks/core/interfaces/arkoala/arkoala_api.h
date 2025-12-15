@@ -6166,6 +6166,11 @@ struct ArkUINavigationModifier {
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
     void (*setNavBackButtonText)(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr textResource);
     void (*resetNavBackButtonText)(ArkUINodeHandle node);
+    void (*hideDivider)(ArkUINodeHandle node);
+    void (*setDividerColor)(ArkUINodeHandle node, ArkUI_CharPtr color, ArkUI_VoidPtr colorRes, ArkUI_Bool definedColor);
+    void (*setDividerStartMargin)(ArkUINodeHandle node, ArkUI_CharPtr start, ArkUI_VoidPtr startRes);
+    void (*setDividerEndMargin)(ArkUINodeHandle node, ArkUI_CharPtr end, ArkUI_VoidPtr endRes);
+    void (*resetDividerStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {
