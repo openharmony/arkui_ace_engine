@@ -114,23 +114,23 @@ namespace {
         }
         auto& item = params.at(index).value();
         if (type == "d") {
-            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+            if (auto* value = std::get_if<int64_t>(&item)) {
                 return std::to_string(*value);
-            } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+            } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(static_cast<int64_t>(*value));
             }
         } else if (type == "s") {
-            if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
+            if (auto* value = std::get_if<std::string>(&item)) {
                 return *value;
             }
         } else if (type == "f") {
-            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+            if (auto* value = std::get_if<int64_t>(&item)) {
                 return std::to_string(static_cast<double>(*value));
-            } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+            } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(*value);
             }
         }
-        if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
+        if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
             return value->ToString().value_or("");
         }
         return "";
