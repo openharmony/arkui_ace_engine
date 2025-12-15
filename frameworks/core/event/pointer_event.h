@@ -144,7 +144,7 @@ struct DragPointerEvent final : public PointerEvent {
 
     int32_t GetTargetDisplayId() const
     {
-        return targetWindowId;
+        return displayId;
     }
 
     void reset()
