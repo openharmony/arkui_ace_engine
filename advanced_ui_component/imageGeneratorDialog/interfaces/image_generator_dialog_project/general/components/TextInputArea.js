@@ -155,10 +155,10 @@ export class TextInputArea extends ViewV2 {
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            SymbolGlyph.create({ "id": 125835100, "type": 40000, params: ['sys.symbol.AI_pencil'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            SymbolGlyph.width('16vp');
-            SymbolGlyph.height('16vp');
-        }, SymbolGlyph);
+            Image.create({ "id": 125836321, "type": 20000, params: ['sys.media.maintain_layout'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.width('16vp');
+            Image.height('16vp');
+        }, Image);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('保持布局');
             Text.height('100%');

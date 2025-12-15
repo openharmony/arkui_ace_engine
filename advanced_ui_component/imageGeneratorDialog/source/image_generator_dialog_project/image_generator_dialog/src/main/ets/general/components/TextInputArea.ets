@@ -99,7 +99,7 @@ export struct TextInputArea {
     Column() {
       Row({ space: 8 }) {
         Row({space: 4}) {
-          SymbolGlyph($r('sys.symbol.AI_pencil'))
+          Image($r('sys.media.maintain_layout'))
             .width('16vp')
             .height('16vp')
           Text('保持布局')
