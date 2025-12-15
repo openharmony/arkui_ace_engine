@@ -1959,7 +1959,7 @@ export class NodeAdapter implements MaterializedBase {
         let result = new Array<FrameNode>();
         let nodes = ArkUIAniModule._NodeAdapter_GetAllItems(this.peer!.ptr!);
         if (nodes !== undefined) {
-            nodes.forEach((nodeId: number, index: number, arr: Array<number>) => {
+            nodes.forEach((nodeId: number, index: int, arr: Array<number>) => {
                 if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
                     let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
                     result.push(frameNode!);

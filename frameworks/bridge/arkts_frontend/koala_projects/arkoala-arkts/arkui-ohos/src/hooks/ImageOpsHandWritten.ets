@@ -15,11 +15,15 @@
 
 import { SerializerBase, runtimeType, RuntimeType, pointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ImageError, BusinessError } from "#generated"
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ImageError } from "#generated"
 import { default as image } from "@ohos.multimedia.image"
+import { BusinessError } from '#external'
 import { Resource } from "global.resource"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { DrawableDescriptor_serializer, image_PixelMap_serializer, Resource_serializer, ImageAIOptions_serializer } from "#generated"
+import { ImageAIOptions_serializer } from "#generated"
+import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { Resource_serializer } from './../framework/resource'
+import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
 import { ArkUIAniModule } from "arkui.ani";
 import { int32 } from "@koalaui/common";
 

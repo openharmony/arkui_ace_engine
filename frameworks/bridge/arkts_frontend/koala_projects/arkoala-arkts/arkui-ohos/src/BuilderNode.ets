@@ -138,7 +138,7 @@ class BuilderNodeFinalizationRegisterProxy {
     }
     public static register<T>(target: object): void {
         let builderNode = target as BuilderNode<T>
-        let trunk = new BuilderNodeFinalizationRegisterCleanerThunk<T>(BuilderNodeFinalizationRegisterProxy.removeJSBuilderNode, builderNode._JSBuilderNode)
+        let trunk = new BuilderNodeFinalizationRegisterCleanerThunk<T>(BuilderNodeFinalizationRegisterProxy.removeJSBuilderNode<T>, builderNode._JSBuilderNode<T>)
         finalizerRegister(builderNode, trunk)
     }
     public static instance_: BuilderNodeFinalizationRegisterProxy = new BuilderNodeFinalizationRegisterProxy();

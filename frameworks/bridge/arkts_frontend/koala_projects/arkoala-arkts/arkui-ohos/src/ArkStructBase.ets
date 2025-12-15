@@ -15,7 +15,7 @@
 
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
-import { SyntaxItemPeer } from "./base/RepeatImpl"
+import { SyntaxItemPeer } from './base/SyntaxNodeBase'
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
@@ -75,7 +75,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         reuseKey?: string
     ): void {
         if (reuseKey) {
-            ArkStructBase._instantiateReusable(reuseKey!, factory, content, initializers);
+            ArkStructBase._instantiateReusable<T, T_Options>(reuseKey!, factory, content, initializers);
             return
         }
         const receiver = remember(() => {

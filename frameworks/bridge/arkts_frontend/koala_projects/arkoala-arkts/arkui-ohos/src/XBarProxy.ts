@@ -36,11 +36,13 @@ const CUSTOM_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.System
 const DEFAULT_TITLE_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__TitleBar__Component"
 const DEFAULT_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__ButtonBar__Component"
 
+abstract class DummyCustomComponent extends CustomComponent<DummyCustomComponent, undefined> {}
+
 export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
     static initializeXBarProxy(): void {
-        console.log(`[createXBarCustomComponent]initializeXBarProxy`)
-        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent)
+        console.log(`[createXBarCustomComponent]initializeXBarProxy`);
+        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent<DummyCustomComponent, undefined>)
     }
 
     public static CallNative(xBarType: int32, callType: string, message: string): void {

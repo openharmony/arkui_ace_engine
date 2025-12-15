@@ -15,7 +15,9 @@
 
 import { SerializerBase, runtimeType, RuntimeType, pointer } from '@koalaui/interop';
 import { ArkUIGeneratedNativeModule } from '#components';
-import { ModifierKeyStateGetter, InteractionHand, int32, int64, SourceType, SourceTool, ArkSaveButtonComponent, ResourceStr, ArkSaveButtonPeer, SaveButtonCallback, ClickEvent, SaveButtonOnClickResult, BusinessError, EventTarget, Area, Position, Length } from '#generated';
+import { ModifierKeyStateGetter, InteractionHand, SourceType, SourceTool, ArkSaveButtonComponent, ResourceStr, ArkSaveButtonPeer, SaveButtonCallback, ClickEvent, SaveButtonOnClickResult, EventTarget, Area, Position, Length } from '#generated';
+import { int32, int64 } from '@koalaui/common';
+import { BusinessError } from '#external';
 import { ArkUIAniModule } from 'arkui.ani';
 
 class PositionImpl implements Position {
@@ -33,7 +35,7 @@ class AreaImpl implements Area {
 }
 
 class EventTargetImpl implements EventTarget {
-    public area: Area = {};
+    public area: Area = new AreaImpl();
     public id?: string;
     constructor() { };
 }
@@ -47,7 +49,7 @@ class ClickEventImpl implements ClickEvent {
     public y: double;
     public hand?: InteractionHand;
     public preventDefault() { };
-    public target: EventTarget = {};
+    public target: EventTarget = new EventTargetImpl();
     public timestamp: int64;
     public source: SourceType = SourceType.UNKNOWN;
     public axisHorizontal?: double;

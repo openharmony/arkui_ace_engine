@@ -99,18 +99,18 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
         }
         const keyGen = (e: T, idx: int32): int32 => receiver.keyGenerator
             ? hashCodeFromString(receiver.keyGenerator!(e, idx)) : hashCodeFromString(defaultKey(e, idx))
-        array.forEach((item: T, idx: number) => {
-            const key: int32 = keyGen(item, idx.toInt())
+        array.forEach((item: T, idx: int) => {
+            const key: int32 = keyGen(item, idx)
             newKeys.push(key)
             if (manager.keys.indexOf(key) === -1) {
-                diffIndex.push(idx.toInt())
+                diffIndex.push(idx)
             }
         })
-        newKeys.forEach((key: int32, idx: number) => {
+        newKeys.forEach((key: int32, idx: int) => {
             if (key2Index.has(key)) {
-                duplicateIndex.push(idx.toInt())
+                duplicateIndex.push(idx)
             } else {
-                key2Index.set(key, idx.toInt())
+                key2Index.set(key, idx)
             }
         })
 

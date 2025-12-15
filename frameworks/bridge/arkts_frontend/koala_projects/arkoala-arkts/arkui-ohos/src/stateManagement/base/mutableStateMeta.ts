@@ -22,6 +22,7 @@ import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { StateUpdateLoop } from './stateUpdateLoop';
 import { StateTracker } from '../tests/lib/stateTracker';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 class MutableStateMetaBase {
     public readonly info_: string;

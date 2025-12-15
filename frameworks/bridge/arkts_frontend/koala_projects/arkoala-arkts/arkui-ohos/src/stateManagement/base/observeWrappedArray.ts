@@ -169,7 +169,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public static $_invoke<T>(arrayLength?: number): WrappedArray<T> {
         if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength));
+            return new WrappedArray<T>(new Array<T>(arrayLength.toInt()));
         } else {
             return new WrappedArray<T>(new Array<T>());
         }
