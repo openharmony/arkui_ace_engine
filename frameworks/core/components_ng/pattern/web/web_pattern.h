@@ -1338,7 +1338,7 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitMagnifier();
-    void ShowMagnifier(int centerOffsetX, int centerOffsetY);
+    void ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove = false);
     void HideMagnifier();
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
@@ -1604,6 +1604,7 @@ private:
 
     OHNativeWindow* pipNativeWindow_ = nullptr;
     std::mutex pipNativeWindowMutex_;
+    int showMagnifierFingerId_ = -1;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

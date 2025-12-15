@@ -1190,7 +1190,6 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
             delegate_->OnBlur();
         }
-        UninitMenuLifeCycleCallback();
     }
 }
 
@@ -4956,7 +4955,9 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             }
         }
     }
-    HideMagnifier();
+    if (info.GetChangedTouches().front().GetFingerId() == showMagnifierFingerId_) {
+        HideMagnifier();
+    }
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
@@ -4992,7 +4993,7 @@ void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto localX = handleRect.GetX() - webOffset_.GetX() + handleRect.Width() / HALF;
     auto localY = handleRect.GetY() - webOffset_.GetY() + handleRect.Height() / HALF;
-    ShowMagnifier(localX, localY);
+    ShowMagnifier(localX, localY, true);
 }
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
@@ -5037,8 +5038,9 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
-        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
-            ShowMagnifier(touchPoint.x, touchPoint.y);
+        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist() &&
+            touchPoint.id == showMagnifierFingerId_) {
+            ShowMagnifier(touchPoint.x, touchPoint.y, true);
         }
 
         if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
@@ -5085,7 +5087,9 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
     }
-    HideMagnifier();
+    if (info.GetChangedTouches().front().GetFingerId() == showMagnifierFingerId_) {
+        HideMagnifier();
+    }
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
@@ -5360,8 +5364,10 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     return false;
 }
 
-void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
+void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
+    showMagnifierFingerId_ =
+        isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
         OffsetF localOffset = OffsetF(centerOffsetX, centerOffsetY);
         magnifierController_->SetLocalOffset(localOffset);
@@ -5371,6 +5377,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
+    showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
