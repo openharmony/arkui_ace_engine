@@ -2485,6 +2485,8 @@ bool FocusHub::UpdateFocusView()
 
 void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut)
 {
+    auto frameNode = GetFrameNode();
+    FREE_NODE_CHECK(frameNode, SetFocusScopeId, focusScopeId, isGroup, arrowKeyStepOut);
     if (focusType_ != FocusType::SCOPE) {
         return;
     }
@@ -2517,6 +2519,8 @@ void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bo
 
 void FocusHub::RemoveFocusScopeIdAndPriority()
 {
+    auto frameNode = GetFrameNode();
+    FREE_NODE_CHECK(frameNode, RemoveFocusScopeIdAndPriority);
     auto focusManager = GetFocusManager();
     if (isFocusScope_) {
         if (!focusScopeId_.empty() && focusManager) {
@@ -2531,6 +2535,8 @@ void FocusHub::RemoveFocusScopeIdAndPriority()
 
 void FocusHub::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
 {
+    auto frameNode = GetFrameNode();
+    FREE_NODE_CHECK(frameNode, SetFocusScopePriority, focusScopeId, focusPriority);
     if (isFocusScope_) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "FocusScope can not set focusPriority");
         return;
