@@ -20,7 +20,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string UNIT_AUTO = "auto";
 }
-double WaterFlowLayoutUtils::originalWidth_ = 0.0f;
 std::string WaterFlowLayoutUtils::PreParseArgs(const std::string& args)
 {
     if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
@@ -144,7 +143,7 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(const ConstraintPa
     return itemConstraint;
 }
 
-std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapper, Axis axis)
+std::tuple<SizeF, bool, double> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapper, Axis axis)
 {
     const auto& props = wrapper->GetLayoutProperty();
     auto size = CreateIdealSize(props->GetLayoutConstraint().value(), axis, props->GetMeasureType(), true);
@@ -168,10 +167,9 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
         wrapper->GetGeometryNode()->SetFrameSize(size);
     }
     double originalWidth = size.Width();
-    originalWidth_ = originalWidth;
     MinusPaddingToSize(props->CreatePaddingAndBorder(), size);
     wrapper->GetGeometryNode()->SetContentSize(size);
-    return { size, matchChildren };
+    return { size, matchChildren, originalWidth };
 }
 
 float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
@@ -237,10 +235,5 @@ AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& 
         child = child->GetFirstChild();
     } while (child);
     return pos;
-}
-
-double WaterFlowLayoutUtils::GetOriginalWidth()
-{
-    return originalWidth_;
 }
 } // namespace OHOS::Ace::NG

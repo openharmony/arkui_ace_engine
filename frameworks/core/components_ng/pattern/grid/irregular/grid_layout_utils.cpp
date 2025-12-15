@@ -17,7 +17,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
-double GridLayoutUtils::originalWidth_ = 0.0f;
 GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const LayoutWrapper* wrapper, int32_t idx)
 {
     GridItemSize size { 1, 1 };
@@ -104,15 +103,5 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             pattern->SetPreloadItemList({});
         }
     });
-}
-
-void GridLayoutUtils::SetOriginalWidth(double originalWidth)
-{
-    originalWidth_ = originalWidth;
-}
-
-double GridLayoutUtils::GetOriginalWidth()
-{
-    return originalWidth_;
 }
 } // namespace OHOS::Ace::NG
