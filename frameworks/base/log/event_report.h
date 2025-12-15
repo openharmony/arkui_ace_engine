@@ -81,6 +81,11 @@ enum class ComponentExcepType {
     NAVIGATION_BAR_ERR,
 };
 
+// EXCEPTION_COMPONENT
+enum class ComponentExcepTypeNG {
+    RELATIVE_CONTAINER_LOOP_ERR = 0
+};
+
 // EXCEPTION_API_CHANNEL
 enum class APIChannelExcepType {
     JS_BRIDGE_INIT_ERR = 0,
@@ -224,6 +229,8 @@ public:
     static void SendAppStartException(AppStartExcepType type);
     static void SendPageRouterException(PageRouterExcepType type, const std::string& pageUrl = "");
     static void SendComponentException(ComponentExcepType type);
+    static void SendComponentExceptionNG(
+        ComponentExcepTypeNG type, int32_t nodeType = 0, int32_t nodeId = 0, const std::string& message = "");
     static void ReportPageLoadTimeout(const EventInfo& eventInfo);
     static void SendAPIChannelException(APIChannelExcepType type);
     static void SendRenderException(RenderExcepType type);
