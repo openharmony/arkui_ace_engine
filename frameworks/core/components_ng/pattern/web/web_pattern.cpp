@@ -1216,6 +1216,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    isEditableOnContextMenu_ = contextMenuParam_->IsEditable();
     bool isImage = false;
     bool isHyperLink = false;
     bool isText = false;
@@ -5444,7 +5445,11 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         if (nodeInfoWrap->GetIsFocus()) {
             focusType = type;
         }
+        if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST && type == AceAutoFillType::ACE_UNSPECIFIED) {
+            jsonNode->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
+        }
     }
+
     auto pageUrl = viewDataWrap->GetPageUrl();
     jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
     auto otherAccount = viewDataWrap->GetOtherAccount();
@@ -5452,6 +5457,14 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     delegate_->NotifyAutoFillViewData(jsonNode->ToString(), ConvertAceAutoFillTriggerType(triggerType));
 
     // shift focus after autofill
+    ShiftFocusAfterAutoFill(focusType);
+    if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
+        autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    }
+}
+
+void WebPattern::ShiftFocusAfterAutoFill(AceAutoFillType focusType)
+{
     if (focusType != AceAutoFillType::ACE_UNSPECIFIED && !isPasswordFill_) {
         for (const auto& nodeInfo : pageNodeInfo_) {
             if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
@@ -5671,8 +5684,9 @@ bool WebPattern::HandleAutoFillEvent()
 
     auto eventType = viewDataCommon_->GetEventType();
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
         if (isPasswordFill_ && !system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
-            return RequestAutoFill(GetFocusedType());
+            return RequestAutoFill(GetFocusedType(), triggerType);
         }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -5684,7 +5698,8 @@ bool WebPattern::HandleAutoFillEvent()
             [weak = WeakClaim(this), nodeInfos = pageNodeInfo_] () {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos);
+                AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
+                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos, triggerType);
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
         return fillRet;
@@ -5719,12 +5734,13 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapVa
     return HandleAutoFillEvent();
 }
 
-bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
-    return RequestAutoFill(autoFillType, pageNodeInfo_);
+    return RequestAutoFill(autoFillType, pageNodeInfo_, triggerType);
 }
 
-bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos)
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos,
+    AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
@@ -5752,8 +5768,24 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     CHECK_NULL_RETURN(container, false);
     isAutoFillClosing_ = false;
     bool isPopup = false;
-    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
+    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_,
+                                      false, nullptr, nullptr, triggerType) ==
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+void WebPattern::RequestPasswordAutoFill(WebMenuType menuType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RequestPasswordAutoFill");
+    if (menuType == WebMenuType::TYPE_CONTEXTMENU) {
+        if (!isEditableOnContextMenu_) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "web do not send autofill request.");
+            return;
+        }
+    }
+    autoFillMenuType_ = menuType;
+    FakePageNodeInfo();
+    RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+    isEditableOnContextMenu_ = false;
 }
 
 void WebPattern::FakePageNodeInfo()

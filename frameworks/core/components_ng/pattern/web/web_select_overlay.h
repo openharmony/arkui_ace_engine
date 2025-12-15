@@ -213,6 +213,7 @@ private:
     bool IsMouseInHandleRect(
         const MouseInfo& mouseInfo, std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& selectionHandle, float& offsetY);
     void OnOverlayMouseEvent(const MouseInfo& info);
+    bool IsShowMenuOfAutoFill(uint32_t flags, SelectOverlayInfo& selectInfo);
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
     bool isSelectAll_ = false;

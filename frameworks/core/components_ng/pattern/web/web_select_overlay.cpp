@@ -351,6 +351,16 @@ void WebSelectOverlay::HideMagnifier()
     pattern->HideMagnifier();
 }
 
+bool WebSelectOverlay::IsShowMenuOfAutoFill(uint32_t flags, SelectOverlayInfo& selectInfo)
+{
+    if (!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_AUTOFILL) ||
+        !(selectInfo.isSingleHandle || selectInfo.menuInfo.showCut)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
@@ -383,7 +393,8 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
-    bool detectFlag = !isSelectAll_;
+    selectInfo.menuInfo.showAutoFill = IsShowMenuOfAutoFill(flags, selectInfo);
+
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     selectInfo.menuInfo.showSearch = false;
@@ -402,7 +413,7 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
     canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) && !queryWord.empty();
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
-    DetectSelectedText(detectFlag ? value : std::string());
+    DetectSelectedText((!isSelectAll_) ? value : std::string());
 }
 
 void WebSelectOverlay::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
@@ -960,6 +971,13 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             break;
         case OptionMenuActionId::ASK_CELIA:
             HandleOnAskCelia();
+            break;
+        case OptionMenuActionId::PASSWORD_VAULT:
+            pattern->RequestPasswordAutoFill(WebMenuType::TYPE_QUICKMENU);
+            pattern->CloseSelectOverlay();
+            break;
+        case OptionMenuActionId::AUTO_FILL:
+            HandleOnAutoFill(type);
             break;
         default:
             break;

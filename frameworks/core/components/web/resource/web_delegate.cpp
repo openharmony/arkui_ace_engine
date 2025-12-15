@@ -831,6 +831,17 @@ void ContextMenuResultOhos::PasteAndMatchStyle() const
     }
 }
 
+void ContextMenuResultOhos::RequestPasswordAutoFill() const
+{
+    if (callback_) {
+        callback_->Continue(CI_REQUEST_AUTOFILL, EF_NONE);
+    }
+    auto delegate = delegate_.Upgrade();
+    if (delegate) {
+        delegate->OnRequestAutofill(static_cast<int32_t>(NG::WebMenuType::TYPE_CONTEXTMENU));
+    }
+}
+
 void WebWindowNewHandlerOhos::SetWebController(int32_t id)
 {
     if (handler_) {
@@ -9590,6 +9601,13 @@ void WebDelegate::OnFirstScreenPaint(
                 std::make_shared<FirstScreenPaintEvent>(url, navigationStartTime, firstScreenPaintTime));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebOnFirstScreenPaint");
+}
+
+void WebDelegate::OnRequestAutofill(int32_t menuType)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RequestPasswordAutoFill(static_cast<NG::WebMenuType>(menuType));
 }
 
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
