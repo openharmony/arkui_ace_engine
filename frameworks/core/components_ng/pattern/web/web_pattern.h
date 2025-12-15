@@ -94,6 +94,7 @@ namespace OHOS::Ace::NG {
 class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
+class WebDomDocument;
 
 namespace {
 
@@ -1605,6 +1606,8 @@ private:
     OHNativeWindow* pipNativeWindow_ = nullptr;
     std::mutex pipNativeWindowMutex_;
     int showMagnifierFingerId_ = -1;
+
+    std::unique_ptr<WebDomDocument> webDomDocument_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
