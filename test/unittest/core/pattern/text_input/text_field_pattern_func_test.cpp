@@ -390,6 +390,81 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc092, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPatternFunc093
+ * @tc.desc: test HasOnWillInsertValueEvent/HasOnDidInsertValueEvent/HasOnWillDeleteValueEvent/HasOnDidDeleteValueEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc093, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Check the return value when no event is set
+     * @tc.expected: return value is false
+     */
+    EXPECT_TRUE(!eventHub_->HasOnWillInsertValueEvent());
+    EXPECT_TRUE(!eventHub_->HasOnDidInsertValueEvent());
+    EXPECT_TRUE(!eventHub_->HasOnWillDeleteValueEvent());
+    EXPECT_TRUE(!eventHub_->HasOnDidDeleteValueEvent());
+
+    /**
+     * @tc.steps: step3. set event
+     */
+    int32_t willInsertOffset = 0;
+    std::string willInsertValue = "";
+    auto onWillInsertChange = [&willInsertOffset, &willInsertValue](const InsertValueInfo& info) {
+        willInsertOffset = info.insertOffset;
+        willInsertValue = StringUtils::Str16ToStr8(info.insertValue);
+        return true;
+    };
+    eventHub_->SetOnWillInsertValueEvent(std::move(onWillInsertChange));
+
+    TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
+    int32_t willDeleteOffset = 0;
+    std::string willDeleteValue = "";
+    auto onWillDeleteChange = [&willDeleteOffset, &willDeleteValue, &direction](const DeleteValueInfo& info) {
+        willDeleteOffset = info.deleteOffset;
+        willDeleteValue = StringUtils::Str16ToStr8(info.deleteValue);
+        direction = info.direction;
+        return true;
+    };
+    eventHub_->SetOnWillDeleteEvent(std::move(onWillDeleteChange));
+
+    int32_t didInsertOffset = 0;
+    std::string didInsertValue = "";
+    auto onDidInsertChange = [&didInsertOffset, &didInsertValue](const InsertValueInfo& info) {
+        didInsertOffset = info.insertOffset;
+        didInsertValue = StringUtils::Str16ToStr8(info.insertValue);
+        return true;
+    };
+    eventHub_->SetOnDidInsertValueEvent(std::move(onDidInsertChange));
+
+    TextDeleteDirection didDirection = TextDeleteDirection::BACKWARD;
+    int32_t didDeleteOffset = 0;
+    std::string didDeleteValue = "";
+    auto onDidDeleteChange = [&didDeleteOffset, &didDeleteValue, &didDirection](const DeleteValueInfo& info) {
+        didDeleteOffset = info.deleteOffset;
+        didDeleteValue = StringUtils::Str16ToStr8(info.deleteValue);
+        didDirection = info.direction;
+        return true;
+    };
+    eventHub_->SetOnDidDeleteEvent(std::move(onDidDeleteChange));
+
+    /**
+     * @tc.steps: step4. Check the return value
+     * @tc.expected: return value is true
+     */
+    EXPECT_TRUE(eventHub_->HasOnWillInsertValueEvent());
+    EXPECT_TRUE(eventHub_->HasOnDidInsertValueEvent());
+    EXPECT_TRUE(eventHub_->HasOnWillDeleteValueEvent());
+    EXPECT_TRUE(eventHub_->HasOnDidDeleteValueEvent());
+}
+
+/**
  * @tc.name: GetTextContentRect001
  * @tc.desc: test GetTextContentRect.
  * @tc.type: FUNC

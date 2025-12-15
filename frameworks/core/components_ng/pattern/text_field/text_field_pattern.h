@@ -1867,6 +1867,10 @@ private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
+    void reportOnWillInsertEvent();
+    void reportOnWillDeleteEvent();
+    void reportOnDidInsertEvent();
+    void reportOnDidDeleteEvent();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
     void AfterIMEInsertValue(const std::u16string& insertValue);
     bool BeforeIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction, int32_t offset);
