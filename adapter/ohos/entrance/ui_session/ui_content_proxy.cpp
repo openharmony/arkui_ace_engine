@@ -307,6 +307,81 @@ int32_t UIContentServiceProxy::RegisterLifeCycleEventCallback(const EventCallbac
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterSelectTextEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterSelectTextEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_SELECT_TEXT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterSelectTextEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+    const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetSpecifiedContentOffsets write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(content)) {
+        LOGW("GetSpecifiedContentOffsets write data failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetSpecifiedContentOffsets reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetSpecifiedContentOffsets(eventCallback);
+    if (Remote()->SendRequest(GET_SPECIFIED_CONTENT_OFFSETS, data, reply, option) != ERR_NONE) {
+        LOGW("GetSpecifiedContentOffsets send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::HighlightSpecifiedContent(int32_t id, const std::string& content,
+    const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("HighlightSpecifiedContent write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(content) || !data.WriteInt32(nodeIds.size()) ||
+        !data.WriteString(configs)) {
+        LOGW("HighlightSpecifiedContent write data failed");
+        return FAILED;
+    }
+    for (auto& i : nodeIds) {
+        if (!data.WriteString(i)) {
+            LOGW("HighlightSpecifiedContent write data failed");
+            return FAILED;
+        }
+    }
+    if (Remote()->SendRequest(HIGHLIGHT_SPECIFIED_CONTENT, data, reply, option) != ERR_NONE) {
+        LOGW("HighlightSpecifiedContent send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::SendCommand(int32_t id, const std::string& command)
 {
     MessageParcel data;
@@ -533,6 +608,27 @@ int32_t UIContentServiceProxy::UnregisterLifeCycleEventCallback()
     report_->UnregisterLifeCycleEventCallback();
     if (Remote()->SendRequest(UNREGISTER_LIFE_CYCLE_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("UnregisterLifeCycleEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterSelectTextEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterSelectTextEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterSelectTextEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_SELECT_TEXT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterSelectTextEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

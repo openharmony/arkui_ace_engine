@@ -29,9 +29,11 @@ class TextOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextOverlayModifier, OverlayModifier);
 
 public:
-    TextOverlayModifier();
+    TextOverlayModifier(const WeakPtr<Pattern>& pattern = nullptr);
 
     void onDraw(DrawingContext& drawingContext) override;
+
+    void onDrawHighlight(DrawingContext& drawingContext);
 
     void SetPrintOffset(const OffsetF& paintOffset);
 
@@ -57,9 +59,15 @@ public:
     void SetSingleLine(bool value);
 
     std::vector<RectF> GetSelectedRects() const;
+    void SetHightlightOpacity(float value)
+    {
+        CHECK_NULL_VOID(highlightOpacityAnimation_);
+        highlightOpacityAnimation_->Set(value);
+    }
 protected:
     std::optional<RectF> contentRect_;
     RefPtr<PropertyBool> showSelect_;
+    WeakPtr<Pattern> pattern_;
 
 private:
     bool IsSelectedRectsChanged(const std::vector<RectF>& selectedRects);
@@ -72,6 +80,7 @@ private:
     std::vector<RectF> selectedRects_;
     std::vector<RectF> selectedUrlRects_;
     RefPtr<PropertyInt> selectedUrlColor_;
+    RefPtr<AnimatablePropertyFloat> highlightOpacityAnimation_;
     bool isSingleLineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };

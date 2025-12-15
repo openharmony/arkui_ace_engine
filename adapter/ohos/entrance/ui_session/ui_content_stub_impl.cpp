@@ -72,6 +72,14 @@ int32_t UIContentServiceStubImpl::RegisterLifeCycleEventCallback(const EventCall
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->SetSelectTextEventRegistered(true);
+    // first register
+    UiSessionManager::GetInstance()->ReportSelectText();
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& command)
 {
     UiSessionManager::GetInstance()->NotifySendCommandPattern(id, command);
@@ -130,6 +138,12 @@ int32_t UIContentServiceStubImpl::UnregisterScrollEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterLifeCycleEventCallback()
 {
     UiSessionManager::GetInstance()->SetLifeCycleEventRegistered(false);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterSelectTextEventCallback()
+{
+    UiSessionManager::GetInstance()->SetSelectTextEventRegistered(false);
     return NO_ERROR;
 }
 
@@ -227,6 +241,20 @@ int32_t UIContentServiceStubImpl::RegisterContentChangeCallback(const ContentCha
     const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
 {
     UiSessionManager::GetInstance()->RegisterContentChangeCallback(config);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+    const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetSpecifiedContentOffsets(id, content);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::HighlightSpecifiedContent(int32_t id, const std::string& content,
+    const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    UiSessionManager::GetInstance()->HighlightSpecifiedContent(id, content, nodeIds, configs);
     return NO_ERROR;
 }
 

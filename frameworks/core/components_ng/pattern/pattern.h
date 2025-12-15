@@ -760,6 +760,13 @@ public:
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
     int32_t OnRecvCommand(const std::string& command);
+    virtual std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content)
+    {
+        return std::vector<std::pair<float, float>>{};
+    };
+    virtual void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
+    virtual void ReportSelectedText() {};
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;

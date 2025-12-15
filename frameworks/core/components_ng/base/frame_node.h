@@ -1460,6 +1460,11 @@ public:
 
     int32_t OnRecvCommand(const std::string& command) override;
 
+    std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content);
+    void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
+    void ReportSelectedText();
+
     void ResetLastFrameNodeRect()
     {
         if (lastFrameNodeRect_) {

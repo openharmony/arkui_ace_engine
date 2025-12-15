@@ -78,6 +78,16 @@ public:
     void ReportLifeCycleEvent(const std::string& data) override;
 
     /**
+     * @description: notify stub side to report select text value
+     */
+    void ReportSelectTextEvent(const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report select text offsets
+     */
+    void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
+
+    /**
      * @description: notify stub side to report web unfocus value
      */
     void SendBaseInfo(const std::string& data) override;

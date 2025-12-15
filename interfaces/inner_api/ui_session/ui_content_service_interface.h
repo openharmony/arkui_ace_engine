@@ -45,6 +45,7 @@ public:
         REGISTER_WEB_UNFOCUS_EVENT,
         REGISTER_SCROLL_EVENT,
         REGISTER_LIFE_CYCLE_EVENT,
+        REGISTER_SELECT_TEXT_EVENT,
         UNREGISTER_CLICK_EVENT,
         UNREGISTER_SEARCH_EVENT,
         UNREGISTER_TEXT_CHANGE_EVENT,
@@ -53,6 +54,7 @@ public:
         UNREGISTER_WEB_UNFOCUS_EVENT,
         UNREGISTER_SCROLL_EVENT,
         UNREGISTER_LIFE_CYCLE_EVENT,
+        UNREGISTER_SELECT_TEXT_EVENT,
         RESET_ALL_TEXT,
         RESET_TEXT_BY_ID,
         GET_WEB_VIEW_LANGUAGE,
@@ -68,6 +70,8 @@ public:
         SENDCOMMAND_EVENT,
         SEND_COMMAND,
         EXE_APP_AI_FUNCTION,
+        GET_SPECIFIED_CONTENT_OFFSETS,
+        HIGHLIGHT_SPECIFIED_CONTENT,
         REGISTER_CONTENT_CHANGE,
         UNREGISTER_CONTENT_CHANGE,
         GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
@@ -147,6 +151,26 @@ public:
     virtual int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
+     * @description: define register a callback on select text event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterSelectTextEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback get select offsets
+     * @return: result number
+     */
+    virtual int32_t GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback highlight content text
+     * @return: result number
+     */
+    virtual int32_t HighlightSpecifiedContent(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs) = 0;
+
+    /**
      * @description: define register a callback on SendCommand event occur to execute interface
      * @return: result number
      *          0: Node execution is successful.
@@ -217,6 +241,12 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterLifeCycleEventCallback() = 0;
+
+    /**
+     * @description: define unregister the select text event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterSelectTextEventCallback() = 0;
 
     /**
      * @description:get web need translate text
@@ -331,12 +361,14 @@ public:
         REPORT_WEB_UNFOCUS_EVENT,
         REPORT_SCROLL_EVENT,
         REPORT_LIFE_CYCLE_EVENT,
+        REPORT_SELECT_TEXT_EVENT,
         SEND_BASE_INFO,
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
         SEND_IMAGES,
         SEND_CURRENT_PAGE_NAME,
         SEND_EXE_APP_AI_FUNCTION_RESULT,
+        SEND_SPECIFIED_CONTENT_OFFSETS,
         SEND_CONTENT_CHANGE,
         REPORT_HIT_TEST_NODE_INFOS,
         REPORT_STATE_MGMT_INFO,
@@ -391,6 +423,16 @@ public:
      * @description: define reports the life cycle event to the proxy interface
      */
     virtual void ReportLifeCycleEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the select text event to the proxy interface
+     */
+    virtual void ReportSelectTextEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the select content offsets to the proxy interface
+     */
+    virtual void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) = 0;
 
     /**
      * @description: define send base info value to the proxy interface

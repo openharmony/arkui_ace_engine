@@ -85,6 +85,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterLifeCycleEventCallbackInner(data, reply, option);
             break;
         }
+        case REGISTER_SELECT_TEXT_EVENT: {
+            RegisterSelectTextEventCallbackInner(data, reply, option);
+            break;
+        }
         case SENDCOMMAND_ASYNC_EVENT: {
             SendCommandInnerAsync(data, reply, option);
             break;
@@ -123,6 +127,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case UNREGISTER_LIFE_CYCLE_EVENT: {
             UnregisterLifeCycleEventCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_SELECT_TEXT_EVENT: {
+            UnregisterSelectTextEventCallbackInner(data, reply, option);
             break;
         }
         case RESET_ALL_TEXT: {
@@ -175,6 +183,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case EXE_APP_AI_FUNCTION: {
             ExeAppAIFunctionInner(data, reply, option);
+            break;
+        }
+        case GET_SPECIFIED_CONTENT_OFFSETS: {
+            GetSpecifiedContentOffsetsInner(data, reply, option);
+            break;
+        }
+        case HIGHLIGHT_SPECIFIED_CONTENT: {
+            HighlightSpecifiedContentInner(data, reply, option);
             break;
         }
         case REGISTER_CONTENT_CHANGE: {
@@ -282,6 +298,13 @@ int32_t UiContentStub::RegisterLifeCycleEventCallbackInner(
     return NO_ERROR;
 }
 
+int32_t UiContentStub::RegisterSelectTextEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterSelectTextEventCallback(nullptr));
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::SendCommandInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -358,6 +381,13 @@ int32_t UiContentStub::UnregisterLifeCycleEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(UnregisterLifeCycleEventCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterSelectTextEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterSelectTextEventCallback());
     return NO_ERROR;
 }
 
@@ -489,6 +519,28 @@ int32_t UiContentStub::UnregisterContentChangeCallbackInner(
 {
     UiSessionManager::GetInstance()->EraseProcessId("contentChange");
     reply.WriteInt32(UnregisterContentChangeCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetSpecifiedContentOffsetsInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string content = data.ReadString();
+    reply.WriteInt32(GetSpecifiedContentOffsets(id, content, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::HighlightSpecifiedContentInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string content = data.ReadString();
+    int32_t size = data.ReadInt32();
+    std::string configs = data.ReadString();
+    std::vector<std::string> nodeIds;
+    for (int32_t i = 0; i < size; i++) {
+        nodeIds.push_back(data.ReadString());
+    }
+    reply.WriteInt32(HighlightSpecifiedContent(id, content, nodeIds, configs));
     return NO_ERROR;
 }
 

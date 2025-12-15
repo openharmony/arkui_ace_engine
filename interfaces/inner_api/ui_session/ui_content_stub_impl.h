@@ -40,6 +40,7 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     int32_t RegisterScrollEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterSelectTextEventCallback(const EventCallback& eventCallback) override;
     int32_t SendCommand(int32_t id, const std::string& command) override;
     int32_t SendCommandAsync(int32_t id, const std::string& command) override;
     int32_t SendCommand(const std::string command) override;
@@ -51,6 +52,11 @@ public:
     int32_t UnregisterWebUnfocusEventCallback() override;
     int32_t UnregisterScrollEventCallback() override;
     int32_t UnregisterLifeCycleEventCallback() override;
+    int32_t UnregisterSelectTextEventCallback() override;
+    int32_t GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback) override;
+    int32_t HighlightSpecifiedContent(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs) override;
     bool IsConnect() override;
     int32_t ResetTranslateTextAll() override;
     int32_t ResetTranslateText(int32_t nodeId) override;

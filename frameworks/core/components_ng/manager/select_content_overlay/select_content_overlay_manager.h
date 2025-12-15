@@ -109,6 +109,10 @@ public:
     void UpdateIsSingleHandle(bool isSingleHandle);
     static bool IsPasteOption(const RefPtr<UINode>& node);
 
+    int32_t GetTextSelectionHolderId();
+    void SetTextSelectionHolderId(int32_t id);
+    void RemoveTextSelectionHolderId(int32_t id);
+
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
     bool HasHolder(int32_t holderId);
@@ -160,6 +164,8 @@ private:
     LegacyManagerCallbacks legacyManagerCallbacks_;
     bool isIntercept_ = false;
     int32_t containerId_ = -1;
+
+    int32_t textSelectHolderId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayManager);
 };

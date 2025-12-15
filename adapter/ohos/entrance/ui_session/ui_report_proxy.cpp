@@ -230,6 +230,48 @@ void UiReportProxy::ReportLifeCycleEvent(const std::string& data)
     }
 }
 
+void UiReportProxy::ReportSelectTextEvent(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportLifeCycleEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportLifeCycleEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_SELECT_TEXT_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportLifeCycleEvent send request failed");
+    }
+}
+
+void UiReportProxy::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendSpecifiedContentOffsets write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(offsets.size())) {
+        LOGW("SendSpecifiedContentOffsets write size failed");
+        return;
+    }
+    for (auto& offset : offsets) {
+        if (!messageData.WriteFloat(offset.first) || (!messageData.WriteFloat(offset.second))) {
+            LOGW("SendSpecifiedContentOffsets write data failed");
+            return;
+        }
+    }
+    if (Remote()->SendRequest(SEND_SPECIFIED_CONTENT_OFFSETS, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendSpecifiedContentOffsets send request failed");
+    }
+}
+
 void UiReportProxy::SendBaseInfo(const std::string& data)
 {
     MessageParcel messageData;

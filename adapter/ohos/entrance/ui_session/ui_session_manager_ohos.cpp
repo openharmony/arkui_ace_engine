@@ -153,6 +153,19 @@ void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
     }
 }
 
+void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr && GetSelectTextEventRegistered()) {
+            reportService->ReportSelectTextEvent(data);
+        } else {
+            LOGW("report select text event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
     // add death callback
@@ -230,6 +243,17 @@ void UiSessionManagerOhos::SetLifeCycleEventRegistered(bool status)
     }
 }
 
+void UiSessionManagerOhos::SetSelectTextEventRegistered(bool status)
+{
+    if (status) {
+        selectTextEventRegisterProcesses_.fetch_add(1);
+    } else {
+        selectTextEventRegisterProcesses_.fetch_sub(1);
+    }
+    LOGD("SetSelectTextEventRegistered selectTextEventRegisterProcesses_: %{public}d",
+        selectTextEventRegisterProcesses_.load());
+}
+
 bool UiSessionManagerOhos::GetClickEventRegistered()
 {
     return clickEventRegisterProcesses_.load() > 0 ? true : false;
@@ -263,6 +287,11 @@ bool UiSessionManagerOhos::GetScrollEventRegistered()
 bool UiSessionManagerOhos::GetLifeCycleEventRegistered()
 {
     return lifeCycleEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::GetSelectTextEventRegistered()
+{
+    return selectTextEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
@@ -511,6 +540,60 @@ void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
             reportService->SendCurrentPageName(result);
         } else {
             LOGW("report send current page name failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
+void UiSessionManagerOhos::SaveGetSpecifiedContentOffsetsFunction(
+    std::function<std::vector<std::pair<float, float>>(int32_t id, const std::string& content)>&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    getSpecifiedContentOffsetsCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::SaveHighlightSpecifiedContentFunction(std::function<void(int32_t id,
+    const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)>&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    highlightSpecifiedContentCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::SaveSelectTextFunction(std::function<void()>&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    selectTextCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::GetSpecifiedContentOffsets(int32_t id, const std::string& content)
+{
+    if (getSpecifiedContentOffsetsCallback_) {
+        getSpecifiedContentOffsetsCallback_(id, content);
+    }
+}
+
+void UiSessionManagerOhos::HighlightSpecifiedContent(
+    int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    if (highlightSpecifiedContentCallback_) {
+        highlightSpecifiedContentCallback_(id, content, nodeIds, configs);
+    }
+}
+
+void UiSessionManagerOhos::ReportSelectText()
+{
+    if (selectTextCallback_) {
+        selectTextCallback_();
+    }
+}
+
+void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
+{
+    for (auto& pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->SendSpecifiedContentOffsets(offsets);
+        } else {
+            LOGW("report send specified content offsets failed,process id:%{public}d", pair.first);
         }
     }
 }
