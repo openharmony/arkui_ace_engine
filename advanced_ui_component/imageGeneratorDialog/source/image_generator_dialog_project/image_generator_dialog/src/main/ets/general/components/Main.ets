@@ -21,16 +21,18 @@ import { TextTouchUpComponent } from "./TextTouchUp"
 @ComponentV2
 export struct ImageGeneratorDialog {
   stack: NavPathStack = new NavPathStack();
-  options?: imageGeneration.GeneratorDialogOptions;
+  @Param @Require options?: imageGeneration.GeneratorDialogOptions;
   @Local width_: Dimension = 650;
   @Local height_: Dimension = 560;
   private MAX_IMAGE_COUNT: number = 4;
   @Local imageInfoArr: Array<imageGeneration.ImageItem> = [];
+  @Local stylesArr: Array<imageGeneration.ImageStyle> = [];
 
   @Builder
   pageMap(name: string) {
     if (name === 'home') {
-      CanvasHome({ imageInfoArr: this.imageInfoArr})
+      CanvasHome({ imageInfoArr: this.imageInfoArr, styles: this.options?.imageGenerationModel?.getModelSupportStyles()})
+      // CanvasHome({ imageInfoArr: this.imageInfoArr, styles: this.stylesArr})
     } else if (name === 'textTouchUp') {
       TextTouchUpComponent()
     }
@@ -56,6 +58,9 @@ export struct ImageGeneratorDialog {
   }
   aboutToAppear(): void {
     this.initImageInfoArr();
+    for (let i = 0; i < this.MAX_IMAGE_COUNT; ++i) {
+      this.stylesArr.push({ name: '' + i, icon: $r('sys.symbol.style')})
+    }
     this.stack.pushPath({name: 'home'})
   }
 

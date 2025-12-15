@@ -16,23 +16,11 @@
 import { AIGenerateOptions } from "../utils/AIGenerateOptions";
 import { styleItem } from "./CanvasFramework"
 
-@Builder export function UserInteractiveTabBarBuilder(name: string) {
+@Builder export function UserInteractiveTabBarBuilder(index: number, name: string, icon: Resource) {
   UserInteractiveAreaTabBar({
-    name: name
-  })
-}
-
-class StyleSelectTabBarParams{
-  name: string = '';
-  icon: Resource = {bundleName: "", moduleName: "", id: 0};
-  bgColor?: ResourceColor = 'rgba(0,0,0,0.05)';
-}
-
-@Builder export function StyleSelectTabBarBuilder(params: StyleSelectTabBarParams) {
-  UserFunctionAreaTabBar({
-    name: params.name,
-    icon: params.icon,
-    tabBarBgColor: params.bgColor
+    index: index,
+    name: name,
+    icon: icon
   })
 }
 
@@ -59,40 +47,9 @@ export struct FunctionAreaPlaceholder {
 
 // style select
 @ComponentV2
-struct UserFunctionAreaTabBar {
-  @Param name: string = '__NA__'
-  @Param icon?: Resource = undefined
-  @Param tabBarBgColor: ResourceColor = 'rgba(0,0,0,0.05)';
-
-  build() {
-    Column() {
-      Column() {
-        Image(this.icon)
-          .width(24)
-          .height(24)
-      }
-      .padding(12)
-      .width(48)
-      .height(48)
-      .margin({bottom: 4})
-      .borderRadius(100)
-      .backgroundColor(this.tabBarBgColor)
-      Column() {
-        Text(this.name)
-          .fontFamily("HarmonyHeiTi")
-          .fontColor("#000000")
-          .fontSize(10)
-          .fontWeight(500)
-      }
-      .height(10)
-    }
-  }
-}
-
-@ComponentV2
 export struct StyleSelect {
   @Local curSelectedStyle: string | undefined = AIGenerateOptions.getInstance().style;
-  @Param stylesArray: Array<styleItem> = [
+  @Param @Require stylesArray: Array<styleItem> = [
     {
       name: '插画',
       resourceAddr: undefined
@@ -149,7 +106,8 @@ export struct StyleSelect {
                   Column() {
                     Checkbox()
                       .select(this.curSelectedStyle === item.item.name)
-                      .shape(CheckBoxShape.CIRCLE)
+                      .opacity(this.curSelectedStyle === item.item.name ? 1.0 : 0.0)
+                      .shape(CheckBoxShape.ROUNDED_SQUARE)
                       .onClick(() => {
                         let nameStr: string = ''
                         if (typeof(item.item.name) === 'string') {
@@ -204,7 +162,7 @@ export struct StyleSelect {
       }
       .scrollBar(BarState.Off)
       .scrollable(ScrollDirection.Vertical)
-      .height(260)
+      .height(396)
       .width(56)
     }
   }
@@ -213,25 +171,29 @@ export struct StyleSelect {
 
 @ComponentV2
 struct UserInteractiveAreaTabBar {
+  @Param index: number = 0
+  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
   @Param name: string = '__NA__'
+  @Param @Require icon?: Resource
 
   build() {
     Column() {
       Column() {
-        Image('')
+        Image(this.icon)
           .width(24)
           .height(24)
+          .opacity(this.index === this.selectedIndex ? 0.9 : 0.6)
       }
       .padding(12)
       .width(48)
       .height(48)
       .margin({bottom: 4})
       .borderRadius(24)
-      .backgroundColor('rgba(0,0,0,0.05)')
+      .backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)')
       Column() {
         Text(this.name)
-          .fontFamily("HarmonyHeiTi")
-          .fontColor("#000000")
+          .fontFamily('HarmonyHeiTi')
+          .fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)')
           .fontSize(10)
           .fontWeight(500)
       }

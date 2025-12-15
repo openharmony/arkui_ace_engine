@@ -15,16 +15,9 @@
 
 import { styleItem } from "./CanvasFramework";
 @Builder
-export declare function UserInteractiveTabBarBuilder(x13: string): void;
-declare class StyleSelectTabBarParams {
-    name: string;
-    icon: Resource;
-    bgColor?: ResourceColor;
-}
+export declare function UserInteractiveTabBarBuilder(index: number, name: string, icon: Resource): void;
 @Builder
-export declare function StyleSelectTabBarBuilder(p13: StyleSelectTabBarParams): void;
-@Builder
-export declare function StyleSelectBuilder(h13: Array<styleItem>): void;
+export declare function StyleSelectBuilder(styleItems: Array<styleItem>): void;
 @ComponentV2
 export declare struct FunctionAreaPlaceholder {
     build(): void;
@@ -34,8 +27,8 @@ export declare struct StyleSelect {
     @Local
     curSelectedStyle: string | undefined;
     @Param
+    @Require
     readonly stylesArray: Array<styleItem>;
-    updateSelectIndex(w11: string): void;
+    updateSelectIndex(newSelectedStyle: string): void;
     build(): void;
 }
-export {};
