@@ -50,8 +50,6 @@ public:
     {
         TextLayoutProperty::ToJsonValue(json, filter);
         json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
-        json->PutExtAttr(
-            "selectedDragPreviewStyle", GetSelectedDragPreviewStyleValue().ColorToString().c_str(), filter);
     }
 
     void UpdateScrollBarColor(const std::optional<Color>& color)
