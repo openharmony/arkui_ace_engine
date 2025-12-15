@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { LengthMetrics, MeasureUtils } from '@kit.ArkUI';
+import { MeasureUtils } from '@kit.ArkUI';
 import { AIGenerateImpl } from '../utils/AIGenerateImpl'
 import { default as imageGeneration } from '@ohos.arkui.intelligence.imageGeneration'
 
@@ -111,10 +111,10 @@ struct TextTouchUp {
             .width('100%')
             .height(40)
             .padding({
-              top: LengthMetrics.vp(8),
-              bottom: LengthMetrics.vp(12),
-              start: LengthMetrics.vp(8),
-              end: LengthMetrics.vp(8)
+              top: 8,
+              bottom: 12,
+              left: 8,
+              right: 8
             })
 
             Text(this.aiThinkText)
@@ -124,8 +124,8 @@ struct TextTouchUp {
               .lineHeight(17)
               .backgroundColor(Color.Transparent)
               .padding({
-                start: LengthMetrics.vp(8),
-                end: LengthMetrics.vp(8)
+                left: 8,
+                right: 8
               })
               .visibility(this.imgOrientation == ImageRotateOrientation.UP ? Visibility.Visible : Visibility.None)
 
@@ -136,8 +136,8 @@ struct TextTouchUp {
             }
             .width('100%')
             .padding({
-              top: LengthMetrics.vp(8.5),
-              bottom: LengthMetrics.vp(8)
+              top: 8,
+              bottom: 8
             })
 
             Column() {
@@ -149,20 +149,20 @@ struct TextTouchUp {
                 .lineHeight(19)
                 .backgroundColor("#ffffffff")
                 .padding({
-                  top: LengthMetrics.vp(0),
-                  bottom: LengthMetrics.vp(0),
-                  start: LengthMetrics.vp(0),
-                  end: LengthMetrics.vp(0)
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0
                 })
                 .borderRadius(0)
             }
             .width('100%')
             .height(184)
             .padding({
-              top: LengthMetrics.vp(8),
-              bottom: LengthMetrics.vp(8),
-              start: LengthMetrics.vp(16),
-              end: LengthMetrics.vp(16)
+              top: 8,
+              bottom: 8,
+              left: 16,
+              right: 16
             })
             .borderRadius(16)
             .backgroundColor("#ffffffff")
@@ -174,16 +174,16 @@ struct TextTouchUp {
               color: '#05ffffff'
             })
           }.padding({
-            bottom: LengthMetrics.vp(6),
-            start: LengthMetrics.vp(16),
+            bottom: 6,
+            left: 16
           })
         }.constraintSize({maxHeight: 358})
       }
       .height(382)
       .width('100%')
       .margin({
-        top: LengthMetrics.vp(16),
-        end: LengthMetrics.vp(8)
+        top: 16,
+        right: 8
       })
 
       Text('内容由API生成')
@@ -199,13 +199,15 @@ struct TextTouchUp {
         .fontSize(16)
         .fontWeight(500)
         .margin({
-          top: LengthMetrics.vp(20),
-          bottom: LengthMetrics.vp(16),
-          start: LengthMetrics.vp(101),
-          end: LengthMetrics.vp(101)
+          top: 20,
+          bottom: 16,
+          left: 101,
+          right: 101
         })
         .onClick(() => {
-          this.stack!.pop(this.aiResultText);
+          if (this.stack) {
+            this.stack.pop(this.aiResultText);
+          }
         })
     }
     .width('100%')

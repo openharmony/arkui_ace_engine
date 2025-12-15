@@ -13,43 +13,42 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (v11, w11, x11, y11) {
-    var z11 = arguments.length, a12 = z11 < 3 ? w11 : y11 === null ? y11 = Object.getOwnPropertyDescriptor(w11, x11) : y11, b12;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        a12 = Reflect.decorate(v11, w11, x11, y11);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var c12 = v11.length - 1; c12 >= 0; c12--)
-            if (b12 = v11[c12])
-                a12 = (z11 < 3 ? b12(a12) : z11 > 3 ? b12(w11, x11, a12) : b12(w11, x11)) || a12;
-    return z11 > 3 && a12 && Object.defineProperty(w11, x11, a12), a12;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { LengthMetrics } from "@ohos.arkui.node";
 import { AIGenerateImpl } from '../utils/AIGenerateImpl';
 export class TextTouchUpComponent extends ViewV2 {
-    constructor(p11, q11, r11, s11 = -1, t11, u11) {
-        super(p11, s11, u11);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(o11) {
+    resetStateVarsOnReuse(params) {
     }
     initialRender() {
-        this.observeComponentCreation2((i11, j11) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             NavDestination.create(() => {
                 {
-                    this.observeComponentCreation2((k11, l11) => {
-                        if (l11) {
-                            let m11 = new TextTouchUp(this, {}, undefined, k11, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TextTouchUp.ets", line: 24, col: 7 });
-                            ViewV2.create(m11);
-                            let n11 = () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new TextTouchUp(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TextTouchUp.ets", line: 24, col: 7 });
+                            ViewV2.create(componentCall);
+                            let paramsLambda = () => {
                                 return {};
                             };
-                            m11.paramsGenerator_ = n11;
+                            componentCall.paramsGenerator_ = paramsLambda;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(k11, {});
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
                         }
                     }, { name: "TextTouchUp" });
                 }
@@ -71,8 +70,8 @@ export class TextTouchUpComponent extends ViewV2 {
     }
 }
 class TextTouchUp extends ViewV2 {
-    constructor(c11, d11, e11, f11 = -1, g11, h11) {
-        super(c11, f11, h11);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
         this.originText = "";
         this.uiContext = this.getUIContext();
         this.uiContextMeasure = this.uiContext.getMeasureUtils();
@@ -89,7 +88,7 @@ class TextTouchUp extends ViewV2 {
         this.taskId = -1;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(b11) {
+    resetStateVarsOnReuse(params) {
         this.originText = "";
         this.uiContext = this.getUIContext();
         this.uiContextMeasure = this.uiContext.getMeasureUtils();
@@ -107,47 +106,47 @@ class TextTouchUp extends ViewV2 {
             },
             onError: () => {
             },
-            onResult: (a11) => {
-                if (a11.reasoningContent) {
-                    this.aiThinkText += a11.reasoningContent;
+            onResult: (result) => {
+                if (result.reasoningContent) {
+                    this.aiThinkText += result.reasoningContent;
                 }
-                if (a11.content) {
-                    this.aiResultText += a11.content;
+                if (result.content) {
+                    this.aiResultText += result.content;
                 }
             },
-            onComplete: (z10) => {
+            onComplete: (result) => {
             },
-        }).then((y10) => {
-            this.taskId = y10;
+        }).then((id) => {
+            this.taskId = id;
         });
     }
     initialRender() {
-        this.observeComponentCreation2((w10, x10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.height('100%');
         }, Column);
-        this.observeComponentCreation2((u10, v10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.height(382);
             Column.width('100%');
             Column.margin({
-                top: LengthMetrics.vp(16),
-                end: LengthMetrics.vp(8)
+                top: 16,
+                right: 8
             });
         }, Column);
-        this.observeComponentCreation2((s10, t10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create();
             Scroll.constraintSize({ maxHeight: 358 });
         }, Scroll);
-        this.observeComponentCreation2((q10, r10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.padding({
-                bottom: LengthMetrics.vp(6),
-                start: LengthMetrics.vp(16),
+                bottom: 6,
+                left: 16
             });
         }, Column);
-        this.observeComponentCreation2((o10, p10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create({
                 direction: FlexDirection.Row,
                 justifyContent: FlexAlign.Start,
@@ -156,13 +155,13 @@ class TextTouchUp extends ViewV2 {
             Flex.width('100%');
             Flex.height(40);
             Flex.padding({
-                top: LengthMetrics.vp(8),
-                bottom: LengthMetrics.vp(12),
-                start: LengthMetrics.vp(8),
-                end: LengthMetrics.vp(8)
+                top: 8,
+                bottom: 12,
+                left: 8,
+                right: 8
             });
         }, Flex);
-        this.observeComponentCreation2((m10, n10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('深度思考');
             Text.width(582);
             Text.height(20);
@@ -173,7 +172,7 @@ class TextTouchUp extends ViewV2 {
             Text.lineHeight(17);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((k10, l10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create(this.symbolRes);
             SymbolGlyph.width(20);
             SymbolGlyph.height(20);
@@ -190,7 +189,7 @@ class TextTouchUp extends ViewV2 {
             });
         }, SymbolGlyph);
         Flex.pop();
-        this.observeComponentCreation2((i10, j10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.aiThinkText);
             Text.fontColor({ "id": 125830984, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontSize(14);
@@ -198,35 +197,35 @@ class TextTouchUp extends ViewV2 {
             Text.lineHeight(17);
             Text.backgroundColor(Color.Transparent);
             Text.padding({
-                start: LengthMetrics.vp(8),
-                end: LengthMetrics.vp(8)
+                left: 8,
+                right: 8
             });
             Text.visibility(this.imgOrientation == ImageRotateOrientation.UP ? Visibility.Visible : Visibility.None);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((g10, h10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.padding({
-                top: LengthMetrics.vp(8.5),
-                bottom: LengthMetrics.vp(8)
+                top: 8,
+                bottom: 8
             });
         }, Column);
-        this.observeComponentCreation2((e10, f10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Divider.create();
             Divider.strokeWidth(0.5);
             Divider.color({ "id": 125831013, "type": 10001, params: ['sys.color.comp_divider'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
         }, Divider);
         Column.pop();
-        this.observeComponentCreation2((c10, d10) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.height(184);
             Column.padding({
-                top: LengthMetrics.vp(8),
-                bottom: LengthMetrics.vp(8),
-                start: LengthMetrics.vp(16),
-                end: LengthMetrics.vp(16)
+                top: 8,
+                bottom: 8,
+                left: 16,
+                right: 16
             });
             Column.borderRadius(16);
             Column.backgroundColor("#ffffffff");
@@ -238,8 +237,8 @@ class TextTouchUp extends ViewV2 {
                 color: '#05ffffff'
             });
         }, Column);
-        this.observeComponentCreation2((z9, a10) => {
-            TextArea.create({ text: { value: this.aiResultText, changeEvent: b10 => { this.aiResultText = b10; } } });
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            TextArea.create({ text: { value: this.aiResultText, changeEvent: newValue => { this.aiResultText = newValue; } } });
             TextArea.placeholderFont({ size: 14 });
             TextArea.fontColor('#e6000000');
             TextArea.fontSize(16);
@@ -247,10 +246,10 @@ class TextTouchUp extends ViewV2 {
             TextArea.lineHeight(19);
             TextArea.backgroundColor("#ffffffff");
             TextArea.padding({
-                top: LengthMetrics.vp(0),
-                bottom: LengthMetrics.vp(0),
-                start: LengthMetrics.vp(0),
-                end: LengthMetrics.vp(0)
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0
             });
             TextArea.borderRadius(0);
         }, TextArea);
@@ -258,7 +257,7 @@ class TextTouchUp extends ViewV2 {
         Column.pop();
         Scroll.pop();
         Column.pop();
-        this.observeComponentCreation2((x9, y9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('内容由API生成');
             Text.fontColor({ "id": 125830984, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontSize(12);
@@ -267,20 +266,22 @@ class TextTouchUp extends ViewV2 {
             Text.textAlign(TextAlign.Center);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((v9, w9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel('使用润色结果');
             Button.width(448);
             Button.height(40);
             Button.fontSize(16);
             Button.fontWeight(500);
             Button.margin({
-                top: LengthMetrics.vp(20),
-                bottom: LengthMetrics.vp(16),
-                start: LengthMetrics.vp(101),
-                end: LengthMetrics.vp(101)
+                top: 20,
+                bottom: 16,
+                left: 101,
+                right: 101
             });
             Button.onClick(() => {
-                this.stack.pop(this.aiResultText);
+                if (this.stack) {
+                    this.stack.pop(this.aiResultText);
+                }
             });
         }, Button);
         Button.pop();
