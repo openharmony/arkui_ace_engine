@@ -18476,7 +18476,7 @@ void ResetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
 {
     auto resultValue =
-        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getIgnoreLayoutSafeArea(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getIgnoreLayoutSafeAreaOpts(node->uiNodeHandle);
     g_numberValues[NUM_0].u32 = resultValue.type;
     g_numberValues[NUM_1].u32 = resultValue.edges;
     return &g_attributeItem;
@@ -18597,20 +18597,20 @@ int32_t SetBorderRadiusType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         type = item->value[NUM_0].i32;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadiusType(node->uiNodeHandle, type);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRenderStrategy(node->uiNodeHandle, type);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetBorderRadiusType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadiusType(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderStrategy(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetBorderRadiusType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadiusType(node->uiNodeHandle);
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getRenderStrategy(node->uiNodeHandle);
     if (g_numberValues[0].i32 < 0 || g_numberValues[0].i32 > 1) {
         return nullptr;
     }

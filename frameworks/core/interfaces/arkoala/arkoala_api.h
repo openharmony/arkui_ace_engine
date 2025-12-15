@@ -3135,11 +3135,11 @@ struct ArkUICommonModifier {
     void (*resetDashWidth)(ArkUINodeHandle node);
     void (*getDashWidth)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 unit);
     ArkUI_Int32 (*getLayoutGravity)(ArkUINodeHandle node);
-    void (*setBorderRadiusType)(ArkUINodeHandle node, ArkUI_Int32 type);
-    void (*resetBorderRadiusType)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getBorderRadiusType)(ArkUINodeHandle node);
+    void (*resetRenderStrategy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRenderStrategy)(ArkUINodeHandle node);
     void (*setMaterialFilter)(ArkUINodeHandle node, void* filter);
     void (*resetMaterialFilter)(ArkUINodeHandle node);
+    ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeAreaOpts)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
