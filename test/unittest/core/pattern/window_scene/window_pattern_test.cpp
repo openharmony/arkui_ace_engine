@@ -145,6 +145,32 @@ HWTEST_F(WindowPatternTest, AddPersistentImage, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSnapshotWindowProperty
+ * @tc.desc: UpdateSnapshotWindowProperty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, UpdateSnapshotWindowProperty, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->enableRemoveStartingWindow_ = false;
+    sceneSession_->appBufferReady_ = false;
+    sceneSession_->surfaceNode_->bufferAvailable_ = false;
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene_);
+    windowScene_->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene_->snapshotWindow_, nullptr);
+
+    sceneSession_->isPersistentImageFit_ = true;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), true);
+
+    sceneSession_->isPersistentImageFit_ = false;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), false);
+}
+
+/**
  * @tc.name: AddBackgroundColorDelayed
  * @tc.desc: add background color delayed
  * @tc.type: FUNC
@@ -181,12 +207,35 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
     windowScene_->CreateSnapshotWindow();
     auto key = Rosen::defaultStatus;
     sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
+    sceneSession_->isPersistentImageFit_ = true;
+    sceneSession_->lastLayoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 200,
+        .height_ = 200,
+    };
     windowScene_->CreateSnapshotWindow();
 
     sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     sceneSession_->freeMultiWindow_.store(true);
+    sceneSession_->isPersistentImageFit_ = false;
     windowScene_->CreateSnapshotWindow();
-    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, true);
 }
 
 /**
