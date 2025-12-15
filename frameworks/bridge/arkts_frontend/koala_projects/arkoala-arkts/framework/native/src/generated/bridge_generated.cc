@@ -29981,6 +29981,11 @@ void impl_DragEvent_executeDropAnimation(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getDragEventAccessor()->executeDropAnimation(self, static_cast<Callback_Void*>(&customDropAnimationValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DragEvent_executeDropAnimation, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_DragEvent_getDisplayId(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->getDisplayId(self);
+}
+KOALA_INTEROP_DIRECT_1(DragEvent_getDisplayId, Ark_Int32, Ark_NativePointer)
 void impl_DragEvent_enableInternalDropAnimation(Ark_NativePointer thisPtr, const KStringPtr& configuration) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         GetAccessors()->getDragEventAccessor()->enableInternalDropAnimation(self, (const Ark_String*) (&configuration));

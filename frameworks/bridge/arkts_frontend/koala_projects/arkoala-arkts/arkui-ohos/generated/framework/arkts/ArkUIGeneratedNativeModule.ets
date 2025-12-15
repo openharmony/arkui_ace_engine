@@ -4087,6 +4087,8 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_executeDropAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragEvent_getDisplayId(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _DragEvent_enableInternalDropAnimation(ptr: KPointer, configuration: KStringPtr): void
     @ani.unsafe.Direct

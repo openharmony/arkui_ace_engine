@@ -13202,6 +13202,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Callback_Void* customDropAnimation)
     {
     }
+    Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -20315,6 +20319,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityYImpl,
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
+            DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,

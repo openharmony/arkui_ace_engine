@@ -670,6 +670,7 @@ export interface DragEvent {
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
+    getDisplayId(): int32
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -768,6 +769,9 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
+    public getDisplayId(): int32 {
+        return this.getDisplayId_serialize()
+    }
     public enableInternalDropAnimation(configuration: string): void {
         const configuration_casted = configuration as (string)
         this.enableInternalDropAnimation_serialize(configuration_casted)
@@ -857,6 +861,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    getDisplayId_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayId(this.peer!.ptr)
+        return retval
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
