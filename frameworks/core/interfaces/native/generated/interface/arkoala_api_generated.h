@@ -23931,6 +23931,8 @@ typedef struct GENERATED_ArkUIListModifier {
                                 const Opt_ChildrenMainSize* value);
     void (*setMaintainVisibleContentPosition)(Ark_NativePointer node,
                                               const Opt_Boolean* value);
+    void (*setSupportEmptyBranchInLazyLoading)(Ark_NativePointer node,
+                                               const Opt_Boolean* value);
     void (*setStackFromEnd)(Ark_NativePointer node,
                             const Opt_Boolean* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
