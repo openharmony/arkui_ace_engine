@@ -305,7 +305,7 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    multiSelectable(value: boolean | undefined): this {
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
         this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value)
         this.markDirty()
         return this
