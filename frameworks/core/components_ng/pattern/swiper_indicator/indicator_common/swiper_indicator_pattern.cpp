@@ -880,7 +880,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
         }
     }
 
-    if (currentIndex >= childrenSize - displayCount) {
+    if ((!swiperPattern->IsLoop() && currentIndex >= childrenSize - displayCount) || currentIndex == childrenSize - 1) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             if (NonPositive(touchOffset)) {
                 touchBottomType = TouchBottomType::START;
