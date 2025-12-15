@@ -2485,6 +2485,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallIn
 ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     if (nodeArg.IsNull()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, node is null");
@@ -2528,7 +2529,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* ru
     panda::Local<panda::ObjectRef> localParamObj = localParamArg->ToObject(vm);
     Framework::JSRef<Framework::JSObject> paramObj { Framework::JSObject(vm, localParamObj) };
     // not support form now, the second param is false
-    AnimationOption option = Framework::JSViewContext::CreateAnimation(paramObj, false);
+    AnimationOption option = Framework::JSViewContext::CreateAnimation(info.GetExecutionContext(), paramObj, false);
     std::optional<int32_t> finishCount;
     option.SetOnFinishEvent(ParseFinishCallback(localParamObj, frameNode, vm, finishCount));
     auto result = ViewAbstract::CreatePropertyAnimation(frameNode, propertyType, startValue, endValue, option);
