@@ -912,25 +912,31 @@ void SubwindowOhos::HideWindow()
         ContainerModalUnFocus();
     }
 
-    OHOS::Rosen::WMError ret = window_->Hide();
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    if (!parentContainer) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
-        return;
-    }
-    if (parentContainer->IsSceneBoardWindow()) {
-        window_->SetTouchable(true);
-    }
+    if (GetDestroyInHide()) {
+        DestroyWindow();
+    } else {
+        OHOS::Rosen::WMError ret = window_->Hide();
+        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        if (!parentContainer) {
+            TAG_LOGE(
+                AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
+            return;
+        }
+        if (parentContainer->IsSceneBoardWindow()) {
+            window_->SetTouchable(true);
+        }
 
-    if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
-        return;
+        if (ret != OHOS::Rosen::WMError::WM_OK) {
+            TAG_LOGE(
+                AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
+            return;
+        }
+        if (isShowed_) {
+            detachState_ = MenuWindowState::DETACHING;
+        }
+        isShowed_ = false;
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow successfully.");
     }
-    if (isShowed_) {
-        detachState_ = MenuWindowState::DETACHING;
-    }
-    isShowed_ = false;
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow successfully.");
 #ifndef NG_BUILD
     auto context = aceContainer->GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -955,6 +961,16 @@ void SubwindowOhos::ContainerModalUnFocus()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ContainerModalUnFocus();
     }
+}
+
+bool SubwindowOhos::GetDestroyInHide()
+{
+    return destroyInHide_;
+}
+
+void SubwindowOhos::SetDestroyInHide(bool destroyInHide)
+{
+    destroyInHide_ = destroyInHide;
 }
 
 void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)

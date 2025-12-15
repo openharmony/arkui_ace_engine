@@ -262,6 +262,8 @@ public:
     {
         return window_->IsReceiveDragEventEnabled();
     }
+    bool GetDestroyInHide() override;
+    void SetDestroyInHide(bool destroyInHide) override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -333,6 +335,7 @@ private:
     bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
     bool ifNeedSetCurrentWindow_ = true;
+    bool destroyInHide_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
