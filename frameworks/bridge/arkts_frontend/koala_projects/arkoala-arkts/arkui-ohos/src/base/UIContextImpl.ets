@@ -1180,6 +1180,10 @@ export class DetachedRootEntryImpl<T extends IncrementalNode> implements Detache
     dispose(): void {
         this.entry.dispose();
     }
+
+    forceCompleteRerender(): void {
+        this.entry.forceCompleteRerender();
+    }
 }
 
 export class DetachedRootEntryManager {
