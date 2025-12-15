@@ -551,8 +551,8 @@ export class Application {
         rootState?.forceCompleteRerender();
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
-            detachedRoot.compute()
-            detachedRoot.forceCompleteRerender()
+            detachedRoot.compute();
+            detachedRoot.forceCompleteRerender();
         }
         this.manager!.syncChanges();
         this.manager!.updateSnapshot();
