@@ -711,21 +711,32 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
-    MenuParam menuParam;
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
     if (!isPartialUpdate.has_value()) {
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_PARAM_INVALID);
         return;
     }
+    MenuParam menuParamOpen;
+    auto result = ViewAbstractModelStatic::GetMenuParam(menuParamOpen, frameNode);
+    if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(outputArgumentForReturningPromise, result);
+        return;
+    }
+    MenuParam menuParam;
     if (isPartialUpdate.value()) {
-        auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
-        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
-            ReturnPromise(outputArgumentForReturningPromise, result);
-            return;
-        }
+        menuParam = menuParamOpen;
     }
     g_bindMenuOptionsParam(*options, menuParam);
-    auto result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    // Updating these parameters is not supported
+    menuParam.isShowInSubWindow = menuParamOpen.isShowInSubWindow;
+    menuParam.previewMode = menuParamOpen.previewMode;
+    result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;
     }
