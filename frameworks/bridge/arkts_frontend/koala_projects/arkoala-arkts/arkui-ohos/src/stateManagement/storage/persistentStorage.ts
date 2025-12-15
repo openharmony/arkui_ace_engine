@@ -215,6 +215,10 @@ class PersistentStorage {
         });
     }
 
+    private isSimpleOrEnumType(ttype: Type, isEnum: boolean): boolean {
+        return this.simpleTypeSet.has(ttype) || isEnum;
+    }
+
     private persistPropInternal<T>(
         key: string,
         defaultValue: T,
@@ -223,7 +227,7 @@ class PersistentStorage {
     ): boolean {
         const ttype = Type.of(defaultValue);
         let isSimpleType = false;
-        if (!toJson && !fromJson && this.simpleTypeSet.has(ttype)) {
+        if (!toJson && !fromJson && this.isSimpleOrEnumType(ttype, defaultValue instanceof BaseEnum)) {
             isSimpleType = true;
         }
         try {
@@ -242,7 +246,7 @@ class PersistentStorage {
 
             // case 1: property exists in storage already and start to persist it
             if (AppStorage.has(key)) {
-                const success = PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
+                const success = PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson);
                 if (!success) {
                     StateMgmtConsole.log(`Failed to start persistence for existing key ${key}`);
                 }
@@ -254,6 +258,7 @@ class PersistentStorage {
                 PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
                     key,
                     ttype,
+                    isSimpleType,
                     isSimpleType ? undefined : fromJson,
                     isSimpleType ? undefined : toJson
                 )
@@ -266,6 +271,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
+                isSimpleType,
                 isSimpleType ? undefined : toJson
             );
             if (!success) {
@@ -320,12 +326,12 @@ class PersistentStorage {
 
     // case 1: neither on disk nor in storage
     // create with default value and start to persist
-    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>): boolean {
+    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
         if (!AppStorage.setOrCreate<T>(key, defaultValue)) {
             StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
         }
-        return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
+        return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson);
     }
 
     // case 2: not in storage
@@ -334,6 +340,7 @@ class PersistentStorage {
     private __readFromDiskSetAndPersist<T>(
         key: string,
         ttype: Type,
+        isSimpleType: boolean,
         fromJson?: FromJSONType<T>,
         toJson?: ToJSONType<T>
     ): boolean {
@@ -344,7 +351,7 @@ class PersistentStorage {
         }
 
         try {
-            if (this.simpleTypeSet.has(ttype) && fromJson === undefined) {
+            if (isSimpleType && fromJson === undefined) {
                 // Step 2: simple type just parse from disk
                 const value = JSON.parse<T>(jsonString, ttype);
 
@@ -352,7 +359,7 @@ class PersistentStorage {
                 AppStorage.setOrCreate(key, value);
 
                 // Step 4: persist the property
-                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
+                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson); // returns true on success
             } else {
                 // Step 2: Parse JSON string into JsonElement
                 const jsonElement = JSON.parseJsonElement(jsonString);
@@ -367,7 +374,7 @@ class PersistentStorage {
                 AppStorage.setOrCreate(key, value);
 
                 // Step 5: persist the property
-                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
+                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson); // returns true on success
             }
         } catch (error) {
             if (error instanceof jsonx.JsonError) {
@@ -381,7 +388,7 @@ class PersistentStorage {
 
     // case 3 - used by case 1 and 2: property exists in storage (caller needs to verify)
     // start to persist it
-    private __startToPersistStorageProperty<T>(key: string, ttype: Type, toJson?: ToJSONType<T>): boolean {
+    private __startToPersistStorageProperty<T>(key: string, ttype: Type, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
         const ref = AppStorage.ref<T>(key) as AbstractProperty<T> | undefined; // Explicitly specify T
         if (ref === undefined) {
             StateMgmtConsole.log(`Failed to get AppStorage ref for key ${key}`);
@@ -394,7 +401,7 @@ class PersistentStorage {
                 return;
             }
             try {
-                if (this.simpleTypeSet.has(ttype) && toJson === undefined) {
+                if (isSimpleType && toJson === undefined) {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {
