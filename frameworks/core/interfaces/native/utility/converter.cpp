@@ -120,8 +120,8 @@ namespace {
                 return std::to_string(static_cast<int64_t>(*value));
             }
         } else if (type == "s") {
-            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
-                return std::to_string(*value);
+            if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
+                return *value;
             }
         } else if (type == "f") {
             if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
@@ -129,6 +129,9 @@ namespace {
             } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
                 return std::to_string(*value);
             }
+        }
+        if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
+            return value->ToString().value_or("");
         }
         return "";
     }
