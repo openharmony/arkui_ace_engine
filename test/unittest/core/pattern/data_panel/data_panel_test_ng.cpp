@@ -985,7 +985,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level0)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
@@ -1016,7 +1015,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level0)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
@@ -1055,7 +1053,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     dataPanelModifier.SetMax(100.0f);
     std::vector<double> VALUES = { 0.001f, 20.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1144,7 +1141,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
@@ -1199,7 +1195,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
@@ -1445,7 +1440,6 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level0)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
