@@ -1764,6 +1764,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         focusHub->RemoveSelf();
     }
     pattern_->OnDetachFromMainTree();
+    pattern_->ContentChangeByDetaching(context);
     if (eventHub_) {
         eventHub_->OnDetachClear();
     }

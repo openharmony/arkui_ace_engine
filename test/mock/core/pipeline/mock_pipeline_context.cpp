@@ -1621,6 +1621,11 @@ const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
     return postEventManager_;
 }
 
+RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
+{
+    return contentChangeMgr_;
+}
+
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace

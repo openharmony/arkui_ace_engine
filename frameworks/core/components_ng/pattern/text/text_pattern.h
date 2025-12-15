@@ -1250,6 +1250,7 @@ private:
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
     bool RegularMatchNumbers(const std::u16string& content);
     void ResetMouseLeftPressedState();
+    void ContentChangeByDetaching(PipelineContext*) override;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
