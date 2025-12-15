@@ -23,7 +23,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
 import { int32 } from "@koalaui/common"
-import { CommonMethod, Bindable, BlurStyle } from "./component/common"
+import { CommonMethod, Bindable, BlurStyle, MenuKeyboardAvoidMode } from "./component/common"
 import { Resource } from "global.resource"
 import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset } from "./component/units"
 import { Color, OptionWidthMode } from "./component/enums"
@@ -31,6 +31,7 @@ import { ControlSize } from "./component/button"
 import { DividerOptions } from "./component/textPicker"
 import { TextModifier } from "arkui.TextModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { LengthMetrics } from "arkui.Graphics"
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute,AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -101,6 +102,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _showDefaultSelectedIcon_0_0value?: boolean | undefined
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundColor_0_0value?: ResourceColor | undefined
+    _keyboardAvoidMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _keyboardAvoidMode_0_0value?: MenuKeyboardAvoidMode | undefined
+    _minKeyboardAvoidDistance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minKeyboardAvoidDistance_0_0value?: LengthMetrics | undefined
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
@@ -632,6 +637,42 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._keyboardAvoidMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._keyboardAvoidMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setKeyboardAvoidModeAttribute((this._keyboardAvoidMode_0_0value as MenuKeyboardAvoidMode | undefined));
+                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setKeyboardAvoidModeAttribute((undefined as MenuKeyboardAvoidMode | undefined));
+                }
+            }
+        }
+        if (this._minKeyboardAvoidDistance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minKeyboardAvoidDistance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinKeyboardAvoidDistanceAttribute((this._minKeyboardAvoidDistance_0_0value as LengthMetrics | undefined));
+                    this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinKeyboardAvoidDistanceAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
         if (this._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._menuAlign_0_flag) {
@@ -1049,6 +1090,32 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._keyboardAvoidMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._keyboardAvoidMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.keyboardAvoidMode(modifier._keyboardAvoidMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.keyboardAvoidMode((undefined as MenuKeyboardAvoidMode | undefined));
+                }
+            }
+        }
+        if (modifier._minKeyboardAvoidDistance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minKeyboardAvoidDistance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minKeyboardAvoidDistance(modifier._minKeyboardAvoidDistance_0_0value);
+                    break;
+                }
+                default: {
+                    this.minKeyboardAvoidDistance((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
         if (modifier._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._menuAlign_0_flag) {
@@ -1392,6 +1459,30 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
+        if (((this._keyboardAvoidMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._keyboardAvoidMode_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
+        if (((this._minKeyboardAvoidDistance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minKeyboardAvoidDistance_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

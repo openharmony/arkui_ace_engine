@@ -5511,6 +5511,14 @@ typedef struct Opt_MenuAlignType {
     Ark_Tag tag;
     Ark_MenuAlignType value;
 } Opt_MenuAlignType;
+typedef enum Ark_MenuKeyboardAvoidMode {
+    ARK_MENU_KEYBOARD_AVOID_MODE_NONE = 0,
+    ARK_MENU_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE = 1,
+} Ark_MenuKeyboardAvoidMode;
+typedef struct Opt_MenuKeyboardAvoidMode {
+    Ark_Tag tag;
+    Ark_MenuKeyboardAvoidMode value;
+} Opt_MenuKeyboardAvoidMode;
 typedef enum Ark_MenuPolicy {
     ARK_MENU_POLICY_DEFAULT = 0,
     ARK_MENU_POLICY_HIDE = 1,
@@ -21204,6 +21212,8 @@ typedef struct Ark_ContextMenuOptions {
     Opt_PreviewScaleMode previewScaleMode;
     Opt_AvailableLayoutArea availableLayoutArea;
     Opt_Position anchorPosition;
+    Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
+    Opt_LengthMetrics minKeyboardAvoidDistance;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -21455,6 +21465,8 @@ typedef struct Ark_MenuOptions {
     Opt_Position anchorPosition;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
+    Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
+    Opt_LengthMetrics minKeyboardAvoidDistance;
 } Ark_MenuOptions;
 typedef struct Opt_MenuOptions {
     Ark_Tag tag;
@@ -24925,6 +24937,10 @@ typedef struct GENERATED_ArkUISelectModifier {
                                        const Opt_Boolean* value);
     void (*setBackgroundColor)(Ark_NativePointer node,
                                const Opt_ResourceColor* value);
+    void (*setKeyboardAvoidMode)(Ark_NativePointer node,
+                                 const Opt_MenuKeyboardAvoidMode* value);
+    void (*setMinKeyboardAvoidDistance)(Ark_NativePointer node,
+                                        const Opt_LengthMetrics* value);
     void (*setMenuAlign)(Ark_NativePointer node,
                          const Opt_MenuAlignType* alignType,
                          const Opt_Offset* offset);

@@ -639,6 +639,7 @@ namespace Converter {
     template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
     template<> MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options);
     template<> NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options);
+    template<> MenuKeyboardAvoidMode Convert(const Ark_MenuKeyboardAvoidMode& options);
     template<> NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src);
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
