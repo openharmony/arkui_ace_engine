@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (n9, o9, p9, q9) {
-    var r9 = arguments.length, s9 = r9 < 3 ? o9 : q9 === null ? q9 = Object.getOwnPropertyDescriptor(o9, p9) : q9, t9;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        s9 = Reflect.decorate(n9, o9, p9, q9);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var u9 = n9.length - 1; u9 >= 0; u9--)
-            if (t9 = n9[u9])
-                s9 = (r9 < 3 ? t9(s9) : r9 > 3 ? t9(o9, p9, s9) : t9(o9, p9)) || s9;
-    return r9 > 3 && s9 && Object.defineProperty(o9, p9, s9), s9;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { ImageGenerateState } from "../types/Declaration";
-import { LengthMetrics } from "@ohos.arkui.node";
 import { AIGenerateOptions } from '../utils/AIGenerateOptions';
 export class TextInputArea extends ViewV2 {
-    constructor(g9, h9, i9, j9 = -1, k9, l9) {
-        super(g9, j9, l9);
-        this.changeGenerateState = "changeGenerateState" in h9 ? h9.changeGenerateState : (m9) => { };
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.changeGenerateState = "changeGenerateState" in params ? params.changeGenerateState : (state) => { };
         this.isTextEdit = false;
         this.inputText = '';
         this.userPrompt = '';
@@ -60,8 +59,8 @@ export class TextInputArea extends ViewV2 {
         this.updateInputText = '';
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(e9) {
-        this.changeGenerateState = "changeGenerateState" in e9 ? e9.changeGenerateState : (f9) => { };
+    resetStateVarsOnReuse(params) {
+        this.changeGenerateState = "changeGenerateState" in params ? params.changeGenerateState : (state) => { };
         this.isTextEdit = false;
         this.inputText = '';
         this.userPrompt = '';
@@ -81,45 +80,44 @@ export class TextInputArea extends ViewV2 {
         this.updateInputText = '';
         this.resetMonitorsOnReuse();
     }
-    watchKeepLayout(v8) {
+    watchKeepLayout(monitor) {
         if (this.imgCounts <= 1) {
             this.isClickKeepLayout = false;
             if (this.inputText.includes(this.keepLayoutStr)) {
-                let d9 = this.inputText.replace(this.keepLayoutStr + '，', "");
-                this.inputText = d9;
+                let str = this.inputText.replace(this.keepLayoutStr + '，', "");
+                this.inputText = str;
             }
         }
         if (this.isClickKeepLayout && !this.inputText.includes(this.keepLayoutStr)) {
             this.inputText = this.keepLayoutStr + '，' + this.inputText;
         }
         else if (!this.isClickKeepLayout && this.inputText.includes(this.keepLayoutStr)) {
-            let b9 = this.inputText.includes(this.keepLayoutStr + '，') ? this.keepLayoutStr + '，' : this.keepLayoutStr;
-            let c9 = this.inputText.replace(b9, "");
-            this.inputText = c9;
+            let replaceStr = this.inputText.includes(this.keepLayoutStr + '，') ? this.keepLayoutStr + '，' : this.keepLayoutStr;
+            let str = this.inputText.replace(replaceStr, "");
+            this.inputText = str;
         }
         if (this.isSelectedPatches && !this.inputText.includes(this.patchesStr)) {
             if (this.inputText.includes(this.keepLayoutStr)) {
-                let y8 = this.inputText.indexOf(this.keepLayoutStr);
-                let z8 = this.inputText.slice(0, y8 + this.keepLayoutStr.length);
-                let a9 = this.inputText.slice(y8 + this.keepLayoutStr.length);
-                this.inputText = z8.concat('，' + this.patchesStr).concat(a9);
+                let index = this.inputText.indexOf(this.keepLayoutStr);
+                let part1 = this.inputText.slice(0, index + this.keepLayoutStr.length);
+                let part2 = this.inputText.slice(index + this.keepLayoutStr.length);
+                this.inputText = part1.concat('，' + this.patchesStr).concat(part2);
             }
             else {
                 this.inputText = this.patchesStr + '，' + this.inputText;
             }
         }
         else if (!this.isSelectedPatches && this.inputText.includes(this.patchesStr)) {
-            let w8 = this.inputText.includes(this.patchesStr + '，') ? this.patchesStr + '，' : this.patchesStr;
-            let x8 = this.inputText.replace(w8, "");
-            this.inputText = x8;
+            let replaceStr = this.inputText.includes(this.patchesStr + '，') ? this.patchesStr + '，' : this.patchesStr;
+            let str = this.inputText.replace(replaceStr, "");
+            this.inputText = str;
         }
         if (this.updateInputText.length != 0) {
-            this.inputText = this.updateInputText;
             this.inputText = this.updateInputText;
             this.updateInputText = '';
         }
     }
-    watchUserPromptChange(u8) {
+    watchUserPromptChange(monitor) {
         this.inputText = this.userPrompt;
     }
     aboutToAppear() {
@@ -127,27 +125,27 @@ export class TextInputArea extends ViewV2 {
         this.stack = this.queryNavigationInfo()?.pathStack;
     }
     initialRender() {
-        this.observeComponentCreation2((s8, t8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Start);
             Column.padding({
-                start: LengthMetrics.vp(16),
-                end: LengthMetrics.vp(16)
+                left: 16,
+                right: 16
             });
         }, Column);
-        this.observeComponentCreation2((q8, r8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 8 });
             Row.width('100%');
             Row.height(28);
             Row.visibility(this.isTextEdit ? Visibility.Visible : Visibility.None);
         }, Row);
-        this.observeComponentCreation2((o8, p8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 4 });
             Row.padding({
-                top: LengthMetrics.vp(6),
-                bottom: LengthMetrics.vp(6),
-                start: LengthMetrics.vp(12),
-                end: LengthMetrics.vp(12)
+                top: 6,
+                bottom: 6,
+                left: 12,
+                right: 12
             });
             Row.borderRadius(20);
             Row.backgroundColor(this.isClickKeepLayout ? { "id": 125831004, "type": 10001, params: ['sys.color.comp_background_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": 125831008, "type": 10001, params: ['sys.color.comp_background_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -156,25 +154,25 @@ export class TextInputArea extends ViewV2 {
                 this.isClickKeepLayout = !this.isClickKeepLayout;
             });
         }, Row);
-        this.observeComponentCreation2((m8, n8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({ "id": 125835100, "type": 40000, params: ['sys.symbol.AI_pencil'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             SymbolGlyph.width('16vp');
             SymbolGlyph.height('16vp');
         }, SymbolGlyph);
-        this.observeComponentCreation2((k8, l8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('保持布局');
             Text.height('100%');
             Text.fontSize(12);
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((h8, i8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 4 });
             Row.padding({
-                top: LengthMetrics.vp(6),
-                bottom: LengthMetrics.vp(6),
-                start: LengthMetrics.vp(12),
-                end: LengthMetrics.vp(12)
+                top: 6,
+                bottom: 6,
+                left: 12,
+                right: 12
             });
             Row.borderRadius(20);
             Row.backgroundColor({ "id": 125831008, "type": 10001, params: ['sys.color.comp_background_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -184,33 +182,34 @@ export class TextInputArea extends ViewV2 {
                 this.isShowTouchUp = true;
                 this.inputController.stopEditing();
                 AIGenerateOptions.getInstance().updateUserPrompt(this.inputText);
-                this.stack.pushPath({
-                    name: 'textTouchUp',
-                    onPop: (j8) => {
-                        this.inputText = j8.result.toString();
-                    }
-                });
+                if (this.stack) {
+                    this.stack.pushPath({
+                        name: 'textTouchUp', onPop: (popInfo) => {
+                            this.inputText = popInfo.result.toString();
+                        }
+                    });
+                }
             });
         }, Row);
-        this.observeComponentCreation2((f8, g8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({ "id": 125835100, "type": 40000, params: ['sys.symbol.AI_pencil'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             SymbolGlyph.width('16vp');
             SymbolGlyph.height('16vp');
         }, SymbolGlyph);
-        this.observeComponentCreation2((d8, e8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('文本润色');
             Text.height('100%');
             Text.fontSize(12);
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((b8, c8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 4 });
             Row.padding({
-                top: LengthMetrics.vp(6),
-                bottom: LengthMetrics.vp(6),
-                start: LengthMetrics.vp(12),
-                end: LengthMetrics.vp(12)
+                top: 6,
+                bottom: 6,
+                left: 12,
+                right: 12
             });
             Row.borderRadius(20);
             Row.backgroundColor(this.isSelectedPatches ? { "id": 125831004, "type": 10001, params: ['sys.color.comp_background_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": 125831008, "type": 10001, params: ['sys.color.comp_background_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -219,12 +218,12 @@ export class TextInputArea extends ViewV2 {
                 this.isSelectedPatches = !this.isSelectedPatches;
             });
         }, Row);
-        this.observeComponentCreation2((z7, a8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({ "id": 125831455, "type": 40000, params: ['sys.symbol.stickers'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             SymbolGlyph.width('16vp');
             SymbolGlyph.height('16vp');
         }, SymbolGlyph);
-        this.observeComponentCreation2((x7, y7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('贴纸效果');
             Text.height('100%');
             Text.fontSize(12);
@@ -232,24 +231,24 @@ export class TextInputArea extends ViewV2 {
         Text.pop();
         Row.pop();
         Row.pop();
-        this.observeComponentCreation2((v7, w7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 12 });
             Row.width('100%');
             Row.alignItems(VerticalAlign.Bottom);
             Row.padding({
-                top: LengthMetrics.vp(12),
-                bottom: LengthMetrics.vp(12)
+                top: 12,
+                bottom: 12
             });
         }, Row);
-        this.observeComponentCreation2((t7, u7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.height(this.inputHeight);
             Column.width(510);
             Column.borderRadius(31.11);
             Column.borderWidth(0.5);
         }, Column);
-        this.observeComponentCreation2((n7, o7) => {
-            TextArea.create({ placeholder: '描述你想要创作的内容', text: { value: this.inputText, changeEvent: s7 => { this.inputText = s7; } }, controller: this.inputController });
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            TextArea.create({ placeholder: '描述你想要创作的内容', text: { value: this.inputText, changeEvent: newValue => { this.inputText = newValue; } }, controller: this.inputController });
             TextArea.padding({ top: this.textAreaPadding, bottom: this.textAreaPadding });
             TextArea.constraintSize({
                 maxHeight: this.textAreaPadding * 2 +
@@ -262,8 +261,8 @@ export class TextInputArea extends ViewV2 {
             TextArea.maxLines(this.textMaxLines);
             TextArea.textOverflow(this.textOverflow);
             TextArea.barState(BarState.On);
-            TextArea.onChange((r7) => {
-                this.inputText = r7;
+            TextArea.onChange((value) => {
+                this.inputText = value;
                 this.isEnableTouchUp = this.inputText.length > 0 ? true : false;
                 if (!this.inputText.includes(this.keepLayoutStr)) {
                     this.isClickKeepLayout = false;
@@ -278,15 +277,15 @@ export class TextInputArea extends ViewV2 {
                     this.isSelectedPatches = true;
                 }
             });
-            TextArea.onClick((q7) => {
+            TextArea.onClick((event) => {
                 if (!this.inputText.includes(this.keepLayoutStr) && this.imgCounts > 1) {
                     this.inputText = this.keepLayoutStr + '，' + this.inputText;
                     this.isClickKeepLayout = true;
                 }
             });
-            TextArea.onEditChange((p7) => {
-                this.isTextEdit = p7;
-                if (p7) {
+            TextArea.onEditChange((isEditing) => {
+                this.isTextEdit = isEditing;
+                if (isEditing) {
                     this.textMaxLines = 0;
                     this.textOverflow = TextOverflow.None;
                     this.inputHeight = 'auto';
@@ -301,7 +300,7 @@ export class TextInputArea extends ViewV2 {
             });
         }, TextArea);
         Column.pop();
-        this.observeComponentCreation2((l7, m7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.borderRadius(31.11);
             Column.borderWidth(0.5);

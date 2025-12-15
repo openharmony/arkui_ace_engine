@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { ImageGenerateState } from "../types/Declaration";
-import { KeyboardAvoidMode, MeasureUtils, LengthMetrics } from '@kit.ArkUI';
+import { KeyboardAvoidMode, MeasureUtils } from '@kit.ArkUI';
 import { AIGenerateOptions } from '../utils/AIGenerateOptions';
 
 @ComponentV2
@@ -81,7 +81,6 @@ export struct TextInputArea {
 
     if (this.updateInputText.length != 0) {
       this.inputText = this.updateInputText;
-      this.inputText = this.updateInputText;
       this.updateInputText = '';
     }
   }
@@ -108,10 +107,10 @@ export struct TextInputArea {
             .fontSize(12)
         }
         .padding({
-          top: LengthMetrics.vp(6),
-          bottom: LengthMetrics.vp(6),
-          start: LengthMetrics.vp(12),
-          end: LengthMetrics.vp(12)
+          top: 6,
+          bottom: 6,
+          left: 12,
+          right: 12
         })
         .borderRadius(20)
         .backgroundColor(this.isClickKeepLayout ? $r('sys.color.comp_background_primary') :
@@ -130,10 +129,10 @@ export struct TextInputArea {
             .fontSize(12)
         }
         .padding({
-          top: LengthMetrics.vp(6),
-          bottom: LengthMetrics.vp(6),
-          start: LengthMetrics.vp(12),
-          end: LengthMetrics.vp(12)
+          top: 6,
+          bottom: 6,
+          left: 12,
+          right: 12
         })
         .borderRadius(20)
         .backgroundColor($r('sys.color.comp_background_tertiary'))
@@ -143,11 +142,13 @@ export struct TextInputArea {
           this.isShowTouchUp = true;
           this.inputController.stopEditing();
           AIGenerateOptions.getInstance().updateUserPrompt(this.inputText);
-          this.stack!.pushPath({
-            name: 'textTouchUp', onPop: (popInfo: PopInfo) => {
-              this.inputText = popInfo.result.toString();
-            }
-          })
+          if (this.stack) {
+            this.stack.pushPath({
+              name: 'textTouchUp', onPop: (popInfo: PopInfo) => {
+                this.inputText = popInfo.result.toString();
+              }
+            })
+          }
         })
 
         Row({space: 4}) {
@@ -159,10 +160,10 @@ export struct TextInputArea {
             .fontSize(12)
         }
         .padding({
-          top: LengthMetrics.vp(6),
-          bottom: LengthMetrics.vp(6),
-          start: LengthMetrics.vp(12),
-          end: LengthMetrics.vp(12)
+          top: 6,
+          bottom: 6,
+          left: 12,
+          right: 12
         })
         .borderRadius(20)
         .backgroundColor(this.isSelectedPatches ? $r('sys.color.comp_background_primary') :
@@ -243,14 +244,14 @@ export struct TextInputArea {
       .width('100%')
       .alignItems(VerticalAlign.Bottom)
       .padding({
-        top: LengthMetrics.vp(12),
-        bottom: LengthMetrics.vp(12)
+        top: 12,
+        bottom: 12
       })
     }
     .alignItems(HorizontalAlign.Start)
     .padding({
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16)
+      left: 16,
+      right: 16
     })
   }
 }

@@ -59,9 +59,9 @@ export declare struct TextInputArea {
     @Local
     updateInputText: string;
     @Monitor('imgCounts', 'isClickKeepLayout', 'updateInputText', 'isSelectedPatches')
-    watchKeepLayout(v8: IMonitor): void;
+    watchKeepLayout(monitor: IMonitor): void;
     @Monitor('userPrompt')
-    watchUserPromptChange(u8: IMonitor): void;
+    watchUserPromptChange(monitor: IMonitor): void;
     aboutToAppear(): void;
     build(): void;
 }
