@@ -551,6 +551,7 @@ constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
+constexpr char OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE[] = "persist.web.offline_web_evict_frame_buffers_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
@@ -631,12 +632,11 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
-    int webId = GetWebId();
-    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", webId);
-    CleanupWebPatternResource(webId);
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
+    CleanupWebPatternResource();
     UninitTouchEventListener();
     if (setWebDetachCallback_) {
-        auto setWebDetachTask = [callback = setWebDetachCallback_, webId]() {
+        auto setWebDetachTask = [callback = setWebDetachCallback_, webId = GetWebId()]() {
             CHECK_NULL_VOID(callback);
             callback(webId);
         };
@@ -1491,6 +1491,7 @@ void WebPattern::InitFeatureParam()
 {
     isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
     isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
+    isOfflineWebEvictFrameBuffersEnable_ = system::GetBoolParameter(OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE, true);
 }
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -4595,8 +4596,10 @@ void WebPattern::InitInOfflineMode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowStateChangedCallback(host->GetId());
-    offlineWebNodeId_ = host->GetId();
+    if (isOfflineWebEvictFrameBuffersEnable_) {
+        pipelineContext->AddWindowStateChangedCallback(host->GetId());
+        offlineWebNodeId_ = host->GetId();
+    }
     int width = 0;
     int height = 0;
     auto layoutProperty = host->GetLayoutProperty();
@@ -6826,26 +6829,25 @@ void WebPattern::OnWindowShow()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        if (OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
-            delegate_->OnActive();
-        }
+        delegate_->SetOfflineWebActiveStatus(webId, true);
         return;
     }
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
 
-    if (isWindowShow_ || !isVisible_) {
-        return;
-    }
-
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     componentVisibility_ = layoutProperty->GetVisibility().value_or(VisibleType::GONE);
     // When the visibility of web component is invisible, the window notification is not processed
-    if (componentVisibility_ == VisibleType::INVISIBLE) {
-        ACE_SCOPED_TRACE("WebPattern::OnWindowShow visibility of web component is invisible, WebId %d", GetWebId());
+    if (isWindowShow_ || !isVisible_ || componentVisibility_ == VisibleType::INVISIBLE) {
+        ACE_SCOPED_TRACE("WebPattern::OnWindowShow WebId %d, isWindowShow %d, isVisible %d, componentVisibility_ %d",
+            webId, isWindowShow_, isVisible_, static_cast<int>(componentVisibility_));
+        if (offlineWebInited_ && isOfflineWebEvictFrameBuffersEnable_) {
+            delegate_->SetOfflineWebActiveStatus(webId, true);
+        }
         return;
     }
+
     delegate_->ShowWebView();
     SetActiveStatusInner(true);
     isWindowShow_ = true;
@@ -6856,11 +6858,12 @@ void WebPattern::OnWindowHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     NodeStatus nodeStatus = host->GetNodeStatus();
+    int32_t webId = GetWebId();
     TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowHide WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
-        GetWebId(), offlineWebInited_, static_cast<int>(nodeStatus));
+        webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->OnInactive(true);
+        delegate_->SetOfflineWebActiveStatus(webId, false);
         return;
     }
     delegate_->OnRenderToBackground();
@@ -6868,9 +6871,10 @@ void WebPattern::OnWindowHide()
     if (!isWindowShow_) {
         return;
     }
-
-    CHECK_NULL_VOID(delegate_);
-    SetActiveStatusInner(false, offlineWebInited_ && !isActive_);
+    if (offlineWebInited_ && !isActive_) {
+        delegate_->SetOfflineWebActiveStatus(webId, false);
+    }
+    SetActiveStatusInner(false);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
     needOnFocus_ = false;
@@ -9924,10 +9928,10 @@ void WebPattern::OnStatusBarClick()
     }
 }
 
-void WebPattern::CleanupWebPatternResource(int32_t webId)
+void WebPattern::CleanupWebPatternResource()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::CleanupWebPatternResource");
-    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(webId);
+    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(GetWebId());
     if (offlineWebInited_) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);

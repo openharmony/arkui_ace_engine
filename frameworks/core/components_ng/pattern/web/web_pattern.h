@@ -1068,7 +1068,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void CleanupWebPatternResource(int32_t webId);
+    void CleanupWebPatternResource();
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -1457,6 +1457,7 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
+    bool isOfflineWebEvictFrameBuffersEnable_ = false;
     OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isScrollStarted_ = false;
