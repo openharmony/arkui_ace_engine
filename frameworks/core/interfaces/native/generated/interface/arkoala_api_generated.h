@@ -29231,8 +29231,6 @@ typedef struct GENERATED_ArkUITextTimerControllerAccessor {
 } GENERATED_ArkUITextTimerControllerAccessor;
 
 typedef struct GENERATED_ArkUIThemeOpsAccessor {
-    // core interface
-
     void (*sendThemeToNative)(const Array_ResourceColor* colorArray,
                               const Array_ResourceColor* darkColorArray,
                               Ark_Int32 elmtId,
