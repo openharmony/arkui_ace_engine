@@ -112,14 +112,23 @@ namespace {
         if (index >= params.size()) {
             return std::string();
         }
-        if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
-            return *value;
-        } else if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
-            return std::to_string(*value);
-        } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
-            return std::to_string(*value);
-        } else if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
-            return value->ToString().value_or("");
+        auto& item = params.at(index).value();
+        if (type == "d") {
+            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+                return std::to_string(*value);
+            } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+                return std::to_string(static_cast<int64_t>(*value));
+            }
+        } else if (type == "s") {
+            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+                return std::to_string(*value);
+            }
+        } else if (type == "f") {
+            if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+                return std::to_string(static_cast<double>(*value));
+            } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+                return std::to_string(*value);
+            }
         }
         return "";
     }
