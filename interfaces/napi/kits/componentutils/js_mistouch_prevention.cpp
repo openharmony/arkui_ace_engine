@@ -28,10 +28,21 @@ napi_value MistouchPrevention::GetItemsInShapePath(napi_env env, napi_callback_i
     size_t argc = 1;
     napi_value args[1] = { nullptr };
 
+    napi_value array = nullptr;
+    napi_create_array(env, &array);
+
     napi_env napiEnv = env;
     napi_get_cb_info(napiEnv, info, &argc, args, nullptr, nullptr);
+    if (argc < 1 || args[0] == nullptr) {
+        LOGE("GetItemsInShapePath error, at least 1 argument required");
+        return array;
+    }
     napi_value imagesValue;
-    napi_get_named_property(env, args[0], "images", &imagesValue);
+    napi_status status = napi_get_named_property(env, args[0], "images", &imagesValue);
+    if (status != napi_ok) {
+        LOGE("GetItemsInShapePath error, cannot get images property");
+        return array;
+    }
     return imagesValue;
 }
 
