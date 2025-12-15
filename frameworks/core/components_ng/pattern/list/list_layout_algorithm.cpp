@@ -71,7 +71,7 @@ static RefPtr<LayoutWrapper> GetListItemWidthEmptyBranch(
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index , addToRenderTree, isCache);
+    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
 }
 } // namespace
 
@@ -2539,7 +2539,8 @@ void ListLayoutAlgorithm::PredictBuildV2(
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
-        auto wrapper = GetListItemWidthEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
+        auto wrapper =
+            GetListItemWidthEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
