@@ -598,6 +598,8 @@ public:
         return onContentDidScroll_;
     }
 
+    std::pair<int32_t, float> GetIndicatorProgress() const;
+
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
     bool IsUseCustomAnimation() const;

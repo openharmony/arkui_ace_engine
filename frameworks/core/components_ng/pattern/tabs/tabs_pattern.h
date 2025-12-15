@@ -87,6 +87,8 @@ public:
 
     void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll);
+
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
@@ -171,7 +173,6 @@ public:
 
     void OnColorModeChange(uint32_t colorMode) override;
     void DumpInfo() override;
-    void DumpAdvanceInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -208,6 +209,7 @@ private:
 
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventWithPreIndexPtr onChangeEvent_;
+    std::shared_ptr<ContentDidScrollEvent> onContentDidScroll_;
     ChangeEventPtr selectedEvent_;
     ChangeEventPtr unselectedEvent_;
     ChangeEventPtr onTabBarClickEvent_;

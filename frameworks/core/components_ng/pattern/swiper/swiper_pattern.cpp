@@ -6552,6 +6552,15 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     pipeline->FlushMessages();
 }
 
+std::pair<int32_t, float> SwiperPattern::GetIndicatorProgress() const
+{
+    auto firstItem = GetFirstItemInfoInVisibleArea();
+    float translateLength = firstItem.second.endPos - firstItem.second.startPos;
+    int32_t swipingIndex = firstItem.first;
+    float turnPageRate = (!NearZero(translateLength)) ? -firstItem.second.startPos / translateLength : 0.0f;
+    return { swipingIndex, turnPageRate };
+}
+
 void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
 {
     CHECK_NULL_VOID(swiperController_);
