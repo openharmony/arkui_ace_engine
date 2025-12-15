@@ -1102,7 +1102,6 @@ void FrameNode::DumpOverlayInfo()
 void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
-    json->Put("$debugLine", "");
     if (!propInspectorId_->empty()) {
         json->Put("compid", propInspectorId_.value_or("").c_str());
     }
@@ -1121,6 +1120,7 @@ void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonVal
         }
         if (config.interactionInfo) {
             json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
+            json->Put(TreeKey::IS_EDITABLE, accessibilityProperty_->IsEditable());
         }
     }
 }

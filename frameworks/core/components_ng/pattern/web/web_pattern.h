@@ -890,6 +890,8 @@ public:
     void OnColorConfigurationUpdate() override;
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
+    void DumpSimplifyInfoOnlyForParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
 
     bool IsPreviewImageNodeExist() const
     {

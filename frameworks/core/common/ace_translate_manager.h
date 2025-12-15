@@ -35,7 +35,6 @@ public:
     void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
     void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
-    void FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result);
     void PostToUI(const std::function<void()>& task) override;
 
 private:

@@ -3858,7 +3858,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
-        uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
+        rootNode_->FindTopNavDestination(topNavNode);
         if (topNavNode != nullptr) {
             GetOverlayInspector(root, { true, true, true });
             if (!root->Contains("$children")) {
@@ -6508,43 +6508,62 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, Para
     }
 }
 
+void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, ParamConfig& config)
+{
+    if (topNavNode != nullptr) {
+        GetOverlayInspector(root, config);
+        if (!root->Contains("$children")) {
+            auto array = JsonUtil::CreateArray();
+            root->PutRef("$children", std::move(array));
+        }
+        auto childrenJson = root->GetValue("$children");
+        auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+        topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
+        childrenJson->Put(topNavDestinationJson);
+    } else {
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
+    }
+}
+
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
 {
-    auto root = JsonUtil::CreateSharedPtrJson(true);
-    auto cb = [root, onlyNeedVisible]() {
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        auto res = JsonUtil::Create(true);
-        res->Put("0", json.c_str());
-        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        if (!onlyNeedVisible) {
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        }
-    };
-    ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d][config.accessibilityInfo:%d]["
-                     "config.cacheNodes:%d]",
-        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes);
-    if (onlyNeedVisible) {
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
-        uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
-        if (topNavNode != nullptr) {
-            GetOverlayInspector(root, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
+    constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
+    CHECK_NULL_VOID(taskExecutor_);
+    auto weak = WeakClaim(this);
+    taskExecutor_->PostSyncTaskTimeout(
+        [weak, onlyNeedVisible, config]() mutable {
+            auto pipelineContext = weak.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            auto root = JsonUtil::CreateSharedPtrJson(true);
+            auto cb = [root, onlyNeedVisible]() {
+                auto json = root->ToString();
+                json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+                auto res = JsonUtil::Create(true);
+                res->Put("0", json.c_str());
+                UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+                if (!onlyNeedVisible) {
+                    UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+                }
+            };
+            ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
+                             "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
+                onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
+            auto rootNode = pipelineContext->GetRootElement();
+            CHECK_NULL_VOID(rootNode);
+            auto taskExecutor = pipelineContext->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            if (onlyNeedVisible) {
+                RefPtr<NG::FrameNode> topNavNode = nullptr;
+                rootNode->FindTopNavDestination(topNavNode);
+                pipelineContext->DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
+                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
+            } else {
+                rootNode->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
             }
-            auto childrenJson = root->GetValue("$children");
-            auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-            topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
-            childrenJson->Put(topNavDestinationJson);
-        } else {
-            rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
-        }
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
-    } else {
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
-    }
+        },
+        TaskExecutor::TaskType::UI, SEARCH_ELEMENT_TIMEOUT_TIME, "ArkUIGetInspectorTree");
 }
 
 void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)

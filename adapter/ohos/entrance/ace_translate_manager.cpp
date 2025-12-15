@@ -155,7 +155,7 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
     RefPtr<NG::FrameNode> result;
-    FindTopNavDestination(pageNode, result);
+    pageNode->FindTopNavDestination(result);
     if (result != nullptr) {
         TravelFindPixelMap(result);
     } else {
@@ -189,20 +189,6 @@ void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
 {
     if (taskExecutor_) {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
-    }
-}
-
-void UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result)
-{
-    for (const auto& item : currentNode->GetChildren()) {
-        auto node = AceType::DynamicCast<NG::FrameNode>(item);
-        if (node && node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(node);
-            CHECK_NULL_VOID(navigationGroupNode);
-            result = navigationGroupNode->GetTopDestination();
-            return;
-        }
-        FindTopNavDestination(item, result);
     }
 }
 } // namespace OHOS::Ace
