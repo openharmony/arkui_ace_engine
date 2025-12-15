@@ -133,11 +133,12 @@ void RenderTextureImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [surface = extTexture_, id = textureId_, left, top, width, height]() {
-            if (surface) {
-                surface->SetSize(id, width, height);
+        [surface = extTexture_, weak = WeakClaim(this), left, top, width, height]() {
+            auto refThis = weak.Upgrade();
+            if (surface && refThis) {
+                surface->SetSize(refThis->textureId_, width, height);
 #if defined(IOS_PLATFORM)
-                surface->SetBounds(id, left, top, width, height);
+                surface->SetBounds(refThis->textureId_, left, top, width, height);
 #endif
             }
         },
@@ -166,7 +167,6 @@ void RenderTextureImpl::UpdateTextureImage(std::vector<float>& matrix)
 #ifdef RENDER_EXTRACT_SUPPORTED
 void RenderTextureImpl::GetTextureIsVideo(int32_t& type)
 {
-    std::string id = GetUniqueId();
     CHECK_NULL_VOID(extTexture_);
     extTexture_->GetTextureIsVideo(type);
 }
