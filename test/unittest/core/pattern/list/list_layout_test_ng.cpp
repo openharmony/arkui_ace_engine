@@ -21,6 +21,7 @@
 
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
@@ -4219,5 +4220,35 @@ HWTEST_F(ListLayoutTestNg, UpdateChildrenMainSizeRoundingMode001, TestSize.Level
     ASSERT_NE(listPattern, nullptr);
     listPattern->GetOrCreateListChildrenMainSize();
     EXPECT_EQ(listNode->afterAttachMainTreeTasks_.size(), taskSize + 1);
+}
+
+/**
+ * @tc.name: SupportEmptyBranchInLazyLoading001
+ * @tc.desc: Test SupportEmptyBranchInLazyLoading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SupportEmptyBranchInLazyLoading001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto wrapper0 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper0, nullptr);
+
+    model.SetSupportEmptyBranchInLazyLoading(true);
+    auto layoutProperty = frameNode_->GetLayoutProperty<ListLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper1, nullptr);
+
+    int32_t itemCount = 5;
+    float mainSize = 100.0f;
+    CreateItemsInLazyForEach(itemCount, mainSize);
+    CreateDone();
+
+    auto wrapper2 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
+    EXPECT_NE(wrapper2, nullptr);
 }
 } // namespace OHOS::Ace::NG
