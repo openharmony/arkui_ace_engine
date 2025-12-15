@@ -905,6 +905,9 @@ public:
     // multi thread function start
     void RemoveSelfMultiThread(BlurReason reason);
     void RemoveSelfExecuteFunction(BlurReason reason);
+    void SetFocusScopeIdMultiThread(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
+    void RemoveFocusScopeIdAndPriorityMultiThread();
+    void SetFocusScopePriorityMultiThread(const std::string& focusScopeId, const uint32_t focusPriority);
     // multi thread function end
 
 protected:

@@ -53,4 +53,37 @@ void FocusHub::RemoveSelfExecuteFunction(BlurReason reason)
         RemoveFocusScopeIdAndPriority();
     }
 }
+
+void FocusHub::SetFocusScopeIdMultiThread(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), focusScopeId, isGroup, arrowKeyStepOut]() {
+        auto focusHub = weak.Upgrade();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
+    });
+}
+
+void FocusHub::RemoveFocusScopeIdAndPriorityMultiThread()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+        auto focusHub = weak.Upgrade();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RemoveFocusScopeIdAndPriority();
+    });
+}
+
+void FocusHub::SetFocusScopePriorityMultiThread(const std::string& focusScopeId, const uint32_t focusPriority)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), focusScopeId, focusPriority]() {
+        auto focusHub = weak.Upgrade();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+    });
+}
 } // namespace OHOS::Ace::NG
