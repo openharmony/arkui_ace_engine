@@ -64,6 +64,8 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
+    std::unordered_map<int32_t, FingerInfo> latestTouchPoints;
+    std::unordered_map<int32_t, uint64_t> latestTimeStamps;
     for (const auto& point : touchPoints_) {
         if (CheckFingerListInDownFingers(point.second.id)) {
             continue;
@@ -71,14 +73,21 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         PointF localPoint(point.second.x, point.second.y);
         TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
-        FingerInfo fingerInfo = { point.second.GetOriginalReCovertId(), point.second.operatingHand,
-            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
-            point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
-        fingerList_.emplace_back(fingerInfo);
-        if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
-            && point.second.pointers.size() >= touchPoints_.size()) {
+        auto originalId = point.second.GetOriginalReCovertId();
+        auto currentTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
+        
+        auto it = latestTimeStamps.find(originalId);
+        if (it == latestTimeStamps.end() || currentTimeStamp > it->second) {
+            latestTimeStamps[originalId] = currentTimeStamp;
+
+            FingerInfo fingerInfo = { originalId, point.second.operatingHand,
+                point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
+                point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
+            latestTouchPoints[originalId] = fingerInfo;
+        }
+        if (maxTimeStamp <= currentTimeStamp && point.second.pointers.size() >= touchPoints_.size()) {
             lastPointEvent_ = point.second.GetTouchEventPointerEvent();
-            maxTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
+            maxTimeStamp = currentTimeStamp;
         } else if (point.second.pointers.size() < touchPoints_.size()) {
             std::string str = "[";
             for (const auto& point : touchPoints_) {
@@ -91,6 +100,9 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
                 "extraInfo:%{public}s",
                 static_cast<int32_t>(point.second.pointers.size()), str.c_str(), GetExtraInfo().c_str());
         }
+    }
+    for (const auto& fingerInfo : latestTouchPoints) {
+        fingerList_.emplace_back(fingerInfo.second);
     }
 }
 

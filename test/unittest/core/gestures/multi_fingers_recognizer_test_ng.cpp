@@ -341,6 +341,7 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test008, TestSize.Level1)
         for (auto id : testCase.touchPointIds) {
             TouchEvent event;
             event.id = id;
+            event.originalId = id;
             clickRecognizer->touchPoints_[id] = event;
         }
         clickRecognizer->UpdateFingerListInfo();
