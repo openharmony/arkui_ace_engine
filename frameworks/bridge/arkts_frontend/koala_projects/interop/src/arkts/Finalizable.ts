@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { finalizerRegister, finalizerUnregister, Thunk } from "@koalaui/common"
+import { finalizerRegister, finalizerUnregister, Thunk, int32 } from '@koalaui/common';
 import { InteropNativeModule } from "./InteropNativeModule"
+import { CallbackResource } from './SerializerBase'
 import { pointer, nullptr } from "./InteropTypes"
 
 export class NativeThunk implements Thunk {
@@ -38,6 +39,26 @@ export class NativeThunk implements Thunk {
     destroyNative(ptr: pointer, finalizer: pointer): void {
         InteropNativeModule._InvokeFinalizer(ptr, finalizer)
     }
+}
+
+class ResourceThunk implements Thunk {
+    resourceId: int32;
+    releaser: pointer;
+
+    constructor(resourceId: int32, releaser: pointer) {
+        this.resourceId = resourceId;
+        this.releaser = releaser;
+    }
+
+
+    clean(): void {
+        InteropNativeModule._CallCallbackResourceReleaser(this.releaser, this.resourceId)
+    }
+}
+
+export function resourceFinalizerRegister(value: object, resource: CallbackResource) {
+    InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
+    finalizerRegister(value, new ResourceThunk(resource.resourceId, resource.release))
 }
 
 /**
