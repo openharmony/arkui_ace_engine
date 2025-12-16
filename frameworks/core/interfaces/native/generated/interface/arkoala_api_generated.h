@@ -27577,7 +27577,7 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
 typedef struct GENERATED_ArkUIGestureOpsAccessor {
     Ark_NativePointer (*createTapGesture)(const Ark_Number* fingers,
                                           const Ark_Number* count,
-                                          const Ark_Number* distanceThreshold,
+                                          const Ark_Float64 distanceThreshold,
                                           Ark_Boolean isFingerCountLimited);
     Ark_NativePointer (*createLongPressGesture)(const Ark_Number* fingers,
                                                 Ark_Boolean repeat,

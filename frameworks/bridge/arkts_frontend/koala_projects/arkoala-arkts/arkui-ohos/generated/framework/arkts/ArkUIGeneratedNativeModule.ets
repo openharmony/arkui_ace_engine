@@ -4414,7 +4414,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _GestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
+    native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: KDouble, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
     native static _GestureOps_createLongPressGesture(fingers: number, repeat: KInt, duration: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
