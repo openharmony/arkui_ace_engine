@@ -277,16 +277,6 @@ public:
         return info_.contentStartOffset_;
     }
 
-    void SetEditModeOptions(EditModeOptions& editModeOptions)
-    {
-        editModeOptions_ = editModeOptions;
-    }
-
-    EditModeOptions GetEditModeOptions() const override
-    {
-        return editModeOptions_;
-    }
-
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -351,8 +341,6 @@ private:
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
-
-    EditModeOptions editModeOptions_;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

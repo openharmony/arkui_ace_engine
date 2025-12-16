@@ -110,6 +110,14 @@ void GridModelStatic::SetEditable(FrameNode* frameNode, const std::optional<bool
     }
 }
 
+void GridModelStatic::SetEditModeOptions(FrameNode* frameNode, const EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
 void GridModelStatic::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
 {
     auto pattern = frameNode->GetPattern<GridPattern>();

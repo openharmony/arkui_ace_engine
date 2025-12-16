@@ -26,6 +26,7 @@ public:
     static bool IsSelectedItemNode(const RefPtr<FrameNode>& frameNode);
     static std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems(const RefPtr<FrameNode>& frameNode);
     static bool IsGatherSelectedItemsAnimationEnabled(RefPtr<FrameNode>& frameNode);
+    static void BindContextMenu(FrameNode* frameNode);
 
     void PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode);
 

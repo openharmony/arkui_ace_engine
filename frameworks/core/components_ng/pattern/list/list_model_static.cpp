@@ -553,6 +553,14 @@ void ListModelStatic::SetEditMode(FrameNode* frameNode, bool editMode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
 }
 
+void ListModelStatic::SetEditModeOptions(FrameNode* frameNode, const EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
 void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable)
 {
     CHECK_NULL_VOID(frameNode);

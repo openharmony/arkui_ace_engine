@@ -921,6 +921,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_setAlignItems(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _GridAttribute_setEditModeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _GridAttribute_setOnScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_setOnWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1162,6 +1164,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_setSupportEmptyBranchInLazyLoading(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_setStackFromEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ListAttribute_setEditModeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_setOnScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

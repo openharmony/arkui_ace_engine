@@ -3069,6 +3069,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_GridItemAlignment* value)
     {
     }
+    void SetEditModeOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditModeOptions* value)
+    {
+    }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                    const Opt_OnScrollFrameBeginCallback* value)
     {
@@ -3637,6 +3641,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetStackFromEndImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
+    {
+    }
+    void SetEditModeOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditModeOptions* value)
     {
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
@@ -9084,6 +9092,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::SetEnableScrollInteractionImpl,
             GridAttributeModifier::SetFrictionImpl,
             GridAttributeModifier::SetAlignItemsImpl,
+            GridAttributeModifier::SetEditModeOptionsImpl,
             GridAttributeModifier::SetOnScrollFrameBeginImpl,
             GridAttributeModifier::SetOnWillScrollImpl,
             GridAttributeModifier::SetOnDidScrollImpl,
@@ -9295,6 +9304,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::SetChildrenMainSizeImpl,
             ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
             ListAttributeModifier::SetStackFromEndImpl,
+            ListAttributeModifier::SetEditModeOptionsImpl,
             ListAttributeModifier::SetOnScrollIndexImpl,
             ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
             ListAttributeModifier::SetOnItemMoveImpl,

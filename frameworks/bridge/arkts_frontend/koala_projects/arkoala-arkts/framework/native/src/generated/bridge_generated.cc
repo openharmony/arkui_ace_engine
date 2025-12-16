@@ -7878,6 +7878,19 @@ void impl_GridAttribute_setAlignItems(Ark_NativePointer thisPtr, KSerializerBuff
         GetNodeModifiers()->getGridModifier()->setAlignItems(self, static_cast<Opt_GridItemAlignment*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GridAttribute_setAlignItems, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GridAttribute_setEditModeOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_EditModeOptions valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = EditModeOptions_serializer::read(thisDeserializer);
+        }
+        Opt_EditModeOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGridModifier()->setEditModeOptions(self, static_cast<Opt_EditModeOptions*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GridAttribute_setEditModeOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridAttribute_setOnScrollFrameBegin(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -9645,6 +9658,19 @@ void impl_ListAttribute_setStackFromEnd(Ark_NativePointer thisPtr, KSerializerBu
         GetNodeModifiers()->getListModifier()->setStackFromEnd(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ListAttribute_setStackFromEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ListAttribute_setEditModeOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_EditModeOptions valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = EditModeOptions_serializer::read(thisDeserializer);
+        }
+        Opt_EditModeOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getListModifier()->setEditModeOptions(self, static_cast<Opt_EditModeOptions*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ListAttribute_setEditModeOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ListAttribute_setOnScrollIndex(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
