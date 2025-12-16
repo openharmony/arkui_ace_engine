@@ -2734,7 +2734,7 @@ void MovingPhotoPattern::SetMovingPhotoController(const RefPtr<MovingPhotoContro
     if (controller_) {
         return;
     }
-    CHECK_NULL_VOID(controller_);
+    CHECK_NULL_VOID(movingPhotoController);
     controller_ = movingPhotoController;
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();

@@ -406,7 +406,7 @@ void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[
 void MovingPhotoAni::SetMovingPhotoUri(ani_env *env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
 {
     ani_ref fn_ref;
-    if (ANI_OK == env->Object_CallMethodByName_Ref(obj, "getUri", ":C{std.core.String}", &fn_ref)) {
+    if (ANI_OK != env->Object_CallMethodByName_Ref(obj, "getUri", ":C{std.core.String}", &fn_ref)) {
         return;
     }
     std::string imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(fn_ref));

@@ -133,7 +133,7 @@ generate_static_abc("movingphotoview_abc") {
   dst_file = target_out_dir + "/movingphotoview.abc"
   out_puts = [ target_out_dir + "/movingphotoview.abc" ]
   is_boot_abc = "True"
-  external_dependencies = [ "ace_engine:copy_arkui_ets" ]
+  dependencies = [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/inner_api:copy_arkui_ets" ]
   ui_enable = "True"
   only_memo = "True"
 }
