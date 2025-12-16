@@ -56,6 +56,7 @@ public:
     static void PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
         DragPreviewOption& option);
     static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
+    static int32_t ParseUiMaterial(const DragPreviewOption& option);
     static std::optional<Shadow> GetDefaultShadow();
     static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
     static float RadiusToSigma(float radius);

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "ui/properties/ui_material.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -1097,6 +1098,9 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto optionsFromModifier = frameNode->GetDragPreviewOption().options;
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
+    }
+    if (optionsFromModifier.material) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(imageNode), AceType::RawPtr(optionsFromModifier.material));
     }
 }
 

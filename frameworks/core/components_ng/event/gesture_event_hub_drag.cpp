@@ -990,11 +990,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
 
     const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
+    const int32_t materialId = frameNode ? DragDropFuncWrapper::ParseUiMaterial(frameNode->GetDragPreviewOption()) : -1;
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, pointerId, screenX, screenY,
         info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, dragEvent->IsUseDataLoadParams(),
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
-        dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+        dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialId };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);

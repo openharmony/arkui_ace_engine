@@ -28,6 +28,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -913,5 +914,35 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest022, Test
     gatherNode = NG::DragControllerFuncWrapper::CreateGatherNode(childrenInfo, data, asyncCtxData);
     EXPECT_EQ(gatherNode, nullptr);
     EXPECT_EQ(childrenInfo.size(), 0);
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest023
+ * @tc.desc: Test UpdatePreviewAttr. ImageContext's uiMaterial can be updated.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare imageNode and dragPreviewOption.
+     * @tc.expected: step1. ImageNode is not null.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.options.material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(previewOption.options.material, nullptr);
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() {return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdatePreviewAttr function when has material.
+     * @tc.expected: step2. material is not null.
+     */
+    NG::DragControllerFuncWrapper::UpdatePreviewAttr(imageNode, previewOption);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    auto material = imageContext->GetSystemMaterial();
+    EXPECT_NE(material, nullptr);
 }
 } // namespace OHOS::Ace::NG
