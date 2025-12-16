@@ -1326,11 +1326,11 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: MovingPhotoPatternTest029
+ * @tc.name: MovingPhotoPatternTest032
  * @tc.desc: Test setMovingController
  * @tc.type: FUNC
  */
-HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest029, TestSize.Level1)
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create MovingPhoto
@@ -1355,11 +1355,11 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: MovingPhotoPatternTest030
+ * @tc.name: MovingPhotoPatternTest033
  * @tc.desc: Test setMovingController Ani
  * @tc.type: FUNC
  */
-HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest030, TestSize.Level1)
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create MovingPhoto
