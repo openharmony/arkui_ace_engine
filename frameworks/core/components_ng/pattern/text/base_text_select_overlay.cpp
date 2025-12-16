@@ -159,11 +159,11 @@ void BaseTextSelectOverlay::ShowMenu()
     UpdateOriginalMenuIsShow();
 }
 
-void BaseTextSelectOverlay::HideMenu(bool noAnimation)
+void BaseTextSelectOverlay::HideMenu(bool noAnimation, bool showSubMenu)
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->HideOptionMenu(noAnimation);
+    manager->HideOptionMenu(noAnimation, showSubMenu);
     UpdateOriginalMenuIsShow();
 }
 
@@ -1350,7 +1350,7 @@ void BaseTextSelectOverlay::HandleOnAutoFill(OptionMenuType type)
     CHECK_NULL_VOID(node && !node->GetIsExtensionMenu());
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "HandleOnAutoFill");
     node->SetSubToolbarStatus(SubToolbarStatus::NEEDEXPAND);
-    HideMenu(true);
+    HideMenu(true, true);
 }
 
 void BaseTextSelectOverlay::HandleOnTranslate()
