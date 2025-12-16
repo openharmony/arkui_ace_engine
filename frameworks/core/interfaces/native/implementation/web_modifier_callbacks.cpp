@@ -1466,6 +1466,36 @@ void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCal
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebSafeBrowsingCheckFinish");
 #endif // ARKUI_CAPI_UNITTEST
 }
+
+void OnCameraCaptureStateChange(const CallbackHelper<OnCameraCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<CameraCaptureStateEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_CameraCaptureStateChangeInfo parameter;
+    parameter.originalState = static_cast<Ark_CameraCaptureState>(eventInfo->GetOriginalCameraCaptureState());
+    parameter.newState = static_cast<Ark_CameraCaptureState>(eventInfo->GetNewCameraCaptureState());
+    arkCallback.InvokeSync(parameter);
+}
+
+void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<MicrophoneCaptureStateEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_MicrophoneCaptureStateChangeInfo parameter;
+    parameter.originalState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetOriginalMicrophoneCaptureState());
+    parameter.newState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetNewMicrophoneCaptureState());
+    arkCallback.InvokeSync(parameter);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

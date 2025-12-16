@@ -5902,6 +5902,28 @@ void callManagedOnAlphabetIndexerSelectCallbackSync(Ark_VMContext vmContext, Ark
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedOnCameraCaptureStateChangeCallback(Ark_Int32 resourceId, Ark_CameraCaptureStateChangeInfo event)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnCameraCaptureStateChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    CameraCaptureStateChangeInfo_serializer::write(argsSerializer, event);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnCameraCaptureStateChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_CameraCaptureStateChangeInfo event)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnCameraCaptureStateChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    CameraCaptureStateChangeInfo_serializer::write(argsSerializer, event);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedOnCheckboxChangeCallback(Ark_Int32 resourceId, Ark_Boolean value)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -6343,6 +6365,28 @@ void callManagedOnMenuItemClickCallbackSync(Ark_VMContext vmContext, Ark_Int32 r
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void callManagedOnMicrophoneCaptureStateChangeCallback(Ark_Int32 resourceId, Ark_MicrophoneCaptureStateChangeInfo event)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnMicrophoneCaptureStateChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    MicrophoneCaptureStateChangeInfo_serializer::write(argsSerializer, event);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnMicrophoneCaptureStateChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_MicrophoneCaptureStateChangeInfo event)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnMicrophoneCaptureStateChangeCallback);
+    argsSerializer.writeInt32(resourceId);
+    MicrophoneCaptureStateChangeInfo_serializer::write(argsSerializer, event);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -8752,6 +8796,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallback);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallback);
         case Kind_OnAlphabetIndexerSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerSelectCallback);
+        case Kind_OnCameraCaptureStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCameraCaptureStateChangeCallback);
         case Kind_OnCheckboxChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCheckboxChangeCallback);
         case Kind_OnCheckboxGroupChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCheckboxGroupChangeCallback);
         case Kind_OnContentScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnContentScrollCallback);
@@ -8770,6 +8815,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallback);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallback);
         case Kind_OnMenuItemClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMenuItemClickCallback);
+        case Kind_OnMicrophoneCaptureStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMicrophoneCaptureStateChangeCallback);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandler);
         case Kind_OnNativeEmbedObjectParamChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedObjectParamChangeCallback);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedVisibilityChangeCallback);
@@ -9081,6 +9127,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnAlphabetIndexerPopupSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerPopupSelectCallbackSync);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerRequestPopupDataCallbackSync);
         case Kind_OnAlphabetIndexerSelectCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAlphabetIndexerSelectCallbackSync);
+        case Kind_OnCameraCaptureStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCameraCaptureStateChangeCallbackSync);
         case Kind_OnCheckboxChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCheckboxChangeCallbackSync);
         case Kind_OnCheckboxGroupChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnCheckboxGroupChangeCallbackSync);
         case Kind_OnContentScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnContentScrollCallbackSync);
@@ -9099,6 +9146,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallbackSync);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallbackSync);
         case Kind_OnMenuItemClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMenuItemClickCallbackSync);
+        case Kind_OnMicrophoneCaptureStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMicrophoneCaptureStateChangeCallbackSync);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandlerSync);
         case Kind_OnNativeEmbedObjectParamChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedObjectParamChangeCallbackSync);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedVisibilityChangeCallbackSync);

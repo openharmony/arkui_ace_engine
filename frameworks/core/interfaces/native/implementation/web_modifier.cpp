@@ -2898,6 +2898,47 @@ void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
+void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnMicrophoneCaptureStateChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onMicrophoneCaptureStateChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnMicrophoneCaptureStateChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetMicrophoneCaptureStateChangedId(frameNode, onMicrophoneCaptureStateChange);
+#endif // WEB_SUPPORTED
+}
+
+void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
+                                       const Opt_OnCameraCaptureStateChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onCameraCaptureStateChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnCameraCaptureStateChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetCameraCaptureStateChangedId(frameNode, onCameraCaptureStateChange);
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -3042,6 +3083,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
+        WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+        WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };

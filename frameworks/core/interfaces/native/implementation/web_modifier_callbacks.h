@@ -167,6 +167,10 @@ void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnCameraCaptureStateChange(const CallbackHelper<OnCameraCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

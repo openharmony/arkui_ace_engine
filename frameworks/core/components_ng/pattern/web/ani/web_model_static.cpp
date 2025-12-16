@@ -1595,4 +1595,24 @@ void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->SetJsProxyCallback(std::move(callback));
 }
+
+void WebModelStatic::SetCameraCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnCameraCaptureStateChangedEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetMicrophoneCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnMicrophoneCaptureStateChangedEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG
