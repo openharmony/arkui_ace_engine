@@ -981,6 +981,20 @@ ArkUI_Int32 GetScrollSnapAnimationSpeed(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, 0);
     return static_cast<ArkUI_Int32>(ListModelNG::GetScrollSnapAnimationSpeed(frameNode));
 }
+
+void SetSupportEmptyBranchInLazyLoading(ArkUINodeHandle node, ArkUI_Bool support)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetSupportEmptyBranchInLazyLoading(frameNode, support);
+}
+
+ArkUI_Bool GetSupportEmptyBranchInLazyLoading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetSupportEmptyBranchInLazyLoading(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1128,6 +1142,8 @@ const ArkUIListModifier* GetListModifier()
         .parseResObjDividerEndMargin = ParseResObjDividerEndMargin,
         .createWithResourceObjLaneConstrain = CreateWithResourceObjLaneConstrain,
         .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
+        .setSupportEmptyBranchInLazyLoading = SetSupportEmptyBranchInLazyLoading,
+        .getSupportEmptyBranchInLazyLoading = GetSupportEmptyBranchInLazyLoading,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

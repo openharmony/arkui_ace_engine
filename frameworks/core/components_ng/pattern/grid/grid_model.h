@@ -94,7 +94,7 @@ public:
     virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) {};
-    virtual void SetSupportLazyLoadingEmptyBranch(bool supportLazyLoadingEmptyBranch) {};
+    virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

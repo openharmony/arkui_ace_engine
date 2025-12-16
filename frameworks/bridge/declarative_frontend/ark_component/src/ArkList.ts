@@ -666,6 +666,21 @@ class ListFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
     }
   }
 }
+
+class ListSupportEmptyBranchInLazyLoading  extends ModifierWithKey<boolean> {
+  constructor(value) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listSupportEmptyBranchInLazyLoading ');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.setSupportLazyLoadingEmptyBranch(node, false);
+    } else {
+      getUINativeModule().list.setSupportLazyLoadingEmptyBranch(node, this.value);
+    }
+  }
+}
+
 interface ListParam {
   initialIndex?: number;
   space?: number | string;
@@ -880,6 +895,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   focusWrapMode(value: FocusWrapMode): this {
     modifierWithKey(this._modifiersWithKeys, ListFocusWrapModeModifier.identity, ListFocusWrapModeModifier, value);
+    return this;
+  }
+  supportEmptyBranchInLazyLoading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
 }

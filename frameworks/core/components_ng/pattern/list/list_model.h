@@ -114,6 +114,7 @@ public:
 #endif
     virtual void ResetListChildrenMainSize() {}
     virtual void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) {}
+    virtual void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

@@ -998,6 +998,16 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args)
+{
+    bool supportEmptyBranch = false;
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsBoolean()) {
+        supportEmptyBranch = arg0->ToBoolean();
+    }
+    ListModel::GetInstance()->SetSupportEmptyBranchInLazyLoading(supportEmptyBranch);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -1027,6 +1037,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
     JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
+    JSClass<JSList>::StaticMethod("supportEmptyBranchInLazyLoading", &JSList::SetSupportEmptyBranchInLazyLoading);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);

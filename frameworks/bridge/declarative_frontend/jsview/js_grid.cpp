@@ -454,7 +454,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
     JSClass<JSGrid>::StaticMethod("syncLoad", &JSGrid::SetSyncLoad);
-    JSClass<JSGrid>::StaticMethod("supportLazyLoadingEmptyBranch", &JSGrid::SetSupportLazyLoadingEmptyBranch);
+    JSClass<JSGrid>::StaticMethod("supportEmptyBranchInLazyLoading", &JSGrid::SetSupportLazyLoadingEmptyBranch);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -798,20 +798,20 @@ void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
 }
 
 /**
- * JS API definition: supportLazyLoadingEmptyBranch(supported: boolean | undefined): GridAttribute;
+ * JS API definition: supportEmptyBranchInLazyLoading(supported: boolean | undefined): GridAttribute;
  * supported: true - enable lazy loading for empty branch, false - disable lazy loading for empty branch
  * if supported is undefined, disable lazy loading for empty branch
  */
 void JSGrid::SetSupportLazyLoadingEmptyBranch(const JSCallbackInfo& info)
 {
-    bool supportLazyLoadingEmptyBranch = false;
+    bool enable = false;
     if (info.Length() == 1) {
         auto value = info[0];
         if (value->IsBoolean()) {
-            supportLazyLoadingEmptyBranch = value->ToBoolean();
+            enable = value->ToBoolean();
         }
     }
-    GridModel::GetInstance()->SetSupportLazyLoadingEmptyBranch(supportLazyLoadingEmptyBranch);
+    GridModel::GetInstance()->SetSupportLazyLoadingEmptyBranch(enable);
 }
 
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)

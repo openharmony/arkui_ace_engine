@@ -192,7 +192,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
     return this;
   }
-  supportLazyLoadingEmptyBranch(value): this {
+  supportEmptyBranchInLazyLoading(value): this {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }

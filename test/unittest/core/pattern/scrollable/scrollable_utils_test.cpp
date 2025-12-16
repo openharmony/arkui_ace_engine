@@ -137,7 +137,7 @@ RefPtr<UINode> ScrollableUtilsTest::CreateScrollableChildUINode()
 RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t childCount)
 {
     std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
-        return std::make_pair(2, 0);
+        return std::make_pair(0, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
@@ -146,7 +146,7 @@ RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t c
     std::function<void()> onPurge = []() {};
     std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+        0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
     node->arrLen_ = childCount;
     node->totalCount_ = childCount;
     return node;

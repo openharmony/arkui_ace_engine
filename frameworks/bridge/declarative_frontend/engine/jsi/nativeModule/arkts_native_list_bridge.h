@@ -94,6 +94,7 @@ public:
     static ArkUINativeModuleValue SetOnListDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnListReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnListReachEnd(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSupportEmptyBranchInLazyLoading(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
     static ArkUINativeModuleValue ResetOnScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo);

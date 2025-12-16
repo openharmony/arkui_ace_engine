@@ -1143,23 +1143,23 @@ void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<Resou
     pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));
 }
 
-void GridModelNG::SetSupportLazyLoadingEmptyBranch(bool supportLazyLoadingEmptyBranch)
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(bool enable)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable);
 }
 
-void GridModelNG::SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool supportLazyLoadingEmptyBranch)
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch, frameNode);
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode);
 }
 
 bool GridModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
 {
-    bool supportLazyLoadingEmptyBranch = false;
-    CHECK_NULL_RETURN(frameNode, supportLazyLoadingEmptyBranch);
+    bool enable = false;
+    CHECK_NULL_RETURN(frameNode, enable);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        GridLayoutProperty, SupportLazyLoadingEmptyBranch, supportLazyLoadingEmptyBranch, frameNode, false);
-    return supportLazyLoadingEmptyBranch;
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
+    return enable;
 }
 } // namespace OHOS::Ace::NG

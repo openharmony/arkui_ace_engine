@@ -600,11 +600,8 @@ protected:
     void GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup);
     int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
-    RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true) const
-    {
-        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree);
-    }
+    RefPtr<LayoutWrapper> GetListItem(
+        LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true, bool isCache = false) const;
     RefPtr<LayoutWrapper> GetChildByIndex(LayoutWrapper* layoutWrapper, uint32_t index, bool isCache = false) const
     {
         index =  !isStackFromEnd_ ? index : totalItemCount_ - index - 1;

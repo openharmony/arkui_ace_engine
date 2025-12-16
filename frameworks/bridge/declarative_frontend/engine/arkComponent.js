@@ -7645,7 +7645,7 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
     return this;
   }
-  supportLazyLoadingEmptyBranch(value) {
+  supportEmptyBranchInLazyLoading(value) {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }
@@ -7960,7 +7960,7 @@ class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey {
     }
   }
 }
-GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('supportLazyLoadingEmptyBranch');
+GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('gridSupportEmptyBranchInLazyLoading');
 class GridOnReachStartModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -36753,6 +36753,21 @@ class ListInitialScrollerModifier extends ModifierWithKey {
 }
 ListInitialScrollerModifier.identity = Symbol('listInitialScroller');
 
+class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.setSupportEmptyBranchInLazyLoading(node, false);
+    }
+    else {
+      getUINativeModule().list.setSupportEmptyBranchInLazyLoading(node, this.value);
+    }
+  }
+}
+ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
+
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -36964,6 +36979,10 @@ class ArkListComponent extends ArkScrollable {
   }
   childrenMainSize(value) {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
+    return this;
+  }
+  supportEmptyBranchInLazyLoading(value) {
+    modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
 }
