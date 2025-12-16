@@ -96,6 +96,7 @@ void CanvasPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     id_ = host->GetId();
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", id_);
+    TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] CanvasPattern::OnAttachToFrameNode", id_);
 #ifndef ACE_UNITTEST
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
