@@ -75,6 +75,9 @@ public:
     virtual int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     virtual int32_t UnregisterContentChangeCallback() override;
+    virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
+
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;

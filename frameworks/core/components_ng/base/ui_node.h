@@ -757,7 +757,6 @@ public:
     {
         isNodeAdapter_ = enable;
     }
-    
 
     bool IsArkTsFrameNode() const
     {
@@ -1219,6 +1218,7 @@ public:
     {
         return subtreeIgnoreCount_ != 0;
     }
+    void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
 
@@ -1337,7 +1337,7 @@ private:
             child->ClearObserverParentForDrawChildren();
         }
     }
-    
+
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);

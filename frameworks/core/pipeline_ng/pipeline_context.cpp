@@ -7230,4 +7230,28 @@ RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
 }
+
+void PipelineContext::GetStateMgmtInfo(
+    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+{
+    std::vector<std::string> resultsStateMgmtInfo;
+    std::vector<int32_t> matchNodeIds;
+    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName);
+    if (matchNodeIds.empty()) {
+        LOGE("GetStateMgmtInfo can't find componentName: %s", componentName.c_str());
+        return;
+    }
+    auto frontend = weakFrontend_.Upgrade();
+    CHECK_NULL_VOID(frontend);
+    std::vector<std::optional<std::string>> resultsOptionalStateMgmtInfo;
+    resultsOptionalStateMgmtInfo = frontend->CallGetStateMgmtInfo(matchNodeIds, propertyName, jsonPath);
+    for (size_t i = 0; i < resultsOptionalStateMgmtInfo.size(); i++) {
+        const auto& resultOptional = resultsOptionalStateMgmtInfo[i];
+        if (resultOptional.has_value()) {
+            resultsStateMgmtInfo.emplace_back(resultOptional.value());
+        }
+    }
+
+    UiSessionManager::GetInstance()->ReportGetStateMgmtInfo(resultsStateMgmtInfo);
+}
 } // namespace OHOS::Ace::NG

@@ -189,6 +189,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetHitTestNodeInfoForTouchInner(data, reply, option);
             break;
         }
+        case REQUEST_STATE_MGMT_INFO: {
+            GetStateMgmtInfoInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -485,6 +489,17 @@ int32_t UiContentStub::UnregisterContentChangeCallbackInner(
 {
     UiSessionManager::GetInstance()->EraseProcessId("contentChange");
     reply.WriteInt32(UnregisterContentChangeCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("GetStateMgmtInfo", processId);
+    std::string componentName = data.ReadString();
+    std::string propertyName = data.ReadString();
+    std::string jsonPath = data.ReadString();
+    reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

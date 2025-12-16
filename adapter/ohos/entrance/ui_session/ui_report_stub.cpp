@@ -131,6 +131,12 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportHitTestNodeInfos(result, partNum, isLastPart);
             break;
         }
+        case REPORT_STATE_MGMT_INFO: {
+            std::vector<std::string> results;
+            data.ReadStringVector(&results);
+            ReportGetStateMgmtInfo(results);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -391,6 +397,18 @@ void UiReportStub::SendContentChange(ChangeType type, const std::string& simpleT
 {
     if (contentChangeCallback_) {
         contentChangeCallback_(type, simpleTree);
+    }
+}
+
+void UiReportStub::RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& eventCallback)
+{
+    getStateMgmtInfoCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::ReportGetStateMgmtInfo(std::vector<std::string> results)
+{
+    if (getStateMgmtInfoCallback_) {
+        getStateMgmtInfoCallback_(results);
     }
 }
 } // namespace OHOS::Ace

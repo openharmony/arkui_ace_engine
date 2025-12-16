@@ -2567,4 +2567,21 @@ void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
         }
     }
 }
+
+void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name)
+{
+    if (auto customNode = DynamicCast<CustomNode>(this)) {
+        const std::string& tag = customNode->GetCustomTag();
+        if (tag.size() >= name.size() && StringUtils::StartWith(tag, name)) {
+            foundNodeId.emplace_back(nodeId_);
+        }
+    }
+    for (auto& child : children_) {
+        child->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+}
 } // namespace OHOS::Ace::NG

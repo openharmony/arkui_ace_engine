@@ -88,6 +88,7 @@ public:
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void SendExeAppAIFunctionResult(uint32_t result) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
+    void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

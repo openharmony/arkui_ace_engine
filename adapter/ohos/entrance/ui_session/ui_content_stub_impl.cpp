@@ -235,4 +235,11 @@ int32_t UIContentServiceStubImpl::UnregisterContentChangeCallback()
     UiSessionManager::GetInstance()->UnregisterContentChangeCallback();
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

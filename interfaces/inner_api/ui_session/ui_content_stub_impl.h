@@ -77,6 +77,8 @@ public:
     int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
         [[maybe_unused]] const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     int32_t UnregisterContentChangeCallback() override;
+    int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H
