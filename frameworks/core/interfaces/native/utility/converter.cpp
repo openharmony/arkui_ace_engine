@@ -138,7 +138,6 @@ namespace {
                 return std::to_string(fVal);
             }
         }
-
         return "";
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
