@@ -31,6 +31,7 @@ class WebPattern : public Pattern {
 public:
     using SetWebDetachCallback = std::function<void(int32_t)>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     ~WebPattern() override;
 
@@ -140,6 +141,7 @@ public:
     }
 
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback) {}
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback);
     OnControllerAttachedCallback GetOnControllerAttachedCallback();

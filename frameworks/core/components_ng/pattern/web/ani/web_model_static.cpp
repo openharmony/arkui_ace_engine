@@ -915,6 +915,18 @@ void WebModelStatic::SetOnFileSelectorShow(
     webEventHub->SetOnFileSelectorShowEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetDefaultFileSelectorShow(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) {
+        func(info.get());
+    };
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetDefaultFileSelectorShowCallback(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnDetectedBlankScreen(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
