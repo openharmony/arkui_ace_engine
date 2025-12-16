@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
@@ -112,7 +113,6 @@ bool ParseAllBorderRadius(const JSRef<JSObject>& object, std::optional<CalcDimen
 } // namespace
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
-const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
@@ -356,8 +356,8 @@ bool JSButton::SetTextAlign(JSRef<JSVal>& textAlign, ButtonParameters& buttonPar
 {
     if (!textAlign->IsNull() && textAlign->IsNumber()) {
         auto textAlignValue = textAlign->ToNumber<int32_t>();
-        if (textAlignValue >= 0 && textAlignValue < static_cast<int32_t>(TEXT_ALIGN.size())) {
-            buttonParameters.textAlign = TEXT_ALIGN[textAlignValue];
+        if (textAlignValue >= 0 && textAlignValue < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+            buttonParameters.textAlign = TEXT_ALIGNS[textAlignValue];
             return true;
         }
     }
