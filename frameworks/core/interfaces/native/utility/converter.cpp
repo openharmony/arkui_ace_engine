@@ -119,8 +119,8 @@ namespace {
             } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(static_cast<int64_t>(*value));
             } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
-                auto intVal = value->ToInt().value_or(0);
-                return std::to_string(intVal);
+                auto num = value->ToFloat().value_or(0);
+                return std::to_string(static_cast<int64_t>(num));
             }
         } else if (type == "s") {
             if (auto* value = std::get_if<std::string>(&item)) {
@@ -134,8 +134,8 @@ namespace {
             } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(*value);
             } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
-                auto fVal = value->ToFloat().value_or(0);
-                return std::to_string(fVal);
+                auto num = value->ToFloat().value_or(0);
+                return std::to_string(num);
             }
         }
         return "";
