@@ -4832,7 +4832,7 @@ void WebDelegate::LoadUrl()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
 }
 
-void WebDelegate::OnInactive(bool isOfflineWebOffMainTree)
+void WebDelegate::OnInactive()
 {
     int webId = GetWebId();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", webId);
@@ -4841,15 +4841,13 @@ void WebDelegate::OnInactive(bool isOfflineWebOffMainTree)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId, isOfflineWebOffMainTree]() {
+        [weak = WeakClaim(this), webId]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                if (!isOfflineWebOffMainTree) {
-                    OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
-                }
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
                 delegate->nweb_->OnPause();
             }
         },
@@ -9890,5 +9888,28 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
+}
+
+void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), webId, isActive]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate || !delegate->nweb_) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus delegate is nullptr");
+                return;
+            }
+            if (isActive && OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
+                delegate->nweb_->OnContinue();
+            } else if (!isActive) {
+                delegate->nweb_->OnPause();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "SetOfflineWebActiveStatus");
 }
 } // namespace OHOS::Ace

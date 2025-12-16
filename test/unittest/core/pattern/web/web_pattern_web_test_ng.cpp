@@ -307,6 +307,54 @@ HWTEST_F(WebPatternWebTest, InitInOfflineMode_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitInOfflineMode_003
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = false;
+    webPattern->isOfflineWebEvictFrameBuffersEnable_ = false;
+    webPattern->InitInOfflineMode();
+    EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
+ * @tc.name: InitInOfflineMode_004
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = false;
+    webPattern->isOfflineWebEvictFrameBuffersEnable_ = true;
+    webPattern->InitInOfflineMode();
+    EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
  * @tc.name: IsNeedResizeVisibleViewport
  * @tc.desc: IsNeedResizeVisibleViewport.
  * @tc.type: FUNC
@@ -493,6 +541,31 @@ HWTEST_F(WebPatternWebTest, OnDetachContextAllFalse, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->tooltipId_ = 1;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
+    EXPECT_EQ(webPattern->tooltipId_, -1);
+#endif
+}
+
+/**
+ * @tc.name: OnDetachContextOfflineWeb
+ * @tc.desc: OnDetachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnDetachContextOfflineWeb, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->tooltipId_ = 1;
+    webPattern->offlineWebInited_ = true;
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     EXPECT_EQ(webPattern->tooltipId_, -1);
