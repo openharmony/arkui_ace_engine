@@ -73,8 +73,8 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableInitializeTest001, TestSize.Level1)
     /**
     * @tc.steps: initialize parameters.
     */
-   AnimatableMatrix4 animatableMatrix4Obj1;
-   EXPECT_TRUE(animatableMatrix4Obj1.isFirstAssign_);
+    AnimatableMatrix4 animatableMatrix4Obj1;
+    EXPECT_TRUE(animatableMatrix4Obj1.isFirstAssign_);
 }
 
 /**
