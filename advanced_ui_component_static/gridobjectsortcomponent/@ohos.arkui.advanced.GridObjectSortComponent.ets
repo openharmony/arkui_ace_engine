@@ -292,6 +292,7 @@ export struct GridObjectSortComponent {
       let uiContent: UIContext = this.getUIContext();
       let hostContext: common.UIAbilityContext = uiContent.getHostContext() as common.UIAbilityContext
       this.applicationContext = hostContext.getApplicationContext();
+      this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
     } catch (paramError) {
       let code = (paramError as ClassCastError).code;
       let message = (paramError as ClassCastError).message;
@@ -377,6 +378,12 @@ export struct GridObjectSortComponent {
     this.menuSwitch = false;
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
+    if (this.callbackId) {
+      this.applicationContext.offEnvironment(this.callbackId as Int,
+        (err: BusinessError<void> | null): void => {
+          hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
+        })
+    }
   }
 
   // Array deduplication
@@ -1959,17 +1966,16 @@ export struct GridObjectSortComponent {
    * @returns string
    */
 
-  getAccessibilityText(resource: ResourceStr): string {
+  getAccessibilityText(resource: ResourceStr | undefined): string {
     try {
       let resourceString: string = '';
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        if ((resource as Resource).id === -1) {
-          resourceString = resourceManager.getSysResourceManager()
-            .getStringByNameSync(((resource as Resource).params?.[0] as string).split('.').pop() as string || '');
-        } else {
-          resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id);
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+         if (uiContent) {
+          resourceString =
+            (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)
         }
       }
       return resourceString;

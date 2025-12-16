@@ -209,7 +209,7 @@ export struct EditableTitleBar {
   @PropRef contentMargin: LocalizedMargin | undefined = undefined;
   @State titleBarMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
-    end: LengthMetrics.resource($r('sys.float.margin_right')),
+    end: LengthMetrics.resource($r('sys.float.margin_right'))
   } as LocalizedMargin
   @State fontSize: number = 1;
 
