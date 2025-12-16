@@ -1239,6 +1239,58 @@ void JsiDeclarativeEngineInstance::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxT
     uiNodeCleanUpIdleFunc_->Call(runtime_, global, argv, argv.size());
 }
 
+std::vector<std::optional<std::string>> JsiDeclarativeEngineInstance::CallGetStateMgmtInfo(
+    const std::vector<int32_t>& nodeIds,
+    const std::string& propertyName,
+    const std::string& jsonPath)
+{
+    std::vector<std::optional<std::string>> result;
+    if (nodeIds.empty()) {
+        return result;
+    }
+    if (!runtime_) {
+        LOGE("CallGetStateMgmtInfo fail runtime is invalid.");
+        return result;
+    }
+    panda::LocalScope Scope(runtime_->GetEcmaVm());
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    if (!global) {
+        LOGE("CallGetStateMgmtInfo fail global is invalid.");
+        return result;
+    }
+    if (!getStateMgmtInfoFunc_) {
+        shared_ptr<JsValue> getStateMgmtInfoFunc = global->GetProperty(runtime_, "getStateMgmtInfo");
+        if (!getStateMgmtInfoFunc || !getStateMgmtInfoFunc->IsFunction(runtime_)) {
+            LOGE("The getStateMgmtInfo is invalid or not a function.");
+            return result;
+        }
+        getStateMgmtInfoFunc_ = getStateMgmtInfoFunc;
+    }
+    shared_ptr<JsValue> jsNodeIds = runtime_->NewArray();
+    for (size_t i = 0; i < nodeIds.size(); ++i) {
+        jsNodeIds->SetProperty(runtime_, runtime_->NewInt32(i), runtime_->NewNumber(nodeIds[i]));
+    }
+    shared_ptr<JsValue> jsPropertyName = runtime_->NewString(propertyName);
+    shared_ptr<JsValue> jsJsonPath = runtime_->NewString(jsonPath);
+    std::vector<shared_ptr<JsValue>> argv = { jsNodeIds, jsPropertyName, jsJsonPath };
+    shared_ptr<JsValue> retVal = getStateMgmtInfoFunc_->Call(runtime_, global, argv, argv.size());
+    if (!retVal || !retVal->IsArray(runtime_)) {
+        LOGE("CallGetStateMgmtInfo fail retVal is not valid.");
+        return result;
+    }
+    int32_t len = retVal->GetArrayLength(runtime_);
+    result.reserve(len);
+    for (int32_t i = 0; i < len; ++i) {
+        shared_ptr<JsValue> item = retVal->GetProperty(runtime_, i);
+        if (!item || item->IsUndefined(runtime_) || item->IsNull(runtime_)) {
+            result.emplace_back(std::nullopt);
+            continue;
+        }
+        result.emplace_back(item->ToString(runtime_));
+    }
+    return result;
+}
+
 shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallViewFunc(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue> functionName, const std::vector<shared_ptr<JsValue>>& argv)
 {

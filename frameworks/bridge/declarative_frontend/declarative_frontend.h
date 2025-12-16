@@ -182,6 +182,8 @@ public:
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
     void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override;
+    std::vector<std::optional<std::string>> CallGetStateMgmtInfo(const std::vector<int32_t>& nodeIds,
+        const std::string& propertyName, const std::string& jsonPath) override;
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
