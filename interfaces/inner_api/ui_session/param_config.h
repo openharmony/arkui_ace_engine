@@ -26,6 +26,10 @@ struct ParamConfig {
     bool withWeb = false;
 };
 
+struct InteractionParamConfig {
+    bool isTopMost = true;
+};
+
 enum class ChangeType {
     PAGE = 0, // Navigation router
     SCROLL,   // scroll event

@@ -209,6 +209,13 @@ int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetLatestHitTestNodeInfosForTouch(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, InteractionParamConfig config)
+{
+    UiSessionManager::GetInstance()->GetLatestHitTestNodeInfosForTouch(config);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::ExeAppAIFunction(
     const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
 {

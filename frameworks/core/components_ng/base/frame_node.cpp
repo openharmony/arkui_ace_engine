@@ -3418,6 +3418,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     AddJudgeToTargetComponent(targetComponent);
     AddNodeToRegisterTouchTest();
+    RecordHitTestNodeInfo();
 
     // first update HitTestResult by children status.
     if (consumed) {
@@ -7865,6 +7866,15 @@ void FrameNode::OnContentChangeRegister(const ContentChangeConfig& config)
     if (pattern_) {
         pattern_->OnContentChangeRegister(config);
     }
+}
+
+void FrameNode::RecordHitTestNodeInfo()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->AddHitTestInfoRecord(AceType::Claim(this));
 }
 
 void FrameNode::OnContentChangeUnregister()

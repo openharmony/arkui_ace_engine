@@ -423,6 +423,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;

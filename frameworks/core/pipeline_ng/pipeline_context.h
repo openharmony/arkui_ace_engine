@@ -1154,6 +1154,8 @@ public:
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
 
+    void GetHitTestInfos(InteractionParamConfig config);
+
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);

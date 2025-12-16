@@ -1657,6 +1657,7 @@ private:
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
+    void RecordHitTestNodeInfo();
     void CleanupPipelineResources();
 
     void MarkModifyDoneMultiThread();

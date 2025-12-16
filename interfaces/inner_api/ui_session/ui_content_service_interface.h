@@ -70,6 +70,7 @@ public:
         EXE_APP_AI_FUNCTION,
         REGISTER_CONTENT_CHANGE,
         UNREGISTER_CONTENT_CHANGE,
+        GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
     };
 
     /**
@@ -80,6 +81,15 @@ public:
         ParamConfig config = ParamConfig()) = 0;
     virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig()) = 0;
+
+    /**
+     * @description: define get the node info for touch test interface
+     * @return: result number
+     */
+    virtual int32_t GetLatestHitTestNodeInfosForTouch(
+        const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        InteractionParamConfig config = InteractionParamConfig()) = 0;
+
     /**
      * @description: define SA process and current process connect interface
      * @return: result number
@@ -320,6 +330,7 @@ public:
         SEND_CURRENT_PAGE_NAME,
         SEND_EXE_APP_AI_FUNCTION_RESULT,
         SEND_CONTENT_CHANGE,
+        REPORT_HIT_TEST_NODE_INFOS,
     };
 
     /**
@@ -351,6 +362,11 @@ public:
      * @description: define reports inspector value to the proxy interface
      */
     virtual void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) = 0;
+
+    /**
+     * @description: define reports the information of hit test node to the proxy interface
+     */
+    virtual void ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart) = 0;
 
     /**
      * @description: define reports web unfocus value to the proxy interface

@@ -3263,6 +3263,7 @@ void PipelineContext::OnTouchEvent(
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
         touchRestrict.sourceTool = point.sourceTool;
 
+        eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -3404,6 +3405,7 @@ void PipelineContext::OnTouchEvent(
     eventManager_->DispatchTouchEvent(scalePoint);
 
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
+        eventManager_->LogHitTestInfoRecord(scalePoint.id);
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
@@ -6564,6 +6566,15 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
             }
         },
         TaskExecutor::TaskType::UI, SEARCH_ELEMENT_TIMEOUT_TIME, "ArkUIGetInspectorTree");
+}
+
+void PipelineContext::GetHitTestInfos(InteractionParamConfig config)
+{
+    CHECK_NULL_VOID(eventManager_);
+    auto json = eventManager_->GetLastHitTestNodeInfosForTouch(config.isTopMost);
+    if (json.size() != 0) {
+        UiSessionManager::GetInstance()->ReportHitTestNodeInfos(json);
+    }
 }
 
 void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)

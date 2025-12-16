@@ -83,6 +83,26 @@ struct MarkProcessedEventInfo {
     int64_t lastLogTimeStamp = 0;
 };
 
+struct NodeGeneralInfo {
+    int32_t nodeId = -1;
+};
+struct HitNodeInfos {
+    int32_t pointerId = -1;
+    float positionX = 0.0f;
+    float positionY = 0.0f;
+    uint64_t timeStamp = 0;
+    std::vector<NodeGeneralInfo> hitNodeInfos;
+};
+
+struct HitTestRecordInfo {
+    bool isRealTouch = false;
+    float screenX = 0.0f;
+    float screenY = 0.0f;
+    int32_t fingerId = -1;
+    TimeStamp timeStamp;
+    TouchType type;
+};
+
 class EventManager : virtual public NG::KeyEventManager {
     DECLARE_ACE_TYPE(EventManager, KeyEventManager);
 
@@ -421,6 +441,11 @@ public:
     void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node = nullptr) const;
     bool OnTouchpadInteractionBegin() const;
     void NotifyCoastingAxisEventStop() const;
+    std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
+    void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
+    void LogHitTestInfoRecord(int32_t fingerId);
+    void ClearHitTestInfoRecord(const TouchEvent& touchPoint);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -527,6 +552,9 @@ private:
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
     bool isDragCancelPending_ = false;
+    std::map<int32_t, HitNodeInfos> touchHitTestInfos_;
+    // Only used in TouchTest
+    std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
 };
 
 } // namespace OHOS::Ace

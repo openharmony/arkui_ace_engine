@@ -171,6 +171,17 @@ public:
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
 
     /**
+     * @description: notify stub side to report the information of hit test node
+     */
+    void ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
+     * @description: register a callback when get the info of hit test node
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetHitTestNodeInfoCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
+
+    /**
      * @description: report web unfocus value for SA
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
@@ -208,6 +219,7 @@ private:
     EventCallback lifeCycleEventCallback_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
+    std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
     std::function<void(uint32_t)> exeAppAIFunctionCallback_;

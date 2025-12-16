@@ -66,6 +66,9 @@ public:
     void NotifySendCommandPattern(int32_t id, const std::string& command) override;
     int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) override;
     void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) override;
+    void SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function) override;
+    void GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config) override;
+    void ReportHitTestNodeInfos(const std::string& data) override;
     bool GetWebFocusRegistered() override;
     void OnRouterChange(const std::string& path, const std::string& event) override;
     void SaveBaseInfo(const std::string& info) override;

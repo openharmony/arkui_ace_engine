@@ -80,6 +80,32 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::GetLatestHitTestNodeInfosForTouch(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, InteractionParamConfig config)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetLatestHitTestNodeInfosForTouch write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterGetHitTestNodeInfoCallback(eventCallback);
+
+    data.WriteBool(config.isTopMost);
+
+    if (Remote()->SendRequest(GET_HIT_TEST_NODE_INFO_FOR_TOUCH, data, reply, option) != ERR_NONE) {
+        LOGW("GetLatestHitTestNodeInfosForTouch send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+
 int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;
