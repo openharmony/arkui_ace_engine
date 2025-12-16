@@ -7532,6 +7532,15 @@ int32_t SwiperPattern::CheckIndexRange(int32_t index) const
     return index;
 }
 
+void SwiperPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("SwiperCacheCount: ")
+        .append(std::to_string(property->GetCachedCount().value_or(0))));
+}
+
 void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("isLastIndicatorFocused", isLastIndicatorFocused_);

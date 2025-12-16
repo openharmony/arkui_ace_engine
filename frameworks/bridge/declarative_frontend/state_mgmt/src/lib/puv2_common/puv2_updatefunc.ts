@@ -37,6 +37,7 @@ declare class WeakRef<T extends Object> {
 
   declare class DumpLog {
     static print(depth: number, content: string): void;
+    static addDesc(content: string): void;
   }
   
   // function type of partial update function

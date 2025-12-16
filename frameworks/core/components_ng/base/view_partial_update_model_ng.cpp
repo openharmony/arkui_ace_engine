@@ -88,6 +88,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetClearAllRecycleFunc(std::move(info.clearAllRecycleFunc));
     customNode->SetOnRecycleFunc(std::move(info.recycleFunc));
     customNode->SetOnReuseFunc(std::move(info.reuseFunc));
+    customNode->SetCreatorId(std::to_string(info.creatorId));
     return customNode;
 }
 

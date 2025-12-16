@@ -169,6 +169,16 @@ void JSView::GetMainInstanceId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(currentInstance)));
 }
 
+void JSView::JsSetCreatorId(int64_t creatorId)
+{
+    creatorId_ = creatorId;
+}
+
+int64_t JSView::GetCreatorId() const
+{
+    return creatorId_;
+}
+
 void JSView::JsSetCardId(int64_t cardId)
 {
     cardId_ = cardId;
@@ -200,7 +210,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar, int64_t creatorId)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -549,7 +559,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar, int64_t creatorId)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
@@ -760,7 +770,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName(),
-        .isV2 = GetJSIsV2() };
+        .isV2 = GetJSIsV2(),
+        .creatorId = GetCreatorId()};
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -997,7 +1008,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
             LOGE("View is null");
             return;
         }
-        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(false, false, view->GetCreatorId()), true);
     }
 }
 
@@ -1328,6 +1339,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);
+    JSClass<JSViewPartialUpdate>::Method("setCreatorId", &JSViewPartialUpdate::JsSetCreatorId);
     JSClass<JSViewPartialUpdate>::CustomMethod("getCardId", &JSViewPartialUpdate::JsGetCardId);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);

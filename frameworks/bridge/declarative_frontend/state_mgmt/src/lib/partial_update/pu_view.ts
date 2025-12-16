@@ -335,6 +335,10 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
+  public getRecycleDump(): string {
+    return this.recycleManager_?.getDumpInfo();
+  }
+
    /**
    * Indicate if this @Component is allowed to freeze by calling with freezeState=true
    * Called with value of the @Component decorator 'freezeWhenInactive' parameter

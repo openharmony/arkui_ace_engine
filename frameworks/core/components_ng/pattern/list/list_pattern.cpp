@@ -3333,6 +3333,15 @@ void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
     json->Put("itemPosition", children);
 }
 
+void ListPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("ListCacheCount: ")
+        .append(std::to_string(property->GetCachedCountWithDefault())));
+}
+
 void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     ScrollablePattern::DumpAdvanceInfo(json);
