@@ -387,7 +387,7 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
-    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse = false);
 
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 

@@ -55,9 +55,13 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     dirtyLayoutNodes_.emplace_back(dirty);
 }
 
-void UITaskScheduler::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+void UITaskScheduler::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse)
 {
     CHECK_RUN_ON(UI);
+    if (postByTraverse) {
+        traverseSafeAreaBundles_.emplace_back(bundle.second);
+        return;
+    }
     ignoreLayoutSafeAreaBundles_.emplace_back(std::move(bundle));
 }
 
@@ -167,7 +171,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
     }
 
-    while (!ignoreLayoutSafeAreaBundles_.empty()) {
+    while (!ignoreLayoutSafeAreaBundles_.empty() || !traverseSafeAreaBundles_.empty()) {
         FlushPostponedLayoutTask(forceUseMainThread);
     }
 
@@ -189,6 +193,20 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
 void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
 {
+    auto traverseSafeAreaBundles = std::move(traverseSafeAreaBundles_);
+    for (auto&& rit = traverseSafeAreaBundles.rbegin(); rit != traverseSafeAreaBundles.rend(); ++rit) {
+        auto& container = *rit;
+        if (!container || container->IsInDestroying()) {
+            continue;
+        }
+        const auto& layoutProperty = container->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(layoutProperty);
+        //Mark container dirty to prevent skipMeasure or skipLayout.
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        container->SetLayoutDirtyMarked(true);
+        container->CreateLayoutTask(forceUseMainThread, LayoutType::TRAVERSE_FOR_IGNORE);
+        continue;
+    }
     auto ignoreLayoutSafeAreaBundles = std::move(ignoreLayoutSafeAreaBundles_);
     for (auto&& bundle = ignoreLayoutSafeAreaBundles.rbegin(); bundle != ignoreLayoutSafeAreaBundles.rend();
         ++bundle) {

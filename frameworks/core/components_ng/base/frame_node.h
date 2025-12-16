@@ -869,7 +869,7 @@ public:
 
     void PostTaskForIgnore();
 
-    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes);
+    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes = {}, bool postByTraverse = false);
 
     bool PostponedTaskForIgnore();
 
