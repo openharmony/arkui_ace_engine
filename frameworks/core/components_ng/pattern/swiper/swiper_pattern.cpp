@@ -3475,14 +3475,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         isTouchPad_ = true;
     }
 
-    PointF dragPoint(
-        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
-    NGGestureRecognizer::Transform(dragPoint, GetHost(), true, info.GetIsPostEventResult(), info.GetPostEventNodeId());
-    if (IsOutOfHotRegion(dragPoint)) {
-        isTouchPad_ = false;
-        return;
-    }
-
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
     mainDeltaSum_ += mainDelta;
@@ -5210,17 +5202,6 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetSecondItemInfoInVisibleArea
     }
     return std::make_pair(itemPosition_.begin()->first,
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
-}
-
-bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_RETURN(context, true);
-
-    auto hotRegion = context->GetPaintRectWithoutTransform();
-    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
 void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
