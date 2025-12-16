@@ -236,7 +236,8 @@ std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::stri
     return result_string;
 }
 
-ani_object WrapBusinessError(ani_env* env, const char *msg)
+// Do not use this function directly to create a BusinessError object.
+static ani_object WrapBusinessError(ani_env* env, const char *msg)
 {
     ani_class cls {};
     ani_method method {};
