@@ -414,7 +414,9 @@ HWTEST_F(NodeAnimateTest, MotionPathOptionsDispose001, TestSize.Level1)
 {
     OH_ArkUI_MotionPathOptions_Dispose(nullptr);
     ArkUI_MotionPathOptions* tempOptions = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(tempOptions, nullptr);
     OH_ArkUI_MotionPathOptions_SetPath(tempOptions, "M10,10");
+    EXPECT_STREQ(tempOptions->path, "M10,10");
     OH_ArkUI_MotionPathOptions_Dispose(tempOptions);
 }
 
@@ -463,7 +465,21 @@ HWTEST_F(NodeAnimateTest, MotionPathOptionsGetPath001, TestSize.Level1)
     EXPECT_EQ(
         OH_ArkUI_MotionPathOptions_GetPath(options, buffer, srcLen, &writeLen), ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR);
     EXPECT_EQ(writeLen, srcLen + 1);
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetPath(options, buffer, 50, &writeLen), ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_MotionPathOptions_Dispose(options);
+
+    ArkUI_MotionPathOptions* optionsWithNullPath = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(optionsWithNullPath, nullptr);
+    if (optionsWithNullPath->path) {
+        delete[] optionsWithNullPath->path;
+        optionsWithNullPath->path = nullptr;
+    }
+    writeLen = -1;
+    EXPECT_EQ(OH_ArkUI_MotionPathOptions_GetPath(optionsWithNullPath, buffer, sizeof(buffer), &writeLen),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    EXPECT_EQ(writeLen, -1);
+    OH_ArkUI_MotionPathOptions_Dispose(optionsWithNullPath);
 }
 
 /**
