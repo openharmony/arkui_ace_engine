@@ -56,6 +56,9 @@ public:
     void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
         float hoverRectHeight, bool isFocus);
 
+    void SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+        float hoverRectHeight, bool isFocus);
+
     virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
 
     virtual float GetHoverIconPadding() const
