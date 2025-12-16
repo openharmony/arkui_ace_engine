@@ -440,8 +440,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_ref appLocal;
     ani_ref optionalEntry;
     env->GetUndefined(&optionalEntry);
-    auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env);
+    auto entryPointObj = url == "__INTEROP__" ? nullptr : entryLoader.GetPageEntryObj();
+    auto legacyEntryPointObj = url == "__INTEROP__" ? nullptr : LegacyLoadPage(env);
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, UIContentErrorCode::NULL_POINTER);
     std::string moduleName = currentContainer->GetModuleName();
