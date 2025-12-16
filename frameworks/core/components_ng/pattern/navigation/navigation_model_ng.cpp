@@ -1316,10 +1316,11 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
     }
     bool hasValidContent = !toolBarNode->GetChildren().empty();
     toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
+    bool needHideToolbar = toolBarNode->IsHideToolBar() || !hasValidContent;
+    rowProperty->UpdateVisibility(needHideToolbar ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt)
@@ -1948,10 +1949,11 @@ void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::Ba
     }
     bool hasValidContent = !toolBarNode->GetChildren().empty();
     toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
+    bool needHideToolbar = toolBarNode->IsHideToolBar() || !hasValidContent;
+    rowProperty->UpdateVisibility(needHideToolbar ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)

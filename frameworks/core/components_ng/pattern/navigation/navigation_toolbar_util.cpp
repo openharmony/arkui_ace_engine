@@ -583,7 +583,8 @@ bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vec
     }
     bool hasValidContent = !containerNode->GetChildren().empty();
     toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
+    bool needHideToolbar = toolBarNode->IsHideToolBar() || !hasValidContent;
+    rowProperty->UpdateVisibility(needHideToolbar ? VisibleType::GONE : VisibleType::VISIBLE);
     if (!needMoreButton) {
         return true;
     }
