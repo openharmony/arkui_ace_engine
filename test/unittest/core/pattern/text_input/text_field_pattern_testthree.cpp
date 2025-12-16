@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_input_base.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -638,5 +643,65 @@ HWTEST_F(TextFieldPatternTestThree, PlaceholderResponseArea002, TestSize.Level0)
     auto gesture = placeholderNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gesture, nullptr);
     EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
+}
+
+/**
+ * @tc.name: PlaceholderResponseArea003
+ * @tc.desc: test PlaceholderResponseArea PlaceholderResponseArea003 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, PlaceholderResponseArea003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    // 创建 PlaceholderResponseArea 实例
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanString->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    // 验证 placeholderNode_ 是否创建成功
+    auto placeholderNode = placeholderResponseArea->GetFrameNode();
+    ASSERT_NE(placeholderNode, nullptr);
+
+    auto textInputLayoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    std::u16string textContent = u"";
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    // 调用测试方法
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(frameNode_->GetThemeScopeId());
+    ASSERT_NE(textFieldTheme, nullptr);
+    LayoutWrapperNode textInputLayoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    textInputLayoutAlgorithm->ConstructStyledPlaceholderStyle(&textInputLayoutWrapper, frameNode_, textFieldTheme);
+
+    // 验证单行输入框text自身maxlines优先，且行数为1
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textLayoutProperty = placeholderNode->GetLayoutProperty<TextLayoutProperty>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, geometryNode, textLayoutProperty);
+    auto pattern = placeholderNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextStyle textStyleText;
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>(
+        pattern->GetSpanItemChildren(), pattern->GetParagraphManager(), true, textStyleText, false);
+    EXPECT_FALSE(textLayoutAlgorithm == nullptr);
+
+    // set theme.
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    LayoutConstraintF contentConstraint;
+    textLayoutAlgorithm->MeasureContent(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto textStylePlaceholder = textLayoutAlgorithm->GetTextStyle();
+    EXPECT_TRUE(textLayoutProperty->GetIsTextMaxlinesFirstValue(false));
+    EXPECT_EQ(textStylePlaceholder.GetMaxLines(), 1);
 }
 } // namespace OHOS::Ace::NG

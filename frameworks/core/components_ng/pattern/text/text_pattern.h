@@ -1044,6 +1044,7 @@ protected:
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
     virtual bool CanStartAITask() const;
     virtual bool NeedClearAISpanMap(const std::u16string& textForAICache) { return true; };
+    virtual bool GetDefaultClipValue() const;
 
     void MarkDirtySelf();
     void OnAttachToMainTree() override;

@@ -1748,11 +1748,8 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(host, false);
     PointF textOffset = GetTextOffset(localLocation, textContentRect);
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
+    auto clip = GetDefaultClipValue();
+    if (!renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
@@ -1764,6 +1761,15 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
         }
     }
     if (onClick_) {
+        return true;
+    }
+    return false;
+}
+
+bool TextPattern::GetDefaultClipValue() const
+{
+    // RichEditor is default truncation.
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return true;
     }
     return false;
