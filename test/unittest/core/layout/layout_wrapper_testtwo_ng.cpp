@@ -1257,6 +1257,25 @@ HWTEST_F(LayoutWrapperTestTwoNg, GetAccumulatedSafeAreaExpandCacheHitTest001, Te
         });
         ViewAbstract::SetSafeAreaPadding(CalcLength(30.0f, DimensionUnit::PX));
     });
+    /* corresponding ets code:
+        Stack() {
+            Stack() {
+                Stack() {
+                    Stack()
+                        .width(LayoutPolicy.matchParent)
+                        .height(LayoutPolicy.matchParent)
+                        .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.ALL])
+                    Stack()
+                        .width(LayoutPolicy.matchParent)
+                        .height(LayoutPolicy.matchParent)
+                        .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.ALL])
+                }
+                .width('300px').height('300px').safeAreaPadding(LengthMetrics.px(10))
+            }
+            .safeAreaPadding(LengthMetrics.px(20))
+        }
+        .safeAreaPadding(LengthMetrics.px(30))
+    */
     IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
     auto childLayoutProperty1 = child1->GetLayoutProperty();
