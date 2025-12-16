@@ -74,6 +74,7 @@ OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRec
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, offset);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
         return OffsetF(nodeWidth, offset.GetY());
