@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;
     constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
+    const uint32_t ERROR_UINT_CODE = -1;
 }
 
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
@@ -708,6 +709,48 @@ void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
     RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
 }
  
+void SetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, value);
+}
+
+void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
+
+void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, value);
+}
+
+void ResetRichEditorIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetRichEditorFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, value);
+}
+
+void ResetRichEditorFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
 void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -736,6 +779,47 @@ void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
 }
+
+void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    RichEditorModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedDragPreviewStyle", resObj, result);
+        }
+    }
+}
+
+void ResetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -809,10 +893,19 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
+        .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
+        .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
+        .setRichEditorIncludeFontPadding = SetRichEditorIncludeFontPadding,
+        .resetRichEditorIncludeFontPadding = ResetRichEditorIncludeFontPadding,
+        .setRichEditorFallbackLineSpacing = SetRichEditorFallbackLineSpacing,
+        .resetRichEditorFallbackLineSpacing = ResetRichEditorFallbackLineSpacing,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
-        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor
+        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor,
+        .setRichEditorSelectedDragPreviewStyle = SetRichEditorSelectedDragPreviewStyle,
+        .resetRichEditorSelectedDragPreviewStyle = ResetRichEditorSelectedDragPreviewStyle,
+        .getRichEditorSelectedDragPreviewStyle = GetRichEditorSelectedDragPreviewStyle
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

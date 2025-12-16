@@ -25,7 +25,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceColor, Length, ResourceStr, Font, Font_serializer } from "./units"
-import { Color, FontWeight, FontStyle, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
+import { Color, FontWeight, FontStyle, TextOverflow, TextHeightAdaptivePolicy, TextAlign } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookButtonContentModifier, hookButtonAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
@@ -150,10 +150,10 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -178,10 +178,10 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -344,6 +344,7 @@ export interface ButtonLabelStyle {
     maxFontSize?: double | ResourceStr;
     heightAdaptivePolicy?: TextHeightAdaptivePolicy;
     font?: Font;
+    textAlign?: TextAlign;
 }
 export interface ButtonAttribute extends CommonMethod {
     setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
@@ -837,6 +838,14 @@ export class ButtonLabelStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextAlign  = value.textAlign
+        if (valueHolderForTextAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextAlignTmpValue  = (valueHolderForTextAlign as TextAlign)
+            valueSerializer.writeInt32(valueHolderForTextAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ButtonLabelStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -912,7 +921,13 @@ export class ButtonLabelStyle_serializer {
             fontTmpBuf = Font_serializer.read(valueDeserializer)
         }
         const fontTmpResult : Font | undefined = fontTmpBuf
-        let value : ButtonLabelStyle = ({overflow: overflowTmpResult, maxLines: maxLinesTmpResult, minFontSize: minFontSizeTmpResult, maxFontSize: maxFontSizeTmpResult, heightAdaptivePolicy: heightAdaptivePolicyTmpResult, font: fontTmpResult} as ButtonLabelStyle)
+        const textAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textAlignTmpBuf : TextAlign | undefined = undefined
+        if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textAlignTmpResult : TextAlign | undefined = textAlignTmpBuf
+        let value : ButtonLabelStyle = ({overflow: overflowTmpResult, maxLines: maxLinesTmpResult, minFontSize: minFontSizeTmpResult, maxFontSize: maxFontSizeTmpResult, heightAdaptivePolicy: heightAdaptivePolicyTmpResult, font: fontTmpResult, textAlign: textAlignTmpResult} as ButtonLabelStyle)
         return value
     }
 }

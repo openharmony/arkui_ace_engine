@@ -686,4 +686,22 @@ void SearchModelStatic::SetCancelSymbolIcon(FrameNode *frameNode,
     pattern->SetCancelSymbolIcon();
 }
 
+void SearchModelStatic::SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue)
+{
+    SearchModelNG::SetIncludeFontPadding(frameNode, optValue.value_or(false));
+}
+
+void SearchModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, std::optional<bool>& optValue)
+{
+    SearchModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
+}
+
+void SearchModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        SearchModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -311,10 +311,10 @@ export class SwipeActionItem_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx0  = valueHolderForActionAreaDistanceTmpValue as string
                 valueSerializer.writeString(valueHolderForActionAreaDistanceTmpValueForIdx0)
-            } else if (valueHolderForActionAreaDistanceTmpValue instanceof number) {
+            } else if (valueHolderForActionAreaDistanceTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForActionAreaDistanceTmpValueForIdx1)
+                const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForActionAreaDistanceTmpValueForIdx1)
             } else if (valueHolderForActionAreaDistanceTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx2  = valueHolderForActionAreaDistanceTmpValue as Resource
@@ -385,17 +385,17 @@ export class SwipeActionItem_serializer {
         let actionAreaDistanceTmpBuf : Length | undefined = undefined
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const actionAreaDistanceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let actionAreaDistanceTmpBuf_ : string | number | Resource | undefined
+            let actionAreaDistanceTmpBuf_ : string | double | Resource | undefined
             if (actionAreaDistanceTmpBuf_UnionSelector == (0).toByte()) {
                 actionAreaDistanceTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toByte()) {
-                actionAreaDistanceTmpBuf_ = (valueDeserializer.readNumber() as number)
+                actionAreaDistanceTmpBuf_ = valueDeserializer.readFloat64()
             } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toByte()) {
                 actionAreaDistanceTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for actionAreaDistanceTmpBuf_ has to be chosen through deserialisation.")
             }
-            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | number | Resource)
+            actionAreaDistanceTmpBuf = (actionAreaDistanceTmpBuf_ as string | double | Resource)
         }
         const actionAreaDistanceTmpResult : Length | undefined = actionAreaDistanceTmpBuf
         const onActionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

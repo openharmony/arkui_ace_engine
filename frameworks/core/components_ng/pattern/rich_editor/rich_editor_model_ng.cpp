@@ -656,6 +656,36 @@ void RichEditorModelNG::SetEnableAutoSpacing(bool enabled)
     pattern->SetEnableAutoSpacing(enabled);
 }
 
+void RichEditorModelNG::SetCompressLeadingPunctuation(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CompressLeadingPunctuation, enabled);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetIncludeFontPadding(bool isIncludeFontPadding)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(bool isFallbackLineSpacing)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFallbackLineSpacing(isFallbackLineSpacing);
+}
+
 void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -690,6 +720,33 @@ void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
     pattern->SetEnableAutoSpacing(enabled);
 }
 
+void RichEditorModelNG::SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CompressLeadingPunctuation, enabled, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool isIncludeFontPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, isIncludeFontPadding, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetIncludeFontPadding(isIncludeFontPadding);
+}
+
+void RichEditorModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool isFallbackLineSpacing)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, isFallbackLineSpacing, frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetFallbackLineSpacing(isFallbackLineSpacing);
+}
+
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
 {
     CHECK_NULL_VOID(frameNode);
@@ -717,6 +774,34 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->UpdateScrollBarColor(value, true);
+}
+
+void RichEditorModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void RichEditorModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RichEditorLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color RichEditorModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void RichEditorModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void RichEditorModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 
 void RichEditorModelNG::SetSingleLine(bool isEnable)

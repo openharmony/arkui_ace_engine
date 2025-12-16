@@ -1906,6 +1906,12 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DROP));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ITEM_ON_SELECT, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_SELECT));
+    
+    nodeType = static_cast<int32_t>(ARKUI_NODE_PICKER);
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_PICKER_EVENT_ON_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_PICKER_EVENT_ON_SCROLL_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_SCROLL_STOP));
 }
 
 /**
@@ -2160,6 +2166,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DROP));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_SELECT);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ITEM_ON_SELECT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CONTAINER_PICKER_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CONTAINER_PICKER_SCROLL_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_SCROLL_STOP));
 }
 
 /**
@@ -10843,6 +10853,47 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_002, TestSize.
 }
 
 /**
+ * @tc.name: NativeNodeTest_NODE_RESPONSE_REGION_LIST_003
+ * @tc.desc: Test NODE_RESPONSE_REGION_LIST function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float size = 100.0f;
+    ArkUI_NumberValue value[] = { { .f32 = size } };
+    ArkUI_AttributeItem sizeItem = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+
+    ArkUI_NumberValue value2[] =
+    { 
+        { .i32 = -1 }, { .f32 = 0.0f }, { .f32 = 10.0f }, { .f32 = 10.0f }, { .f32 = 10.0f },
+        { .i32 = 0 }, { .f32 = -10.0f }, { .f32 = 0.0f }, { .f32 = 20.0f }, { .f32 = 20.0f },
+        { .i32 = 1 }, { .f32 = 10.0f }, { .f32 = 20.0f }, { .f32 = 50.0f }, { .f32 = 50.0f },
+        { .i32 = 2 }, { .f32 = 80.0f }, { .f32 = 60.0f }, { .f32 = 30.0f }, { .f32 = 30.0f },
+        { .i32 = 3 }, { .f32 = 20.0f }, { .f32 = 30.0f }, { .f32 = 60.0f }, { .f32 = 60.0f }
+    };
+    ArkUI_AttributeItem regionListItem = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &sizeItem);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &sizeItem);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_RESPONSE_REGION_LIST, &regionListItem);
+    auto regionListVal = nodeAPI->getAttribute(rootNode, NODE_RESPONSE_REGION_LIST);
+    EXPECT_EQ(regionListVal->size, 20);
+}
+
+/**
  * @tc.name: NativeNodeTest_MonopolizeEvents_001
  * @tc.desc: Test NODE_MONOPOLIZE_EVENTS function.
  * @tc.type: FUNC
@@ -11407,5 +11458,98 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_DistanceThreshold_004, TestSize.Level1)
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_ON_CLICK_EVENT_DISTANCE_THRESHOLD), ARKUI_ERROR_CODE_NO_ERROR);
     nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: ShowCounterConfig
+ * @tc.desc: Test ShowCounterConfig function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ShowCounterConfigTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize.
+     */
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(nullptr), 0x00000000);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(nullptr), 0x00000000);
+
+    /**
+     * @tc.steps: step2. Create an showCounterConfig and configure the properties,
+     *            then set the color to the CounterTextColor.
+     */
+    auto config = OH_ArkUI_ShowCounterConfig_Create();
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0x00000000);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0x00000000);
+
+    /**
+     * @tc.steps: step3. Test attribute acquisition,
+     */
+    OH_ArkUI_ShowCounterConfig_SetCounterTextColor(config, 0xFF0000FF);
+    OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(config, 0xFFFFFF00);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0xFF0000FF);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0xFFFFFF00);
+    OH_ArkUI_ShowCounterConfig_Dispose(config);
+} 
+
+/**
+ * @tc.name: NativeNodeConvertToWindowTest001
+ * @tc.desc: Test convert to window function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeConvertToWindowTest001, TestSize.Level1)
+{
+    auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    ArkUI_IntOffset position = {10, 30};
+    ArkUI_IntOffset pos1;
+    auto ret = OH_ArkUI_NativeModule_ConvertPositionToWindow(node, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
+    ret = OH_ArkUI_NativeModule_ConvertPositionToWindow(nullptr, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeConvertFromWindowTest001
+ * @tc.desc: Test convert to window function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeConvertFromWindowTest001, TestSize.Level1)
+{
+    auto node = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    ArkUI_IntOffset position = {10, 30};
+    ArkUI_IntOffset pos1;
+    auto ret = OH_ArkUI_NativeModule_ConvertPositionFromWindow(node, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
+    ret = OH_ArkUI_NativeModule_ConvertPositionFromWindow(nullptr, position, &pos1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: ShowCounterConfigTest002
+ * @tc.desc: Test ShowCounterConfig function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ShowCounterConfigTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto textinput = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr, true});
+    auto textarea = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr, true});
+    auto config = OH_ArkUI_ShowCounterConfig_Create();
+    OH_ArkUI_ShowCounterConfig_SetCounterTextColor(config, 0xFF0000FF);
+    OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(config, 0xFFFFFF00);
+    ArkUI_NumberValue showCounterArray[] = {{.i32 = true},  // 显示计数器
+                                               {.f32 = 50.0f}, // 计数器阈值（百分比）
+                                               {.i32 = true}};
+    ArkUI_AttributeItem item = {.value = showCounterArray, .size = 3, .object = config};
+    nodeAPI->setAttribute(textinput, NODE_TEXT_INPUT_SHOW_COUNTER, &item);
+    nodeAPI->setAttribute(textarea, NODE_TEXT_AREA_SHOW_COUNTER, &item);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0xFF0000FF);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0xFFFFFF00);
+    OH_ArkUI_ShowCounterConfig_Dispose(config);
+    nodeAPI->disposeNode(textinput);
+    nodeAPI->disposeNode(textarea);
 }
 } // namespace OHOS::Ace

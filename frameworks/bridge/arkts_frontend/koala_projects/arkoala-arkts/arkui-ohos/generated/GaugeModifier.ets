@@ -52,9 +52,9 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeWidth_0_0value?: Length | undefined
     _description_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _description_0_0value?: CustomBuilder | undefined
+    _description_0_0value?: CustomBuilder | null | undefined
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _trackShadow_0_0value?: GaugeShadowOptions | undefined
+    _trackShadow_0_0value?: GaugeShadowOptions | null | undefined
     _indicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _indicator_0_0value?: GaugeIndicatorOptions | null | undefined
     _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -159,7 +159,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             switch (this._description_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDescriptionAttribute((this._description_0_0value as CustomBuilder | undefined));
+                    peer.setDescriptionAttribute((this._description_0_0value as CustomBuilder | null | undefined));
                     this._description_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -169,7 +169,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
                 default: {
                     this._description_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDescriptionAttribute((undefined as CustomBuilder | undefined));
+                    peer.setDescriptionAttribute((undefined as CustomBuilder | null | undefined));
                 }
             }
         }
@@ -177,7 +177,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             switch (this._trackShadow_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as GaugeShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as GaugeShadowOptions | null | undefined));
                     this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -187,7 +187,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
                 default: {
                     this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTrackShadowAttribute((undefined as GaugeShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((undefined as GaugeShadowOptions | null | undefined));
                 }
             }
         }
@@ -323,7 +323,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                     break;
                 }
                 default: {
-                    this.description((undefined as CustomBuilder | undefined));
+                    this.description((undefined as CustomBuilder | null | undefined));
                 }
             }
         }
@@ -336,7 +336,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                     break;
                 }
                 default: {
-                    this.trackShadow((undefined as GaugeShadowOptions | undefined));
+                    this.trackShadow((undefined as GaugeShadowOptions | null | undefined));
                 }
             }
         }
@@ -435,7 +435,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         }
         return this
     }
-    description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | null | undefined): this {
         if (((this._description_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._description_0_flag = AttributeUpdaterFlag.UPDATE
@@ -446,7 +446,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         }
         return this
     }
-    trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | null | undefined): this {
         if (((this._trackShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE

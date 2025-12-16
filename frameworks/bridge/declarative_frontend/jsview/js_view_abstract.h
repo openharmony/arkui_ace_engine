@@ -249,13 +249,15 @@ public:
         NG::SheetHeight& detent, bool isReset, RefPtr<ResourceObject>& resObj);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
-    static void ParseCallback(const JSRef<JSObject>& paramObj,
+    static void ParseCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void(const float)>& callbackDidChange, const char* prop);
-    static void ParseLifeCycleCallback(const JSRef<JSObject>& paramObj, std::function<void()>& lifeCycleCallBack,
+    static void ParseLifeCycleCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
+        std::function<void()>& lifeCycleCallBack,
         const char* prop);
-    static void ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
+    static void ParseSpringBackCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void()>& sheetSpringBack, const char* prop);
-    static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+    static void ParseSheetCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
+        std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
         std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
@@ -270,8 +272,9 @@ public:
     static panda::Local<panda::JSValueRef> JsSheetSpringBack(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseModalTransitonEffect(
         const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
-    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, const JSCallbackInfo& info,
+        std::function<void()>& onAppear, std::function<void()>& onDisappear,
+        std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
         std::function<void(const int32_t& info)>& onWillDismiss);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
@@ -862,7 +865,8 @@ public:
     static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
-
+    static std::function<void(NG::DrawingContext& context)> GetDrawOverlayCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
     static void JsFocusScopeId(const JSCallbackInfo& info);
@@ -872,6 +876,7 @@ public:
     static void JsBackgroundFilter(const JSCallbackInfo& info);
     static void JsForegroundFilter(const JSCallbackInfo& info);
     static void JsCompositingFilter(const JSCallbackInfo& info);
+    static void JsMaterialFilter(const JSCallbackInfo& info);
     static NG::PaddingProperty GetLocalizedPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
         const std::optional<CalcDimension>& end);
@@ -906,6 +911,7 @@ public:
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
+    static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
 
 private:
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,

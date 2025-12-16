@@ -541,6 +541,14 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    void SetCompressLeadingPunctuation(bool enabled)
+    {
+        CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
+        isCompressLeadingPunctuation_ = enabled;
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void OnAttachToFrameNodeMultiThread() {}
@@ -1125,7 +1133,7 @@ public:
     void ResetKeyboardIfNeed();
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     bool NeedCloseKeyboard() override;
-    void CloseTextCustomKeyboard(int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
 
     void HandleOnEnter() override
     {
@@ -1319,6 +1327,28 @@ public:
         return isStopBackPress_;
     }
 
+    void SetIncludeFontPadding(bool isIncludeFontPadding)
+    {
+        CHECK_NULL_VOID(isIncludeFontPadding_ != isIncludeFontPadding);
+        isIncludeFontPadding_ = isIncludeFontPadding;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
+    }
+
+    void SetFallbackLineSpacing(bool isFallbackLineSpacing)
+    {
+        CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
+        isFallbackLineSpacing_ = isFallbackLineSpacing;
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
@@ -1387,6 +1417,11 @@ public:
         return !isAppendContent;
     }
 
+    bool GetDefaultClipValue() const override
+    {
+        return true;
+    }
+
     void SetTextDetectEnable(bool enable) override
     {
         auto currentEnable = textDetectEnable_;
@@ -1428,6 +1463,9 @@ public:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     bool ProcessAutoFill(AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void ProcessAutoFillOnPaste();
+    void HandleOnPasswordVault();
+    bool IsShowAutoFill();
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1564,6 +1602,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
     RefPtr<UINode> GetChildByIndex(int32_t index) const override;
@@ -1873,7 +1912,6 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
@@ -1923,6 +1961,7 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     bool isEnableAutoSpacing_ = false;
+    bool isCompressLeadingPunctuation_ = false;
     float maxLinesHeight_ = FLT_MAX;
     int32_t maxLines_ = INT32_MAX;
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
@@ -1937,6 +1976,8 @@ private:
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
+    bool isIncludeFontPadding_ = false;
+    bool isFallbackLineSpacing_ = false;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
     RefPtr<UINode> customKeyboardNode_;

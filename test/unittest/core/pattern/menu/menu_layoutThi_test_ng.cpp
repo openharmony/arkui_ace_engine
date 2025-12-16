@@ -1003,67 +1003,70 @@ HWTEST_F(MenuLayout3TestNg, SkipUpdateTargetNodeSize001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ModifyTargetOffset001
- * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.name: ModifyOffset001
+ * @tc.desc: Verify ModifyOffset.
  * @tc.type: FUNC
  */
  
-HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset001, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, ModifyOffset001, TestSize.Level1)
 {
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
     MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     ;
     menuLayoutAlgorithm.isUIExtensionSubWindow_ = false;
-    menuLayoutAlgorithm.ModifyTargetOffset();
-    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TWENTY);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
 }
  
 /**
- * @tc.name: ModifyTargetOffset002
- * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.name: ModifyOffset002
+ * @tc.desc: Verify ModifyOffset.
  * @tc.type: FUNC
  */
  
-HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset002, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, ModifyOffset002, TestSize.Level1)
 {
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
     MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = false;
-    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
     menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = false;
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyTargetOffset();
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
 }
  
 /**
- * @tc.name: ModifyTargetOffset003
- * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.name: ModifyOffset003
+ * @tc.desc: Verify ModifyOffset.
  * @tc.type: FUNC
  */
  
-HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset003, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, ModifyOffset003, TestSize.Level1)
 {
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
     MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = true;
     menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = false;
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyTargetOffset();
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
 }
 

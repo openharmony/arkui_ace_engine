@@ -57,7 +57,7 @@ void InputMethodManager::CloseKeyboardInPipelineDestroy() {}
 
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode) {}
 
-void InputMethodManager::CloseCustomKeyboard() {}
+void InputMethodManager::CloseCustomKeyboard(bool isUIExtension) {}
 
 void InputMethodManager::HideKeyboardAcrossProcesses() {}
 

@@ -147,7 +147,7 @@ static JSValueRef u64ToBigInt(JSContextRef context, uint64_t value) {
     bigint = JSObjectCallAsFunction(context, bigIntFromParts, nullptr, 2, parts, nullptr);
 #else
     char buffer[128] = {0};
-    interop_snprintf(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
+    InteropPrintToBufferN(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
     JSStringRef script = JSStringCreateWithUTF8CString(buffer);
     bigint = JSEvaluateScript(context, script, nullptr, nullptr, 0, nullptr);
     JSStringRelease(script);

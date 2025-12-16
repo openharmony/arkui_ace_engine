@@ -317,8 +317,9 @@ class ContextMenuResultOhos : public ContextMenuResult {
     DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult);
 
 public:
-    explicit ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
-        : callback_(callback) {}
+    explicit ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback,
+                                   const WeakPtr<WebDelegate>& delegate)
+        : callback_(callback), delegate_(delegate) {}
 
     void Cancel() const override;
     void CopyImage() const override;
@@ -329,9 +330,11 @@ public:
     void Undo() const override;
     void Redo() const override;
     void PasteAndMatchStyle() const override;
+    void RequestPasswordAutoFill() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
+    WeakPtr<WebDelegate> delegate_;
 };
 
 class WebGeolocationOhos : public WebGeolocation {
@@ -1144,7 +1147,7 @@ public:
     }
     void HandleAccessibilityHoverEvent(
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
-    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
@@ -1297,6 +1300,7 @@ public:
     void SetDragResizeStartFlag(bool isDragResizeStart);
     void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool ProcessAutoFillOnPaste();
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
@@ -1473,6 +1477,7 @@ public:
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
+    void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
@@ -1505,6 +1510,7 @@ public:
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void SetImeShow(bool visible);
+    void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
     {

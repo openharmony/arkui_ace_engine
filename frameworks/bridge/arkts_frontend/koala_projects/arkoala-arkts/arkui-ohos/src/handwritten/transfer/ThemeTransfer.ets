@@ -18,6 +18,7 @@ import { ResourceColor } from 'arkui/component/units';
 import { ArkSystemColors, ArkSystemCustomColors } from 'arkui/theme/system/ArkSystemColors';
 import { ResourceTransfer } from './ResourceTransfer';
 import { Color } from 'arkui/component/enums';
+import { int32 } from '@koalaui/common';
 
 export class ResourceColorTransfer {
     static transferStatic(input: Any): ResourceColor {
@@ -26,7 +27,7 @@ export class ResourceColorTransfer {
             return inputVal.toString();
         }
         if (inputVal.isNumber()) {
-            return inputVal.toNumber();
+            return inputVal.toNumber() as int32;
         }
         if (inputVal.isObject()) {
             return ResourceTransfer.transferStatic(input) as ResourceColor;

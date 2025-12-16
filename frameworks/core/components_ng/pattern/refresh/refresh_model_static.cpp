@@ -84,6 +84,17 @@ void RefreshModelStatic::SetPullToRefresh(FrameNode* frameNode, const std::optio
     }
 }
 
+void RefreshModelStatic::SetPullUpToCancelRefresh(
+    FrameNode* frameNode, const std::optional<bool>& pullUpToCancelRefresh)
+{
+    if (pullUpToCancelRefresh) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RefreshLayoutProperty, PullUpToCancelRefresh, pullUpToCancelRefresh.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullUpToCancelRefresh, frameNode);
+    }
+}
+
 void RefreshModelStatic::SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio)
 {
     if (pullDownRatio) {

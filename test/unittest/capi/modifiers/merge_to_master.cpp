@@ -41,6 +41,21 @@ HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
     }
 }
 
+HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragResultValues) {
+        dragEvent_->SetResult(value);
+        EXPECT_EQ(accessor_->getResult(peer_), expected) <<
+            "Input value is: " << input << ", method: SetResult";
+    }
+}
+
+HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}
+
 HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -60,21 +75,6 @@ HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
     ASSERT_NE(modifier_->setCashedCount, nullptr);
     auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
     EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
-}
-
-HWTEST_F(TextTimerModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
-{
-    auto checkValue = [this](const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        auto format = Converter::ArkValue<Opt_String>(value);
-        modifier_->setFormat(node_, &format);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORMAT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFormat, attribute: format";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureTextTimerDateFormatValidValues) {
-        checkValue(input, value, expected);
-    }
 }
 
 HWTEST_F(StateStylesOpsAccessorTest, onStateStyleChangeTest, TestSize.Level1)

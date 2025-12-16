@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -53,11 +53,14 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
+class ListPattern : public SelectableContainerPattern {
+    DECLARE_ACE_TYPE(ListPattern, SelectableContainerPattern);
 
 public:
-    ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
+    ListPattern() : SelectableContainerPattern()
+    {
+        SetEdgeEffect(EdgeEffect::SPRING, false);
+    }
     ~ListPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -344,6 +347,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
@@ -361,12 +365,25 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
-    void SetItemPressed(bool isPressed, int32_t id)
+    void SetItemState(ItemState itemState, int32_t id)
     {
-        if (isPressed) {
-            pressedItem_.emplace(id);
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            noDividerItems_[id] = itemState;
         } else {
-            pressedItem_.erase(id);
+            item->second |= itemState;
+        }
+    }
+
+    void ResetItemState(ItemState itemState, int32_t id)
+    {
+        auto item = noDividerItems_.find(id);
+        if (item == noDividerItems_.end()) {
+            return;
+        }
+        item->second &= ~itemState;
+        if (item->second == ITEM_STATE_NORMAL) {
+            noDividerItems_.erase(id);
         }
     }
 
@@ -480,6 +497,16 @@ public:
             return scrollable_->GetListSnapSpeed();
         }
         return listSnapSpeed_;
+    }
+
+    void SetEditModeOptions(EditModeOptions& editModeOptions)
+    {
+        editModeOptions_ = editModeOptions;
+    }
+
+    EditModeOptions GetEditModeOptions() const override
+    {
+        return editModeOptions_;
     }
 
 protected:
@@ -665,7 +692,7 @@ private:
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
-    std::set<int32_t> pressedItem_;
+    std::map<int32_t, uint32_t> noDividerItems_;
     int32_t lanes_ = 1;
     int32_t laneIdx4Divider_ = 0;
     float laneGutter_ = 0.0f;
@@ -699,6 +726,8 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
+
+    EditModeOptions editModeOptions_;
 };
 } // namespace OHOS::Ace::NG
 

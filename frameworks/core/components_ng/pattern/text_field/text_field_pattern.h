@@ -1073,11 +1073,13 @@ public:
     {
         HandleOnSelectAll(true);
     }
+    void HandleOnPasswordVault();
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
     bool IsShowTranslate();
     bool IsShowSearch();
+    bool IsShowAutoFill();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1465,6 +1467,8 @@ public:
 
     bool ProcessAutoFill(bool& isPopup, bool ignoreFillType = false, bool isNewPassWord = false,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void ProcessAutoFillAndKeyboard(SourceType sourceType = SourceType::NONE, bool ignoreFillType = false,
+        bool isNewPassWord = false, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void SetAutoFillUserName(const std::string& userName)
     {
         autoFillUserName_ = userName;
@@ -1798,7 +1802,7 @@ public:
     bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     bool NeedCloseKeyboard() override;
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
-    void CloseTextCustomKeyboard(int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
     void SetPlaceholderColorInfo(const std::string& info)
     {

@@ -15,12 +15,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "generated/type_helpers.h"
 #include "arkoala_api_generated.h"
+
 #include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -78,8 +80,8 @@ const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 
 const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
-const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_INT);
-const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_FLOAT);
+const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
+const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_FLOAT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
 
 const Opt_ResourceColor OPT_COLOR_COLOR = Converter::ArkValue<Opt_ResourceColor>(COLOR_COLOR);

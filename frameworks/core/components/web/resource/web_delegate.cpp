@@ -831,6 +831,17 @@ void ContextMenuResultOhos::PasteAndMatchStyle() const
     }
 }
 
+void ContextMenuResultOhos::RequestPasswordAutoFill() const
+{
+    if (callback_) {
+        callback_->Continue(CI_REQUEST_AUTOFILL, EF_NONE);
+    }
+    auto delegate = delegate_.Upgrade();
+    if (delegate) {
+        delegate->OnRequestAutofill(static_cast<int32_t>(NG::WebMenuType::TYPE_CONTEXTMENU));
+    }
+}
+
 void WebWindowNewHandlerOhos::SetWebController(int32_t id)
 {
     if (handler_) {
@@ -3093,6 +3104,10 @@ void WebDelegate::InitWebViewWithWindow()
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
 
+            auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
+            vaultPlainTextImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
+
             std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
             delegate->UpdateSettting(isNewPipe);
@@ -3622,8 +3637,12 @@ void WebDelegate::InitWebViewWithSurface()
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
+            auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
+            vaultPlainTextImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->RegisterMenuLifeCycleCallback();
             pattern->InitDataDetector();
             pattern->InitSelectDataDetector();
             pattern->InitAIDetectResult();
@@ -6296,7 +6315,6 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAILinkMenuShow(false);
-        webPattern->RegisterMenuLifeCycleCallback();
         if (delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, true, true);
             result = true;
@@ -6323,7 +6341,6 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
             webPattern->SetAILinkMenuShow(false);
-            webPattern->RegisterMenuLifeCycleCallback();
             if (delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, true, true);
                 result = true;
@@ -7352,18 +7369,23 @@ void WebDelegate::HandleAccessibilityHoverEvent(
     nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
-void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
+void WebDelegate::NotifyAutoFillViewData(
+    const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), jsonStr]() {
+        [weak = WeakClaim(this), jsonStr, type]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
             romMessage->SetType(NWebRomValue::Type::STRING);
             romMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillDataFromTriggerType(romMessage, type);
+            if (ArkWebGetErrno() == RESULT_OK) {
+                return;
+            }
             delegate->nweb_->FillAutofillDataV2(romMessage);
             if (ArkWebGetErrno() != RESULT_OK) {
                 auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
@@ -9173,6 +9195,15 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
     return htmlStr;
 }
 
+bool WebDelegate::ProcessAutoFillOnPaste()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "ProcessAutoFillOnPaste");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    bool isPopup = false;
+    return webPattern->RequestAutoFill(isPopup, false, AceAutoFillTriggerType::PASTE_REQUEST);
+}
+
 void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
 {
     auto webPattern = webPattern_.Upgrade();
@@ -9571,6 +9602,13 @@ void WebDelegate::OnFirstScreenPaint(
         TaskExecutor::TaskType::JS, "ArkUIWebOnFirstScreenPaint");
 }
 
+void WebDelegate::OnRequestAutofill(int32_t menuType)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RequestPasswordAutoFill(static_cast<NG::WebMenuType>(menuType));
+}
+
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
     const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold)
 {
@@ -9606,6 +9644,25 @@ void WebDelegate::UpdateEnableImageAnalyzer(bool enable)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateEnableImageAnalyzer");
+}
+
+void WebDelegate::SetEnableAutoFill(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->SetEnableAutoFill(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableAutoFill");
 }
 
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)

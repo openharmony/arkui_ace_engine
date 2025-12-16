@@ -3139,9 +3139,19 @@ void ViewAbstract::SetIsMirrorable(bool isMirrorable)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable);
 }
 
+void ViewAbstract::SetIsMirrorable(FrameNode* frameNode, bool isMirrorable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsMirrorable, isMirrorable, frameNode);
+}
+
 void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
+
+void ViewAbstract::SetAlign(FrameNode* frameNode, std::string localizedAlignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LocalizedAlignment, localizedAlignment, frameNode);
 }
 
 void ViewAbstract::SetLayoutGravity(FrameNode* frameNode, Alignment alignment)
@@ -4835,10 +4845,6 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -5600,6 +5606,20 @@ void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen:
     target->UpdateCompositingFilter(compositingFilter);
 }
 
+void ViewAbstract::SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilter);
+}
+
+void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
+}
+
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5612,6 +5632,9 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
     CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
         auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
         auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
@@ -5909,6 +5932,11 @@ void ViewAbstract::SetForegroundColor(const Color& color)
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    if (strategy == ForegroundColorStrategy::CONTRAST) {
+        BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::CONTRAST, 500);
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true); // to prevent inheriting from other foreground strategy
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
@@ -6550,6 +6578,9 @@ void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr
 
 void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)
 {
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
@@ -6624,10 +6655,6 @@ void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gr
             gradientValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradientValue, frameNode);
-            const auto& target = frameNode->GetRenderContext();
-            if (target) {
-                target->OnSweepGradientUpdate(gradientValue);
-            }
         };
         pattern->AddResObj("SweepGradient.gradient", resObj, std::move(updateFunc));
     }
@@ -7097,6 +7124,15 @@ void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& m
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
 }
 
+std::optional<MotionPathOption> ViewAbstract::GetMotionPath(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, std::nullopt);
+    auto motionPath = target->GetMotionPath();
+    return motionPath;
+}
+
 void ViewAbstract::SetFocusOnTouch(FrameNode* frameNode, bool isSet)
 {
     CHECK_NULL_VOID(frameNode);
@@ -7116,6 +7152,7 @@ void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
 void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetFocusable, frameNode, focusable);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
@@ -9835,9 +9872,25 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
+}
+
+void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -9853,9 +9906,25 @@ void ViewAbstract::ResetMarkAnchorStart()
     layoutProperty->ResetMarkAnchorStart();
 }
 
+void ViewAbstract::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
+}
+
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

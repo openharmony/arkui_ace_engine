@@ -390,6 +390,7 @@ void ContextMenuResultOhos::CopyImage() const {}
 void ContextMenuResultOhos::Copy() const {}
 void ContextMenuResultOhos::Paste() const {}
 void ContextMenuResultOhos::Cut() const {}
+void ContextMenuResultOhos::RequestPasswordAutoFill() const {}
 void ContextMenuResultOhos::SelectAll() const {}
 void WebWindowNewHandlerOhos::SetWebController(int32_t id) {}
 bool WebWindowNewHandlerOhos::IsFrist() const
@@ -1085,7 +1086,8 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
     }
     return -1;
 }
-void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
+void WebDelegate::NotifyAutoFillViewData(
+    const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
@@ -1356,6 +1358,10 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& conte
 {
     return "";
 }
+bool WebDelegate::ProcessAutoFillOnPaste()
+{
+    return false;
+}
 bool WebDelegate::CloseImageOverlaySelection()
 {
     return false;
@@ -1457,6 +1463,7 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}
@@ -1471,6 +1478,7 @@ void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
     const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
+void WebDelegate::OnRequestAutofill(int32_t menuType) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}

@@ -63,7 +63,11 @@ void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& ark
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
@@ -163,6 +167,10 @@ void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnCameraCaptureStateChange(const CallbackHelper<OnCameraCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 

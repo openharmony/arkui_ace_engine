@@ -736,4 +736,11 @@ void LazyForEachNode::EnablePreBuild(bool enable)
         builder_->EnablePreBuild(enable);
     }
 }
+
+void LazyForEachNode::DumpInfo()
+{
+    if (builder_) {
+        builder_->DumpInfo();
+    }
+}
 } // namespace OHOS::Ace::NG

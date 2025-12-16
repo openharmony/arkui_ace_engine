@@ -1296,25 +1296,27 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     // create nodes
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode2 = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-
     auto frameNode3 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     frameNode1->MountToParent(frameNode0);
     frameNode2->MountToParent(frameNode1);
     frameNode3->MountToParent(frameNode2);
+
     // make sure nodes mount correctly
     EXPECT_EQ(frameNode1->GetParent()->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_EQ(frameNode2->GetParent()->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(frameNode3->GetParent()->GetTag(), V2::FLEX_ETS_TAG);
+
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP };
     auto columnLayoutProperty = frameNode1->GetLayoutProperty();
     EXPECT_NE(columnLayoutProperty, nullptr);
+
     columnLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto flexLayoutProperty = frameNode2->GetLayoutProperty();
     EXPECT_NE(flexLayoutProperty, nullptr);
+
     flexLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto rowLayoutProperty = frameNode3->GetLayoutProperty();
     EXPECT_NE(rowLayoutProperty, nullptr);
@@ -1398,6 +1400,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         KeyBoardAvoidMode::RESIZE_WITH_CARET,
         KeyBoardAvoidMode::NONE
     };
+
     std::vector<std::pair<bool, bool>> expectedRes = {
         { true, false },
         { false, true },
@@ -1425,7 +1428,6 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, inset.start);
     EXPECT_EQ(keyboardInset.end, inset.end);
-
     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
@@ -1441,14 +1443,11 @@ HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
 {
     safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
     EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
-
     auto ret = safeAreaManager_->GetKeyboardInsetImpl();
     auto compare = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(ret, compare);
-
     safeAreaManager_->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)>());
     EXPECT_EQ(safeAreaManager_->getKeyboardInset, nullptr);
-
     ret = safeAreaManager_->GetKeyboardInsetImpl();
     compare = safeAreaManager_->GetKeyboardInset();
     EXPECT_EQ(ret, compare);

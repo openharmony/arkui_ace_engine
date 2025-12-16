@@ -63,6 +63,7 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -96,7 +97,7 @@ const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.s
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
-std::mutex g_mutexFormRenderFontFamily;
+std::mutex g_mutexFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 constexpr int32_t DARK_RES_DUMP_MIN_SIZE = 3;
@@ -474,7 +475,9 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
     taskExecutor_ = taskExecutorImpl;
     // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ ||
+        type_ == FrontendType::ARK_TS || type_ == FrontendType::DYNAMIC_HYBRID_STATIC ||
+        type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         GetSettings().useUIAsJSThread = true;
     } else {
         taskExecutorImpl->InitJsThread();
@@ -1220,6 +1223,27 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     front->OnNewRequest(data);
 }
 
+void AceContainer::InitForceSplitManager()
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    auto abilityInfo = abilityInfo_.lock();
+    if (abilityInfo && abilityInfo->iconId != 0) {
+        mgr->SetAppIconId(abilityInfo->iconId);
+        return;
+    }
+    auto runtimeContext = runtimeContext_.lock();
+    CHECK_NULL_VOID(runtimeContext);
+    auto appInfo = runtimeContext->GetApplicationInfo();
+    if (appInfo && appInfo->iconId != 0) {
+        mgr->SetAppIconId(appInfo->iconId);
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to get app iconId");
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
@@ -1416,21 +1440,26 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
+    auto&& densityChangeCallback = [id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density, id]() {
-            context->OnSurfaceDensityChanged(density);
-            if (context->IsNeedReloadDensity()) {
-                auto container = Container::GetContainer(id);
-                CHECK_NULL_VOID(container);
-                auto aceContainer = DynamicCast<AceContainer>(container);
-                CHECK_NULL_VOID(aceContainer);
-                aceContainer->NotifyDensityUpdate(density);
-                context->SetIsNeedReloadDensity(false);
+        auto container = Container::GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto callback = [container, density]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->OnSurfaceDensityChanged(density);
+                if (pipelineContext->IsNeedReloadDensity()) {
+                    auto aceContainer = DynamicCast<AceContainer>(container);
+                    CHECK_NULL_VOID(aceContainer);
+                    aceContainer->NotifyDensityUpdate(density);
+                    pipelineContext->SetIsNeedReloadDensity(false);
+                }
             }
         };
-        auto taskExecutor = context->GetTaskExecutor();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
@@ -1655,12 +1684,16 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-
+    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content, params);
+        auto result = front->RunPageByNamedRouter(content, params);
+        container->LoadCompleteManagerStopCollect();
+        return result;
     }
 
-    return front->RunPage(content, params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1671,7 +1704,10 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    return front->RunPage(content, params);
+    container->LoadCompleteManagerStartCollect(params);
+    auto result = front->RunPage(content, params);
+    container->LoadCompleteManagerStopCollect();
+    return result;
 }
 
 bool AceContainer::RunDynamicPage(
@@ -1731,16 +1767,19 @@ public:
             auto node = node_.Upgrade();
             CHECK_NULL_VOID(node);
             taskExecutor->PostTask(
-                [viewDataWrap, node, autoFillType = autoFillType_]() {
+                [viewDataWrap, node, autoFillType = autoFillType_, triggerType = triggerType_]() {
                     if (node) {
-                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType);
+                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType, triggerType);
                     }
                 },
                 TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");
             return;
         }
         auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
+        if (!node) {
+            TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "requesting node is nullptr.");
+            return;
+        }
         taskExecutor->PostTask(
             [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {
@@ -2724,6 +2763,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
+    InitForceSplitManager();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
         auto container = weak.Upgrade();
@@ -3369,13 +3409,8 @@ void AceContainer::CheckAndSetFontFamily()
     for (const auto& fontFamilyName : fontFamilyNames) {
         fullPath.push_back(path + fontFamilyName);
     }
-    if (isFormRender_) {
-        // Resolve garbled characters caused by FRS multi-thread async
-        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    } else {
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    }
+    std::lock_guard<std::mutex> lock(g_mutexFontFamily);
+    fontManager->SetFontFamily(familyName.c_str(), fullPath);
 }
 
 void AceContainer::SetFontScaleAndWeightScale(int32_t instanceId)
@@ -3701,7 +3736,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(
@@ -5078,5 +5113,19 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     if (subFrontend_) {
         subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
     }
+}
+
+void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+}
+
+void AceContainer::LoadCompleteManagerStopCollect()
+{
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetLoadCompleteManager()->StopCollect();
 }
 } // namespace OHOS::Ace::Platform

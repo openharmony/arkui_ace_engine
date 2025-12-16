@@ -15,7 +15,7 @@
 
 #include "core/components/declaration/common/declaration_creator_manager.h"
 
-#include "core/components/declaration/badge/badge_declaration.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/canvas/canvas_declaration.h"
 #include "core/components/declaration/clock/clock_declaration.h"
@@ -63,7 +63,6 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
         { DOM_NODE_TAG_ANIMATE, DeclarationCreator<SvgAnimateDeclaration> },
         { DOM_NODE_TAG_ANIMATE_MOTION, DeclarationCreator<SvgAnimateDeclaration> },
         { DOM_NODE_TAG_ANIMATE_TRANSFORM, DeclarationCreator<SvgAnimateDeclaration> },
-        { DOM_NODE_TAG_BADGE, DeclarationCreator<BadgeDeclaration> },
         { DOM_NODE_TAG_BUTTON, DeclarationCreator<ButtonDeclaration> },
         { DOM_NODE_TAG_CANVAS, DeclarationCreator<CanvasDeclaration> },
         { DOM_NODE_TAG_CIRCLE, DeclarationCreator<SvgCircleDeclaration> },
@@ -104,6 +103,16 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
     RefPtr<Declaration> declaration = AceType::MakeRefPtr<Declaration>();
     if (creatorIndex >= 0) {
         declaration = declarationCreators[creatorIndex].value(tag);
+    } else {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
+        if (!loader) {
+            declaration->Init();
+            return declaration;
+        }
+        auto newDeclaration = loader->CreateDeclaration();
+        if (newDeclaration) {
+            declaration = newDeclaration;
+        }
     }
     declaration->Init();
     return declaration;

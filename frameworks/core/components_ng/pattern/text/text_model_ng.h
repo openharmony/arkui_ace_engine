@@ -105,6 +105,8 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
@@ -112,6 +114,8 @@ public:
     void SetColorShaderStyle(const Color& value) override;
     void ResetGradientShaderStyle() override;
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -248,6 +252,10 @@ public:
     static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
@@ -267,6 +275,9 @@ public:
     static void ResetLineHeightMultiply(FrameNode* frameNode);
     static void ResetMinimumLineHeight(FrameNode* frameNode);
     static void ResetMaximumLineHeight(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,6 +22,7 @@ group("ace_packages") {
     "$ace_root/advanced_ui_component:advanced_ui_component",
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
+    "$ace_root/build:libace_compatible_components",
     "$ace_root/build:libace_engine_pa_ark",
     "$ace_root/component_ext:component_ext",
     "$ace_root/frameworks/base/network:ace_network",

@@ -362,6 +362,34 @@ std::pair<int32_t, float> ListPositionMap::GetEndIndexAndPos() const
     return { end->first, end->second.mainPos + end->second.mainSize };
 }
 
+int32_t ListPositionMap::GetEntryAtOrBeforeIndex(int32_t index) const
+{
+    if (posMap_.empty()) {
+        return -1;
+    }
+    auto it = posMap_.lower_bound(index);
+    if (it != posMap_.end() && it->first == index) {
+        return it->first;
+    }
+    if (it == posMap_.begin()) {
+        return -1;
+    }
+    --it;
+    return it->first;
+}
+
+int32_t ListPositionMap::GetEntryAtOrAfterIndex(int32_t index) const
+{
+    if (posMap_.empty()) {
+        return -1;
+    }
+    auto it = posMap_.lower_bound(index);
+    if (it == posMap_.end()) {
+        return -1;
+    }
+    return it->first;
+}
+
 void ListPositionMap::OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos,
     const float offset, const float contentSize)
 {

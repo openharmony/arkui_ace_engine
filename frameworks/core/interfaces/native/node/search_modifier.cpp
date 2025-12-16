@@ -1395,6 +1395,7 @@ void ResetSearchOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
 void SetSearchCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool enable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1414,6 +1415,68 @@ void ResetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCompressLeadingPunctuation(frameNode, DEFAULT_LEADING_PUNCTUATION);
+}
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
+void SetSearchSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    auto pattern = frameNode->GetPattern();
+    SearchModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
+    } else {
+        pattern->UnRegisterResource("selectedDragPreviewStyleColor");
+    }
+}
+
+void ResetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return SearchModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
 } // namespace
 namespace NodeModifier {
@@ -1549,6 +1612,13 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchDirection = SetSearchDirection,
         .getSearchDirection = GetSearchDirection,
         .resetSearchDirection = ResetSearchDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
+        .setSearchSelectedDragPreviewStyle = SetSearchSelectedDragPreviewStyle,
+        .resetSearchSelectedDragPreviewStyle = ResetSearchSelectedDragPreviewStyle,
+        .getSearchSelectedDragPreviewStyle = GetSearchSelectedDragPreviewStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

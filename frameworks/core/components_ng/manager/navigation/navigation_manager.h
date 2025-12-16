@@ -27,11 +27,8 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-    struct NavigateChangeInfo {
-        std::string name;
-        bool isSplit;
-    };
-};
+    struct NavigateChangeInfo;
+}
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
@@ -81,7 +78,7 @@ struct NavdestinationRecoveryInfo {
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 
-using TransitionCallback = std::function<void(const std::string&, const std::string&)>;
+using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>;
 
 const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
 
@@ -237,23 +234,6 @@ public:
         }
         return false;
     }
-    bool IsForceSplitSupported() const
-    {
-        return isForceSplitSupported_;
-    }
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation = false);
-    bool IsForceSplitEnable() const
-    {
-        return isForceSplitEnable_;
-    }
-    const std::string& GetHomePageName() const
-    {
-        return homePageName_;
-    }
-    bool GetIgnoreOrientation() const;
-
-    void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
-    void RemoveForceSplitListener(int32_t nodeId);
     bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
 
     std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
@@ -361,12 +341,7 @@ private:
     std::optional<NavigationIntentInfo> navigationIntentInfo_ = std::nullopt;
 
     GetSystemColorCallback getSystemColorCallback_;
-    bool isForceSplitSupported_ = false;
-    bool isForceSplitEnable_ = false;
-    std::string homePageName_;
     int navigateCallbackId_ = 0;
-    std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
-    bool ignoreOrientation_ = false;
     std::unordered_map<int32_t, TransitionCallback> changeCallbacks_; // page or navigation change callback
 
     //-------force split begin-------

@@ -244,7 +244,7 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo)
+void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo, napi_value context)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -258,26 +258,7 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
     }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    napi_value objValue = nullptr;
-    napi_create_object(env_, &objValue);
-    napi_value napiCtx = pageInfo.context;
-    napi_value napiIndex = nullptr;
-    napi_value napiName = nullptr;
-    napi_value napiPath = nullptr;
-    napi_value napiState = nullptr;
-    napi_value napiPageId = nullptr;
-    napi_create_int32(env_, pageInfo.index, &napiIndex);
-    napi_create_string_utf8(env_, pageInfo.name.c_str(), pageInfo.name.length(), &napiName);
-    napi_create_string_utf8(env_, pageInfo.path.c_str(), pageInfo.path.length(), &napiPath);
-    napi_create_int32(env_, static_cast<int32_t>(pageInfo.state), &napiState);
-    napi_create_string_utf8(env_, pageInfo.pageId.c_str(), pageInfo.pageId.length(), &napiPageId);
-    napi_set_named_property(env_, objValue, "context", napiCtx);
-    napi_set_named_property(env_, objValue, "index", napiIndex);
-    napi_set_named_property(env_, objValue, "name", napiName);
-    napi_set_named_property(env_, objValue, "path", napiPath);
-    napi_set_named_property(env_, objValue, "state", napiState);
-    napi_set_named_property(env_, objValue, "pageId", napiPageId);
-    napi_value argv[] = { objValue };
+    napi_value argv[] = { CreateRouterPageInfoObj(pageInfo, context) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
 }
@@ -395,7 +376,7 @@ void UIObserverListener::OnDrawOrLayout()
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
+void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -409,7 +390,7 @@ void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchIn
     }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
+    napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo, context) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
 }
@@ -439,6 +420,44 @@ void UIObserverListener::OnTextChangeEvent(const NG::TextChangeEventInfo& info)
     napi_set_named_property(env_, objValue, "uniqueId", uniqueId);
     napi_set_named_property(env_, objValue, "content", content);
     napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnRouterPageSizeChange(const NG::RouterPageInfoNG& info, napi_value context)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(
+            AceLogTag::ACE_OBSERVER, "Handle router page size change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value argv[] = { CreateRouterPageInfoObj(info, context) };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::OnNavDestinationSizeChange(const NG::NavDestinationInfo& info)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle NavDestination size change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value argv[] = { CreateNavDestinationInfoObj(info) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
     napi_close_handle_scope(env_, scope);
 }
@@ -488,7 +507,8 @@ void UIObserverListener::HandleSwiperContentUpdate(const NG::SwiperContentInfo& 
     napi_close_handle_scope(env_, scope);
 }
 
-napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
+napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(
+    const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
 {
     napi_value objValue = nullptr;
     napi_create_object(env_, &objValue);
@@ -506,7 +526,7 @@ napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDe
         napi_create_string_utf8(env_, NAV_BAR, NAPI_AUTO_LENGTH, &napiTo);
     }
     napi_create_int32(env_, static_cast<int32_t>(switchInfo.operation), &napiOperation);
-    napi_set_named_property(env_, objValue, "context", switchInfo.context);
+    napi_set_named_property(env_, objValue, "context", context);
     napi_set_named_property(env_, objValue, "from", napiFrom);
     napi_set_named_property(env_, objValue, "to", napiTo);
     napi_set_named_property(env_, objValue, "operation", napiOperation);
@@ -1332,6 +1352,51 @@ napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinat
         napi_create_int32(env_, static_cast<int32_t>(info.uniqueId), &napiUniqueId);
         napi_set_named_property(env_, objValue, "mode", napiMode);
         napi_set_named_property(env_, objValue, "uniqueId", napiUniqueId);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) && info.size.has_value()) {
+        napi_value napiSize = nullptr;
+        napi_create_object(env_, &napiSize);
+        napi_value width = nullptr;
+        napi_value height = nullptr;
+        napi_create_double(env_, info.size->Width(), &width);
+        napi_create_double(env_, info.size->Height(), &height);
+        napi_set_named_property(env_, napiSize, "width", width);
+        napi_set_named_property(env_, napiSize, "height", height);
+        napi_set_named_property(env_, objValue, "size", napiSize);
+    }
+    return objValue;
+}
+
+napi_value UIObserverListener::CreateRouterPageInfoObj(const NG::RouterPageInfoNG& info, napi_value context)
+{
+    napi_value objValue = nullptr;
+    napi_value index = nullptr;
+    napi_value name = nullptr;
+    napi_value path = nullptr;
+    napi_value state = nullptr;
+    napi_value pageId = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_create_int32(env_, info.index, &index);
+    napi_create_string_utf8(env_, info.name.c_str(), info.name.length(), &name);
+    napi_create_string_utf8(env_, info.path.c_str(), info.path.length(), &path);
+    napi_create_int32(env_, static_cast<int32_t>(info.state), &state);
+    napi_create_string_utf8(env_, info.pageId.c_str(), info.pageId.length(), &pageId);
+    napi_set_named_property(env_, objValue, "context", context);
+    napi_set_named_property(env_, objValue, "index", index);
+    napi_set_named_property(env_, objValue, "name", name);
+    napi_set_named_property(env_, objValue, "path", path);
+    napi_set_named_property(env_, objValue, "state", state);
+    napi_set_named_property(env_, objValue, "pageId", pageId);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) && info.size.has_value()) {
+        napi_value size = nullptr;
+        napi_value width = nullptr;
+        napi_value height = nullptr;
+        napi_create_object(env_, &size);
+        napi_create_double(env_, info.size->Width(), &width);
+        napi_create_double(env_, info.size->Height(), &height);
+        napi_set_named_property(env_, size, "width", width);
+        napi_set_named_property(env_, size, "height", height);
+        napi_set_named_property(env_, objValue, "size", size);
     }
     return objValue;
 }

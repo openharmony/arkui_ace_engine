@@ -60,6 +60,7 @@ public:
     static void ResetButtonFontColor(FrameNode* frameNode);
     static void ResetButtonFontSize(FrameNode* frameNode);
     static void ResetFontFamily(FrameNode* frameNode);
+    static void ResetTextAlign(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);

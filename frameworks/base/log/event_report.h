@@ -79,7 +79,11 @@ enum class ComponentExcepType {
     LIST_ITEM_ERR,
     MARQUEE_ERR,
     NAVIGATION_BAR_ERR,
-    COMPONENT_LOAD_TIMEOUT,
+};
+
+// EXCEPTION_COMPONENT
+enum class ComponentExcepTypeNG {
+    RELATIVE_CONTAINER_LOOP_ERR = 0
 };
 
 // EXCEPTION_API_CHANNEL
@@ -225,6 +229,8 @@ public:
     static void SendAppStartException(AppStartExcepType type);
     static void SendPageRouterException(PageRouterExcepType type, const std::string& pageUrl = "");
     static void SendComponentException(ComponentExcepType type);
+    static void SendComponentExceptionNG(
+        ComponentExcepTypeNG type, int32_t nodeType = 0, int32_t nodeId = 0, const std::string& message = "");
     static void ReportPageLoadTimeout(const EventInfo& eventInfo);
     static void SendAPIChannelException(APIChannelExcepType type);
     static void SendRenderException(RenderExcepType type);
@@ -259,6 +265,8 @@ public:
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
+    static void ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+            const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
     static void ReportRichEditorInfo(const RichEditorInfo& richEditorInfo);
     static void ReportScrollableErrorEvent(

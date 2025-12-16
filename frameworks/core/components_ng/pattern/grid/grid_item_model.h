@@ -39,6 +39,7 @@ public:
     virtual void SetSelected(bool selected) = 0;
     virtual void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetOnSelect(std::function<void(bool)>&& onSelect) = 0;
+    virtual void BindContextMenu() {}
 
 private:
     static std::unique_ptr<GridItemModel> instance_;

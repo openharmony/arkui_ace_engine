@@ -113,13 +113,15 @@
                 "jsframework",
                 "opencl-headers",
                 "opengles",
+                "opencv",
                 "zlib",
                 "skia",
                 "libuv",
                 "resource_schedule_service",
                 "background_task_mgr",
                 "request",
-                "qrcodegen"
+                "qrcodegen",
+                "sdk"
             ],
             "third_party": []
         },
@@ -151,7 +153,8 @@
                             "viewport_config.h",
                             "serialized_gesture.h",
                             "serializeable_object.h",
-                            "modal_ui_extension_config.h"
+                            "modal_ui_extension_config.h",
+                            "node_module_inner.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"

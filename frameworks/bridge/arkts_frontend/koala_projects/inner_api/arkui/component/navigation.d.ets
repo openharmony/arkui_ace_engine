@@ -28,7 +28,7 @@ import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
 import { ComponentBase } from 'arkui/ComponentBase';
 import { LayoutSafeAreaEdge, LayoutSafeAreaType } from 'arkui.component.common';
-import { CustomBuilder, PageMapBuilder } from 'arkui/component/builder';
+import { CustomBuilder, PageMapBuilder } from 'arkui.component.builder';
 import {
     NavBarPosition,
     NavigationMenuItem,
@@ -55,13 +55,15 @@ import image from '@ohos.multimedia.image';
 type PixelMap = image.PixelMap;
 type SystemBarStyle = window.SystemBarStyle;
 
+export interface NavigationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+    isUserCreateStack?: boolean;
+}
+
 export declare class ArkNavigationPeer extends ArkCommonMethodPeer {
-    constructor(peerPtr: KPointer, id: int32, name: string);
-    constructor(peerPtr: KPointer, id: int32);
     protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkNavigationPeer;
-    public setNavigationOptions0Attribute(): void;
-    public setNavigationOptions1Attribute(pathInfos: NavPathStack): void;
     public navBarWidthAttribute(value: Length | undefined): void;
     public navBarPositionAttribute(value: NavBarPosition | undefined): void;
     public navBarWidthRangeAttribute(value: [Dimension, Dimension] | undefined): void;
@@ -244,7 +246,7 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
         name: string, param: (Object | null | undefined)) => void;
     public _needSync: boolean;
     public getPeer(): ArkNavigationPeer;
-    public setNavigationOptions(pathInfos?: NavPathStack): this;
+    public setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this;
     public navBarWidth(value: Length | undefined): this;
     public navBarPosition(value: NavBarPosition | undefined): this;
     public navBarWidthRange(value: [Dimension, Dimension] | undefined): this;

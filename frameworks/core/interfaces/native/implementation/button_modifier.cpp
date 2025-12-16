@@ -18,7 +18,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -74,6 +74,7 @@ ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
             parameters.fontFamily = labelFont->fontFamilies;
         }
     }
+    parameters.textAlign = Converter::OptConvert<TextAlign>(src.textAlign);
     return parameters;
 }
 }
@@ -218,6 +219,9 @@ void SetLabelStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
+    if (!parameters->textAlign.has_value()) {
+        ButtonModelStatic::ResetTextAlign(frameNode);
+    }
     ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,

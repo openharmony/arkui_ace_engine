@@ -49,11 +49,11 @@ void EventManager::UpdatePenHoverNode(const TouchEvent& event, const TouchTestRe
     }
 
     int32_t eventIdentity = event.GetEventIdentity();
-    if (event.type == TouchType::PROXIMITY_IN) {
+    if (event.type == TouchType::LEVITATE_IN_WINDOW) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pen proximity in hover event.");
         lastPenHoverResultsMap_[eventIdentity].clear();
         curPenHoverResultsMap_[eventIdentity] = std::move(penHoverTestResult);
-    } else if (event.type == TouchType::PROXIMITY_OUT) {
+    } else if (event.type == TouchType::LEVITATE_OUT_WINDOW) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pen proximity out hover event.");
         lastPenHoverResultsMap_[eventIdentity] = std::move(curPenHoverResultsMap_[eventIdentity]);
         curPenHoverResultsMap_[eventIdentity].clear();

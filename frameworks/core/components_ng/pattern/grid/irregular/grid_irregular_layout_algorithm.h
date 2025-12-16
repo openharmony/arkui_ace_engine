@@ -173,7 +173,7 @@ private:
     bool canOverScrollEnd_ = false;
 
     SizeF frameSize_;
-
+    double originalWidth_ = 0.0;
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };
 

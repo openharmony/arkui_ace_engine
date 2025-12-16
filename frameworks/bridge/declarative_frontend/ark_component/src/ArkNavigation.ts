@@ -117,12 +117,17 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
-  menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute {
+  menus(value: Array<NavigationMenuItem> | undefined, options?: NavigationMenuOptions): NavigationAttribute {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, undefined);
       return this;
     }
-    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, value);
+    let config: ArkNavigationMenu = new ArkNavigationMenu();
+    config.menu = value;
+    if (!isNull(options)) {
+      config.options = options;
+    }
+    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, config);
     return this;
   }
   toolBar(value: object | undefined): NavigationAttribute {
@@ -467,8 +472,8 @@ class TitleModeModifier extends ModifierWithKey<number> {
   }
 }
 
-class MenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefined> {
-  constructor(value: Array<NavigationMenuItem> | undefined) {
+class MenusModifier extends ModifierWithKey<ArkNavigationMenu> {
+  constructor(value: ArkNavigationMenu) {
     super(value);
   }
   static identity: Symbol = Symbol('menus');
@@ -477,7 +482,7 @@ class MenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefine
     if (reset) {
       getUINativeModule().navigation.resetMenus(node);
     } else {
-      getUINativeModule().navigation.setMenus(node, this.value);
+      getUINativeModule().navigation.setMenus(node, this.value.menu, this.value.options);
     }
   }
 

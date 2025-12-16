@@ -338,4 +338,27 @@ void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
         LOGW("SendExeAppAIFunctionResult send request failed");
     }
 }
+
+void UiReportProxy::SendContentChange(ChangeType type, const std::string& simpleTree)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendContentChange write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(static_cast<int32_t>(type))) {
+        LOGW("SendContentChange write type failed");
+        return;
+    }
+    if (!messageData.WriteString(simpleTree)) {
+        LOGW("SendContentChange write simple tree failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(SEND_CONTENT_CHANGE, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendContentChange send request failed");
+    }
+}
 } // namespace OHOS::Ace

@@ -1019,6 +1019,29 @@ bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
     return result;
 }
 
+void GridModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEditModeOptions(frameNode, editModeOptions);
+}
+
+void GridModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
+EditModeOptions GridModelNG::GetEditModeOptions(FrameNode* frameNode)
+{
+    EditModeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, options);
+    return pattern->GetEditModeOptions();
+}
+
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1118,5 +1141,25 @@ void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<Resou
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, result, node);
     };
     pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));
+}
+
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(bool enable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable);
+}
+
+void GridModelNG::SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode);
+}
+
+bool GridModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
+{
+    bool enable = false;
+    CHECK_NULL_RETURN(frameNode, enable);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
+    return enable;
 }
 } // namespace OHOS::Ace::NG

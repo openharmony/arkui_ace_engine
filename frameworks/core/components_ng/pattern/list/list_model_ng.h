@@ -62,6 +62,7 @@ public:
     void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetStackFromEnd(bool enabled) override;
     void SetSyncLoad(bool enabled) override;
+    void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -91,6 +92,7 @@ public:
         const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) override;
+    void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -156,6 +158,8 @@ public:
     static bool GetListStackFromEnd(FrameNode* frameNode);
     static void SetListSyncLoad(FrameNode* frameNode, bool enabled);
     static bool GetListSyncLoad(FrameNode* frameNode);
+    static void SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions);
+    static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
@@ -210,6 +214,8 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
     static void SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed);
     static ScrollSnapAnimationSpeed GetScrollSnapAnimationSpeed(FrameNode* frameNode);
+    static void SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool supportEmptyBranch);
+    static bool GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

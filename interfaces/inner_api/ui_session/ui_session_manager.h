@@ -166,6 +166,7 @@ public:
     virtual void SendCurrentPageName(const std::string& result) {};
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
+    virtual void EraseProcessId(const std::string& key) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
     virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
@@ -180,6 +181,11 @@ public:
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
     virtual void SendExeAppAIFunctionResult(uint32_t result) {};
+    virtual void RegisterContentChangeCallback(const ContentChangeConfig& config) {};
+    virtual void UnregisterContentChangeCallback() {};
+    virtual void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) {};
+    virtual void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) {};
+    virtual void SetStopContentChangeDetectCallback(std::function<void()>&&) {};
 protected:
     UiSessionManager() = default;
     virtual ~UiSessionManager() = default;
@@ -208,6 +214,8 @@ protected:
     std::function<std::string()> pipelineContextPageNameCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
+    std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
+    std::function<void()> stopContentChangeDetectCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

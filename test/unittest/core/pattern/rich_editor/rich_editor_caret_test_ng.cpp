@@ -170,6 +170,25 @@ HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CaretColorTest002
+ * @tc.desc: test set and get caretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CaretColorTest002, TestSize.Level0)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    Color patternCaretColor = richEditorPattern->GetCaretColor();
+    EXPECT_EQ(patternCaretColor, SYSTEM_CARET_COLOR);
+    model.SetCaretColor(host, Color::BLUE);
+    patternCaretColor = richEditorPattern->GetCaretColor();
+    EXPECT_EQ(patternCaretColor, Color::BLUE);
+}
+
+/**
  * @tc.name: SetCaretPosition001
  * @tc.desc: test SetCaretPosition
  * @tc.type: FUNC

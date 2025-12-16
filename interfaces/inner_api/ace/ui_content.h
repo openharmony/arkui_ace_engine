@@ -515,10 +515,10 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) {}
+    virtual void SetForceSplitEnable(bool isForceSplit) {}
 
-    virtual void SetForceSplitConfig(const std::string& configJsonStr) {}
+    virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                                     const std::optional<AppForceSplitConfig>& appConfig) {}
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 
@@ -590,7 +590,7 @@ public:
     virtual void AddKeyFrameNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
-    virtual void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>&) {};
+    virtual void LinkKeyFrameNode() {};
 
     // intent framework
     virtual void SetIntentParam(const std::string& intentInfoSerialized,
@@ -601,8 +601,8 @@ public:
         return "";
     }
     virtual void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) {}
-    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const std::string& from,
-        const std::string& to)>&& callback)
+    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo& from,
+        const NavigateChangeInfo& to)>&& callback)
     {
         return -1;
     }

@@ -601,7 +601,6 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest002, TestSize.Level1)
 
     /**
      * @tc.step: step2. update property's IndicatorType to -1.
-     * @tc.expected: jsonValue->GetValue("type") is a name string.
      */
     property->UpdateIndicatorType(-1);
 
@@ -635,7 +634,6 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest003, TestSize.Level1)
 
     /**
      * @tc.step: step2. update property's IndicatorType to 2.
-     * @tc.expected: jsonValue->GetValue("type") is a name string.
      */
     property->UpdateIndicatorType(2);
 

@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -1747,11 +1748,8 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(host, false);
     PointF textOffset = GetTextOffset(localLocation, textContentRect);
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
+    auto clip = GetDefaultClipValue();
+    if (!renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
@@ -1763,6 +1761,15 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
         }
     }
     if (onClick_) {
+        return true;
+    }
+    return false;
+}
+
+bool TextPattern::GetDefaultClipValue() const
+{
+    // RichEditor is default truncation.
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return true;
     }
     return false;
@@ -2666,6 +2673,20 @@ void TextPattern::ResetMouseLeftPressedState()
     leftMousePressed_ = false;
 }
 
+void TextPattern::ContentChangeByDetaching(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto contentChangeManager = context->GetContentChangeManager();
+    CHECK_NULL_VOID(contentChangeManager);
+    if (!contentChangeManager->IsTextAABBCollecting()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    contentChangeManager->OnTextChangeEnd(rect);
+}
+
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
     bool pressBetweenSelectedPosition = blockPress_;
@@ -3514,6 +3535,11 @@ TextDragInfo TextPattern::CreateTextDragInfo()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, info);
     info.handleColor = theme->GetCaretColor();
+    if (textLayoutProperty->HasSelectedDragPreviewStyle()) {
+        info.dragBackgroundColor = textLayoutProperty->GetSelectedDragPreviewStyleValue();
+    } else {
+        info.dragBackgroundColor = std::nullopt;
+    }
     info.selectedBackgroundColor = theme->GetSelectedColor();
     selectOverlay_->GetVisibleDragViewHandles(info.firstHandle, info.secondHandle);
     if (IsAiSelected()) {
@@ -3587,6 +3613,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textShadows = node->GetTextShadowValue({});
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
     textStyle.paragraphSpacing = node->GetParagraphSpacing();
+    textStyle.textDirection = static_cast<int32_t>(node->GetTextDirectionValue(TextDirection::INHERIT));
     auto textVerticalAlign = node->GetTextVerticalAlign();
     if (textVerticalAlign.has_value()) {
         textStyle.textVerticalAlign =static_cast<int32_t>(textVerticalAlign.value());
@@ -4100,6 +4127,7 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         return;
     }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSelectedDataDetector", selectDetectEnabled_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig",
         dataDetectorAdapter_ ? dataDetectorAdapter_->textDetectConfigStr_.c_str() : "", filter);
     const auto& selector = GetTextSelector();
@@ -7058,6 +7086,7 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+        DEFINE_PROP_HANDLER(selectedDragPreviewStyleColor, Color, UpdateSelectedDragPreviewStyle),
 
         { "LineHeight", [](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
@@ -7066,6 +7095,18 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
                         realValue->Reset();
                     }
                     prop->UpdateLineHeight(*realValue);
+                }
+            }
+        },
+
+        { "MarqueeSpacing", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        prop->ResetTextMarqueeSpacing();
+                    } else {
+                        prop->UpdateTextMarqueeSpacing(*realValue);
+                    }
                 }
             }
         },

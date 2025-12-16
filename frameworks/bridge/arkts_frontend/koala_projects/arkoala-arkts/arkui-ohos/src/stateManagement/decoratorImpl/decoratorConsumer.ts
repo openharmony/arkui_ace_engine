@@ -34,14 +34,10 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
 
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${this.getTraceInfo()}`);
-        const shouldAddRef = this.shouldAddRef()
         if (this.sourceProvider_) {
-            const value = this.sourceProvider_!.get();
-            if (shouldAddRef) {
-                uiUtils.builtinContainersAddRefLength(value);
-            }
-            return value;
+            return this.sourceProvider_!.get();
         }
+        const shouldAddRef = this.shouldAddRef()
         const value = this.backing_!.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);

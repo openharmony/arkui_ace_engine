@@ -74,6 +74,11 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
+#if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
+const int TEXTURETYPE_XCOMPONENT = 1;
+#endif
+
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -160,6 +165,12 @@ void XComponentPattern::InitSurface()
         }
         handlingSurfaceRenderContext_ = renderContextForSurface_;
     } else if (type_ == XComponentType::TEXTURE) {
+#ifdef RENDER_EXTRACT_SUPPORTED
+        RegisterRenderContextCallBack();
+#ifdef IOS_PLATFORM
+        renderSurface_->SetPatternType(TEXTURETYPE_XCOMPONENT);
+#endif
+#endif
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
         renderContext->OnNodeNameUpdate(GetId());
@@ -177,6 +188,20 @@ void XComponentPattern::InitSurface()
     UpdateTransformHint();
     RegisterNode();
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void XComponentPattern::OnTextureRefresh(int32_t instanceId, int64_t textureId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto nativeView = container->GetAceView();
+    CHECK_NULL_VOID(nativeView);
+    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+    CHECK_NULL_VOID(nativeWindow);
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->MarkNewFrameAvailable(nativeWindow);
+}
+#endif
 
 void XComponentPattern::RegisterNode()
 {
@@ -293,7 +318,7 @@ void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
                                                         : RenderContext::ContextType::HARDWARE_SURFACE;
-    RenderContext::ContextParam param = { contextType, GetId() + "Surface", RenderContext::PatternType::XCOM };
+    RenderContext::ContextParam param = { contextType, "xcomponentSurface", RenderContext::PatternType::XCOM };
 #else
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                                           GetId() + "Surface", RenderContext::PatternType::XCOM };
@@ -303,7 +328,6 @@ void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
         param.isSkipCheckInMultiInstance = true;
     }
 #endif
-
     renderContextForSurface_->InitContext(false, param);
 
     renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
@@ -324,26 +348,43 @@ RenderSurface::RenderSurfaceType XComponentPattern::CovertToRenderSurfaceType(co
 
 void XComponentPattern::RegisterRenderContextCallBack()
 {
+    InitializeRenderContext();
     CHECK_NULL_VOID(renderContextForSurface_);
-    auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto xcomponentNodeSize = geometryNode->GetContentSize();
-        auto xcomponentNodeOffset = geometryNode->GetContentOffset();
-        auto transformRelativeOffset = host->GetTransformRelativeOffset();
-        Rect rect = Rect(transformRelativeOffset.GetX() + xcomponentNodeOffset.GetX(),
-            transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
-            xcomponentNodeSize.Height());
-        if (pattern->renderSurface_) {
-            pattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(), rect.Top(),
-                rect.Width(), rect.Height());
+    extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
+    if (extSurfaceClient_) {
+        renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+    }
+    handlingSurfaceRenderContext_ = renderContextForSurface_;
+    renderSurfaceWeakPtr_ = renderSurface_;
+
+    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) {
+        auto xcPattern = weak.Upgrade();
+        CHECK_NULL_VOID(xcPattern);
+        if (auto renderSurface = xcPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->AttachToGLContext(textureId, isAttach);
         }
     };
-    renderContextForSurface_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
+    renderContextForSurface_->AddAttachCallBack(OnAttachCallBack);
+
+    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) {
+        auto xcPattern = weak.Upgrade();
+        CHECK_NULL_VOID(xcPattern);
+        if (auto renderSurface = xcPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->UpdateTextureImage(matrix);
+        }
+    };
+    renderContextForSurface_->AddUpdateCallBack(OnUpdateCallBack);
+
+#ifdef IOS_PLATFORM
+    auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->renderSurface_) {
+            pattern->renderSurface_->GetTextureIsVideo(type);
+        }
+    };
+    renderContextForSurface_->AddInitTypeCallBack(OnInitTypeCallback);
+#endif
 }
 
 void XComponentPattern::RequestFocus()
@@ -438,9 +479,15 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
 
 void XComponentPattern::OnRebuildFrame()
 {
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE) {
+        return;
+    }
+#else
     if (type_ != XComponentType::SURFACE) {
         return;
     }
+#endif
     if (!renderSurface_->IsSurfaceValid()) {
         return;
     }
@@ -480,11 +527,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
                 eventHub->FireDetachEvent(id_.value());
             }
             eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
-#ifdef RENDER_EXTRACT_SUPPORTED
-            if (renderContextForSurface_) {
-                renderContextForSurface_->RemoveSurfaceChangedCallBack();
-            }
-#endif
         }
     }
 
@@ -637,6 +679,18 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
     HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, needFireNativeEvent, config.frameOffsetChange);
+#else
+    if (type_ == XComponentType::TEXTURE) {
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetExtSurfaceBounds(
+            static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
+            static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
+        if (handlingSurfaceRenderContext_) {
+            handlingSurfaceRenderContext_->SetBounds(
+                paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+        }
+    }
 #endif
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
@@ -730,7 +784,6 @@ void XComponentPattern::XComponentSizeInit()
     } else {
         AdjustNativeWindowSize(initSize_.Width(), initSize_.Height());
     }
-    
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
         surfaceId_ = renderSurface_->GetUniqueId();
@@ -1794,8 +1847,8 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
-    } else {
 #ifdef RENDER_EXTRACT_SUPPORTED
+    } else {
         RefPtr<FrameNode> host;
         if (!frameNode) {
             host = GetHost();

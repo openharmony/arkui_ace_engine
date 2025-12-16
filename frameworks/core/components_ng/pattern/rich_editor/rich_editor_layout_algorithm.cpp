@@ -254,6 +254,7 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
             target->textLineStyle->UpdateLeadingMargin(leadingMargin);
         }
         target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlign());
+        target->textLineStyle->UpdateTextDirection(source->textLineStyle->GetTextDirection());
     }
     styleManager_->UpdateTextStyleByTypingStyle(target);
     styleManager_->UpdateStyleByTypingParagraphStyle(target);

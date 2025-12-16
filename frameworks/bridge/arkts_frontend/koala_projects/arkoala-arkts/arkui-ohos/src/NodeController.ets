@@ -54,8 +54,8 @@ export abstract class NodeController {
     onTouchEvent(event: TouchEvent) {}
     onAttach() { }
     onDetach() { }
-    onBind(containerId: number) { }
-    onUnbind(containerId: number) { }
-    onWillBind(containerId: number) { }
-    onWillUnbind(containerId: number) { }
+    onBind(containerId: long) { }
+    onUnbind(containerId: long) { }
+    onWillBind(containerId: long) { }
+    onWillUnbind(containerId: long) { }
 }

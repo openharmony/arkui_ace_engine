@@ -28,7 +28,7 @@ import { ResourceColor, Dimension, Font, ResourceStr } from "./component/units"
 import { Color, CopyOptions, TextAlign } from "./component/enums"
 import { Resource } from "global.resource"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { ColorMetrics } from "arkui.Graphics"
@@ -135,8 +135,14 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
+    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _includeFontPadding_0_0value?: boolean | undefined
+    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fallbackLineSpacing_0_0value?: boolean | undefined
     _dividerColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dividerColor_0_0value?: ColorMetrics | undefined
+    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _searchButton_0_0value?: string | undefined
     _searchButton_0_1value?: SearchButtonOptions | undefined
@@ -978,6 +984,60 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1634,6 +1694,45 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._includeFontPadding_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fallbackLineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2177,6 +2276,39 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
+            this._includeFontPadding_0_0value = value
+        } else
+        {
+            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fallbackLineSpacing_0_0value = value
+        } else
+        {
+            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedDragPreviewStyle_0_0value = value
+        } else
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

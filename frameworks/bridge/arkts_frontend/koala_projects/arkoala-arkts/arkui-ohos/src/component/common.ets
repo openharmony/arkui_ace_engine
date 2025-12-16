@@ -37,6 +37,8 @@ export class DrawModifier {
     public drawFront(drawContext: DrawContext): void { }
 
     public drawForeground(drawContext: DrawContext): void { }
+    
+    public drawOverlay(drawContext: DrawContext): void { }
 
     public invalidate(): void {
         let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();
@@ -162,7 +164,7 @@ export class KeyEventTransfer {
         retValue.setProperty('metaKey', objectInternal.metaKey);
         retValue.setProperty('unicode', objectInternal.unicode);
         retValue.setProperty('timestamp', objectInternal.timestamp);
-        retValue.setProperty('intentionCode', objectInternal.intentionCode);
+        retValue.setProperty('intentionCode', TypeChecker.IntentionCode_ToNumeric(objectInternal.intentionCode));
         return retValue;
     }
 }

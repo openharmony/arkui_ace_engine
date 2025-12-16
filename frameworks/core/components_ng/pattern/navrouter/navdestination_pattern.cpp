@@ -523,7 +523,7 @@ void NavDestinationPattern::OnDetachFromMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     backupStyle_.reset();
     currStyle_.reset();
-    if (!host->IsHomeDestination()) {
+    if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
@@ -870,7 +870,57 @@ bool NavDestinationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     hostNode->AdjustRenderContextIfNeeded();
+    // proxy NavDestination don't need notification
+    if (hostNode->GetNavDestinationType() == NavDestinationType::PROXY) {
+        return false;
+    }
+    CHECK_NULL_RETURN(navDestinationContext_, false);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto geometry = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, false);
+    auto frameSize = geometry->GetFrameSize();
+    auto widthVp = context->Px2VpWithCurrentDensity(frameSize.Width());
+    auto heightVp = context->Px2VpWithCurrentDensity(frameSize.Height());
+    SizeF curSize(widthVp, heightVp);
+    auto layoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& currentDestSize = navDestinationContext_->GetCurrentSize();
+    if (!currentDestSize.has_value() || currentDestSize.value() != curSize) {
+        navDestinationContext_->SetCurrentSize(curSize);
+        if (layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE) {
+            NotifyNavDestinationSizeChange();
+        } else {
+            needNotifySizeChangeWhenVisible_ = true;
+        }
+    }
     return false;
+}
+
+void NavDestinationPattern::NotifyNavDestinationSizeChange()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto task = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto eventHub = pattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto state = eventHub->GetState();
+        UIObserverHandler::GetInstance().NotifyNavDestinationSizeChange(WeakPtr(pattern), state);
+    };
+    context->AddAfterLayoutTask(std::move(task));
+}
+
+void NavDestinationPattern::OnVisibleChange(bool isVisible)
+{
+    NavDestinationPatternBase::OnVisibleChange(isVisible);
+    if (!isVisible || !needNotifySizeChangeWhenVisible_) {
+        return;
+    }
+    needNotifySizeChangeWhenVisible_ = false;
+    // InVisible -> Visible
+    NotifyNavDestinationSizeChange();
 }
 
 void NavDestinationPattern::CheckIfOrientationChanged()

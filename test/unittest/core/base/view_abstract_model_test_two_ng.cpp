@@ -67,6 +67,7 @@ void ViewAbstractModelTestTwoNg::SetUpTestSuite()
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
+
 void ViewAbstractModelTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
@@ -283,14 +284,14 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityUseSamePage001, TestSize.Le
     std::string pageMode = "pageMode";
     int32_t nodeId = 1;
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
-    frameNode.accessibilityProperty_->SetAccessibilitySamePage(pageMode);
+    frameNode.GetOrCreateAccessibilityProperty()->SetAccessibilitySamePage(pageMode);
 
     viewAbstractModelNG.SetAccessibilityUseSamePage(&frameNode, pageMode);
-    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityUseSamePage_, pageMode);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->accessibilityUseSamePage_, pageMode);
 
     pageMode = "testMode";
     viewAbstractModelNG.SetAccessibilityUseSamePage(&frameNode, pageMode);
-    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityUseSamePage_, pageMode);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->accessibilityUseSamePage_, pageMode);
 }
 
 /**
@@ -305,14 +306,14 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilitySelected002, TestSize.Level
     bool resetValue = true;
     int32_t nodeId = 1;
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
-    frameNode.accessibilityProperty_->SetUserSelected(selected);
+    frameNode.GetOrCreateAccessibilityProperty()->SetUserSelected(selected);
 
     viewAbstractModelNG.SetAccessibilitySelected(&frameNode, selected, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->isSelected_.has_value(), false);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->isSelected_.has_value(), false);
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilitySelected(&frameNode, selected, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->isSelected_, selected);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->isSelected_, selected);
 }
 
 /**
@@ -328,13 +329,13 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityChecked002, TestSize.Level1
     int32_t nodeId = 1;
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
 
-    frameNode.accessibilityProperty_->SetUserCheckedType(checked);
+    frameNode.GetOrCreateAccessibilityProperty()->SetUserCheckedType(checked);
     viewAbstractModelNG.SetAccessibilityChecked(&frameNode, checked, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->checkedType_.has_value(), false);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->checkedType_.has_value(), false);
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityChecked(&frameNode, checked, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->checkedType_, checked);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->checkedType_, checked);
 }
 
 /**
@@ -349,13 +350,13 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityScrollTriggerable002, TestS
     bool resetValue = true;
     int32_t nodeId = 1;
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
-    frameNode.accessibilityProperty_->SetUserScrollTriggerable(triggerable);
+    frameNode.GetOrCreateAccessibilityProperty()->SetUserScrollTriggerable(triggerable);
     viewAbstractModelNG.SetAccessibilityScrollTriggerable(&frameNode, triggerable, resetValue);
-    EXPECT_NE(frameNode.accessibilityProperty_->isUserScrollTriggerable_, triggerable);
+    EXPECT_NE(frameNode.GetOrCreateAccessibilityProperty()->isUserScrollTriggerable_, triggerable);
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityScrollTriggerable(&frameNode, triggerable, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->isUserScrollTriggerable_, triggerable);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->isUserScrollTriggerable_, triggerable);
 }
 
 /**
@@ -370,13 +371,13 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityRole002, TestSize.Level1)
     bool resetValue = true;
     int32_t nodeId = 1;
     FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
-    frameNode.accessibilityProperty_->SetAccessibilityCustomRole(role);
+    frameNode.GetOrCreateAccessibilityProperty()->SetAccessibilityCustomRole(role);
     viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
-    EXPECT_NE(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
+    EXPECT_NE(frameNode.GetOrCreateAccessibilityProperty()->accessibilityCustomRole_, role);
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
-    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
+    EXPECT_EQ(frameNode.GetOrCreateAccessibilityProperty()->accessibilityCustomRole_, role);
 }
 
 /**
@@ -514,10 +515,10 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityStateDescription001, TestSi
     auto frameNodeMain = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNodeMain, nullptr);
     EXPECT_FALSE(
-        frameNodeMain->accessibilityProperty_->accessibilityStateDescription_.has_value());
+        frameNodeMain->GetOrCreateAccessibilityProperty()->accessibilityStateDescription_.has_value());
     viewAbstractModelNG.SetAccessibilityStateDescription(TEST_STATE_DESCRIPTION);
     EXPECT_EQ(
-        frameNodeMain->accessibilityProperty_->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
+        frameNodeMain->GetOrCreateAccessibilityProperty()->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
 }
 
 /**

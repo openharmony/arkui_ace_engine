@@ -4012,6 +4012,33 @@ HWTEST_F(WebModelTestNg, SetPermissionRequestEventId028, TestSize.Level1)
 #endif
 }
 
+/**
+  * @tc.name: SetWindowNewExtEvent002
+  * @tc.desc: Test web_model_ng.cpp
+  * @tc.type: FUNC
+  */
+ HWTEST_F(WebModelTestNg, SetWindowNewExtEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webModelNG.SetWindowNewExtEvent(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) { callbackCalled = true; });
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnWindowNewExtEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
  /**
   * @tc.name: SetOnFullScreenEnter002
   * @tc.desc: SetOnFullScreenEnter
@@ -5571,6 +5598,54 @@ HWTEST_F(WebModelTestNg, SetMicrophoneCaptureStateChangedId002, TestSize.Level1)
     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
     webEventHub->FireOnMicrophoneCaptureStateChangedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableAutoFill001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableAutoFill001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableAutoFill(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableAutoFill(false), true);
+    webModelNG.SetEnableAutoFill(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableAutoFill(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableAutoFill002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableAutoFill002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableAutoFill(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableAutoFill(false), true);
+    webModelNG.SetEnableAutoFill(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableAutoFill(true), true);
 #endif
 }
 } // namespace OHOS::Ace::NG

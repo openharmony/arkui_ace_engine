@@ -170,6 +170,8 @@ public:
 
     void UpdateOrientation();
 
+    void PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host);
+
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
@@ -439,6 +441,7 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAltError();
 
     void OnColorConfigurationUpdate() override;
+    void OnDpiConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);

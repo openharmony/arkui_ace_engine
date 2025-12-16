@@ -315,6 +315,12 @@ void ButtonModelStatic::SetLabelStyle(FrameNode* frameNode, const std::optional<
         SetFontFamily(frameNode, std::nullopt);
         SetFontStyle(frameNode, std::nullopt);
     }
+    if (buttonParameters && buttonParameters->textAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, TextAlign, buttonParameters->textAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextAlign, frameNode);
+    }
 }
 
 void ButtonModelStatic::SetSize(
@@ -483,6 +489,16 @@ void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, c
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
+}
+
+void ButtonModelStatic::ResetTextAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetTextAlign();
 }
 
 void ButtonModelStatic::ResetButtonTextFontSize(FrameNode* frameNode)

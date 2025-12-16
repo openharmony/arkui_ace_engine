@@ -56,6 +56,7 @@ class Blender;
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::Kit {
@@ -352,7 +353,10 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
+    virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
+    void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -966,6 +970,7 @@ private:
     std::function<void(bool)> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
+    RefPtr<UiMaterial> uiMaterial_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG

@@ -1,0 +1,71 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_source_set("ace_compatible_source") {
+  if (defined(current_platform.name)) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    if (defined(current_platform.config)) {
+      config = current_platform.config
+    }
+    if (defined(config.defines)) {
+      defines += config.defines
+    }
+    if (defined(config.cflags_cc)) {
+      cflags_cc += config.cflags_cc
+    }
+  }
+  configs = [ "$ace_root:ace_config" ]
+
+  sources = [
+    "components/badge/badge_component.cpp",
+    "components/badge/badge_composed_element.cpp",
+    "components/badge/badge_declaration.cpp",
+    "components/badge/badge_loader.cpp",
+    "components/badge/badge_model_impl.cpp",
+    "components/badge/dom_badge.cpp",
+    "components/badge/render_badge.cpp",
+    "components/badge/render_badge_creator.cpp",
+    "components/badge/rosen_render_badge.cpp",
+    "components/component_loader.cpp",
+    "components/marquee/dom_marquee.cpp",
+    "components/marquee/marquee_composed_element.cpp",
+    "components/marquee/marquee_loader.cpp",
+    "components/marquee/marquee_model_impl.cpp",
+    "components/marquee/render_marquee.cpp",
+    "components/marquee/render_marquee_creator.cpp",
+    "components/marquee/rosen_render_marquee.cpp",
+  ]
+  external_deps = [
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:librender_service_base",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+  ]
+  deps = [
+    "$ace_root/frameworks/core:ace_container_scope",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  ]
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
+}

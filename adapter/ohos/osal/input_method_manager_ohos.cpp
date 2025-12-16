@@ -97,6 +97,10 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
+    if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+        CloseCustomKeyboard(true);
+    }
 
     isLastFocusUIExtension_ = curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG;
     lastFocusNodeId_ = curFocusNode->GetId();
@@ -221,7 +225,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
-void InputMethodManager::CloseCustomKeyboard()
+void InputMethodManager::CloseCustomKeyboard(bool isUIExtension)
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_VOID(currentFocusNode);
@@ -229,7 +233,7 @@ void InputMethodManager::CloseCustomKeyboard()
     CHECK_NULL_VOID(pipeline);
     auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(manager);
-    manager->CloseTextCustomKeyboard(currentFocusNode->GetId());
+    manager->CloseTextCustomKeyboard(currentFocusNode->GetId(), isUIExtension);
 }
 
 void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)

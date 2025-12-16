@@ -15,7 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src)
+void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src, ConvContext *ctx)
 {
     switch (src) {
         case RefreshStatus::INACTIVE:
@@ -163,6 +163,13 @@ void SetPullToRefreshImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RefreshModelStatic::SetPullToRefresh(frameNode, convValue);
 }
+void setPullUpToCancelRefreshImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RefreshModelStatic::SetPullUpToCancelRefresh(frameNode, convValue);
+}
 void SetOnOffsetChangeImpl(Ark_NativePointer node,
                            const Opt_Callback_F64_Void* value)
 {
@@ -199,6 +206,7 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshAttributeModifier::SetOnRefreshingImpl,
         RefreshAttributeModifier::SetRefreshOffsetImpl,
         RefreshAttributeModifier::SetPullToRefreshImpl,
+        RefreshAttributeModifier::setPullUpToCancelRefreshImpl,
         RefreshAttributeModifier::SetOnOffsetChangeImpl,
         RefreshAttributeModifier::SetPullDownRatioImpl,
     };

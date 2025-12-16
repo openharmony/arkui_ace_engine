@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -425,7 +423,6 @@ void SetFocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CommonMethodModifier::SetFocusBoxImpl(node, style);
-    SecurityComponentModelNG::SetFocusBox(frameNode);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()

@@ -30,6 +30,7 @@ public:
     inline static const std::string CARET_COLOR_KEY = "caretColor";
     inline static const std::string SCROLL_BAR_COLOR_KEY = "scrollBarColor";
     inline static const std::string PLACEHOLDER_FONT_COLOR_KEY = "placeholderFontColor";
+    inline static const std::string SELECTED_DRAG_PREVIEW_COLOR_KEY = "selectedDragPreviewColor";
     inline static const std::string SELECTED_BACKGROUND_COLOR_KEY = "selectedBackgroundColor";
 
     // color in TextStyle
@@ -205,6 +206,7 @@ public:
         spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
         spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
         spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+        spanNode->UpdateTextDirection(style.textDirection.value_or(TextDirection::INHERIT));
         if (style.paragraphSpacing.has_value()) {
             spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
         } else {
@@ -458,6 +460,7 @@ public:
         spanParagraphStyle.leadingMargin = typingParagraphStyle.leadingMargin;
         spanParagraphStyle.paragraphSpacing = typingParagraphStyle.paragraphSpacing;
         spanParagraphStyle.textVerticalAlign = typingParagraphStyle.textVerticalAlign;
+        spanParagraphStyle.textDirection = typingParagraphStyle.textDirection;
         spans.push_back(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, length));
     }
 

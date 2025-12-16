@@ -15,15 +15,19 @@
 
 #include <gtest/gtest.h>
 
+#include "arkoala_api_generated.h"
+#include "generated/test_fixtures.h"
+#include "generated/type_helpers.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "generated/test_fixtures.h"
 #include "point_light_test.h"
-#include "generated/type_helpers.h"
-#include "arkoala_api_generated.h"
-#include "test/unittest/capi/stubs/ace_pixelmap_stub.h"
+
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "test/unittest/capi/stubs/ace_pixelmap_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -84,10 +88,8 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     std::string expectedStr = CHECK_RESOURCE_LOCAL_STR;
-    auto inputStr = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
-        Converter::ArkValue<Ark_String>(expectedStr));
-    auto optInputStr = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputStr);
-    modifier_->setAlt(frameNode, &optInputStr);
+    auto inputStr = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt, Ark_String>(expectedStr);
+    modifier_->setAlt(frameNode, &inputStr);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
     EXPECT_EQ(resultStr, expectedStr);
@@ -106,9 +108,9 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
 
     std::string expectedStr = CHECK_RESOURCE_THEME_STR;
     auto expectedArkResource = Converter::ArkCreate<Ark_Resource>(IMAGE_RES_ID, ResourceType::STRING);
-    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(expectedArkResource);
-    auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputArkResource);
-    modifier_->setAlt(frameNode, &optInputArkResource);
+    auto inputArkResource = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt,
+        Ark_Resource>(expectedArkResource);
+    modifier_->setAlt(frameNode, &inputArkResource);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
     EXPECT_EQ(resultStr, expectedStr);
@@ -129,7 +131,7 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
     Ark_image_PixelMap expectedPixelMap = &pixelMapPeer;
-    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap,
+    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap_ImageAlt,
         Ark_image_PixelMap>(expectedPixelMap);
     modifier_->setAlt(frameNode, &optInputArkPixelMap);
 

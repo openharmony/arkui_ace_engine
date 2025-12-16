@@ -19,7 +19,6 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -121,13 +120,13 @@ void SetMarkImpl(Ark_NativePointer node,
     } else {
         CheckBoxGroupModelStatic::ResetCheckMarkColor(frameNode);
     }
-    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
     if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
         size = Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE);
     }
     CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
     auto strokeWidth =
-        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
     if (!strokeWidth.has_value() || (strokeWidth.value().Unit() == DimensionUnit::PERCENT)
         || (strokeWidth.value().IsNegative())) {
         auto context = frameNode->GetContext();

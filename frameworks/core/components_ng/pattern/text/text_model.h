@@ -67,6 +67,8 @@ struct TextDetectConfig {
     Color entityDecorationColor;
     TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
     bool enablePreviewMenu = false;
+    bool entityColorFlag = false;
+    bool entityDecorationColorFlag = false;
 
     TextDetectConfig()
     {
@@ -252,6 +254,10 @@ public:
     virtual void SetMaximumLineHeight(const Dimension& value) {};
     virtual void SetTextDirection(TextDirection value) {}
     virtual void ResetTextDirection() {}
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

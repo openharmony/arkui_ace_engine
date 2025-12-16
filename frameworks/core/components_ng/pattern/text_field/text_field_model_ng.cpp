@@ -2765,6 +2765,42 @@ bool TextFieldModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetIncludeFontPadding(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled);
+}
+
+void TextFieldModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, IncludeFontPadding, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled);
+}
+
+void TextFieldModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, FallbackLineSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2819,6 +2855,34 @@ void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->HandleOnDelete(true);
+}
+
+void TextFieldModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void TextFieldModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color TextFieldModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

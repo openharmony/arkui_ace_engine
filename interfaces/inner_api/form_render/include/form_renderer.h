@@ -78,6 +78,7 @@ private:
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RemoveFormDeathRecipient();
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
+    void SetUIContentProperty(const OHOS::AAFwk::Want &want);
 
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
@@ -90,6 +91,7 @@ private:
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     bool enableBlurBackground_ = false;
+    bool deleteBackgroundImage_ = false;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
@@ -99,6 +101,7 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
     sptr<IRemoteObject> proxy_;
+    AppExecFwk::Constants::FormLocation formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
 };
 
 /**

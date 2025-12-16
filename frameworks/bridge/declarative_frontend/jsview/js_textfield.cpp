@@ -2487,6 +2487,24 @@ void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
 }
 
+void JSTextField::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSTextField::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetFallbackLineSpacing(enabled);
+}
+
 void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2656,5 +2674,30 @@ void JSTextField::SetScrollBarColor(const JSCallbackInfo& info)
         RegisterResource<Color>("scrollBarColor", resObj, scrollBarColor);
     }
     TextFieldModel::GetInstance()->SetTextAreaScrollBarColor(scrollBarColor);
+}
+
+void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    UnRegisterResource("selectedDragPreviewStyle");
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        TextFieldModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColor(param, color, resourceObject)) {
+        TextFieldModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
+    }
+    TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 } // namespace OHOS::Ace::Framework

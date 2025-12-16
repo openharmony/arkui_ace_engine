@@ -114,8 +114,11 @@ constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
+constexpr char MAINWINDOW_TRANSPARENT_DETECTED[] = "MAINWINDOW_TRANSPARENT_DETECTED";
 constexpr char EVENT_KEY_SCROLLABLE_ERROR[] = "SCROLLABLE_ERROR";
 constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
+constexpr char COMMON_NODE_ID[] = "NODE_ID";
+constexpr char COMMON_ERROR_MESSAGE[] = "ERROR_MESSAGE";
 constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
 constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
 constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
@@ -286,6 +289,19 @@ void EventReport::SendComponentException(ComponentExcepType type)
     };
 
     SendEventInner(eventInfo);
+}
+
+void EventReport::SendComponentExceptionNG(
+    ComponentExcepTypeNG type, int32_t nodeType, int32_t nodeId, const std::string& message)
+{
+    auto packageName = Container::CurrentBundleName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EXCEPTION_COMPONENT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_NODE_TYPE, nodeType,
+        COMMON_NODE_ID, nodeId,
+        COMMON_ERROR_MESSAGE, message);
 }
 
 void EventReport::ReportPageLoadTimeout(const EventInfo& eventInfo)
@@ -625,6 +641,20 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UIEXTENSION_TRANSPARENT_DETECTED,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PAGE_NAME, pageUrl,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_MODULE_NAME, moduleName);
+}
+
+void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, MAINWINDOW_TRANSPARENT_DETECTED,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PAGE_NAME, pageUrl,
         EVENT_KEY_VERSION_CODE, app_version_code,

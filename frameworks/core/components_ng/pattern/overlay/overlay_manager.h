@@ -512,6 +512,15 @@ public:
         std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
+    void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
+        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext = false);
     void CloseSheet(const SheetKey& sheetKey);
     void InitSheetMask(
         const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
@@ -776,18 +785,10 @@ public:
     {
         return menuLifeCycleCallbackMap_[targetId];
     }
+    bool CheckTargetIdIsValid(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
-    void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
-        std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange,
-        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext = false);
     void SetSheetProperty(
         const RefPtr<FrameNode>& sheetPageNode,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -800,7 +801,6 @@ private:
     void SaveSheetPageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
-    bool CheckTargetIdIsValid(int32_t targetId);
     void UpdateSheetRender(
         const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
@@ -991,6 +991,7 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

@@ -26,7 +26,7 @@ import { FrameNode } from "./FrameNode"
 import { ArkUIAniModule } from "arkui.ani"
 import { BusinessError } from '#external';
 import hilog from '@ohos.hilog'
-import { RenderNodeExtender, NodeEdgeStyles, EdgeNumber, BorderRadiuses_graphics } from "./framework";
+import { RenderNodeExtender, NodeEdgeStyles, EdgeI32, EdgeF64, BorderRadiuses_graphics } from "./framework";
 
 export type DrawCallback = (context: DrawContext) => void;
 export class RenderNodeInternal {
@@ -47,24 +47,24 @@ export class RenderNode implements MaterializedBase {
     private parentRenderNode: WeakRef<RenderNode> | null = null
     private lengthMetricsUnitValue: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
     private borderStyleValue: NodeEdges<BorderStyle> | undefined = undefined
-    private borderWidthValue: NodeEdges<number> | undefined = undefined;
-    private borderColorValue: NodeEdges<number> | undefined = undefined;
+    private borderWidthValue: NodeEdges<double> = { left: 0, top: 0, right: 0, bottom: 0 }
+    private borderColorValue: NodeEdges<int32> = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 }
     private borderRadiusValue: Corners<number> | undefined = undefined;
     private shapeMaskValue: ShapeMask | undefined = undefined;
     private shapeClipValue: ShapeClip | undefined = undefined;
-    private backgroundColorValue: number = 0
+    private backgroundColorValue: int32 = 0
     private clipToFrameValue: boolean = true
     private frameValue: Frame = { x: 0, y: 0, width: 0, height: 0 }
-    private opacityValue: number = 1.0
+    private opacityValue: double = 1.0
     private pivotValue: Vector2 = { x: 0.5, y: 0.5 }
     private rotationValue: Vector3 = { x: 0, y: 0, z: 0 }
     private scaleValue: Vector2 = { x: 1.0, y: 1.0 }
-    private shadowColorValue: number = 0
+    private shadowColorValue: int32 = 0
     private shadowOffsetValue: Vector2 = { x: 0, y: 0 }
     private labelValue: string = ""
-    private shadowAlphaValue: number = 0
-    private shadowElevationValue: number = 0
-    private shadowRadiusValue: number = 0
+    private shadowAlphaValue: double = 0
+    private shadowElevationValue: double = 0
+    private shadowRadiusValue: double = 0
     private transformValue: Matrix4 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
     private translationValue: Vector2 = { x: 0, y: 0 }
     private markNodeGroupValue: boolean = false
@@ -78,12 +78,12 @@ export class RenderNode implements MaterializedBase {
         }
         return arg as T
     }
-    get backgroundColor(): number {
+    get backgroundColor(): int32 {
         return this.backgroundColorValue
     }
-    set backgroundColor(backgroundColor: number) {
-        this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(backgroundColor, 0)
-        this.setBackgroundColor(this.backgroundColorValue)
+    set backgroundColor(backgroundColor: int32) {
+        this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<int32>(backgroundColor, 0)
+        RenderNodeExtender.setBackgroundColor(this, this.backgroundColorValue)
     }
     get clipToFrame(): boolean {
         return this.clipToFrameValue
@@ -92,12 +92,12 @@ export class RenderNode implements MaterializedBase {
         this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(clipToFrame, true)
         this.setClipToFrame(this.clipToFrameValue)
     }
-    get opacity(): number {
+    get opacity(): double {
         return this.opacityValue
     }
-    set opacity(opacity: number) {
-        this.opacityValue = this.checkUndefinedOrNullWithDefaultValue<number>(opacity, 1.0)
-        this.setOpacity(this.opacityValue)
+    set opacity(opacity: double) {
+        this.opacityValue = this.checkUndefinedOrNullWithDefaultValue<double>(opacity, 1.0)
+        RenderNodeExtender.setOpacity(this, this.opacityValue)
     }
     get size(): Size {
         return { width: this.frameValue.width, height: this.frameValue.height }
@@ -201,12 +201,12 @@ export class RenderNode implements MaterializedBase {
         }
         this.setTransform(this.transformValue);
     }
-    get shadowColor(): number {
+    get shadowColor(): int32 {
         return this.shadowColorValue
     }
-    set shadowColor(shadowColor: number) {
-        this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowColor, 0)
-        this.setShadowColor(this.shadowColorValue)
+    set shadowColor(shadowColor: int32) {
+        this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue<int32>(shadowColor, 0)
+        RenderNodeExtender.setShadowColor(this, this.shadowColorValue)
     }
     get shadowOffset(): Vector2 {
         return { x: this.shadowOffsetValue.x, y: this.shadowOffsetValue.y }
@@ -228,26 +228,26 @@ export class RenderNode implements MaterializedBase {
         this.labelValue = this.checkUndefinedOrNullWithDefaultValue<string>(label, '')
         this.setLabel(this.labelValue)
     }
-    get shadowAlpha(): number {
+    get shadowAlpha(): double {
         return this.shadowAlphaValue
     }
-    set shadowAlpha(shadowAlpha: number) {
-        this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowAlpha, 0)
-        this.setShadowAlpha(this.shadowAlphaValue)
+    set shadowAlpha(shadowAlpha: double) {
+        this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<double>(shadowAlpha, 0)
+        RenderNodeExtender.setShadowAlpha(this, this.shadowAlphaValue)
     }
-    get shadowElevation(): number {
+    get shadowElevation(): double {
         return this.shadowElevationValue
     }
-    set shadowElevation(shadowElevation: number) {
-        this.shadowElevationValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowElevation, 0)
-        this.setShadowElevation(this.shadowElevationValue)
+    set shadowElevation(shadowElevation: double) {
+        this.shadowElevationValue = this.checkUndefinedOrNullWithDefaultValue<double>(shadowElevation, 0)
+        RenderNodeExtender.setShadowElevation(this, this.shadowElevationValue)
     }
-    get shadowRadius(): number {
+    get shadowRadius(): double {
         return this.shadowRadiusValue
     }
-    set shadowRadius(shadowRadius: number) {
-        this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowRadius, 0)
-        this.setShadowRadius(this.shadowRadiusValue)
+    set shadowRadius(shadowRadius: double) {
+        this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<double>(shadowRadius, 0)
+        RenderNodeExtender.setShadowRadius(this, this.shadowRadiusValue)
     }
     get borderStyle(): NodeEdges<BorderStyle> | undefined {
         return this.borderStyleValue
@@ -256,28 +256,28 @@ export class RenderNode implements MaterializedBase {
         this.setBorderStyle(borderStyle);
         this.borderStyleValue = borderStyle;
     }
-    get borderWidth(): NodeEdges<number> | undefined {
+    get borderWidth(): NodeEdges<double> | undefined {
         return this.borderWidthValue
     }
-    set borderWidth(borderWidth: NodeEdges<number>) {
+    set borderWidth(borderWidth: NodeEdges<double>) {
         if (borderWidth === undefined || borderWidth === null) {
-            this.borderWidthValue = { left: 0, top: 0, right: 0, bottom: 0 } as NodeEdges<number>
+            this.borderWidthValue = { left: 0, top: 0, right: 0, bottom: 0 } as NodeEdges<double>
         } else {
             this.borderWidthValue = borderWidth;
         }
-        const borderWidth_casted = this.borderWidthValue as NodeEdges<number>
+        const borderWidth_casted = this.borderWidthValue as NodeEdges<double>
         this.setBorderWidth(borderWidth_casted)
     }
-    get borderColor(): NodeEdges<number> | undefined {
+    get borderColor(): NodeEdges<int32> | undefined {
         return this.borderColorValue
     }
-    set borderColor(borderColor: NodeEdges<number>) {
+    set borderColor(borderColor: NodeEdges<int32>) {
         if (borderColor === undefined || borderColor === null) {
             this.borderColorValue = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 };
         } else {
             this.borderColorValue = borderColor;
         }
-        const borderColor_casted = this.borderColorValue as NodeEdges<number>
+        const borderColor_casted = this.borderColorValue as NodeEdges<int32>
         this.setBorderColor(borderColor_casted)
     }
     get borderRadius(): Corners<number> | undefined {
@@ -309,6 +309,7 @@ export class RenderNode implements MaterializedBase {
     }
     set markNodeGroup(markNodeGroup: boolean) {
         this.setMarkNodeGroup(markNodeGroup)
+        this.markNodeGroupValue = markNodeGroup;
     }
     get lengthMetricsUnit(): LengthMetricsUnit {
         return this.lengthMetricsUnitValue
@@ -357,7 +358,7 @@ export class RenderNode implements MaterializedBase {
         }
         let result = RenderNodeExtender.appendChild(this, node_casted);
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-            const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
+            const error = Error("The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.");
             throw new BusinessError(100025, error);
         }
         this.childrenList.push(node)
@@ -382,7 +383,7 @@ export class RenderNode implements MaterializedBase {
             childrenListStartPosition = indexOfSibling + 1;
         }
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-            const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
+            const error = Error("The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.");
             throw new BusinessError(100025, error);
         }
         this.childrenList.splice(childrenListStartPosition, 0, child);
@@ -406,9 +407,9 @@ export class RenderNode implements MaterializedBase {
         RenderNodeExtender.clearChildren(this)
         return
     }
-    public getChild(index: number): RenderNode | null {
+    public getChild(index: int32): RenderNode | null {
         if (this.childrenList.length > index && index >= 0) {
-            return this.childrenList[index as int32]
+            return this.childrenList[index]
         }
         return null
     }
@@ -431,7 +432,7 @@ export class RenderNode implements MaterializedBase {
         if (index === -1) {
             return null
         }
-        return parent!.getChild(index + 1)
+        return parent!.getChild((index + 1) as int32)
     }
     public getPreviousSibling(): RenderNode | null {
         if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
@@ -446,7 +447,7 @@ export class RenderNode implements MaterializedBase {
         if (index === -1) {
             return null
         }
-        return parent!.getChild(index - 1)
+        return parent!.getChild((index - 1) as int32)
     }
     public draw(context: DrawContext): void {
         InteropNativeModule._NativeLog("RenderNode Draw")
@@ -466,16 +467,8 @@ export class RenderNode implements MaterializedBase {
             this.peer?.close();
         }
     }
-    private setBackgroundColor(backgroundColor: number): void {
-        RenderNodeExtender.setBackgroundColor(this, backgroundColor)
-        return
-    }
     private setClipToFrame(clipToFrame: boolean): void {
         RenderNodeExtender.setClipToFrame(this, clipToFrame)
-        return
-    }
-    private setOpacity(opacity: number): void {
-        RenderNodeExtender.setOpacity(this, opacity)
         return
     }
     private setSize(size: Size): void {
@@ -510,10 +503,6 @@ export class RenderNode implements MaterializedBase {
         RenderNodeExtender.setTransform(this, transform)
         return
     }
-    private setShadowColor(shadowColor: number): void {
-        RenderNodeExtender.setShadowColor(this, shadowColor)
-        return
-    }
     private setShadowOffset(shadowOffset: Vector2): void {
         const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
         RenderNodeExtender.setShadowOffset(this, shadowOffset, lengthMetricsUnitValue)
@@ -521,18 +510,6 @@ export class RenderNode implements MaterializedBase {
     }
     private setLabel(label: string): void {
         RenderNodeExtender.setLabel(this, label)
-        return
-    }
-    private setShadowAlpha(shadowAlpha: number): void {
-        RenderNodeExtender.setShadowAlpha(this, shadowAlpha)
-        return
-    }
-    private setShadowElevation(shadowElevation: number): void {
-        RenderNodeExtender.setShadowElevation(this, shadowElevation)
-        return
-    }
-    private setShadowRadius(shadowRadius: number): void {
-        RenderNodeExtender.setShadowRadius(this, shadowRadius)
         return
     }
     private setBorderStyle(borderStyle: NodeEdges<BorderStyle>): void {
@@ -544,22 +521,22 @@ export class RenderNode implements MaterializedBase {
         RenderNodeExtender.setBorderStyle(this, edgesBorderStyle);
         return
     }
-    private setBorderWidth(borderWidth: NodeEdges<number>): void {
+    private setBorderWidth(borderWidth: NodeEdges<double>): void {
         const top = (borderWidth.top === null || undefined) ? 0.0 : borderWidth.top;
         const left = (borderWidth.left === null || undefined) ? 0.0 : borderWidth.left;
         const bottom = (borderWidth.bottom === null || undefined) ? 0.0 : borderWidth.bottom;
         const right = (borderWidth.right === null || undefined) ? 0.0 : borderWidth.right;
-        const edgesBorderWidth = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeNumber;
+        const edgesBorderWidth = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeF64;
         const lengthMetricsUnitValue = this.lengthMetricsUnitValue as int32;
         RenderNodeExtender.setBorderWidth(this, edgesBorderWidth, lengthMetricsUnitValue);
         return
     }
-    private setBorderColor(borderColor: NodeEdges<number>): void {
-        const top = ((borderColor.top === null || undefined) ? 0xFF000000 : borderColor.top) as number;
-        const left = ((borderColor.left === null || undefined) ? 0xFF000000 : borderColor.left) as number;
-        const bottom = ((borderColor.bottom === null || undefined) ? 0xFF000000 : borderColor.bottom) as number;
-        const right = ((borderColor.right === null || undefined) ? 0xFF000000 : borderColor.right) as number;
-        const edgesBorderColor = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeNumber;
+    private setBorderColor(borderColor: NodeEdges<int32>): void {
+        const top = ((borderColor.top === null || undefined) ? 0xFF000000 : borderColor.top) as int32;
+        const left = ((borderColor.left === null || undefined) ? 0xFF000000 : borderColor.left) as int32;
+        const bottom = ((borderColor.bottom === null || undefined) ? 0xFF000000 : borderColor.bottom) as int32;
+        const right = ((borderColor.right === null || undefined) ? 0xFF000000 : borderColor.right) as int32;
+        const edgesBorderColor = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeI32;
         RenderNodeExtender.setBorderColor(this, edgesBorderColor);
         return
     }

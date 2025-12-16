@@ -172,6 +172,16 @@ public:
         const std::string& id, napi_value callback = nullptr);
     static void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
     static bool IsSwiperContentObserverEmpty();
+    static void RegisterRouterPageSizeChangeCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterRouterPageSizeChangeCallback(napi_value callback);
+    static void HandleRouterPageSizeChange(const NG::RouterPageInfoNG& info);
+    static void RegisterNavDestinationSizeChangeCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterNavDestinationSizeChangeCallback(napi_value callback);
+    static void HandleNavDestinationSizeChange(const NG::NavDestinationInfo& info);
+    static void RegisterNavDestinationSizeChangeByUniqueIdCallback(
+        int32_t uniqueId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterNavDestinationSizeChangeByUniqueIdCallback(int32_t uniqueId, napi_value callback);
+    static void HandleNavDestinationSizeChangeByUniqueId(const NG::NavDestinationInfo& info);
 
     using PanGestureListenersPair =
         std::pair<std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>&,
@@ -191,12 +201,13 @@ private:
     static void HandleUIContextNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     using NavIdAndListenersMap =
         std::unordered_map<std::optional<std::string>, std::list<std::shared_ptr<UIObserverListener>>>;
-    static void HandleListenersWithEmptyNavigationId(
-        const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo);
-    static void HandleListenersWithSpecifiedNavigationId(
-        const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo);
+    static void HandleListenersWithEmptyNavigationId(const NavIdAndListenersMap& listenersMap,
+        const NG::NavDestinationSwitchInfo& switchInfo, napi_value abilityContext);
+    static void HandleListenersWithSpecifiedNavigationId(const NavIdAndListenersMap& listenersMap,
+        const NG::NavDestinationSwitchInfo& switchInfo, napi_value abilityContext);
     static void GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info);
     static napi_env GetCurrentNapiEnv();
+    static napi_value GetContextValue();
 
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
@@ -268,6 +279,11 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> afterPanStartInfos_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> afterPanEndInfos_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> PanGestureInfos_;
+
+    static std::list<std::shared_ptr<UIObserverListener>> routerPageSizeChangeListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavDestinationSizeChangeListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedNavDestinationSizeChangeListeners_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

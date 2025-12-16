@@ -264,6 +264,7 @@ export class TextMenuItemId implements MaterializedBase {
     static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
     static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
+    static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextMenuItemId.getFinalizer())
     }
@@ -348,6 +349,11 @@ export class TextMenuItemId implements MaterializedBase {
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
+    private static getPasswordVault_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getPasswordVault()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
     public static of(id: ResourceStr): TextMenuItemId {
         const id_casted = id as (ResourceStr)
         return TextMenuItemId.of_serialize(id_casted)
@@ -388,6 +394,9 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getAutoFill(): TextMenuItemId {
         return TextMenuItemId.getAutoFill_serialize()
+    }
+    private static getPasswordVault(): TextMenuItemId {
+        return TextMenuItemId.getPasswordVault_serialize()
     }
     equals_serialize(id: TextMenuItemId): boolean {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
@@ -510,6 +519,15 @@ export interface AccessibilitySpanOptions {
     accessibilityText?: ResourceStr;
     accessibilityDescription?: ResourceStr;
     accessibilityLevel?: string;
+}
+export enum TextDirection {
+    LTR = 0,
+    RTL = 1,
+    DEFAULT = 2,
+    AUTO = 3
+}
+export interface SelectedDragPreviewStyle {
+    color?: ResourceColor;
 }
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
@@ -960,10 +978,10 @@ export class DecorationStyleResult_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
-        } else if (valueHolderForColor instanceof number) {
+        } else if (valueHolderForColor instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForColorForIdx1  = valueHolderForColor as number
-            valueSerializer.writeNumber(valueHolderForColorForIdx1)
+            const valueHolderForColorForIdx1  = valueHolderForColor as int32
+            valueSerializer.writeInt32(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
@@ -986,11 +1004,11 @@ export class DecorationStyleResult_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
         const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let colorTmpBuf : Color | number | string | Resource | undefined
+        let colorTmpBuf : Color | int32 | string | Resource | undefined
         if (colorTmpBufUnionSelector == (0).toChar()) {
             colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (colorTmpBufUnionSelector == (1).toChar()) {
-            colorTmpBuf = (valueDeserializer.readNumber() as number)
+            colorTmpBuf = valueDeserializer.readInt32()
         } else if (colorTmpBufUnionSelector == (2).toChar()) {
             colorTmpBuf = (valueDeserializer.readString() as string)
         } else if (colorTmpBufUnionSelector == (3).toChar()) {
@@ -998,7 +1016,7 @@ export class DecorationStyleResult_serializer {
         } else {
             throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
         }
-        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
+        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | int32 | string | Resource)
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let styleTmpBuf : TextDecorationStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1006,6 +1024,59 @@ export class DecorationStyleResult_serializer {
         }
         const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
         let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleResult)
+        return value
+    }
+}
+export class SelectedDragPreviewStyle_serializer {
+    public static write(buffer: SerializerBase, value: SelectedDragPreviewStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SelectedDragPreviewStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        let value : SelectedDragPreviewStyle = ({color: colorTmpResult} as SelectedDragPreviewStyle)
         return value
     }
 }
@@ -1167,10 +1238,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof number) {
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
@@ -1187,10 +1258,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1210,28 +1281,28 @@ export class CaretStyle_serializer {
         let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | number | Resource | undefined
+            let widthTmpBuf_ : string | double | Resource | undefined
             if (widthTmpBuf_UnionSelector == (0).toChar()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                widthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
                 widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
         const widthTmpResult : Length | undefined = widthTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1239,7 +1310,7 @@ export class CaretStyle_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         let value : CaretStyle = ({width: widthTmpResult, color: colorTmpResult} as CaretStyle)
@@ -1318,10 +1389,10 @@ export class TextDataDetectorConfig_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1378,11 +1449,11 @@ export class TextDataDetectorConfig_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1390,7 +1461,7 @@ export class TextDataDetectorConfig_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

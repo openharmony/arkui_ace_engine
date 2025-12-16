@@ -642,10 +642,6 @@ HWTEST_F(MenuAnimationTestNg, AnimationScale002, TestSize.Level1)
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
 
-    /**
-     * @tc.steps: step2. config params and call initialize and measure
-     * @tc.expected: the scaleOptions in menu as expected
-     */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -661,19 +657,12 @@ HWTEST_F(MenuAnimationTestNg, AnimationScale002, TestSize.Level1)
     layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
+
+    // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
     EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    ASSERT_NE(menuWrapperPattern, nullptr);
-    /**
-     * @tc.steps: step3. change menu hide status and call LayoutPreviewMenu.
-     * @tc.expected: previewScale_ value set by user defined value after LayoutNormalPreviewMenu
-     */
-    menuWrapperPattern->menuStatus_ = MenuStatus::HIDE;
-    layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
-    menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
     layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
 }

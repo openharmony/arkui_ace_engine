@@ -57,7 +57,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     info_->childrenCount_ = 0;
     pattern->GetRepeatCountInfo(host, info_->repeatDifference_, info_->firstRepeatCount_, info_->childrenCount_);
     info_->axis_ = axis_ = props_->GetAxis();
-    auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
+    auto [idealSize, matchChildren, originalWidth] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     sections_ = pattern->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         info_->isDataValid_ = false;
@@ -70,7 +70,6 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
-    double originalWidth = WaterFlowLayoutUtils::GetOriginalWidth();
     Init(idealSize, originalWidth);
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);

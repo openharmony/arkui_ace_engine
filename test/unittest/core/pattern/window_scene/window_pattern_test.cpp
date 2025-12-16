@@ -183,7 +183,7 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
     sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
     windowScene_->CreateSnapshotWindow();
 
-    sceneSession_->scenePersistence_->isSavingSnapshot_[key] = true;
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     sceneSession_->freeMultiWindow_.store(true);
     windowScene_->CreateSnapshotWindow();
     EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
@@ -202,7 +202,7 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
     sceneSession_->state_ = Rosen::SessionState::STATE_DISCONNECT;
     sceneSession_->SetShowRecent(true);
     auto key = Rosen::defaultStatus;
-    sceneSession_->scenePersistence_->isSavingSnapshot_[key] = true;
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(sceneSession_->GetShowRecent(), true);
 
@@ -237,6 +237,35 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
     sceneSession_->isAppLockControl_.store(true);
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+}
+
+/**
+ * @tc.name: CreateStartingWindow
+ * @tc.desc: CreateStartingWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE;
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
+
+    sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::DEFAULT;
+    ssm_->preLoadStartingWindowMap_.clear();
+    windowScene_->WindowPattern::CreateStartingWindow();
+    auto sessionInfo = sceneSession_->GetSessionInfo();
+    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    ssm_->preLoadStartingWindowMap_.emplace(std::pair<std::string, std::shared_ptr<Media::PixelMap>>(key, pixelMap));
+    EXPECT_NE(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+    ssm_->preLoadStartingWindowMap_.clear();
 }
 
 /**

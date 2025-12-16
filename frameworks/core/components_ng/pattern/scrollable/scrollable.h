@@ -826,6 +826,7 @@ private:
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
     double lastMainDelta_ = 0.0;
+    double prevRemainDelta_ = 0.0;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation

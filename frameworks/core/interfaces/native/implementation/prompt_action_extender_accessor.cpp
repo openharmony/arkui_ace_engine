@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -21,6 +20,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
@@ -329,6 +329,8 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.outlineWidth = outlineWidth;
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
+    menuParam.keyboardAvoidMode = OptConvert<MenuKeyboardAvoidMode>(menuOptions.keyboardAvoidMode);
+    menuParam.minKeyboardAvoidDistance = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
     g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 
@@ -449,11 +451,13 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
+    Validator::ValidateNonPercent(outlineWidthOpt);
     if (outlineWidthOpt.has_value()) {
         popupParam->SetOutlineWidth(outlineWidthOpt.value());
     }
     auto borderWidthOpt = Converter::OptConvert<CalcDimension>(src.borderWidth);
     Validator::ValidateNonNegative(borderWidthOpt);
+    Validator::ValidateNonPercent(borderWidthOpt);
     if (borderWidthOpt.has_value()) {
         popupParam->SetInnerBorderWidth(borderWidthOpt.value());
     }
@@ -503,11 +507,15 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
     auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
     if (shadowOpt.has_value()) {
         popupParam->SetShadow(shadowOpt.value());
+        if (src.shadow.value.selector == 1) {
+            popupParam->SetIsShadowStyle(true);
+        }
     } else {
         auto defaultPopupShadowStyle = g_getPopupDefaultShadow();
         Shadow shadow;
         g_getShadowFromTheme(defaultPopupShadowStyle, shadow);
         popupParam->SetShadow(shadow);
+        popupParam->SetIsShadowStyle(true);
     }
     auto popupBackgroundBlurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
     if (popupBackgroundBlurStyleOpt.has_value()) {
@@ -705,21 +713,32 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
-    MenuParam menuParam;
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
     if (!isPartialUpdate.has_value()) {
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_PARAM_INVALID);
         return;
     }
+    MenuParam menuParamOpen;
+    auto result = ViewAbstractModelStatic::GetMenuParam(menuParamOpen, frameNode);
+    if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(outputArgumentForReturningPromise, result);
+        return;
+    }
+    MenuParam menuParam;
     if (isPartialUpdate.value()) {
-        auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
-        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
-            ReturnPromise(outputArgumentForReturningPromise, result);
-            return;
-        }
+        menuParam = menuParamOpen;
     }
     g_bindMenuOptionsParam(*options, menuParam);
-    auto result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    // Updating these parameters is not supported
+    menuParam.isShowInSubWindow = menuParamOpen.isShowInSubWindow;
+    menuParam.previewMode = menuParamOpen.previewMode;
+    result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;
     }

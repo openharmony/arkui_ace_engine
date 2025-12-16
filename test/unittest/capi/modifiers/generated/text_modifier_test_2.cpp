@@ -198,7 +198,7 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, Test
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -289,7 +289,7 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20NumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20ResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

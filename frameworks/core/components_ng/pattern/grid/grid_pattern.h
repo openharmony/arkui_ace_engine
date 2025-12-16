@@ -22,13 +22,13 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT GridPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
+class ACE_EXPORT GridPattern : public SelectableContainerPattern {
+    DECLARE_ACE_TYPE(GridPattern, SelectableContainerPattern);
 
 public:
     GridPattern() = default;
@@ -277,6 +277,16 @@ public:
         return info_.contentStartOffset_;
     }
 
+    void SetEditModeOptions(EditModeOptions& editModeOptions)
+    {
+        editModeOptions_ = editModeOptions;
+    }
+
+    EditModeOptions GetEditModeOptions() const override
+    {
+        return editModeOptions_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -334,12 +344,15 @@ private:
     RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
+    float mainSizeChanged_ = 0.0f;
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
 
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
+
+    EditModeOptions editModeOptions_;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

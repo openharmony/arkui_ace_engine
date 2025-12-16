@@ -14,16 +14,28 @@
  */
 
 #include "water_flow_test_ng.h"
+#define protected public
+#define private public
 // mock
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#undef private
+#undef protected
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float SCROLL_BAR_CHILD_WIDTH = 20.f;
+constexpr float SCROLL_BAR_CHILD_HEIGHT = 160.f;
+constexpr float MAIN_DELTA = 10.0f;
+} // namespace
 /**
  * @tc.name: WaterFlowLayoutInfoTest002
  * @tc.desc: Test functions in WaterFlowLayoutInfo.
@@ -2089,5 +2101,46 @@ HWTEST_F(WaterFlowTestNg, GetContentHeightWithContentEndOffsetChange, TestSize.L
     FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+}
+
+/**
+ * @tc.name: ScrollBarOverDrag001
+ * @tc.desc: Test ScrollBar over drag with contentStartOffset and contentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarOverDrag001, TestSize.Level1)
+{
+    StackModelNG stackModel;
+    stackModel.Create();
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+
+    CreateWaterFlowItems(20);
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    SetSize(Axis::VERTICAL, CalcLength(SCROLL_BAR_CHILD_WIDTH), CalcLength(SCROLL_BAR_CHILD_HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    auto prevOffset = pattern_->GetTotalOffset();
+
+    GestureEvent info;
+    info.SetMainDelta(MAIN_DELTA);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBarPattern->HandleDragStart(info);
+    scrollBarPattern->HandleDragUpdate(info);
+    FlushUITasks();
+
+    info.SetMainDelta(-SCROLL_BAR_CHILD_HEIGHT);
+    scrollBarPattern->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollBarPattern->HandleDragEnd(info);
+    EXPECT_EQ(pattern_->GetTotalOffset(), prevOffset);
 }
 } // namespace OHOS::Ace::NG

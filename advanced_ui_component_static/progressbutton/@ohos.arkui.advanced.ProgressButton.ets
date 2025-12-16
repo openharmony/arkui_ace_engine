@@ -40,6 +40,7 @@ const BUTTON_NORMARL_HEIGHT: number = 28;
 const BUTTON_BORDER_RADIUS: number = 14;
 const TEXT_ENABLE: number = 1.0;
 
+
 // Set the key value for the basic component of skin changing corresponding to progressButton
 const PROGRESS_BUTTON_PROGRESS_KEY = 'progress_button_progress_key';
 const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
@@ -48,13 +49,13 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @Component
 export struct ProgressButton {
-  @PropRef @Watch('getProgressContext') progress: double = 0.0;
+  @PropRef @Watch('getProgressContext') progress: double | undefined;
   @State textProgress: string = EMPTY_STRING as string;
-  @PropRef content: ResourceStr = EMPTY_STRING as string;
+  @PropRef content: ResourceStr | undefined = EMPTY_STRING as string;
   @State @Watch('getLoadingProgress') isLoading: boolean = false;
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH as number;
   clickCallback: () => void = () => {};
-  @PropRef enable: boolean = true;
+  @PropRef enable: boolean | undefined = true as boolean;
   @PropRef colorOptions: ProgressButtonColorOptions | undefined = undefined;
   @PropRef progressButtonRadius?: LengthMetrics | undefined = undefined;
   @State progressColor: ResourceColor = '#330A59F7';
@@ -70,24 +71,29 @@ export struct ProgressButton {
   }
 
   private getButtonProgress(): double {
-    if (this.progress < 0) {
-      return 0;
-    } else if (this.progress > MAX_PROGRESS) {
-      return MAX_PROGRESS;
+    if (this.progress === undefined) {
+      return 0.0;
     }
-    return this.progress;
+    const safeProgress: double = this.progress as double;
+    const minValue: double = Math.min(safeProgress, MAX_PROGRESS);
+    return Math.max(0.0, minValue);
   }
 
   private getProgressContext(propertyName: string) {
-    if (this.progress < 0.0) {
+    if (this.progress === undefined) {
+      this.isLoading = false;
+      this.textProgress = '';
+    }
+    const safeProgress: double = this.progress as double;
+    if (safeProgress < 0.0) {
       this.isLoading = false;
       this.textProgress = MIN_PERCENTAGE;
-    } else if (this.progress >= MAX_PROGRESS) {
+    } else if (safeProgress >= MAX_PROGRESS) {
       this.isLoading = false;
       this.textProgress = MAX_PERCENTAGE;
     } else {
       this.isLoading = true;
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS) + '%';
+      this.textProgress = Math.floor(safeProgress / MAX_PROGRESS * MAX_PROGRESS) + '%';
     }
   }
 
@@ -102,13 +108,14 @@ export struct ProgressButton {
   }
 
   private getLoadingProgress(propertyName: string) {
+    const safeProgress: double = this.progress as double;
     if (this.isLoading) {
-      if (this.progress < 0.0) {
+      if (safeProgress < 0.0) {
         this.textProgress = MIN_PERCENTAGE;
-      } else if (this.progress >= MAX_PROGRESS) {
+      } else if (safeProgress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE;
       } else {
-        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS) + '%';
+        this.textProgress = Math.floor(safeProgress / MAX_PROGRESS * MAX_PROGRESS) + '%';
       }
     }
   }
@@ -229,10 +236,14 @@ export struct ProgressButton {
     .width(this.getButtonWidth())
     .stateEffect(this.enable)
     .onClick((event?: ClickEvent) => {
+      if(this.progress === undefined){
+        return;
+      }
+      const safeProgress: double = this.progress as double;
       if (!this.enable) {
         return;
       }
-      if (this.progress < MAX_PROGRESS) {
+      if (safeProgress < MAX_PROGRESS) {
         this.isLoading = !this.isLoading;
       }
       if (this.clickCallback) {

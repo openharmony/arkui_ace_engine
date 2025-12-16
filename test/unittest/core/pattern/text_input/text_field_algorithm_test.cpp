@@ -1131,4 +1131,26 @@ HWTEST_F(TextFieldAlgorithmTest, IsHint002, TestSize.Level1)
     layoutProperty_->UpdateValue(StringUtils::Str8ToStr16(DEFAULT_TEXT));
     EXPECT_FALSE(accessibilityProperty->IsHint());
 }
+
+/**
+ * @tc.name: GetPlaceHolder_WithPlaceholderResponseArea_001
+ * @tc.desc: Test GetPlaceHolder when placeholderResponseArea_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, GetPlaceHolder_WithPlaceholderResponseArea_001, TestSize.Level1)
+{
+    CreateTextField("123", "12345");
+
+    // 设置placeholderResponseArea
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+    auto placeholderResponseArea = pattern_->GetPlaceholderResponseArea();
+    ASSERT_NE(placeholderResponseArea, nullptr);
+
+    auto result = pattern_->GetPlaceHolder();
+
+    // 当placeholderResponseArea_不为空时，应该返回GetStyledPlaceHolderValue的结果
+    // 这里需要模拟TextPattern的GetTextForDisplay返回预期的值
+    EXPECT_EQ(result, u"Styled Placeholder");
+}
 } // namespace OHOS::Ace::NG //

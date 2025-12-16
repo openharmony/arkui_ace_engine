@@ -39,10 +39,6 @@ public:
     static void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuAppearLifeCycleParam(
-        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuDisappearLifeCycleParam(
-        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex);
     static void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
@@ -80,6 +76,21 @@ private:
         const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
     static void ParseBorderRadiusPropsByLengthMetrics(
         const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void ParseBackgroundParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuLifeCycleParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAboutToAppearLifeCycleParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAppearLifeCycleParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAboutToDisappearLifeCycleParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuDisappearLifeCycleParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseTransitionParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseAnchorPositionParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::Framework
 

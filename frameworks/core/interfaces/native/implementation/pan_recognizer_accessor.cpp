@@ -36,9 +36,9 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
     auto options = peer->GetPanGestureOptions();
     CHECK_NULL_RETURN(options, nullptr);
+    auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
     panGestureOptionsPeer->handler = options;
     return reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer);
 }

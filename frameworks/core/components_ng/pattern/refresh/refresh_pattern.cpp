@@ -131,6 +131,7 @@ void RefreshPattern::OnModifyDone()
         refreshOffset_ = GetTriggerRefreshDisTance();
     }
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
+    pullUpToCancelRefresh_ = layoutProperty->GetPullUpToCancelRefresh().value_or(true);
     InitPanEvent(host);
     InitOnKeyEvent(host);
     InitChildNode(host);
@@ -859,7 +860,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         auto pullDownRatio = CalculatePullDownRatio();
         dealSpeed = (pullDownRatio * speed) / (targetOffset - scrollOffset_);
     } else if (NearZero(scrollOffset_) && NonPositive(speed)) {
-        SwitchToFinish();
+        if (pullUpToCancelRefresh_) {
+            SwitchToFinish();
+        }
         return;
     }
     bool recycle = true;
@@ -868,7 +871,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
         recycle = false;
-        SwitchToFinish();
+        if (pullUpToCancelRefresh_) {
+            SwitchToFinish();
+        }
     }
     ResetAnimation();
     AnimationOption option;
@@ -1400,6 +1405,8 @@ void RefreshPattern::DumpInfo()
         std::string("LoadingTextOpacity: ").append(std::to_string(GetLoadingTextOpacity())));
     DumpLog::GetInstance().AddDesc(
         std::string("LoadingProgressColor: ").append(GetLoadingProgressColor().ColorToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PullUpToCancelRefresh: ").append(std::to_string(pullUpToCancelRefresh_)));
 }
 
 void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1408,5 +1415,6 @@ void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("LoadingProgressOpacity", GetLoadingProgressOpacity());
     json->Put("LoadingTextOpacity", GetLoadingTextOpacity());
     json->Put("LoadingProgressColor", GetLoadingProgressColor().ColorToString().c_str());
+    json->Put("PullUpToCancelRefresh", pullUpToCancelRefresh_);
 }
 } // namespace OHOS::Ace::NG

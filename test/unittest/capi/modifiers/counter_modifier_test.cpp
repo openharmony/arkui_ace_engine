@@ -211,8 +211,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
     const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)),
              "#FFFFFFFF" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
+        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f)), "#00000000" },
         { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
         { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
         { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(resName)),

@@ -1017,6 +1017,29 @@ bool ListModelNG::GetListSyncLoad(FrameNode* frameNode)
     return value;
 }
 
+void ListModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEditModeOptions(frameNode, editModeOptions);
+}
+
+void ListModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
+EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
+{
+    EditModeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, options);
+    return pattern->GetEditModeOptions();
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -1620,5 +1643,24 @@ ScrollSnapAnimationSpeed ListModelNG::GetScrollSnapAnimationSpeed(FrameNode* fra
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, ScrollSnapAnimationSpeed::NORMAL);
     return pattern->GetSnapSpeed();
+}
+
+void ListModelNG::SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch);
+}
+
+void ListModelNG::SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool supportEmptyBranch)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch, frameNode);
+}
+
+bool ListModelNG::GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode)
+{
+    bool enable = false;
+    CHECK_NULL_RETURN(frameNode, enable);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ListLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
+    return enable;
 }
 } // namespace OHOS::Ace::NG

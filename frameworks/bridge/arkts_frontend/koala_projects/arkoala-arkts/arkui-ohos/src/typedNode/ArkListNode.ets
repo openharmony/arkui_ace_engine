@@ -99,8 +99,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    divider(value: ListDividerOptions | undefined): this {
-        const value_casted = value as (ListDividerOptions | undefined)
+    divider(value: ListDividerOptions | null | undefined): this {
+        const value_casted = value as (ListDividerOptions | null | undefined)
         this.getPeer()?.setDividerAttribute(value_casted)
         this.markDirty()
         return this
@@ -302,6 +302,11 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         const value_casted = value as (EdgeEffect | undefined)
         const options_casted = options as (EdgeEffectOptions | undefined)
         this.getPeer()?.setEdgeEffectAttribute(value_casted, options_casted)
+        this.markDirty()
+        return this
+    }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value)
         this.markDirty()
         return this
     }

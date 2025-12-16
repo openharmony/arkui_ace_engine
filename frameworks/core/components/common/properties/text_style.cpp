@@ -47,6 +47,8 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
            propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_ &&
            propCompressLeadingPunctuation_ == rhs.propCompressLeadingPunctuation_ &&
+           propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
+           propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ &&
            NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 

@@ -41,6 +41,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -135,7 +136,9 @@ int32_t NavigationCallbackTestNg::AddNavigationCallback(NavigateChangeInfo& preV
     auto navigationManager = context->GetNavigationManager();
     CHECK_NULL_RETURN(navigationManager, -1);
     int32_t callbackId = navigationManager->RegisterNavigateChangeCallback(
-        [preVal, curVal, test = this](const std::string& from, const std::string& to) {
+        [preVal, curVal, test = this](const NavigateChangeInfo& from, const NavigateChangeInfo& to) {
+        ASSERT_EQ(from.name, preVal.name);
+        ASSERT_EQ(from.isSplit, preVal.isSplit);
         test->index_ = 1;
     });
     return callbackId;

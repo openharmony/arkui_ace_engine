@@ -15,8 +15,6 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-koala_root = ".."
-
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
@@ -53,7 +51,6 @@ action("incremental.abc") {
     "build:incremental:gn",
   ]
 
-  deps = [ "$koala_root/ui2abc:ui2abc" ]
 }
 
 group("incremental") {

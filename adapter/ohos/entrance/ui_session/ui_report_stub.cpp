@@ -118,6 +118,12 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendExeAppAIFunctionResult(result);
             break;
         }
+        case SEND_CONTENT_CHANGE: {
+            ChangeType type = static_cast<ChangeType>(data.ReadInt32());
+            std::string simpleTree = data.ReadString();
+            SendContentChange(type, simpleTree);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -346,6 +352,25 @@ void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
 {
     if (exeAppAIFunctionCallback_) {
         exeAppAIFunctionCallback_(result);
+    }
+}
+
+
+void UiReportStub::RegisterContentChangeCallback(
+    const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
+{
+    contentChangeCallback_ = callback;
+}
+
+void UiReportStub::UnregisterContentChangeCallback()
+{
+    contentChangeCallback_ = nullptr;
+}
+
+void UiReportStub::SendContentChange(ChangeType type, const std::string& simpleTree)
+{
+    if (contentChangeCallback_) {
+        contentChangeCallback_(type, simpleTree);
     }
 }
 } // namespace OHOS::Ace

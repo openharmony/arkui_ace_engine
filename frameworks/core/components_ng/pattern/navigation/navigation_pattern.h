@@ -109,7 +109,7 @@ public:
 
     bool JudgeFoldStateChangeAndUpdateState();
 
-    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
+    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback = true);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
     {
@@ -550,9 +550,9 @@ public:
     }
     bool IsForceSplitSupported(const RefPtr<PipelineContext>& context);
 
-    RefPtr<NavDestinationGroupNode> GetHomeNode() const
+    RefPtr<NavDestinationGroupNode> GetForceSplitHomeDestination() const
     {
-        return homeNode_.Upgrade();
+        return forceSplitHomeDest_.Upgrade();
     }
     const std::vector<WeakPtr<NavDestinationGroupNode>>& GetPrimaryNodes() const
     {
@@ -567,7 +567,7 @@ public:
         primaryNodesToBeRemoved_ = primaryNodesToBeRemoved;
     }
     void RecognizeHomePageIfNeeded();
-    void TryForceSplitIfNeeded(const SizeF& frameSize);
+    void TryForceSplitIfNeeded();
     void SwapNavDestinationAndProxyNode(bool needFireLifecycle);
     bool IsPrimaryNode(const RefPtr<NavDestinationGroupNode>& destNode) const;
     // Only used for the toolbar in 'container_modal' component
@@ -611,7 +611,7 @@ public:
 
     bool IsTopFullScreenChanged() const
     {
-        return isTopFullScreenPage_;
+        return isTopFullScreenChanged_;
     }
     
     bool CheckNeedInitRangeCalculation(SizeF& newSize)
@@ -621,8 +621,24 @@ public:
 
     void FireNavigateChangeCallback();
 
+    //-------for force split------- begin------
+    bool CreateRelatedDestination(
+        const std::string& name, RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& relatedDest);
+    bool IsRelatedDestinationShouldVisible();
+    bool IsRelatedDestinationAtTop();
+    void FireRelatedDestinationLifecycleForModeChange();
+    bool IsSplitDisplay() const
+    {
+        return isSplitDisplay_;
+    }
+    void SetIsSplitDisplay(bool isSplit)
+    {
+        isSplitDisplay_ = isSplit;
+    }
+    //-------for force split------- end------
+
 private:
-    void UpdateCanForceSplitLayout(const SizeF& frameSize);
+    void UpdateCanForceSplitLayout();
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
         NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
     void ClearNavigationCustomTransition();
@@ -806,6 +822,9 @@ private:
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
     void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
     NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -817,8 +836,13 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
+    void UpdatePlaceholderOrRelatedPageVisible(bool phIsVisible);
+    void UpdateNavContentAndChildVisibility(const RefPtr<FrameNode>& navContentNode, bool isVisible);
+    void FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
+    void FireRelatedDestinationLifecycleInner(bool isOnShow, bool isFromWindow);
+    RefPtr<NavDestinationGroupNode> GetNonTopForceSplitHomeDestination();
+    RefPtr<NavDestinationGroupNode> GetVisibleRelatedDestination();
+    RefPtr<NavDestinationGroupNode> GetTopRelatedDestination();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -896,10 +920,11 @@ private:
     std::optional<bool> homeNodeTouched_;
     bool navBarIsHome_ = false;
     bool isTargetForceSplitNav_ = false;
-    WeakPtr<NavDestinationGroupNode> homeNode_;
+    WeakPtr<NavDestinationGroupNode> forceSplitHomeDest_;
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    bool isSplitDisplay_ = false;
     //-------for force split------- end  ------
 };
 

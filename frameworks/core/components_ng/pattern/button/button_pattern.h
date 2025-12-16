@@ -249,6 +249,8 @@ protected:
 private:
     static void UpdateTextLayoutProperty(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    static void UpdateTextAlignProperty(
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     static void UpdateTextStyle(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     static bool NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty);
@@ -257,6 +259,8 @@ private:
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void OnFontScaleConfigurationUpdate() override;
     void InitButtonAlphaOffscreen();
+    void OnColorConfigurationUpdateTextColor(const RefPtr<FrameNode>& host, const ButtonStyleMode& buttonStyle,
+        const ButtonRole& buttonRole, const Color& textColor);
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;

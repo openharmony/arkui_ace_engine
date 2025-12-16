@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "frameworks/core/interfaces/native/implementation/length_metrics_peer.h"
-#include "frameworks/core/interfaces/native/implementation/paragraph_style_peer.h"
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h"
+#include <gmock/gmock.h>
+
 #include "accessor_test_base.h"
-#include "frameworks/core/interfaces/native/utility/callback_helper.h"
-#include "frameworks/core/interfaces/native/utility/converter.h"
-#include "frameworks/core/interfaces/native/utility/reverse_converter.h"
-#include "test/unittest/capi/modifiers/generated/type_helpers.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/paragraph_style_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/mock/base/mock_pixel_map.h"
-#include "gmock/gmock.h"
+#include "test/unittest/capi/modifiers/generated/type_helpers.h"
 
 namespace OHOS::Ace::NG {
 

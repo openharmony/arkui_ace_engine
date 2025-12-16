@@ -22,13 +22,14 @@
 #include "js_native_api_types.h"
 
 #include "base/error/error_code.h"
-#include "base/memory/referenced.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas/canvas_rendering_context_2d_model_impl.h"
@@ -180,6 +181,9 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("on", &JSRenderingContext::JsOn);
     JSClass<JSRenderingContext>::CustomMethod("off", &JSRenderingContext::JsOff);
+
+    JSClass<JSRenderingContext>::StaticMethod(
+        "getContext2DFromDrawingContext", &JSRenderingContext::JsGetContext2DFromDrawingContext);
 
     // Register the "CanvasRenderingContext2D" to the global object of the vm
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
@@ -579,5 +583,28 @@ void JSRenderingContext::JsOff(const JSCallbackInfo& info)
     }
 
     DeleteCallbackFromList(info.Length(), env, cb, type);
+}
+
+void JSRenderingContext::JsGetContext2DFromDrawingContext(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "param is not a DrawingRenderingContext object");
+        return;
+    }
+    auto* drawingContext = JSRef<JSObject>::Cast(args[0])->Unwrap<JSDrawingRenderingContext>();
+    if (!drawingContext) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "param is not a DrawingRenderingContext object");
+        return;
+    }
+    bool antialias = false;
+    if (args[1]->IsObject()) {
+        auto contextOptionsObj = JSRef<JSObject>::Cast(args[1]);
+        auto antiAliasJSValue = contextOptionsObj->GetProperty("antialias");
+        if (antiAliasJSValue->IsBoolean()) {
+            antialias = antiAliasJSValue->ToBoolean();
+        }
+    }
+
+    args.SetReturnValue(drawingContext->GetOrCreateContext2D(antialias));
 }
 } // namespace OHOS::Ace::Framework

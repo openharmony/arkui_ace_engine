@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookSliderContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from "./component/slider"
+import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions, ColorMetricsLinearGradient } from "./component/slider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./component/units"
@@ -79,6 +79,8 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _trackColorMetrics_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _trackColorMetrics_0_0value?: ColorMetricsLinearGradient | undefined
     _showSteps_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showSteps_1_0value?: boolean | undefined
     _showSteps_1_1value?: SliderShowStepOptions | undefined
@@ -91,6 +93,8 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
+    _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentModifier_0_0value?: ContentModifier<SliderConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -437,6 +441,24 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (this._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTrackColorMetricsAttribute((this._trackColorMetrics_0_0value as ColorMetricsLinearGradient | undefined));
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._trackColorMetrics_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTrackColorMetricsAttribute((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
         if (this._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._showSteps_1_flag) {
@@ -506,6 +528,24 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 default: {
                     this._showTips_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setShowTipsAttribute((undefined as boolean | undefined), (undefined as ResourceStr | undefined | undefined));
+                }
+            }
+        }
+        if (this._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookSliderContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<SliderConfiguration> | undefined));
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookSliderContentModifier(peer, (undefined as ContentModifier<SliderConfiguration> | undefined));
                 }
             }
         }
@@ -760,6 +800,19 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
             }
         }
+        if (modifier._trackColorMetrics_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._trackColorMetrics_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.trackColorMetrics(modifier._trackColorMetrics_0_0value);
+                    break;
+                }
+                default: {
+                    this.trackColorMetrics((undefined as ColorMetricsLinearGradient | undefined));
+                }
+            }
+        }
         if (modifier._showSteps_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._showSteps_1_flag) {
@@ -809,6 +862,19 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
                 }
                 default: {
                     this.showTips((undefined as boolean | undefined), (undefined as ResourceStr | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._contentModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<SliderConfiguration> | undefined));
                 }
             }
         }
@@ -1067,6 +1133,28 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         } else
         {
             this._showTips_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentModifier_0_0value = value
+        } else
+        {
+            this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    trackColorMetrics(value: ColorMetricsLinearGradient | undefined): this {
+        if (((this._trackColorMetrics_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._trackColorMetrics_0_0value) !== (value)))
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.UPDATE
+            this._trackColorMetrics_0_0value = value
+        } else
+        {
+            this._trackColorMetrics_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

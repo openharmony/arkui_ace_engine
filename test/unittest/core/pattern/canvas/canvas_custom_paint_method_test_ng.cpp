@@ -1338,26 +1338,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest033
- * @tc.desc: Test the function 'RestoreProperties' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-    paintMethod->SaveProperties();
-    paintMethod->RestoreProperties();
-    paintMethod->RestoreProperties();
-    EXPECT_TRUE(paintMethod->matrixStates_.empty());
-}
-
-/**
  * @tc.name: CanvasCustomPaintMethodTest034
  * @tc.desc: Test the function 'PutImageData' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
@@ -1376,37 +1356,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest034, TestSize
     imageData1.pixelMap = pixelMap;
     paintMethod->PutImageData(imageData1);
     EXPECT_TRUE(imageData1.data.empty());
-}
-
-/**
- * @tc.name: CanvasCustomPaintMethodTest035
- * @tc.desc: Test the function 'TranslateMatrix' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest035, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-
-    /**
-     * @tc.steps2: Call the function TranslateMatrix.
-     */
-    double tx = .0;
-    double ty = .0;
-    paintMethod->TranslateMatrix(tx, ty);
-    ty = 1.0;
-    paintMethod->TranslateMatrix(tx, ty);
-    tx = 1.0;
-    ty = .0;
-    paintMethod->TranslateMatrix(tx, ty);
-    ty = 1.0;
-    paintMethod->TranslateMatrix(tx, ty);
-    EXPECT_TRUE(paintMethod->matrixStates_.empty());
 }
 
 /**

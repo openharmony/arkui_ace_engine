@@ -811,8 +811,8 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         CHECK_NULL_RETURN(container, nullptr);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
+        auto animationOptionResult = std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(
+            context, propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
         GetAnimationOptionResult(animationOptionResult, propAnimationOption, pipelineContext, context);
         result->SetAnimationOption(animationOptionResult);
     }
@@ -1827,11 +1827,10 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
     int units[size];
 
     if (isLengthMetrics) {
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         SetBorderWidthArrayByDimen(top, values, units, NUM_0);
-        SetBorderWidthArrayByDimen(isRightToLeft ? left : right, values, units, NUM_1);
+        SetBorderWidthArrayByDimen(right, values, units, NUM_1);
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
-        SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
+        SetBorderWidthArrayByDimen(left, values, units, NUM_3);
         ParseNullptrResObj(resObj, NUM_4);
     } else {
         SetBorderWidthArray(vm, topArgs, values, units, NUM_0, resObj);
@@ -1841,7 +1840,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
     }
 
     auto rawPtr = static_cast<void*>(&resObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size, rawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size, rawPtr, isLengthMetrics);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1986,9 +1985,15 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> renderStrategy = runtimeCallInfo->GetCallArgRef(NUM_5);
+    ArkUI_Int32 renderStrategyNumber = 0;
+    if (renderStrategy->IsNumber()) {
+        renderStrategyNumber = renderStrategy->ToNumber(vm)->Value();
+    }
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getCommonModifier()->setRenderStrategy(nativeNode, renderStrategyNumber);
         return panda::JSValueRef::Undefined(vm);
     }
     CalcDimension topLeft;
@@ -2011,13 +2016,14 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     }
     ArkUI_Float32 values[SIZE_OF_FOUR];
     int units[SIZE_OF_FOUR];
-    bool isMirror = isLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft();
-    ParseMirrorDimen(values, units, NUM_0, isMirror ? topRight : topLeft);
-    ParseMirrorDimen(values, units, NUM_1, isMirror ? topLeft : topRight);
-    ParseMirrorDimen(values, units, NUM_2, isMirror ? bottomRight : bottomLeft);
-    ParseMirrorDimen(values, units, NUM_3, isMirror ? bottomLeft : bottomRight);
+    ParseMirrorDimen(values, units, NUM_0, topLeft);
+    ParseMirrorDimen(values, units, NUM_1, topRight);
+    ParseMirrorDimen(values, units, NUM_2, bottomLeft);
+    ParseMirrorDimen(values, units, NUM_3, bottomRight);
     auto rawPtr = static_cast<void*>(&resObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(nativeNode, values, units, SIZE_OF_FOUR, rawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(
+        nativeNode, values, units, SIZE_OF_FOUR, rawPtr, isLengthMetrics);
+    GetArkUINodeModifiers()->getCommonModifier()->setRenderStrategy(nativeNode, renderStrategyNumber);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2165,20 +2171,16 @@ ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCa
 
     if (useEdges) {
         ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, edgesResObj, CalcDimension(0.0));
-        if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            // Swap left and right
-            std::swap(edges[NUM_1], edges[NUM_3]);
-        }
         PushDimensionsToVector(options, edges);
         auto edgesRawPtr = static_cast<void*>(&edgesResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(
-            nativeNode, useEdges, options.data(), edgesRawPtr);
+            nativeNode, useEdges, options.data(), edgesRawPtr, res == ParseResult::LENGTHMETRICS_SUCCESS);
     } else {
         ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, edgesResObj, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
         auto edgesRawPtr = static_cast<void*>(&edgesResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(
-            nativeNode, useEdges, options.data(), edgesRawPtr);
+            nativeNode, useEdges, options.data(), edgesRawPtr, false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2313,16 +2315,10 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtim
     if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor, resObj, nodeInfo)) {
         leftColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (SystemProperties::ConfigChangePerform() && isRightToLeft && isLocalized) {
-        std::swap(resObj[1], resObj[3]);
-    }
     auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorderColor(nativeNode,
-        topColor.GetValue(),
-        (isRightToLeft && isLocalized) ? leftColor.GetValue() : rightColor.GetValue(),
-        bottomColor.GetValue(),
-        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue(), rawPtr);
+        topColor.GetValue(), rightColor.GetValue(), bottomColor.GetValue(), leftColor.GetValue(),
+        rawPtr, isLocalized);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5092,18 +5088,16 @@ ArkUINativeModuleValue CommonBridge::SetOffset(ArkUIRuntimeCallInfo* runtimeCall
 
     if (useEdges) {
         ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, edgesResObj, CalcDimension(0.0));
-        if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            // Swap left and right
-            std::swap(edges[NUM_1], edges[NUM_3]);
-        }
         PushDimensionsToVector(options, edges);
         auto edgesRawPtr = static_cast<void*>(&edgesResObj);
-        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data(), edgesRawPtr);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(
+            nativeNode, useEdges, options.data(), edgesRawPtr, res == ParseResult::LENGTHMETRICS_SUCCESS);
     } else {
         ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, edgesResObj, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
         auto edgesRawPtr = static_cast<void*>(&edgesResObj);
-        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data(), edgesRawPtr);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(
+            nativeNode, useEdges, options.data(), edgesRawPtr, false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -5196,13 +5190,7 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     }
 
     if (isLengthMetrics) {
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode,
-            &top,
-            isRightToLeft ? &left : &right,
-            &bottom,
-            isRightToLeft ? &right : &left,
-            nullptr);
+        GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode, &top, &right, &bottom, &left, nullptr, true);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -5211,7 +5199,7 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     ParsePadding(vm, forthArg, bottomDimen, bottom, resObj);
     ParsePadding(vm, fifthArg, leftDimen, left, resObj);
     auto rawPtr = static_cast<void*>(&resObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode, &top, &right, &bottom, &left, rawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode, &top, &right, &bottom, &left, rawPtr, false);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -5291,13 +5279,8 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     ParseMarginLengthMetrics(vm, forthArg, bottomDimen, bottom, isLengthMetrics);
     ParseMarginLengthMetrics(vm, fifthArg, leftDimen, left, isLengthMetrics);
     if (isLengthMetrics) {
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode,
-            &top,
-            isRightToLeft ? &left : &right,
-            &bottom,
-            isRightToLeft ? &right : &left,
-            nullptr);
+        GetArkUINodeModifiers()->getCommonModifier()->setMargin(
+            nativeNode, &top, &right, &bottom, &left, nullptr, true);
         ParseNullptrResObj(resObj, NUM_4);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -5306,7 +5289,7 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     ParseMargin(vm, forthArg, bottomDimen, bottom, resObj);
     ParseMargin(vm, fifthArg, leftDimen, left, resObj);
     auto rawPtr = static_cast<void*>(&resObj);
-    GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode, &top, &right, &bottom, &left, rawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode, &top, &right, &bottom, &left, rawPtr, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5395,17 +5378,14 @@ ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo* runtime
     RefPtr<ResourceObject> yResObj;
     bool useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, xArg, x);
     useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, yArg, y) || useLengthMetrics;
-    if (useLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        x.SetValue(-x.Value());
-    }
     bool hasX = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, xArg, x, DimensionUnit::VP, xResObj);
     bool hasY = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, yArg, y, DimensionUnit::VP, yResObj);
-    if (useLengthMetrics || hasX || hasY) {
+    if (hasX || hasY) {
         auto xRawPtr = AceType::RawPtr(xResObj);
         auto yRawPtr = AceType::RawPtr(yResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setMarkAnchor(
             nativeNode, x.Value(), static_cast<int32_t>(x.Unit()), y.Value(), static_cast<int32_t>(y.Unit()),
-            xRawPtr, yRawPtr);
+            xRawPtr, yRawPtr, useLengthMetrics);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetMarkAnchor(nativeNode);
     }
@@ -10764,9 +10744,8 @@ ArkUINativeModuleValue CommonBridge::ResetNextFocus(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
+static void FillAxisMap(EcmaVM* vm, Local<panda::MapRef>& axisMap, const NG::FocusAxisEventInfo& info)
 {
-    auto axisMap = panda::MapRef::New(vm);
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_X)),
         panda::NumberRef::New(vm, info.GetAbsXValue()));
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_Y)),
@@ -10783,6 +10762,34 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, info.GetAbsHat0XValue()));
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0Y)),
         panda::NumberRef::New(vm, info.GetAbsHat0YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RX)),
+        panda::NumberRef::New(vm, info.GetAbsRxValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RY)),
+        panda::NumberRef::New(vm, info.GetAbsRyValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_THROTTLE)),
+        panda::NumberRef::New(vm, info.GetAbsThrottleValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RUDDER)),
+        panda::NumberRef::New(vm, info.GetAbsRudderValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_WHEEL)),
+        panda::NumberRef::New(vm, info.GetAbsWheelValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT1X)),
+        panda::NumberRef::New(vm, info.GetAbsHat1XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT1Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat1YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT2X)),
+        panda::NumberRef::New(vm, info.GetAbsHat2XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT2Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat2YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT3X)),
+        panda::NumberRef::New(vm, info.GetAbsHat3XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT3Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat3YValue()));
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
+{
+    auto axisMap = panda::MapRef::New(vm);
+    FillAxisMap(vm, axisMap, info);
     const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool",
         "deviceId", "getModifierKeyState", "stopPropagation", "targetDisplayId" };
     Local<JSValueRef> values[] = { axisMap, FrameNodeBridge::CreateEventTargetObject(vm, info),
@@ -11098,6 +11105,42 @@ ArkUINativeModuleValue CommonBridge::ResetCompositingFilter(ArkUIRuntimeCallInfo
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getCommonModifier()->resetCompositingFilter(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetMaterialFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> materialFilterArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (!materialFilterArg->IsObject(vm)) {
+        nodeModifiers->getCommonModifier()->resetMaterialFilter(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsVal = info[NUM_1];
+    auto* materialFilter = Framework::UnwrapNapiValue(jsVal);
+    nodeModifiers->getCommonModifier()->setMaterialFilter(nativeNode, materialFilter);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetMaterialFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCommonModifier()->resetMaterialFilter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

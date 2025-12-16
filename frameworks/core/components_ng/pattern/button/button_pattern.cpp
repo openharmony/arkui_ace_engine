@@ -197,6 +197,9 @@ void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const
         V2::ConvertWrapTextHeightAdaptivePolicyToString(
             layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
             .c_str());
+    if (layoutProperty->GetTextAlign().has_value()) {
+        labelJsValue->Put("textAlign", V2::ConvertWrapTextAlignToString(layoutProperty->GetTextAlignValue()).c_str());
+    }
     labelJsValue->Put("font", fontJsValue->ToString().c_str());
     json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
 
@@ -379,8 +382,17 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
+    UpdateTextAlignProperty(layoutProperty, textLayoutProperty);
     // update text style defined by buttonStyle and control size
     UpdateTextStyle(layoutProperty, textLayoutProperty);
+}
+
+void ButtonPattern::UpdateTextAlignProperty(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (layoutProperty->GetTextAlign().has_value()) {
+        textLayoutProperty->UpdateTextAlign(layoutProperty->GetTextAlign().value());
+    }
 }
 
 void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType)
@@ -606,7 +618,6 @@ void ButtonPattern::InitButtonLabel()
     } else {
         textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
     }
-
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
@@ -1048,6 +1059,10 @@ void ButtonPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             "HeightAdaptivePolicy: " + ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
     }
+    if (layoutProperty->HasTextAlign()) {
+        DumpLog::GetInstance().AddDesc(
+            "TextAlign: " + StringUtils::ToString(layoutProperty->GetTextAlignValue()));
+    }
 
     DumpSubInfo(layoutProperty);
 }
@@ -1266,20 +1281,32 @@ void ButtonPattern::OnColorConfigurationUpdate()
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto backgroundColor = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    auto textColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
-        auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        renderContext->UpdateBackgroundColor(color);
+        renderContext->UpdateBackgroundColor(backgroundColor);
     }
+    OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
     if (SystemProperties::ConfigChangePerform()) {
-        themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+        if (renderContext->HasForegroundColor() && renderContext->GetForegroundColorValue() == themeTextColor_) {
+            renderContext->UpdateForegroundColor(textColor);
+            PropagateForegroundColorToChildren();
+        }
+        themeBgColor_ = backgroundColor;
+        themeTextColor_ = textColor;
     }
-    auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
+}
+
+void ButtonPattern::OnColorConfigurationUpdateTextColor(const RefPtr<FrameNode>& host,
+    const ButtonStyleMode& buttonStyle, const ButtonRole& buttonRole, const Color& textColor)
+{
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetTextColor().value_or(themeTextColor_) == themeTextColor_) {
-        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textLayoutProperty->UpdateTextColor(textColor);
         textNode->MarkDirtyNode();
     }
 }

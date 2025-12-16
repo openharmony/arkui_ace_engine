@@ -74,6 +74,7 @@ public:
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
     static void SetEnterKeyType(const JSCallbackInfo& info);
@@ -94,10 +95,13 @@ public:
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSingleLine(const JSCallbackInfo& info);
     static bool ParseJsColorWithResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
@@ -145,6 +149,7 @@ public:
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseParagraphSpacing(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseTextVerticalAlign(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseTextDirection(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseLineBreakStrategyParagraphStyle(
         const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
@@ -160,6 +165,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void DeleteBackward(const JSCallbackInfo& args);
     void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
@@ -242,7 +248,6 @@ public:
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
-    void DeleteBackward(const JSCallbackInfo& args);
     void ToStyledString(const JSCallbackInfo& args);
     void FromStyledString(const JSCallbackInfo& args);
 

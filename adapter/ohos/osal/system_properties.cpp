@@ -315,11 +315,6 @@ bool IsNavigationBlurEnabled()
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
-bool IsForceSplitIgnoreOrientationEnabled()
-{
-    return (system::GetParameter("persist.ace.navigation.ignoreorientation.enabled", "0") == "1");
-}
-
 std::optional<bool> IsArkUIHookEnabled()
 {
     auto enabledValue = system::GetParameter("persist.ace.arkuihook.enabled", "NA");
@@ -477,6 +472,11 @@ float ReadDragStartPanDistanceThreshold()
 {
     return system::GetIntParameter("debug.ace.drag.pan.threshold",
         DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
+}
+
+bool ReadIsOpenYuvDecode()
+{
+    return system::GetBoolParameter("persist.ace.yuv.decode.enabled", false);
 }
 
 uint32_t ReadCanvasDebugMode()
@@ -744,7 +744,6 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
-bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
@@ -781,8 +780,9 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPoint
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
+bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
-
+bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -941,7 +941,6 @@ void SystemProperties::InitDeviceInfo(
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = configChangePerform_ || IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
-    forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
     arkUIHookEnabled_ = IsArkUIHookEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
@@ -964,6 +963,8 @@ void SystemProperties::InitDeviceInfo(
     InitDeviceTypeBySystemProperty();
     GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
     isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
+    isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+    isOpenYuvDecode_ = ReadIsOpenYuvDecode();
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1142,11 +1143,6 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
-}
-
-bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
-{
-    return forceSplitIgnoreOrientationEnabled_;
 }
 
 std::optional<bool> SystemProperties::GetArkUIHookEnabled()
@@ -1407,6 +1403,11 @@ ACE_WEAK_SYM bool SystemProperties::GetCompatibleInputTransEnabled()
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
 {
     return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
+bool SystemProperties::IsAutoFillSupport()
+{
+    return isAutoFillSupport_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

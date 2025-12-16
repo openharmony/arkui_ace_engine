@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "color_metrics_linear_gradient_peer_impl.h"
+
+#include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_static.h"
-#include "core/components/slider/slider_theme.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -110,8 +112,8 @@ template<>
 SliderBlockSizeOptions Convert(const Ark_SizeOptions& src)
 {
     return {
-        .width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP),
-        .height = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.height, DimensionUnit::VP)
+        .width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.width, DimensionUnit::VP),
+        .height = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.height, DimensionUnit::VP)
     };
 }
 
@@ -136,6 +138,14 @@ SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
         .shape = Converter::OptConvertPtr<RefPtr<BasicShape>>(shape)
     };
+}
+
+template<>
+void AssignCast(std::optional<Gradient>& dst, const Ark_ColorMetricsLinearGradient& src)
+{
+    CHECK_NULL_VOID(src);
+    CHECK_EQUAL_VOID(src->gradient.GetColors().empty(), true);
+    dst = src->gradient;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -276,7 +286,7 @@ void SetTrackThicknessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidatePositive(convValue);
     SliderModelStatic::SetThickness(frameNode, convValue);
 }
@@ -311,7 +321,7 @@ void SetBlockBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetBlockBorderWidth(frameNode, convValue);
 }
@@ -328,7 +338,7 @@ void SetTrackBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
@@ -377,7 +387,7 @@ void SetStepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetStepSize(frameNode, convValue);
 }
@@ -428,6 +438,17 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     }
     SliderModelNG::SetEnableHapticFeedback(frameNode, *convValue);
 }
+void SetTrackColorMetricsImpl(Ark_NativePointer node, const Opt_ColorMetricsLinearGradient* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gradientOpt = Converter::OptConvert<Gradient>(*value);
+    if (gradientOpt.has_value()) {
+        SliderModelStatic::SetTrackBackgroundColor(frameNode, gradientOpt.value(), false);
+    } else {
+        SliderModelStatic::ResetTrackBackgroundColor(frameNode);
+    }
+}
 void SetShowTipsImpl(Ark_NativePointer node,
                      const Opt_Boolean* value,
                      const Opt_ResourceStr* content)
@@ -467,6 +488,7 @@ const GENERATED_ArkUISliderModifier* GetSliderModifier()
         SliderAttributeModifier::SetSlideRangeImpl,
         SliderAttributeModifier::SetDigitalCrownSensitivityImpl,
         SliderAttributeModifier::SetEnableHapticFeedbackImpl,
+        SliderAttributeModifier::SetTrackColorMetricsImpl,
         SliderAttributeModifier::SetShowSteps1Impl,
         SliderAttributeModifier::SetShowTipsImpl,
     };

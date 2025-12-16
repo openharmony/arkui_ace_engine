@@ -403,24 +403,11 @@ void FrameNodeBridge::FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGloba
 }
 
 static ArkUINodeType ParseNodeType(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node,
+    const std::unordered_map<std::string, ArkUINodeType>& typeMap)
 {
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
     std::string type = firstArg->IsString(vm) ? firstArg->ToString(vm)->ToString(vm) : "";
-    static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
-        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
-        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
-        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
-        { "ListItem", ARKUI_LIST_ITEM }, { "Scroll", ARKUI_SCROLL }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
-        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
-        { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
-        { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
-        { "FlowItem", ARKUI_FLOW_ITEM }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID },
-        { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
-        { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
-        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
-        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
@@ -463,12 +450,13 @@ static void HandleNodeParams(
     }
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+static ArkUINativeModuleValue CreateTypedFrameNodeImpl(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    const std::unordered_map<std::string, ArkUINodeType>& typeMap)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> node;
-    ArkUINodeType nodeType = ParseNodeType(runtimeCallInfo, vm, nodeId, node);
+    ArkUINodeType nodeType = ParseNodeType(runtimeCallInfo, vm, nodeId, node, typeMap);
     if (nodeType != ARKUI_CUSTOM) {
         HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
@@ -477,6 +465,26 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
+        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
+        { "ListItem", ARKUI_LIST_ITEM }, { "Scroll", ARKUI_SCROLL }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
+        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
+        { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
+        { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
+        { "FlowItem", ARKUI_FLOW_ITEM }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID },
+        { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
+        { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
+        { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
+        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
+    auto result = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMap);
+    return result;
 } // namespace OHOS::Ace::NG
 
 ArkUINativeModuleValue FrameNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -571,6 +579,80 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runti
     Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0]));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1]));
+    return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // 0: the first parameter
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 3); // 3: size of return value
+    Local<JSValueRef> x = runtimeCallInfo->GetCallArgRef(1);                 // 1: the second parameter
+    Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);                 // 2: the third parameter
+    if (!x->IsNumber() || !y->IsNumber()) {
+        Framework::ArrayRef::SetValueAt(
+            vm, valueArray, 0, panda::NumberRef::New(vm, 2)); // 2: means the param position has error
+        return valueArray;
+    }
+    ArkUI_Float32 position[2];
+    position[0] = x->ToNumber(vm)->Value();
+    position[1] = y->ToNumber(vm)->Value();
+
+    ArkUI_Float32 targetNodePositionOffset[2];
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
+        nativeNode, position, &targetNodePositionOffset, true);
+    if (result != ERROR_CODE_NO_ERROR) {
+        Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
+        return valueArray;
+    }
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1)); // 0: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0])); // 1: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
+    return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // 0: the first parameter
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 3); // 3: size of return value
+    Local<JSValueRef> x = runtimeCallInfo->GetCallArgRef(1);                 // 1: the second parameter
+    Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);                 // 2: the third parameter
+    if (!x->IsNumber() || !y->IsNumber()) {
+        Framework::ArrayRef::SetValueAt(
+            vm, valueArray, 0, panda::NumberRef::New(vm, 2)); // 2: means the param position has error
+        return valueArray;
+    }
+    ArkUI_Float32 position[2];
+    position[0] = x->ToNumber(vm)->Value();
+    position[1] = y->ToNumber(vm)->Value();
+
+    ArkUI_Float32 targetNodePositionOffset[2];
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
+        nativeNode, position, &targetNodePositionOffset, true);
+    if (result != ERROR_CODE_NO_ERROR) {
+        Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
+        return valueArray;
+    }
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1)); // 0: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0])); // 1: index
+    Framework::ArrayRef::SetValueAt(
+        vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
     return valueArray;
 }
 
@@ -2403,6 +2485,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallIn
 ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     panda::Local<panda::JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     if (nodeArg.IsNull()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "FrameNode::createAnimation, node is null");
@@ -2446,7 +2529,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* ru
     panda::Local<panda::ObjectRef> localParamObj = localParamArg->ToObject(vm);
     Framework::JSRef<Framework::JSObject> paramObj { Framework::JSObject(vm, localParamObj) };
     // not support form now, the second param is false
-    AnimationOption option = Framework::JSViewContext::CreateAnimation(paramObj, false);
+    AnimationOption option = Framework::JSViewContext::CreateAnimation(info.GetExecutionContext(), paramObj, false);
     std::optional<int32_t> finishCount;
     option.SetOnFinishEvent(ParseFinishCallback(localParamObj, frameNode, vm, finishCount));
     auto result = ViewAbstract::CreatePropertyAnimation(frameNode, propertyType, startValue, endValue, option);
@@ -3105,5 +3188,30 @@ ArkUINativeModuleValue FrameNodeBridge::FireArkUIObjectLifecycleCallback(ArkUIRu
     void* data = static_cast<void*>(runtimeCallInfo);
     context->FireArkUIObjectLifecycleCallback(data);
     return defaultReturnValue;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    static const std::unordered_map<std::string, ArkUINodeType> typeMapLite = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
+        { "Image", ARKUI_IMAGE }, { "Button", ARKUI_BUTTON }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}};
+    auto reslut = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMapLite);
+    return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    static const std::unordered_map<std::string, ArkUINodeType> typeMapFull = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
+        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
+        { "ListItem", ARKUI_LIST_ITEM }, { "RelativeContainer", ARKUI_RELATIVE_CONTAINER },
+        { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS },
+        { "Button", ARKUI_BUTTON }, { "QRCode", ARKUI_QRCODE }, { "Badge", ARKUI_BADGE },
+        { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK }, { "TextTimer", ARKUI_TEXT_TIMER },
+        { "Marquee", ARKUI_MARQUEE }, { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP },
+        { "Rating", ARKUI_RATING}, { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Toggle", ARKUI_TOGGLE }};
+    auto reslut = CreateTypedFrameNodeImpl(runtimeCallInfo, typeMapFull);
+    return reslut;
 }
 } // namespace OHOS::Ace::NG

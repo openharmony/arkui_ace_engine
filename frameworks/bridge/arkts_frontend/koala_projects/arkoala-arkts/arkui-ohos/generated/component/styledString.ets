@@ -32,6 +32,7 @@ import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.dra
 import { default as image } from "@ohos.multimedia.image"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
+import { TextDirection } from "./textCommon"
 import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -250,11 +251,11 @@ export class DecorationStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readInt32()
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -262,7 +263,7 @@ export class DecorationStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -541,6 +542,7 @@ export class ParagraphStyle implements MaterializedBase {
     readonly wordBreak?: WordBreak | undefined
     readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
     readonly paragraphSpacing?: double | undefined
+    readonly textDirection?: TextDirection | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -550,6 +552,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.wordBreak = this.getWordBreak()
         this.leadingMargin = this.getLeadingMargin()
         this.paragraphSpacing = this.getParagraphSpacing()
+        this.textDirection = this.getTextDirection()
     }
     constructor(value?: ParagraphStyleInterface) {
         this(false, ParagraphStyle.construct(value))
@@ -590,6 +593,9 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getParagraphSpacing(): double | undefined {
         return this.getParagraphSpacing_serialize()
+    }
+    private getTextDirection(): TextDirection | undefined {
+        return this.getTextDirection_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
@@ -675,6 +681,17 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private getTextDirection_serialize(): TextDirection | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextDirection(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextDirection | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextDirection.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : TextDirection | undefined = buffer
         return returnResult
     }
 }
@@ -1018,11 +1035,11 @@ export class TextStyle implements MaterializedBase {
         let buffer : ResourceColor | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : Color | number | string | Resource | undefined
+            let buffer_ : Color | int32 | string | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = Color.values()[retvalDeserializer.readInt32()]
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readInt32()
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -1030,7 +1047,7 @@ export class TextStyle implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as Color | number | string | Resource)
+            buffer = (buffer_ as Color | int32 | string | Resource)
         }
         const returnResult : ResourceColor | undefined = buffer
         return returnResult
@@ -1152,6 +1169,7 @@ export interface ParagraphStyleInterface {
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
     paragraphSpacing?: LengthMetrics;
+    textDirection?: TextDirection;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
@@ -1461,10 +1479,10 @@ export class DecorationStyleInterface_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1498,11 +1516,11 @@ export class DecorationStyleInterface_serializer {
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (colorTmpBuf_UnionSelector == (0).toChar()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                colorTmpBuf_ = valueDeserializer.readInt32()
             } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1510,7 +1528,7 @@ export class DecorationStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1545,10 +1563,10 @@ export class TextStyleInterface_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -1620,11 +1638,11 @@ export class TextStyleInterface_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -1632,7 +1650,7 @@ export class TextStyleInterface_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1864,6 +1882,14 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
@@ -1918,7 +1944,13 @@ export class ParagraphStyleInterface_serializer {
             paragraphSpacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
-        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
+        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as ParagraphStyleInterface)
         return value
     }
 }

@@ -383,6 +383,7 @@ protected:
         enableContainerModal_ = true;
     }
     bool IsNeedMenuTranslate();
+    void HandleOnAutoFill(OptionMenuType type);
     void HandleOnTranslate();
     bool IsNeedMenuSearch();
     void HandleOnSearch();

@@ -301,6 +301,11 @@ void ProgressModifier::SetSmoothEffect(bool value)
 {
     CHECK_NULL_VOID(smoothEffect_);
     smoothEffect_->Set(value);
+    if (!value) {
+        if (animation_) {
+            AnimationUtils::StopAnimation(animation_);
+        }
+    }
 }
 
 void ProgressModifier::StartRingLoadingAnimation()
@@ -673,10 +678,8 @@ void ProgressModifier::SetValue(float value)
         RefPtr<FrameRateRange> frameRateRange =
             AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
         option.SetFrameRateRange(frameRateRange);
-        auto pattern = pattern_.Upgrade();
-        auto host = pattern? pattern->GetHost(): nullptr;
-        auto contextPtr = host? host->GetContextRefPtr(): nullptr;
-        AnimationUtils::Animate(option, [&]() { value_->Set(value); }, nullptr, nullptr, contextPtr);
+        animation_ =
+            AnimationUtils::StartAnimation(option, [&]() { value_->Set(value); });
     } else {
         value_->Set(value);
     }

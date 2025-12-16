@@ -132,6 +132,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("scrollBarColor", &JSTextField::SetScrollBarColor);
     JSClass<JSTextArea>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
     JSClass<JSTextArea>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
+    JSClass<JSTextArea>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
+    JSClass<JSTextArea>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
+    JSClass<JSTextArea>::StaticMethod("selectedDragPreviewStyle", &JSTextField::SetSelectedDragPreviewStyle);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

@@ -18,6 +18,12 @@
 
 #include "frameworks/core/components_ng/manager/event/json_report.h"
 #include "frameworks/core/gestures/gesture_event.h"
+namespace OHOS::Ace {
+struct TouchEvent;
+struct MouseEvent;
+struct AxisEvent;
+struct KeyEvent;
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT Reporter : public AceType {
     DECLARE_ACE_TYPE(Reporter, AceType);
@@ -25,6 +31,14 @@ class ACE_FORCE_EXPORT Reporter : public AceType {
 public:
     static Reporter& GetInstance();
     virtual void HandleUISessionReporting(const JsonReport& report) const = 0;
+    virtual void HandleInputEventInspectorReporting(const TouchEvent& event) const = 0;
+    virtual void HandleInputEventInspectorReporting(const MouseEvent& event) const = 0;
+    virtual void HandleInputEventInspectorReporting(const AxisEvent& event) const = 0;
+    virtual void HandleInputEventInspectorReporting(const KeyEvent& event) const = 0;
+    virtual void HandleWindowFocusInspectorReporting(bool isFocus) const = 0;
+
+private:
+    virtual void HandleInspectorReporting(const JsonReport& report) const = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif

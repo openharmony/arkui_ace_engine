@@ -25,6 +25,7 @@ void JSDumpLog::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDumpLog>::Declare("DumpLog");
     JSClass<JSDumpLog>::StaticMethod("print", &JSDumpLog::Print);
+    JSClass<JSDumpLog>::StaticMethod("addDesc", &JSDumpLog::AddDesc);
     JSClass<JSDumpLog>::Bind(globalObj);
 }
 
@@ -36,6 +37,16 @@ void JSDumpLog::Print(const JSCallbackInfo& info)
     }
 
     DumpLog::GetInstance().Print(info[0]->ToNumber<int32_t>(), info[1]->ToString());
+}
+
+void JSDumpLog::AddDesc(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        LOGE("JSDumpLog::AddDesc invalid arguments, expected a string");
+        return;
+    }
+
+    DumpLog::GetInstance().AddDesc(info[0]->ToString());
 }
 
 void JSDumpRegister::JSBind(BindingTarget globalObj)

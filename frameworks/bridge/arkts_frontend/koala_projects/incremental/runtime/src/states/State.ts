@@ -68,6 +68,7 @@ export interface StateManager extends StateContext {
     updateSnapshot(): uint32
     getInvalidScopes(): int32
     updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
+    updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
     scheduleCallback(callback: () => void): void
     callCallbacks(): void
     frozen: boolean

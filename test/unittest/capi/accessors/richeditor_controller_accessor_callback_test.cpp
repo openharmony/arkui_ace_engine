@@ -15,6 +15,8 @@
 #include "accessor_test_base.h"
 #include "accessor_test_utils.h"
 #include "richeditor_accessor_test.h"
+
+#include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

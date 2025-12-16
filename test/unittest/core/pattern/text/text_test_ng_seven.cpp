@@ -518,6 +518,78 @@ HWTEST_F(TextTestNgSeven, TextEnableAutoSpacing, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextIncludeFontPadding
+ * @tc.desc: Test the enable or disable the IncludeFontPadding attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, TextIncludeFontPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetIncludeFontPadding(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get IncludeFontPadding Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), true);
+    EXPECT_EQ(TextModelNG::GetIncludeFontPadding(frameNode), true);
+    /**
+     * @tc.expected: Set IncludeFontPadding False.
+     */
+    TextModelNG::SetIncludeFontPadding(frameNode, false);
+    /**
+     * @tc.expected: Get IncludeFontPadding Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), false);
+    EXPECT_EQ(TextModelNG::GetIncludeFontPadding(frameNode), false);
+}
+
+/**
+ * @tc.name: TextFallbackLineSpacing
+ * @tc.desc: Test the enable or disable the FallbackLineSpacing attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, TextFallbackLineSpacing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text node with default text
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    textModelNG.SetFallbackLineSpacing(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get FallbackLineSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), true);
+    EXPECT_EQ(TextModelNG::GetFallbackLineSpacing(frameNode), true);
+    /**
+     * @tc.expected: Set FallbackLineSpacing False.
+     */
+    TextModelNG::SetFallbackLineSpacing(frameNode, false);
+    /**
+     * @tc.expected: Get FallbackLineSpacing Value.
+     */
+    EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), false);
+    EXPECT_EQ(TextModelNG::GetFallbackLineSpacing(frameNode), false);
+}
+
+/**
  * @tc.name: TextParagraphVerticalAlign
  * @tc.desc: Test the setting for paragragph vertical align attribute.
  * @tc.type: FUNC
@@ -1151,5 +1223,43 @@ HWTEST_F(TextTestNgSeven, TextContentModifier004, TestSize.Level1)
     textContentModifier->DrawObscuration(context);
     EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
     textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: CreateTextDragInfo004
+ * @tc.desc: Test CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, CreateTextDragInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto dragInfo = textPattern->CreateTextDragInfo();
+    EXPECT_EQ(dragInfo.dragBackgroundColor.value_or(Color::WHITE), Color::WHITE);
+}
+
+/**
+ * @tc.name: CreateTextDragInfo005
+ * @tc.desc: Test CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, CreateTextDragInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"Hello World");
+    textModelNG.SetSelectedDragPreviewStyle(Color::BLUE);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    textModelNG.SetSelectedDragPreviewStyle(frameNode, Color::BLUE);
+    auto color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
+    EXPECT_EQ(color.GetValue(), Color::BLUE.GetValue());
 }
 } // namespace OHOS::Ace::NG

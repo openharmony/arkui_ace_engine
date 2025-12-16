@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkRefreshPeer, RefreshStatus, RefreshAttribute } from "./component/refresh"
+import { ArkRefreshPeer, RefreshStatus, RefreshAttribute, RefreshOptions} from "./component/refresh"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RefreshModifier extends CommonMethodModifier implements RefreshAttribute,AttributeModifier<RefreshAttribute> {
@@ -37,6 +37,8 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     applyDisabledAttribute(instance: RefreshAttribute): void { }
     applySelectedAttribute(instance: RefreshAttribute): void { }
     _onStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setRefreshOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setRefreshOptions_0_0value?: RefreshOptions
     _onStateChange_0_0value?: ((state: RefreshStatus) => void) | undefined
     _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onRefreshing_0_0value?: (() => void) | undefined
@@ -44,6 +46,8 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     _refreshOffset_0_0value?: double | undefined
     _pullToRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullToRefresh_0_0value?: boolean | undefined
+    _pullUpToCancelRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pullUpToCancelRefresh_0_0value?: boolean | undefined
     _onOffsetChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onOffsetChange_0_0value?: ((value0: double) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -67,6 +71,24 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 default: {
                     this._onStateChange_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnStateChangeAttribute((undefined as ((state: RefreshStatus) => void) | undefined));
+                }
+            }
+        }
+
+        if (this._setRefreshOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._setRefreshOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRefreshOptionsAttribute((this._setRefreshOptions_0_0value as RefreshOptions));
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._setRefreshOptions_0_flag = AttributeUpdaterFlag.INITIAL;
                 }
             }
         }
@@ -121,6 +143,24 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 default: {
                     this._pullToRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setPullToRefreshAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPullUpToCancelRefreshAttribute((this._pullUpToCancelRefresh_0_0value as boolean | undefined));
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPullUpToCancelRefreshAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -190,6 +230,18 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (modifier._setRefreshOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._setRefreshOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setRefreshOptions(modifier._setRefreshOptions_0_0value!);
+                    break;
+                }
+                default: {
+                }
+            }
+        }
         if (modifier._refreshOffset_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._refreshOffset_0_flag) {
@@ -213,6 +265,19 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
                 default: {
                     this.pullToRefresh((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pullUpToCancelRefresh(modifier._pullUpToCancelRefresh_0_0value);
+                    break;
+                }
+                default: {
+                    this.pullUpToCancelRefresh((undefined as boolean | undefined));
                 }
             }
         }
@@ -287,6 +352,17 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
         return this
     }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
+        if (((this._pullUpToCancelRefresh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullUpToCancelRefresh_0_0value) !== (value)))
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pullUpToCancelRefresh_0_0value = value
+        } else
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onOffsetChange(value: ((value0: double) => void) | undefined): this {
         if (((this._onOffsetChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -311,5 +387,18 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
+    }
+
+    setRefreshOptions(value: RefreshOptions): this {
+        if (((this._setRefreshOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._setRefreshOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._setRefreshOptions_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._setRefreshOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
 }

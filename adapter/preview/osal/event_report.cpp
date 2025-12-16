@@ -28,6 +28,9 @@ void EventReport::SendPageRouterException(PageRouterExcepType type, const std::s
 
 void EventReport::SendComponentException(ComponentExcepType type) {}
 
+void EventReport::SendComponentExceptionNG(
+    ComponentExcepTypeNG type, int32_t nodeType, int32_t nodeId, const std::string& message) {}
+
 void EventReport::ReportPageLoadTimeout(const EventInfo& eventInfo) {}
 
 void EventReport::SendAPIChannelException(APIChannelExcepType type) {}
@@ -82,6 +85,10 @@ void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName,
 {}
 
 void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{}
+
+void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
     const std::string& moduleName)
 {}
 

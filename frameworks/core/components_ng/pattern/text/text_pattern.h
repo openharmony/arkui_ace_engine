@@ -1044,6 +1044,7 @@ protected:
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
     virtual bool CanStartAITask() const;
     virtual bool NeedClearAISpanMap(const std::u16string& textForAICache) { return true; };
+    virtual bool GetDefaultClipValue() const;
 
     void MarkDirtySelf();
     void OnAttachToMainTree() override;
@@ -1250,6 +1251,7 @@ private:
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
     bool RegularMatchNumbers(const std::u16string& content);
     void ResetMouseLeftPressedState();
+    void ContentChangeByDetaching(PipelineContext*) override;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

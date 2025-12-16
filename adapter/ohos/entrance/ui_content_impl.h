@@ -381,9 +381,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
-        bool isRouter = true, bool ignoreOrientation = false) override;
-    void SetForceSplitConfig(const std::string& configJsonStr) override;
+    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                             const std::optional<AppForceSplitConfig>& appConfig) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -435,7 +435,7 @@ public:
         void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
 
-    void LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode) override;
+    void LinkKeyFrameNode() override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
@@ -452,8 +452,8 @@ public:
         const std::function<void()>&& loadPageCallback, bool isColdStart) override;
     std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
-    int32_t RegisterNavigateChangeCallback(const std::function<void(const std::string&,
-        const std::string&)>&& callback) override;
+    int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo&,
+        const NavigateChangeInfo&)>&& callback) override;
     UIContentErrorCode InitializeWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
 
@@ -472,6 +472,8 @@ public:
 
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
+
+    void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
 
 protected:
     void RunIntentPageIfNeeded();
@@ -575,7 +577,6 @@ protected:
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
     std::function<void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
-    std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode> keyFrameNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;
     OHOS::Rosen::WindowSizeChangeReason cachedReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;

@@ -138,6 +138,8 @@ public:
         return false;
     }
 
+    void RemoveUrlCache(const std::string& /* url */) override {}
+
     bool RemoveDownloadTask(const std::string& url, int32_t nodeId, bool isCancel = true) override
     {
         return false;
@@ -151,6 +153,11 @@ public:
     bool IsContains(const std::string& url) override
     {
         return false;
+    }
+
+    void* WrapDownloadInfoToNapiValue(void* env, const ImageErrorInfo& errorInfo) override
+    {
+        return nullptr;
     }
 
 private:

@@ -22,6 +22,7 @@
 
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

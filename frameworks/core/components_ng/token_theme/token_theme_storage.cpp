@@ -249,4 +249,13 @@ void TokenThemeStorage::SetIsThemeColorSetByUser(int32_t themeId, bool isDark, i
     }
     themeIdMap[isDark][index] = isColorSetByUser;
 }
+
+void TokenThemeStorage::InitDarkThemeMapWithoutUserSet(int32_t themeId, bool isDark)
+{
+    if (themeColorSetByUser_.find(themeId) == themeColorSetByUser_.end()) {
+        return;
+    }
+    auto& themeIdMap = themeColorSetByUser_[themeId];
+    themeIdMap[isDark] = themeIdMap[!isDark];
+}
 } // namespace OHOS::Ace::NG

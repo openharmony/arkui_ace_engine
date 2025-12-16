@@ -23,6 +23,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "base/utils/string_utils.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -39,10 +40,13 @@ constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
 constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 constexpr int32_t TOAST_TIME_MAX = 10000;    // ms
 constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
+constexpr int32_t TOAST_ALIGNMENT_INVALID = -1; // Invalid alignment when bottom value is valid and non-zero
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const double SHADOW_OPTION_NONE = -1.000000;
 const int32_t SHADOW_STYLE_NONE = 100;
+const int32_t SHADOW_PARAM_NONE = 1000;
+const int32_t SHADOWOPTIONS_EXIST = 1001;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -97,11 +101,100 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 
+std::optional<DimensionOffset> ParseToastOffset(const NativeOffset& offset)
+{
+    // Only create offset if at least one dimension is non-zero or has a valid unit type
+    // Note: unitType 0 typically means VP, so we check if both are zero with default unit
+    if (offset.dx.value != 0.0 || offset.dy.value != 0.0 || offset.dx.unitType != 0 || offset.dy.unitType != 0) {
+        double dxVal = offset.dx.value;
+        int32_t dxType = offset.dx.unitType;
+        CalcDimension dx = CalcDimension(dxVal, static_cast<DimensionUnit>(dxType));
+        double dyVal = offset.dy.value;
+        int32_t dyType = offset.dy.unitType;
+        CalcDimension dy = CalcDimension(dyVal, static_cast<DimensionUnit>(dyType));
+        return DimensionOffset(dx, dy);
+    }
+    return std::nullopt;
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, false);
+    auto colorMode = container->GetColorMode();
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void CreateCustomShadow(const NativeShadowOptions& shadowOption, Shadow& shadow)
+{
+    // Custom shadow options provided - use default constructor like GetShadowProps/GetNapiObjectShadow
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    double xValue = isRtl ? shadowOption.offsetX * (-1) : shadowOption.offsetX;
+    shadow.SetOffsetX(xValue);
+    shadow.SetOffsetY(shadowOption.offsetY);
+    double radiusValue = shadowOption.radius;
+    if (LessNotEqual(radiusValue, 0.0)) {
+        radiusValue = 0.0;
+    }
+    shadow.SetBlurRadius(radiusValue);
+    shadow.SetColor(Color(shadowOption.color));
+    int32_t shadowType = static_cast<int32_t>(shadowOption.shadowType);
+    if (shadowType != static_cast<int32_t>(ShadowType::BLUR)) {
+        shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    }
+    shadowType = std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR),
+                            static_cast<int32_t>(ShadowType::BLUR));
+    shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    shadow.SetIsFilled(shadowOption.fill);
+}
+
+void GetShadowFromOptions(int32_t shadowStyle, const NativeShadowOptions& shadowOption, Shadow& shadow)
+{
+    if (shadowStyle == SHADOW_PARAM_NONE) {
+        // if shadow param none, set shadow to default
+        if (!GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+            shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
+        }
+    } else if (shadowStyle != SHADOWOPTIONS_EXIST) {
+        // input shadowStyle not shadowoption exist, will set shadowstyle
+        if (!GetShadowFromTheme(static_cast<ShadowStyle>(shadowStyle), shadow)) {
+            shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(shadowStyle));
+        }
+    } else {
+        // Custom shadow options provided
+        CreateCustomShadow(shadowOption, shadow);
+    }
+}
+
+int32_t CalculateToastAlignment(int32_t alignment, const std::string& bottom)
+{
+    if (bottom.empty()) {
+        return alignment;
+    }
+    double value = StringUtils::StringToDouble(bottom);
+    constexpr double EPSILON = 1e-9;
+    if (std::abs(value) < EPSILON) {
+        return alignment;
+    }
+    return TOAST_ALIGNMENT_INVALID;
+}
+
 void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
     LOGI("Dialog IsCurrentUseNewPipeline.");
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     dialogProperties.onCancel = [callback, taskExecutor = context->GetTaskExecutor()] {
         taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
             TaskExecutor::TaskType::JS, "CJFroentendShowDialogInner");
@@ -558,6 +651,44 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
             .shadow = shadow,
             .enableHoverMode = options.enableHoverMode,
             .hoverModeArea = HoverModeAreaType(options.hoverModeArea) };
+        overlayManager->ShowToast(toastInfo, nullptr);
+    };
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+}
+
+void FfiPromptShowToastWithOptionV2(NativeShowToastOptions options)
+{
+    int32_t durationTime = std::clamp(options.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    std::string toastMessage(options.message ? options.message : "");
+    std::string toastBottom(options.bottom ? options.bottom : "");
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    int32_t toastAlignment = CalculateToastAlignment(options.alignment, toastBottom);
+
+    auto task = [options, toastMessage, toastBottom, durationTime, isRightToLeft, toastAlignment,
+                    containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+
+        auto offset = ParseToastOffset(options.offset);
+        Shadow shadow;
+        GetShadowFromOptions(options.shadowStyle, options.shadowOption, shadow);
+        // Set isTypeStyleShadow based on shadow type: true for theme shadow style, false for custom shadow object
+        bool isTypeStyleShadow = !(options.shadowStyle == SHADOWOPTIONS_EXIST);
+
+        auto toastInfo = NG::ToastInfo { .message = toastMessage,
+            .duration = durationTime,
+            .bottom = toastBottom,
+            .isRightToLeft = isRightToLeft,
+            .showMode = NG::ToastShowMode(options.showMode),
+            .alignment = toastAlignment,
+            .offset = offset,
+            .backgroundColor = Color(options.backgroundColor),
+            .textColor = Color(options.textColor),
+            .backgroundBlurStyle = options.backgroundBlurStyle,
+            .shadow = shadow,
+            .enableHoverMode = options.enableHoverMode,
+            .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
+            .isTypeStyleShadow = isTypeStyleShadow };
         overlayManager->ShowToast(toastInfo, nullptr);
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");

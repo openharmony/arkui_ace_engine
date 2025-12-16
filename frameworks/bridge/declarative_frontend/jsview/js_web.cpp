@@ -2075,6 +2075,8 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
         JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
         JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
+        JSClass<JSContextMenuResult>::CustomMethod("requestPasswordAutoFill",
+            &JSContextMenuResult::RequestPasswordAutoFill);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -2148,6 +2150,13 @@ public:
         RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->PasteAndMatchStyle();
+        }
+    }
+
+    void RequestPasswordAutoFill(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->RequestPasswordAutoFill();
         }
     }
 
@@ -2411,8 +2420,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
-    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChanged", &JSWeb::OnCameraCaptureStateChanged);
-    JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChanged", &JSWeb::OnMicrophoneCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChange", &JSWeb::OnCameraCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChange", &JSWeb::OnMicrophoneCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -2471,6 +2480,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onFirstScreenPaint", &JSWeb::OnFirstScreenPaint);
     JSClass<JSWeb>::StaticMethod("onTextSelectionChange", &JSWeb::OnTextSelectionChange);
     JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
+    JSClass<JSWeb>::StaticMethod("enableAutoFill", &JSWeb::EnableAutoFill);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
@@ -3134,6 +3144,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 if (!eventInfo) {
                     return;
                 }
+
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                auto napi_status = napi_open_handle_scope(env, &scope);
+                if (napi_status != napi_ok) {
+                    return;
+                }
+
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
@@ -3143,6 +3164,8 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 obj->SetPropertyObject("url", urlVal);
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
                 auto result = func->Call(webviewController, 1, argv);
+
+                napi_close_handle_scope(env, scope);
         };
     }
 
@@ -5266,10 +5289,6 @@ bool JSWeb::HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
     auto handler = eventInfo->GetWebWindowNewHandler();
     if (handler && !handler->IsFrist()) {
         int32_t parentId = -1;
-        auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
-        if (controller.IsEmpty()) {
-            return false;
-        }
         napi_env env = GetNapiEnv();
         if (!env) {
             return false;
@@ -5277,6 +5296,11 @@ bool JSWeb::HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
         napi_handle_scope scope = nullptr;
         auto napi_status = napi_open_handle_scope(env, &scope);
         if (napi_status != napi_ok) {
+            return false;
+        }
+        auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
+        if (controller.IsEmpty()) {
+            napi_close_handle_scope(env, scope);
             return false;
         }
         auto getWebIdFunction = controller->GetProperty("innerGetWebId");
@@ -5292,6 +5316,7 @@ bool JSWeb::HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
             func->Call(controller, 1, argv);
         }
         napi_close_handle_scope(env, scope);
+        return false;
     }
     return true;
 }
@@ -7582,6 +7607,16 @@ void JSWeb::OnVerifyPinRequest(const JSCallbackInfo& args)
         return true;
     };
     WebModel::GetInstance()->SetOnVerifyPinRequest(jsCallback);
+}
+
+void JSWeb::EnableAutoFill(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableAutoFill(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableAutoFill(isEnabled);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

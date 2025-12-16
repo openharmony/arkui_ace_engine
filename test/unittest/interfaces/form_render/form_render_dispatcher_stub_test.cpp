@@ -44,7 +44,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, Tes
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    uint32_t code = 11;
+    uint32_t code = IFormRendererDispatcher::Message::MESSAGE_END;
     std::u16string name = u"form_render_dispatcher_stub";
     data.WriteInterfaceToken(name);
     EXPECT_EQ(renderDispather->OnRemoteRequest(code, data, reply, option), ERR_INVALID_VALUE);
@@ -61,7 +61,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, Tes
     }
     EXPECT_FALSE(flag);
 
-    code = 3;
+    code = IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT;
     itFunc = renderDispather->memberFuncMap_.find(code);
     if (itFunc != renderDispather->memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;

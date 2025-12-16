@@ -532,6 +532,7 @@ public:
     void StopTranslateAnimation();
     void StopSpringAnimationImmediately();
     void StopSpringAnimation();
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
@@ -597,6 +598,8 @@ public:
     {
         return onContentDidScroll_;
     }
+
+    std::pair<int32_t, float> GetIndicatorProgress() const;
 
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
@@ -679,6 +682,8 @@ public:
         }
     }
     void UpdateNodeRate();
+
+    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged() override;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
     virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}

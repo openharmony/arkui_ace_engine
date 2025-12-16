@@ -921,4 +921,23 @@ void TextFieldModelStatic::SetCustomKeyboard(FrameNode* frameNode, const std::fu
     }
 }
 
+void TextFieldModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetIncludeFontPadding(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
+
 } // namespace OHOS::Ace::NG

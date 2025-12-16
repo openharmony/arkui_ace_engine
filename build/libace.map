@@ -40,6 +40,7 @@
       GetCJUIFullNodeAPI;
       GetArkUIFullNodeAPI;
       GetArkUIAniModifiers;
+      GetArkUIDrawableDescriptor;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -216,6 +217,11 @@
       OHOS::Ace::PixelMapDrawableDescriptor::*;
       OHOS::Ace::LayeredDrawableDescriptor::*;
       OHOS::Ace::AnimatedDrawableDescriptor::*;
+      "OHOS::Ace::ControlledAnimator::Finish()";
+      "OHOS::Ace::ControlledAnimator::Pause()";
+      "OHOS::Ace::ControlledAnimator::Forward()";
+      "OHOS::Ace::ControlledAnimator::GetControlStatus() const";
+      OHOS::Ace::DrawableDescriptorInfo::DrawableDescriptorInfo*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -532,6 +538,7 @@
       OHOS::Ace::NG::ConvertToPx*;
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::MaterialUtils::*;
+      OHOS::Ace::UiMaterial::*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -541,6 +548,8 @@
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       OHOS::Ace::NG::ComponentSnapshot::*;
       virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
+      vtable?for?OHOS::Ace::UiMaterial;
+      VTT?for?OHOS::Ace::UiMaterial;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -605,6 +614,39 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+
+      OHOS::Ace::Component::*;
+      OHOS::Ace::SoleChildElement::*;
+      OHOS::Ace::Element::*;
+      OHOS::Ace::RenderNode::*;
+      OHOS::Ace::Framework::DOMNode::*;
+      OHOS::Ace::TextComponent::*;
+      OHOS::Ace::RenderText::*;
+      OHOS::Ace::Framework::ViewStackProcessor::*;
+      OHOS::Ace::ComposedElement::*;
+      OHOS::Ace::V2::InspectorComposedElement::*;
+      OHOS::Ace::Declaration::*;
+      OHOS::Ace::Edge::NONE;
+      OHOS::Ace::FontManager::RemoveVariationNode*;
+      OHOS::Ace::FontManager::AddVariationNode*;
+      OHOS::Ace::DebugBoundaryPainter::*;
+      OHOS::Ace::Edge::IsValid*;
+      OHOS::Ace::Edge::GetLayoutSizeInPx*;
+      OHOS::Ace::RosenRenderContext::GetCanvas*;
+      OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
+      OHOS::Ace::DOM_CLICK;
+      OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
+      virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
+      virtual?thunk?to?OHOS::Ace::RenderElement::*;
+      virtual?thunk?to?OHOS::Ace::Element::*;
+      virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
+      virtual?thunk?to?OHOS::Ace::Declaration::*;
+      VTT?for?OHOS::Ace::SoleChildElement;
+      VTT?for?OHOS::Ace::ComposedElement;
+      VTT?for?OHOS::Ace::ClickRecognizer;
+      vtable?for?OHOS::Ace::SoleChildElement;
+      vtable?for?OHOS::Ace::ClickRecognizer;
+      non-virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
       VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;

@@ -18,6 +18,8 @@
 #include "ipc_skeleton.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
 int32_t UIContentServiceProxy::GetInspectorTree(
@@ -36,9 +38,11 @@ int32_t UIContentServiceProxy::GetInspectorTree(
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
 
-    data.WriteBool(config.interactionInfo);
-    data.WriteBool(config.accessibilityInfo);
-    data.WriteBool(config.cacheNodes);
+    GetInspectorTreeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("GetInspectorTree write config failed");
+        return FAILED;
+    }
 
     if (Remote()->SendRequest(UI_CONTENT_SERVICE_GET_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetInspectorTree send request failed");
@@ -63,9 +67,11 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
 
-    data.WriteBool(config.interactionInfo);
-    data.WriteBool(config.accessibilityInfo);
-    data.WriteBool(config.cacheNodes);
+    GetInspectorTreeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("GetInspectorTree write config failed");
+        return FAILED;
+    }
 
     if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetVisibleInspectorTree send request failed");
@@ -785,6 +791,67 @@ int32_t UIContentServiceProxy::ExeAppAIFunction(
     report_->RegisterExeAppAIFunction(finishCallback);
     if (Remote()->SendRequest(EXE_APP_AI_FUNCTION, data, reply, option) != ERR_NONE) {
         LOGW("ExeAppAIFunction send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::RegisterContentChangeCallback(const ContentChangeConfig& config,
+    const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
+{
+    if (callback == nullptr) {
+        LOGW("RegisterContentChangeCallback callback is nullptr");
+        return PARAM_INVALID;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterContentChangeCallback write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("RegisterContentChangeCallback write processId failed");
+        return FAILED;
+    }
+
+    ContentChangeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("RegisterContentChangeCallback write config failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("RegisterContentChangeCallback is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterContentChangeCallback(callback);
+
+    if (Remote()->SendRequest(REGISTER_CONTENT_CHANGE, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterContentChangeCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterContentChangeCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("UnregisterContentChangeCallback is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterContentChangeCallback();
+    if (Remote()->SendRequest(UNREGISTER_CONTENT_CHANGE, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterContentChangeCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

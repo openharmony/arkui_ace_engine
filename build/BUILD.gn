@@ -182,6 +182,15 @@ ohos_shared_library("libace_compatible") {
   subsystem_name = ace_engine_subsystem
 }
 
+ohos_shared_library("libace_compatible_components") {
+  deps = [
+    ":libace_compatible",
+    "$ace_root/frameworks/compatible:ace_compatible_source",
+  ]
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
+}
+
 if (!is_asan) {
   ohos_shared_library("libace") {
     external_deps = []

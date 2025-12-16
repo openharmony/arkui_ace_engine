@@ -16,16 +16,17 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H
 
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_parser_base.h"
 
 namespace OHOS::Ace {
   
-class UINodeGcParamParser : public ConfigXMLParserBase {
+class UINodeGcParamParser : public ConfigParserBase {
 public:
     UINodeGcParamParser() = default;
     ~UINodeGcParamParser() = default;
 
     ParseErrCode ParseFeatureParam(xmlNode& node) override;
+    ParseErrCode ParseMetaData(const AppExecFwk::Metadata& metaData) override;
 };
 } // namespace OHOS::Ace
 

@@ -35,6 +35,7 @@ let ColoringStrategy;
   ColoringStrategy.INVERT = 'invert';
   ColoringStrategy.AVERAGE = 'average';
   ColoringStrategy.PRIMARY = 'primary';
+  ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 let TextInputStyle;
@@ -2083,6 +2084,10 @@ let GestureControl;
     GestureType[GestureType.ROTATION_GESTURE = 5] = 'ROTATION_GESTURE';
     GestureType[GestureType.DRAG = 6] = 'DRAG';
     GestureType[GestureType.CLICK = 7] = 'CLICK';
+    GestureType[GestureType.BOX_SELECT_GESTURE = 8] = 'BOX_SELECT_GESTURE';
+    GestureType[GestureType.WEB_SCROLL_GESTURE = 9] = 'WEB_SCROLL_GESTURE';
+    GestureType[GestureType.TEXT_FIELD_SELECT_GESTURE = 10] = 'TEXT_FIELD_SELECT_GESTURE';
+    GestureType[GestureType.CONTEXT_MENU_HOVER_GESTURE = 11] = 'CONTEXT_MENU_HOVER_GESTURE';
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
@@ -2444,6 +2449,14 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get autoFill() {
+    return new TextMenuItemId('OH_DEFAULT_AUTO_FILL');
+  }
+
+  static get passwordVault() {
+    return new TextMenuItemId('OH_DEFAULT_PASSWORD_VAULT');
+  }
+
   static get TRANSLATE() {
     return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
@@ -2601,7 +2614,6 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
-    this.preTopInfo = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2609,19 +2621,20 @@ class NavPathStack {
   setPathStack(pathStack, animated) {
     this.nativeStack?.setPathStack(this, pathStack, animated);
   }
-  updatePreTopInfo(preTopInfo) {
+  updatePreTopInfo() {
     if (this.pathArray.length === undefined || this.pathArray.length === 0) {
-        this.preTopInfo = undefined;
+        this.nativeStack.preTopInfo = undefined;
         return;
     }
-    this.preTopInfo = this.pathArray[this.pathArray.length - 1];
+    this.nativeStack.preTopInfo = this.pathArray[this.pathArray.length - 1];
   }
   isPushOperation() {
-    if (this.preTopInfo === undefined) {
+    const preTopInfo = this.nativeStack.preTopInfo;
+    if (preTopInfo === undefined) {
         return true;
     }
     return this.pathArray.findIndex((info)=>{ // If the top of the previous stack exists, the next stack operation is push.
-        return info === this.preTopInfo;
+        return info === preTopInfo;
     }) !== -1;
   }
   getJsIndexFromNativeIndex(index) {
@@ -2770,12 +2783,52 @@ class NavPathStack {
     if (!this.checkPathValid(info)) {
       return;
     }
-    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
-    let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
+    // parseNavigationOptions
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof optionParam === 'boolean') {
+      animated = optionParam;
+    } else if (optionParam !== undefined && optionParam !== null) {
+      if (typeof optionParam.animated === 'boolean') {
+        animated = optionParam.animated;
+      }
+      if (optionParam.launchMode !== undefined && optionParam.launchMode !== null) {
+        launchMode = optionParam.launchMode;
+      }
+    }
+    // pushWithLaunchModeAndAnimated
+    let ret = false;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      let index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].needUpdate = true;
+        this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
+        if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+          this.moveIndexToTop(index, animated);
+        } else {
+          this.innerPopToIndex(index, undefined, animated, false);
+        }
+        ret = true;
+      }
+    }
     if (ret) {
       return;
     }
-    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    // find in pop array
+    info.index = -1;
+    info.navDestinationId = undefined;
+    for (let i = this.popArray.length - 1; i >= 0; i--) {
+      if (info.name === this.popArray[i].name) {
+        let infoFind = this.popArray.splice(i, 1);
+        info.index = infoFind[0].index;
+        info.navDestinationId = infoFind[0].navDestinationId;
+        break;
+      }
+    }
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -3919,6 +3972,12 @@ let AvoidanceMode;
   AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
 })(AvoidanceMode || (AvoidanceMode = {}));
 
+let MenuKeyboardAvoidMode;
+(function (MenuKeyboardAvoidMode) {
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
+  MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
+})(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -4413,6 +4472,12 @@ let MarqueeStartPolicy;
   MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
 })(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
+let MarqueeUpdatePolicy;
+(function (MarqueeUpdatePolicy) {
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeUpdatePolicy[MarqueeUpdatePolicy.PRESERVE_POSITION = 1] = 'PRESERVE_POSITION';
+})(MarqueeUpdatePolicy || (MarqueeUpdatePolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus.CREATE = 0;
@@ -4498,15 +4563,6 @@ const ColorPlaceholder = {
   ACCENT: 'ACCENT',
   FOREGROUND: 'FOREGROUND',
 };
-let ColorPickStrategy;
-(function (ColorPickStrategy) {
-  ColorPickStrategy[ColorPickStrategy.NONE = 0] = 'NONE';
-  ColorPickStrategy[ColorPickStrategy.DOMINANT = 1] = 'DOMINANT';
-  ColorPickStrategy[ColorPickStrategy.AVERAGE = 2] = 'AVERAGE';
-  ColorPickStrategy[ColorPickStrategy.CONTRAST = 3] = 'CONTRAST';
-})(ColorPickStrategy || (ColorPickStrategy = {}));
-
-globalThis.ColorPlaceholder = ColorPlaceholder;
 
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
@@ -4790,6 +4846,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+  AxisModel[AxisModel.ABS_RX = 8] = 'ABS_RX';
+  AxisModel[AxisModel.ABS_RY = 9] = 'ABS_RY';
+  AxisModel[AxisModel.ABS_THROTTLE = 10] = 'ABS_THROTTLE';
+  AxisModel[AxisModel.ABS_RUDDER = 11] = 'ABS_RUDDER';
+  AxisModel[AxisModel.ABS_WHEEL = 12] = 'ABS_WHEEL';
+  AxisModel[AxisModel.ABS_HAT1X = 13] = 'ABS_HAT1X';
+  AxisModel[AxisModel.ABS_HAT1Y = 14] = 'ABS_HAT1Y';
+  AxisModel[AxisModel.ABS_HAT2X = 15] = 'ABS_HAT2X';
+  AxisModel[AxisModel.ABS_HAT2Y = 16] = 'ABS_HAT2Y';
+  AxisModel[AxisModel.ABS_HAT3X = 17] = 'ABS_HAT3X';
+  AxisModel[AxisModel.ABS_HAT3Y = 18] = 'ABS_HAT3Y';
 })(AxisModel || (AxisModel = {}));
 
 let CrownSensitivity;
@@ -5015,6 +5082,8 @@ let SystemProperties;
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
   SystemProperties.WINDOW_SIZE = 'system.window.size';
   SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
+  SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
+  SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
 })(SystemProperties || (SystemProperties = {}));
 
 let PinVerifyResult;
@@ -5039,3 +5108,30 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.LAST_FOREGROUND = 4] = 'LAST_FOREGROUND';
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
+
+let ThreatType;
+(function (ThreatType) {
+  ThreatType[ThreatType.THREAT_ILLEGAL = 0] = 'THREAT_ILLEGAL';
+  ThreatType[ThreatType.THREAT_FRAUD = 1] = 'THREAT_FRAUD';
+  ThreatType[ThreatType.THREAT_RISK = 2] = 'THREAT_RISK';
+  ThreatType[ThreatType.THREAT_WARNING = 3] = 'THREAT_WARNING';
+  ThreatType[ThreatType.THREAT_NONE = 4] = 'THREAT_NONE';
+  ThreatType[ThreatType.THREAT_UNPROCESSED = 5] = 'THREAT_UNPROCESSED';
+})(ThreatType || (ThreatType = {}));
+
+let ConsoleMessageSource
+(function (ConsoleMessageSource) {
+  ConsoleMessageSource[ConsoleMessageSource.XML = 0] = 'XML';
+  ConsoleMessageSource[ConsoleMessageSource.JAVASCRIPT = 1] = 'JAVASCRIPT';
+  ConsoleMessageSource[ConsoleMessageSource.NETWORK = 2] = 'NETWORK';
+  ConsoleMessageSource[ConsoleMessageSource.CONSOLE_API = 3] = 'CONSOLE_API';
+  ConsoleMessageSource[ConsoleMessageSource.STORAGE = 4] = 'STORAGE';
+  ConsoleMessageSource[ConsoleMessageSource.RENDERING = 5] = 'RENDERING';
+  ConsoleMessageSource[ConsoleMessageSource.SECURITY = 6] = 'SECURITY';
+  ConsoleMessageSource[ConsoleMessageSource.OTHER = 7] = 'OTHER';
+  ConsoleMessageSource[ConsoleMessageSource.DEPRECATION = 8] = 'DEPRECATION';
+  ConsoleMessageSource[ConsoleMessageSource.WORKER = 9] = 'WORKER';
+  ConsoleMessageSource[ConsoleMessageSource.VIOLATION = 10] = 'VIOLATION';
+  ConsoleMessageSource[ConsoleMessageSource.INTERVENTION = 11] = 'INTERVENTION';
+  ConsoleMessageSource[ConsoleMessageSource.RECOMMENDATION = 12] = 'RECOMMENDATION';
+})(ConsoleMessageSource || (ConsoleMessageSource = {}));

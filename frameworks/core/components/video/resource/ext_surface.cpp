@@ -49,10 +49,26 @@ ExtSurface::~ExtSurface()
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONCREATE));
+        resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONCHANGED));
+        resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONDESTROYED));
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
         platformTaskExecutor.PostTask(
             [eventHash = MakeEventHash(SURFACE_METHOD_ONCREATE), weak] {
+                auto resRegister = weak.Upgrade();
+                CHECK_NULL_VOID(resRegister);
+                resRegister->UnregisterEvent(eventHash);
+            },
+            "ArkUIVideoExtSurfaceUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [eventHash = MakeEventHash(SURFACE_METHOD_ONCHANGED), weak] {
+                auto resRegister = weak.Upgrade();
+                CHECK_NULL_VOID(resRegister);
+                resRegister->UnregisterEvent(eventHash);
+            },
+            "ArkUIVideoExtSurfaceUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [eventHash = MakeEventHash(SURFACE_METHOD_ONDESTROYED), weak] {
                 auto resRegister = weak.Upgrade();
                 CHECK_NULL_VOID(resRegister);
                 resRegister->UnregisterEvent(eventHash);

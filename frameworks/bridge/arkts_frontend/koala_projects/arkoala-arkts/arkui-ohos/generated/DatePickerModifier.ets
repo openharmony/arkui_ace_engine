@@ -51,6 +51,8 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _canLoop_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -181,6 +183,24 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
+        if (this._canLoop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._canLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCanLoopAttribute((this._canLoop_0_0value as boolean | undefined));
+                    this._canLoop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._canLoop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._canLoop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCanLoopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: DatePickerModifier): void {
         super.mergeModifier(modifier)
@@ -276,6 +296,19 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
                 }
             }
         }
+        if (modifier._canLoop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._canLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.canLoop(modifier._canLoop_0_0value);
+                    break;
+                }
+                default: {
+                    this.canLoop((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     lunar(value: boolean | undefined): this {
         if (((this._lunar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lunar_0_0value) !== (value)))
@@ -351,6 +384,17 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    canLoop(value: boolean | undefined): this {
+        if (((this._canLoop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._canLoop_0_0value) !== (value)))
+        {
+            this._canLoop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._canLoop_0_0value = value
+        } else
+        {
+            this._canLoop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -433,7 +433,9 @@ export enum TextAlign {
     Start = 0,
     END = 2,
     End = 2,
-    JUSTIFY = 3
+    JUSTIFY = 3,
+    LEFT = 4,
+    RIGHT = 5
 }
 export enum TextOverflow {
     NONE = 0,
@@ -717,7 +719,18 @@ export enum AxisModel {
     ABS_GAS = 4,
     ABS_BRAKE = 5,
     ABS_HAT0X = 6,
-    ABS_HAT0Y = 7
+    ABS_HAT0Y = 7,
+    ABS_RX = 8,
+    ABS_RY = 9,
+    ABS_THROTTLE = 10,
+    ABS_RUDDER = 11,
+    ABS_WHEEL = 12,
+    ABS_HAT1X = 13,
+    ABS_HAT1Y = 14,
+    ABS_HAT2X = 15,
+    ABS_HAT2Y = 16,
+    ABS_HAT3X = 17,
+    ABS_HAT3Y = 18
 }
 export enum PageFlipMode {
     CONTINUOUS = 0,
@@ -747,6 +760,10 @@ export enum FocusDrawLevel {
 export enum DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1
+}
+export enum TipsAnchorType {
+    TARGET = 0,
+    CURSOR = 1
 }
 export enum AnimationPropertyType {
     ROTATION = 0,

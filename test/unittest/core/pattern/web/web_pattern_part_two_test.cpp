@@ -381,6 +381,34 @@ public:
 };
 
 /**
+ * @tc.name: ShiftFocusAfterAutoFill001
+ * @tc.desc: ShiftFocusAfterAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, ShiftFocusAfterAutoFill001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    auto viewDataWrap = RefPtr<ViewDataWrapMock>();
+    viewDataWrap = nullptr;
+    RefPtr<PageNodeInfoWrapMock> nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    AceAutoFillType autoFillType = AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET;
+    webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
+    webPattern->isPasswordFill_ = false;
+    webPattern->ShiftFocusAfterAutoFill(autoFillType);
+#endif
+}
+
+/**
  * @tc.name: NotifyFillRequestSuccess001
  * @tc.desc: NotifyFillRequestSuccess.
  * @tc.type: FUNC
@@ -913,6 +941,33 @@ HWTEST_F(WebPatternPartTwoTest, RequestAutoFill001, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     auto ret = webPattern->RequestAutoFill(AceAutoFillType::ACE_UNSPECIFIED);
     EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: RequestPasswordAutoFill001
+ * @tc.desc: RequestPasswordAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, RequestPasswordAutoFill001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    WebMenuType menuType = WebMenuType::TYPE_CONTEXTMENU;
+    webPattern->isEditableOnContextMenu_ = false;
+    webPattern->RequestPasswordAutoFill(menuType);
+    EXPECT_EQ(webPattern->isEditableOnContextMenu_, false);
+    menuType = WebMenuType::TYPE_QUICKMENU;
+    webPattern->RequestPasswordAutoFill(menuType);
+    EXPECT_EQ(webPattern->isEditableOnContextMenu_, false);
 #endif
 }
 

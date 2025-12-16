@@ -35,6 +35,7 @@ public:
     void SetSelected(bool selected) override;
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetOnSelect(SelectFunc&& onSelect) override;
+    void BindContextMenu() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);

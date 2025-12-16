@@ -216,8 +216,8 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         peer->span->GetImageAttribute()->drawingColorFilter, empty);
     if (peer->span->GetImageAttribute()->colorFilterMatrix) {
         auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
-        ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
-        auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
+        ArkArrayHolder<Array_Float64> colorFilterHolder(colorFilter);
+        auto arrayNumber = ArkValue<Array_Float64>(colorFilterHolder.ArkValue());
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->construct(&arrayNumber);
         return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {

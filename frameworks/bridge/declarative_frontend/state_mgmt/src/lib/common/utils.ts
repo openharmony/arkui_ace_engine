@@ -13,6 +13,7 @@
  * limitations under the License.
  *
  */
+/// <reference path="./module_map.d.ts" />
 class Utils {
     private static currentAppApiVersion: number = -1;
     private static arkTsUtil: ArkTsUtil | undefined = undefined;

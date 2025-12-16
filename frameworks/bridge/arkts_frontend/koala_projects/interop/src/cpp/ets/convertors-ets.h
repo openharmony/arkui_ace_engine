@@ -122,7 +122,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       int bufferLength = value.length;
       ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
+      interop_memory_copy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -220,7 +220,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
       int bufferLength = value.length;
       ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
+      interop_memory_copy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.data, bufferLength);
       return array;

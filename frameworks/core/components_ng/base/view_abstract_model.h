@@ -185,6 +185,7 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
+    virtual void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
     virtual void SetSystemMaterial(const UiMaterial* material) {};
 
@@ -475,7 +476,9 @@ public:
     virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,

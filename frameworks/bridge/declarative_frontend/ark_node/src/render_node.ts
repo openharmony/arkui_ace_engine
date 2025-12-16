@@ -202,15 +202,15 @@ class ColorMetrics {
   private resourceId_: number;
   private colorSpace_: ColorSpace;
   private res_: Resource | undefined;
-  private static clamp(value: number): number {
-    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
-  }
   private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
     this.res_ = res === undefined ? undefined : res;
+  }
+  private static clamp(value: number): number {
+    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
   private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
@@ -422,11 +422,15 @@ class ShapeMask extends BaseShape {
   public fillColor: number = 0XFF000000;
   public strokeColor: number = 0XFF000000;
   public strokeWidth: number = 0;
+  constructor(...args: []) {
+      super(...args);
+  }
 }
 
 class RenderNode extends Disposable {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
+  private type: string; // use for transfer
   private parentRenderNode: WeakRef<RenderNode> | null;
   private backgroundColorValue: number;
   private clipToFrameValue: boolean;
@@ -459,7 +463,7 @@ class RenderNode extends Disposable {
   constructor(type: string, cptrVal: number = 0) {
     super();
     this.nodePtr = null;
-    this.type = type;     // for transfer to arkts1.2
+    this.type = type; // use for transfer
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
@@ -490,7 +494,7 @@ class RenderNode extends Disposable {
       return;
     }
 
-    if (cptrVal === 0) {
+    if (cptrVal === 0 || cptrVal === null || cptrVal === undefined) {
       this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     } else {
       this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
@@ -714,12 +718,12 @@ class RenderNode extends Disposable {
     if (this.childrenList.findIndex(element => element === node) !== -1) {
       return;
     }
-    this.childrenList.push(node);
-    node.parentRenderNode = new WeakRef(this);
     let result = getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'node' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
+    this.childrenList.push(node);
+    node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null): void{
@@ -730,22 +734,23 @@ class RenderNode extends Disposable {
     if (indexOfNode !== -1) {
       return;
     }
-    child.parentRenderNode = new WeakRef(this);
     let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
     if (indexOfSibling === -1) {
       sibling === null;
     }
     let result = 0;
+    let childrenListStartPosition = 0;
     if (sibling === undefined || sibling === null) {
-      this.childrenList.splice(0, 0, child);
       result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
     } else {
-      this.childrenList.splice(indexOfSibling + 1, 0, child);
+      childrenListStartPosition = indexOfSibling + 1;
       result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
-      throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
+      throw { message: "The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.", code: 100025 };
     }
+    this.childrenList.splice(childrenListStartPosition, 0, child);
+    child.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
   removeChild(node: RenderNode) {

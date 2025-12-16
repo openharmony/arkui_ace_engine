@@ -163,6 +163,28 @@ void FormRendererDispatcherProxy::SetObscured(bool isObscured)
     }
 }
 
+void FormRendererDispatcherProxy::SetColorMode(int32_t colorMode)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+ 
+    if (!data.WriteInt32(colorMode)) {
+        HILOG_ERROR("write colorMode fail, action error");
+        return;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        SendRequest(static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_COLOR_MODE), data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
+
 void FormRendererDispatcherProxy::OnAccessibilityChildTreeRegister(
     uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {

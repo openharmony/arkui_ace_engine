@@ -130,9 +130,9 @@ HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
         {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE),
             Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_BLUE).value_or(Color())},
         // Ark_Number
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Float64>(0x11223344)),
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Float64>(0x11223344)),
             Color(0x11223344)},
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Float64>(0xAABBCCDD)),
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Float64>(0xAABBCCDD)),
             Color(0xAABBCCDD)},
         // Ark_String
         {Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")),

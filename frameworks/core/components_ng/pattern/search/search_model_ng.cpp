@@ -2601,6 +2601,62 @@ bool SearchModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     return value;
 }
 
+void SearchModelNG::SetIncludeFontPadding(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled, textFieldChild);
+}
+
+void SearchModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled, textFieldChild);
+}
+
+bool SearchModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, IncludeFontPadding, value, textFieldChild, value);
+    return value;
+}
+
+void SearchModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled, textFieldChild);
+}
+
+void SearchModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FallbackLineSpacing, enabled, textFieldChild);
+}
+
+bool SearchModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, FallbackLineSpacing, value, textFieldChild, value);
+    return value;
+}
+
 void SearchModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2645,5 +2701,58 @@ void SearchModelNG::SetUserMargin(FrameNode* frameNode)
     layoutProperty->ResetUserMargin();
     CHECK_NULL_VOID(marginProp);
     layoutProperty->UpdateUserMargin(*marginProp);
+}
+
+void SearchModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value, textFieldChild);
+}
+
+void SearchModelNG::ResetSelectedDragPreviewStyle()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, textFieldChild);
+}
+
+Color SearchModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color::WHITE);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, Color::WHITE);
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectedDragPreviewStyle, value, textFieldChild, value);
+    return value;
+}
+
+void SearchModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, value, textFieldChild);
+}
+
+void SearchModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, textFieldChild);
 }
 } // namespace OHOS::Ace::NG

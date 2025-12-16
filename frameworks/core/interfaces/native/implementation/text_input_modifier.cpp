@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
@@ -245,7 +246,7 @@ void SetOnSubmitImpl(Ark_NativePointer node,
     auto onSubmit = [arkCallback = CallbackHelper(*optValue)](
                         const int32_t& value, NG::TextFieldCommonEvent& info) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(value));
-        const auto event = Converter::ArkSubmitEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_SubmitEvent>(info);
         arkCallback.InvokeSync(enterKeyType, event.ArkValue());
     };
     TextFieldModelNG::SetOnSubmit(frameNode, onSubmit);
@@ -984,6 +985,30 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Color>(value->value.color);
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
                         const Opt_Callback_String_Void* error)
@@ -1122,6 +1147,9 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetOnWillChangeImpl,
         TextInputAttributeModifier::SetKeyboardAppearanceImpl,
         TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextInputAttributeModifier::SetIncludeFontPaddingImpl,
+        TextInputAttributeModifier::SetFallbackLineSpacingImpl,
+        TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,

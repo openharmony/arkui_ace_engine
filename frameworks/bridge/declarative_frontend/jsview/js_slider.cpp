@@ -364,6 +364,7 @@ bool JSSlider::ConvertColorMetricsLinearGradientColor(const JsiRef<JsiValue>& pa
             LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().color));
         gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().offset);
         gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
         return true;
     }
 

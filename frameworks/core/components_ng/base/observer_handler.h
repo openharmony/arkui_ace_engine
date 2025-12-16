@@ -56,6 +56,7 @@ struct NavDestinationInfo {
     NavDestinationMode mode;
     int32_t uniqueId;
     int32_t navigationUniqueId = -1; //Internal use only
+    std::optional<SizeF> size;
 
     NavDestinationInfo() = default;
 
@@ -81,6 +82,34 @@ struct NavDestinationInfo {
           navDestinationId(std::move(navDesId)), mode(mode),
           uniqueId(std::move(uniqueId)), navigationUniqueId(std::move(navigationUniqueId))
     {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
+                       std::string navDesId, NavDestinationMode mode, int32_t uniqueId, std::optional<SizeF> size)
+        : navigationId(std::move(id)),
+          name(std::move(name)),
+          state(state),
+          index(index),
+          param(param),
+          navDestinationId(std::move(navDesId)),
+          mode(mode),
+          uniqueId(std::move(uniqueId)),
+          size(std::move(size))
+    {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
+                       std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId,
+                       std::optional<SizeF> size)
+        : navigationId(std::move(id)),
+          name(std::move(name)),
+          state(state),
+          index(index),
+          param(param),
+          navDestinationId(std::move(navDesId)),
+          mode(mode),
+          uniqueId(std::move(uniqueId)),
+          navigationUniqueId(std::move(navigationUniqueId)),
+          size(std::move(size))
+    {}
 };
 
 enum class ScrollEventType {
@@ -102,30 +131,34 @@ struct ScrollEventInfo {
 
 struct NavDestinationSwitchInfo {
     // UIContext
-    napi_value context;
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation;
 
-    NavDestinationSwitchInfo(napi_value ctx, std::optional<NavDestinationInfo>&& fromInfo,
-        std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
-        : context(ctx), from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+    NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo, std::optional<NavDestinationInfo>&& toInfo,
+        NavigationOperation op)
+        : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
           to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
     {}
 };
 
 struct RouterPageInfoNG {
-    napi_value context;
     int32_t index;
     std::string name;
     std::string path;
     RouterPageState state;
     std::string pageId;
+    std::optional<SizeF> size;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+    RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
         std::string pageId)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+        : index(index), name(std::move(name)), path(std::move(path)), state(state),
           pageId(std::move(pageId))
+    {}
+    RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
+        std::string pageId, std::optional<SizeF> size)
+        : index(index), name(std::move(name)), path(std::move(path)), state(state),
+          pageId(std::move(pageId)), size(size)
     {}
 };
 
@@ -207,8 +240,10 @@ public:
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyNavigationStateChangeForAni(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
-    void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
-    void NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
+    void NotifyRouterPageStateChange(
+        const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size);
+    void NotifyRouterPageStateChangeForAni(
+        const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size);
     void NotifyDensityChange(double density);
     void NotifyWillClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
@@ -233,6 +268,9 @@ public:
     void NotifyNavDestinationSwitchForAni(std::optional<NavDestinationInfo>& from,
         std::optional<NavDestinationInfo>& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
+    void NotifyRouterPageSizeChange(const RefPtr<PageInfo>& pageInfo,
+        RouterPageState state, const std::optional<SizeF>& size);
+    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
     bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
@@ -262,6 +300,9 @@ public:
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
     using SwiperContentObservrEmptyFunc = bool (*)();
+    using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
+    using NavDestinationSizeChangeHandleFunc = void (*)(const NavDestinationInfo&);
+    using NavDestinationSizeChangeByUniqueIdHandleFunc = void (*)(const NavDestinationInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
@@ -307,6 +348,9 @@ public:
     void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
     void SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func);
     void SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func);
+    void SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func);
+    void SetNavDestinationSizeChangeHandleFunc(NavDestinationSizeChangeHandleFunc func);
+    void SetNavDestinationSizeChangeByUniqueIdHandleFunc(NavDestinationSizeChangeByUniqueIdHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -340,6 +384,10 @@ private:
 
     WillClickHandleFuncForAni willClickHandleFuncForAni_ = nullptr;
     DidClickHandleFuncForAni didClickHandleFuncForAni_ = nullptr;
+
+    RouterPageSizeChangeHandleFunc routerPageSizeChangeHandleFunc_ = nullptr;
+    NavDestinationSizeChangeHandleFunc navDestinationSizeChangeHandleFunc_ = nullptr;
+    NavDestinationSizeChangeByUniqueIdHandleFunc navDestinationSizeChangeByUniqueIdHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();
 };

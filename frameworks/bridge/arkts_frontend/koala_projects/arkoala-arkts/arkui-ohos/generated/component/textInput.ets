@@ -23,7 +23,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, ResourceColor, Dimension, Font, Length, ResourceStr } from "./units"
-import { CaretStyle_serializer, EditMenuOptions_serializer, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
+import { CaretStyle_serializer, EditMenuOptions_serializer, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { CancelButtonOptions_serializer, CancelButtonSymbolOptions_serializer, CancelButtonOptions, CancelButtonSymbolOptions } from "./search"
 import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Arkui_Component_Units_ResourceStr_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from "./richEditor"
@@ -151,10 +151,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -239,10 +239,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -339,10 +339,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -367,10 +367,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -551,10 +551,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -662,10 +662,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -1170,6 +1170,42 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSelectedDragPreviewStyleAttribute(value: SelectedDragPreviewStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SelectedDragPreviewStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((value0: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1541,6 +1577,15 @@ export interface TextInputAttribute extends CommonMethod {
     compressLeadingPunctuation(value: boolean | undefined): this {
         throw new Error("Unimplemented method compressLeadingPunctuation")
     }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        throw new Error("Unimplemented method selectedDragPreviewStyle")
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         throw new Error("Unimplemented method inputFilter")
     }
@@ -1624,7 +1669,10 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined
+    selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
     setTextInputOptions(value?: TextInputOptions): this {
         return this
     }
@@ -1836,6 +1884,15 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
         return this
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
@@ -2428,6 +2485,30 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (this.checkPriority("selectedDragPreviewStyle")) {
+            const value_casted = value as (SelectedDragPreviewStyle | undefined)
+            this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -2593,10 +2674,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTypingTmpValueForIdx0  = valueHolderForTypingTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForTypingTmpValue instanceof number) {
+            } else if (valueHolderForTypingTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTypingTmpValueForIdx1)
+                const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx1)
             } else if (valueHolderForTypingTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTypingTmpValueForIdx2  = valueHolderForTypingTmpValue as string
@@ -2617,10 +2698,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForNormalTmpValueForIdx0  = valueHolderForNormalTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForNormalTmpValue instanceof number) {
+            } else if (valueHolderForNormalTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as number
-                valueSerializer.writeNumber(valueHolderForNormalTmpValueForIdx1)
+                const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx1)
             } else if (valueHolderForNormalTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForNormalTmpValueForIdx2  = valueHolderForNormalTmpValue as string
@@ -2641,10 +2722,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForErrorTmpValue instanceof number) {
+            } else if (valueHolderForErrorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForErrorTmpValueForIdx1)
+                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx1)
             } else if (valueHolderForErrorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForErrorTmpValueForIdx2  = valueHolderForErrorTmpValue as string
@@ -2665,10 +2746,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDisableTmpValueForIdx0  = valueHolderForDisableTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForDisableTmpValue instanceof number) {
+            } else if (valueHolderForDisableTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as number
-                valueSerializer.writeNumber(valueHolderForDisableTmpValueForIdx1)
+                const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx1)
             } else if (valueHolderForDisableTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDisableTmpValueForIdx2  = valueHolderForDisableTmpValue as string
@@ -2688,11 +2769,11 @@ export class UnderlineColor_serializer {
         let typingTmpBuf : ResourceColor | undefined = undefined
         if ((typingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const typingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let typingTmpBuf_ : Color | number | string | Resource | undefined
+            let typingTmpBuf_ : Color | int32 | string | Resource | undefined
             if (typingTmpBuf_UnionSelector == (0).toChar()) {
                 typingTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (typingTmpBuf_UnionSelector == (1).toChar()) {
-                typingTmpBuf_ = (valueDeserializer.readNumber() as number)
+                typingTmpBuf_ = valueDeserializer.readInt32()
             } else if (typingTmpBuf_UnionSelector == (2).toChar()) {
                 typingTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (typingTmpBuf_UnionSelector == (3).toChar()) {
@@ -2700,18 +2781,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for typingTmpBuf_ has to be chosen through deserialisation.")
             }
-            typingTmpBuf = (typingTmpBuf_ as Color | number | string | Resource)
+            typingTmpBuf = (typingTmpBuf_ as Color | int32 | string | Resource)
         }
         const typingTmpResult : ResourceColor | undefined = typingTmpBuf
         const normalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let normalTmpBuf : ResourceColor | undefined = undefined
         if ((normalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const normalTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let normalTmpBuf_ : Color | number | string | Resource | undefined
+            let normalTmpBuf_ : Color | int32 | string | Resource | undefined
             if (normalTmpBuf_UnionSelector == (0).toChar()) {
                 normalTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (normalTmpBuf_UnionSelector == (1).toChar()) {
-                normalTmpBuf_ = (valueDeserializer.readNumber() as number)
+                normalTmpBuf_ = valueDeserializer.readInt32()
             } else if (normalTmpBuf_UnionSelector == (2).toChar()) {
                 normalTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (normalTmpBuf_UnionSelector == (3).toChar()) {
@@ -2719,18 +2800,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for normalTmpBuf_ has to be chosen through deserialisation.")
             }
-            normalTmpBuf = (normalTmpBuf_ as Color | number | string | Resource)
+            normalTmpBuf = (normalTmpBuf_ as Color | int32 | string | Resource)
         }
         const normalTmpResult : ResourceColor | undefined = normalTmpBuf
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : ResourceColor | undefined = undefined
         if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let errorTmpBuf_ : Color | number | string | Resource | undefined
+            let errorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (errorTmpBuf_UnionSelector == (0).toChar()) {
                 errorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
-                errorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                errorTmpBuf_ = valueDeserializer.readInt32()
             } else if (errorTmpBuf_UnionSelector == (2).toChar()) {
                 errorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (errorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2738,18 +2819,18 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for errorTmpBuf_ has to be chosen through deserialisation.")
             }
-            errorTmpBuf = (errorTmpBuf_ as Color | number | string | Resource)
+            errorTmpBuf = (errorTmpBuf_ as Color | int32 | string | Resource)
         }
         const errorTmpResult : ResourceColor | undefined = errorTmpBuf
         const disableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disableTmpBuf : ResourceColor | undefined = undefined
         if ((disableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const disableTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let disableTmpBuf_ : Color | number | string | Resource | undefined
+            let disableTmpBuf_ : Color | int32 | string | Resource | undefined
             if (disableTmpBuf_UnionSelector == (0).toChar()) {
                 disableTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (disableTmpBuf_UnionSelector == (1).toChar()) {
-                disableTmpBuf_ = (valueDeserializer.readNumber() as number)
+                disableTmpBuf_ = valueDeserializer.readInt32()
             } else if (disableTmpBuf_UnionSelector == (2).toChar()) {
                 disableTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (disableTmpBuf_UnionSelector == (3).toChar()) {
@@ -2757,7 +2838,7 @@ export class UnderlineColor_serializer {
             } else {
                 throw new Error("One of the branches for disableTmpBuf_ has to be chosen through deserialisation.")
             }
-            disableTmpBuf = (disableTmpBuf_ as Color | number | string | Resource)
+            disableTmpBuf = (disableTmpBuf_ as Color | int32 | string | Resource)
         }
         const disableTmpResult : ResourceColor | undefined = disableTmpBuf
         let value : UnderlineColor = ({typing: typingTmpResult, normal: normalTmpResult, error: errorTmpResult, disable: disableTmpResult} as UnderlineColor)

@@ -50,6 +50,10 @@ public:
 
     bool ParseRegion(napi_value* regionObject, NG::SnapshotOptions& options);
 
+    void ParseColorMode(napi_value* regionObject, NG::SnapshotOptions& options);
+
+    void ParseDynamicRangeMode(napi_value* regionObject, NG::SnapshotOptions& options);
+
     static constexpr int32_t ARGC_MAX = 5;
 
 private:

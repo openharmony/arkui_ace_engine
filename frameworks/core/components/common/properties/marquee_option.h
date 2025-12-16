@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_MARQUEE_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_MARQUEE_OPTION_H
 
+#include "base/geometry/calc_dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 
@@ -29,12 +30,15 @@ struct MarqueeOption {
     int32_t delay = 0;
     bool fadeout = false;
     MarqueeStartPolicy startPolicy = MarqueeStartPolicy::DEFAULT;
+    MarqueeUpdatePolicy updatePolicy = MarqueeUpdatePolicy::DEFAULT;
+    std::optional<CalcDimension> spacing;
 
     bool operator==(const MarqueeOption& other) const
     {
         return start == other.start && NearEqual(step, other.step) && loop == other.loop &&
                direction == other.direction && delay == other.delay && fadeout == other.fadeout &&
-               startPolicy == other.startPolicy;
+               startPolicy == other.startPolicy && updatePolicy == other.updatePolicy &&
+               spacing == other.spacing;
     }
 };
 

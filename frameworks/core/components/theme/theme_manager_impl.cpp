@@ -216,7 +216,11 @@ std::unordered_map<ThemeType, Ace::Kit::BuildThemeWrapperFunc> TOKEN_THEME_WRAPP
 
 ThemeManagerImpl::ThemeManagerImpl()
 {
+#ifdef CROSS_PLATFORM
+    auto resAdapter = ResourceAdapter::CreateV2();
+#else
     auto resAdapter = ResourceAdapter::Create();
+#endif
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
@@ -235,6 +239,14 @@ void ThemeManagerImpl::RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        return GetThemeMultiThread(type);
+    }
+    return GetThemeNormal(type);
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeNormal(ThemeType type)
 {
     auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
@@ -302,6 +314,14 @@ void ThemeManagerImpl::RegisterCustomThemeKit(ThemeType type, Ace::Kit::BuildThe
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, TokenThemeScopeId themeScopeId)
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        return GetThemeMultiThread(type, themeScopeId);
+    }
+    return GetThemeNormal(type, themeScopeId);
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeNormal(ThemeType type, TokenThemeScopeId themeScopeId)
 {
     auto theme = GetThemeKit(type, themeScopeId);
     CHECK_NULL_RETURN(theme, GetThemeOrigin(type, themeScopeId));

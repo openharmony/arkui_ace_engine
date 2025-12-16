@@ -28,6 +28,7 @@
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
@@ -46,6 +47,7 @@ constexpr size_t URL_KEEP_TOTAL_LENGTH = 30;
 constexpr int32_t NEED_MASK_INDEX = 3;
 constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
 constexpr size_t NEED_MASK_START_OFFSET = 2;
+constexpr int32_t INVALID_ID = -1;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -593,6 +595,7 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     // update rotate orientation before decoding
     UpdateOrientation();
+    PreprocessYUVDecodeFormat(host);
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -608,6 +611,22 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
+{
+    if (!SystemProperties::IsOpenYuvDecode()) {
+        return;
+    }
+    CHECK_NULL_VOID(loadingCtx_);
+    auto obj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(obj);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasValidSlice = renderProperty && (renderProperty->HasImageResizableSlice() ||
+        renderProperty->HasImageResizableLattice());
+    bool isYUVDecode = layoutProperty->GetIsYUVDecode().value_or(false);
+    obj->SetIsYUVDecode(hasValidSlice? false : isYUVDecode);
 }
 
 // Update the necessary rotate orientation for drawing and measuring.
@@ -946,7 +965,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline && host->IsActive()) {
+        if (pipeline && host->GetId() != INVALID_ID) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
@@ -1005,7 +1024,7 @@ void ImagePattern::LoadImageDataIfNeed()
         auto altErrorImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
         LoadAltErrorImage(altErrorImageSourceInfo);
     }
-    if (loadingCtx_->NeedAlt()) {
+    if (loadingCtx_ && loadingCtx_->NeedAlt()) {
         if (imageLayoutProperty->GetAltPlaceholder()) {
             auto altImageSourceInfo = imageLayoutProperty->GetAltPlaceholder().value_or(ImageSourceInfo(""));
             isLoadAlt_ = false;
@@ -2076,6 +2095,12 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
     }
+    OnConfigurationUpdate();
+}
+
+void ImagePattern::OnDpiConfigurationUpdate()
+{
+    ImageDecoder::ClearPixelMapCache();
     OnConfigurationUpdate();
 }
 

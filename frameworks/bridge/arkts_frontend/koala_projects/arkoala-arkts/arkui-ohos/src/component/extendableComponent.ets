@@ -14,6 +14,7 @@
  */
 
 import { int32 } from '@koalaui/common';
+import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { CustomComponentV2 } from './customComponent';
 import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
@@ -57,6 +58,8 @@ export interface IExtendableComponent {
     __addMeToParent__IExtendableComponent_Internal(): void;
     isViewActive(): boolean;
     setActiveInternal(active: boolean, isReuse: boolean): void;
+    fireAboutToReuse(param?: RecordData): void;
+    fireAboutToRecycle(): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
@@ -77,6 +80,22 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.useSharedStorage_ = useSharedStorage;
         this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
+    }
+
+    __aboutToReuse_Internal(param?: RecordData): void {
+        this.delegate_!.fireAboutToReuse(param);
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.__aboutToReuse_Internal(param);
+        });
+    }
+
+    __aboutToRecycle_Internal(): void {
+        this.delegate_!.fireAboutToRecycle();
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.__aboutToRecycle_Internal();
+        });
     }
 
     __addMeToParent__Internal(): void {

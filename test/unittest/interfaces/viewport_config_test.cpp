@@ -102,7 +102,7 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
 
 /**
 * @tc.name: ViewportConfigTest003
-* @tc.desc: Verify SetKeyFrameConfig, GetKeyFrameConfig api for ViewportConfig
+* @tc.desc: Verify SetKeyFrameConfig, GetKeyFrameConfig, SetKeyFrameConfigCacheState api for ViewportConfig
 * @tc.type: FUNC
  */
 HWTEST_F(ViewportConfigTest, ViewportConfigTest003, TestSize.Level1)
@@ -112,5 +112,8 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest003, TestSize.Level1)
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().enableKeyFrame_, true);
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().animationDuration_, 100);
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().animationDelay_, 200);
+    ASSERT_EQ(viewConfig.GetKeyFrameConfig().fromAnimateCache_, false);
+    viewConfig.SetKeyFrameConfigCacheState(true);
+    ASSERT_EQ(viewConfig.GetKeyFrameConfig().fromAnimateCache_, true);
 }
 } // namespace OHOS::Ace

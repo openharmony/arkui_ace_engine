@@ -34,67 +34,27 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr char PLACEHOLDER_PAGE_URL[] = "placeholder";
 constexpr char PLACEHOLDER_PAGE_PATH[] = "placeholder.js";
-const std::string BG_COLOR_SYS_RES_NAME = "sys.color.ohos_id_color_sub_background";
 constexpr int32_t PRIMARY_PAGE_NODE_THRESHOLD = 100;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
-constexpr Dimension APP_ICON_SIZE = 64.0_vp;
 const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "root"};
-
-class PlaceholderPattern : public StackPattern {
-    DECLARE_ACE_TYPE(PlaceholderPattern, StackPattern);
-public:
-    PlaceholderPattern() = default;
-    ~PlaceholderPattern() override = default;
-
-    void OnColorConfigurationUpdate() override;
-    void OnAttachToMainTree() override;
-    void RefreshBackgroundColor();
-};
-
-void PlaceholderPattern::OnColorConfigurationUpdate()
-{
-    RefreshBackgroundColor();
-}
-
-void PlaceholderPattern::OnAttachToMainTree()
-{
-    StackPattern::OnAttachToMainTree();
-    RefreshBackgroundColor();
-}
-
-void PlaceholderPattern::RefreshBackgroundColor()
-{
-    auto host = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navManager);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    Color bgColor;
-    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
-        renderContext->UpdateBackgroundColor(bgColor);
-    }
-}
 }
 
 void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
     const std::string& curTopPageName, const RefPtr<PipelineContext>& context)
 {
     CHECK_NULL_VOID(context);
-    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
-    CHECK_NULL_VOID(stageManager);
-    if (!stageManager->IsForceSplitSupported()) {
-        return;
-    }
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(true)) {
+        return;
+    }
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
     stageManager->UpdateIsTopFullScreenPage(forceSplitMgr->IsFullScreenPage(curTopPageName));
     if (stageManager->IsTopFullScreenPageChanged()) {
         forceSplitMgr->NotifyForceFullScreenChange(stageManager->IsTopFullScreenPage());
         // try to update mode immediately
-        stageManager->OnForceSplitConfigUpdate();
+        forceSplitMgr->NotifyForceSplitStateChange();
     }
 }
 
@@ -103,21 +63,23 @@ void ParallelPageRouterManager::LoadPage(
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
+    LoadPlaceholderOrRelatedPageIfNeeded(context, stageManager);
+
     bool needClearSecondaryPage = CheckSecondaryPageNeedClear(isPush);
     if (!CheckStackSize(target, needClearSecondaryPage)) {
         return;
     }
-    NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
+    NotifyForceFullScreenChangeIfNeeded(target.url, context);
     LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
-    CHECK_NULL_VOID(stageManager);
 
     RefPtr<FrameNode> preLastPage = nullptr;
     if (!pageRouterStack_.empty()) {
@@ -146,13 +108,8 @@ void ParallelPageRouterManager::LoadPage(
     stageManager->RemoveSecondaryPagesOfPrimaryHomePage();
 
     if (DetectPrimaryPage(target, preLastPage)) {
-        auto loadPlaceHolderPageCallback = [weakMgr = WeakClaim(this)]() -> RefPtr<FrameNode> {
-            auto mgr = weakMgr.Upgrade();
-            CHECK_NULL_RETURN(mgr, nullptr);
-            return mgr->LoadPlaceHolderPage();
-        };
         TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as primary page", target.url.c_str());
-        stageManager->OnPrimaryPageDetected(pageNode, std::move(loadPlaceHolderPageCallback), pageRouterStack_);
+        stageManager->OnPrimaryPageDetected(pageNode, pageRouterStack_);
     }
 
     pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -169,21 +126,23 @@ void ParallelPageRouterManager::LoadPageExtender(
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+    CHECK_NULL_RETURN(stageManager, false);
+    LoadPlaceholderOrRelatedPageIfNeeded(context, stageManager);
+
     bool needClearSecondaryPage = CheckSecondaryPageNeedClear(isPush);
     if (!CheckStackSize(target, needClearSecondaryPage)) {
         return;
     }
-    NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
+    NotifyForceFullScreenChangeIfNeeded(target.url, context);
     LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePageExtender(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
-    CHECK_NULL_VOID(stageManager);
 
     RefPtr<FrameNode> preLastPage = nullptr;
     if (!pageRouterStack_.empty()) {
@@ -211,13 +170,8 @@ void ParallelPageRouterManager::LoadPageExtender(
     stageManager->RemoveSecondaryPagesOfPrimaryHomePage();
 
     if (DetectPrimaryPage(target, preLastPage)) {
-        auto loadPlaceHolderPageCallback = [weakMgr = WeakClaim(this)]() -> RefPtr<FrameNode> {
-            auto mgr = weakMgr.Upgrade();
-            CHECK_NULL_RETURN(mgr, nullptr);
-            return mgr->LoadPlaceHolderPage();
-        };
         TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as primary page", target.url.c_str());
-        stageManager->OnPrimaryPageDetected(pageNode, std::move(loadPlaceHolderPageCallback), pageRouterStack_);
+        stageManager->OnPrimaryPageDetected(pageNode, pageRouterStack_);
     }
 
     pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -227,6 +181,34 @@ void ParallelPageRouterManager::LoadPageExtender(
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+}
+
+void ParallelPageRouterManager::LoadPlaceholderOrRelatedPageIfNeeded(
+    const RefPtr<PipelineContext>& context, const RefPtr<ParallelStageManager>& manager)
+{
+    if (hasTryLoadPlaceholderOrRelatedPage_) {
+        return;
+    }
+    hasTryLoadPlaceholderOrRelatedPage_ = true;
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(true)) {
+        return;
+    }
+    do {
+        if (!forceSplitMgr->HasRelatedPage()) {
+            break;
+        }
+        auto relatedPage = forceSplitMgr->GetRelatedPageName();
+        if (LoadRelatedPage(relatedPage, manager)) {
+            return;
+        }
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "will create placeholder page when failed to create relatedPage.");
+    } while (false);
+    if (!LoadPlaceHolderPage(manager)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to load placeholder page");
+    }
 }
 
 int32_t ParallelPageRouterManager::GetLastPageIndex()
@@ -250,11 +232,11 @@ bool ParallelPageRouterManager::DetectPrimaryPage(const RouterPageInfo& target, 
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
 
-    if (!stageManager->IsForceSplitSupported()) {
-        TAG_LOGE(AceLogTag::ACE_ROUTER, "No need for home page recognition");
+    if (!forceSplitMgr->IsForceSplitSupported(true)) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "No need for home page recognition");
         return false;
     }
 
@@ -269,10 +251,9 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, false);
-
-    std::string homePageConfig = stageManager->GetHomePageConfig();
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    std::string homePageConfig = forceSplitMgr->GetHomePageName();
     std::string pageInfo = target.url;
     if (!homePageConfig.empty()) {
         if (strcmp(homePageConfig.c_str(), pageInfo.c_str()) == 0) {
@@ -308,8 +289,9 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
     return false;
 }
 
-RefPtr<FrameNode> ParallelPageRouterManager::LoadPlaceHolderPage()
+bool ParallelPageRouterManager::LoadPlaceHolderPage(const RefPtr<ParallelStageManager>& manager)
 {
+    CHECK_NULL_RETURN(manager, false);
     auto pageId = GenerateNextPageId();
     // create pageNode
     ACE_SCOPED_TRACE_COMMERCIAL("load placeholder(id:%d)", pageId);
@@ -318,51 +300,75 @@ RefPtr<FrameNode> ParallelPageRouterManager::LoadPlaceHolderPage()
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     auto placeHolderPageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
-    CHECK_NULL_RETURN(placeHolderPageNode, nullptr);
-
-    int32_t stackId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto stackNode = FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
-    CHECK_NULL_RETURN(stackNode, nullptr);
-    stackNode->MountToParent(placeHolderPageNode);
-    auto stackContext = stackNode->GetRenderContext();
-    CHECK_NULL_RETURN(stackContext, nullptr);
-    auto resourceWrapper = CreateResourceWrapper();
-    CHECK_NULL_RETURN(resourceWrapper, nullptr);
-    Color bgColor = resourceWrapper->GetColorByName(BG_COLOR_SYS_RES_NAME);
-    stackContext->UpdateBackgroundColor(bgColor);
-    auto stackLayoutProperty = stackNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
-    stackLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    int32_t imageId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imageNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, imageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    CHECK_NULL_RETURN(imageNode, nullptr);
-    auto pipeline = imageNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto id = windowManager->GetAppIconId();
-    auto pixelMap = themeConstants->GetPixelMap(id);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    CalcSize imageCalcSize((CalcLength(APP_ICON_SIZE)), CalcLength(APP_ICON_SIZE));
-    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
-    imageNode->MountToParent(stackNode);
-    imageNode->MarkModifyDone();
+    CHECK_NULL_RETURN(placeHolderPageNode, false);
+    auto placeHolderPattern = placeHolderPageNode->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_RETURN(placeHolderPattern, false);
+    placeHolderPattern->SetPageType(RouterPageType::PLACEHOLDER_PAGE);
+    auto context = placeHolderPageNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    auto contentNode = ForceSplitUtils::CreatePlaceHolderContent(context);
+    CHECK_NULL_RETURN(contentNode, false);
+    contentNode->MountToParent(placeHolderPageNode);
 
     if (!SetOnKeyEvent(placeHolderPageNode)) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "fail to init key event handler of SystemPlaceHolder");
-        return nullptr;
+        return false;
     }
+    auto stageNode = manager->GetStageNode();
+    CHECK_NULL_RETURN(stageNode, false);
+    auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
+    CHECK_NULL_RETURN(stagePattern, false);
+    stagePattern->SetPlaceholderPage(placeHolderPageNode);
     TAG_LOGI(AceLogTag::ACE_ROUTER, "success to load SystemPlaceHolder");
-    return placeHolderPageNode;
+    return true;
+}
+
+bool ParallelPageRouterManager::LoadRelatedPage(const std::string& url, const RefPtr<ParallelStageManager>& manager)
+{
+    CHECK_NULL_RETURN(manager, false);
+    if (url.empty()) {
+        return false;
+    }
+    RouterPageInfo target;
+    target.url = url;
+    target.params = "";
+    target.recoverable = false;
+    target.errorCallback = [url](const std::string& errorMsg, int32_t errorCode) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            return;
+        }
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to loadRelatedPage with url:%{public}s, code:%{public}d, "
+            "msg:%{public}s", url.c_str(), errorCode, errorMsg.c_str());
+    };
+    if (!manifestParser_) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "empty manifestParser found in LoadRelatedPage with url: %{public}s",
+            url.c_str());
+        return false;
+    }
+    target.path = manifestParser_->GetRouter()->GetPagePath(target.url);
+    if (target.path.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in LoadRelatedPage with url: %{public}s", url.c_str());
+        return false;
+    }
+    auto relatedPage = CreatePage(GenerateNextPageId(), target);
+    if (!relatedPage) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create RelatedPage");
+        return false;
+    }
+    auto pattern = relatedPage->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->SetPageType(RouterPageType::RELATED_PAGE);
+    if (!SetOnKeyEvent(relatedPage)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "fail to init key event handler of RelatedPage");
+        return false;
+    }
+    auto stageNode = manager->GetStageNode();
+    CHECK_NULL_RETURN(stageNode, false);
+    auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
+    CHECK_NULL_RETURN(stagePattern, false);
+    stagePattern->SetRelatedPage(relatedPage);
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "success to load RelatedPage");
+    return true;
 }
 
 RefPtr<ResourceWrapper> ParallelPageRouterManager::CreateResourceWrapper()
@@ -394,7 +400,7 @@ bool ParallelPageRouterManager::ShouldDetectPrimaryPage(
     CHECK_NULL_RETURN(stageNode, false);
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    auto primaryNode = stagePattern->GetPrimaryPage().Upgrade();
+    auto primaryNode = stagePattern->GetPrimaryPage();
     if (!primaryNode) {
         return true;
     }

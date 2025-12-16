@@ -60,6 +60,7 @@ namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+constexpr int32_t INHERIT_INDEX = 2;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 static std::atomic<int32_t> spanStringControllerStoreIndex_;
 
@@ -292,6 +293,9 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
         paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
             textStyleResult.textVerticalAlign.value());
     }
+    if (textStyleResult.textDirection.has_value()) {
+        paragraphStyleObj->SetProperty<int32_t>("textDirection", textStyleResult.textDirection.value());
+    }
     return paragraphStyleObj;
 }
 
@@ -381,6 +385,9 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     }
     if (info.textVerticalAlign.has_value()) {
         obj->SetProperty<int32_t>("textVerticalAlign", info.textVerticalAlign.value());
+    }
+    if (info.textDirection.has_value()) {
+        obj->SetProperty<int32_t>("textDirection", info.textDirection.value());
     }
     return obj;
 }
@@ -1339,6 +1346,33 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetCaretColor(color);
 }
 
+void JSRichEditor::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    const auto& key = NG::StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY;
+    UnRegisterResource(key);
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        RichEditorModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColorWithResource(param, color, resourceObject)) {
+        RichEditorModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>(key, resourceObject, color);
+    }
+    RichEditorModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+
 void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1500,6 +1534,15 @@ void JSRichEditor::SetEnableAutoSpacing(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSRichEditor::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
+}
+
 void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
 {
     bool isStopBackPress = true;
@@ -1532,6 +1575,24 @@ void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
         scrollBarColor = color;
     }
     RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+}
+
+void JSRichEditor::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool includeFontPadding = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        includeFontPadding = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetIncludeFontPadding(includeFontPadding);
+}
+
+void JSRichEditor::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool fallbackLineSpacing = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        fallbackLineSpacing = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetFallbackLineSpacing(fallbackLineSpacing);
 }
 
 bool JSRichEditor::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
@@ -1640,6 +1701,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
+    JSClass<JSRichEditor>::StaticMethod("selectedDragPreviewStyle", &JSRichEditor::SetSelectedDragPreviewStyle);
     JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::StaticMethod("onEditingChange", &JSRichEditor::SetOnEditingChange);
     JSClass<JSRichEditor>::StaticMethod("enterKeyType", &JSRichEditor::SetEnterKeyType);
@@ -1657,10 +1719,13 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
     JSClass<JSRichEditor>::StaticMethod("enableAutoSpacing", &JSRichEditor::SetEnableAutoSpacing);
+    JSClass<JSRichEditor>::StaticMethod("compressLeadingPunctuation", &JSRichEditor::SetCompressLeadingPunctuation);
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
     JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
+    JSClass<JSRichEditor>::StaticMethod("includeFontPadding", &JSRichEditor::SetIncludeFontPadding);
+    JSClass<JSRichEditor>::StaticMethod("fallbackLineSpacing", &JSRichEditor::SetFallbackLineSpacing);
     JSClass<JSRichEditor>::StaticMethod("singleLine", &JSRichEditor::SetSingleLine);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -2341,15 +2406,6 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
 }
 
-void JSRichEditorController::DeleteBackward(const JSCallbackInfo& args)
-{
-    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    CHECK_NULL_VOID(richEditorController);
-    richEditorController->DeleteBackward();
-}
-
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -2450,7 +2506,7 @@ void JSRichEditorBaseController::ParseTextAlignParagraphStyle(const JSRef<JSObje
     auto textAlignObj = styleObject->GetProperty("textAlign");
     if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
         auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
-        if (align < TextAlign::START || align > TextAlign::JUSTIFY) {
+        if (align < TextAlign::START || align > TextAlign::RIGHT) {
             align = TextAlign::START;
         }
         style.textAlign = align;
@@ -2483,6 +2539,23 @@ void JSRichEditorBaseController::ParseTextVerticalAlign(const JSRef<JSObject>& s
     style.textVerticalAlign = textVerticalAlign;
 }
 
+void JSRichEditorBaseController::ParseTextDirection(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto textDirectionObj = styleObject->GetProperty("textDirection");
+    if (textDirectionObj->IsNull() || !textDirectionObj->IsNumber()) {
+        return;
+    }
+
+    int32_t index = textDirectionObj->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        style.textDirection = TEXT_DIRECTIONS[INHERIT_INDEX];
+        return;
+    }
+    style.textDirection = TEXT_DIRECTIONS[index];
+}
+
 bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2496,6 +2569,7 @@ bool JSRichEditorBaseController::ParseParagraphStyle(const JSRef<JSObject>& styl
     }
     ParseParagraphSpacing(styleObject, style);
     ParseTextVerticalAlign(styleObject, style);
+    ParseTextDirection(styleObject, style);
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
         // [LeadingMarginPlaceholder]
@@ -2652,6 +2726,14 @@ void JSRichEditorBaseController::GetCaretOffset(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
     }
+}
+
+void JSRichEditorBaseController::DeleteBackward(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->DeleteBackward();
 }
 
 void JSRichEditorBaseController::GetCaretRect(const JSCallbackInfo& args)
@@ -3349,6 +3431,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "deleteBackward", &JSRichEditorStyledStringController::DeleteBackward);
     JSClass<JSRichEditorStyledStringController>::Method(
         "stopEditing", &JSRichEditorStyledStringController::StopEditing);
     JSClass<JSRichEditorStyledStringController>::Method(

@@ -84,6 +84,14 @@ public:
     {
         return forceSplitPlaceHolderNode_;
     }
+    void SetRelatedPageDestNode(const RefPtr<UINode>& node)
+    {
+        relatedPageDestinationNode_ = node;
+    }
+    const RefPtr<UINode>& GetRelatedPageDestNode() const
+    {
+        return relatedPageDestinationNode_;
+    }
 
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
@@ -297,6 +305,7 @@ public:
     RefPtr<FrameNode> GetTopDestination();
     void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
     void OnAttachToMainTree(bool recursive) override;
+    void LoadRelatedPageIfNeeded();
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
@@ -413,9 +422,10 @@ private:
     void SoftTransitionAnimationPop(const RefPtr<FrameNode>& preNode,
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
-    bool HandleBackForHomeDestination();
+    bool HandleBackForHomeOrRelatedDestination();
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
+    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
 
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;
@@ -447,6 +457,8 @@ private:
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
     RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> forceSplitPlaceHolderNode_;
+    RefPtr<UINode> relatedPageCustomNode_;
+    RefPtr<UINode> relatedPageDestinationNode_;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

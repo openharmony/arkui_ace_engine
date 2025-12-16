@@ -905,6 +905,9 @@ public:
     // multi thread function start
     void RemoveSelfMultiThread(BlurReason reason);
     void RemoveSelfExecuteFunction(BlurReason reason);
+    void SetFocusScopeIdMultiThread(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
+    void RemoveFocusScopeIdAndPriorityMultiThread();
+    void SetFocusScopePriorityMultiThread(const std::string& focusScopeId, const uint32_t focusPriority);
     // multi thread function end
 
 protected:
@@ -992,6 +995,8 @@ private:
     bool IsArrowKeyStepOut(FocusStep moveStep);
 
     bool IsLastWeakNodeFocused() const;
+
+    void OnPaintFocusState(bool isFocus);
 
     std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;

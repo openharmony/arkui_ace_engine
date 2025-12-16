@@ -1102,4 +1102,45 @@ HWTEST_F(GridScrollerTestTwoNg, UpdateContentEndOffset, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.prevOffset_, -70);
     EXPECT_EQ(pattern_->GetTotalOffset(), 670);
 }
+
+/**
+ * @tc.name: ScrollToIndexWithContentAndCrossCountChanged
+ * @tc.desc: test Scroll to index with contentOffset and crossCount changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestTwoNg, ScrollToIndexWithContentAndCrossCountChanged, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateItemsInLazyForEach(30, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    bool smooth = false;
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->info_.startIndex_, 15);
+    EXPECT_EQ(pattern_->info_.endIndex_, 29);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr");
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 15);
+    EXPECT_EQ(pattern_->info_.endIndex_, 19);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 14);
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 12);
+    EXPECT_EQ(pattern_->info_.endIndex_, 26);
+
+    ScrollToIndex(6, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+    EXPECT_EQ(pattern_->info_.endIndex_, 17);
+}
 } // namespace OHOS::Ace::NG

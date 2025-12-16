@@ -701,6 +701,7 @@ void TextEmojiProcessor::OnTagQueueState(uint32_t codePoint, int32_t& state, int
 
 int32_t TextEmojiProcessor::GetEmojiLengthAtEnd(const std::u32string& u32Content, bool isCountNonEmoji)
 {
+    CHECK_NULL_RETURN(u32Content.length() != 0, 0);
     int32_t deleteCount = 0;
     int32_t lastVSCount = 0;
     int32_t state = STATE_BEGIN;

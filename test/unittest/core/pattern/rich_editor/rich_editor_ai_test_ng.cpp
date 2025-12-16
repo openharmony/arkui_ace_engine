@@ -175,7 +175,6 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level2)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
     auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_EQ("", richEditorPattern->aiWriteAdapter_->GetBundleName());
     EXPECT_FALSE(result);
 }
 
@@ -206,8 +205,6 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level2)
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
     auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_EQ("bundleName", richEditorPattern->aiWriteAdapter_->GetBundleName());
-    EXPECT_EQ("abilityName", richEditorPattern->aiWriteAdapter_->GetAbilityName());
     EXPECT_FALSE(result);
 }
 
@@ -239,8 +236,6 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
     theme->aiWriteAbilityName_ = "abilityName";
     theme->aiWriteIsSupport_ = "true";
     auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_EQ("bundleName", richEditorPattern->aiWriteAdapter_->GetBundleName());
-    EXPECT_EQ("abilityName", richEditorPattern->aiWriteAdapter_->GetAbilityName());
     EXPECT_TRUE(result);
 }
 
@@ -738,4 +733,18 @@ HWTEST_F(RichEditorAITestOneNg, NeedClearAISpanMap001, TestSize.Level2)
     EXPECT_TRUE(richEditorPattern->NeedClearAISpanMap(u"hello1"));
 }
 
+
+/**
+ * @tc.name: GetAIWriteAdapter001
+ * @tc.desc: test GetAIWriteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, GetAIWriteAdapter001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto aiWriteAdapter = richEditorPattern->GetAIWriteAdapter();
+    EXPECT_NE(aiWriteAdapter, nullptr);
+}
 }

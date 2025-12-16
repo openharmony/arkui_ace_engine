@@ -15,18 +15,24 @@
 
 #include "reverse_converter.h"
 
+// SORTED_SECTION
 #include "base/utils/string_utils.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 #include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
-#include "core/interfaces/native/implementation/image_attachment_peer.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/nav_destination_context_peer.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
+#include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
@@ -35,6 +41,8 @@
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/utility/peer_utils.h"
+
+#include "ace_engine_types.h"
 #include "converter.h"
 #include "validators.h"
 
@@ -135,44 +143,6 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_font_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx)
-{
-    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
-    dst.language = Converter::ArkValue<Ark_String>(src.font, ctx);
-}
-
-void AssignArkValue(Ark_font_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx)
-{
-    dst.fontSetName = Converter::ArkValue<Ark_String>(src.groupName, ctx);
-    dst.fallback = Converter::ArkValue<Array_font_UIFontFallbackInfo>(src.fallbackInfoSet, ctx);
-}
-
-void AssignArkValue(Ark_font_UIFontAdjustInfo& dst, const AdjustInfo& src)
-{
-    dst.weight = Converter::ArkValue<Ark_Float64>(src.origValue);
-    dst.to = Converter::ArkValue<Ark_Int32>(src.newValue);
-}
-
-void AssignArkValue(Ark_font_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx)
-{
-    dst.name = Converter::ArkValue<Ark_String>(src.familyName, ctx);
-    dst.weight = Converter::ArkValue<Ark_Float64>(src.weight);
-}
-
-void AssignArkValue(Ark_font_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx)
-{
-    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
-    dst.alias = Converter::ArkValue<Array_font_UIFontAliasInfo>(src.aliasSet, ctx);
-    dst.adjust = Converter::ArkValue<Array_font_UIFontAdjustInfo>(src.adjustSet, ctx);
-}
-
-void AssignArkValue(Ark_font_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx)
-{
-    dst.fontDir = Converter::ArkValue<Array_String>(src.fontDirSet, ctx);
-    dst.generic = Converter::ArkValue<Array_font_UIFontGenericInfo>(src.genericSet, ctx);
-    dst.fallbackGroups = Converter::ArkValue<Array_font_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
-}
-
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
@@ -185,30 +155,13 @@ void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvCon
     dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo, ctx);
 }
 
-void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
-{
-    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxAscent);
-    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxDescent);
-    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxLeft);
-    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxRight);
-    dst.alphabeticBaseline = Converter::ArkValue<Ark_Float64>(src.alphabeticBaseline);
-    dst.emHeightAscent = Converter::ArkValue<Ark_Float64>(src.emHeightAscent);
-    dst.emHeightDescent = Converter::ArkValue<Ark_Float64>(src.emHeightDescent);
-    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxAscent);
-    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxDescent);
-    dst.hangingBaseline = Converter::ArkValue<Ark_Float64>(src.hangingBaseline);
-    dst.ideographicBaseline = Converter::ArkValue<Ark_Float64>(src.ideographicBaseline);
-    dst.width = Converter::ArkValue<Ark_Float64>(src.width);
-    dst.height = Converter::ArkValue<Ark_Float64>(src.height);
-}
-
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.Value());
     auto unit = static_cast<int32_t>(src.Unit());
-    
+
     dst.unit = static_cast<Ark_LengthUnit>(unit);
-    dst.value = Converter::ArkValue<Ark_Number>(value);
+    dst.value = Converter::ArkValue<Ark_Float64>(value);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -246,16 +199,8 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
 
 void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
 {
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
-}
-
-void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
-{
-    CHECK_NULL_VOID(src);
-    dst.navigationId = ArkValue<Ark_String>(src->navigationId);
-    dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
-    dst.uniqueId = ArkValue<Opt_Int32>(src->uniqueId);
+    dst.x = Converter::ArkValue<Ark_Float64>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
@@ -306,7 +251,7 @@ void AssignArkValue(Ark_String& dst, const CalcDimension& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src, ConvContext *ctx)
@@ -331,7 +276,7 @@ void AssignArkValue(Ark_Length& dst, const CalcLength& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Dimension& dst, const float& src)
@@ -529,7 +474,7 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
     auto duUnit = static_cast<int32_t>(du);
     return {
         .unit = static_cast<Ark_LengthUnit>(duUnit),
-        .value = ArkValue<Ark_Number>(value),
+        .value = ArkValue<Ark_Float64>(value),
     };
 }
 
@@ -555,10 +500,10 @@ void AssignArkValue(Ark_RectResult& dst, const RectF& src)
 
 void AssignArkValue(Ark_Frame& dst, const RectF& src)
 {
-    dst.x = ArkValue<Ark_Number>(src.GetX());
-    dst.y = ArkValue<Ark_Number>(src.GetY());
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.x = ArkValue<Ark_Float64>(src.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.GetY());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 template<typename PeerType, typename AceSpan>
@@ -623,8 +568,8 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
@@ -752,262 +697,6 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.params = Converter::ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(paramsArray, ctx);
     dst.type = Converter::ArkValue<Opt_Int32>(src.GetType());
 }
-void AssignArkValue(Ark_text_Affinity& dst, const TextAffinity& src)
-{
-    switch (src) {
-        case TextAffinity::UPSTREAM:
-            dst = Ark_text_Affinity::ARK_TEXT_AFFINITY_UPSTREAM;
-            break;
-        case TextAffinity::DOWNSTREAM:
-            dst = Ark_text_Affinity::ARK_TEXT_AFFINITY_DOWNSTREAM;
-            break;
-        default:
-            LOGE("Unexpected enum value in TextAffinity: %{public}d", src);
-            dst = Ark_text_Affinity::ARK_TEXT_AFFINITY_UPSTREAM;
-            break;
-    }
-}
-void AssignArkValue(Ark_common2D_Rect& dst, const OHOS::Ace::NG::RectT<float>& src)
-{
-    dst.left = Converter::ArkValue<Ark_Float64>(src.Left());
-    dst.top = Converter::ArkValue<Ark_Float64>(src.Top());
-    dst.right = Converter::ArkValue<Ark_Float64>(src.Right());
-    dst.bottom = Converter::ArkValue<Ark_Float64>(src.Bottom());
-}
-void AssignArkValue(Ark_text_TextDirection& dst, const OHOS::Ace::TextDirection& src)
-{
-    switch (src) {
-        case OHOS::Ace::TextDirection::LTR:
-            dst = Ark_text_TextDirection::ARK_TEXT_TEXT_DIRECTION_LTR;
-            break;
-        case OHOS::Ace::TextDirection::RTL:
-            dst = Ark_text_TextDirection::ARK_TEXT_TEXT_DIRECTION_RTL;
-            break;
-        default:
-            LOGE("Unexpected enum value in TextDirection: %{public}d", src);
-            dst = Ark_text_TextDirection::ARK_TEXT_TEXT_DIRECTION_LTR;
-            break;
-    }
-}
-void AssignArkValue(Ark_text_TextBox& dst, const ParagraphManager::TextBox& src)
-{
-    AssignArkValue(dst.direction, src.direction_);
-    dst.rect = Converter::ArkValue<Ark_common2D_Rect>(src.rect_);
-}
-void AssignArkValue(Ark_text_LineMetrics& dst, const OHOS::Ace::TextLineMetrics& src, ConvContext *ctx)
-{
-    dst.startIndex = Converter::ArkValue<Ark_Int32>(src.startIndex);
-    dst.endIndex = Converter::ArkValue<Ark_Int32>(src.endIndex);
-    dst.ascent = Converter::ArkValue<Ark_Float64>(src.ascender);
-    dst.descent = Converter::ArkValue<Ark_Float64>(src.descender);
-    dst.height = Converter::ArkValue<Ark_Float64>(src.height);
-    dst.width = Converter::ArkValue<Ark_Float64>(src.width);
-    dst.left = Converter::ArkValue<Ark_Float64>(src.x);
-    dst.baseline = Converter::ArkValue<Ark_Float64>(src.baseline);
-    dst.lineNumber = Converter::ArkValue<Ark_Int32>(src.lineNumber);
-    dst.topHeight = Converter::ArkValue<Ark_Float64>(src.y);
-    dst.runMetrics = Converter::ArkValue<Map_Int32_text_RunMetrics>(src.runMetrics, ctx);
-}
-void AssignArkValue(Map_Int32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx)
-{
-    dst = {};
-    CHECK_NULL_VOID(ctx);
-    CHECK_NULL_VOID(src.size());
-    dst = ctx->AllocateMap<Map_Int32_text_RunMetrics>(src.size());
-    Ark_Int32* keys = dst.keys;
-    Ark_text_RunMetrics* values = dst.values;
-    CHECK_NULL_VOID(keys && values);
-    for (const auto& item : src) {
-        *keys++ = Converter::ArkValue<Ark_Int32>(item.first, ctx);
-        *values++ = Converter::ArkValue<Ark_text_RunMetrics>(item.second, ctx);
-    }
-    dst.size = src.size();
-}
-void AssignArkValue(Ark_text_RunMetrics& dst, const RunMetrics& src, ConvContext *ctx)
-{
-    dst.textStyle = Converter::ArkValue<Ark_text_TextStyle>(src.textStyle, ctx);
-    dst.fontMetrics = Converter::ArkValue<Ark_drawing_FontMetrics>(src.fontMetrics, ctx);
-}
-void AssignArkValue(Ark_text_TextStyle& dst, const TextStyle& src, ConvContext *ctx)
-{
-    Opt_text_Decoration decoration = {};
-    decoration.tag = INTEROP_TAG_OBJECT;
-    decoration.value = Converter::ArkValue<Ark_text_Decoration>(src.GetTextDecorationFirst());
-    dst.decoration = decoration;
-    Opt_common2D_Color color = {};
-    color.tag = INTEROP_TAG_OBJECT;
-    color.value = Converter::ArkValue<Ark_common2D_Color>(src.GetTextColor());
-    dst.color = color;
-    Opt_text_FontWeight fontWeight = {};
-    fontWeight.tag = INTEROP_TAG_OBJECT;
-    fontWeight.value = Converter::ArkValue<Ark_text_FontWeight>(src.GetFontWeight());
-    dst.fontWeight = fontWeight;
-    Opt_text_FontStyle fontStyle = {};
-    fontStyle.tag = INTEROP_TAG_OBJECT;
-    fontStyle.value = Converter::ArkValue<Ark_text_FontStyle>(src.GetFontStyle());
-    dst.fontStyle = fontStyle;
-    Opt_text_TextBaseline textBaseline = {};
-    textBaseline.tag = INTEROP_TAG_OBJECT;
-    textBaseline.value = Converter::ArkValue<Ark_text_TextBaseline>(src.GetTextBaseline());
-    dst.baseline = textBaseline;
-    dst.fontFamilies = Converter::ArkValue<Opt_Array_String>(src.GetFontFamilies(), ctx);
-    dst.fontSize = Converter::ArkValue<Opt_Float64>(src.GetFontSize().Value());
-    dst.letterSpacing = Converter::ArkValue<Opt_Float64>(src.GetLetterSpacing().Value());
-    dst.wordSpacing = Converter::ArkValue<Opt_Float64>(src.GetWordSpacing().Value());
-    dst.heightScale = Converter::ArkValue<Opt_Float64>(src.GetHeightScale());
-    dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.GetHalfLeading());
-    dst.heightOnly = Converter::ArkValue<Opt_Boolean>(src.GetHeightOnly());
-    dst.ellipsis = Converter::ArkValue<Opt_String>(StringUtils::Str16ToStr8(src.GetEllipsis()), ctx);
-    Opt_text_EllipsisMode ellipsisMode = {};
-    ellipsisMode.tag = INTEROP_TAG_OBJECT;
-    ellipsisMode.value = Converter::ArkValue<Ark_text_EllipsisMode>(src.GetEllipsisMode());
-    dst.ellipsisMode = ellipsisMode;
-    dst.locale = Converter::ArkValue<Opt_String>(src.GetLocale(), ctx);
-    dst.baselineShift = Converter::ArkValue<Opt_Float64>(Ark_Empty());
-    Opt_Array_text_FontFeature fontFeatures = {};
-    fontFeatures.tag = INTEROP_TAG_UNDEFINED;
-    dst.fontFeatures = fontFeatures;
-    Opt_Array_text_TextShadow textShadows = {};
-    textShadows.tag = INTEROP_TAG_UNDEFINED;
-    dst.textShadows = textShadows;
-    Opt_text_RectStyle backgroundRect = {};
-    backgroundRect.tag = INTEROP_TAG_UNDEFINED;
-    dst.backgroundRect = backgroundRect;
-    Opt_Array_text_FontVariation fontVariations = {};
-    fontVariations.tag = INTEROP_TAG_UNDEFINED;
-    dst.fontVariations = fontVariations;
-}
-void AssignArkValue(Ark_text_Decoration& dst, const TextDecoration& src, ConvContext *ctx)
-{
-    Opt_text_TextDecorationType textDecoration = {};
-    textDecoration.tag = INTEROP_TAG_OBJECT;
-    textDecoration.value = Converter::ArkValue<Ark_text_TextDecorationType>(src);
-    dst.textDecoration = textDecoration;
-    Opt_common2D_Color color = {};
-    color.tag = INTEROP_TAG_UNDEFINED;
-    dst.color = color;
-    Opt_text_TextDecorationStyle decorationStyle = {};
-    decorationStyle.tag = INTEROP_TAG_UNDEFINED;
-    dst.decorationStyle = decorationStyle;
-    Opt_Float64 decorationThicknessScale = Converter::ArkValue<Opt_Float64>(Ark_Empty());
-    dst.decorationThicknessScale = decorationThicknessScale;
-}
-void AssignArkValue(Ark_text_TextDecorationType& dst, const TextDecoration& src, ConvContext *ctx)
-{
-    switch (src) {
-        case TextDecoration::NONE:
-            dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_NONE;
-            break;
-        case TextDecoration::UNDERLINE:
-            dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_UNDERLINE;
-            break;
-        case TextDecoration::OVERLINE:
-            dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_OVERLINE;
-            break;
-        case TextDecoration::LINE_THROUGH:
-            dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH;
-            break;        
-        case TextDecoration::INHERIT:
-        default:
-            LOGE("Unexpected enum value in TextDecoration: %{public}d", src);
-            dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_NONE;
-            break;
-    }
-}
-void AssignArkValue(Ark_common2D_Color& dst, const Color& src, ConvContext *ctx)
-{
-    dst.alpha = Converter::ArkValue<Ark_Int32>(src.GetAlpha());
-    dst.red = Converter::ArkValue<Ark_Int32>(src.GetRed());
-    dst.green = Converter::ArkValue<Ark_Int32>(src.GetGreen());
-    dst.blue = Converter::ArkValue<Ark_Int32>(src.GetBlue());
-}
-void AssignArkValue(Ark_text_FontWeight& dst, const FontWeight& src, ConvContext *ctx)
-{
-    switch (src) {
-        case FontWeight::W100:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W100;
-            break;
-        case FontWeight::W200:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W200;
-            break;
-        case FontWeight::W300:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W300;
-            break;
-        case FontWeight::W400:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W400;
-            break;    
-        case FontWeight::W500:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W500;
-            break;
-        case FontWeight::W600:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W600;
-            break;
-        case FontWeight::W700:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W700;
-            break;
-        case FontWeight::W800:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W800;
-            break;
-        case FontWeight::W900:
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W900;
-            break;
-        default:
-            LOGE("Unexpected enum value in FontWeight: %{public}d", src);
-            dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W400;
-            break;
-    }
-}
-void AssignArkValue(Ark_text_FontStyle& dst, const OHOS::Ace::FontStyle& src, ConvContext *ctx)
-{
-    switch (src) {
-        case OHOS::Ace::FontStyle::NORMAL:
-            dst = Ark_text_FontStyle::ARK_TEXT_FONT_STYLE_NORMAL;
-            break;
-        case OHOS::Ace::FontStyle::ITALIC:
-            dst = Ark_text_FontStyle::ARK_TEXT_FONT_STYLE_ITALIC;
-            break;
-        case OHOS::Ace::FontStyle::NONE:
-            dst = Ark_text_FontStyle::ARK_TEXT_FONT_STYLE_OBLIQUE;
-            break;
-        default:
-            LOGE("Unexpected enum value in FontStyle: %{public}d", src);
-            dst = Ark_text_FontStyle::ARK_TEXT_FONT_STYLE_NORMAL;
-            break;
-    }
-}
-void AssignArkValue(Ark_text_TextBaseline& dst, const TextBaseline& src, ConvContext *ctx)
-{
-    switch (src) {
-        case TextBaseline::ALPHABETIC:
-            dst = Ark_text_TextBaseline::ARK_TEXT_TEXT_BASELINE_ALPHABETIC;
-            break;
-        case TextBaseline::IDEOGRAPHIC:
-            dst = Ark_text_TextBaseline::ARK_TEXT_TEXT_BASELINE_IDEOGRAPHIC;
-            break;
-        default:
-            LOGE("Unexpected enum value in TextBaseline: %{public}d", src);
-            dst = Ark_text_TextBaseline::ARK_TEXT_TEXT_BASELINE_ALPHABETIC;
-            break;
-    }
-}
-void AssignArkValue(Ark_text_EllipsisMode& dst, const EllipsisMode& src, ConvContext *ctx)
-{
-    switch (src) {
-        case EllipsisMode::HEAD:
-            dst = Ark_text_EllipsisMode::ARK_TEXT_ELLIPSIS_MODE_START;
-            break;
-        case EllipsisMode::MIDDLE:
-            dst = Ark_text_EllipsisMode::ARK_TEXT_ELLIPSIS_MODE_MIDDLE;
-            break;
-        case EllipsisMode::TAIL:
-            dst = Ark_text_EllipsisMode::ARK_TEXT_ELLIPSIS_MODE_END;
-            break;
-        default:
-            LOGE("Unexpected enum value in FontStyle: %{public}d", src);
-            dst = Ark_text_EllipsisMode::ARK_TEXT_ELLIPSIS_MODE_END;
-            break;
-    }
-}
 void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx)
 {
     dst.flags = Converter::ArkValue<Opt_Int32>(src.fFlags);
@@ -1085,8 +774,8 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
     dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
-        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value());
-        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin);
+        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value(), Converter::FC);
+        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin, Converter::FC);
     }
     dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
@@ -1159,11 +848,6 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
     dst.navDestinationId.value = Converter::ArkValue<Ark_String>(std::to_string(navDestinationId), Converter::FC);
 }
 
-void AssignArkValue(Ark_NavigationMode& dst, NG::NavigationMode& src)
-{
-    dst = static_cast<Ark_NavigationMode>(src);
-}
-
 void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src)
 {
     dst = static_cast<Ark_NavigationOperation>(src);
@@ -1228,14 +912,6 @@ void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, Co
     dst.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter);
     dst.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, ctx);
     dst.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, ctx);
-}
-
-void AssignArkValue(
-    Ark_NavPathStack& dst, const RefPtr<NG::GeneratedModifier::NavigationContext::NavigationStack>& src)
-{
-    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
-    peer->SetNavigationStack(src);
-    dst = peer;
 }
 
 void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)

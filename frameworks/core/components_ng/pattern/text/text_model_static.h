@@ -70,6 +70,9 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void ResetSelectionMenuOptions(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 };
 } // namespace OHOS::Ace::NG
 

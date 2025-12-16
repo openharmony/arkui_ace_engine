@@ -49,6 +49,9 @@ TouchType ConvertTouchEventType(int32_t originAction)
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_MOVE, TouchType::LEVITATE_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_IN_WINDOW, TouchType::LEVITATE_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_OUT_WINDOW, TouchType::LEVITATE_OUT_WINDOW },
     };
     auto typeIter = actionMap.find(originAction);
     if (typeIter == actionMap.end()) {
@@ -492,6 +495,9 @@ void ConvertMouseEvent(
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
     events.deviceId = pointerEvent->GetDeviceId();
+    if (pointerEvent->GetRightButtonSource() == MMI::PointerEvent::RightButtonSource::TOUCHPAD_TWO_FINGER_TAP) {
+        events.isRightButtonEventFromDoulbeTap = true;
+    }
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -827,6 +833,17 @@ void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEven
     event.absHat0YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT0Y);
     event.absBrakeValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_BRAKE);
     event.absGasValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_GAS);
+    event.absRxValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RX);
+    event.absRyValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RY);
+    event.absThrottleValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_THROTTLE);
+    event.absRudderValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RUDDER);
+    event.absWheelValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_WHEEL);
+    event.absHat1XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT1X);
+    event.absHat1YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT1Y);
+    event.absHat2XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT2X);
+    event.absHat2YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT2Y);
+    event.absHat3XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3X);
+    event.absHat3YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3Y);
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetNonPointerAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();

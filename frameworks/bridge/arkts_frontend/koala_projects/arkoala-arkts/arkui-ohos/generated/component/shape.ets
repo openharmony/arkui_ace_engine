@@ -83,10 +83,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -111,10 +111,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -162,10 +162,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx0)
-                } else if (valueTmpValueTmpElement instanceof number) {
+                } else if (valueTmpValueTmpElement instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
-                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as double
+                    thisSerializer.writeFloat64(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource

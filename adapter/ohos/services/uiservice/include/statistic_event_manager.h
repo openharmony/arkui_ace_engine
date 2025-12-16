@@ -19,6 +19,7 @@
 #include <memory>
 #include <singleton.h>
 #include <list>
+#include <set>
 
 #include "event_handler.h"
 #include "event_runner.h"
@@ -28,32 +29,36 @@ namespace OHOS {
 namespace Ace {
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 struct StatisticEvent {
-    AppInfoParcel appInfo;
-    StatisticEventInfoParcel eventInfo;
+    std::string eventName;
+    std::vector<int32_t> eventCounts;
+    std::vector<std::string> bundleNames;
 };
 
 class StatisticEventManager final {
     DECLARE_DELAYED_SINGLETON(StatisticEventManager)
 public:
     void SendStatisticEvents(const AppInfoParcel& appInfo, const std::vector<StatisticEventInfoParcel>& eventInfos);
-    void PostTimedEvent(uint32_t interval);
-    void ReportTimedStatisticEvent(uint32_t interval);
+    void PostTimedEvent(int32_t interval);
+    void ReportTimedStatisticEvent(int32_t interval);
     void Init(std::shared_ptr<EventHandler>& handler);
 private:
     void InitTimedMap();
     void InitReporter();
     void StartTimedEvent();
-    void ReportStatisticEvent(const std::string& eventName);
-    void ReportFaAppStartEvent(StatisticEvent& event);
-    void AggregateEvent(std::vector<StatisticEvent>& events,
+    void ReportStatisticEvent(StatisticEvent& event);
+    void ReportCommonStatistiEvent(StatisticEvent& event);
+    void ReportDefaultTimedStatisticEvents();
+    void ReportCustomTimedStatisticEvents(int32_t interval);
+    void AggregateEvent(StatisticEvent& event,
         const AppInfoParcel& newAppInfo, const StatisticEventInfoParcel& newEventInfo);
 
     int32_t defaultReportInterval_ = 1;
     std::shared_ptr<EventHandler> handler_;
-    std::map<uint32_t, std::list<std::string>> timedMap_;
-    std::map<std::string, std::vector<StatisticEvent>> eventMap_;
+    std::set<int32_t> timedSet_;
+    std::map<std::string, StatisticEvent> eventMap_;
+    std::map<std::string, int32_t> customEventReportInterval_;
     using ReporterFunc = void (StatisticEventManager::*)(StatisticEvent& event);
-    std::map<std::string, ReporterFunc> reporterFuncMap_;
+    std::map<std::string, ReporterFunc> customEventReportFunc_;
 };
 }  // namespace Ace
 }  // namespace OHOS

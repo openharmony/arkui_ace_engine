@@ -105,7 +105,6 @@ bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
-bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
 std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::gridIrregularLayoutEnable_ = false;
@@ -138,6 +137,7 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER
 bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
+bool SystemProperties::isOpenYuvDecode_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -300,6 +300,11 @@ bool SystemProperties::IsPCMode()
     return false;
 }
 
+bool SystemProperties::IsAutoFillSupport()
+{
+    return false;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return false;
@@ -333,11 +338,6 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
-}
-
-bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
-{
-    return forceSplitIgnoreOrientationEnabled_;
 }
 
 std::optional<bool> SystemProperties::GetArkUIHookEnabled()

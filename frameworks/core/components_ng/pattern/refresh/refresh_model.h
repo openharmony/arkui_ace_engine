@@ -64,6 +64,7 @@ public:
     virtual void ResetLoadingText() {}
     virtual void SetRefreshOffset(const Dimension& offset) = 0;
     virtual void SetPullToRefresh(bool isPullToRefresh) = 0;
+    virtual void SetPullUpToCancelRefresh(bool isPullUpToCancelRefresh) = 0;
     virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
     virtual void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 private:

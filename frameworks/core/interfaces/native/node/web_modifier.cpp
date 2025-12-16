@@ -46,6 +46,7 @@ constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
 constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
 constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
+constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
@@ -1533,9 +1534,9 @@ void SetOnWindowNewExt(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
-    CHECK_NULL_VOID(originalCallbackPtr);
     if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
         auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
             auto* onWindowNewExt = static_cast<WebWindowNewExtEvent*>(event.get());
             if (onWindowNewExt != nullptr) {
@@ -2478,6 +2479,20 @@ void ResetEnableImageAnalyzer(ArkUINodeHandle node)
     WebModelNG::SetEnableImageAnalyzer(frameNode, DEFAULT_ENABLE_IMAGE_ANALYZER);
 }
 
+void SetEnableAutoFill(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableAutoFill(frameNode, value);
+}
+
+void ResetEnableAutoFill(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableAutoFill(frameNode, DEFAULT_AUTO_FILL_ENABLED);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2804,6 +2819,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
         .setOnMicrophoneCaptureStateChanged = SetOnMicrophoneCaptureStateChanged,
         .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
+        .setEnableAutoFill = SetEnableAutoFill,
+        .resetEnableAutoFill = ResetEnableAutoFill,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3047,6 +3064,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
         .setOnMicrophoneCaptureStateChanged = SetOnMicrophoneCaptureStateChanged,
         .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
+        .setEnableAutoFill = SetEnableAutoFill,
+        .resetEnableAutoFill = ResetEnableAutoFill,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -16,6 +16,8 @@
 #include "frameworks/bridge/common/dom/dom_document.h"
 
 #include "base/log/event_report.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
 #include "frameworks/bridge/common/dom/dom_dialog.h"
@@ -28,7 +30,6 @@
 #include "frameworks/bridge/common/dom/dom_label.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
-#include "frameworks/bridge/common/dom/dom_marquee.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_picker_view.h"
@@ -72,7 +73,6 @@
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #ifndef WEARABLE_PRODUCT
-#include "frameworks/bridge/common/dom/dom_badge.h"
 #if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
 #include "frameworks/bridge/common/dom/dom_camera.h"
 #endif
@@ -134,7 +134,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_ANIMATE, &DOMNodeCreator<DOMSvgAnimate> },
         { DOM_NODE_TAG_ANIMATE_MOTION, &DOMNodeCreator<DOMSvgAnimateMotion> },
         { DOM_NODE_TAG_ANIMATE_TRANSFORM, &DOMNodeCreator<DOMSvgAnimateTransform> },
-        { DOM_NODE_TAG_BADGE, &DOMNodeCreator<DOMBadge> },
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
 #ifndef WEARABLE_PRODUCT
@@ -169,7 +168,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
-        { DOM_NODE_TAG_MARQUEE, &DOMNodeCreator<DOMMarquee> },
         { DOM_NODE_TAG_MASK, &DOMNodeCreator<DOMSvgMask> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_MENU, &DOMNodeCreator<DOMMenu> },
@@ -262,9 +260,17 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
             creatorIndex = BinarySearchFindIndex(phoneNodeCreators, ArraySize(phoneNodeCreators), tag.c_str());
             if (creatorIndex >= 0) {
                 domNode = phoneNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
+            } else {
+                
+                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
+                if (loader) {
+                    LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
+                    domNode = loader->CreateDomNode(nodeId, tag);
+                }
+                if (!domNode) {
+                    return nullptr;
+                }
             }
-        } else {
-            return nullptr;
         }
 #endif
     }

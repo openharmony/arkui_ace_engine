@@ -23,6 +23,7 @@ README_zh.md @arkui_architecture
 .gitcode/ @arkui_architecture
 .gitcode/CODEOWNERS @liyujie43
 .gitcode/owner_config.json @liyujie43
+.gitcode/multi_thread_mapping.json @liyujie43
 
 [OpenHarmony adapter]
 adapter/ohos/build/ @arkui_architecture
@@ -181,6 +182,7 @@ adapter/ohos/osal/resource_convertor.h @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.cpp @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.h @arkui_framework_resource
 adapter/ohos/osal/ressched_report.cpp @arkui_framework_resource
+adapter/ohos/osal/statistic_event_adapter.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.h @arkui_framework_xnode
 adapter/ohos/osal/stylus_detector_default.cpp @ArkUI_Event
@@ -2464,6 +2466,7 @@ frameworks/core/components_ng/layout/ @arkuilayout1
 frameworks/core/components_ng/layout/section/ @arkuiscroll
 frameworks/core/components_ng/manager/avoid_info/ @arkui_navigation
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
+frameworks/core/components_ng/manager/content_change_manager/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/display_sync/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/drag_drop/ @ArkUI_Event
 frameworks/core/components_ng/manager/focus/ @ArkUI_Event
@@ -3551,6 +3554,7 @@ test/unittest/core/common/storage/ @arkui_statemgmt
 test/unittest/core/common/task/ @arkui_framework_xnode
 test/unittest/core/common/vibrator/ @arkui_framework_xnode
 test/unittest/core/common/transform/ @ArkUI_Event
+test/unittest/core/common/statistic_event/ @arkui_framework_xnode
 test/unittest/core/event/ @ArkUI_Event
 test/unittest/core/gestures/ @ArkUI_Event
 test/unittest/core/image_file_cache/ @arkui001
@@ -3560,6 +3564,7 @@ test/unittest/core/layout/ @arkuilayout1
 test/unittest/core/layout/safe_area/ @arkuilayout1
 test/unittest/core/manager/  @ArkUI_Event
 test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_navigation
+test/unittest/core/manager/content_change_manager_test_ng.cpp  @arkui_framework_xnode
 test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_navigation
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout1
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_navigation
@@ -3723,8 +3728,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/s
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
-[Koala mirror]
-frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
+[UT for CAPI]
 test/unittest/capi/ @huaweimaxuchu
 
 [window scene]

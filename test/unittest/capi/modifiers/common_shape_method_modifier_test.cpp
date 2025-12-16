@@ -54,8 +54,8 @@ const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
     { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-    { ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+    { ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+    { ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
     { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { CreateResourceUnion<Opt_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },

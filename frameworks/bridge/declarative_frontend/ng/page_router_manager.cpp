@@ -34,6 +34,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1259,9 +1260,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !stageManager->GetForceSplitEnable()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !forceSplitMgr->IsForceSplitEnable(true)) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);

@@ -14,14 +14,16 @@
  */
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
-import { KPointer } from "@koalaui/interop"
+import { KPointer, nullptr } from '@koalaui/interop';
+import { IncrementalNode } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
-import { CustomBuilder } from "./component/builder"
-import { CustomNodeBuilder, ArkComponentRootPeer } from "#generated"
+import { CustomBuilder, CustomBuilderT } from "./component/builder"
+import { CustomNodeBuilder, ArkComponentRootPeer, CustomBuilderT_Arkui_Component_Enums_ResponseType } from "#generated"
 import { UIContextUtil } from './base/UIContextUtil';
 import { UIContextImpl } from './base/UIContextImpl';
 import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 import { ExtendableComponent } from './component/extendableComponent';
+import { ResponseType } from "./component/enums"
 
 // Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
@@ -47,6 +49,10 @@ function componentRootPeerFactory(): PeerNode {
     return ArkComponentRootPeer.create(undefined)
 }
 
+function componentFreeRootFactory(): IncrementalNode {
+    return new IncrementalNode();
+}
+
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
         const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -66,8 +72,8 @@ export class CallbackTransformer {
                     ExtendableComponent.current = lastExtendableComponent;
                 }
             };
-            const peer = createUiDetachedRoot(componentRootPeerFactory, cb);
-            return peer.peer.ptr;
+            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(componentFreeRootFactory, cb);
+            return peer ? peer.peer.ptr : nullptr;
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
@@ -76,5 +82,28 @@ export class CallbackTransformer {
     static transformToPeerFromCustomBuilder(value: CustomBuilder): KPointer {
         const peer = createUiDetachedRoot(componentRootPeerFactory, value)
         return peer.peer.ptr
+    }
+
+    static transformFromCustomBuilderT(value: CustomBuilderT<ResponseType>): CustomBuilderT_Arkui_Component_Enums_ResponseType {
+        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        const currentExtendableComponent = ExtendableComponent.current;
+        return (t: ResponseType, parentNodeId: KPointer): KPointer => {
+            /** @memo */
+            const cb = () => {
+                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                const lastExtendableComponent = ExtendableComponent.current;
+                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+                ExtendableComponent.current = currentExtendableComponent;
+                try {
+                    value(t);
+                } finally {
+                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                    ExtendableComponent.current = lastExtendableComponent;
+                }
+            };
+            const peer = createUiDetachedRoot(componentRootPeerFactory, cb);
+            return peer.peer.ptr;
+        }
     }
 }

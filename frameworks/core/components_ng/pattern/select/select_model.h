@@ -30,6 +30,7 @@
 namespace OHOS::Ace {
 namespace NG {
 struct MenuParam;
+enum class MenuKeyboardAvoidMode;
 }
 enum class SelectColorType {
     FONT_COLOR,
@@ -159,6 +160,8 @@ public:
     virtual void SetSelectedOptionFontColorByUser(bool isValidValue = true) {};
     virtual void SetOptionBgColorByUser(bool isValidValue = true) {};
     virtual void SetSelectedOptionBgColorByUser(bool isValidValue = true) {};
+    virtual void SetKeyboardAvoidMode(const std::optional<NG::MenuKeyboardAvoidMode>& mode) {};
+    virtual void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) {};
 
 private:
     static std::unique_ptr<SelectModel> instance_;

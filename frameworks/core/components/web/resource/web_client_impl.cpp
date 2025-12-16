@@ -149,6 +149,16 @@ std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<u
     return delegate->SpanstringConvertHtml(content);
 }
 
+bool VaultPlainTextImpl::ProcessAutoFillOnPaste()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->ProcessAutoFillOnPaste();
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -709,7 +719,7 @@ bool WebClientImpl::RunContextMenu(
     ContainerScope scope(delegate->GetInstanceId());
     bool jsResult = false;
     auto param = std::make_shared<ContextMenuEvent>(AceType::MakeRefPtr<ContextMenuParamOhos>(params),
-        AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
+        AceType::MakeRefPtr<ContextMenuResultOhos>(callback, webDelegate_));
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -842,12 +852,10 @@ void WebClientImpl::OnWindowNewByJS(
 
 void WebClientImpl::OnWindowNewExtByJS(std::shared_ptr<NWeb::NWebWindowNewEventInfo> dataInfo)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "zhengx WebClientImpl::OnWindowNewExtByJS");
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnWindowNewExt(dataInfo);
-    TAG_LOGI(AceLogTag::ACE_WEB, "zhengx WebClientImpl::OnWindowNewExtByJS end");
 }
 
 void WebClientImpl::OnActivateContentByJS()

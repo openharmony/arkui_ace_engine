@@ -141,6 +141,11 @@ typedef enum {
      * @since 20
      */
     ARKUI_NODE_UNDEFINED,
+    /**
+     * Picker container.
+     * @since 23
+     */
+    ARKUI_NODE_PICKER = 1018,
 } ArkUI_NodeType;
 
 /**
@@ -2144,6 +2149,20 @@ typedef enum {
      */
     NODE_PIXEL_ROUND = 109,
     /**
+     * @brief Defines the motion path attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .object indicates a pointer to the ArkUI_MotionPathOptions. The parameter type is
+     * {@link ArkUI_MotionPathOptions}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .object indicates a pointer to the ArkUI_MotionPathOptions. The parameter type is
+     * {@link ArkUI_MotionPathOptions}. \n
+     *
+     * @since 23
+     */
+    NODE_MOTION_PATH = 111,
+    /**
      * @brief Defines the response region list attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
@@ -2900,6 +2919,59 @@ typedef enum {
     NODE_TEXT_TEXT_SELECTION = 1046,
 
     /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_COMPRESS_LEADING_PUNCTUATION = 1048,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INCLUDE_FONT_PADDING = 1049,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_FALLBACK_LINE_SPACING = 1050,
+
+    /**
+     * @brief Set the marquee options of text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the marquee options of text. The parameter type is {@link ArkUI_TextMarqueeOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the marquee options of text. The parameter type is {@link ArkUI_TextMarqueeOptions}.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_MARQUEE_OPTIONS = 1051,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2912,6 +2984,21 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_DIRECTION = 1052,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the {@link Arkui_AttributeItem} parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value {@link Arkui_AttributeItem}: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link ArkUI_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_SELECTED_DRAG_PREVIEW_STYLE = 1053,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -3977,6 +4064,46 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE = 7041,
 
     /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_COMPRESS_LEADING_PUNCTUATION = 7044,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_INCLUDE_FONT_PADDING = 7045,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_FALLBACK_LINE_SPACING = 7046,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3989,6 +4116,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_INPUT_DIRECTION = 7047,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_INPUT_SELECTED_DRAG_PREVIEW_STYLE = 7048,
 
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
@@ -4488,6 +4629,46 @@ typedef enum {
     NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE = 8037,
 
     /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_COMPRESS_LEADING_PUNCTUATION = 8040,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_INCLUDE_FONT_PADDING = 8041,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_FALLBACK_LINE_SPACING = 8042,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4500,6 +4681,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_DIRECTION = 8044,
+
+    /**
+     * @brief Used to set the selected drag preview style. \n
+     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * \n
+     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_AREA_SELECTED_DRAG_PREVIEW_STYLE = 8045,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -6517,6 +6712,25 @@ typedef enum {
     NODE_LIST_LANES_ITEMFILLPOLICY = 1003018,
 
     /**
+     * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>List</b> container. 
+     * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+     * empty branches (items without content) in the <b>List</b> will be rendered and set to width 0 and height 0, 
+     * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+     * data source may have gaps or when maintaining specific layout positions is required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+     * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+     * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 23
+     */
+    NODE_LIST_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1003019,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -7182,6 +7396,21 @@ typedef enum {
      * @since 20
      */
     NODE_REFRESH_MAX_PULL_DOWN_DISTANCE = 1009005,
+    /**
+     * @brief Sets whether the pull-up gesture cancels refresh.
+     * This attribute can be set, reset, and obtained through the API as required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the pull-up gesture cancels refresh. The value <b>1</b> means that the pull-up gesture
+     * cancels refresh, and <b>0</b> means the opposite. Default value: <b>1</b>.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * * .value[0].i32: whether the pull-up gesture cancels refresh. The value <b>1</b> means that the pull-up gesture
+     * cancels refresh, and <b>0</b> means the opposite.
+     *
+     * @since 23
+     */
+    NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH = 1009006,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -7601,6 +7830,25 @@ typedef enum {
     NODE_GRID_MULTI_SELECTABLE = 1013013,
 
     /**
+     * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>Grid</b> container. 
+     * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+     * empty branches (items without content) in the <b>Grid</b> will be rendered and set to width 0 and height 0, 
+     * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+     * data source may have gaps or when maintaining specific layout positions is required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+     * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+     * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 23
+     */
+    NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013014,
+
+    /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -7903,6 +8151,64 @@ typedef enum {
      * @since 23
      */
     NODE_MONOPOLIZE_EVENTS = 117,
+
+    /**
+     * @brief Defines the index of the default selected item in the data selection range of the picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: index. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: index. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_OPTION_SELECTED_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_PICKER,
+
+    /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 23
+     */
+    NODE_PICKER_ENABLE_HAPTIC_FEEDBACK = 1018001,
+
+    /**
+     * @brief Defines whether to support scroll looping for the picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support scroll looping. The value <b>true</b> means to support scroll looping, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The value <b>1</b> means to support scroll looping, and <b>0</b> means the opposite. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_CAN_LOOP = 1018002,
+
+    /**
+     * @brief Sets the type and parameters of the selection indicator.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} Format: \n
+     * .object: Parameter type {@link ArkUI_PickerIndicatorStyle}.
+     * \n
+     * Attribute fetch method return value {@link ArkUI_AttributeItem} format: \n
+     * .object: Parameter type {@link ArkUI_PickerIndicatorStyle}.
+     *
+     * @since 23
+     */
+    NODE_PICKER_SELECTION_INDICATOR = 1018003,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -8327,7 +8633,7 @@ typedef enum {
      * The event is triggered when the component is touched. \n
      * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
      * {@link ArkUI_TouchTestInfo} object. \n
-     * @since 23
+     * @since 22
      */
     NODE_ON_CHILD_TOUCH_TEST = 32,
 
@@ -9620,6 +9926,32 @@ typedef enum {
      * @since 23
      */
     NODE_GRID_ITEM_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID_ITEM,
+
+    /**
+     * @brief Defines the event triggered when an item is selected in the <b>ARKUI_NODE_PICKER</b> component.
+     *
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 23
+     */
+    NODE_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_PICKER,
+
+     /**
+      * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+      * <b>ARKUI_NODE_PICKER</b> component.
+      *
+      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+      * {@link ArkUI_NodeComponentEvent}. \n
+      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+      * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+      *
+      * @since 23
+      */
+    NODE_PICKER_EVENT_ON_SCROLL_STOP = 1018001,
 } ArkUI_NodeEventType;
 
 /**
@@ -9753,7 +10085,7 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
  * @param nodeEvent Indicates the pointer to an <b>ArkUI_NodeEvent</b> object.
  * @return Returns the pointer to an <b>ArkUI_TouchTestInfo</b> object.
  *         Returns <b>null</b> if the parameter passed in is invalid or is not a touch test info.
- * @since 23
+ * @since 22
  */
 ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent);
 
@@ -11478,6 +11810,38 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
  * @since 21
  */
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Converts a point's coordinates with transform from the target node's coordinate system 
+ * to the current window's coordinate system.
+ *
+ * @param {ArkUI_NodeHandle} node ArkUI_NodeHandle The target node.
+ * @param {ArkUI_IntOffset} localPosition The point's coordinates in the target node's local coordinate system, in px.
+ * @param {ArkUI_IntOffset*} windowPosition The converted coordinates in the current window's coordinate system, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
+ * @since 23
+ */
+int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset localPosition,
+    ArkUI_IntOffset* windowPosition);
+ 
+/**
+ * @brief Converts a point's coordinates with transform from the window's coordinate system 
+ * to the target node's coordinate system.
+ *
+ * @param {ArkUI_NodeHandle} targetNode ArkUI_NodeHandle The target node.
+ * @param {ArkUI_IntOffset} windowPosition The point's coordinates in the window's coordinate system, in px.
+ * @param {ArkUI_IntOffset*} localPosition The converted coordinates in the target node's local coordinate system, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
+ * @since 23
+ */
+int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
+    ArkUI_IntOffset* localPosition);
 
 /** 
  * @brief Stop the animation being executed by the Swiper node.

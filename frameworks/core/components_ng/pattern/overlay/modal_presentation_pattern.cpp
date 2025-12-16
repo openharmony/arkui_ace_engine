@@ -15,6 +15,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -114,5 +115,30 @@ void ModalPresentationPattern::RegisterModalBgColorResFunc(
     } else {
         pattern->RemoveResObj("modalPage.backgroundColor");
     }
+}
+
+void ModalPresentationPattern::OnAppear()
+{
+    if (onAppear_) {
+        onAppear_();
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnDialogChangeEnd(GetHost());
+}
+
+void ModalPresentationPattern::OnDisappear()
+{
+    if (onDisappear_) {
+        isExecuteOnDisappear_ = true;
+        onDisappear_();
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnDialogChangeEnd(GetHost());
 }
 } // namespace OHOS::Ace::NG

@@ -161,11 +161,15 @@ public:
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetTextAreaScrollBarColor(const Color& value) override;
     void ResetTextAreaScrollBarColor() override;
     void SetTextDirection(TextDirection value) override;
     void ResetTextDirection() override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
 
     static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -381,6 +385,10 @@ public:
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value);
@@ -391,6 +399,9 @@ public:
     static void SetTextDirection(FrameNode* frameNode, TextDirection value);
     static void ResetTextDirection(FrameNode* frameNode);
     static TextDirection GetTextDirection(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

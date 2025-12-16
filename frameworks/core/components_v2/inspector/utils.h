@@ -523,6 +523,16 @@ inline MarqueeStartPolicy ConvertWrapStringToMarqueeStartPolicy(const std::strin
     return uMap.count(str) ? uMap.at(str) : MarqueeStartPolicy::DEFAULT;
 }
 
+inline MarqueeUpdatePolicy ConvertWrapStringToMarqueeUpdatePolicy(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeUpdatePolicy> uMap {
+        { "MarqueeUpdatePolicy.DEFAULT", MarqueeUpdatePolicy::DEFAULT },
+        { "MarqueeUpdatePolicy.PRESERVE_POSITION", MarqueeUpdatePolicy::PRESERVE_POSITION },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeUpdatePolicy::DEFAULT;
+}
+
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 {
     static const LinearEnumMapNode<FontStyle, std::string> fontStyleTable[] = {

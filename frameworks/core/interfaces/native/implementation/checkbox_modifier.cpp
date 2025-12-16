@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -153,7 +152,7 @@ void SetMarkImpl(Ark_NativePointer node,
         CheckBoxModelStatic::ResetCheckMarkColor(frameNode);
     }
 
-    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
     if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
         size = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
     }
@@ -164,7 +163,7 @@ void SetMarkImpl(Ark_NativePointer node,
     auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
     auto width = optValue->strokeWidth.tag == INTEROP_TAG_UNDEFINED
         ? defaultStroke
-        : Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+        : Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
     if (!width.has_value() || (width.value().Unit() == DimensionUnit::PERCENT) || (width.value().IsNegative())) {
         width = defaultStroke;
     }

@@ -55,6 +55,27 @@ int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions
     return result;
 }
 
+int32_t OH_ArkUI_SnapshotOptions_SetColorMode(ArkUI_SnapshotOptions* snapshotOptions, int32_t colorSpace, bool isAuto)
+{
+    CHECK_NULL_RETURN(snapshotOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_INTERNAL_ERROR);
+    auto result = impl->getSnapshotAPI()->snapshotOptionsSetColorMode(
+        reinterpret_cast<ArkUISnapshotOptions*>(snapshotOptions), colorSpace, isAuto);
+    return result;
+}
+
+int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
+    ArkUI_SnapshotOptions* snapshotOptions, int32_t dynamicRangeMode, bool isAuto)
+{
+    CHECK_NULL_RETURN(snapshotOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_INTERNAL_ERROR);
+    auto result = impl->getSnapshotAPI()->snapshotOptionsSetDynamicRangeMode(
+        reinterpret_cast<ArkUISnapshotOptions*>(snapshotOptions), dynamicRangeMode, isAuto);
+    return result;
+}
+
 int32_t OH_ArkUI_GetNodeSnapshot(
     ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions, OH_PixelmapNative** pixelmap)
 {
@@ -75,6 +96,10 @@ int32_t OH_ArkUI_GetNodeSnapshot(
             return ARKUI_ERROR_CODE_INTERNAL_ERROR;
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
             return ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            return ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            return ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED;
         default:
             return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }

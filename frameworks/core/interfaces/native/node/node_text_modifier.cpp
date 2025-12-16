@@ -76,6 +76,9 @@ constexpr int NUM_10 = 10;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
+constexpr Dimension DEFAULT_MARQUEE_STEP_VALUE = 4.0_vp;
+constexpr float DEFAULT_MARQUEE_STEP_NUMBER_VALUE = 4.0f;
+constexpr Dimension DEFAULT_MARQUEE_SPACING_WIDTH = 48.0_vp;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -1654,21 +1657,36 @@ void ResetTextEnableHapticFeedback(ArkUINodeHandle node)
     TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
 
-void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value)
+void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value,
+    void* spacingRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     TextMarqueeOptions marqueeOptions;
     marqueeOptions.UpdateTextMarqueeStart(value->start);
-    marqueeOptions.UpdateTextMarqueeStep(value->step);
+    marqueeOptions.UpdateTextMarqueeStep(GreatNotEqual(value->step, 0.0f) ? value->step :
+        DEFAULT_MARQUEE_STEP_VALUE.ConvertToPx());
     marqueeOptions.UpdateTextMarqueeLoop(value->loop);
     marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     marqueeOptions.UpdateTextMarqueeDelay(value->delay);
     marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
     marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+    marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
+    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
+    if (spacing.IsNegative()) {
+        spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
+    }
+    marqueeOptions.UpdateTextMarqueeSpacing(spacing);
 
     TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
 }
 
 void ResetMarqueeOptions(ArkUINodeHandle node)
@@ -1677,6 +1695,37 @@ void ResetMarqueeOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextMarqueeOptions marqueeOptions;
     TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MarqueeSpacing");
+    }
+}
+
+ArkUITextMarqueeOptions GetMarqueeOptions(ArkUINodeHandle node)
+{
+    ArkUITextMarqueeOptions option;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, option);
+    TextMarqueeOptions marqueeOptions = TextModelNG::GetMarqueeOptions(frameNode);
+
+    CalcDimension stepVal(marqueeOptions.GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_NUMBER_VALUE));
+    option.step = stepVal.ConvertToVp();
+    option.delay = marqueeOptions.GetTextMarqueeDelay().value_or(0);
+    option.loop = marqueeOptions.GetTextMarqueeLoop().value_or(-1);
+    option.marqueeStartPolicy =
+        static_cast<int32_t>(marqueeOptions.GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT));
+    option.start = marqueeOptions.GetTextMarqueeStart().value_or(true);
+    option.fromStart =
+        marqueeOptions.GetTextMarqueeDirection().value_or(MarqueeDirection::DEFAULT) == MarqueeDirection::DEFAULT;
+    option.fadeout = marqueeOptions.GetTextMarqueeFadeout().value_or(false);
+    option.marqueeUpdatePolicy =
+        static_cast<int32_t>(marqueeOptions.GetTextMarqueeUpdatePolicy().value_or(MarqueeUpdatePolicy::DEFAULT));
+    CalcDimension spacingVal = marqueeOptions.GetTextMarqueeSpacing().value_or(DEFAULT_MARQUEE_SPACING_WIDTH);
+    option.spacing.value = spacingVal.ConvertToVp();
+    option.spacing.units = static_cast<int32_t>(DimensionUnit::VP);
+    return option;
 }
 
 void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
@@ -2563,6 +2612,90 @@ void ResetTextBindSelectionMenu(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetBindSelectionMenu(frameNode);
 }
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+ArkUI_Bool GetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextModelNG::GetIncludeFontPadding(frameNode));
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool fallbackLineSpacing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(fallbackLineSpacing));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFallbackLineSpacing(frameNode, false);
+}
+
+ArkUI_Bool GetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(TextModelNG::GetFallbackLineSpacing(frameNode));
+}
+
+void SetTextSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    TextModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("selectedDragPreviewStyleColor");
+        }
+    }
+}
+
+void ResetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2719,6 +2852,7 @@ const ArkUITextModifier* GetTextModifier()
         .setImmutableFontWeight = SetImmutableFontWeight,
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
+        .getTextMarqueeOptions = GetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .getLineCount = GetLineCount,
@@ -2752,6 +2886,15 @@ const ArkUITextModifier* GetTextModifier()
         .setTextDirection = SetTextDirection,
         .getTextDirection = GetTextDirection,
         .resetTextDirection = ResetTextDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .getIncludeFontPadding = GetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
+        .getFallbackLineSpacing = GetFallbackLineSpacing,
+        .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
+        .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
+        .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

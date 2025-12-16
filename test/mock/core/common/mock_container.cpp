@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/interfaces/ipc_single/iremote_object.h"
 
@@ -101,12 +103,12 @@ bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<s
 
 void MockContainer::SetUp()
 {
-    container_ = AceType::MakeRefPtr<MockContainer>();
+    container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>();
 }
 
 void MockContainer::SetUp(RefPtr<PipelineBase> pipelineContext)
 {
-    container_ = AceType::MakeRefPtr<MockContainer>(pipelineContext);
+    container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>(pipelineContext);
 }
 
 void MockContainer::TearDown()

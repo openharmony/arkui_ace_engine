@@ -99,14 +99,13 @@ public:
      */
     RefPtr<Theme> GetTheme(ThemeType type) override;
 
+    RefPtr<Theme> GetThemeNormal(ThemeType type);
+
     RefPtr<Theme> GetThemeMultiThread(ThemeType type);
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
-        if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
-            return AceType::DynamicCast<T>(GetThemeMultiThread(T::TypeId()));
-        }
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
 
@@ -116,14 +115,13 @@ public:
      */
     RefPtr<Theme> GetTheme(ThemeType type, int32_t themeScopeId) override;
 
+    RefPtr<Theme> GetThemeNormal(ThemeType type, int32_t themeScopeId);
+
     RefPtr<Theme> GetThemeMultiThread(ThemeType type, int32_t themeScopeId);
 
     template<typename T>
     RefPtr<T> GetTheme(int32_t themeScopeId)
     {
-        if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
-            return AceType::DynamicCast<T>(GetThemeMultiThread(T::TypeId()), themeScopeId);
-        }
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()), themeScopeId);
     }
 

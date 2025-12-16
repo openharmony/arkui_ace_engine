@@ -47,6 +47,7 @@ group("advanced_ui_component_static") {
       "exceptionprompt:exceptionPrompt",
       "toolbar:toolBar",
       "filter:Filter",
+      "formmenu:formMenu",
     ]
   }
 }

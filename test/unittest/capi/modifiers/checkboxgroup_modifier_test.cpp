@@ -68,7 +68,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal1, "#FF007DFF");
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setSelectedColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "selectedColor");
@@ -84,7 +84,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal1, "#FF000000");
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setUnselectedColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
@@ -114,7 +114,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level1)
 {
     Ark_MarkStyle style;
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     style.strokeColor.value = color;
     style.size = Converter::ArkValue<Opt_Length>("111.00px");
     style.strokeWidth = Converter::ArkValue<Opt_Length>("222.00px");

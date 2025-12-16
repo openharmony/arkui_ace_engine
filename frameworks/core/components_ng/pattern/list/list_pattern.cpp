@@ -408,7 +408,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
-    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached, clip);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, noDividerItems_, showCached, clip);
     paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
@@ -3331,6 +3331,15 @@ void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
         children->Put(child);
     }
     json->Put("itemPosition", children);
+}
+
+void ListPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("ListCacheCount: ")
+        .append(std::to_string(property->GetCachedCountWithDefault())));
 }
 
 void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

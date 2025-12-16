@@ -27,10 +27,11 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -38,28 +39,35 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
+#include "core/components_ng/pattern/progress/progress_model_static.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
-#endif
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/axis_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
@@ -72,6 +80,7 @@
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/text_field_modifier.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
@@ -115,20 +124,6 @@ enum class PixelroundRule {
 
 namespace OHOS::Ace::NG {
 namespace {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
-#endif
-
 Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     Ark_GestureRecognizer peer = nullptr;
@@ -463,11 +458,15 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
     if (shadowOpt.has_value()) {
         popupParam->SetShadow(shadowOpt.value());
+        if (src.shadow.value.selector == 1) {
+            popupParam->SetIsShadowStyle(true);
+        }
     } else {
         auto defaultPopupShadowStyle = g_getPopupDefaultShadow();
         Shadow shadow;
         g_getShadowFromTheme(defaultPopupShadowStyle, shadow);
         popupParam->SetShadow(shadow);
+        popupParam->SetIsShadowStyle(true);
     }
     auto popupBackgroundBlurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
     if (popupBackgroundBlurStyleOpt.has_value()) {
@@ -496,11 +495,13 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
+    Validator::ValidateNonPercent(outlineWidthOpt);
     if (outlineWidthOpt.has_value()) {
         popupParam->SetOutlineWidth(outlineWidthOpt.value());
     }
     auto borderWidthOpt = Converter::OptConvert<CalcDimension>(src.borderWidth);
     Validator::ValidateNonNegative(borderWidthOpt);
+    Validator::ValidateNonPercent(borderWidthOpt);
     if (borderWidthOpt.has_value()) {
         popupParam->SetInnerBorderWidth(borderWidthOpt.value());
     }
@@ -724,6 +725,8 @@ auto g_bindMenuOptionsParam = [](
     menuParam.outlineWidth = outlineWidth;
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
+    menuParam.keyboardAvoidMode = OptConvert<MenuKeyboardAvoidMode>(menuOptions.keyboardAvoidMode);
+    menuParam.minKeyboardAvoidDistance = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -783,6 +786,8 @@ void FixBorderWidthProperty(BorderWidthProperty& prop, bool nonPercent, bool non
     FixBorderWidthDimension(prop.topDimen, nonPercent, nonNegative, resetZero);
     FixBorderWidthDimension(prop.rightDimen, nonPercent, nonNegative, resetZero);
     FixBorderWidthDimension(prop.bottomDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.startDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.endDimen, nonPercent, nonNegative, resetZero);
 }
 
 namespace GeneratedModifier {
@@ -882,6 +887,31 @@ Alignment Convert(const Ark_LocalizedAlignment& src)
             return Alignment::BOTTOM_CENTER;
         case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_END:
             return Alignment::BOTTOM_RIGHT;
+    }
+}
+
+template<>
+std::string Convert(const Ark_LocalizedAlignment& src)
+{
+    switch (src) {
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_START:
+            return "top_start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP:
+            return "top";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_END:
+            return "top_end";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_START:
+            return "start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_CENTER:
+            return "center";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_END:
+            return "end";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_START:
+            return "bottom_start";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM:
+            return "bottom";
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_END:
+            return "bottom_end";
     }
 }
 
@@ -1846,7 +1876,15 @@ void AssignCast(std::optional<PopupKeyboardAvoidMode> &dst, const Ark_KeyboardAv
         default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
-
+template<>
+void AssignCast(std::optional<TipsAnchorType> &dst, const Ark_TipsAnchorType& src)
+{
+    switch (src) {
+        case ARK_TIPS_ANCHOR_TYPE_TARGET: dst = TipsAnchorType::TARGET; break;
+        case ARK_TIPS_ANCHOR_TYPE_CURSOR: dst = TipsAnchorType::CURSOR; break;
+        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+    }
+}
 template<>
 RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
 {
@@ -1892,6 +1930,10 @@ RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
                 popupParam->SetArrowHeight(arrowHeightOpt.value());
             }
         }
+    }
+    auto showAtAnchorOpt = Converter::OptConvert<TipsAnchorType>(src.showAtAnchor);
+    if (showAtAnchorOpt.has_value()) {
+        popupParam->SetAnchorType(showAtAnchorOpt.value());
     }
     return popupParam;
 }
@@ -2015,7 +2057,7 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
     return nullptr;
 }
 
-void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
+void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
 {
     dst.windowX = ArkValue<Ark_Float64>(src.windowPoint.GetX());
     dst.windowY = ArkValue<Ark_Float64>(src.windowPoint.GetY());
@@ -2024,9 +2066,9 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
     dst.x = ArkValue<Ark_Float64>(src.subCmpPoint.GetX());
     dst.y = ArkValue<Ark_Float64>(src.subCmpPoint.GetY());
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
-    dst.id = ArkValue<Ark_String>(src.id);
+    dst.id = ArkValue<Ark_String>(src.id, ctx);
 }
-void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
     if (dst) {
@@ -2034,7 +2076,7 @@ void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecogn
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src)
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
     if (dst) {
@@ -2042,7 +2084,7 @@ void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& s
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src)
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
     if (dst) {
@@ -2050,7 +2092,7 @@ void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressReco
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src)
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
     if (dst) {
@@ -2058,7 +2100,7 @@ void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src)
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
     if (dst) {
@@ -2066,7 +2108,7 @@ void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>&
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src)
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
     if (dst) {
@@ -2074,7 +2116,7 @@ void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>&
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src)
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
 {
     dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
     if (dst) {
@@ -2082,15 +2124,10 @@ void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecogn
         dst->Update(src);
     }
 }
-void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
+
+void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src, ConvContext *ctx)
 {
-    auto tagOpt = src.GetTag();
-    if (tagOpt.has_value()) {
-        dst.tag.tag = InteropTag::INTEROP_TAG_STRING;
-        dst.tag.value = Converter::ArkValue<Ark_String>(tagOpt.value(), Converter::FC);
-    } else {
-        dst.tag.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-    }
+    dst.tag = Converter::ArkValue<Opt_String>(src.GetTag(), ctx);
     dst.type = ArkValue<Ark_GestureControl_GestureType>(src.GetType());
     dst.isSystemGesture = ArkValue<Ark_Boolean>(src.IsSystemGesture());
 }
@@ -2217,6 +2254,17 @@ void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
         ViewAbstractModelStatic::SetHeight(frameNode, *value);
     }
 }
+void SetBlankHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::BLANK_ETS_TAG) {
+        return;
+    }
+    if (!value.has_value()) {
+        return;
+    }
+    BlankModelNG::SetHeight(frameNode, value.value());
+}
 void SetHeightImpl(Ark_NativePointer node,
                    const Opt_Union_Length_LayoutPolicy* value)
 {
@@ -2230,6 +2278,7 @@ void SetHeightImpl(Ark_NativePointer node,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetHeightInternal(frameNode, result);
+            SetBlankHeight(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2472,6 +2521,8 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
             backgroundColor = colorValue.value();
         }
         NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
+    } else if (frameNode->GetTag() == V2::PROGRESS_ETS_TAG) {
+        ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
@@ -2791,6 +2842,8 @@ void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderR
                 radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
         }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    } else {
+        ViewAbstract::SetBorderRadius(frameNode, Dimension(0));
     }
     auto renderStrategy = type->value;
     ViewAbstractModelStatic::SetRenderStrategy(
@@ -3063,7 +3116,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
         return;
     }
     auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
@@ -3086,7 +3139,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
     auto onHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        const auto event = Converter::SyncEvent<Ark_HoverEvent>(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstract::SetOnHover(frameNode, std::move(onHover));
@@ -3112,7 +3165,7 @@ void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
         bool isHover, AccessibilityHoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-        auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
+        auto event = Converter::SyncEvent<Ark_AccessibilityHoverEvent>(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
@@ -3125,13 +3178,14 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
         TouchEventInfo& info) {
         PipelineContext::SetCallBackNode(node);
-        const auto event = Converter::ArkTouchEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
         arkCallback.InvokeSync(event.ArkValue());
     };
     ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
@@ -3163,7 +3217,7 @@ void SetOnMouseImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onMouse = [arkCallback = CallbackHelper(*optValue), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
-        const auto event = Converter::ArkMouseEventSync(mouseInfo);
+        const auto event = Converter::SyncEvent<Ark_MouseEvent>(mouseInfo);
         arkCallback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
@@ -3180,7 +3234,7 @@ void SetOnTouchImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](TouchEventInfo& info) {
-        const auto event = Converter::ArkTouchEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
@@ -3198,7 +3252,7 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto weakNode = AceType::WeakClaim(frameNode);
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
-            const auto event = Converter::ArkKeyEventSync(info);
+            const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
@@ -3248,7 +3302,7 @@ void SetOnKeyPreImeImpl(Ark_NativePointer node,
         auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info)
             -> bool {
             PipelineContext::SetCallBackNode(node);
-            const auto event = Converter::ArkKeyEventSync(info);
+            const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
@@ -3268,7 +3322,7 @@ void SetOnKeyEventDispatchImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
         PipelineContext::SetCallBackNode(node);
-        const auto event = Converter::ArkKeyEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
         auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
         return Converter::Convert<bool>(arkResult);
     };
@@ -3287,7 +3341,7 @@ void SetOnFocusAxisEventImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onFocusAxis = [callback = CallbackHelper(*optValue), node = weakNode](NG::FocusAxisEventInfo& info) {
         PipelineContext::SetCallBackNode(node);
-        const auto arkInfo = Converter::ArkFocusAxisEventSync(info);
+        const auto arkInfo = Converter::SyncEvent<Ark_FocusAxisEvent>(info);
         callback.InvokeSync(arkInfo.ArkValue());
     };
     ViewAbstract::SetOnFocusAxisEvent(frameNode, std::move(onFocusAxis));
@@ -3305,7 +3359,7 @@ void SetOnAxisEventImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAxis = [callback = CallbackHelper(*optValue), node = weakNode](AxisInfo& info) {
         PipelineContext::SetCallBackNode(node);
-        const auto arkInfo = Converter::ArkAxisEventSync(info);
+        const auto arkInfo = Converter::SyncEvent<Ark_AxisEvent>(info);
         callback.InvokeSync(arkInfo.ArkValue());
     };
     ViewAbstract::SetOnAxisEvent(frameNode, std::move(onAxis));
@@ -4008,16 +4062,16 @@ void SetAlignImpl(Ark_NativePointer node,
     }
     switch (optValue->selector) {
         case CASE_0: {
-            auto alignValue = optValue->value0;
-            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            auto alignmentValue = optValue->value0;
+            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignmentValue);
             if (result) {
                 ViewAbstractModelStatic::SetAlign(frameNode, result.value());
             }
             break;
         }
         case CASE_1: {
-            auto alignValue = optValue->value1;
-            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            auto localizedAlignmentValue = optValue->value1;
+            auto result = Converter::OptConvert<std::string>(localizedAlignmentValue);
             if (result) {
                 ViewAbstractModelStatic::SetAlign(frameNode, result.value());
             }
@@ -4213,7 +4267,12 @@ void SetOnDragStartImpl(Ark_NativePointer node,
 
         auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
             if (auto fnode = weakNode.Upgrade(); fnode) {
-                result.customNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
+                auto uiNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+                result.customNode = CreateProxyNode(uiNode);
+#else
+                result.customNode = uiNode;
+#endif
             }
         };
         auto parseDragI = [&result, weakNode](const Ark_DragItemInfo& value) {
@@ -4222,7 +4281,12 @@ void SetOnDragStartImpl(Ark_NativePointer node,
             auto fnode = weakNode.Upgrade();
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
             if (builder && fnode) {
-                result.customNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+                auto uiNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+                result.customNode = CreateProxyNode(uiNode);
+#else
+                result.customNode = uiNode;
+#endif
             }
         };
         auto handler = [&parseCustBuilder, &parseDragI](Ark_Union_CustomBuilder_DragItemInfo arkResult) {
@@ -5020,7 +5084,7 @@ void SetOnTouchInterceptImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onTouchIntercept = [arkCallback = CallbackHelper(*optValue), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
-        const auto event = Converter::ArkTouchEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
         auto resultOpt = arkCallback.InvokeWithOptConvertResult<
             HitTestMode, Ark_HitTestMode, Callback_HitTestMode_Void>(event.ArkValue());
         return resultOpt.value_or(HitTestMode::HTMDEFAULT);
@@ -5065,6 +5129,13 @@ void SetAccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
+void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<UiMaterial*>(value);
+    ViewAbstract::SetSystemMaterial(frameNode, ptrOpt.value_or(nullptr));
+}
 void SetCustomPropertyImpl(Ark_NativePointer node,
                            const Ark_String* name,
                            const Opt_Object* value)
@@ -5089,6 +5160,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaType |= vec[i].value_or(0);
         }
         opts.type = safeAreaType;
+    } else {
+        opts.type = SAFE_AREA_TYPE_ALL;
     }
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (convEdges.has_value()) {
@@ -5097,6 +5170,8 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
             safeAreaEdge |= vec[i].value_or(0);
         }
         opts.edges = safeAreaEdge;
+    } else {
+        opts.edges = NG::SAFE_AREA_EDGE_ALL;
     }
     ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
@@ -5155,11 +5230,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
     CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
             CHECK_NULL_VOID(uiNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-                return CreateProxyNode(uiNode);
-#else
                 return uiNode;
-#endif
             };
             ViewAbstract::SetIsBuilderBackground(frameNode, true);
             ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
@@ -5265,7 +5336,7 @@ void SetOnClick1Impl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optEvent)](GestureEvent& info) {
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
@@ -5507,8 +5578,10 @@ void SetOverlayImpl(Ark_NativePointer node,
                 ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
                 }, node);
         },
-        [](const Ark_ComponentContent& src) {
-            LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
+        [frameNode, overlay](const Ark_ComponentContent& src) {
+            FrameNodePeer* nodePeer = src ? reinterpret_cast<FrameNodePeer *>(src) : nullptr;
+            auto uiNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+            ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
         },
         [frameNode]() {
             OverlayOptions overlay;
@@ -5639,7 +5712,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
             popupParam->SetIsShow(optShow.value_or(false));
-           ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+            ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         },
         [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
@@ -5647,19 +5720,35 @@ void SetBindPopupImpl(Ark_NativePointer node,
             onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
                 popupParam->SetIsShow(optShow.value_or(false));
-                CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
+                auto weakNode = AceType::WeakClaim(frameNode);
+                CallbackHelper(value.builder).BuildAsync([weakNode, popupParam](const RefPtr<UINode>& uiNode) {
+                    auto frameNode = weakNode.Upgrade();
                     ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
                     }, node);
             } else {
                 popupParam->SetIsShow(optShow.value_or(false));
-                ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+                ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
             }
         },
         [frameNode, optShow]() {
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
             popupParam->SetIsShow(optShow.value_or(false));
-            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
+            ViewAbstractModelStatic::BindPopup(AceType::Claim(frameNode), popupParam, nullptr);
         });
+}
+void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto child = uiNode->GetFirstChild();
+    CHECK_NULL_VOID(child);
+    auto menuNode = child->GetFirstChild();
+    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
+        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<InnerMenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->OnModifyDone();
+    }
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
@@ -5696,6 +5785,7 @@ void BindMenuBase(Ark_NativePointer node,
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
                 auto builder = [uiNode]() {
+                    CallMenuOnModifyDone(uiNode);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
@@ -5757,6 +5847,7 @@ void BindContextMenuBase(Ark_NativePointer node,
                 [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
                     auto builder = [frameNode, uiNode]() {
                         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        CallMenuOnModifyDone(uiNode);
                         ViewStackProcessor::GetInstance()->Push(uiNode);
                     };
                     ViewAbstractModelStatic::BindContextMenuStatic(
@@ -5797,6 +5888,67 @@ void BindContextMenuBase(Ark_NativePointer node,
             contentBuilder(menuParam, std::move(previewBuildFunc));
         });
 }
+void BindContextMenuBoth(Ark_NativePointer node,
+    const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+    const Opt_ContextMenuOptions* options,
+    MenuParam& menuParam)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(content);
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShowInSubWindow = true;
+    if (!optValue) {
+        return;
+    }
+    std::vector<ResponseType> responseTypeArray = { ResponseType::RIGHT_CLICK, ResponseType::LONG_PRESS };
+    auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode](ResponseType type,
+                              MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
+        auto arkType = static_cast<Ark_ResponseType>(type);
+        callback.BuildAsync([frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
+            auto builder = [frameNode, uiNode]() {
+                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstractModelStatic::BindContextMenuStatic(
+                AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+            ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+        }, arkType, node);
+    };
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    auto menuOption = Converter::GetOptPtr(options);
+    for (auto& type : responseTypeArray) {
+        auto triggerMenuParam = menuParam;
+        Converter::VisitUnion(menuOption->preview,
+            [&triggerMenuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
+                auto mode = Converter::OptConvert<MenuPreviewMode>(value);
+                if (mode && mode.value() == MenuPreviewMode::IMAGE) {
+                    triggerMenuParam.previewMode = MenuPreviewMode::IMAGE;
+                }
+                ParseContextMenuParam(triggerMenuParam, menuOption, type, node);
+                std::function<void()> previewBuildFunc = nullptr;
+                contentBuilder(type, triggerMenuParam, std::move(previewBuildFunc));
+            },
+            [&triggerMenuParam, menuOption, type, node, &contentBuilder](const CustomNodeBuilder& value) {
+                auto frameNode = reinterpret_cast<FrameNode *>(node);
+                CHECK_NULL_VOID(frameNode);
+                triggerMenuParam.previewMode = MenuPreviewMode::CUSTOM;
+                ParseContextMenuParam(triggerMenuParam, menuOption, type, node);
+                CallbackHelper(value).BuildAsync([frameNode, triggerMenuParam, contentBuilder, type](const RefPtr<UINode>& uiNode) {
+                    auto previewBuildFunc = [frameNode, uiNode]() {
+                        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        ViewStackProcessor::GetInstance()->Push(uiNode);
+                    };
+                    contentBuilder(type, triggerMenuParam, std::move(previewBuildFunc));
+                    }, node);
+            },
+            [&triggerMenuParam, menuOption, type, node, contentBuilder]() {
+                std::function<void()> previewBuildFunc = nullptr;
+                ParseContextMenuParam(triggerMenuParam, menuOption, type, node);
+                contentBuilder(type, triggerMenuParam, std::move(previewBuildFunc));
+            });
+    }
+}
 void SetBindContextMenu0Impl(Ark_NativePointer node,
                              const Opt_CustomNodeBuilder* content,
                              const Opt_ResponseType* responseType,
@@ -5809,6 +5961,16 @@ void SetBindContextMenu0Impl(Ark_NativePointer node,
     BindContextMenuBase(node, content, responseType, options, menuParam);
 }
 void SetBindContextMenu1Impl(Ark_NativePointer node,
+                             const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+                             const Opt_ContextMenuOptions* options)
+{
+    MenuParam menuParam;
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
+    menuParam.isShow = false;
+    menuParam.setShow = false;
+    BindContextMenuBoth(node, content, options, menuParam);
+}
+void SetBindContextMenu2Impl(Ark_NativePointer node,
                              const Opt_Boolean* isShown,
                              const Opt_CustomNodeBuilder* content,
                              const Opt_ContextMenuOptions* options)
@@ -6327,6 +6489,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+        CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
@@ -6360,6 +6523,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBindMenu1Impl,
         CommonMethodModifier::SetBindContextMenu0Impl,
         CommonMethodModifier::SetBindContextMenu1Impl,
+        CommonMethodModifier::SetBindContextMenu2Impl,
         CommonMethodModifier::SetBindContentCover0Impl,
         CommonMethodModifier::SetBindContentCover1Impl,
         CommonMethodModifier::SetBindSheetImpl,

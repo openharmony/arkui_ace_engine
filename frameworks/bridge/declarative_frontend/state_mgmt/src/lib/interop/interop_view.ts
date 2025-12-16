@@ -81,6 +81,9 @@ class ViewInterop extends PUV2ViewBase implements IView {
     public findProvidePU__: (providedPropName: string) => ObservedPropertyAbstractPU<Object> | undefined;
     public findProvideV2: (providedPropName: string) => [ViewV2, string] | undefined;
     public findLocalStorageInterop: () => Object;
+    public getRecycleDump(): string {
+        return '';
+    }
 }
 
 function makeInteropAliasKey(name: string): string {

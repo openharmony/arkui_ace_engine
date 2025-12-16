@@ -81,6 +81,7 @@ public:
     void GetCurrentPageName() override;
     void SendCurrentPageName(const std::string& result) override;
     void SaveProcessId(std::string key, int32_t id) override;
+    void EraseProcessId(const std::string& key) override;
     void SendCurrentLanguage(std::string result) override;
     void GetWebTranslateText(std::string extraData, bool isContinued) override;
     void SendWebTextToAI(int32_t nodeId, std::string res) override;
@@ -96,6 +97,11 @@ public:
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) override;
     void ExeAppAIFunction(const std::string& funcName, const std::string& params) override;
     void SendExeAppAIFunctionResult(uint32_t result) override;
+    void RegisterContentChangeCallback(const ContentChangeConfig& config) override;
+    void UnregisterContentChangeCallback() override;
+    void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) override;
+    void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) override;
+    void SetStopContentChangeDetectCallback(std::function<void()>&&) override;
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 private:

@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"

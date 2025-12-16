@@ -805,6 +805,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextDirection, TextDirection, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);

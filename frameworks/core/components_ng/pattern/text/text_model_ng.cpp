@@ -587,8 +587,22 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         TextDetectConfig& textDetectConfigValue = const_cast<TextDetectConfig&>(textDetectConfig);
+        if (!textDetectConfigValue.entityColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityColor = hyperlinkTheme->GetTextColor();
+        }
+        if (!textDetectConfigValue.entityDecorationColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityDecorationColor = hyperlinkTheme->GetTextColor();
+        }
         textDetectConfigValue.ReloadResources();
-        textPattern->SetTextDetectConfig(textDetectConfig);
+        textPattern->SetTextDetectConfig(textDetectConfigValue);
     };
     textPattern->AddResObj("dataDetectorConfig", resObj, std::move(updateFunc));
 }
@@ -967,51 +981,26 @@ void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
     SetMarqueeOptions(frameNode, options);
 }
 
+#define UPDATE_OR_RESET_MARQUEE_PROPERTY(Property) \
+    if (options.Has##Property()) { \
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY( \
+            TextLayoutProperty, Property, options.Get##Property##Value(), frameNode); \
+    } else { \
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Property, frameNode); \
+    }
+
 void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options)
 {
     CHECK_NULL_VOID(frameNode);
-    if (options.HasTextMarqueeStart()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, frameNode);
-    }
-    if (options.HasTextMarqueeStep()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStep, options.GetTextMarqueeStepValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, frameNode);
-    }
-    if (options.HasTextMarqueeLoop()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeLoop, options.GetTextMarqueeLoopValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, frameNode);
-    }
-    if (options.HasTextMarqueeDirection()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeDirection, options.GetTextMarqueeDirectionValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, frameNode);
-    }
-    if (options.HasTextMarqueeDelay()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
-    }
-    if (options.HasTextMarqueeFadeout()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeFadeout, options.GetTextMarqueeFadeoutValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeFadeout, frameNode);
-    }
-    if (options.HasTextMarqueeStartPolicy()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, TextMarqueeStartPolicy, options.GetTextMarqueeStartPolicyValue(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStartPolicy, frameNode);
-    }
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStart);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStep);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeLoop);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeDirection);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeDelay);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeFadeout);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStartPolicy);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeUpdatePolicy);
+    UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeSpacing);
 }
 
 void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
@@ -1064,6 +1053,12 @@ TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
     }
     if (layoutProperty->HasTextMarqueeStartPolicy()) {
         options.UpdateTextMarqueeStartPolicy(layoutProperty->GetTextMarqueeStartPolicy().value());
+    }
+    if (layoutProperty->HasTextMarqueeUpdatePolicy()) {
+        options.UpdateTextMarqueeUpdatePolicy(layoutProperty->GetTextMarqueeUpdatePolicy().value());
+    }
+    if (layoutProperty->HasTextMarqueeSpacing()) {
+        options.UpdateTextMarqueeSpacing(layoutProperty->GetTextMarqueeSpacing().value());
     }
 
     return options;
@@ -1768,6 +1763,40 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetIncludeFontPadding(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IncludeFontPadding, enabled);
+}
+
+void TextModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncludeFontPadding, enabled, frameNode);
+}
+
+bool TextModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, IncludeFontPadding, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FallbackLineSpacing, enabled);
+}
+
+void TextModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FallbackLineSpacing, enabled, frameNode);
+}
+
+bool TextModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FallbackLineSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1906,5 +1935,33 @@ void TextModelNG::ReSetTextContentAlign(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT, frameNode);
+}
+
+void TextModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color TextModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 } // namespace OHOS::Ace::NG

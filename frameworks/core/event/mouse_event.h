@@ -102,6 +102,7 @@ struct MouseEvent final : public PointerEvent {
     bool isPrivacyMode = false;
     bool isMockWindowTransFlag = false;
     TimeStamp pressedTime;
+    bool isRightButtonEventFromDoulbeTap = false;
 
     int32_t GetEventIdentity() const
     {
@@ -188,6 +189,8 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
         mouseEvent.passThrough = passThrough;
         mouseEvent.pressedTime = pressedTime;
+        mouseEvent.convertInfo = convertInfo;
+        mouseEvent.isRightButtonEventFromDoulbeTap = isRightButtonEventFromDoulbeTap;
         // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             mouseEvent.postEventNodeId = postEventNodeId;
@@ -368,7 +371,7 @@ public:
     {
         return rawDeltaY_;
     }
-    
+
     void SetPressedButtons(const std::vector<MouseButton>& pressedButtonsArray)
     {
         pressedButtonsArray_ = pressedButtonsArray;
@@ -376,6 +379,16 @@ public:
     std::vector<MouseButton> GetPressedButtons()
     {
         return pressedButtonsArray_;
+    }
+
+    void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
+    {
+        isRightButtonEventFromDoulbeTap_ = isRightButtonEventFromDoulbeTap;
+    }
+
+    bool GetIsRightButtonEventFromDoulbeTap() const
+    {
+        return isRightButtonEventFromDoulbeTap_;
     }
 
 private:
@@ -394,6 +407,7 @@ private:
     float rawDeltaX_ = 0.0f;
     float rawDeltaY_ = 0.0f;
     std::vector<MouseButton> pressedButtonsArray_;
+    bool isRightButtonEventFromDoulbeTap_ = false;
 };
 
 using HoverEffectFunc = std::function<void(bool)>;

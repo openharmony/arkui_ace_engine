@@ -45,6 +45,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
@@ -3525,6 +3526,7 @@ void ScrollablePattern::OnScrollStop(
         }
         StartScrollBarAnimatorByProxy();
         SetUiDvsyncSwitch(false);
+        ContentChangeReport(host);
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -4971,5 +4973,14 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
     if (geometryNode->GetFrameSize(true) != overlayGeometryNode->GetFrameSize(true)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void ScrollablePattern::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnScrollChangeEnd(keyNode);
 }
 } // namespace OHOS::Ace::NG

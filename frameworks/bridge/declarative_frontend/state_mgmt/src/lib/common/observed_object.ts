@@ -546,6 +546,7 @@ class SubscribableMapSetHandler extends SubscribableHandler {
           } else if (target.get(prop) !== val) {
             target.set(prop, val);
             ObserveV2.getObserve().fireChange(conditionalTarget, prop);
+            ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_MONITOR_ANY_PROPERTY);
           }
           ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
           

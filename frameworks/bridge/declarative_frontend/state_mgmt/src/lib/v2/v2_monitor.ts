@@ -320,10 +320,14 @@ class MonitorV2 {
    */
   public value<T>(path?: string): IMonitorValue<T> {
     if (path) {
-      return this.values_.get(path) as IMonitorValue<T>;
+      const monitorValue = this.values_.get(path);
+      if (monitorValue === undefined) {
+        return undefined;
+      }
+      return monitorValue.isWildcard() ? undefined : monitorValue as IMonitorValue<T>;
     }
     for (let monitorValue of this.values_.values()) {
-      if (monitorValue.isDirty()) {
+      if (monitorValue.isDirty() && !monitorValue.isWildcard()) {
         return monitorValue as MonitorValueV2<T> as IMonitorValue<T>;
       }
     }
@@ -348,6 +352,15 @@ class MonitorV2 {
       this.recordDependenciesForProp(monitorValue, true);
     })
     return this;
+  }
+
+  // re-record the dependencies for each path / MonitorValueV2
+  // invoked on @ReusableV2 re-use, see ViewV2.resetAllMonitorsOnReuse
+  public recordDependenciesForProps(): void {
+    this.values_.forEach((monitorValue: MonitorValueV2<unknown>) => {
+      // set initRun: true, pretend this is a first run, do not mark dirty on path value change  
+      this.recordDependenciesForProp(monitorValue, true);
+    });
   }
 
   // Called by ObserveV2 once if any monitored path was dirty.

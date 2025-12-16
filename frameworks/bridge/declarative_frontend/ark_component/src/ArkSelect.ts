@@ -191,6 +191,16 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
     return this;
   }
+  keyboardAvoidMode(mode: Optional<MenuKeyboardAvoidMode>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuKeyboardAvoidModeModifier.identity, MenuKeyboardAvoidModeModifier, mode);
+    return this;
+  }
+  minKeyboardAvoidDistance(distance: Optional<LengthMetrics>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MinKeyboardAvoidDistanceModifier.identity, MinKeyboardAvoidDistanceModifier, distance);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
@@ -784,6 +794,41 @@ class MenuOutlineModifier extends ModifierWithKey<MenuOutlineOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
       !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
+  }
+}
+
+class MenuKeyboardAvoidModeModifier extends ModifierWithKey<Optional<MenuKeyboardAvoidMode>> {
+  constructor(value: Optional<MenuKeyboardAvoidMode>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuKeyboardAvoidMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetMenuKeyboardAvoidMode(node);
+    } else {
+      getUINativeModule().select.setMenuKeyboardAvoidMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class MinKeyboardAvoidDistanceModifier extends ModifierWithKey<Optional<LengthMetrics>> {
+  constructor(value: Optional<LengthMetrics>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('minKeyboardAvoidDistance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMinKeyboardAvoidDistance(node);
+    } else {
+      getUINativeModule().select.setMinKeyboardAvoidDistance(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

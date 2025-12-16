@@ -31,6 +31,7 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 constexpr int32_t DEFAULT_BUTTON_TYPE = 1;
@@ -52,6 +53,7 @@ constexpr int32_t FONT_SIZE_ARG_6 = 6;
 constexpr int32_t FONT_WEIGHT_ARG_7 = 7;
 constexpr int32_t FONT_STYLE_ARG_8 = 8;
 constexpr int32_t FONT_FAMILY_ARG_9 = 9;
+constexpr int32_t TEXT_ALIGN_ARG_10 = 10;
 const char* BUTTON_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -436,6 +438,16 @@ void ButtonBridge::PutButtonValuesParameters(
         }
     }
     PushValuesVector(fontStyleOptional, valuesVector);
+
+    std::optional<int32_t> textAlignOptional = std::nullopt;
+    Local<JSValueRef> textAlignArg = runtimeCallInfo->GetCallArgRef(TEXT_ALIGN_ARG_10);
+    if (!textAlignArg->IsNull() && textAlignArg->IsNumber()) {
+        auto textAlign = textAlignArg->Int32Value(vm);
+        if (textAlign >= 0 && textAlign < static_cast<int32_t>(TEXT_ALIGN.size())) {
+            textAlignOptional = textAlign;
+        }
+    }
+    PushValuesVector(textAlignOptional, valuesVector);
 }
 
 void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDim, std::vector<ArkUI_Float32>& dimensions)

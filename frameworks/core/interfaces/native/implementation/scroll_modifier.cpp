@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -22,7 +21,6 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"

@@ -894,6 +894,46 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorModel022
+ * @tc.desc: test SetEnableAutoSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel022, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create RichEditor node and Set EnableAutoSpacing True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetEnableAutoSpacing(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, true);
+
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    richEditorModel.SetEnableAutoSpacing(false);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, false);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -929,6 +969,64 @@ HWTEST_F(RichEditorBaseTestNg, SetKeyboardAppearance001, TestSize.Level0)
     value = KeyboardAppearance::IMMERSIVE;
     richEditorModel.SetKeyboardAppearance(richEditorNode, value);
     EXPECT_EQ(richEditorPattern->GetKeyboardAppearance(), value);
+}
+
+/**
+ * @tc.name: SetCompressLeadingPunctuation001
+ * @tc.desc: test SetCompressLeadingPunctuation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCompressLeadingPunctuation001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create RichEditor node and Set compressLeadingPunctuation True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetCompressLeadingPunctuation(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Get compressLeadingPunctuation value
+     */
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation(), true);
+    EXPECT_EQ(pattern->isCompressLeadingPunctuation_, true);
+
+    /**
+     * @tc.steps: step3. Set EnableAutoSpacing False
+     */
+    RichEditorModelNG::SetCompressLeadingPunctuation(richEditorNode, false);
+
+    /**
+     * @tc.steps: step4. Get compressLeadingPunctuation value
+     */
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation(), false);
+    EXPECT_EQ(pattern->isCompressLeadingPunctuation_, false);
+}
+
+/**
+ * @tc.name: SetCompressLeadingPunctuation002
+ * @tc.desc: test SetCompressLeadingPunctuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCompressLeadingPunctuation002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->SetCompressLeadingPunctuation(false);
+    EXPECT_EQ(richEditorPattern->isCompressLeadingPunctuation_, false);
+
+    richEditorPattern->SetCompressLeadingPunctuation(true);
+    EXPECT_EQ(richEditorPattern->isCompressLeadingPunctuation_, true);
 }
 
 /**
@@ -1000,6 +1098,72 @@ HWTEST_F(RichEditorBaseTestNg, GetRichEditorController001, TestSize.Level0)
     richEditorModel.Create();
     auto controller = richEditorModel.GetRichEditorController();
     ASSERT_NE(controller, nullptr);
+}
+
+/**
+ * @tc.name: SetEnableHapticFeedback001
+ * @tc.desc: test SetEnableHapticFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetEnableHapticFeedback001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetEnableHapticFeedback(true);
+    EXPECT_TRUE(richEditorPattern->isEnableHapticFeedback_);
+
+    richEditorModel.SetEnableHapticFeedback(false);
+    EXPECT_FALSE(richEditorPattern->isEnableHapticFeedback_);
+}
+
+/**
+ * @tc.name: SetBarState001
+ * @tc.desc: test SetBarState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetBarState001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorLayoutProperty = richEditorNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(richEditorLayoutProperty, nullptr);
+
+    richEditorModel.SetBarState(DisplayMode::AUTO);
+    auto barState = richEditorLayoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+    EXPECT_EQ(barState, DisplayMode::AUTO);
+}
+
+/**
+ * @tc.name: SetBarState
+ * @tc.desc: test SetBarState002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetBarState002, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorLayoutProperty = richEditorNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(richEditorLayoutProperty, nullptr);
+
+    richEditorModel.SetBarState(richEditorNode, DisplayMode::ON);
+    auto barState = richEditorLayoutProperty->GetDisplayModeValue(DisplayMode::ON);
+    EXPECT_EQ(barState, DisplayMode::ON);
 }
 
 } // namespace OHOS::Ace::NG

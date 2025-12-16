@@ -44,7 +44,7 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
@@ -57,7 +57,7 @@ import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, Pop
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
@@ -81,8 +81,37 @@ import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#
 import { ListHandWritten } from "./ListHandWritten"
 import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
+import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
+import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
+import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
 
 export function hookId(component: object, value?: string) {}
+
+export interface KeyboardShortcut { value?: string | FunctionKey; keys?: Array<ModifierKey>; action?: () => void; }
+
+export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array<KeyboardShortcut>): void {
+  if (shortcuts && shortcuts.length > 0) {
+    for (let i = 0; i < shortcuts.length; i++) {
+      const shortcut = shortcuts[i];
+      peer.setKeyboardShortcutAttribute(
+        shortcut.value as string | FunctionKey | undefined,
+        shortcut.keys as Array<ModifierKey> | undefined,
+        shortcut.action as (() => void) | undefined
+      );
+    }
+  }
+}
+
+export function hookMergeKeyboardShortcuts(
+  targetModifier: CommonMethodModifier,
+  sourceShortcuts: Array<KeyboardShortcut>): void {
+  if (sourceShortcuts && sourceShortcuts.length > 0) {
+    for (let i = 0; i < sourceShortcuts.length; i++) {
+      const shortcut = sourceShortcuts[i];
+      targetModifier.keyboardShortcut(shortcut.value, shortcut.keys, shortcut.action);
+    }
+  }
+}
 
 export function hookGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
@@ -395,6 +424,8 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
       flag |= (1 << 2);
     } else if (classType.getMethod(i)?.getName() === "drawForeground") {
       flag |= (1 << 3);
+    } else if (classType.getMethod(i)?.getName() === 'drawOverlay') {
+      flag |= (1 << 4);
     }
   }
   if (flag) {
@@ -410,6 +441,10 @@ export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandW
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
+
+export function hookImageOnError(receiver: ArkImageComponent | ArkImagePeer, value: ImageErrorCallback | undefined): void {
+    ImageOpsHandWritten.hookImageOnErrorImpl(receiver, value);
 }
 
 export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
@@ -447,7 +482,6 @@ export function convertDimensionStrToNumber(value: string, density: number): num
     let unitPart : string = ''
     if (match.length > 1 && match[1] !== undefined) {
         numericValue = Number.parseFloat(match[1] as string);
-        return numericValue
     }
     if (match.length > 2 && match[2] !== undefined) {
         unitPart = match[2] as string;
@@ -509,38 +543,31 @@ export function hookGetImageData(peerPtr: CanvasRenderer, sx: number, sy: number
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
     return resObj
 }
-export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, dx: number | string, dy: number | string): void {
-    let dx_type: int = RuntimeType.UNDEFINED
-    let dy_type: int = RuntimeType.UNDEFINED
-    dx_type = runtimeType(dx)
-    dy_type = runtimeType(dy)
-    const density = getCanvasDensity(peerPtr)
-    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string, density) : (dx as number)
-    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string, density) : (dy as number)
-    ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int)
+export function parseImageData(value: number | string, density: number): number {
+    let ret_val: number
+    if (value instanceof string) {
+        ret_val = convertDimensionStrToNumber(value as string, density)
+    } else {
+        let value_casted = value as number
+        ret_val = value_casted * density
+    }
+    return ret_val
 }
-export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
-
-    let dx_type: int = RuntimeType.UNDEFINED
-    let dy_type: int = RuntimeType.UNDEFINED
-    let dirtyX_type: int = RuntimeType.UNDEFINED
-    let dirtyY_type: int = RuntimeType.UNDEFINED
-    let dirtyWidth_type: int = RuntimeType.UNDEFINED
-    let dirtyHeight_type: int = RuntimeType.UNDEFINED
-    dx_type = runtimeType(dx)
-    dy_type = runtimeType(dy)
-    dirtyX_type = runtimeType(dirtyX)
-    dirtyY_type = runtimeType(dirtyY)
-    dirtyWidth_type = runtimeType(dirtyWidth)
-    dirtyHeight_type = runtimeType(dirtyHeight)
+export function hookPutImageData(peerPtr: CanvasRenderer,
+    imagedata: ImageData, dx: number | string, dy: number | string): void {
     const density = getCanvasDensity(peerPtr)
-    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string, density) : (dx as number)
-    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string, density) : (dy as number)
-    let dirtyX_val: number = (dirtyX_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyX as string, density) : (dirtyX as number)
-    let dirtyY_val: number = (dirtyY_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyY as string, density) : (dirtyY as number)
-    let dirtyWidth_val: number = (dirtyWidth_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyWidth as string, density) : (dirtyWidth as number)
-    let dirtyHeight_val: number = (dirtyHeight_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyHeight as string, density) : (dirtyHeight as number)
-    ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int, dirtyX_val, dirtyY_val, dirtyWidth_val, dirtyHeight_val)
+    ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data,
+        parseImageData(dx, density), parseImageData(dy, density), imagedata.width as int, imagedata.height as int)
+}
+export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData,
+    dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string,
+    dirtyWidth: number | string, dirtyHeight: number | string): void {
+    const density = getCanvasDensity(peerPtr)
+    ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data,
+        parseImageData(dx, density), parseImageData(dy, density),
+        imagedata.width as int, imagedata.height as int,
+        parseImageData(dirtyX, density), parseImageData(dirtyY, density),
+        parseImageData(dirtyWidth, density), parseImageData(dirtyHeight, density))
 }
 export function hookGetContext(
   peerPtr: OffscreenCanvas,
@@ -743,4 +770,14 @@ export function hookJavaScriptProxy(
 export function hookVideoOnError(
   component: ArkVideoComponent | ArkVideoPeer, value: VoidCallback | ErrorCallback | undefined): void {
     VideoOpsHandWritten.hookSetVideoOnErrorImpl(component, value);
+}
+
+export function hookSaveButtonOnClick(
+  receiver: ArkSaveButtonComponent | ArkSaveButtonPeer, value: SaveButtonCallback | undefined): void {
+    SaveButtonOpsHandWritten.hookSaveButtonOnClickImpl(receiver, value);
+}
+
+export function hookPasteButtonOnClick(
+  receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
+    PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
 }

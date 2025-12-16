@@ -89,6 +89,18 @@ void JSRefresh::SetPullToRefresh(const JSCallbackInfo& info)
     RefreshModel::GetInstance()->SetPullToRefresh(pullToRefresh);
 }
 
+void JSRefresh::SetPullUpToCancelRefresh(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isCancelRefresh = true;
+    if (info[0]->IsBoolean()) {
+        isCancelRefresh = info[0]->ToBoolean();
+    }
+    RefreshModel::GetInstance()->SetPullUpToCancelRefresh(isCancelRefresh);
+}
+
 void JSRefresh::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRefresh>::Declare("Refresh");
@@ -96,6 +108,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
     JSClass<JSRefresh>::StaticMethod("refreshOffset", &JSRefresh::JsRefreshOffset);
     JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
+    JSClass<JSRefresh>::StaticMethod("pullUpToCancelRefresh", &JSRefresh::SetPullUpToCancelRefresh, opt);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);

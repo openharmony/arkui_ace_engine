@@ -15,9 +15,9 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -341,10 +341,9 @@ void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeById(Converter::Convert<std::string>(*id), Converter::Convert<bool>(isFrozen));
 }
-void FreezeUINode1Impl(const Ark_Number* id, Ark_Boolean isFrozen)
+void FreezeUINode1Impl(Ark_Int32 id, Ark_Boolean isFrozen)
 {
-    CHECK_NULL_VOID(id);
-    ViewAbstract::FreezeUINodeByUniqueId(Converter::Convert<int32_t>(*id), Converter::Convert<bool>(isFrozen));
+    ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
 }
 Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEvent event)
 {

@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-import {
-    __memo_context_type as __memo_context_type,
-    __memo_id_type as __memo_id_type,
-} from 'arkui.stateManagement.runtime';
 import { memo } from '@koalaui/runtime/annotations'
 
 @memo

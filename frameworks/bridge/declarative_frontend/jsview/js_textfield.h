@@ -162,6 +162,9 @@ public:
     static void SetScrollBarColor(const JSCallbackInfo& info);
     static Local<JSValueRef> JsSetIMEExtraInfo(panda::JsiRuntimeCallInfo* info);
     static IMEAttachCallback ParseAndCreateAttachCallback(const JSCallbackInfo& info);
+    static void SetIncludeFontPadding(const JSCallbackInfo& info);
+    static void SetFallbackLineSpacing(const JSCallbackInfo& info);
+    static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

@@ -32,6 +32,7 @@ constexpr char SCROLLABLE[] = "scrollable";
 constexpr char CONTENT[] = "content";
 constexpr char PLACEHOLDER[] = "placeholder";
 constexpr char CHECKED[] = "checked";
+constexpr char IS_EDITABLE[] = "editable";
 }; // namespace TreeKey
 
 enum FixedAttrBit : uint64_t {

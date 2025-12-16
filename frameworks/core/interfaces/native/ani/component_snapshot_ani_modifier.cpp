@@ -43,6 +43,11 @@ void ConvertSnapshotParam(SnapshotParam& snapShotParam, const ArkUISnapshotParam
     snapShotParam.options.snapshotRegion.top = param.options.snapshotRegion.top;
     snapShotParam.options.snapshotRegion.end = param.options.snapshotRegion.end;
     snapShotParam.options.snapshotRegion.start = param.options.snapshotRegion.start;
+    snapShotParam.options.colorSpaceModeOptions.colorSpaceMode = param.options.colorSpaceModeOptions.colorSpaceMode;
+    snapShotParam.options.colorSpaceModeOptions.isAuto = param.options.colorSpaceModeOptions.isAuto;
+    snapShotParam.options.dynamicRangeModeOptions.dynamicRangeMode =
+        param.options.dynamicRangeModeOptions.dynamicRangeMode;
+    snapShotParam.options.dynamicRangeModeOptions.isAuto = param.options.dynamicRangeModeOptions.isAuto;
 }
 
 void ConvertSnapShotAsync(

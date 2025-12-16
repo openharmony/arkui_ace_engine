@@ -1546,4 +1546,97 @@ HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityActionOptions002, TestSize.Lev
     auto scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
     EXPECT_EQ(scrollStep, 1);
 }
+
+/**
+ * @tc.name: SetAccessibilityActionOptions003
+ * @tc.desc: Test the SetAccessibilityActionOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityActionOptions003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    AccessibilityActionOptions accessibilityActionOptions;
+    accessibilityActionOptions.scrollStep = 2;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityActionOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityActionOptions(accessibilityActionOptions);
+    viewAbstractModelNG.ResetAccessibilityActionOptions();
+    auto scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    EXPECT_EQ(scrollStep, 1);
+}
+
+/**
+ * @tc.name: SetAccessibilityActionOptions004
+ * @tc.desc: Test the SetAccessibilityActionOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityActionOptions004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    AccessibilityActionOptions accessibilityActionOptions;
+    accessibilityActionOptions.scrollStep = 0;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityActionOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityActionOptions(accessibilityActionOptions);
+    auto scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    EXPECT_EQ(scrollStep, 1);
+}
+
+/**
+ * @tc.name: SetAccessibilityActionOptions005
+ * @tc.desc: Test the SetAccessibilityActionOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityActionOptions005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    AccessibilityActionOptions accessibilityActionOptions;
+    accessibilityActionOptions.scrollStep = -1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityActionOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityActionOptions(accessibilityActionOptions);
+    auto scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    EXPECT_EQ(scrollStep, 1);
+}
+
+/**
+ * @tc.name: SetAccessibilityActionOptions006
+ * @tc.desc: Test the SetAccessibilityActionOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityActionOptions006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenode
+     */
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    AccessibilityActionOptions accessibilityActionOptions;
+    accessibilityActionOptions.scrollStep = 10000000;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->accessibilityActionOptions_.has_value());
+    viewAbstractModelNG.SetAccessibilityActionOptions(accessibilityActionOptions);
+    auto scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    EXPECT_EQ(scrollStep, 1);
+}
 } // namespace OHOS::Ace::NG

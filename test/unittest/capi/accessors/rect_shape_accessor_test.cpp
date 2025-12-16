@@ -208,7 +208,7 @@ HWTEST_F(RectShapeAccessorTest, fillTest, TestSize.Level1)
     ASSERT_NE(accessor_->fill, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x12345678);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x12345678);
     auto expected = Color(0x12345678);
     EXPECT_EQ(accessor_->fill(peer_, &color), peer_);
     EXPECT_EQ(peer_->shape->GetColor(), expected);

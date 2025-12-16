@@ -648,7 +648,6 @@ HWTEST_F(SelectControlSizeNg, OnColorConfigurationUpdateTest001, TestSize.Level1
      */
     EXPECT_EQ(menuRenderContext->GetBackgroundColorValue(Color::RED), themeBgColor);
     EXPECT_EQ(optionPaintProperty->GetOptionBgColorValue(Color::RED), themeBgColor);
-    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**

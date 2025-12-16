@@ -35,7 +35,6 @@ constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t height)
 {
     antiAlias_ = false;
-    matrix_.Reset();
     width_ = width;
     height_ = height;
     lastLayoutSize_.SetWidth(static_cast<float>(width));
@@ -90,7 +89,6 @@ RefPtr<PixelMap> OffscreenCanvasPaintMethod::TransferToImageBitmap()
 
 void OffscreenCanvasPaintMethod::Reset()
 {
-    matrix_.Reset();
     ResetStates();
     InitBitmap();
 }
@@ -140,8 +138,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     // copy the bitmap to tempCanvas
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
     int32_t size = dirtyWidth * dirtyHeight;
-    auto srcRect =
-        RSRect(scaledLeft, scaledTop, dirtyWidth + scaledLeft, dirtyHeight + scaledTop);
+    auto srcRect = RSRect(scaledLeft, scaledTop, dirtyWidth + scaledLeft, dirtyHeight + scaledTop);
     auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
     RSBitmap tempCache;
     tempCache.Build(dirtyWidth, dirtyHeight, format);

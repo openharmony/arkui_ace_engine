@@ -132,6 +132,28 @@ export interface LayoutConstraint {
     percentReference: Size;
 }
 
+export class LayoutConstraintImpl implements LayoutConstraint {
+    maxSize: Size;
+    minSize: Size;
+    percentReference: Size;
+    constructor(maxSizeWidth: double, maxSizeHeight: double,
+        minSizeWidth: double, minSizeHeight: double,
+        percentReferenceWidth: double, percentReferenceHeight: double) {
+        this.maxSize = { width: maxSizeWidth, height: maxSizeHeight };
+        this.minSize = { width: minSizeWidth, height: minSizeHeight };
+        this.percentReference = { width: percentReferenceWidth, height: percentReferenceHeight };
+    }
+}
+
+export class NodePositionImpl implements NodePosition{
+    x: double;
+    y: double;
+    constructor(x: double, y: double) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -232,8 +254,7 @@ export class FrameNode implements MaterializedBase {
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
-                ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-                ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
+                ArkUIAniModule._SetCustomCallbackWithCheck(this!.peer!.ptr, this);  
             } else {
                 const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
@@ -343,13 +364,12 @@ export class FrameNode implements MaterializedBase {
         }
         return node;
     }
-    public getChild(index: number, expandMode?: ExpandMode | undefined): FrameNode | null {
-        const index_casted = index as (number);
+    public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
         }
-        const retval = FrameNodeExtender.getChild(this, index_casted, expand_casted);
+        const retval = FrameNodeExtender.getChild(this, index, expand_casted);
         if (retval !== nullptr) {
             let child = extractors.fromFrameNodePtr(retval);
             const nodeId = FrameNodeExtender.getIdByFrameNode(toPeerPtr(child));
@@ -428,7 +448,7 @@ export class FrameNode implements MaterializedBase {
         }
         return null;
     }
-    public getChildrenCount(): number {
+    public getChildrenCount(): int {
         return FrameNodeExtender.getChildrenCount(this);
     }
     public dispose(): void {
@@ -443,7 +463,7 @@ export class FrameNode implements MaterializedBase {
             this.peer?.close();
         }
     }
-    public getOpacity(): number {
+    public getOpacity(): double {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
@@ -470,31 +490,30 @@ export class FrameNode implements MaterializedBase {
     public getLayoutPosition(): NodePosition {
         return FrameNodeExtender.getLayoutPosition(this);
     }
-   public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigBorderWidth(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
+        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth_serialize(this);
+        return {
+            top: borderWidth.top, left: borderWidth.left,
+            bottom: borderWidth.bottom, right: borderWidth.right
+        };
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigPadding(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let padding = FrameNodeExtender.getUserConfigPadding_serialize(this)
+        return {
+            top: padding.top, left: padding.left,
+            bottom: padding.bottom, right: padding.right
+        }
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigMargin(this);
-        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
-          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
-        return result;
+        let margin = FrameNodeExtender.getUserConfigMargin_serialize(this)
+        return {
+            top: margin.top, left: margin.left,
+            bottom: margin.bottom, right: margin.right
+        }
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        let sizeTLengthMetrics: SizeTLengthMetrics = FrameNodeExtender.getUserConfigSize(this);
-        let result: SizeT<LengthMetrics> = {
-            width: sizeTLengthMetrics.width,
-            height: sizeTLengthMetrics.height
-        };
-        return result;
+        let size = FrameNodeExtender.getUserConfigSize_serialize(this)
+        return { width: size.width, height: size.height }
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
@@ -514,25 +533,13 @@ export class FrameNode implements MaterializedBase {
     public getInspectorInfo(): Object {
         return FrameNodeExtender.getInspectorInfo(this);
     }
-    public onDraw(context: DrawContext): void {
-    }
-    public onMeasureInner(width1: number, height1: number, width2: number, height2: number,
-        width3: number, height3: number): void {
-        const maxSize: Size = { width: width1, height: height1 };
-        const minSize: Size = { width: width2, height: height2 };
-        const percentReference: Size = { width: width3, height: height3 };
-        const constraint: LayoutConstraint = { maxSize: maxSize, minSize: minSize, percentReference: percentReference };
-        this.onMeasure(constraint);
-    }
-    public onMeasure(constraint: LayoutConstraint): void {
-        ArkUIAniModule._OnMeasure_InnerMeasure(this!.peer!.ptr);
-    }
-    public onLayoutInner(x: number, y: number): void {
-        const position: NodePosition = { x: x, y: y };
-        this.onLayout(position);
-    }
-    public onLayout(position: NodePosition): void {
-        ArkUIAniModule._OnLayout_InnerLayout(this!.peer!.ptr);
+    public onDrawWrapper(context: DrawContext): void {
+        context.canvas.clipRect({
+            left: 0,
+            top: 0,
+            right: this.uiContext!.vp2px(context.size.width),
+            bottom: this.uiContext!.vp2px(context.size.height)
+        })
     }
     public setMeasuredSize(size: Size): void {
         const width = Math.max(size.width, 0);
@@ -641,11 +648,11 @@ export class FrameNode implements MaterializedBase {
         const node_casted = node as (FrameNode);
         return FrameNodeExtender.getIdByFrameNode(toPeerPtr(node_casted));
     }
-    public moveTo(targetParent: FrameNode, index?: number): void {
+    public moveTo(targetParent: FrameNode, index?: int): void {
         if (targetParent === undefined || targetParent === null) {
             return;
         }
-        let index_casted: number = -1;
+        let index_casted: int = -1;
         if (index !== undefined && index !== null) {
             index_casted = index;
         }
@@ -663,10 +670,10 @@ export class FrameNode implements MaterializedBase {
         return;
     }
 
-    public getFirstChildIndexWithoutExpand(): number {
+    public getFirstChildIndexWithoutExpand(): int {
         return FrameNodeExtender.getFirstChildIndexWithoutExpand(this);
     }
-    public getLastChildIndexWithoutExpand(): number {
+    public getLastChildIndexWithoutExpand(): int {
         return FrameNodeExtender.getLastChildIndexWithoutExpand(this);
     }
     public reuse(): void {
@@ -753,6 +760,58 @@ export class FrameNode implements MaterializedBase {
         const y = chanels[2];
         return { x: x, y: y } as NodePosition;
     }
+    public convertPositionToWindow(positionByLocal: NodePosition): NodePosition {
+        if (positionByLocal === undefined) {
+            const error = Error("The parameter 'positionByLocal' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (positionByLocal === null) {
+            const error = Error("The parameter 'positionByLocal' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed.");
+            throw new BusinessError(10026, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        let channels: Array<number> = [];
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        channels = FrameNodeExtender.convertPositionToWindow(this, positionByLocal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        if (channels.length < 3 || channels[0] === 0) {
+            const error = new Error("The current FrameNode is not on the main tree.");
+            throw new BusinessError(10028, error);
+        }
+        const x = channels[1];
+        const y = channels[2];
+        return { x: x, y: y } as NodePosition;
+    }
+    public convertPositionFromWindow(positionByWindow: NodePosition): NodePosition {
+        if (positionByWindow === undefined) {
+            const error = Error("The parameter 'positionByWindow' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (positionByWindow === null) {
+            const error = Error("The parameter 'positionByWindow' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
+            throw new BusinessError(401, error);
+        }
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed.");
+            throw new BusinessError(10026, error);
+        }
+        const instanceId = this.instanceId_!.toInt();
+        let channels: Array<number> = [];
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        channels = FrameNodeExtender.convertPositionFromWindow(this, positionByWindow);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        if (channels.length < 3 || channels[0] === 0) {
+            const error = new Error("The current FrameNode is not on the main tree.");
+            throw new BusinessError(10028, error);
+        }
+        const x = channels[1];
+        const y = channels[2];
+        return { x: x, y: y } as NodePosition;
+    }
     public isInRenderState(): boolean {
         return FrameNodeExtender.isOnRenderTree(this);
     }
@@ -795,7 +854,7 @@ export class ProxyFrameNode extends ImmutableFrameNode {
     getType(): string {
         return 'ProxyFrameNode';
     }
-    moveTo(targetParent: FrameNode, index?: number): void {
+    moveTo(targetParent: FrameNode, index?: int): void {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
@@ -1884,18 +1943,18 @@ class NodeAdapterFinalizable extends Finalizable {
 export class NodeAdapter implements MaterializedBase {
     private peer?: Finalizable | undefined = undefined;
     private attachedNodeRef_?: WeakRef<FrameNode>;
-    private count_: number = 0;
+    private count_: int = 0;
     private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
 
-    onDisposeChild(index: number, node: FrameNode) {
+    onDisposeChild(index: int32, node: FrameNode) {
 
     }
 
-    onUpdateChild(index: number, node: FrameNode) {
+    onUpdateChild(index: int32, node: FrameNode) {
 
     }
 
-    onCreateChild(index: number): FrameNode {
+    onCreateChild(index: int): FrameNode {
         return new FrameNode(undefined);
     }
 
@@ -1917,7 +1976,7 @@ export class NodeAdapter implements MaterializedBase {
         }
     }
 
-    set totalNodeCount(count: number) {
+    set totalNodeCount(count: int) {
         if (count < 0) {
             return;
         }
@@ -1932,25 +1991,25 @@ export class NodeAdapter implements MaterializedBase {
     reloadAllItems() {
         ArkUIAniModule._NodeAdapter_NotifyItemReloaded(this.peer!.ptr!);
     }
-    reloadItem(start: number, count: number) {
+    reloadItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemChanged(this.peer!.ptr!, start, count);
     }
-    removeItem(start: number, count: number) {
+    removeItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemRemoved(this.peer!.ptr!, start, count);
     }
-    insertItem(start: number, count: number) {
+    insertItem(start: int32, count: int32) {
         if (start < 0 || count < 0) {
             return;
         }
         ArkUIAniModule._NodeAdapter_NotifyItemInserted(this.peer!.ptr!, start, count);
     }
-    moveItem(from: number, to: number) {
+    moveItem(from: int32, to: int32) {
         if (from < 0 || to < 0) {
             return;
         }
@@ -2003,7 +2062,7 @@ export class NodeAdapter implements MaterializedBase {
     }
     onCreateNewNodePtr(index: number): pointer {
         if (this.onCreateChild !== undefined) {
-            let frameNode = this.onCreateChild(index);
+            let frameNode = this.onCreateChild(index as int32);
             if (!this.nodeRefs_.find((node) => {
                 return node === frameNode;
             })) {
@@ -2020,7 +2079,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
-                this.onDisposeChild(index, frameNode);
+                this.onDisposeChild((index as int32), frameNode);
                 let index2 = this.nodeRefs_.indexOf(frameNode);
                 if (index2 > -1) {
                     this.nodeRefs_.splice(index2, 1);
@@ -2033,7 +2092,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
-                this.onUpdateChild(index, frameNode!);
+                this.onUpdateChild((index as int32), frameNode!);
             }
         }
     }

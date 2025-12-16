@@ -15,8 +15,8 @@
 
 #include <memory>
 
-#include "ani.h"
 #include "draw/canvas.h"
+#include "drawableDescriptor_utils.h"
 #include "image/bitmap.h"
 #include "image/image_info.h"
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
@@ -27,9 +27,11 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/log.h"
+#include "core/common/ace_engine.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/layered_drawable_descriptor.h"
 #include "core/drawable/pixel_map_drawable_descriptor.h"
+#include "frameworks/base/error/error_code.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -42,13 +44,14 @@ constexpr char LAYERED_CONSTRUCTOR[] =
     "C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos."
     "arkui.drawableDescriptor.DrawableDescriptor}:";
 constexpr char LAYERED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.LayeredDrawableDescriptor";
+constexpr char LOAD_RESULT_IMPL[] = "@ohos.arkui.drawableDescriptor.DrawableDescriptorLoadedResultImpl";
+constexpr char ANIMATION_CONTROLLER_INNER[] = "@ohos.arkui.drawableDescriptor.AnimationControllerInner";
+constexpr char ANIMATION_OPTIONS_IMPL[] = "@ohos.arkui.drawableDescriptor.AnimationOptionsImpl";
 
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
-
-constexpr size_t MAX_TYPENAME_LEN = 255;
 
 enum class DrawableType {
     BASE,
@@ -76,33 +79,222 @@ ani_object CreatePixelMapDrawableByPixelMap(ani_env* env, const RefPtr<PixelMap>
     return obj;
 }
 
-ani_ref CreateDouble(ani_env* env, ani_int value)
+ani_object CreateDrawableDescriptorLoadedResult(ani_env* env, const int32_t imageWidth, const int32_t imageHeight)
 {
+    ani_object drawableDescriptorLoadedResultAni {};
     ani_class cls;
-    env->FindClass("std.core.Double", &cls);
+    if (env->FindClass(LOAD_RESULT_IMPL, &cls) != ANI_OK) {
+        return nullptr;
+    }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", "d:", &ctor);
-    ani_object rs;
-    env->Object_New(cls, ctor, &rs, static_cast<ani_double>(value));
-    return rs;
+    if (env->Class_FindMethod(cls, "<ctor>", ":", &ctor) != ANI_OK) {
+        return nullptr;
+    }
+
+    ANI_CALL(env, Object_New(cls, ctor, &drawableDescriptorLoadedResultAni), return drawableDescriptorLoadedResultAni);
+    ANI_CALL(env,
+        Object_SetPropertyByName_Int(drawableDescriptorLoadedResultAni, "imageWidth", static_cast<ani_int>(imageWidth)),
+        return drawableDescriptorLoadedResultAni);
+    ANI_CALL(env,
+        Object_SetPropertyByName_Int(
+            drawableDescriptorLoadedResultAni, "imageHeight", static_cast<ani_int>(imageHeight)),
+        return drawableDescriptorLoadedResultAni);
+
+    return drawableDescriptorLoadedResultAni;
+}
+
+static void HandleDrawableDescriptorLoadResult(std::shared_ptr<OHOS::Ace::Ani::DrawableAsyncContext> asyncContext,
+    OHOS::Ace::DrawableDescriptorLoadResult loadResult)
+{
+    CHECK_NULL_VOID((asyncContext && asyncContext->deferred && asyncContext->vm));
+    ani_env* env = nullptr;
+    ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || env == nullptr) {
+        return;
+    }
+    ani_size nrRefs = SPECIFIED_CAPACITY;
+    ANI_CALL(env, CreateLocalScope(nrRefs), return);
+    if (loadResult.errorCode == 0) {
+        ani_object drawableDescriptorLoadedResult =
+            CreateDrawableDescriptorLoadedResult(env, loadResult.imageWidth_, loadResult.imageHeight_);
+        ani_ref drawableDescriptorLoadedResultRef = static_cast<ani_ref>(drawableDescriptorLoadedResult);
+        status = env->PromiseResolver_Resolve(asyncContext->deferred, drawableDescriptorLoadedResultRef);
+        if (status != ANI_OK) {
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR,
+                "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
+        }
+    } else {
+        int32_t errorCode = OHOS::Ace::ERROR_CODE_DRAWABLE_LOADER_ERROR;
+        ani_error error = OHOS::Ace::Ani::GetErrorObject(env, "resource loading failed.", errorCode);
+        status = env->PromiseResolver_Reject(asyncContext->deferred, error);
+        if (status != ANI_OK) {
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR,
+                "[ANI] PromiseResolver_Reject fail. status: %{public}d", status);
+        }
+    }
+    status = env->DestroyLocalScope();
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR,
+            "[ANI] DestroyLocalScope fail. status: %{public}d", status);
+    }
+}
+
+OHOS::Ace::DrawableDescriptor::LoadCallback CreateDrawableLoadCallback(ani_env* env, ani_object* result)
+{
+    auto asyncContext = std::make_shared<DrawableAsyncContext>();
+    ANI_CALL(env, GetVM(&asyncContext->vm), return nullptr);
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ANI_CALL(env, Promise_New(&asyncContext->deferred, result), return nullptr)
+    auto callback = [asyncContext](DrawableDescriptorLoadResult loadResult) mutable {
+        CHECK_NULL_VOID(asyncContext);
+        auto container = OHOS::Ace::AceEngine::Get().GetContainer(asyncContext->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto task = [asyncContext, loadResult]() {
+            HandleDrawableDescriptorLoadResult(asyncContext, loadResult);
+        };
+        taskExecutor->PostTask(
+            std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDrawableParseLoadedResultCallback");
+    };
+    return callback;
+}
+
+ani_object LoadSync(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+{
+    ani_object retValue = nullptr;
+    auto* retValueRef = static_cast<ani_ref>(retValue);
+    ANI_CALL(env, GetUndefined(&retValueRef), return nullptr);
+
+    ani_long nativeObj = 0;
+    ANI_CALL(env, Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj), return retValue);
+
+    auto* drawableDescriptor = reinterpret_cast<DrawableDescriptor*>(nativeObj);
+    if (drawableDescriptor == nullptr) {
+        return retValue;
+    }
+    switch (drawableDescriptor->GetDrawableType()) {
+        case OHOS::Ace::DrawableType::BASE:
+        case OHOS::Ace::DrawableType::LAYERED:
+        case OHOS::Ace::DrawableType::PIXELMAP:
+            break;
+        case OHOS::Ace::DrawableType::ANIMATED: {
+            auto* animatedDrawable = static_cast<AnimatedDrawableDescriptor*>(drawableDescriptor);
+            if (animatedDrawable == nullptr) {
+                return nullptr;
+            }
+            auto drawableDescriptorLoadResult = animatedDrawable->LoadSync();
+            if (drawableDescriptorLoadResult.errorCode == 0) {
+                retValue = CreateDrawableDescriptorLoadedResult(
+                    env, drawableDescriptorLoadResult.imageWidth_, drawableDescriptorLoadResult.imageHeight_);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return retValue;
+}
+
+ani_object Load(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+{
+    ani_object retValue = nullptr;
+    auto* retValueRef = static_cast<ani_ref>(retValue);
+    ANI_CALL(env, GetUndefined(&retValueRef), return nullptr);
+
+    ani_long nativeObj = 0;
+    ANI_CALL(env, Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj), return retValue);
+
+    auto* drawableDescriptor = reinterpret_cast<DrawableDescriptor*>(nativeObj);
+    if (drawableDescriptor == nullptr) {
+        return retValue;
+    }
+
+    switch (drawableDescriptor->GetDrawableType()) {
+        case OHOS::Ace::DrawableType::BASE:
+        case OHOS::Ace::DrawableType::LAYERED:
+        case OHOS::Ace::DrawableType::PIXELMAP:
+            break;
+        case OHOS::Ace::DrawableType::ANIMATED: {
+            auto* animatedDrawable = static_cast<AnimatedDrawableDescriptor*>(drawableDescriptor);
+            if (animatedDrawable == nullptr) {
+                break;
+            }
+            auto callBack = CreateDrawableLoadCallback(env, &retValue);
+            if (callBack != nullptr) {
+                animatedDrawable->LoadAsync(std::move(callBack));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return retValue;
+}
+
+ani_object GetAnimationController(
+    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object AnimatedDrawable, [[maybe_unused]] ani_string id)
+{
+    ani_object retValue = nullptr;
+    auto* retValueRef = static_cast<ani_ref>(retValue);
+    ANI_CALL(env, GetUndefined(&retValueRef), return nullptr);
+
+    ani_boolean isIdUndefined;
+    ANI_CALL(env, Reference_IsUndefined(id, &isIdUndefined), return retValue);
+    std::string componentId {};
+    if (!(static_cast<bool>(isIdUndefined))) {
+        componentId = ANIStringToStdString(env, id);
+    }
+
+    ani_long nativeObj = 0;
+    ANI_CALL(env, Object_GetPropertyByName_Long(AnimatedDrawable, "nativeObj", &nativeObj), return retValue);
+
+    auto* animatedDrawableDescriptor = reinterpret_cast<AnimatedDrawableDescriptor*>(nativeObj);
+    if (animatedDrawableDescriptor == nullptr) {
+        return retValue;
+    }
+    auto animationController = animatedDrawableDescriptor->GetControlledAnimator(componentId);
+    if (!animationController) {
+        return retValue;
+    }
+
+    auto* animationControllerRaw = AceType::RawPtr(animationController);
+
+    ani_class cls;
+    if (ANI_OK != env->FindClass(ANIMATION_CONTROLLER_INNER, &cls)) {
+        TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] find class fail");
+        return retValue;
+    }
+
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+        TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] find method fail");
+        return retValue;
+    }
+
+    if (ANI_OK != env->Object_New(cls, ctor, &retValue, reinterpret_cast<ani_long>(animationControllerRaw))) {
+        TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] create animatorResult fail");
+        return retValue;
+    }
+
+    return retValue;
 }
 
 ani_object CreateAnimatedDrawableByPixelMapList(ani_env* env,
     const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMapList, int32_t duration, int32_t iterations)
 {
     ani_object optionsAni {};
-    static const char* className = "@ohos.arkui.drawableDescriptor.AnimationOptionsImpl";
-
     if (pixelMapList.empty()) {
         return nullptr;
     }
     ani_class cls;
-    env->FindClass(className, &cls);
+    env->FindClass(ANIMATION_OPTIONS_IMPL, &cls);
     ani_method ctor;
     env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
 
-    auto durationAni = CreateDouble(env, duration);
-    auto iterationsAni = CreateDouble(env, iterations);
+    auto* durationAni = CreateANIDoubleObject(env, duration);
+    auto* iterationsAni = CreateANIDoubleObject(env, iterations);
 
     env->Object_New(cls, ctor, &optionsAni);
 
@@ -210,38 +402,29 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
     }
 }
 
-void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
-    ani_array pixelmapsAni, ani_object optionsAni)
+AnimatedDrawableDescriptor* BindAnimatedDrawableDescriptorNative(ani_env* env, ani_object drawableAni)
 {
-    ani_boolean isOptionsUndefined;
-    env->Reference_IsUndefined(optionsAni, &isOptionsUndefined);
     auto* drawable = new AnimatedDrawableDescriptor();
+    CHECK_NULL_RETURN(drawable, nullptr);
     drawable->IncRefCount();
     auto ptr = reinterpret_cast<ani_long>(drawable);
-    env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
-    ani_size size;
-    env->Array_GetLength(pixelmapsAni, &size);
-    std::vector<RefPtr<PixelMap>> results;
-    ani_class arrayClass;
-    env->FindClass("escompat.Array", &arrayClass);
-    ani_method getDataMethod;
-    env->Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod);
-    for (size_t index = 0; index < size; index++) {
-        ani_ref pixelmapAni;
-        env->Object_CallMethod_Ref(pixelmapsAni, getDataMethod, &pixelmapAni, index);
-        auto pixelmap = Media::PixelMapTaiheAni::GetNativePixelMap(env, static_cast<ani_object>(pixelmapAni));
-        results.push_back(PixelMap::Create(pixelmap));
+    auto result = env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
+    if (result != ANI_OK) {
+        drawable->DecRefCount();
+        return nullptr;
     }
-    drawable->SetPixelMapList(results);
-    if (isOptionsUndefined) {
-        return;
-    }
+    return drawable;
+}
+
+void ParseAnimatedOptions(ani_env* env, ani_object optionsAni, AnimatedDrawableDescriptor* drawable)
+{
     ani_boolean isDurationUndefined;
     ani_boolean isIterationsUndefined;
     ani_ref durationRef;
     ani_ref iterationsRef;
     env->Object_GetPropertyByName_Ref(optionsAni, "duration", &durationRef);
     env->Object_GetPropertyByName_Ref(optionsAni, "iterations", &iterationsRef);
+
     ani_object durationAni = static_cast<ani_object>(durationRef);
     ani_object iterationsAni = static_cast<ani_object>(iterationsRef);
     env->Reference_IsUndefined(durationAni, &isDurationUndefined);
@@ -256,17 +439,94 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
         env->Object_CallMethodByName_Int(iterationsAni, "toInt", ":i", &iterations);
         drawable->SetIterations(static_cast<int32_t>(iterations));
     }
+    std::vector<int32_t> frameDurations;
+    if (GetArrayIntParam(env, optionsAni, "frameDurations", frameDurations)) {
+        drawable->SetDurations(frameDurations);
+    }
+
+    bool autoPlay = false;
+    if (GetBoolParam(env, optionsAni, "autoPlay", autoPlay)) {
+        drawable->SetAutoPlay(autoPlay);
+    }
+}
+
+void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_array pixelmapsAni, ani_object optionsAni)
+{
+    auto* drawable = BindAnimatedDrawableDescriptorNative(env, drawableAni);
+    CHECK_NULL_VOID(drawable);
+    ani_size size;
+    ANI_CALL(env, Array_GetLength(pixelmapsAni, &size), return);
+    std::vector<RefPtr<PixelMap>> results;
+    ani_class arrayClass;
+    ANI_CALL(env, FindClass("escompat.Array", &arrayClass), return);
+    ani_method getDataMethod;
+    ANI_CALL(env, Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod), return);
+    for (size_t index = 0; index < size; index++) {
+        ani_ref pixelmapAni;
+        ANI_CALL(env, Object_CallMethod_Ref(pixelmapsAni, getDataMethod, &pixelmapAni, index), return);
+        auto pixelmap = Media::PixelMapTaiheAni::GetNativePixelMap(env, static_cast<ani_object>(pixelmapAni));
+        results.push_back(PixelMap::Create(pixelmap));
+    }
+    drawable->SetPixelMapList(results);
+    ani_boolean isOptionsUndefined;
+    ANI_CALL(env, Reference_IsUndefined(optionsAni, &isOptionsUndefined), return);
+    if (static_cast<bool>(isOptionsUndefined)) {
+        return;
+    }
+    ParseAnimatedOptions(env, optionsAni, drawable);
+}
+
+void CreateAnimatedDrawableByResource(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_object resource, ani_object optionsAni)
+{
+    auto* drawable = BindAnimatedDrawableDescriptorNative(env, drawableAni);
+    CHECK_NULL_VOID(drawable);
+    ResourceObjectInfo result;
+    GetResourceParam(env, resource, result);
+
+    auto resourceRef = AceType::MakeRefPtr<ResourceObject>(result.resId, result.type, result.params,
+        result.bundleName.value_or(""), result.moduleName.value_or(""), Container::CurrentIdSafely());
+    auto info = AceType::MakeRefPtr<DrawableDescriptorInfo>(resourceRef);
+    drawable->SetDrawableDescriptorInfo(info);
+
+    ani_boolean isOptionsUndefined;
+    ANI_CALL(env, Reference_IsUndefined(optionsAni, &isOptionsUndefined), return);
+    if (static_cast<bool>(isOptionsUndefined)) {
+        return;
+    }
+    ParseAnimatedOptions(env, optionsAni, drawable);
+}
+
+void CreateAnimatedDrawableByString(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_string resource, ani_object optionsAni)
+{
+    auto* drawable = BindAnimatedDrawableDescriptorNative(env, drawableAni);
+    CHECK_NULL_VOID(drawable);
+
+    auto src = ANIStringToStdString(env, resource);
+    if (!src.empty()) {
+        auto info = AceType::MakeRefPtr<DrawableDescriptorInfo>(src);
+        drawable->SetDrawableDescriptorInfo(info);
+    }
+
+    ani_boolean isOptionsUndefined;
+    ANI_CALL(env, Reference_IsUndefined(optionsAni, &isOptionsUndefined), return);
+    if (static_cast<bool>(isOptionsUndefined)) {
+        return;
+    }
+    ParseAnimatedOptions(env, optionsAni, drawable);
 }
 
 ani_object CreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
-    auto* pixelMapDrawable = reinterpret_cast<PixelMapDrawableDescriptor*>(nativeObj);
-    if (pixelMapDrawable == nullptr) {
+    auto* drawableDescriptor = reinterpret_cast<DrawableDescriptor*>(nativeObj);
+    if (drawableDescriptor == nullptr) {
         return nullptr;
     }
-    auto pixelMap = pixelMapDrawable->GetPixelMap();
+    auto pixelMap = drawableDescriptor->GetPixelMap();
     if (pixelMap == nullptr) {
         return nullptr;
     }
@@ -471,7 +731,129 @@ void DestructDrawable([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class 
         drawable->DecRefCount();
     }
 }
+
+OHOS::Ace::ControlledAnimator* GetAnimationControllerNative(ani_env* env, ani_object animationController)
+{
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(animationController, &isUndefined);
+    if (static_cast<bool>(isUndefined)) {
+        return nullptr;
+    }
+    ani_long nativeObj = 0;
+    ANI_CALL(env, Object_GetFieldByName_Long(animationController, "nativeObj", &nativeObj), return nullptr);
+    if (nativeObj == 0) {
+        return nullptr;
+    }
+    auto* controlledAnimator = reinterpret_cast<OHOS::Ace::ControlledAnimator*>(nativeObj);
+    return controlledAnimator;
+}
+
+static void AnimationControllerStart(ani_env* env, ani_object animationController)
+{
+    auto* controlledAnimator = GetAnimationControllerNative(env, animationController);
+    if (controlledAnimator == nullptr) {
+        return;
+    }
+    controlledAnimator->Finish();
+    controlledAnimator->Forward();
+}
+
+static void AnimationControllerStop(ani_env* env, ani_object animationController)
+{
+    auto* controlledAnimator = GetAnimationControllerNative(env, animationController);
+    if (controlledAnimator == nullptr) {
+        return;
+    }
+    controlledAnimator->Finish();
+}
+
+static void AnimationControllerPause(ani_env* env, ani_object animationController)
+{
+    auto* controlledAnimator = GetAnimationControllerNative(env, animationController);
+    if (controlledAnimator == nullptr) {
+        return;
+    }
+    controlledAnimator->Pause();
+}
+
+static void AnimationControllerResume(ani_env* env, ani_object animationController)
+{
+    auto* controlledAnimator = GetAnimationControllerNative(env, animationController);
+    if (controlledAnimator == nullptr) {
+        return;
+    }
+    controlledAnimator->Forward();
+}
+
+static ani_enum_item AnimationControllerGetStatus(ani_env* env, ani_object animationController)
+{
+    auto* controlledAnimator = GetAnimationControllerNative(env, animationController);
+    if (controlledAnimator == nullptr) {
+        return nullptr;
+    }
+    auto status = controlledAnimator->GetControlStatus();
+
+    ani_enum animationStatus;
+    if (env->FindEnum("arkui.component.enums.AnimationStatus", &animationStatus) != ANI_OK) {
+        return nullptr;
+    }
+
+    ani_enum_item animationStatusItem = nullptr;
+    switch (status) {
+        case OHOS::Ace::ControlledAnimator::ControlStatus::IDLE: {
+            if (env->Enum_GetEnumItemByName(animationStatus, "Initial", &animationStatusItem) != ANI_OK) {
+                TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] GetEnumItem fail");
+            }
+            break;
+        }
+        case OHOS::Ace::ControlledAnimator::ControlStatus::RUNNING: {
+            if (env->Enum_GetEnumItemByName(animationStatus, "Running", &animationStatusItem) != ANI_OK) {
+                TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] GetEnumItem fail");
+            }
+            break;
+        }
+        case OHOS::Ace::ControlledAnimator::ControlStatus::PAUSED: {
+            if (env->Enum_GetEnumItemByName(animationStatus, "Paused", &animationStatusItem) != ANI_OK) {
+                TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] GetEnumItem fail");
+            }
+            break;
+        }
+        case OHOS::Ace::ControlledAnimator::ControlStatus::STOPPED: {
+            if (env->Enum_GetEnumItemByName(animationStatus, "Stopped", &animationStatusItem) != ANI_OK) {
+                TAG_LOGI(AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "[ANI] GetEnumItem fail");
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return animationStatusItem;
+}
 } // namespace OHOS::Ace::Ani
+
+ani_status BindAnimationController(ani_env* env)
+{
+    ani_class cls;
+    auto res = env->FindClass(OHOS::Ace::Ani::ANIMATION_CONTROLLER_INNER, &cls);
+    if (ANI_OK != res) {
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function { "start", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::AnimationControllerStart) },
+        ani_native_function { "stop", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::AnimationControllerStop) },
+        ani_native_function { "pause", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::AnimationControllerPause) },
+        ani_native_function { "resume", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::AnimationControllerResume) },
+        ani_native_function {
+            "getStatus", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::AnimationControllerGetStatus) },
+    };
+    res = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (ANI_OK != res) {
+        return ANI_ERROR;
+    }
+
+    return ANI_OK;
+}
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -479,12 +861,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
+
+    if (BindAnimationController(env) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
     ani_class cls;
     auto ani_status = env->FindClass("@ohos.arkui.drawableDescriptor.DrawableDescriptorInner", &cls);
     if (ani_status != ANI_OK) {
-        LOGI("find arkui drawable descriptor inner failed");
         return ANI_ERROR;
     }
+
     std::array staticMethods = {
         ani_native_function {
             "createPixelMapDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePixelMapDrawable) },
@@ -492,6 +879,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "createLayeredDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateLayeredDrawable) },
         ani_native_function {
             "createAnimatedDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAnimatedDrawable) },
+        ani_native_function { "createAnimatedDrawableByResource", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAnimatedDrawableByResource) },
+        ani_native_function { "createAnimatedDrawableByString", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAnimatedDrawableByString) },
         ani_native_function { "createPixelMap", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePixelMap) },
         ani_native_function { "composePixelMap", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::ComposePixelMap) },
         ani_native_function { "createForeground", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateForefround) },
@@ -499,6 +890,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "createMask", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateMask) },
         ani_native_function {
             "getMaskClipPath", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableMaskClipPath) },
+        ani_native_function { "loadSync", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::LoadSync) },
+        ani_native_function { "load", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::Load) },
+        ani_native_function {
+            "getAnimationController", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::GetAnimationController) },
         ani_native_function {
             "nativeTransferStatic", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::NativeTransferStatic) },
         ani_native_function { "setBlendMode", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::SetBlendMode) },

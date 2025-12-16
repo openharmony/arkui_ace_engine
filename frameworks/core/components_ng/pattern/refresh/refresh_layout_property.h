@@ -52,6 +52,7 @@ public:
         value->propFriction_ = CloneFriction();
         value->propLoadingText_ = CloneLoadingText();
         value->propPullToRefresh_ = ClonePullToRefresh();
+        value->propPullUpToCancelRefresh_ = ClonePullUpToCancelRefresh();
         value->propRefreshOffset_ = CloneRefreshOffset();
         value->propPullDownRatio_ = ClonePullDownRatio();
         value->propMaxPullDownDistance_ = CloneMaxPullDownDistance();
@@ -67,6 +68,7 @@ public:
         ResetFriction();
         ResetLoadingText();
         ResetPullToRefresh();
+        ResetPullUpToCancelRefresh();
         ResetRefreshOffset();
         ResetPullDownRatio();
         ResetMaxPullDownDistance();
@@ -85,6 +87,7 @@ public:
         json->PutExtAttr(
             "refreshOffset", propRefreshOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("pullToRefresh", propPullToRefresh_.value_or(true), filter);
+        json->PutExtAttr("pullUpToCancelRefresh", propPullUpToCancelRefresh_.value_or(true), filter);
         json->PutExtAttr("friction", propFriction_.value_or(1), filter);
         json->PutExtAttr("promptText", propLoadingText_.value_or(std::string()).c_str(), filter);
         if (propPullDownRatio_.has_value()) {
@@ -108,6 +111,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullDownRatio, float, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxPullDownDistance, float, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomBuilderExist, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullUpToCancelRefresh, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutProperty);

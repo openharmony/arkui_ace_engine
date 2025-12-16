@@ -62,7 +62,7 @@ using HoverAndPressCallback = std::function<void(const Color&)>;
 using Rosen::RSNode;
 
 // RenderNode is the base class for different render backend, represent a render unit for render pipeline.
-class ACE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
+class ACE_FORCE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
     DECLARE_ACE_TYPE(RenderNode, PropertyAnimatable, AceType);
 
 public:

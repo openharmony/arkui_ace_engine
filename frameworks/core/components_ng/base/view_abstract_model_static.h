@@ -143,10 +143,11 @@ public:
         ViewAbstract::SetChainWeight(frameNode, value);
     }
 
-    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    static void BindPopup(const RefPtr<FrameNode>& targetNode,
+        const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
     {
         CHECK_NULL_VOID(targetNode);
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
     static void BindTips(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
@@ -203,7 +204,7 @@ public:
     static void BindMenuGesture(FrameNode* frameNode,
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
-        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+        std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
 
     static void BindContentCover(FrameNode* targetNode, bool isShow,
@@ -291,6 +292,7 @@ public:
     static void SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, std::string localizedAlignment);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
@@ -395,7 +397,7 @@ void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& i
 void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
     const MenuParam& menuParam);
 void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
-    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

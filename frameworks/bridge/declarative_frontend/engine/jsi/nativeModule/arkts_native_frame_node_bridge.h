@@ -154,6 +154,12 @@ public:
     static ArkUINativeModuleValue RemoveAdoptedChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ConvertPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard start
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormLiteSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateTypedFrameNodeFormFullSet(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    // ArkTsCard end
 };
 
 } // namespace OHOS::Ace::NG

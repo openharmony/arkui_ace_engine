@@ -98,6 +98,7 @@ state_mgmt_release_files_to_watch = [
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/env_base/i_env_value.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/env_base/i_env_breakpoint.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/env_base/window_env/i_env_windowsize.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/env_base/window_env/i_env_windowavoidarea.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/module_map.d.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat_impl.ts",

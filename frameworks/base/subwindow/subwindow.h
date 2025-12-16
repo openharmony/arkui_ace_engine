@@ -73,6 +73,8 @@ public:
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
+    virtual bool SetReceiveDragEventEnabled(bool enabled) = 0;
+    virtual bool GetIsReceiveDragEventEnabled() = 0;
     virtual bool ShowPreviewNG(bool isStartDraggingFromSubWindow) = 0;
     virtual void SetWindowTouchable(bool touchable) = 0;
     virtual void HidePreviewNG() = 0;

@@ -22,6 +22,8 @@
 #include "ui_content_errors.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
@@ -175,6 +177,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             ExeAppAIFunctionInner(data, reply, option);
             break;
         }
+        case REGISTER_CONTENT_CHANGE: {
+            RegisterContentChangeCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_CONTENT_CHANGE: {
+            UnregisterContentChangeCallbackInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -185,8 +195,13 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
     return NO_ERROR;
 }
 
@@ -415,8 +430,13 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetVisibleInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetVisibleInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetVisibleInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
     return NO_ERROR;
 }
 
@@ -425,6 +445,34 @@ int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel&
     std::string funcName = data.ReadString();
     std::string params = data.ReadString();
     reply.WriteInt32(ExeAppAIFunction(funcName, params, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::RegisterContentChangeCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("contentChange", processId);
+    ContentChangeConfigImpl* configImplPtr = data.ReadParcelable<ContentChangeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("RegisterContentChangeCallbackInner read ContentChangeConfig failed");
+        reply.WriteInt32(FAILED);
+        return FAILED;
+    }
+
+    ContentChangeConfig config = configImplPtr->GetConfig();
+    int32_t ret = RegisterContentChangeCallback(config, nullptr);
+    delete configImplPtr;
+
+    reply.WriteInt32(ret);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterContentChangeCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    UiSessionManager::GetInstance()->EraseProcessId("contentChange");
+    reply.WriteInt32(UnregisterContentChangeCallback());
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

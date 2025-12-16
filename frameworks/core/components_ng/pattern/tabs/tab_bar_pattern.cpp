@@ -1588,11 +1588,12 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
+        LoadCompleteManagerStartCollect(index);
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
-            LoadCompleteManagerStartCollect();
+            LoadCompleteManagerStartCollect(index);
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1982,7 +1983,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
-            LoadCompleteManagerStartCollect();
+            LoadCompleteManagerStartCollect(index);
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -3584,7 +3585,10 @@ void TabBarPattern::AdjustTabBarInfo()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t totalTabsBarItems = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
-    CHECK_NULL_VOID(static_cast<int32_t>(tabBarItemIds_.size()) > totalTabsBarItems);
+    if (static_cast<int32_t>(tabBarItemIds_.size()) <= totalTabsBarItems) {
+        NotifyTabBarItemsChange();
+        return;
+    }
 
     std::set<int32_t> retainedIndex;
     for (auto i = 0; i < static_cast<int32_t>(tabBarItemIds_.size()); i++) {
@@ -3597,6 +3601,7 @@ void TabBarPattern::AdjustTabBarInfo()
     }
 
     UpdateTabBarInfo<int32_t>(tabBarItemIds_, retainedIndex);
+    NotifyTabBarItemsChange();
     UpdateTabBarInfo<SelectedMode>(selectedModes_, retainedIndex);
     UpdateTabBarInfo<IndicatorStyle>(indicatorStyles_, retainedIndex);
     UpdateTabBarInfo<TabBarStyle>(tabBarStyles_, retainedIndex);
@@ -3807,6 +3812,13 @@ void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_
     std::swap(newInfo, info);
 }
 
+void TabBarPattern::NotifyTabBarItemsChange()
+{
+    if (onTabBarItemsChangeEvent_) {
+        onTabBarItemsChangeEvent_();
+    }
+}
+
 void TabBarPattern::OnColorModeChange(uint32_t colorMode)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -3860,11 +3872,12 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     indicatorNode->MarkModifyDone();
 }
 
-void TabBarPattern::LoadCompleteManagerStartCollect()
+void TabBarPattern::LoadCompleteManagerStartCollect(int32_t index)
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(index);
+        pipeline->GetLoadCompleteManager()->StartCollect(url);
     }
 }
 

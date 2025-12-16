@@ -28,6 +28,7 @@
 
 #include "ani.h"
 #include "load.h"
+#include "securec.h"
 
 #include "base/utils/utils.h"
 #include "core/interfaces/ani/ani_api.h"
@@ -35,6 +36,7 @@
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif
+#include "drag_and_drop/native_drag_drop_global.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -43,6 +45,7 @@ const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
+const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -68,10 +71,11 @@ CommonModuleCallbackAni::~CommonModuleCallbackAni()
     CHECK_NULL_VOID(func_);
     ani_env* env = nullptr;
     auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-        env->GlobalReference_Delete(func_);
+    if (attachCurrentThreadStatus == ANI_OK) {
         vm_->DetachCurrentThread();
     }
+    CHECK_NULL_VOID(env);
+    env->GlobalReference_Delete(func_);
 }
 
 void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
@@ -380,6 +384,27 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawForeGrou
     };
 }
 
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawOverlayFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, ani_ref modifier)
+{
+    return [vm, callbackAni, object = modifier](const NG::DrawingContext& context) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            return;
+        }
+        env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawOverlay",
+            "C{arkui.Graphics.DrawContext}:", drawingContext);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier)
 {
@@ -400,10 +425,12 @@ void SetDrawModifier(
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
     void* fnDrawForegroundFun = nullptr;
+    void* fnDrawOverlayFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawBehindFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawContentFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawFrontFun = nullptr;
     std::function<void(NG::DrawingContext & drawingContext)> drawForegroundFun = nullptr;
+    std::function<void(NG::DrawingContext & drawingContext)> drawOverlayFun = nullptr;
     if (flag & FLAG_DRAW_BEHIND) {
         auto fnDrawBehindAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawBehindFun = ConvertFnObjDrawBehindFun(vm, fnDrawBehindAni, drawModifierRef);
@@ -420,6 +447,10 @@ void SetDrawModifier(
         auto fnDrawForegroundAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
         drawForegroundFun = ConvertFnObjDrawForeGroundFun(vm, fnDrawForegroundAni, drawModifierRef);
     }
+    if (flag & FLAG_DRAW_OVERLAY) {
+        auto fnDrawOverlayAni = std::make_shared<CommonModuleCallbackAni>(env, drawModifierRef);
+        drawOverlayFun = ConvertFnObjDrawOverlayFun(vm, fnDrawOverlayAni, drawModifierRef);
+    }
     if (drawBehindFun != nullptr) {
         fnDrawBehindFun = &drawBehindFun;
     }
@@ -432,8 +463,219 @@ void SetDrawModifier(
     if (drawForegroundFun != nullptr) {
         fnDrawForegroundFun = &drawForegroundFun;
     }
+    if (drawOverlayFun != nullptr) {
+        fnDrawOverlayFun = &drawOverlayFun;
+    }
     modifier->getArkUIAniDrawModifier()->setDrawModifier(
-        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun);
+        ptr, flag, fnDrawBehindFun, fnDrawContentFun, fnDrawFrontFun, fnDrawForegroundFun, fnDrawOverlayFun);
+}
+
+ani_object CreateLayoutConstraintF(ani_env* env, const NG::LayoutConstraintF& constraintF)
+{
+    ani_status status;
+    ani_object result = nullptr;
+    ani_class layoutConstraintFClass;
+    if ((status = env->FindClass("arkui.FrameNode.LayoutConstraintImpl", &layoutConstraintFClass)) != ANI_OK) {
+        HILOGE("FindClass LayoutConstraint failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_method layoutConstraintFCtor;
+    if ((status = env->Class_FindMethod(layoutConstraintFClass, "<ctor>", "dddddd:", &layoutConstraintFCtor)) !=
+        ANI_OK) {
+        HILOGE("Class_FindMethod CreateLayoutConstraintF ctor failed, %{public}d", status);
+        return nullptr;
+    }
+    auto minSize = constraintF.minSize;
+    auto maxSize = constraintF.maxSize;
+    auto percentReference = constraintF.percentReference;
+    if ((status = env->Object_New(layoutConstraintFClass, layoutConstraintFCtor, &result, maxSize.Width(),
+        maxSize.Height(), minSize.Width(), minSize.Height(), percentReference.Width(),
+        percentReference.Height())) != ANI_OK) {
+        HILOGE("Create layoutConstraintFClass object failed, %{public}d", status);
+        return nullptr;
+    }
+    return result;
+}
+
+std::function<void(NG::LayoutConstraintF& layoutConstraint)> ConvertFunOnMeasureFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, std::shared_ptr<ani_wref> frameNdoeWeakRef)
+{
+    return [vm, callbackAni, frameNdoeWeakRef](const NG::LayoutConstraintF& constraint) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        auto layoutConstraintAni = CreateLayoutConstraintF(env, constraint);
+        if (!layoutConstraintAni) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localFrameNodeRef;
+        if (env->WeakReference_GetReference(*frameNdoeWeakRef, &released, &localFrameNodeRef) != ANI_OK) {
+            HILOGE("get frameNodeRef fail GetReference failed");
+            return;
+        }
+        if (released) {
+            HILOGE("localFrameNodeRef released convert onMeasure function fail");
+            return;
+        }
+        auto status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(localFrameNodeRef), "onMeasure",
+            "C{arkui.FrameNode.LayoutConstraint}:", layoutConstraintAni);
+        if (status != ANI_OK) {
+            HILOGE("ConvertFunOnMeasureFun invoke fail status is %{public}d", status);
+        }
+    };
+}
+
+ani_object CreateLayoutOffset(ani_env* env, const NG::OffsetF& offset)
+{
+    ani_status status;
+    ani_class nodePositionClass;
+    if ((status = env->FindClass("arkui.FrameNode.NodePositionImpl", &nodePositionClass)) != ANI_OK) {
+        HILOGE("FindClass Size failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_method nodePositionCtr;
+    if ((status = env->Class_FindMethod(nodePositionClass, "<ctor>", "dd:", &nodePositionCtr)) != ANI_OK) {
+        HILOGE("Class_FindMethod NodePositionImpl ctor failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_double x = offset.GetX();
+    ani_double y = offset.GetY();
+    ani_object offsetObj;
+    if ((status = env->Object_New(nodePositionClass, nodePositionCtr, &offsetObj, x, y)) != ANI_OK) {
+        HILOGE("Create Size object failed, %{public}d", status);
+        return nullptr;
+    }
+    return offsetObj;
+}
+
+std::function<void(const NG::OffsetF& offset)> ConvertFunOnLayoutFun(
+    ani_vm* vm, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, std::shared_ptr<ani_wref> frameNdoeWeakRef)
+{
+    return [vm, callbackAni, frameNdoeWeakRef](const NG::OffsetF& offset) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        auto offsetAni = CreateLayoutOffset(env, offset);
+        if (!offsetAni) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localFrameNodeRef;
+        if (env->WeakReference_GetReference(*frameNdoeWeakRef, &released, &localFrameNodeRef) != ANI_OK) {
+            HILOGE("get frameNodeRef fail GetReference failed");
+            return;
+        }
+        if (released) {
+            HILOGE("localFrameNodeRef released convert onDraw function fail");
+            return;
+        }
+        auto callOnlayoutState = env->Object_CallMethodByName_Void(
+            reinterpret_cast<ani_object>(localFrameNodeRef), "onLayout", "C{arkui.Graphics.Vector2}:", offsetAni);
+        if (callOnlayoutState != ANI_OK) {
+            HILOGE("call onLayout callback fail status is %{public}d", callOnlayoutState);
+        }
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
+
+std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawCallbackFunInner(ani_vm* vm,
+    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni, std::shared_ptr<ani_wref> frameNdoeWeakRef,
+    ani_method onDrawMethod, ani_method onDrawWrapperMethod)
+{
+    return [vm, callbackAni, frameNdoeWeakRef, onDraw = onDrawMethod,
+               onDrawWrapper = onDrawWrapperMethod](const NG::DrawingContext& context) -> void {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env = nullptr;
+        GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        auto drawingContext = CreateDrawingContext(env, context);
+        if (!drawingContext) {
+            HILOGW("Create drawing context failed !");
+            return;
+        }
+        ani_boolean released;
+        ani_ref localFrameNodeRef;
+        if (env->WeakReference_GetReference(*frameNdoeWeakRef, &released, &localFrameNodeRef) != ANI_OK) {
+            HILOGE("get frameNodeRef fail GetReference failed");
+            return;
+        }
+        if (released) {
+            HILOGE("localFrameNodeRef released convert onDraw function fail");
+            return;
+        }
+        env->Object_CallMethod_Void(reinterpret_cast<ani_object>(localFrameNodeRef), onDrawWrapper, drawingContext);
+        env->Object_CallMethod_Void(reinterpret_cast<ani_object>(localFrameNodeRef), onDraw, drawingContext);
+    };
+}
+
+void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_object frameNode)
+{
+    if (frameNode == nullptr) {
+        HILOGE("frameNdoe is undefined.");
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    ani_status status = ANI_OK;
+    ani_type frameNodeType = nullptr;
+    std::shared_ptr<ani_wref> frameNodeWeakRef(new ani_wref, [vm](ani_wref* wref) {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        env->WeakReference_Delete(*wref);
+    });
+    env->WeakReference_Create(frameNode, frameNodeWeakRef.get());
+    if ((status = env->Object_GetType(frameNode, &frameNodeType)) != ANI_OK) {
+        HILOGI("FrameNode Object_GetType fail");
+        return;
+    }
+    auto frameNodeClass = static_cast<ani_class>(frameNodeType);
+    ani_method getterMethod = nullptr;
+    ani_method onDrawMethod = nullptr;
+    if ((status = env->Class_FindMethod(frameNodeClass, "onDraw", "C{arkui.Graphics.DrawContext}:", &onDrawMethod)) !=
+        ANI_OK) {
+        HILOGI("Class_FindMethod onDraw failed, status : %{public}d", status);
+    } else {
+        ani_method onDrawWrapperMethod = nullptr;
+        env->Class_FindMethod(frameNodeClass, "onDrawWrapper", "C{arkui.Graphics.DrawContext}:", &onDrawWrapperMethod);
+        auto funcOnDrawAni = std::make_shared<CommonModuleCallbackAni>(env, frameNode);
+        std::function<void(NG::DrawingContext & drawingContext)> onDrawFunc =
+        ConvertFnObjDrawCallbackFunInner(vm, funcOnDrawAni, frameNodeWeakRef, onDrawMethod, onDrawWrapperMethod);
+        void* fnDrawCallbackFun = &onDrawFunc;
+        modifier->getCommonAniModifier()->setFrameNodeDrawCallback(env, ptr, fnDrawCallbackFun);
+    }
+    if ((status = env->Class_FindMethod(frameNodeClass, "onLayout", "C{arkui.Graphics.Vector2}:", &getterMethod)) !=
+        ANI_OK) {
+        HILOGI("Class_FindMethod onLayout failed, status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Class_FindMethod(
+        frameNodeClass, "onMeasure", "C{arkui.FrameNode.LayoutConstraint}:", &getterMethod)) != ANI_OK) {
+        HILOGI("Class_FindMethod onMeasure failed, status : %{public}d", status);
+        return;
+    }
+    void* fnMeasureFun = nullptr;
+    void* fnLayoutFun = nullptr;
+    std::function<void(NG::LayoutConstraintF & layoutConstraint)> fnObjMeasureFun = nullptr;
+    std::function<void(NG::OffsetF & position)> fnObjLayoutFun = nullptr;
+    auto fnMeasureAni = std::make_shared<CommonModuleCallbackAni>(env, frameNode);
+    fnObjMeasureFun = ConvertFunOnMeasureFun(vm, fnMeasureAni, frameNodeWeakRef);
+    fnObjLayoutFun = ConvertFunOnLayoutFun(vm, fnMeasureAni, frameNodeWeakRef);
+    fnMeasureFun = &fnObjMeasureFun;
+    fnLayoutFun = &fnObjLayoutFun;
+    modifier->getCommonAniModifier()->setCustomCallback(ptr, fnMeasureFun, fnLayoutFun);
+    return;
 }
 
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -1352,5 +1594,186 @@ void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int theme
         return;
     }
     modifier->getCommonAniModifier()->applyThemeScopeId(env, ptr, themeScopeId);
+}
+
+bool IsValidKey(const std::string& key)
+{
+    const std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    std::string lowerKey = key;
+    std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+    return std::find(validKeyCodes.begin(), validKeyCodes.end(), lowerKey) != validKeyCodes.end();
+}
+
+void ReleaseCharArray(char** arr, int32_t length)
+{
+    if (!arr) {
+        return;
+    }
+    for (int32_t i = 0; i < length; ++i) {
+        delete[] arr[i];
+    }
+    delete[] arr;
+}
+
+bool ConvertKeysToLowerStrings(ani_env* env, ani_array keys, char*** outKeys, int32_t* outLength)
+{
+    ani_size length = 0;
+    if (ANI_OK != env->Array_GetLength(keys, &length) || length <= 0) {
+        AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+
+    int32_t lengthInt = static_cast<int32_t>(length);
+    char** modifierKeys = new char* [lengthInt];
+
+    for (int32_t i = 0; i < lengthInt; ++i) {
+        bool isSuccess = true;
+        auto key = GetAniStringEnum(env, keys, static_cast<ani_int>(i), isSuccess);
+        if (!isSuccess || !IsValidKey(key)) {
+            ReleaseCharArray(modifierKeys, i);
+            AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+        std::string lowerKey = key;
+        std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+        size_t size = lowerKey.length() + 1;
+        modifierKeys[i] = new char[size];
+        if (strcpy_s(modifierKeys[i], size, lowerKey.c_str()) != 0) {
+            ReleaseCharArray(modifierKeys, i + 1);
+            AniUtils::AniThrow(env, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+    }
+
+    *outKeys = modifierKeys;
+    *outLength = lengthInt;
+    return true;
+}
+
+bool CheckPressedKeysMatch(char** modifierKeys, int32_t modifierLength, char** pressedKeys, int32_t pressedLength)
+{
+    if (!pressedKeys || pressedLength <= 0) {
+        return false;
+    }
+
+    for (int32_t i = 0; i < modifierLength; ++i) {
+        std::string key(modifierKeys[i]);
+        bool found = false;
+        for (int32_t j = 0; j < pressedLength; ++j) {
+            if (pressedKeys[j] && key == pressedKeys[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ani_boolean GetBaseEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getBaseEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+ani_boolean GetDragEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getDragAniModifier()->getPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+ani_boolean GetKeyEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getKeyEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
+void SetClickEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    auto result = modifier->getCommonAniModifier()->setClickEventPreventDefault(pointer);
+    if (!result) {
+        AniUtils::AniThrow(
+            env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
+    }
+}
+
+void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    auto result = modifier->getCommonAniModifier()->setTouchEventPreventDefault(pointer);
+    if (!result) {
+        AniUtils::AniThrow(
+            env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
+    }
 }
 } // namespace OHOS::Ace::Ani

@@ -46,8 +46,10 @@ void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
 
 // ArkTsCard start
 using CreateFuncCard = void (*)(void*, const char*, const void*);
+using UpdateFuncForm = void (*)(void*, int32_t);
 constexpr char PRE_INIT_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_PreloadAceModuleCard";
 constexpr char RELOAD_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_ReloadAceModuleCard";
+constexpr char LOAD_JS_XNODE_FUNC_FORM[] = "OHOS_ACE_LoadJsXNodeForm";
 
 void InitAceModuleCard(void* runtime, const char* bundleName, const void* hapPathMap)
 {
@@ -93,6 +95,27 @@ void DeclarativeModulePreloader::ReloadCard(NativeEngine& runtime, const std::st
 {
     ReloadAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str(),
         reinterpret_cast<const void*>(&hapPathMap));
+}
+
+void LoadJsXNodeForm(void* runtime, int32_t config)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return;
+    }
+
+    auto entry = reinterpret_cast<UpdateFuncForm>(LOADSYM(handle, LOAD_JS_XNODE_FUNC_FORM));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return;
+    }
+
+    entry(runtime, config);
+}
+
+void DeclarativeModulePreloader::UpdateFormJsXNodeConfig(NativeEngine& runtime, const FormLoadConfig& config)
+{
+    LoadJsXNodeForm(reinterpret_cast<void*>(&runtime), static_cast<int32_t>(config.jsXNodeLoadMode));
 }
 // ArkTsCard end
 

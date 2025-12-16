@@ -35,6 +35,16 @@ std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 namespace {
 constexpr char EMPTY_PAGE_INFO[] = "NA";
 
+std::string GetPageUrl(const RefPtr<PagePattern>& pagePattern)
+{
+    auto pageInfo = pagePattern->GetPageInfo();
+    std::string url = "";
+    if (pageInfo) {
+        url = pageInfo->GetPageUrl();
+    }
+    return url;
+}
+
 void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
 {
     CHECK_NULL_VOID(page);
@@ -68,7 +78,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-    context->GetLoadCompleteManager()->StartCollect("");
+    context->GetLoadCompleteManager()->StartCollect(GetPageUrl(pagePattern));
     pagePattern->TriggerPageTransition(
         [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();
@@ -796,20 +806,5 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     auto info = pattern->GetPageInfo();
     CHECK_NULL_RETURN(info, "");
     return info->GetPagePath();
-}
-
-void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
-{
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s, "
-        "ignoreOrientation: %{public}d", isForceSplit, homePage.c_str(), ignoreOrientation);
-    //app support split mode, whether force split is enable or disable, the homepage will be recognized
-    isForceSplitSupported_ = true;
-    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage && ignoreOrientation_ == ignoreOrientation) {
-        return;
-    }
-    isForceSplit_ = isForceSplit;
-    homePageConfig_ = homePage;
-    ignoreOrientation_ = ignoreOrientation;
-    OnForceSplitConfigUpdate();
 }
 } // namespace OHOS::Ace::NG

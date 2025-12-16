@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -81,16 +82,16 @@ std::optional<BorderRadiusProperty> ConvertBorderRadiusPropertyFromOptBorderRadi
         [&optValue](const Ark_BorderRadiuses& src) {
             BorderRadiusProperty borderRadius;
             borderRadius.radiusTopLeft =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.topLeft, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.topLeft, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusTopLeft);
             borderRadius.radiusTopRight =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.topRight, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.topRight, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusTopRight);
             borderRadius.radiusBottomLeft =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottomLeft, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.bottomLeft, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusBottomLeft);
             borderRadius.radiusBottomRight =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottomRight, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.bottomRight, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
             borderRadius.multiValued = true;
             optValue = borderRadius;
@@ -111,7 +112,7 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
     dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
 
     auto src = rect.value;
-    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.width, DimensionUnit::VP); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
                 dst.SetWidth(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
@@ -120,7 +121,7 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
             }
         }
     }
-    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.height, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.height, DimensionUnit::VP); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
                 dst.SetHeight(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
@@ -130,10 +131,10 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
         }
     }
     auto offset = dst.GetOffset();
-    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.x, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.x, DimensionUnit::VP); dim) {
         offset.SetX(*dim);
     }
-    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.y, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.y, DimensionUnit::VP); dim) {
         offset.SetY(*dim);
     }
     dst.SetOffset(offset);
@@ -164,16 +165,16 @@ std::optional<BorderWidthProperty> ConvertBorderWidthPropertyFromOptEdgeWidths(
         [&optValue](const Ark_EdgeWidths& src) {
             BorderWidthProperty widthProperty;
             widthProperty.topDimen =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.top, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.top, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.topDimen);
             widthProperty.leftDimen =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.left, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.left, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.leftDimen);
             widthProperty.bottomDimen =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottom, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.bottom, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.bottomDimen);
             widthProperty.rightDimen =
-                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.right, DimensionUnit::VP);
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.right, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.rightDimen);
             widthProperty.multiValued = true;
             optValue = widthProperty;

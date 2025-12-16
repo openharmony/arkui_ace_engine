@@ -14,6 +14,7 @@
  */
 
 import { ColorMetrics } from '../../Graphics'
+import { int32 } from "@koalaui/common"
 
 const MAX_CHANNEL_VALUE = 0xFF;
 
@@ -31,7 +32,7 @@ export class ColorMetricsTransfer {
             resourceId = ESValue.wrap(input).getProperty('resourceId_').toNumber();
         }
         let colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
-        colorMetrics.setResourceId(resourceId);
+        colorMetrics.setResourceId(resourceId as int32);
         return colorMetrics;
     }
     static transferDynamic(input: Object): Any {

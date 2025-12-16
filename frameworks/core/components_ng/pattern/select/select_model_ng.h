@@ -114,6 +114,8 @@ public:
     void SetShowDefaultSelectedIcon(bool show) override;
     void ResetShowDefaultSelectedIcon() override;
     void SetMenuOutline(const MenuParam& menuParam) override;
+    void SetKeyboardAvoidMode(const std::optional<MenuKeyboardAvoidMode>& mode) override;
+    void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -172,6 +174,8 @@ public:
     static void SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
     static void BackgroundColor(FrameNode* frameNode, const Color& color);
     static void ResetBackgroundColor(FrameNode* frameNode);
+    static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<MenuKeyboardAvoidMode>& mode);
+    static void SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std::optional<Dimension>& distance);
 
 private:
     void AddResObjWithCallBack(

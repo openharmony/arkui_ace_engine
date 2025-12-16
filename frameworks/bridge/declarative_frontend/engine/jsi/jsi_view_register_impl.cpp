@@ -1107,6 +1107,15 @@ void JsBindFormViews(
     }
 }
 
+void JsBindFormViewsForJsXNode(BindingTarget globalObj)
+{
+    JSScopeUtil::JSBind(globalObj);
+    JSBaseNode::JSBind(globalObj);
+    JSContentSlot::JSBind(globalObj);
+    JSNodeContent::JSBind(globalObj);
+    JSNodeContainer::JSBind(globalObj);
+}
+
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);

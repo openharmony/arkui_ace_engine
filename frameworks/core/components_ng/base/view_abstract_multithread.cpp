@@ -170,6 +170,18 @@ void ResetVisibleChangeMultiThread(FrameNode* frameNode)
     });
 }
 
+void SetFocusableMultiThread(FrameNode* frameNode, bool focusable)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), focusable]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(focusable);
+    });
+}
+
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);

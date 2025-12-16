@@ -243,7 +243,11 @@ public:
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
-        int32_t duration = 500);
+        int32_t duration = 500, bool withMultiSelect = false);
+    RefPtr<LongPressEventActuator> GetLongPressEventActuator()
+    {
+        return longPressEventActuator_;
+    }
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(

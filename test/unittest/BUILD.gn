@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -452,6 +452,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/manager/toolbar/toolbar_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
@@ -633,6 +634,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
     "$ace_root/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
+    "$ace_root/frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.cpp",
     "$ace_root/frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
@@ -799,6 +801,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_decoder.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
@@ -907,6 +910,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_immediate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
@@ -1334,6 +1339,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scroller_observer_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_item_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
@@ -1371,6 +1378,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_mask_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_wrapper_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.cpp",

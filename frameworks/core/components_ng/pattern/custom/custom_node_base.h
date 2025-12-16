@@ -116,12 +116,16 @@ public:
     void SetReuseId(const std::string& reuseId);
     const std::string& GetReuseId() const;
 
+    void SetCreatorId(const std::string& creatorId);
+    const std::string& GetCreatorId() const;
+
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
     bool isV2_ = false;
     bool executeFireOnAppear_ = false;
     std::string reuseId_;
+    std::string creatorId_;
 
 private:
     std::function<void()> updateFunc_;

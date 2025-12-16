@@ -15,7 +15,6 @@
 
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
@@ -24,6 +23,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+#include "navigation_context.h"
 #include "nav_destination_scrollable_processor_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {

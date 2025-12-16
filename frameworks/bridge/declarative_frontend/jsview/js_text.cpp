@@ -1253,6 +1253,24 @@ void JSText::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSText::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSText::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetFallbackLineSpacing(enabled);
+}
+
 void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
 {
     TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
@@ -1412,6 +1430,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
+    JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
+    JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1628,8 +1649,7 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
 
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
-        auto delayDouble = delay->ToNumber<double>();
-        auto delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delay->ToNumber<double>());
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1651,6 +1671,25 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
     if (getStartPolicy->IsNumber()) {
         auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
         options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
+
+    auto getUpdatePolicy = paramObject->GetProperty("marqueeUpdatePolicy");
+    if (getUpdatePolicy->IsNumber()) {
+        auto updatePolicy = static_cast<MarqueeUpdatePolicy>(getUpdatePolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeUpdatePolicy(updatePolicy);
+    }
+
+    auto getSpacing = paramObject->GetProperty("spacing");
+    if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
+        CalcDimension value;
+        UnRegisterResource("MarqueeSpacing");
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()) {
+            options.UpdateTextMarqueeSpacing(value);
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<CalcDimension>("MarqueeSpacing", resObj, value);
+        }
     }
 }
 
@@ -1682,5 +1721,30 @@ void JSText::EditMenuOptions(const JSCallbackInfo& info)
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     TextModel::GetInstance()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
+}
+
+void JSText::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    UnRegisterResource("selectedDragPreviewStyleColor");
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        TextModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColor(param, color, resourceObject)) {
+        TextModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
+    }
+    TextModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 } // namespace OHOS::Ace::Framework

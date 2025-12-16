@@ -137,6 +137,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.setCardId(parent.getCardId());
       // Call below will set this parent_ to parent as well
       parent.addChild(this as unknown as IView); // FIXME
+      this.nativeViewPartialUpdate.setCreatorId(parent.id__());
     }
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
@@ -250,7 +251,11 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
-  
+
+  public __isV2__Internal(): boolean {
+    return this instanceof ViewV2;
+  }
+
   // globally unique id, this is different from compilerAssignedUniqueChildId!
   id__(): number {
     return this.id_;
@@ -384,6 +389,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected abstract debugInfoStateVars(): string;
+
+  public abstract getRecycleDump(): string;
 
   public isViewActive(): boolean {
     return this.activeCount_ > 0;
@@ -838,6 +845,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           view.printDFXHeader('Profiler Info', command);
           view.dumpReport();
           this.sendStateInfo('{}');
+          break;
+        case 'RecyclePool':
+          DumpLog.addDesc('RecyclePool: ' + this.getRecycleDump());
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);

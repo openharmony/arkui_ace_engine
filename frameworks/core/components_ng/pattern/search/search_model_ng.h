@@ -120,10 +120,14 @@ public:
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetUserMargin() override;
     void SetTextDirection(TextDirection value) override;
     void ResetTextDirection() override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -221,12 +225,19 @@ public:
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool GetIncludeFontPadding(FrameNode* frameNode);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool GetFallbackLineSpacing(FrameNode* frameNode);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetUserMargin(FrameNode* frameNode);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     static void SetTextDirection(FrameNode* frameNode, TextDirection value);
     static void ResetTextDirection(FrameNode* frameNode);
     static TextDirection GetTextDirection(FrameNode* frameNode);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

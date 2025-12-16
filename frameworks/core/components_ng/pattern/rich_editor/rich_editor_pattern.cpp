@@ -1217,6 +1217,8 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     ClearOnFocusTextField(node);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
+    CHECK_NULL_VOID(keyboardOverlay_);
+    keyboardOverlay_->CloseKeyboard(node->GetId());
 }
 
 void RichEditorPattern::OnAttachToMainTreeMultiThread()
@@ -1743,6 +1745,10 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
 void RichEditorPattern::DeleteBackwardFunction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "DeleteBackwardFunction called");
+    if (IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Skipping delete operation: preview text inputting");
+        return;
+    }
     HandleOnDelete(true);
 }
 
@@ -2002,6 +2008,7 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, ParagraphSpacing);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextVerticalAlign);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDirection);
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
         if (!needLeadingMargin) {
@@ -3096,6 +3103,10 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
             if (auto textVerticalAlign = (*it)->GetTextVerticalAlign(); textVerticalAlign.has_value()) {
                 textVerticalAlignOpt = static_cast<int32_t>(textVerticalAlign.value());
             }
+            std::optional<int32_t> textDirectionOpt;
+            if (auto textDirection = (*it)->GetTextDirection(); textDirection.has_value()) {
+                textDirectionOpt = static_cast<int32_t>(textDirection.value());
+            }
             res.emplace_back(ParagraphInfo {
                 .leadingMarginPixmap = lm.pixmap,
                 .leadingMarginSize = { lm.size.Width().ToString(),
@@ -3105,6 +3116,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                 .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
                 .paragraphSpacing = spacingOpt,
                 .textVerticalAlign = textVerticalAlignOpt,
+                .textDirection = textDirectionOpt,
                 .range = { paraStart, (*it)->GetSpanItem()->position },
             });
             paraStart = (*it)->GetSpanItem()->position;
@@ -3227,6 +3239,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
     spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
     spanNode->UpdateTextVerticalAlign(style.textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+    spanNode->UpdateTextDirection(style.textDirection.value_or(TextDirection::INHERIT));
     auto paragraphSpacing = spanNode->GetParagraphSpacing();
     if (style.paragraphSpacing.has_value()) {
         spanNode->UpdateParagraphSpacing(style.paragraphSpacing.value());
@@ -3796,6 +3809,11 @@ void RichEditorPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterWindowFocus_ = false;
     StopTwinkling();
+    bool isCloseCustomKeyboard =
+        reason == BlurReason::WINDOW_BLUR && ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+    if (isCloseCustomKeyboard) {
+        CloseKeyboard(true);
+    }
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
@@ -4642,7 +4660,8 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
         std::swap(realStart, realEnd);
     }
     RefPtr<SpanString> spanString = MakeRefPtr<SpanString>(u"");
-    if (aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (aiWriteAdapter && aiWriteAdapter->GetAIWrite()) {
         SetSubSpansWithAIWrite(spanString, realStart, realEnd);
     } else {
         SetSubSpans(spanString, realStart, realEnd, spans_);
@@ -4747,6 +4766,8 @@ void RichEditorPattern::CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem
     textStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     auto verticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     IF_TRUE(verticalAlign.has_value(), textStyle.textVerticalAlign = static_cast<int32_t>(verticalAlign.value()));
+    auto textDirection = spanItem->textLineStyle->GetTextDirection();
+    IF_TRUE(textDirection.has_value(), textStyle.textDirection = static_cast<int32_t>(textDirection.value()));
 }
 
 ImageStyleResult RichEditorPattern::GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem)
@@ -4978,8 +4999,8 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString,
     } else {
         AddSpansByPaste(spanString->GetSpanItems(), reason);
     }
-
-    if (aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (aiWriteAdapter && aiWriteAdapter->GetAIWrite()) {
         return;
     }
     StartTwinkling();
@@ -5130,6 +5151,7 @@ struct UpdateParagraphStyle RichEditorPattern::GetParagraphStyle(const RefPtr<Sp
     paraStyle.lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy();
     paraStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     paraStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
+    paraStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
     return paraStyle;
 }
 
@@ -6613,7 +6635,8 @@ void RichEditorPattern::AfterInsertValue(
     moveLength_ += insertValueLength;
     IF_TRUE(!previewTextRecord_.needUpdateCaret, moveLength_ = 0);
     UpdateSpanPosition();
-    if (isIME || aiWriteAdapter_->GetAIWrite()) {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    if (isIME || (aiWriteAdapter && aiWriteAdapter->GetAIWrite())) {
         AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
         return;
     }
@@ -9058,8 +9081,10 @@ void RichEditorPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWr
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyFillRequestSuccess, autoFillType:%{public}d, triggerType:%{public}d",
         static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
-    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap);
-    IF_TRUE(triggerType == AceAutoFillTriggerType::PASTE_REQUEST, PasteStr(nodeWrap->GetValue()));
+    bool isPasteByAutoFill = triggerType == AceAutoFillTriggerType::PASTE_REQUEST ||
+        triggerType == AceAutoFillTriggerType::MANUAL_REQUEST;
+    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap && isPasteByAutoFill);
+    PasteStr(nodeWrap->GetValue());
 }
 
 void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
@@ -9156,6 +9181,17 @@ void RichEditorPattern::ProcessAutoFillOnPaste()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessAutoFillOnPaste");
     ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+}
+
+void RichEditorPattern::HandleOnPasswordVault()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnPasswordVault");
+    ProcessAutoFill(AceAutoFillTriggerType::MANUAL_REQUEST);
+}
+
+bool RichEditorPattern::IsShowAutoFill()
+{
+    return SystemProperties::IsAutoFillSupport();
 }
 
 std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>
@@ -9396,6 +9432,7 @@ void RichEditorPattern::CreateDragNode()
             info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
         }
     }
+    info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
@@ -10919,6 +10956,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         return;
     }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSelectedDataDetector", selectDetectEnabled_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
     json->PutExtAttr("customKeyboard", GetCustomKeyboardInJson().c_str(), filter);
@@ -10938,8 +10976,12 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto undoStyle = isStyledUndoSupported_ ? OHOS::Ace::UndoStyle::KEEP_STYLE : OHOS::Ace::UndoStyle::CLEAR_STYLE;
     json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
     json->PutExtAttr("enableAutoSpacing", isEnableAutoSpacing_ ? "true" : "false", filter);
+    json->PutExtAttr("compressLeadingPunctuation", isCompressLeadingPunctuation_ ? "true" : "false", filter);
+    json->PutExtAttr("includeFontPadding", isIncludeFontPadding_ ? "true" : "false", filter);
+    json->PutExtAttr("fallbackLineSpacing", isFallbackLineSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
+    json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -10947,6 +10989,15 @@ std::string RichEditorPattern::GetCustomKeyboardInJson() const
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("supportAvoidance", keyboardAvoidance_ ? "true" : "false");
     return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+Color RichEditorPattern::GetSelectedDragPreviewStyleColor() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color::WHITE);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::WHITE);
+    return layoutProperty->GetSelectedDragPreviewStyleValue(Color::WHITE);
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
@@ -11480,14 +11531,15 @@ bool RichEditorPattern::NeedCloseKeyboard()
     return (customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
 }
 
-void RichEditorPattern::CloseTextCustomKeyboard(int32_t nodeId)
+void RichEditorPattern::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "CloseTextCustomKeyboard hostId=%{public}d nodeId=%{public}d NeedCloseKeyboard=%{public}d", host->GetId(),
         nodeId, NeedCloseKeyboard());
-    if (NeedCloseKeyboard() && nodeId != host->GetId()) {
+    bool isCloseCustomKeyboard = NeedCloseKeyboard() && (nodeId != host->GetId() || isUIExtension);
+    if (isCloseCustomKeyboard) {
         CloseCustomKeyboard();
     }
 }
@@ -11563,6 +11615,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.lineBreakStrategy = (*it)->textLineStyle->GetLineBreakStrategy();
             paraStyle.paragraphSpacing = (*it)->textLineStyle->GetParagraphSpacing();
             paraStyle.textVerticalAlign = (*it)->textLineStyle->GetTextVerticalAlign();
+            paraStyle.textDirection = (*it)->textLineStyle->GetTextDirection();
             spanParaStyle = paraStyle;
         }
     } else if (spanNode && spanNode->GetSpanItem()) {
@@ -11575,6 +11628,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
             paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
             paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
+            paraStyle.textDirection = spanNode->GetTextDirection();
             spanParaStyle = paraStyle;
         }
     }
@@ -11798,6 +11852,8 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
         Dimension(paraStyle->paragraphSpacing.value().ConvertToFp(), DimensionUnit::FP));
     IF_TRUE(paraStyle->textVerticalAlign.has_value(), textStyleResult.textVerticalAlign =
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
+    IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =
+        static_cast<int32_t>(paraStyle->textDirection.value()));
     retInfo.SetTextStyle(textStyleResult);
 }
 
@@ -13180,8 +13236,6 @@ bool RichEditorPattern::IsShowAIWrite()
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Failed to obtain AI write package name!");
         return false;
     }
-    aiWriteAdapter_->SetBundleName(bundleName);
-    aiWriteAdapter_->SetAbilityName(abilityName);
 
     auto isAISupport = false;
     if (theme->GetAIWriteIsSupport() == "true") {
@@ -13192,11 +13246,19 @@ bool RichEditorPattern::IsShowAIWrite()
     CHECK_NULL_RETURN(host, false);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Whether the device supports AI write: %{public}d, nodeId: %{public}d",
         isAISupport, host->GetId());
+    if (isAISupport) {
+        auto aiWriteAdapter = GetAIWriteAdapter();
+        CHECK_NULL_RETURN(aiWriteAdapter, false);
+        aiWriteAdapter->SetBundleName(bundleName);
+        aiWriteAdapter->SetAbilityName(abilityName);
+    }
     return isAISupport;
 }
 
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
 {
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    CHECK_NULL_VOID(aiWriteAdapter);
     CHECK_NULL_VOID(!textSelector_.SelectNothing());
     info.firstHandle = textSelector_.firstHandle.ToString();
     info.secondHandle = textSelector_.secondHandle.ToString();
@@ -13213,13 +13275,13 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceStart = 0;
     auto sentenceEnd = textSize;
     for (int32_t i = info.selectStart; i >= 0; --i) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceStart = i + 1;
             break;
         }
     }
     for (int32_t i = info.selectEnd; i < textSize; i++) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceEnd = i;
             break;
         }
@@ -13236,12 +13298,14 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d-%{public}d], content=" SEC_PLD(%{public}s),
         info.selectStart, info.selectEnd, SEC_PARAM(spanString->GetString().c_str()));
     spanString->EncodeTlv(info.selectBuffer);
-    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter->GetSelectLengthOnlyText(spanString->GetU16string()));
 }
 
 void RichEditorPattern::HandleOnAIWrite()
 {
-    aiWriteAdapter_->SetAIWrite(true);
+    auto aiWriteAdapter = GetAIWriteAdapter();
+    CHECK_NULL_VOID(aiWriteAdapter);
+    aiWriteAdapter->SetAIWrite(true);
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
@@ -13252,14 +13316,14 @@ void RichEditorPattern::HandleOnAIWrite()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
-        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        auto aiWriteAdapter = pattern->GetAIWriteAdapter();
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    aiWriteAdapter_->SetPipelineContext(WeakClaim(pipeline));
-    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+    aiWriteAdapter->SetPipelineContext(WeakClaim(pipeline));
+    aiWriteAdapter->ShowModalUIExtension(info, callback);
 }
 
 SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem)
@@ -13545,6 +13609,20 @@ void RichEditorPattern::ReportComponentChangeEvent() {
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}zu",
         frameId_, str.length());
 #endif
+}
+
+RefPtr<AIWriteAdapter> RichEditorPattern::GetAIWriteAdapter()
+{
+    auto pipeline = GetContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetAIWriteAdapter, pipeline is null");
+        return nullptr;
+    }
+    auto adapter = pipeline->GetOrCreateAIWriteAdapter().Upgrade();
+    if (!adapter) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetAIWriteAdapter, adapter is null");
+    }
+    return adapter;
 }
 
 void RichEditorPattern::UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty)

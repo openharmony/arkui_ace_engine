@@ -67,10 +67,15 @@ public:
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetIncludeFontPadding(bool enabled) override;
+    void SetFallbackLineSpacing(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
     void SetScrollBarColor(std::optional<Color> value) override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
     void SetSingleLine(bool isEnable) override;
 
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
@@ -120,11 +125,17 @@ public:
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSingleLine(FrameNode* frameNode, bool isEnable);
 
 private:

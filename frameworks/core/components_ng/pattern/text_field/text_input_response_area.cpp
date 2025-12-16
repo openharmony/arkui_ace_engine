@@ -26,6 +26,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -74,6 +75,7 @@ OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRec
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, offset);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
         return OffsetF(nodeWidth, offset.GetY());
@@ -1337,6 +1339,14 @@ void PlaceholderResponseArea::SetStyleString(const RefPtr<SpanString>& value)
     auto textPattern = placeholderNode_->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetStyledString(value);
+
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldPattern->IsTextArea()) {
+        auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateIsTextMaxlinesFirst(true);
+    }
 }
 
 const RefPtr<FrameNode> PlaceholderResponseArea::GetFrameNode()

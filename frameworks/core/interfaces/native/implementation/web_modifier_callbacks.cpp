@@ -39,10 +39,13 @@
 #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
@@ -385,6 +388,34 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     return result.value_or(false);
 }
 
+void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    CHECK_NULL_VOID(callback);
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    auto paramPeer = new FileSelectorParamPeer();
+    paramPeer->handler = eventInfo->GetParam();
+    auto resultPeer = new FileSelectorResultPeer();
+    resultPeer->handler = eventInfo->GetFileSelectorResult();
+    auto releaseFunc = [&paramPeer, &resultPeer](void* peer) {
+        if (paramPeer == peer) {
+            delete paramPeer;
+            paramPeer = nullptr;
+        } else if (resultPeer == peer) {
+            delete resultPeer;
+            resultPeer = nullptr;
+        }
+    };
+    callback(paramPeer, resultPeer, std::move(releaseFunc));
+}
+
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
@@ -407,6 +438,22 @@ void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& ar
     auto optBlankScreenDetails = Converter::ArkValue<Opt_BlankScreenDetails>(arkBlankScreenDetails);
     parameter.blankScreenDetails = optBlankScreenDetails;
     arkCallback.InvokeSync(parameter);
+}
+
+void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<TextSelectionChangedEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_String selectionText;
+    selectionText = Converter::ArkValue<Ark_String>(eventInfo->GetselectionText());
+    arkCallback.InvokeSync(selectionText);
 }
 
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
@@ -770,7 +817,7 @@ bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    const auto event = Converter::ArkKeyEventSync(keyEventInfo);
+    const auto event = Converter::SyncEvent<Ark_KeyEvent>(keyEventInfo);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(
         event.ArkValue());
     return result.value_or(false);
@@ -1228,7 +1275,7 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     Ark_NativeEmbedTouchInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
-    const auto event = Converter::ArkTouchEventSync(touchEventInfo);
+    const auto event = Converter::SyncEvent<Ark_TouchEvent>(touchEventInfo);
     parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
@@ -1247,7 +1294,7 @@ void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback
     Ark_NativeEmbedMouseInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto mouseEventInfo = eventInfo->GetMouseEventInfo();
-    const auto event = Converter::ArkMouseEventSync(mouseEventInfo);
+    const auto event = Converter::SyncEvent<Ark_MouseEvent>(mouseEventInfo);
     parameter.mouseEvent = Converter::ArkValue<Opt_MouseEvent>(event.ArkValue());
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
@@ -1418,6 +1465,36 @@ void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCal
 #else
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebSafeBrowsingCheckFinish");
 #endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnCameraCaptureStateChange(const CallbackHelper<OnCameraCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<CameraCaptureStateEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_CameraCaptureStateChangeInfo parameter;
+    parameter.originalState = static_cast<Ark_CameraCaptureState>(eventInfo->GetOriginalCameraCaptureState());
+    parameter.newState = static_cast<Ark_CameraCaptureState>(eventInfo->GetNewCameraCaptureState());
+    arkCallback.InvokeSync(parameter);
+}
+
+void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStateChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<MicrophoneCaptureStateEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_MicrophoneCaptureStateChangeInfo parameter;
+    parameter.originalState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetOriginalMicrophoneCaptureState());
+    parameter.newState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetNewMicrophoneCaptureState());
+    arkCallback.InvokeSync(parameter);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED

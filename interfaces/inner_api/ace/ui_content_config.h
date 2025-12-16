@@ -42,6 +42,17 @@ struct DynamicInitialConfig {
     HostWindowInfo hostWindowInfo;
 };
 
+struct SystemForceSplitConfig {
+    bool isRouter;
+    std::string homePage;
+    std::string configJsonStr;
+};
+
+struct AppForceSplitConfig {
+    bool isRouter;
+    std::string configJsonStr;
+};
+
 struct FrameMetrics {
     bool firstDrawFrame = false; // Indicates whether the first frame of the window.
     uint64_t vsyncTimestamp = 0; // Indicates the timestamp of the actual vaync for this frame. The value is expressed
@@ -50,6 +61,11 @@ struct FrameMetrics {
         0; // Indicates the number of nanoseconds elapsed in the input handling stage of a frame.
     uint64_t layoutMeasureDuration =
         0; // Indicates the number of nanoseconds elapsed in the layout measure stage of a frame.
+};
+
+struct NavigateChangeInfo {
+    std::string name; // the navigate page name
+    bool isSplit; // Indicates page is split or not
 };
 } // namespace Ace
 } // namespace OHOS

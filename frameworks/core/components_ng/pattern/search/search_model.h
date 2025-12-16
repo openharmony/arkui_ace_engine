@@ -129,6 +129,10 @@ public:
     virtual void ResetSelectDetectEnable() = 0;
     virtual void SetTextDirection(TextDirection value) {}
     virtual void ResetTextDirection() {}
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

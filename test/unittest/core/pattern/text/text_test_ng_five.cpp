@@ -48,7 +48,6 @@ HWTEST_F(TextTestNgFive, TextOverlayModifierTest001, TestSize.Level1)
     textOverlayModifier.SetPrintOffset(paintOffset);
     textOverlayModifier.SetCursorColor(CURSOR_COLOR);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
-
     std::vector<RectF> rectList;
     rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
     textOverlayModifier.SetSelectedRects(rectList);
@@ -61,12 +60,10 @@ HWTEST_F(TextTestNgFive, TextOverlayModifierTest001, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     RectF contentRect;
     textOverlayModifier.SetContentRect(contentRect);
     textOverlayModifier.onDraw(context);
-
     EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
     EXPECT_EQ(textOverlayModifier.cursorColor_->Get(), CURSOR_COLOR);
     EXPECT_EQ(textOverlayModifier.selectedColor_->Get(), SELECTED_COLOR);
@@ -108,14 +105,12 @@ HWTEST_F(TextTestNgFive, TextPaintMethodTest002, TestSize.Level1)
     textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
-
     Shadow textShadow;
     textShadow.SetBlurRadius(BLURRADIUS_VALUE);
     textShadow.SetColor(TEXT_COLOR_VALUE);
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
@@ -145,10 +140,8 @@ HWTEST_F(TextTestNgFive, TextAccessibilityPropertyGetText001, TestSize.Level1)
     textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
@@ -172,10 +165,8 @@ HWTEST_F(TextTestNgFive, TextAccessibilityPropertyIsSelected001, TestSize.Level1
     textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
     textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
@@ -1020,20 +1011,26 @@ HWTEST_F(TextTestNgFive, TextDecorationToJsonValue001, TestSize.Level1)
     text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
+
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
+
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
+
     std::string decorationStr = json->GetValue("decoration")->GetString();
     auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+
     ASSERT_NE(decorationJson, nullptr);
     EXPECT_TRUE(decorationJson->Contains("type"));
     EXPECT_TRUE(decorationJson->GetValue("type")->GetString() ==

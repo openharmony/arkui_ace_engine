@@ -54,6 +54,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
+    syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -355,6 +356,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent([windowNode = std::move(host)]() { },
+        "ArkUIWindowDestoryWindowNode", TaskExecutor::TaskType::UI);
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {

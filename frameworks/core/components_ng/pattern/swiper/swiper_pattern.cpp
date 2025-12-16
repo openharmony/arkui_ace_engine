@@ -39,6 +39,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
@@ -219,6 +220,14 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCachedCount(GetCachedCount());
     algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     return algo;
+}
+
+RefPtr<FrameNode> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto currIndex = GetLoopIndex(currentIndex_);
+    return DynamicCast<FrameNode>(host->GetChildByIndex(currIndex));
 }
 
 void SwiperPattern::OnIndexChange(bool isInLayout)
@@ -1427,7 +1436,7 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
             pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
         }
 #endif
-        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_) {
+        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_ && SwiperUtils::IsStretch(props)) {
             // If property animation is running and the target index is the same as the running target index, the
             // animation is not played
             return;
@@ -6479,6 +6488,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     auto transition = tabContentAnimatedTransition.transition;
 
     if (!transition) {
+        LoadCompleteManagerStopCollect();
         OnCustomAnimationFinish(fromIndex, toIndex, false);
         return;
     }
@@ -6490,6 +6500,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnCustomAnimationFinish(fromIndex, toIndex, hasOnChanged);
+        swiperPattern->LoadCompleteManagerStopCollect();
     });
 
     transition(proxy);
@@ -6548,6 +6559,15 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushUITasks();
     pipeline->FlushMessages();
+}
+
+std::pair<int32_t, float> SwiperPattern::GetIndicatorProgress() const
+{
+    auto firstItem = GetFirstItemInfoInVisibleArea();
+    float translateLength = firstItem.second.endPos - firstItem.second.startPos;
+    int32_t swipingIndex = firstItem.first;
+    float turnPageRate = (!NearZero(translateLength)) ? -firstItem.second.startPos / translateLength : 0.0f;
+    return { swipingIndex, turnPageRate };
 }
 
 void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
@@ -7512,6 +7532,15 @@ int32_t SwiperPattern::CheckIndexRange(int32_t index) const
     return index;
 }
 
+void SwiperPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("SwiperCacheCount: ")
+        .append(std::to_string(property->GetCachedCount().value_or(0))));
+}
+
 void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("isLastIndicatorFocused", isLastIndicatorFocused_);
@@ -7882,15 +7911,23 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
 {
     auto pipeline = GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StartCollect("");
+        std::string url = pipeline->GetCurrentPageName() + ",index-" + std::to_string(currentIndex_);
+        if (targetIndex_.has_value()) {
+            url += ",targetIndex-" + std::to_string(targetIndex_.value());
+        }
+        pipeline->GetLoadCompleteManager()->StartCollect(url);
     }
 }
 
 void SwiperPattern::LoadCompleteManagerStopCollect()
 {
     auto pipeline = GetContext();
-    if (pipeline) {
-        pipeline->GetLoadCompleteManager()->StopCollect();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->GetLoadCompleteManager()->StopCollect();
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    if (!IsAutoPlay()) {
+        mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
     }
 }
 } // namespace OHOS::Ace::NG

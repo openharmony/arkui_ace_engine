@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
- 
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxGroupOpsAccessor {
 Ark_NativePointer RegisterSelectAllCallbackImpl(Ark_NativePointer node,
@@ -50,4 +49,3 @@ const GENERATED_ArkUICheckboxGroupOpsAccessor* GetCheckboxGroupOpsAccessor()
     return &CheckboxGroupOpsAccessorImpl;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
- 

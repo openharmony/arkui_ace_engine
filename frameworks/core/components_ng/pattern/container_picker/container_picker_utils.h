@@ -45,6 +45,8 @@ const Dimension DEFAULT_RADIUS = 12.0_vp;
 const float HALF = 2.0;
 const float FADE_OPACITY = 0.4f;
 const float DISABLE_ALPHA = 0.6f;
+const float REAL_K = 2.5f; // Control the relationship between scroll distance and speed.
+const int32_t DISPLAY_COUNT = 7;
 } // namespace
 class ContainerPickerUtils {
 public:

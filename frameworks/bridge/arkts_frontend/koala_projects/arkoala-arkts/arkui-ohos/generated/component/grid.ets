@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KInt32ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
 import { NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
@@ -30,11 +30,11 @@ import { Resource } from "global.resource"
 import { Color, BarState, ScrollSource, EdgeEffect } from "./enums"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookGridAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { ModifierStateManager } from "./../CommonModifier"
 import { GridModifier } from "./../GridModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
@@ -102,10 +102,10 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -126,10 +126,10 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -315,6 +315,18 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setSupportAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSupportEmptyBranchInLazyLoadingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setSupportEmptyBranchInLazyLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDragStartAttribute(value: OnItemDragStartCallback | undefined): void {
@@ -581,6 +593,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     supportAnimation(value: boolean | undefined): this {
         throw new Error("Unimplemented method supportAnimation")
     }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportEmptyBranchInLazyLoading")
+    }
     onItemDragStart(value: OnItemDragStartCallback | undefined): this {
         throw new Error("Unimplemented method onItemDragStart")
     }
@@ -639,6 +654,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     cellLength_value?: double | undefined
     layoutDirection_value?: GridDirection | undefined
     supportAnimation_value?: boolean | undefined
+    supportEmptyBranchInLazyLoading_value?: boolean | undefined
     onItemDragStart_value?: OnItemDragStartCallback | undefined
     onItemDragEnter_value?: ((event: ItemDragInfo) => void) | undefined
     onItemDragMove_value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
@@ -704,6 +720,9 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
         return this
     }
     supportAnimation(value: boolean | undefined): this {
+        return this
+    }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
         return this
     }
     onItemDragStart(value: OnItemDragStartCallback | undefined): this {
@@ -906,6 +925,14 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
+    public supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        if (this.checkPriority("supportEmptyBranchInLazyLoading")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onItemDragStart(value: OnItemDragStartCallback | undefined): this {
         if (this.checkPriority("onItemDragStart")) {
             const value_casted = value as (OnItemDragStartCallback | undefined)
@@ -1022,7 +1049,7 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookGridAttributeModifier(this, value);
+            hookGridAttributeModifier(this, value);
         })
         return this
     }

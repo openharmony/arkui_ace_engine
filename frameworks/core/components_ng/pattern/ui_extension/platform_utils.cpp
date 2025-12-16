@@ -39,7 +39,7 @@ std::shared_ptr<MMI::PointerEvent> PlatformUtils::CopyPointerEventWithExtraPrope
     uint32_t length = 0;
     pointerEvent->GetExtraData(raw, length);
     if (length == 0 || !raw) {
-        TAG_LOGW(aceLogTag, "The PointerEvent has no extra data.");
+        TAG_LOGD(aceLogTag, "The PointerEvent has no extra data.");
     } else {
         newPointerEvent->SetExtraData(raw, length);
     }

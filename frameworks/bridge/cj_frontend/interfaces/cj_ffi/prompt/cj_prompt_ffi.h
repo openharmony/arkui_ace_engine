@@ -179,6 +179,7 @@ CJ_EXPORT void FfiPromptOpenCustomDialog(void (*builder)(), NativeBaseOption opt
 CJ_EXPORT void FfiPromptCloseCustomDialog(int32_t id);
 
 CJ_EXPORT void FfiPromptShowToastWithOption(NativeShowToastOptions options);
+CJ_EXPORT void FfiPromptShowToastWithOptionV2(NativeShowToastOptions options);
 CJ_EXPORT void FfiPromptOpenCustomDialogWithOption(NativeCustomDialogOptions options, void (*callback)(int32_t));
 CJ_EXPORT void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActionMenuCallBack callbackRef);
 CJ_EXPORT void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCallBack callbackRef);

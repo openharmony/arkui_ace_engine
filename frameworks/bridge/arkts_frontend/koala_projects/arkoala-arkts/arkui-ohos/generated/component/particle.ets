@@ -179,24 +179,24 @@ export class PointParticleParameters_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRadiusForIdx0  = valueHolderForRadius as string
             valueSerializer.writeString(valueHolderForRadiusForIdx0)
-        } else if (valueHolderForRadius instanceof number) {
+        } else if (valueHolderForRadius instanceof double) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRadiusForIdx1  = valueHolderForRadius as number
-            valueSerializer.writeNumber(valueHolderForRadiusForIdx1)
+            const valueHolderForRadiusForIdx1  = valueHolderForRadius as double
+            valueSerializer.writeFloat64(valueHolderForRadiusForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): PointParticleParameters {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : string | number | undefined
+        let radiusTmpBuf : string | double | undefined
         if (radiusTmpBufUnionSelector == (0).toChar()) {
             radiusTmpBuf = (valueDeserializer.readString() as string)
         } else if (radiusTmpBufUnionSelector == (1).toChar()) {
-            radiusTmpBuf = (valueDeserializer.readNumber() as number)
+            radiusTmpBuf = valueDeserializer.readFloat64()
         } else {
             throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
         }
-        const radiusTmpResult : VP = (radiusTmpBuf as string | number)
+        const radiusTmpResult : VP = (radiusTmpBuf as string | double)
         let value : PointParticleParameters = ({radius: radiusTmpResult} as PointParticleParameters)
         return value
     }

@@ -562,6 +562,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
     buttonParameters.fontWeight = std::make_optional(FontWeight::MEDIUM);
     buttonParameters.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
     buttonParameters.fontStyle = std::make_optional(Ace::FontStyle::NORMAL);
+    buttonParameters.textAlign = std::make_optional(Ace::TextAlign::CENTER);
     ButtonModelStatic::SetLabelStyle(frameNode, buttonParameters);
     /**
      * @tc.steps: step4. ButtonModelNG setLabelStyle.
@@ -577,6 +578,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(layoutProperty->GetTextAlignValue(), Ace::TextAlign::CENTER);
 }
 
 /**

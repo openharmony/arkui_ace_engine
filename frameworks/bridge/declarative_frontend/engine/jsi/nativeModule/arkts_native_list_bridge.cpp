@@ -247,13 +247,33 @@ ArkUINativeModuleValue ListBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     auto cacheCount = DEFAULT_CACHED_COUNT;
+    std::optional<int32_t> minOpt;
+    std::optional<int32_t> maxOpt;
     if (!cacheCountArg->IsUndefined()) {
-        ArkTSUtils::ParseJsInteger(vm, cacheCountArg, cacheCount);
-        if (cacheCount < 0) {
-            cacheCount = DEFAULT_CACHED_COUNT;
+        if (ArkTSUtils::ParseJsInteger(vm, cacheCountArg, cacheCount)) {
+            if (cacheCount < 0) {
+                cacheCount = DEFAULT_CACHED_COUNT;
+            }
+        } else if (cacheCountArg->IsObject(vm)) {
+            auto jsObj = cacheCountArg->ToObject(vm);
+            panda::Local<panda::JSValueRef> min = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "minCount"));
+            panda::Local<panda::JSValueRef> max = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "maxCount"));
+            if (min->IsNumber()) {
+                int32_t num = min->ToNumber(vm)->Value();
+                minOpt = num < 0 ? DEFAULT_CACHED_COUNT : num;
+            }
+            if (max->IsNumber()) {
+                int32_t num = max->ToNumber(vm)->Value();
+                maxOpt = num < minOpt.value_or(DEFAULT_CACHED_COUNT) ? minOpt.value_or(DEFAULT_CACHED_COUNT) : num;
+            }
         }
     }
-    GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cacheCount);
+    if (minOpt.has_value() && maxOpt.has_value()) {
+        GetArkUINodeModifiers()->getListModifier()->setCacheRange(nativeNode, minOpt.value(), maxOpt.value());
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetCacheRange(nativeNode);
+        GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cacheCount);
+    }
 
     bool show = !cacheShowArg.IsNull() && cacheShowArg->IsTrue();
     GetArkUINodeModifiers()->getListModifier()->setShowCached(nativeNode, show);
@@ -269,6 +289,7 @@ ArkUINativeModuleValue ListBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetCachedCount(nativeNode);
     GetArkUINodeModifiers()->getListModifier()->resetShowCached(nativeNode);
+    GetArkUINodeModifiers()->getListModifier()->resetCacheRange(nativeNode);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -501,6 +522,38 @@ ArkUINativeModuleValue ListBridge::ResetListSyncLoad(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetListSyncLoad(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> argOptions = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (argOptions->IsObject(vm)) {
+        ArkUI_EditModeOptions options;
+        JSRef<JSVal> gather = JSRef<JSObject>::Make(argOptions)->GetProperty("enableGatherSelectedItemsAnimation");
+        if (gather->IsBoolean()) {
+            options.enableGatherSelectedItemsAnimation = gather->ToBoolean();
+        }
+        GetArkUINodeModifiers()->getListModifier()->setEditModeOptions(nativeNode, &options);
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetEditModeOptions(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetEditModeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetEditModeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1661,6 +1714,22 @@ ArkUINativeModuleValue ListBridge::ResetOnListReachEnd(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetOnListReachEnd(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetSupportEmptyBranchInLazyLoading(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> arg_support = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getListModifier()->setSupportEmptyBranchInLazyLoading(
+        nativeNode, arg_support->IsBoolean() ? arg_support->ToBoolean(vm)->Value() : false);
+
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

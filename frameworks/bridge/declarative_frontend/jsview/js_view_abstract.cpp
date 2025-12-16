@@ -85,6 +85,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
+#include "base/i18n/localization.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -180,7 +181,7 @@ const char* BOTTOM_END_PROPERTY = "bottomEnd";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
-enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT,
+enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, AUTO_FILL, PASSWORD_VAULT, UNKNOWN, CAMERA_INPUT,
     AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA, AI_MENU_OPTION };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
@@ -392,6 +393,19 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, co
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
 
+std::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision)
+{
+    auto localization = Localization::GetInstance();
+    if (!localization) {
+        return numStr;
+    }
+
+    std::string result = numStr;
+    std::string backup = numStr;
+
+    return localization->LocalizeNumber(result, precision) ? result : backup;
+}
+
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
 {
     auto index = pos + containCount;
@@ -402,11 +416,13 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<int32_t>());
+            std::string numStr = std::to_string(item->ToNumber<int32_t>());
+            return TryLocalizeNumberStr(numStr, 0);
         } else if (item->IsObject()) {
             int32_t result = 0;
             JSViewAbstract::ParseJsInteger(item, result);
-            return std::to_string(result);
+            std::string numStr = std::to_string(result);
+            return TryLocalizeNumberStr(numStr, 0);
         }
     } else if (type == "s") {
         if (item->IsString()) {
@@ -418,11 +434,13 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<float>());
+            std::string numStr = std::to_string(item->ToNumber<float>());
+            return TryLocalizeNumberStr(numStr, -1);
         } else if (item->IsObject()) {
             double result = 0.0;
             JSViewAbstract::ParseJsDouble(item, result);
-            return std::to_string(result);
+            std::string numStr = std::to_string(result);
+            return TryLocalizeNumberStr(numStr, -1);
         }
     }
     return std::string();
@@ -1718,6 +1736,8 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_PASTE", MenuItemType::PASTE },
         { "OH_DEFAULT_CUT", MenuItemType::CUT },
         { "OH_DEFAULT_SELECT_ALL", MenuItemType::SELECT_ALL },
+        { "OH_DEFAULT_AUTO_FILL", MenuItemType::AUTO_FILL },
+        { "OH_DEFAULT_PASSWORD_VAULT", MenuItemType::PASSWORD_VAULT },
         { "OH_DEFAULT_CAMERA_INPUT", MenuItemType::CAMERA_INPUT },
         { "OH_DEFAULT_AI_WRITE", MenuItemType::AI_WRITER },
         { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
@@ -1733,6 +1753,26 @@ MenuItemType StringToMenuItemType(std::string_view id)
 
     auto item = keyMenuItemMap.find(id);
     return item != keyMenuItemMap.end() ? item->second : MenuItemType::UNKNOWN;
+}
+
+void UpdateSubMenuItemsInfo(std::vector<NG::MenuOptionsParam>& subMenuOptionsParam)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    for (auto& subMenuItem : subMenuOptionsParam) {
+        auto opType = StringToMenuItemType(subMenuItem.id);
+        switch (opType) {
+            case MenuItemType::PASSWORD_VAULT:
+                subMenuItem.symbolId = theme->GetPasswordVaultSymbolId();
+                break;
+            default:
+                subMenuItem.labelInfo = subMenuItem.labelInfo.value_or("");
+                subMenuItem.symbolId = subMenuItem.symbolId.value_or(0);
+                break;
+        }
+    }
 }
 
 void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
@@ -1758,6 +1798,10 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
         case MenuItemType::SELECT_ALL:
             menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
             menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
+            break;
+        case MenuItemType::AUTO_FILL:
+            menuOptionsParam.symbolId = theme->GetAutoFillSymbolId();
+            UpdateSubMenuItemsInfo(menuOptionsParam.subMenuItems);
             break;
         case MenuItemType::CAMERA_INPUT:
             menuOptionsParam.symbolId = theme->GetCameraInputSymbolId();
@@ -1834,8 +1878,8 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         CHECK_NULL_RETURN(container, nullptr);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
+        auto animationOptionResult = std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(
+            context, propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -3253,39 +3297,6 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
-}
-
-void JSViewAbstract::JsColorPicker(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        info.ReturnSelf();
-        return;
-    }
-    auto jsVal = info[0];
-    ColorPlaceholder placeholder = ColorPlaceholder::NONE;
-    if (jsVal->IsString()) {
-        Color::MatchPlaceholderString(jsVal->ToString(), placeholder);
-    }
-    // Optional second parameter: ColorPickStrategy (number).
-    ColorPickStrategy strategy = ColorPickStrategy::CONTRAST;
-    if (info.Length() >= 2 && !info[1]->IsUndefined() && !info[1]->IsNull()) {
-        auto sVal = info[1];
-        if (sVal->IsNumber()) {
-            auto newStrategy = static_cast<ColorPickStrategy>(sVal->ToNumber<int32_t>());
-            if (newStrategy >= ColorPickStrategy::NONE &&
-                newStrategy <= ColorPickStrategy::CONTRAST) {
-                strategy = newStrategy;
-            }
-        }
-    }
-    // Optional third parameter: interval (number, milliseconds).
-    uint32_t interval = 0;
-    if (info.Length() >= 3 && info[2]->IsNumber()) {
-        auto iv = info[2]->ToNumber<int32_t>();
-        interval = iv > 0 ? static_cast<uint32_t>(iv) : 0; // negative treated as default 0
-    }
-    ViewAbstractModel::GetInstance()->SetColorPicker(placeholder, strategy, interval);
-    info.ReturnSelf();
 }
 
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
@@ -6959,6 +6970,10 @@ bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, Foregroun
             strategy = ForegroundColorStrategy::INVERT;
             return true;
         }
+        if (colorStr.compare("contrast") == 0) {
+            strategy = ForegroundColorStrategy::CONTRAST;
+            return true;
+        }
     }
     return false;
 }
@@ -9503,7 +9518,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
-    JSClass<JSViewAbstract>::StaticMethod("colorPicker", &JSViewAbstract::JsColorPicker);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
@@ -9728,6 +9742,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
+    JSClass<JSViewAbstract>::StaticMethod("materialFilter", &JSViewAbstract::JsMaterialFilter);
     JSClass<JSViewAbstract>::StaticMethod("systemMaterial", &JSViewAbstract::JsSystemMaterial);
 
     JSClass<JSViewAbstract>::StaticMethod("setPixelRoundMode", &JSViewAbstract::SetPixelRoundMode);
@@ -9822,11 +9837,21 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 
         return GetDrawCallback(jsDrawFunc, execCtx, jsDrawModifier);
     };
+    auto getDrawOverlayModifierFunc = [execCtx, jsDrawModifier](const char* key) -> NG::DrawModifierFunc {
+        JSRef<JSVal> drawMethod = jsDrawModifier->GetProperty(key);
+        if (!drawMethod->IsFunction()) {
+            return nullptr;
+        }
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
+            JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
 
+        return GetDrawOverlayCallback(jsDrawFunc, execCtx, jsDrawModifier);
+    };
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
     drawModifier->drawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->drawFrontFunc = getDrawModifierFunc("drawFront");
     drawModifier->drawForegroundFunc = getDrawModifierFunc("drawForeground");
+    drawModifier->drawOverlayFunc = getDrawOverlayModifierFunc("drawOverlay");
 
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
     AddInvalidateFunc(jsDrawModifier, frameNode);
@@ -10500,7 +10525,10 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
 {
     RefPtr<ResourceObject> resObj;
     JSRef<JSVal> entityColorValue = obj->GetProperty("color");
-    ParseJsColor(entityColorValue, textDetectConfig.entityColor, resObj);
+    auto colorFlagByUser = ParseJsColor(entityColorValue, textDetectConfig.entityColor, resObj);
+    if (colorFlagByUser) {
+        textDetectConfig.entityColorFlag = true;
+    }
     TextDetectConfig::RegisterColorResource(textDetectConfig, resObj);
 
     JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
@@ -10521,6 +10549,11 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
     RefPtr<ResourceObject> decoColorResObj;
     if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor, decoColorResObj)) {
         textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+        if (colorFlagByUser) {
+            textDetectConfig.entityDecorationColorFlag = true;
+        }
+    } else {
+        textDetectConfig.entityDecorationColorFlag = true;
     }
     TextDetectConfig::RegisterDecoColorResource(textDetectConfig, decoColorResObj);
     if (styleValue->IsNumber()) {
@@ -12089,6 +12122,60 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
     return drawCallback;
 }
 
+std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayCallback(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier)
+{
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx, modifier](
+                                                                         NG::DrawingContext& context) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        if (modifier->IsEmpty()) {
+            return;
+        }
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
+
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+
+        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
+}
+
 std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
@@ -12726,6 +12813,16 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     }
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
+}
+
+void JSViewAbstract::JsMaterialFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetMaterialFilter(nullptr);
+        return;
+    }
+    auto materialFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetMaterialFilter(materialFilter);
 }
 
 void JSViewAbstract::JsSystemMaterial(const JSCallbackInfo& info)

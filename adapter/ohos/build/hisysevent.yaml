@@ -66,6 +66,9 @@ COMPONENT_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: component exception }
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
+  NODE_TYPE: {type: INT32 , desc: node type }
+  NODE_ID: {type: INT32, desc: node id }
+  ERROR_MESSAGE: {type: STRING, desc: error message }
 
 API_CHANNEL_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: API channel exception }
@@ -233,7 +236,7 @@ SCROLLABLE_ERROR:
   NODE_TYPE: {type: STRING, desc: node type}
   ERROR_TYPE: {type: INT32, desc: error type}
   SUB_ERROR_TYPE: {type: STRING, desc: sub error type}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  BUNDLE_NAME: {type: STRING, desc: package name}
   TARGET_API_VERSION: {type: INT32, desc: target api version}
   VERSION_CODE: {type: INT32, desc: version code}
   VERSION_NAME: {type: STRING, desc: version name}
@@ -258,12 +261,9 @@ GENERAL_INTERACTION_ERROR:
   FINGER_ID: {type: INT32, desc: finger id}
   TAG: {type: STRING, desc: frame tag}
 
-UI_SERVICE_STATISTIC_EVENT:
+UI_STATISTIC_EVENT:
   __BASE: {type: STATISTIC, level: CRITICAL, desc: ui service statistic event}
   EVENT_NAME: {type: STRING, desc: event name}
-  EVENT_COUNT: {type: INT32, desc: event count}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
-  ABILITY_NAME: {type: STRING, desc: ability name}
-  VERSION_NAME: {type: STRING, desc: version name}
-  VERSION_CODE: {type: STRING, desc: version code}
+  EVENT_COUNT: {type: INT32, arrsize: 100, desc: event count}
+  BUNDLE_NAME: {type: STRING, arrsize: 100, desc: bundle name}
 

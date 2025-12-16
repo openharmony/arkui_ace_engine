@@ -1526,10 +1526,10 @@ export class NavDestinationCustomTitle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
-            } else if (valueHolderForHeightForIdx1 instanceof number) {
+            } else if (valueHolderForHeightForIdx1 instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
-                valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
+                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as double
+                valueSerializer.writeFloat64(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
@@ -1557,17 +1557,17 @@ export class NavDestinationCustomTitle_serializer {
             heightTmpBuf = TitleHeight.fromValue(valueDeserializer.readInt32())
         } else if (heightTmpBufUnionSelector == (1).toChar()) {
             const heightTmpBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBufBufU : string | number | Resource | undefined
+            let heightTmpBufBufU : string | double | Resource | undefined
             if (heightTmpBufBufUUnionSelector == (0).toChar()) {
                 heightTmpBufBufU = (valueDeserializer.readString() as string)
             } else if (heightTmpBufBufUUnionSelector == (1).toChar()) {
-                heightTmpBufBufU = (valueDeserializer.readNumber() as number)
+                heightTmpBufBufU = valueDeserializer.readFloat64()
             } else if (heightTmpBufBufUUnionSelector == (2).toChar()) {
                 heightTmpBufBufU = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBufBufU has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBufBufU as string | number | Resource)
+            heightTmpBuf = (heightTmpBufBufU as string | double | Resource)
         } else {
             throw new Error("One of the branches for heightTmpBuf has to be chosen through deserialisation.")
         }

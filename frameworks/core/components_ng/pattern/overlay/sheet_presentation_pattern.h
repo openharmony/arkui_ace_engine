@@ -959,6 +959,7 @@ public:
     void UpdateSheetObject(SheetType newType);
     void ResetLayoutInfo();
     void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
+    void ResetPopupScrollUserDefinedIdealSize(SheetType newType);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         if (!NearEqual(sheetPopupInfo_.sheetOffsetY, sheetPopupInfo.sheetOffsetY)) {

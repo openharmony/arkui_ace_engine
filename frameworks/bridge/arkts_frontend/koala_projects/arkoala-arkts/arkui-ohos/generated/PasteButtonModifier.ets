@@ -18,7 +18,7 @@
 
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier, extractors, hookPasteButtonOnClick } from '#handwritten'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPasteButtonPeer, PasteButtonCallback, PasteButtonOnClickResult, PasteButtonAttribute } from "./component/pasteButton"
@@ -48,7 +48,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
         {
             switch (this._onClick_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClickAttribute((this._onClick_0_0value as PasteButtonCallback | undefined));
+                    hookPasteButtonOnClick(peer, (this._onClick_0_0value as PasteButtonCallback | undefined));
                     this._onClick_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -58,7 +58,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
                 }
                 default: {
                     this._onClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClickAttribute((undefined as PasteButtonCallback | undefined));
+                    hookPasteButtonOnClick(peer, (undefined as PasteButtonCallback | undefined));
                 }
             }
         }

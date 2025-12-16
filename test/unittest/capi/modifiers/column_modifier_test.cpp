@@ -437,7 +437,7 @@ HWTEST_F(ColumnModifierTest, setPointLightTestPointLightLightSourceColorValidVal
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

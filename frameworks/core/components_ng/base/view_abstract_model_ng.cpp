@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -43,8 +44,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
-// constexpr int32_t HOVER_IMAGE_INTERRUPT_DURATION = 500;
-// constexpr char KEY_CONTEXT_MENU_HOVER[] = "ContextMenuHover";
+constexpr int32_t HOVER_IMAGE_INTERRUPT_DURATION = 500;
+constexpr char KEY_CONTEXT_MENU_HOVER[] = "ContextMenuHover";
 } // namespace
 
 void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
@@ -347,290 +348,310 @@ void BindContextMenuSingle(
     }
 }
 
-// static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNode,
-//     std::function<void(const NG::OffsetF&)>& contextMenuShow, std::function<void()> startVibratorCall)
-// {
-//     CHECK_NULL_VOID(targetNode);
-//     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-//     CHECK_NULL_VOID(gestureHub);
-
-//     auto targetId = targetNode->GetId();
-//     if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
-//         gestureHub->SetOnGestureJudgeNativeBeginForMenu(
-//             [](const RefPtr<NG::GestureInfo>& gestureInfo,
-//                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
-//                 CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
-//                 if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
-//                     return GestureJudgeResult::CONTINUE;
-//                 } else if (gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER) {
-//                     return GestureJudgeResult::REJECT;
-//                 }
-//                 return GestureJudgeResult::CONTINUE;
-//             });
-//         return;
-//     }
-
-//     // bind GestureJudge for hoverScaleInterruption
-//     gestureHub->SetOnGestureJudgeNativeBeginForMenu(
-//         [targetId, showMenu = std::move(contextMenuShow), callVibrator = std::move(startVibratorCall)](
-//             const RefPtr<NG::GestureInfo>& gestureInfo,
-//             const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
-//             CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
-//             if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
-//                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Trigger longPress event for menu hoverScaleInterruption");
-//                 MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::HOVER);
-//                 NG::OffsetF position;
-//                 if (info && !info->GetFingerList().empty()) {
-//                     auto finger = info->GetFingerList().front();
-//                     position = NG::OffsetF(finger.globalLocation_.GetX(), finger.globalLocation_.GetY());
-//                 }
-//                 // show menu for target hoverScale, during which the opacity of menu and preview is 0
-//                 showMenu(position);
-//                 return GestureJudgeResult::REJECT;
-//             }
-
-//             auto isDragGesture = gestureInfo->GetType() == GestureTypeName::DRAG;
-//             auto isContextMenuGesture = gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER;
-//             if (isDragGesture || isContextMenuGesture) {
-//                 auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
-//                 TAG_LOGI(AceLogTag::ACE_MENU,
-//                     "isDragGesture: %{public}d isContextMenuGesture: %{public}d hoverStatus: %{public}d", isDragGesture,
-//                     isContextMenuGesture, hoverStatus);
-//                 if (hoverStatus == MenuHoverScaleStatus::HOVER) {
-//                     callVibrator();
-//                     MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
-//                 }
-//             }
-//             return GestureJudgeResult::CONTINUE;
-//         });
-// }
-
-// static void BindGestureForMenuHoverScale(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
-// {
-//     CHECK_NULL_VOID(targetNode);
-//     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-//     CHECK_NULL_VOID(gestureHub);
-
-//     // bind touch evnet for hoverScaleInterruption
-//     auto targetId = targetNode->GetId();
-//     gestureHub->RegisterMenuOnTouch([targetId](const TouchEventInfo& info) {
-//         if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
-//             return;
-//         }
-
-//         const auto& touches = info.GetTouches();
-//         CHECK_EQUAL_VOID(touches.empty(), true);
-//         auto touchType = touches.front().GetTouchType();
-//         if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-//             auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
-//             TAG_LOGI(AceLogTag::ACE_MENU, "target touch up or cancel, hoverStatus: %{public}d", hoverStatus);
-//             if (hoverStatus == MenuHoverScaleStatus::HOVER) {
-//                 MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
-//                 SubwindowManager::GetInstance()->HideMenuNG();
-//             }
-//         }
-//     });
-
-//     auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(1, false, HOVER_IMAGE_INTERRUPT_DURATION, false, true);
-//     CHECK_NULL_VOID(gesture);
-//     gesture->SetTag(KEY_CONTEXT_MENU_HOVER);
-//     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-//     gesture->SetOnActionId([targetId](GestureEvent& info) {
-//         TAG_LOGI(AceLogTag::ACE_MENU, "long press 500ms for menu hoverScale");
-//         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
-//     });
-//     gestureHub->AddGesture(gesture);
-// }
-
-// static void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam,
-//     std::function<void(const NG::OffsetF&)> contextMenuShow)
-// {
-//     CHECK_NULL_VOID(targetNode);
-//     auto targetId = targetNode->GetId();
-//     auto isHoverInterrupt = menuParam.isShowHoverImage && menuParam.hoverScaleInterruption;
-//     if (!isHoverInterrupt) {
-//         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::DISABLE);
-//     } else {
-//         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::READY);
-//         BindGestureForMenuHoverScale(targetNode, menuParam);
-//     }
-
-//     auto startVibratorCall = [menuParam, weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
-//         auto targetNode = weakTarget.Upgrade();
-//         CHECK_NULL_VOID(targetNode);
-//         auto pipelineContext = targetNode->GetContext();
-//         CHECK_NULL_VOID(pipelineContext);
-//         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-//         CHECK_NULL_VOID(menuTheme);
-//         StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-//     };
-
-//     BindGestureJudgeForMenuHoverScale(targetNode, contextMenuShow, startVibratorCall);
-// }
-
-// static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
-//     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
-// {
-//     CHECK_NULL_VOID(targetNode);
-//     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-//     CHECK_NULL_VOID(gestureHub);
-//     gestureHub->SetPreviewMode(menuParam.previewMode);
-
-//     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-//     auto contextMenuShow = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](NG::OffsetF globalPosition) {
-//         auto taskExecutor = Container::CurrentTaskExecutor();
-//         CHECK_NULL_VOID(taskExecutor);
-//         taskExecutor->PostTask(
-//             [builder, weakTarget, menuParam, previewBuildFunc, globalPosition]() mutable {
-//                 TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
-//                 auto targetNode = weakTarget.Upgrade();
-//                 CHECK_NULL_VOID(targetNode);
-//                 auto pipelineContext = targetNode->GetContext();
-//                 CHECK_NULL_VOID(pipelineContext);
-//                 auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-//                 CHECK_NULL_VOID(menuTheme);
-//                 if (pipelineContext->IsDragging()) {
-//                     TAG_LOGI(AceLogTag::ACE_MENU, "TargetNode is dragging, menu is no longer show");
-//                     return;
-//                 }
-//                 if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
-//                     auto context = targetNode->GetRenderContext();
-//                     CHECK_NULL_VOID(context);
-//                     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-//                     CHECK_NULL_VOID(gestureHub);
-//                     auto pixelMap = context->GetThumbnailPixelMap();
-//                     gestureHub->SetPixelMap(pixelMap);
-//                 }
-//                 NG::OffsetF menuPosition { globalPosition.GetX() + menuParam.positionOffset.GetX(),
-//                     globalPosition.GetY() + menuParam.positionOffset.GetY() };
-//                 if (!(menuParam.isShowHoverImage && menuParam.hoverScaleInterruption)) {
-//                     StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-//                 }
-//                 NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-//                     GetMenuPosition(menuPosition, menuParam), menuParam, std::move(previewBuildFunc));
-//             },
-//             TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
-//     };
-
-//     // create or show menu on long press
-//     auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>([contextMenuShow](const GestureEvent& info) mutable {
-//         TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-//         contextMenuShow(NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-//     });
-//     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-//     auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-//     gestureHub->SetLongPressEvent(longPress, false, true, longPressDuration);
-//     gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
-
-//     BindGestureForContextMenu(targetNode, menuParam, contextMenuShow);
-// }
-
-void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
-    const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNode,
+    std::function<void(const NG::OffsetF&)>& contextMenuShow, std::function<void()> startVibratorCall)
 {
-    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto targetId = targetNode->GetId();
+    if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+        gestureHub->SetOnGestureJudgeNativeBeginForMenu(
+            [](const RefPtr<NG::GestureInfo>& gestureInfo,
+                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+                CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+                if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
+                    return GestureJudgeResult::CONTINUE;
+                } else if (gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER) {
+                    return GestureJudgeResult::REJECT;
+                }
+                return GestureJudgeResult::CONTINUE;
+            });
+        return;
+    }
+
+    // bind GestureJudge for hoverScaleInterruption
+    gestureHub->SetOnGestureJudgeNativeBeginForMenu(
+        [targetId, showMenu = std::move(contextMenuShow), callVibrator = std::move(startVibratorCall)](
+            const RefPtr<NG::GestureInfo>& gestureInfo,
+            const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+            CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+            if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "Trigger longPress event for menu hoverScaleInterruption");
+                MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::HOVER);
+                NG::OffsetF position;
+                if (info && !info->GetFingerList().empty()) {
+                    auto finger = info->GetFingerList().front();
+                    position = NG::OffsetF(finger.globalLocation_.GetX(), finger.globalLocation_.GetY());
+                }
+                // show menu for target hoverScale, during which the opacity of menu and preview is 0
+                showMenu(position);
+                return GestureJudgeResult::REJECT;
+            }
+
+            auto isDragGesture = gestureInfo->GetType() == GestureTypeName::DRAG;
+            auto isContextMenuGesture = gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER;
+            if (isDragGesture || isContextMenuGesture) {
+                auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+                TAG_LOGI(AceLogTag::ACE_MENU,
+                    "isDragGesture: %{public}d isContextMenuGesture: %{public}d hoverStatus: %{public}d", isDragGesture,
+                    isContextMenuGesture, hoverStatus);
+                if (hoverStatus == MenuHoverScaleStatus::HOVER) {
+                    callVibrator();
+                    MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
+                }
+            }
+            return GestureJudgeResult::CONTINUE;
+        });
+}
+
+static void BindGestureForMenuHoverScale(
+    const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, bool needDirty)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    // bind touch evnet for hoverScaleInterruption
+    auto targetId = targetNode->GetId();
+    gestureHub->RegisterMenuOnTouch([targetId](const TouchEventInfo& info) {
+        if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+            return;
+        }
+
+        const auto& touches = info.GetTouches();
+        CHECK_EQUAL_VOID(touches.empty(), true);
+        auto touchType = touches.front().GetTouchType();
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+            TAG_LOGI(AceLogTag::ACE_MENU, "target touch up or cancel, hoverStatus: %{public}d", hoverStatus);
+            if (hoverStatus == MenuHoverScaleStatus::HOVER) {
+                MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+                SubwindowManager::GetInstance()->HideMenuNG();
+            }
+        }
+    });
+
+    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(1, false, HOVER_IMAGE_INTERRUPT_DURATION, false, true);
+    CHECK_NULL_VOID(gesture);
+    gesture->SetTag(KEY_CONTEXT_MENU_HOVER);
+    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    gesture->SetOnActionId([targetId](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "long press 500ms for menu hoverScale");
+        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
+    });
+    gestureHub->AddGesture(gesture);
+    if (needDirty) {
+        // static language need OnModifyDone here.
+        gestureHub->OnModifyDone();
+    }
+}
+
+void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam,
+    std::function<void(const NG::OffsetF&)> contextMenuShow, bool needDirty)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto isHoverInterrupt = menuParam.isShowHoverImage && menuParam.hoverScaleInterruption;
+    if (!isHoverInterrupt) {
+        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::DISABLE);
+    } else {
+        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::READY);
+        BindGestureForMenuHoverScale(targetNode, menuParam, needDirty);
+    }
+
+    auto startVibratorCall = [menuParam, weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        auto pipelineContext = targetNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+    };
+
+    BindGestureJudgeForMenuHoverScale(targetNode, contextMenuShow, startVibratorCall);
+}
+
+void ViewAbstractModelNG::BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode,
+    std::function<void()>& buildFunc, MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetPreviewMode(menuParam.previewMode);
+
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
+    }
+
+    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    auto contextMenuShow = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](NG::OffsetF globalPosition) {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [builder, weakTarget, menuParam, previewBuildFunc, globalPosition]() mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
+                auto pipelineContext = targetNode->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                CHECK_NULL_VOID(menuTheme);
+                if (pipelineContext->IsDragging()) {
+                    TAG_LOGI(AceLogTag::ACE_MENU, "TargetNode is dragging, menu is no longer show");
+                    return;
+                }
+                if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+                    auto context = targetNode->GetRenderContext();
+                    CHECK_NULL_VOID(context);
+                    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+                    CHECK_NULL_VOID(gestureHub);
+                    auto pixelMap = context->GetThumbnailPixelMap();
+                    gestureHub->SetPixelMap(pixelMap);
+                }
+                NG::OffsetF menuPosition { globalPosition.GetX() + menuParam.positionOffset.GetX(),
+                    globalPosition.GetY() + menuParam.positionOffset.GetY() };
+                if (!(menuParam.isShowHoverImage && menuParam.hoverScaleInterruption)) {
+                    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                }
+                NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
+                    UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
+    };
+
+    // create or show menu on long press
+    auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>([contextMenuShow](const GestureEvent& info) mutable {
+        TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
+        contextMenuShow(NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
+    });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+    auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+    gestureHub->SetLongPressEvent(
+        longPress, false, true, longPressDuration, SelectableUtils::IsSelectableItem(targetNode));
+    gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
+
+    BindGestureForContextMenu(targetNode, menuParam, contextMenuShow, needDirty);
+}
+
+static void BindContextMenuWithRightClick(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
+    MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.isShowHoverImage = false;
+    menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+
+    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "Post rightClick task for menu");
+            info.SetStopPropagation(true);
+            taskExecutor->PostTask(
+                [builder = builderF, weakTarget, menuParam, info]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX()
+                        + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    std::function<void()> previewBuildFunc;
+                    TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
+                    auto pipelineContext = targetNode->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                    CHECK_NULL_VOID(menuTheme);
+                    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                    NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
+                        UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
+                        std::move(previewBuildFunc));
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
+        }
+    };
+    auto inputHub = targetNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    inputHub->BindContextMenu(std::move(event));
+}
+
+static bool SetMenuTransitionEffect(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_RETURN(targetNode, false);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
         Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-        CHECK_NULL_VOID(childContainer);
+        CHECK_NULL_RETURN(childContainer, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_RETURN(pipeline, false);
         auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
+        CHECK_NULL_RETURN(overlayManager, false);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
+            CHECK_NULL_RETURN(menuWrapperPattern, false);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
             menuWrapperPattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
         }
     }
+    return true;
+}
+
+void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
+    MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(targetNode);
+    if (!SetMenuTransitionEffect(targetNode, menuParam)) {
+        return;
+    }
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
         BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
     } else {
-        auto hub = targetNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(hub);
-        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-                auto taskExecutor = Container::CurrentTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                    TAG_LOGI(AceLogTag::ACE_MENU, "Post rightClick task for menu");
-                    info.SetStopPropagation(true);
-                    taskExecutor->PostTask(
-                        [builder = builderF, weakTarget, menuParam, info]() mutable {
-                            auto targetNode = weakTarget.Upgrade();
-                            CHECK_NULL_VOID(targetNode);
-                            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX()
-                                + menuParam.positionOffset.GetX(),
-                                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                            std::function<void()> previewBuildFunc;
-                            TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
-                            auto pipelineContext = targetNode->GetContext();
-                            CHECK_NULL_VOID(pipelineContext);
-                            auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-                            CHECK_NULL_VOID(menuTheme);
-                            StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-                            NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-                                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
-                                std::move(previewBuildFunc));
-                        },
-                        TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
-                }
-            };
-            auto inputHub = targetNode->GetOrCreateInputEventHub();
-            CHECK_NULL_VOID(inputHub);
-            inputHub->BindContextMenu(std::move(event));
+            BindContextMenuWithRightClick(targetNode, buildFunc, menuParam);
         } else if (type == ResponseType::LONG_PRESS) {
-            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->SetPreviewMode(menuParam.previewMode);
-            // create or show menu on long press
-            auto event =
-                [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
-                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-                auto containerId = Container::CurrentId();
-                auto taskExecutor = Container::CurrentTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
-                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
-                        auto targetNode = weakTarget.Upgrade();
-                        CHECK_NULL_VOID(targetNode);
-                        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
-                        CHECK_NULL_VOID(pipelineContext);
-                        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
-                            auto context = targetNode->GetRenderContext();
-                            CHECK_NULL_VOID(context);
-                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-                            CHECK_NULL_VOID(gestureHub);
-                            auto pixelMap = context->GetThumbnailPixelMap();
-                            gestureHub->SetPixelMap(pixelMap);
-                        }
-                        NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                            info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-                        menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-                        NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-                            UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
-                                std::move(previewBuildFunc));
-                    },
-                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
-            };
-            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
-            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
+            ViewAbstractModelNG::BindContextMenuWithLongPress(targetNode, buildFunc, menuParam, previewBuildFunc);
         } else {
             return;
         }
         RegisterContextMenuKeyEvent(targetNode, std::move(buildFunc), menuParam);
+    }
+}
+
+void ViewAbstractModelNG::BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType,
+    MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(targetNode);
+    if (!SetMenuTransitionEffect(targetNode, menuParam)) {
+        return;
+    }
+
+    std::vector<MenuBindingType> menuBindTypes = { MenuBindingType::RIGHT_CLICK, MenuBindingType::LONG_PRESS };
+    for (auto& type : menuBindTypes) {
+        auto currentMenuParam = menuParam;
+        std::function<void()> buildFunc =
+            [buildFuncWithType, type]() {
+                buildFuncWithType(type);
+            };
+
+        if (type == MenuBindingType::LONG_PRESS) {
+            ViewAbstractModelNG::BindContextMenuWithLongPress(
+                targetNode, buildFunc, currentMenuParam, previewBuildFunc);
+        } else {
+            BindContextMenuWithRightClick(targetNode, buildFunc, currentMenuParam);
+        }
+        BindDragWithContextMenuParams(currentMenuParam);
     }
 }
 

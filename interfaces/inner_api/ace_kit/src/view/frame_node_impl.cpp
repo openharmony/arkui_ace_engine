@@ -468,4 +468,10 @@ NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()
     offset = frameNode_->GetParentGlobalOffsetDuringLayout();
     return offset;
 }
+
+ColorMode FrameNodeImpl::GetLocalColorMode() const
+{
+    CHECK_NULL_RETURN(frameNode_, ColorMode::COLOR_MODE_UNDEFINED);
+    return static_cast<ColorMode>(frameNode_->GetLocalColorMode());
+}
 } // namespace OHOS::Ace::Kit

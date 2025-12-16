@@ -65,6 +65,7 @@ public:
 
 private:
     static void GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters);
+    static bool SetTextAlign(JSRef<JSVal>& textAlign, ButtonParameters& buttonParameters);
     static void CompleteParameters(ButtonParameters& buttonParameters);
     static CalcDimension GetSizeValue(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);

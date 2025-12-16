@@ -56,6 +56,8 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
     JSClass<JSNavPathStack>::CustomMethod("getPathStack", &JSNavPathStack::GetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("setPathStack", &JSNavPathStack::SetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("isHomeName", &JSNavPathStack::IsHomeName);
+    JSClass<JSNavPathStack>::CustomProperty(
+        "preTopInfo", &JSNavPathStack::GetPreTopInfo, &JSNavPathStack::SetPreTopInfo);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -250,6 +252,25 @@ void JSNavPathStack::CopyPathInfo(const JSRef<JSArray>& origin, JSRef<JSArray>& 
     dstObj->SetPropertyObject(JS_NAV_PATH_ISENTRY_NAME, isEntry);
     dstObj->SetPropertyObject(JS_NAV_PATH_NAVDESTINATIONID_NAME, id);
     dest->SetValueAt(index, dstObj);
+}
+
+void JSNavPathStack::SetPreTopInfo(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        preTopInfo_ = JSVal::Undefined();
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        preTopInfo_ = JSVal::Undefined();
+        return;
+    }
+    preTopInfo_ = info[0];
+}
+
+void JSNavPathStack::GetPreTopInfo(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(preTopInfo_);
+    return;
 }
 
 void JSNavPathStack::SetPathStack(const JSCallbackInfo& info)

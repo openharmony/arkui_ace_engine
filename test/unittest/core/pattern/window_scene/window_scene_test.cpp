@@ -772,7 +772,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     session->SetShowRecent(true);
     auto key = Rosen::defaultStatus;
-    session->scenePersistence_->isSavingSnapshot_[key] = true;
+    session->scenePersistence_->isSavingSnapshot_ = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
 
@@ -901,5 +901,11 @@ HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
     session->SetShowRecent(false);
     windowScene->OnBoundsChanged(bounds);
     EXPECT_EQ(session->GetShowRecent(), false);
+    bounds.x_ = 0.0;
+    bounds.y_ = 2.0;
+    windowScene->frameNode_.Reset();
+    session->SetShowRecent(true);
+    windowScene->OnBoundsChanged(bounds);
+    EXPECT_EQ(session->GetShowRecent(), true);
 }
 } // namespace OHOS::Ace::NG

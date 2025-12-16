@@ -295,9 +295,15 @@ function toStringFormat(resource: ResourceStr | undefined): string {
 @Component
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
+  @State refreshCnt: int = 0;
+  @Watch('onItems')
   @PropRef items: (IconItemOptions | SymbolGlyphModifier | SymbolItemOptions)[] =
     new Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions>();
   symbolEffect: SymbolEffect = new SymbolEffect();
+
+  private onItems(_: string): void {
+    this.refreshCnt++;
+  }
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
@@ -383,13 +389,7 @@ export struct IconGroupSuffix {
         })
         .borderRadius(iconGroupSuffixTheme.borderRadius)
       }, (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions, index: int) => {
-        let actualItem = UIUtils.getTarget(suffixItem)
-        if (actualItem instanceof SymbolGlyphModifier) {
-          return `${((reflect.Value.of(actualItem) as ClassValue).getFieldByName('_setSymbolGlyphOptions0_value').getData() as Resource).id}_${index}`;
-        } else if (actualItem instanceof SymbolItemOptions) {
-          return `${((reflect.Value.of(actualItem.symbol) as ClassValue).getFieldByName('_setSymbolGlyphOptions0_value').getData() as Resource).id}_${index}`;
-        }
-        return JSON.stringify(actualItem) + index;
+        return `${this.refreshCnt}_${index}`;
       })
     }
   }
@@ -436,12 +436,12 @@ export struct ChipGroup {
   @BuilderParam suffix?: ChipGroupSuffixBuilder;
   public onChange: InnerCallback<Array<int>> = noop;
   private scroller: Scroller = new Scroller();
-  @State isReachEnd: boolean = this.scroller.isAtEnd();
+  @State isReachEnd: boolean = false;
   @PropRef chipGroupPadding?: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
-  @State isRefresh: boolean = true;
+  @State refreshCnt: int = 0;
 
   onItemsChange(value: string) {
-    this.isRefresh = !this.isRefresh;
+    this.refreshCnt++;
   }
 
   onMultipleChange(value: string) {
@@ -560,7 +560,6 @@ export struct ChipGroup {
       (element, index, array) => {
         return (
           element >= 0 &&
-            element % 1 == 0 &&
             element != null &&
             element != undefined &&
             array.indexOf(element) === index &&
@@ -614,13 +613,14 @@ export struct ChipGroup {
   }
 
   private isSelected(itemIndex: int): boolean {
-    if (!this.isMultiple()) {
+    if (!this.isMultiple() && this.getSelectedIndexes().length > 0) {
       return itemIndex == this.getSelectedIndexes()[0];
     } else {
       return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
     }
+    return false;
   }
 
   private getPaddingTop() {
@@ -713,7 +713,7 @@ export struct ChipGroup {
                 } as ChipOptions)
               }
             }, (chipItem: ChipGroupItemOptions, index: int) => {
-              return JSON.stringify(this.isRefresh) + index;
+              return `${this.refreshCnt}_${index}`;
             });
           }
           .padding({

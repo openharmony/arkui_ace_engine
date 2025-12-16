@@ -262,6 +262,7 @@ public:
         const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
     void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetEnableImageAnalyzer(bool isEnabled) override;
+    void SetEnableAutoFill(bool isEnabled) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
@@ -426,6 +427,7 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetMicrophoneCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

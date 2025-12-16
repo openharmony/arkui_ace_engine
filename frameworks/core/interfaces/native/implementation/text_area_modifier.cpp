@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+#include <sstream>
+
 #include "core/interfaces/native/implementation/paste_event_peer.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -231,7 +235,7 @@ void SetOnSubmitImpl(Ark_NativePointer node, const Opt_TextAreaSubmitCallback* v
 		    const int32_t& keyType, NG::TextFieldCommonEvent& info) {
         PipelineContext::SetCallBackNode(node);
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(keyType));
-        const auto event = Converter::ArkSubmitEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_SubmitEvent>(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
         arkCallback.InvokeSync(enterKeyType, eventArkValue);
     };
@@ -772,6 +776,30 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
                         const Opt_Callback_String_Void* error)
@@ -803,15 +831,15 @@ void SetShowCounterImpl(Ark_NativePointer node,
         return;
     }
     auto optionsOpt = Converter::OptConvertPtr<Ark_InputCounterOptions>(options);
-    const int32_t MAX_VALID_VALUE = 100;
-    const int32_t MIN_VALID_VALUE = 1;
+    const int32_t maxValidValue = 100;
+    const int32_t minValidValue = 1;
     std::optional<bool> highlightBorderOpt;
     std::optional<int> thresholdPercentageOpt;
     if (optionsOpt.has_value()) {
         highlightBorderOpt = Converter::OptConvert<bool>(optionsOpt.value().highlightBorder);
         thresholdPercentageOpt = Converter::OptConvert<int32_t>(optionsOpt.value().thresholdPercentage);
         if (thresholdPercentageOpt.has_value() &&
-            (thresholdPercentageOpt.value() < MIN_VALID_VALUE || thresholdPercentageOpt.value() > MAX_VALID_VALUE)) {
+            (thresholdPercentageOpt.value() < minValidValue || thresholdPercentageOpt.value() > maxValidValue)) {
             showCounter = false;
             thresholdPercentageOpt = std::nullopt;
         }
@@ -826,7 +854,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto keyboardOptions = Converter::OptConvertPtr<Ark_KeyboardOptions>(options);
+    auto keyboardOptions = Converter::GetOptPtr(options);
     bool supportAvoidance = keyboardOptions &&
         Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
     auto optValue = Converter::GetOptPtr(value);
@@ -906,6 +934,9 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetOnWillChangeImpl,
         TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
         TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
+        TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
+        TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,

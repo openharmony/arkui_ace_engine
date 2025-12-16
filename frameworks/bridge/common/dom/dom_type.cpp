@@ -1079,12 +1079,6 @@ const char DOM_PIECE_CLOSABLE[] = "closable";
 const char DOM_PIECE_EVENT_CLOSE[] = "close";
 
 // badge constants
-const char DOM_BADGE_CONFIG[] = "config";
-const char DOM_BADGE_COUNT[] = "count";
-const char DOM_BADGE_LABEL[] = "label";
-const char DOM_BADGE_PLACEMENT[] = "placement";
-const char DOM_BADGE_VISIBLE[] = "visible";
-const char DOM_BADGE_MAX_COUNT[] = "maxcount";
 const char DOM_BADGE_COLOR[] = "badgeColor";
 const char DOM_BADGE_CIRCLE_SIZE[] = "badgeSize";
 const char DOM_BADGE_TEXT_FONT_SIZE[] = "textSize";

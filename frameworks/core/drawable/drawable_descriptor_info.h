@@ -34,8 +34,8 @@ public:
         FILE = 2,
     };
 
-    explicit DrawableDescriptorInfo(const std::string& path);
-    explicit DrawableDescriptorInfo(const RefPtr<ResourceObject>& resource);
+    ACE_FORCE_EXPORT explicit DrawableDescriptorInfo(const std::string& path);
+    ACE_FORCE_EXPORT explicit DrawableDescriptorInfo(const RefPtr<ResourceObject>& resource);
 
     SrcType GetSrcType() const
     {

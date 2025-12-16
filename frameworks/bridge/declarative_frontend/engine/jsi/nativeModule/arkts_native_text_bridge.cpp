@@ -42,6 +42,8 @@ const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr int DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr int DEFAULT_LINE_HEIGHT = 28;
 constexpr Dimension DEFAULT_MARQUEE_STEP_VALUE = 4.0_vp;
+constexpr int NUM_8 = 8;
+constexpr int NUM_9 = 9;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -1636,14 +1638,20 @@ void TextBridge::ParseAIEntityColorAndPreview(
     TextDetectConfig textDetectConfig;
     Local<JSValueRef> entityColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor, colorResObj, nodeInfo);
+    auto colorFlagByUser = ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor,
+        colorResObj, nodeInfo);
     arkUITextDetectConfig.entityColor = textDetectConfig.entityColor.GetValue();
-
+    if (colorFlagByUser) {
+        textDetectConfig.entityColorFlag = true;
+    }
     Local<JSValueRef> entityDecorationTypeArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> entityDecorationColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     Local<JSValueRef> entityDecorationStyleArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     arkUITextDetectConfig.entityDecorationType = static_cast<int32_t>(textDetectConfig.entityDecorationType);
     arkUITextDetectConfig.entityDecorationColor = arkUITextDetectConfig.entityColor;
+    if (colorFlagByUser) {
+        textDetectConfig.entityDecorationColorFlag = true;
+    }
     arkUITextDetectConfig.entityDecorationStyle = static_cast<int32_t>(textDetectConfig.entityDecorationStyle);
 
     if (entityDecorationTypeArg->IsInt()) {
@@ -1651,6 +1659,7 @@ void TextBridge::ParseAIEntityColorAndPreview(
     }
     if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor,
         decColorResObj, nodeInfo)) {
+        textDetectConfig.entityDecorationColorFlag = true;
         arkUITextDetectConfig.entityDecorationColor = textDetectConfig.entityDecorationColor.GetValue();
     }
     if (entityDecorationStyleArg->IsInt()) {
@@ -2037,6 +2046,8 @@ ArkUINativeModuleValue TextBridge::SetMarqueeOptions(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> delayArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     Local<JSValueRef> fadeoutArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> marqueeStartPolicyArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> marqueeUpdatePolicyArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    Local<JSValueRef> marqueeSpacingArg = runtimeCallInfo->GetCallArgRef(NUM_9);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
@@ -2051,11 +2062,21 @@ ArkUINativeModuleValue TextBridge::SetMarqueeOptions(ArkUIRuntimeCallInfo* runti
     textMarqueeOptions->fadeout = fadeoutArg->IsBoolean() ? fadeoutArg->ToBoolean(vm)->Value() : false;
     textMarqueeOptions->marqueeStartPolicy = marqueeStartPolicyArg->IsNumber() ?
         marqueeStartPolicyArg->Int32Value(vm) : 0;
+    textMarqueeOptions->marqueeUpdatePolicy = marqueeUpdatePolicyArg->IsNumber() ?
+        marqueeUpdatePolicyArg->Int32Value(vm) : 0;
+    CalcDimension marqueeSpacing;
+    RefPtr<ResourceObject> spacingResObj;
+    bool spacingParseResult = marqueeSpacingArg->IsNull() || marqueeSpacingArg->IsUndefined() ? false:
+        ArkTSUtils::ParseJsDimensionVp(vm, marqueeSpacingArg, marqueeSpacing, spacingResObj);
+    textMarqueeOptions->spacing.value = marqueeSpacing.Value();
+    textMarqueeOptions->spacing.units = static_cast<int32_t>(marqueeSpacing.Unit());
 
     bool isValid = startArg->IsBoolean() || fromStartArg->IsBoolean() || stepArg->IsNumber() || loopArg->IsNumber()
-        || delayArg->IsNumber() || fadeoutArg->IsBoolean() || marqueeStartPolicyArg->IsNumber();
+        || delayArg->IsNumber() || fadeoutArg->IsBoolean() || marqueeStartPolicyArg->IsNumber() ||
+        marqueeUpdatePolicyArg->IsNumber() || spacingParseResult;
     if (isValid) {
-        GetArkUINodeModifiers()->getTextModifier()->setTextMarqueeOptions(nativeNode, textMarqueeOptions.get());
+        GetArkUINodeModifiers()->getTextModifier()->setTextMarqueeOptions(nativeNode, textMarqueeOptions.get(),
+            AceType::RawPtr(spacingResObj));
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetTextMarqueeOptions(nativeNode);
     }
@@ -2139,6 +2160,60 @@ ArkUINativeModuleValue TextBridge::ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t includeFontPadding = false;
+    if (secondArg->IsBoolean()) {
+        includeFontPadding = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setIncludeFontPadding(nativeNode, includeFontPadding);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetIncludeFontPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetIncludeFontPadding(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t fallbackLineSpacing = false;
+    if (secondArg->IsBoolean()) {
+        fallbackLineSpacing = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setFallbackLineSpacing(nativeNode, fallbackLineSpacing);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetFallbackLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetFallbackLineSpacing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetTextVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2199,6 +2274,37 @@ ArkUINativeModuleValue TextBridge::ResetTextContentTransition(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetTextContentTransition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextSelectedDragPreviewStyle(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->setTextSelectedDragPreviewStyle(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextSelectedDragPreviewStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

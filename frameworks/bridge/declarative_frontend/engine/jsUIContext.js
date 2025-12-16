@@ -254,6 +254,36 @@ class UIObserver {
         this.ohos_observer.offSwiperContentUpdate(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
+    onRouterPageSizeChange(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.onRouterPageSizeChange(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    offRouterPageSizeChange(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.offRouterPageSizeChange(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    onNavDestinationSizeChange(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.onNavDestinationSizeChange(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    offNavDestinationSizeChange(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.offNavDestinationSizeChange(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    onNavDestinationSizeChangeByUniqueId(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.onNavDestinationSizeChangeByUniqueId(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    offNavDestinationSizeChangeByUniqueId(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.offNavDestinationSizeChangeByUniqueId(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class MeasureUtils {
@@ -301,7 +331,7 @@ class UIContext {
      * @since 10
      */
     constructor(instanceId) {
-        this.instanceId_ = instanceId ?? -1;
+        this.instanceId_ = instanceId;
     }
 
     static getCallingScopeUIContext() {
@@ -477,7 +507,7 @@ class UIContext {
     }
 
     getId() {
-        return this.instanceId_;
+        return this.instanceId_ ?? -1;
     }
 
     getComponentUtils() {

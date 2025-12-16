@@ -922,6 +922,42 @@ class SearchCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> 
   }
 }
 
+class SearchIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().search.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().search.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: ResourceStr;
   placeholder?: ResourceStr;
@@ -940,6 +976,23 @@ class SearchOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) 
     } else {
       getUINativeModule().search.setOnWillAttachIME(node, this.value);
     }
+  }
+}
+
+class SearchSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().search.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
 
@@ -1210,9 +1263,24 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchCompressLeadingPunctuationModifier.identity, SearchCompressLeadingPunctuationModifier, value);
     return this;
   }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchIncludeFontPaddingModifier.identity, SearchIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchFallbackLineSpacingModifier.identity, SearchFallbackLineSpacingModifier, value);
+    return this;
+  }
   onWillAttachIME(callback: Callback<IMEClient>): this {
     modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
       SearchOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedDragPreviewStyleModifier.identity,
+        SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }

@@ -1760,6 +1760,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(searchTextFieldPattern);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
+    json->PutExtAttr(
+        "enableSelectedDataDetector", textFieldPattern->GetSelectDetectEnable() ? "true" : "false", filter);
     json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
     json->PutExtAttr("placeholderColor",
         textFieldLayoutProperty->GetPlaceholderTextColorValue(searchTheme->GetPlaceholderColor())
@@ -1826,6 +1828,10 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("textDirection",
         StringUtils::ToString(textFieldLayoutProperty->GetTextDirection().value_or(TextDirection::INHERIT)).c_str(),
         filter);
+    json->PutExtAttr("includeFontPadding", std::to_string(
+        textFieldLayoutProperty->GetIncludeFontPadding().value_or(false)).c_str(), filter);
+    json->PutExtAttr("fallbackLineSpacing", std::to_string(
+        textFieldLayoutProperty->GetFallbackLineSpacing().value_or(false)).c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const

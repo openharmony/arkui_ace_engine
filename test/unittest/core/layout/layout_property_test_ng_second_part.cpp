@@ -1007,4 +1007,324 @@ HWTEST_F(LayoutPropertyTestNg, UpdateChainWeight001, TestSize.Level0)
     layoutProperty->UpdateChainWeight(chainWeightPair);
     EXPECT_NE(layoutProperty->flexItemProperty_, nullptr);
 }
+
+/**
+ * @tc.name: CheckSelfIdealSize01
+ * @tc.desc: Test CheckSelfIdealSize() when minSize < maxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckSelfIdealSize01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength(20), CalcLength(20)),
+        .maxSize = CalcSize(CalcLength(50), CalcLength(50)),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    /**
+     * @tc.expected: layoutProperty->calcLayoutConstraint_ is not nullptr
+     */
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    /**
+     * @tc.steps: step2. Call CheckSelfIdealSize()
+     */
+    SizeF originMax(100, 100);
+    layoutProperty->layoutConstraint_ = {
+        .parentIdealSize = OptionalSizeF(60, 60),
+        .maxSize = SizeF(70, 70),
+        .minSize = SizeF(10, 10)
+    };
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    layoutProperty->CheckSelfIdealSize(originMax);
+    /**
+     * @tc.expected: layoutProperty->maxSize, layoutProperty->minSize, layoutProperty->selfIdealSize
+     *               is constrained by [20, 50]
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(20, 20)) <<
+        layoutProperty->layoutConstraint_->minSize.ToString();
+}
+
+/**
+ * @tc.name: CheckSelfIdealSize02
+ * @tc.desc: Test CheckSelfIdealSize() when minSize > maxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckSelfIdealSize02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength(50), CalcLength(50)),
+        .maxSize = CalcSize(CalcLength(20), CalcLength(20)),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    /**
+     * @tc.expected: layoutProperty->calcLayoutConstraint_ is not nullptr
+     */
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    /**
+     * @tc.steps: step2. Call CheckSelfIdealSize()
+     */
+    SizeF originMax(100, 100);
+    layoutProperty->layoutConstraint_ = {
+        .parentIdealSize = OptionalSizeF(60, 60),
+        .maxSize = SizeF(70, 70),
+        .minSize = SizeF(10, 10)
+    };
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    layoutProperty->CheckSelfIdealSize(originMax);
+    /**
+     * @tc.expected: layoutProperty->maxSize, layoutProperty->minSize, layoutProperty->selfIdealSize
+     *               is constrained by [20, 50]
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->minSize.ToString();
+}
+
+/**
+ * @tc.name: CheckSelfIdealSize03
+ * @tc.desc: Test CheckSelfIdealSize() when maxSize < 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckSelfIdealSize03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength(50), CalcLength(50)),
+        .maxSize = CalcSize(CalcLength(-20), CalcLength(-20)),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    /**
+     * @tc.expected: layoutProperty->calcLayoutConstraint_ is not nullptr
+     */
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    /**
+     * @tc.steps: step2. Call CheckSelfIdealSize()
+     */
+    SizeF originMax(100, 100);
+    layoutProperty->layoutConstraint_ = {
+        .parentIdealSize = OptionalSizeF(60, 60),
+        .maxSize = SizeF(70, 70),
+        .minSize = SizeF(10, 10)
+    };
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    layoutProperty->CheckSelfIdealSize(originMax);
+    /**
+     * @tc.expected: layoutProperty->maxSize, layoutProperty->minSize, layoutProperty->selfIdealSize
+     *               is constrained by originMax
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(60, 60)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(100, 100)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(50, 50)) <<
+        layoutProperty->layoutConstraint_->minSize.ToString();
+}
+
+/**
+ * @tc.name: CheckAspectRatioTest01
+ * @tc.desc: Test CheckAspectRatio()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckAspectRatioTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update AspectRatio
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(0.5);
+    layoutProperty->layoutConstraint_ = {
+        .selfIdealSize = OptionalSizeF(10, 10),
+        .maxSize = SizeF(20, 100),
+        .minSize = SizeF(10, 10)
+    };
+    /**
+     * @tc.steps: step2. Call CheckAspectRatio()
+     */
+    layoutProperty->CheckAspectRatio();
+    /**
+     * @tc.expected: maxHeight = maxWidth / aspectRatio, selfIdealSize.height = selfIdealSize.width / aspectRation
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(10, 20)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(20, 40)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+}
+
+/**
+ * @tc.name: CheckAspectRatioTest02
+ * @tc.desc: Test CheckAspectRatio()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckAspectRatioTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update AspectRatio
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(0.5);
+    layoutProperty->layoutConstraint_ = {
+        .selfIdealSize = OptionalSizeF(30, 10),
+        .maxSize = SizeF(20, 100),
+        .minSize = SizeF(10, 10)
+    };
+    /**
+     * @tc.steps: step2. Call CheckAspectRatio()
+     */
+    layoutProperty->CheckAspectRatio();
+    /**
+     * @tc.expected: maxHeight = maxWidth / aspectRatio, selfIdealSize.height = selfIdealSize.width / aspectRation
+     *               selfIdealSize.height is constrained by maxHeight
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(20, 40)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(20, 40)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+}
+
+/**
+ * @tc.name: CheckAspectRatioTest03
+ * @tc.desc: Test CheckAspectRatio()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckAspectRatioTest03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update AspectRatio
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(0.5);
+    layoutProperty->layoutConstraint_ = {
+        .selfIdealSize = OptionalSizeF(std::nullopt, 20),
+        .maxSize = SizeF(20, 30),
+        .minSize = SizeF(10, 10)
+    };
+    /**
+     * @tc.steps: step2. Call CheckAspectRatio()
+     */
+    layoutProperty->CheckAspectRatio();
+    /**
+     * @tc.expected: maxHeight = maxWidth / aspectRatio, selfIdealSize.width = selfIdealSize.height * aspectRation
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(10, 20)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(20, 30)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+}
+
+/**
+ * @tc.name: CheckAspectRatioTest04
+ * @tc.desc: Test CheckAspectRatio()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, CheckAspectRatioTest04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update AspectRatio
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->magicItemProperty_.UpdateAspectRatio(0.5);
+    layoutProperty->layoutConstraint_ = {
+        .selfIdealSize = OptionalSizeF(std::nullopt, 60),
+        .maxSize = SizeF(20, 30),
+        .minSize = SizeF(10, 10)
+    };
+    /**
+     * @tc.steps: step2. Call CheckAspectRatio()
+     */
+    layoutProperty->CheckAspectRatio();
+    /**
+     * @tc.expected: maxHeight = maxWidth / aspectRatio, selfIdealSize.width = selfIdealSize.height * aspectRation
+     *               selfIdealSize.width is constrained by maxWidth
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(20, 40)) <<
+        layoutProperty->layoutConstraint_->selfIdealSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(20, 30)) <<
+        layoutProperty->layoutConstraint_->maxSize.ToString();
+}
+
+/**
+ * @tc.name: UpdateLayoutPolicyWithCheckTest
+ * @tc.desc: Test UpdateLayoutPolicyWithCheck()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyWithCheckTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    /**
+     * @tc.expected: update the layout policy and propertyChangeFlag_ correctly
+     */
+    EXPECT_TRUE(layoutProperty->layoutPolicy_.has_value());
+    EXPECT_TRUE(layoutProperty->layoutPolicy_.value().widthLayoutPolicy_.has_value());
+    EXPECT_EQ(layoutProperty->layoutPolicy_.value().widthLayoutPolicy_.value(), LayoutCalPolicy::MATCH_PARENT);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    /**
+     * @tc.steps: step2. Set width MATCH_PARENT again
+     */
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    /**
+     * @tc.expected: the propertyChangeFlag is not changed
+     */
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    /**
+     * @tc.steps: step3. Set width FIX_AT_IDEAL_SIZE
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    /**
+     * @tc.expected: update the layout policy and propertyChangeFlag_ correctly
+     */
+    EXPECT_EQ(layoutProperty->layoutPolicy_.value().widthLayoutPolicy_.value(), LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+
+    /**
+     * @tc.steps: step4. Set height MATCH_PARENT
+     */
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    /**
+     * @tc.expected: update the layout policy and propertyChangeFlag_ correctly
+     */
+    EXPECT_TRUE(layoutProperty->layoutPolicy_.value().heightLayoutPolicy_.has_value());
+    EXPECT_EQ(layoutProperty->layoutPolicy_.value().heightLayoutPolicy_.value(), LayoutCalPolicy::MATCH_PARENT);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    /**
+     * @tc.steps: step5. Set height MATCH_PARENT again
+     */
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    /**
+     * @tc.expected: the propertyChangeFlag is not changed
+     */
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    /**
+     * @tc.steps: step6. Set height FIX_AT_IDEAL_SIZE
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    /**
+     * @tc.expected: update the layout policy and propertyChangeFlag_ correctly
+     */
+    EXPECT_EQ(layoutProperty->layoutPolicy_.value().heightLayoutPolicy_.value(), LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

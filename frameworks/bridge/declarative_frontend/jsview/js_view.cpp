@@ -169,6 +169,16 @@ void JSView::GetMainInstanceId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(currentInstance)));
 }
 
+void JSView::JsSetCreatorId(int64_t creatorId)
+{
+    creatorId_ = creatorId;
+}
+
+int64_t JSView::GetCreatorId() const
+{
+    return creatorId_;
+}
+
 void JSView::JsSetCardId(int64_t cardId)
 {
     cardId_ = cardId;
@@ -200,7 +210,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar, int64_t creatorId)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -549,7 +559,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar, int64_t creatorId)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
@@ -760,7 +770,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName(),
-        .isV2 = GetJSIsV2() };
+        .isV2 = GetJSIsV2(),
+        .creatorId = GetCreatorId()};
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -997,7 +1008,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
             LOGE("View is null");
             return;
         }
-        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(false, false, view->GetCreatorId()), true);
     }
 }
 
@@ -1123,8 +1134,26 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
             obj->SetProperty<int32_t>("mode", static_cast<int32_t>(result->mode));
             obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
         }
+        if (result->size.has_value()) {
+            JSRef<JSObject> objSize = JSRef<JSObject>::New();
+            objSize->SetProperty<double>("width", result->size.value().Width());
+            objSize->SetProperty<double>("height", result->size.value().Height());
+            obj->SetPropertyObject("size", objSize);
+        }
         info.SetReturnValue(obj);
     }
+}
+
+JSRef<JSVal> JSViewPartialUpdate::GetJsContext()
+{
+    ContainerScope scope(GetInstanceId());
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, JSRef<JSVal>());
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, JSRef<JSVal>());
+    auto context = frontend->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    return jsVal;
 }
 
 void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
@@ -1132,7 +1161,7 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
     auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
-        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        auto jsContext = GetJsContext();
         obj->SetPropertyObject("context", jsContext);
         obj->SetProperty<int32_t>("index", result->index);
         obj->SetProperty<std::string>("name", result->name);
@@ -1140,6 +1169,12 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
         obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
         obj->SetProperty<std::string>("pageId", result->pageId);
         info.SetReturnValue(obj);
+        if (result->size.has_value()) {
+            JSRef<JSObject> objSize = JSRef<JSObject>::New();
+            objSize->SetProperty<double>("width", result->size.value().Width());
+            objSize->SetProperty<double>("height", result->size.value().Height());
+            obj->SetPropertyObject("size", objSize);
+        }
     }
 }
 
@@ -1304,6 +1339,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);
+    JSClass<JSViewPartialUpdate>::Method("setCreatorId", &JSViewPartialUpdate::JsSetCreatorId);
     JSClass<JSViewPartialUpdate>::CustomMethod("getCardId", &JSViewPartialUpdate::JsGetCardId);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
@@ -1467,5 +1503,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     info.SetReturnValue(targetView);
     return;
 }
-
 } // namespace OHOS::Ace::Framework

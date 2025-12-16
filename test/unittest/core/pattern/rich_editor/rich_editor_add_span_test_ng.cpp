@@ -234,11 +234,17 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
     ASSERT_NE(imageSpanItem, nullptr);
     auto imageAttribute = imageSpanItem->options.imageAttribute;
     bool hasImageAttribute = imageAttribute.has_value();
-    EXPECT_TRUE(hasImageAttribute);
+    ASSERT_TRUE(hasImageAttribute);
     auto verticalAlign = imageAttribute.value().verticalAlign;
     auto hasVerticalAlign = verticalAlign.has_value();
     EXPECT_TRUE(hasVerticalAlign);
     EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
+    auto objectFit = imageAttribute.value().objectFit;
+    auto hasObjectFit = objectFit.has_value();
+    EXPECT_FALSE(hasObjectFit);
+    auto size = imageAttribute.value().size;
+    auto hasSize = size.has_value();
+    EXPECT_FALSE(hasSize);
 }
 
 /**

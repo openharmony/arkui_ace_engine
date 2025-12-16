@@ -237,6 +237,9 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageE
     errorInfo_ = errorInfo;
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
+    if (src_.GetSrcType() == SrcType::NETWORK) {
+        DownloadManager::GetInstance()->RemoveUrlCache(src_.GetSrc());
+    }
     TAG_LOGD(AceLogTag::ACE_IMAGE, "fail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
         errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);

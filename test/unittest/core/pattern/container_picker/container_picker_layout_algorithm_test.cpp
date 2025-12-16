@@ -799,48 +799,6 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithLargeHeight
 }
 
 /**
- * @tc.name: CalcMainAndMiddlePosWithPositiveDelta
- * @tc.desc: Test CalcMainAndMiddlePos method with positive delta value
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithPositiveDelta, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Set height to 500.0f and positive delta of 50.0f, then call CalcMainAndMiddlePos
-     * @tc.expected: step1. The positions should be calculated correctly with delta adjustment
-     */
-    algorithm_->SetHeight(500.0f);
-    algorithm_->SetCurrentDelta(50.0f);
-    algorithm_->CalcMainAndMiddlePos();
-
-    EXPECT_EQ(algorithm_->startMainPos_, 110);
-    EXPECT_EQ(algorithm_->endMainPos_, 440);
-    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
-    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
-}
-
-/**
- * @tc.name: CalcMainAndMiddlePosWithNegativeDelta
- * @tc.desc: Test CalcMainAndMiddlePos method with negative delta value
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithNegativeDelta, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Set height to 500.0f and negative delta of -50.0f, then call CalcMainAndMiddlePos
-     * @tc.expected: step1. The positions should be calculated correctly with delta adjustment
-     */
-    algorithm_->SetHeight(500.0f);
-    algorithm_->SetCurrentDelta(-50.0f);
-    algorithm_->CalcMainAndMiddlePos();
-
-    EXPECT_EQ(algorithm_->startMainPos_, 60);
-    EXPECT_EQ(algorithm_->endMainPos_, 390);
-    EXPECT_EQ(algorithm_->middleItemStartPos_, 230);
-    EXPECT_EQ(algorithm_->middleItemEndPos_, 270);
-}
-
-/**
  * @tc.name: MeasurePickerItemsWithItems
  * @tc.desc: Test MeasurePickerItems method with items
  * @tc.type: FUNC
@@ -1769,6 +1727,276 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithRemeasure, 
     algorithm_->CalcMainAndMiddlePos();
     EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, (height - pickerItemHeight) / 2.0f + currentOffsetFromMiddle);
     EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, (height + pickerItemHeight) / 2.0f + currentOffsetFromMiddle);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithPositiveDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is positive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithPositiveDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with positive currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float positiveDelta = 10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = positiveDelta;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should be reduced by pickerItemHeight, endMainPos_ should include delta
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) - pickerItemHeight;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + positiveDelta;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithNegativeDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithNegativeDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with negative currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float negativeDelta = -10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = negativeDelta;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should include delta, endMainPos_ should be increased by pickerItemHeight
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) + negativeDelta;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + pickerItemHeight;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithZeroDelta
+ * @tc.desc: Test CalcMainAndMiddlePos method when currentDelta_ is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithZeroDelta, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with zero currentDelta_
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->currentDelta_ = 0.0f;
+    algorithm_->reMeasure_ = false;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. startMainPos_ should be reduced and endMainPos_ should be increased by pickerItemHeight
+     */
+    float expectedMiddleStart = (height - pickerItemHeight) / 2.0f;
+    float expectedMiddleEnd = (height + pickerItemHeight) / 2.0f;
+    int32_t halfOfDisplayCount = 3; // DISPLAY_COUNT / 2
+    float expectedStartMainPos = expectedMiddleStart - pickerItemHeight * (halfOfDisplayCount - 1) - pickerItemHeight;
+    float expectedEndMainPos = expectedMiddleEnd + pickerItemHeight * (halfOfDisplayCount - 1) + pickerItemHeight;
+
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, expectedMiddleStart);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, expectedMiddleEnd);
+    EXPECT_FLOAT_EQ(algorithm_->startMainPos_, expectedStartMainPos);
+    EXPECT_FLOAT_EQ(algorithm_->endMainPos_, expectedEndMainPos);
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosWithoutRemeasure
+ * @tc.desc: Test CalcMainAndMiddlePos method when reMeasure_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, CalcMainAndMiddlePosWithoutRemeasure, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set up initial values with reMeasure_ false
+     */
+    float height = 200.0f;
+    float pickerItemHeight = 40.0f;
+    float offsetFromMiddle = 10.0f;
+    algorithm_->SetHeight(height);
+    algorithm_->SetItemHeight(pickerItemHeight);
+    algorithm_->reMeasure_ = false;
+    algorithm_->currentOffsetFromMiddle_ = offsetFromMiddle;
+
+    /**
+     * @tc.steps: step2. Call CalcMainAndMiddlePos
+     * @tc.expected: step2. middleItemStartPos_ and middleItemEndPos_ should not include offsetFromMiddle
+     */
+    algorithm_->CalcMainAndMiddlePos();
+    EXPECT_FLOAT_EQ(algorithm_->middleItemStartPos_, (height - pickerItemHeight) / 2.0f);
+    EXPECT_FLOAT_EQ(algorithm_->middleItemEndPos_, (height + pickerItemHeight) / 2.0f);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWhenLessThanLimit
+ * @tc.desc: Test RetainDisplayItems method when item count is less than or equal to DISPLAY_COUNT + 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWhenLessThanLimit, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count less than DISPLAY_COUNT + 1
+     */
+    // Create 10 items which is less than 11
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    int32_t initialSize = algorithm_->itemPosition_.size();
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain unchanged in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsAtTop
+ * @tc.desc: Test RetainDisplayItems method with atTop true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsAtTop, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count greater than DISPLAY_COUNT + 1
+     */
+    // Create 20 items which is more than DISPLAY_COUNT + 1
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with atTop true
+     * @tc.expected: step2. Only DISPLAY_COUNT + 1 items should be retained from the top
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_LE(algorithm_->itemPosition_.size(), 8);
+
+    // Verify that the first item is still index 0
+    EXPECT_TRUE(algorithm_->itemPosition_.find(0) != algorithm_->itemPosition_.end());
+}
+
+/**
+ * @tc.name: RetainDisplayItemsAtBottom
+ * @tc.desc: Test RetainDisplayItems method with atTop false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsAtBottom, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count greater than DISPLAY_COUNT + 1
+     */
+    // Create 20 items which is more than DISPLAY_COUNT + 1
+    for (int32_t i = 0; i < 20; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with atTop false
+     * @tc.expected: step2. Only DISPLAY_COUNT + 1 items should be retained from the bottom
+     */
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_LE(algorithm_->itemPosition_.size(), 8);
+
+    // Verify that the last item is still index 19
+    EXPECT_TRUE(algorithm_->itemPosition_.find(19) != algorithm_->itemPosition_.end());
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWithExactlyLimitCount
+ * @tc.desc: Test RetainDisplayItems method when item count is exactly DISPLAY_COUNT + 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithExactlyLimitCount, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create itemPosition_ with count exactly DISPLAY_COUNT + 1
+     */
+    for (int32_t i = 0; i < 8; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    int32_t initialSize = algorithm_->itemPosition_.size();
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain unchanged in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_EQ(algorithm_->itemPosition_.size(), initialSize);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsWithEmptyPosition
+ * @tc.desc: Test RetainDisplayItems method with empty itemPosition_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithEmptyPosition, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Ensure itemPosition_ is empty
+     */
+    algorithm_->itemPosition_.clear();
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+
+    /**
+     * @tc.steps: step2. Call RetainDisplayItems with both atTop true and false
+     * @tc.expected: step2. itemPosition_ should remain empty in both cases
+     */
+    algorithm_->RetainDisplayItems(true);
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+
+    algorithm_->RetainDisplayItems(false);
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
 }
 
 } // namespace OHOS::Ace::NG

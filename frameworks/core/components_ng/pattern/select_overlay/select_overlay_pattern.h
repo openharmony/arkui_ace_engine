@@ -225,6 +225,7 @@ public:
 
     void DeleteHotAreas();
     void OnMountToSubWindow();
+    void UpdateMenuAccessibility(bool menuIsShow);
 
 protected:
     virtual void CheckHandleReverse();

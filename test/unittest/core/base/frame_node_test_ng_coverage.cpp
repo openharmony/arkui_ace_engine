@@ -3446,4 +3446,38 @@ HWTEST_F(FrameNodeTestNg, OnLayoutFinish013, TestSize.Level1)
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: FrameNodeOnContentChangeRegister01
+ * @tc.desc: Test the function OnContentChangeRegister, OnContentChangeUnregister
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnContentChangeRegister01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function OnContentChangeRegister, OnContentChangeUnregister.
+     */
+    ContentChangeConfig config;
+    frameNode->OnContentChangeRegister(config);
+    frameNode->OnContentChangeUnregister();
+
+    /**
+     * @tc.steps: step3. update pattern_.
+     */
+    auto pattern = frameNode->pattern_;
+    frameNode->pattern_ = nullptr;
+
+    /**
+     * @tc.steps: step4. call the function OnContentChangeRegister, OnContentChangeUnregister.
+     */
+    frameNode->OnContentChangeRegister(config);
+    frameNode->OnContentChangeUnregister();
+    frameNode->pattern_ = pattern;
+}
 } // namespace OHOS::Ace::NG

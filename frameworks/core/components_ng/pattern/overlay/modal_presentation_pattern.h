@@ -111,12 +111,7 @@ public:
         isExecuteOnDisappear_ = false;
     }
 
-    void OnDisappear() {
-        if (onDisappear_) {
-            isExecuteOnDisappear_ = true;
-            onDisappear_();
-        }
-    }
+    void OnDisappear();
 
     void UpdateOnWillDisappear(std::function<void()>&& onWillDisappear)
     {
@@ -130,12 +125,7 @@ public:
         onAppear_ = std::move(onAppear);
     }
 
-    void OnAppear()
-    {
-        if (onAppear_) {
-            onAppear_();
-        }
-    }
+    void OnAppear();
 
     FocusPattern GetFocusPattern() const override
     {

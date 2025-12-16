@@ -279,9 +279,9 @@ bool NavigationModelNG::CreatePrimaryContentIfNeeded(const RefPtr<NavigationGrou
     CHECK_NULL_RETURN(navigationGroupNode, false);
     auto context = navigationGroupNode->GetContext();
     CHECK_NULL_RETURN(context, false);
-    auto manager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(manager, false);
-    if (!manager->IsForceSplitSupported()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
         return true;
     }
     if (navigationGroupNode->GetPrimaryContentNode()) {
@@ -305,7 +305,10 @@ bool NavigationModelNG::CreateForceSplitPlaceHolderIfNeeded(const RefPtr<Navigat
     CHECK_NULL_RETURN(context, false);
     auto manager = context->GetNavigationManager();
     CHECK_NULL_RETURN(manager, false);
-    if (!manager->IsForceSplitSupported() || manager->IsPlaceholderDisabled()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (!forceSplitMgr->IsForceSplitSupported(false) ||
+        manager->IsPlaceholderDisabled() || forceSplitMgr->HasRelatedPage()) {
         return true;
     }
     if (navigationGroupNode->GetForceSplitPlaceHolderNode()) {

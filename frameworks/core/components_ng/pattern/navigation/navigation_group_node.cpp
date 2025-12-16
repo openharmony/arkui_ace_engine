@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -424,7 +425,7 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
     return nullptr;
 }
 
-bool NavigationGroupNode::HandleBackForHomeDestination()
+bool NavigationGroupNode::HandleBackForHomeOrRelatedDestination()
 {
     auto pattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, false);
@@ -435,7 +436,7 @@ bool NavigationGroupNode::HandleBackForHomeDestination()
         CHECK_NULL_BREAK(parentNavNode);
         bool isEntry = false;
         if (parentNavNode->CheckCanHandleBack(isEntry)) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parent Navigation handle back for HomeNavDestination");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parent Navigation handle back for Home or Related NavDestination");
             return true;
         }
     } while (false);
@@ -443,7 +444,7 @@ bool NavigationGroupNode::HandleBackForHomeDestination()
     CHECK_NULL_RETURN(context, false);
     auto frontend = context->GetFrontend();
     CHECK_NULL_RETURN(frontend, false);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Frontend will handle back for HomeNavDestination");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Frontend will handle back for Home or Related NavDestination");
     return frontend->OnBackPressed();
 }
 
@@ -481,9 +482,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
-        if (navDestination->IsHomeDestination()) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination");
-            return navigation->HandleBackForHomeDestination();
+        if (navDestination->IsHomeDestination() ||
+            navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination or related NavDestination");
+            return navigation->HandleBackForHomeOrRelatedDestination();
         }
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
@@ -505,7 +507,6 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             navigation->MarkModifyDone();
             navigation->MarkDirtyNode();
         }
-
         return result;
     }; // backButton event
 
@@ -866,6 +867,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             context->MarkNeedFlushMouseEvent();
             CHECK_NULL_VOID(preNavDesNode);
             preNavDesNode->AddToOcclusionMap(false);
+            navigation->ContentChangeReport(curNavDesNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -900,7 +902,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
     int32_t preAnimationId)
 {
-    if (!CheckEnableCustomNodeDel()) {
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    if (!context->IsCustomNodeDeleteInTransition()) {
         return;
     }
 
@@ -1113,6 +1117,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     curNavDestination->SystemTransitionPushFinish(true, curAnimationId);
                 }
             }
+            navigation->ContentChangeReport(curNode);
             navigation->RemoveDialogDestination();
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
@@ -1153,7 +1158,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(curNavDestination);
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
-        curNavDestination->GetNavDestinationPathInfo());
+        curNavDestination->GetNavDestinationPathInfo(), true);
 #endif
     CHECK_NULL_VOID(preNode);
     preNode->AddToOcclusionMap(true);
@@ -1245,6 +1250,7 @@ void NavigationGroupNode::TransitionWithReplace(
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
+        navigationNode->ContentChangeReport(curNode);
     };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -1534,6 +1540,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current navigation has no parent page");
     }
     CreateHomeDestinationIfNeeded();
+    LoadRelatedPageIfNeeded();
     auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
@@ -1548,6 +1555,41 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
     }
+}
+
+void NavigationGroupNode::LoadRelatedPageIfNeeded()
+{
+    auto pattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(false) ||
+        !forceSplitMgr->HasRelatedPage() ||
+        !pattern->GetIsTargetForceSplitNav() ||
+        relatedPageDestinationNode_) {
+        return;
+    }
+    const auto& relatedPageName = forceSplitMgr->GetRelatedPageName();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will create related NavDestination: %{public}s", relatedPageName.c_str());
+    RefPtr<UINode> customNode = nullptr;
+    RefPtr<NavDestinationGroupNode> destNode = nullptr;
+    if (!pattern->CreateRelatedDestination(relatedPageName, customNode, destNode)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create related NavDestination");
+        return;
+    }
+    CHECK_NULL_VOID(customNode);
+    CHECK_NULL_VOID(destNode);
+    SetBackButtonEvent(destNode);
+    auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAppear();
+    AddChild(destNode, 1);
+    relatedPageCustomNode_ = customNode;
+    relatedPageDestinationNode_ = destNode;
 }
 
 bool NavigationGroupNode::CheckNeedUpdateParentNode(const RefPtr<UINode>& curNode)
@@ -1754,6 +1796,8 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             navigation->LoadCompleteManagerStopCollect();
+            auto curNode = weakCurNode.Upgrade();
+            navigation->ContentChangeReport(curNode);
             navigation->isOnAnimation_ = false;
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
@@ -1916,6 +1960,8 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto curNode = weakCurNode.Upgrade();
+            navigation->ContentChangeReport(curNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();
@@ -2599,14 +2645,14 @@ bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGro
     CHECK_NULL_RETURN(navDestination, false);
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-    if (navDestination != navigationPattern->GetHomeNode()) {
+    if (navDestination != navigationPattern->GetForceSplitHomeDestination()) {
         return false;
     }
     auto context = GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
-    auto navigationManager = context->GetNavigationManager();
-    CHECK_NULL_RETURN(navigationManager, false);
-    return navigationManager->IsForceSplitEnable() && navigationPattern->CanForceSplitLayout() &&
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    return forceSplitMgr->IsForceSplitEnable(false) && navigationPattern->CanForceSplitLayout() &&
         !navigationPattern->IsTopFullScreenPage();
 }
 
@@ -2614,7 +2660,7 @@ void NavigationGroupNode::LoadCompleteManagerStartCollect()
 {
     auto context = GetContextWithCheck();
     if (context) {
-        context->GetLoadCompleteManager()->StartCollect("");
+        context->GetLoadCompleteManager()->StartCollect(context->GetCurrentPageName());
     }
 }
 
@@ -2624,5 +2670,14 @@ void NavigationGroupNode::LoadCompleteManagerStopCollect()
     if (context) {
         context->GetLoadCompleteManager()->StopCollect();
     }
+}
+
+void NavigationGroupNode::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+{
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnPageTransitionEnd(keyNode);
 }
 } // namespace OHOS::Ace::NG

@@ -18,12 +18,13 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { VoidCallback, ResourceColor, ResourceStr, Font, Length, Dimension, Padding, BorderRadiuses, Font_serializer, Padding_serializer, BorderRadiuses_serializer } from "./units"
@@ -33,6 +34,7 @@ import { EnterKeyType, SubmitEvent } from "./textInput"
 import { AttributeModifier, extractors, hookRichEditorAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
+import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -413,10 +415,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -441,10 +443,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -640,6 +642,42 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (spanType !== undefined) {
@@ -681,12 +719,32 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCustomKeyboardAttribute(value: CustomBuilder | undefined, options?: KeyboardOptions): void {
+    setSelectedDragPreviewStyleAttribute(value: SelectedDragPreviewStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+            SelectedDragPreviewStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof ComponentContent) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ComponentContent
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -773,6 +831,7 @@ export interface RichEditorParagraphStyle {
     wordBreak?: WordBreak;
     lineBreakStrategy?: LineBreakStrategy;
     paragraphSpacing?: double;
+    textDirection?: TextDirection;
 }
 export interface PasteEvent {
     preventDefault(): void
@@ -1069,10 +1128,22 @@ export interface RichEditorAttribute extends CommonMethod {
     stopBackPress(value: boolean | undefined): this {
         throw new Error("Unimplemented method stopBackPress")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error("Unimplemented method bindSelectionMenu")
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        throw new Error("Unimplemented method selectedDragPreviewStyle")
+    }
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1113,7 +1184,11 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: int32 | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined
+    selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
     setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
         return this
     }
@@ -1207,10 +1282,22 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     stopBackPress(value: boolean | undefined): this {
         return this
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        return this
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        return this
+    }
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         return this
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1549,6 +1636,30 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         if (this.checkPriority("bindSelectionMenu")) {
             const spanType_casted = spanType as (RichEditorSpanType | undefined)
@@ -1560,9 +1671,17 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    public selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (this.checkPriority("selectedDragPreviewStyle")) {
+            const value_casted = value as (SelectedDragPreviewStyle | undefined)
+            this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | ComponentContent | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
             return this
@@ -2172,10 +2291,10 @@ export class RichEditorSymbolSpanStyle_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx0  = valueHolderForFontColorTmpValueTmpElement as Color
                     valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueHolderForFontColorTmpValueTmpElement instanceof number) {
+                } else if (valueHolderForFontColorTmpValueTmpElement instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as number
-                    valueSerializer.writeNumber(valueHolderForFontColorTmpValueTmpElementForIdx1)
+                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as int32
+                    valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx1)
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx2  = valueHolderForFontColorTmpValueTmpElement as string
@@ -2252,11 +2371,11 @@ export class RichEditorSymbolSpanStyle_serializer {
             let fontColorTmpBuf_ : Array<ResourceColor> = new Array<ResourceColor>(fontColorTmpBuf_Length)
             for (let fontColorTmpBuf_BufCounterI = 0; fontColorTmpBuf_BufCounterI < fontColorTmpBuf_Length; fontColorTmpBuf_BufCounterI++) {
                 const fontColorTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                let fontColorTmpBuf_TempBuf : Color | number | string | Resource | undefined
+                let fontColorTmpBuf_TempBuf : Color | int32 | string | Resource | undefined
                 if (fontColorTmpBuf_TempBufUnionSelector == (0).toChar()) {
                     fontColorTmpBuf_TempBuf = Color.values()[valueDeserializer.readInt32()]
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (1).toChar()) {
-                    fontColorTmpBuf_TempBuf = (valueDeserializer.readNumber() as number)
+                    fontColorTmpBuf_TempBuf = valueDeserializer.readInt32()
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (2).toChar()) {
                     fontColorTmpBuf_TempBuf = (valueDeserializer.readString() as string)
                 } else if (fontColorTmpBuf_TempBufUnionSelector == (3).toChar()) {
@@ -2264,7 +2383,7 @@ export class RichEditorSymbolSpanStyle_serializer {
                 } else {
                     throw new Error("One of the branches for fontColorTmpBuf_TempBuf has to be chosen through deserialisation.")
                 }
-                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | number | string | Resource)
+                fontColorTmpBuf_[fontColorTmpBuf_BufCounterI] = (fontColorTmpBuf_TempBuf as Color | int32 | string | Resource)
             }
             fontColorTmpBuf = fontColorTmpBuf_
         }
@@ -2652,10 +2771,10 @@ export class PlaceholderStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -2681,11 +2800,11 @@ export class PlaceholderStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -2693,7 +2812,7 @@ export class PlaceholderStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         let value : PlaceholderStyle = ({font: fontTmpResult, fontColor: fontColorTmpResult} as PlaceholderStyle)
@@ -2881,6 +3000,14 @@ export class RichEditorParagraphStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorParagraphStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -2934,7 +3061,13 @@ export class RichEditorParagraphStyle_serializer {
             paragraphSpacingTmpBuf = (valueDeserializer.readFloat64() as double)
         }
         const paragraphSpacingTmpResult : double | undefined = paragraphSpacingTmpBuf
-        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as RichEditorParagraphStyle)
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
+        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as RichEditorParagraphStyle)
         return value
     }
 }
@@ -3166,10 +3299,10 @@ export class RichEditorTextStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -3341,11 +3474,11 @@ export class RichEditorTextStyle_serializer {
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | number | string | Resource | undefined
+            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
             if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
                 fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontColorTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
                 fontColorTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
@@ -3353,7 +3486,7 @@ export class RichEditorTextStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | number | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3499,10 +3632,10 @@ export class RichEditorTextStyleResult_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForFontColorForIdx0  = valueHolderForFontColor as Color
             valueSerializer.writeInt32(valueHolderForFontColorForIdx0.getOrdinal())
-        } else if (valueHolderForFontColor instanceof number) {
+        } else if (valueHolderForFontColor instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as number
-            valueSerializer.writeNumber(valueHolderForFontColorForIdx1)
+            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as int32
+            valueSerializer.writeInt32(valueHolderForFontColorForIdx1)
         } else if (valueHolderForFontColor instanceof string) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForFontColorForIdx2  = valueHolderForFontColor as string
@@ -3578,11 +3711,11 @@ export class RichEditorTextStyleResult_serializer {
     public static read(buffer: DeserializerBase): RichEditorTextStyleResult {
         let valueDeserializer : DeserializerBase = buffer
         const fontColorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let fontColorTmpBuf : Color | number | string | Resource | undefined
+        let fontColorTmpBuf : Color | int32 | string | Resource | undefined
         if (fontColorTmpBufUnionSelector == (0).toChar()) {
             fontColorTmpBuf = Color.values()[valueDeserializer.readInt32()]
         } else if (fontColorTmpBufUnionSelector == (1).toChar()) {
-            fontColorTmpBuf = (valueDeserializer.readNumber() as number)
+            fontColorTmpBuf = valueDeserializer.readInt32()
         } else if (fontColorTmpBufUnionSelector == (2).toChar()) {
             fontColorTmpBuf = (valueDeserializer.readString() as string)
         } else if (fontColorTmpBufUnionSelector == (3).toChar()) {
@@ -3590,7 +3723,7 @@ export class RichEditorTextStyleResult_serializer {
         } else {
             throw new Error("One of the branches for fontColorTmpBuf has to be chosen through deserialisation.")
         }
-        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | number | string | Resource)
+        const fontColorTmpResult : ResourceColor = (fontColorTmpBuf as Color | int32 | string | Resource)
         const fontSizeTmpResult : double = (valueDeserializer.readFloat64() as double)
         const fontStyleTmpResult : FontStyle = FontStyle.fromValue(valueDeserializer.readInt32())
         const fontWeightTmpResult : int32 = (valueDeserializer.readInt32() as int32)

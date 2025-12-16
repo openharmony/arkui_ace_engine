@@ -791,23 +791,6 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragEventTestNg009
- * @tc.desc: Invoke GetPreviewPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
-{
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
-
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
-}
-
-/**
  * @tc.name: DragEventTestNg008
  * @tc.desc: Create DragEventActuator and invoke HideTextAnimation function.
  * @tc.type: FUNC
@@ -853,6 +836,23 @@ HWTEST_F(DragEventTestNg, DragEventTestNg008, TestSize.Level1)
     gestureEventHub->SetTextDraggable(true);
     dragEventActuator->HideTextAnimation();
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
+}
+
+/**
+ * @tc.name: DragEventTestNg009
+ * @tc.desc: Invoke GetPreviewPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
+{
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 
 /**
@@ -2053,6 +2053,23 @@ HWTEST_F(DragEventTestNg, DragEventSetDragDampStartPointInfoTest001, TestSize.Le
 }
 
 /**
+ * @tc.name: SetDragNodeNeedClean
+ * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    overlayManager->SetDragNodeNeedClean();
+    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
+}
+
+/**
  * @tc.name: DragEventTryTriggerThumbnailCallbackTest001
  * @tc.desc: Test TryTriggerThumbnailCallback handles different conditions to prevent incorrect thumbnail generation.
  * @tc.type: FUNC
@@ -2111,22 +2128,5 @@ HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.
     dragEventActuator->isThumbnailCallbackTriggered_ = false;
     dragEventActuator->TryTriggerThumbnailCallback();
     EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
-}
-
-/**
- * @tc.name: SetDragNodeNeedClean
- * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->overlayManager_;
-    ASSERT_NE(overlayManager, nullptr);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    ASSERT_NE(dragDropManager, nullptr);
-    overlayManager->SetDragNodeNeedClean();
-    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
 }
 } // namespace OHOS::Ace::NG

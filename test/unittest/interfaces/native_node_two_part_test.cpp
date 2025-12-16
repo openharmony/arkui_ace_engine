@@ -740,7 +740,7 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridItemOptions, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
     ASSERT_NE(rootNode, nullptr);
 
     //set get and reset
@@ -1291,5 +1291,199 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnSelectTest, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     nodeAPI->unregisterNodeEvent(gridItem, NODE_GRID_ITEM_ON_SELECT);
     nodeAPI->disposeNode(gridItem);
+}
+
+/**
+ * @tc.name: NativeNodeOnSelectTest
+ * @tc.desc: Test Picker selected index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSelectedIndexTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.i32 = 0} };
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_OPTION_SELECTED_INDEX, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_OPTION_SELECTED_INDEX)->value[0].i32, 0);
+
+    ArkUI_NumberValue abnormalValue[] = { {.i32 = -1} };
+    ArkUI_AttributeItem abnormalItem = {abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(picker, NODE_PICKER_OPTION_SELECTED_INDEX, &abnormalItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_OPTION_SELECTED_INDEX), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeEnableHapticFeedbackTest
+ * @tc.desc: Test Picker enable haptic feedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeEnableHapticFeedbackTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.i32 = 0} };
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_ENABLE_HAPTIC_FEEDBACK, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ENABLE_HAPTIC_FEEDBACK)->value[0].i32, 0);
+
+    ArkUI_NumberValue abnormalValue[] = { {.i32 = -1} };
+    ArkUI_AttributeItem abnormalItem = {abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(picker, NODE_PICKER_ENABLE_HAPTIC_FEEDBACK, &abnormalItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_ENABLE_HAPTIC_FEEDBACK), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeCanLoopTest
+ * @tc.desc: Test Picker can loop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeCanLoopTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.i32 = 0} };
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_CAN_LOOP, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_CAN_LOOP)->value[0].i32, 0);
+
+    ArkUI_NumberValue abnormalValue[] = { {.i32 = -1} };
+    ArkUI_AttributeItem abnormalItem = {abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(picker, NODE_PICKER_CAN_LOOP, &abnormalItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_CAN_LOOP), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeSelectionIndicatorTest
+ * @tc.desc: Test Picker selection indicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSelectionIndicatorTest_001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_PickerIndicatorStyle* indicatorBackgroundStyle = OH_ArkUI_PickerIndicatorStyle_Create(ARKUI_PICKER_INDICATOR_BACKGROUND);
+
+    ArkUI_PickerIndicatorBackground background = {
+        .backgroundColor = 0xffff0000,
+        .topLeftRadius = 10.0,
+        .topRightRadius = 10.0,
+        .bottomLeftRadius = 10.0,
+        .bottomRightRadius = 10.0
+    };
+    ArkUI_ErrorCode configureBackground = OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, &background);
+    EXPECT_EQ(configureBackground, ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue value[] = {};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    item.object = indicatorBackgroundStyle;
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_SELECTION_INDICATOR, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_SELECTION_INDICATOR)->value[0].i32, ARKUI_PICKER_INDICATOR_BACKGROUND);
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_SELECTION_INDICATOR), ARKUI_ERROR_CODE_NO_ERROR);
+
+
+    ArkUI_PickerIndicatorBackground errorTopLeftRadius = {
+        .backgroundColor = 0xffff0000,
+        .topLeftRadius = -1,
+        .topRightRadius = 10.0,
+        .bottomLeftRadius = 10.0,
+        .bottomRightRadius = 10.0
+    };
+    ArkUI_ErrorCode error1 = OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, &errorTopLeftRadius);
+    EXPECT_EQ(error1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorBackground errorTopRightRadius = {
+        .backgroundColor = 0xffff0000,
+        .topLeftRadius = 10.0,
+        .topRightRadius = -1,
+        .bottomLeftRadius = 10.0,
+        .bottomRightRadius = 10.0
+    };
+    ArkUI_ErrorCode error2 = OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, &errorTopRightRadius);
+    EXPECT_EQ(error2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorBackground errorBottomLeftRadius = {
+        .backgroundColor = 0xffff0000,
+        .topLeftRadius = 10.0,
+        .topRightRadius = 10.0,
+        .bottomLeftRadius = -1,
+        .bottomRightRadius = 10.0
+    };
+    ArkUI_ErrorCode error3 = OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, &errorBottomLeftRadius);
+    EXPECT_EQ(error3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorBackground errorBottomRightRadius = {
+        .backgroundColor = 0xffff0000,
+        .topLeftRadius = 10.0,
+        .topRightRadius = 10.0,
+        .bottomLeftRadius = 10.0,
+        .bottomRightRadius = -1
+    };
+    ArkUI_ErrorCode error4 = OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, &errorBottomRightRadius);
+    EXPECT_EQ(error4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorStyle* indicatorDividerStyle = OH_ArkUI_PickerIndicatorStyle_Create(ARKUI_PICKER_INDICATOR_DIVIDER);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorDividerStyle, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeSelectionIndicatorTest_002
+ * @tc.desc: Test Picker selection indicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSelectionIndicatorTest_002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_PickerIndicatorStyle* indicatorDividerStyle = OH_ArkUI_PickerIndicatorStyle_Create(ARKUI_PICKER_INDICATOR_DIVIDER);
+    ArkUI_PickerIndicatorDivider divider = {
+        .strokeWidth = 10.0, .dividerColor = 0xffff0000, .startMargin = 10.0, .endMargin = 10.0
+    };
+    ArkUI_ErrorCode configureDivider = OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(indicatorDividerStyle, &divider);
+    EXPECT_EQ(configureDivider, ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue dividerValue[] = {};
+    ArkUI_AttributeItem dividerItem = {dividerValue, sizeof(dividerValue) / sizeof(ArkUI_NumberValue), "test"};
+    dividerItem.object = indicatorDividerStyle;
+    EXPECT_EQ(nodeAPI->setAttribute(picker, NODE_PICKER_SELECTION_INDICATOR, &dividerItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_SELECTION_INDICATOR)->value[0].i32, ARKUI_PICKER_INDICATOR_DIVIDER);
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_SELECTION_INDICATOR), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_PickerIndicatorDivider errorStrokeWidth = {
+        .strokeWidth = -1, .dividerColor = 0xffff0000, .startMargin = 10.0, .endMargin = 10.0
+    };
+    ArkUI_ErrorCode error1 = OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(indicatorDividerStyle, &errorStrokeWidth);
+    EXPECT_EQ(error1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorDivider errorStartMargin = {
+        .strokeWidth = 10.0, .dividerColor = 0xffff0000, .startMargin = -1, .endMargin = 10.0
+    };
+    ArkUI_ErrorCode error2 = OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(indicatorDividerStyle, &errorStartMargin);
+    EXPECT_EQ(error2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorDivider errorEndMargin = {
+        .strokeWidth = 10.0, .dividerColor = 0xffff0000, .startMargin = 10.0, .endMargin = -1
+    };
+    ArkUI_ErrorCode error3 = OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(indicatorDividerStyle, &errorEndMargin);
+    EXPECT_EQ(error3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_PickerIndicatorStyle* indicatorBackgroundStyle = OH_ArkUI_PickerIndicatorStyle_Create(ARKUI_PICKER_INDICATOR_BACKGROUND);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(indicatorBackgroundStyle, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(indicatorDividerStyle, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(picker);
 }
 } // namespace OHOS::Ace

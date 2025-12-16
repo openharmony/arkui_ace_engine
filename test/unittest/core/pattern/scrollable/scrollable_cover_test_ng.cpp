@@ -1444,6 +1444,27 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragUpdate002
+ * @tc.desc: Test HandleDragUpdate method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    GestureEvent info;
+    info.SetMainDelta(0.4);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(scrollable->lastMainDelta_, 0.4);
+    EXPECT_EQ(scrollable->prevRemainDelta_, 0.4);
+
+    info.SetMainDelta(0.4);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(scrollable->prevRemainDelta_ - 0.2 < 0.01, true);
+}
+
+/**
  * @tc.name: StartScrollAnimationTest001
  * @tc.desc: Test StartScrollAnimation method
  * @tc.type: FUNC

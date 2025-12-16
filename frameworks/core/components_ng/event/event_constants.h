@@ -29,8 +29,8 @@ enum class MenuPreviewMode {
 };
 
 enum class MenuBindingType {
-    LONG_PRESS,
     RIGHT_CLICK,
+    LONG_PRESS,
 };
 
 namespace OHOS::Ace::NG {
@@ -118,6 +118,17 @@ enum class AxisModel {
     ABS_BRAKE,
     ABS_HAT0X,
     ABS_HAT0Y,
+    ABS_RX,
+    ABS_RY,
+    ABS_THROTTLE,
+    ABS_RUDDER,
+    ABS_WHEEL,
+    ABS_HAT1X,
+    ABS_HAT1Y,
+    ABS_HAT2X,
+    ABS_HAT2Y,
+    ABS_HAT3X,
+    ABS_HAT3Y,
 };
 
 enum class GestureCallbackType {

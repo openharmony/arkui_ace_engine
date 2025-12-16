@@ -111,7 +111,7 @@ HWTEST_F(ProgressMaskAccessorTest, ctorValidTest, TestSize.Level1)
         {
             Converter::ArkValue<Ark_Number>(20.5f), 20.5f,
             Converter::ArkValue<Ark_Number>(200.5f), 200.5f,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff)
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff)
         },
         {
             Converter::ArkValue<Ark_Number>(65535.0f), 65535.0f,
@@ -152,7 +152,7 @@ HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
         {
             Converter::ArkValue<Ark_Number>(10), 10,
             Converter::ArkValue<Ark_Number>(-200.5f), DEFAULT_MAX_VALUE,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff)
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff)
         },
         {
             Converter::ArkValue<Ark_Number>(200.5f), 200.5f,
@@ -227,7 +227,7 @@ HWTEST_F(ProgressMaskAccessorTest, updateColorValidTest, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_ResourceColor, Color>> validValues {
         {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED},
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff)},
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff)},
         {Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), Color::FromString("#123456")},
     };
     ASSERT_NE(accessor_, nullptr);

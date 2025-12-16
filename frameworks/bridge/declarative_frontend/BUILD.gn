@@ -132,10 +132,26 @@ gen_obj("js_proxyclass") {
   snapshot_dep = [ ":run_state_mgmt_build" ]
 }
 
+action("ark_breakpoint_npm_install") {
+  script = "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/npm_install_guard.py"
+  stamp_file = "$target_gen_dir/ark_breakpoint_npm_install.stamp"
+  outputs = [ stamp_file ]
+  inputs = [
+    "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/package.json",
+  ]
+  args = [
+    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
+    rebase_path(stamp_file),
+  ]
+}
+
 action("run_ark_breakpoint_build") {
   script = "ark_breakpoint/build.py"
   inputs = ark_breakpoint_files_to_watch
   outputs = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
+  deps = [
+    ":ark_breakpoint_npm_install($host_toolchain)",
+  ]
   args = [
   rebase_path("$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
   rebase_path(
@@ -477,7 +493,6 @@ template("declarative_js_engine") {
       "jsview/models/action_sheet_model_impl.cpp",
       "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
-      "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
       "jsview/models/button_model_impl.cpp",
       "jsview/models/calendar_controller_model_impl.cpp",
@@ -516,7 +531,6 @@ template("declarative_js_engine") {
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
       "jsview/models/loading_progress_model_impl.cpp",
-      "jsview/models/marquee_model_impl.cpp",
       "jsview/models/menu_item_model_impl.cpp",
       "jsview/models/menu_model_impl.cpp",
       "jsview/models/navigation_model_impl.cpp",

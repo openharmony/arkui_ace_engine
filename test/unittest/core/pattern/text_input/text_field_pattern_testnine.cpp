@@ -1433,4 +1433,43 @@ HWTEST_F(TextFieldPatternTestNine, SetCustomKeyboardNodeId, TestSize.Level1)
     pattern->SetCustomKeyboardNodeId(customNode);
     EXPECT_EQ(pattern->GetCustomKeyboardIsMatched(2002), true);
 }
+
+/**
+ * @tc.name: NeedCloseKeyboard001
+ * @tc.desc: test NeedCloseKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedCloseKeyboard001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->customKeyboardBuilder_ = [] {};
+    EXPECT_FALSE(pattern->NeedCloseKeyboard());
+    pattern->isCustomKeyboardAttached_ = true;
+    EXPECT_TRUE(pattern->NeedCloseKeyboard());
+}
+
+/**
+ * @tc.name: CloseTextCustomKeyboard001
+ * @tc.desc: test NeedCloseKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CloseTextCustomKeyboard001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(keyboard, nullptr);
+    pattern->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
+    pattern->customKeyboardBuilder_ = [] {};
+    pattern->isCustomKeyboardAttached_ = true;
+    pattern->CloseTextCustomKeyboard(1, true);
+    EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
+}
 } // namespace OHOS::Ace::NG

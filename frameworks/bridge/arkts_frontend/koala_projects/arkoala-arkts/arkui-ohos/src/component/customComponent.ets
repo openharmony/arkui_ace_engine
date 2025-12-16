@@ -15,7 +15,7 @@
 
 import { __context, StateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
-import { WrappedBuilder } from "./builder"
+import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
 import { InteropNativeModule } from '@koalaui/interop'
 import { default as uiObserver } from '@ohos/arkui/observer';
@@ -269,6 +269,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         } else {
             throw new Error('not an entry custom component');
         }
+    }
+
+    fireAboutToReuse(param?: RecordData): void {
+        this.aboutToReuse(param, this.initializers?.());
+    }
+
+    fireAboutToRecycle(): void {
+        this.aboutToRecycle();
+    }
+
+    override __aboutToReuse_Internal(param?: RecordData): void {
+        this.instance.__aboutToReuse_Internal(param);
+    }
+
+    override __aboutToRecycle_Internal(): void {
+        this.instance.__aboutToRecycle_Internal();
     }
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void {

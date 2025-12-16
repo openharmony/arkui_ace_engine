@@ -203,10 +203,10 @@ export class Scroller implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const dxForIdx0  = dx as string
             thisSerializer.writeString(dxForIdx0)
-        } else if (dx instanceof number) {
+        } else if (dx instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dxForIdx1  = dx as number
-            thisSerializer.writeNumber(dxForIdx1)
+            const dxForIdx1  = dx as double
+            thisSerializer.writeFloat64(dxForIdx1)
         } else if (dx instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const dxForIdx2  = dx as Resource
@@ -216,10 +216,10 @@ export class Scroller implements MaterializedBase {
             thisSerializer.writeInt8((0).toByte())
             const dyForIdx0  = dy as string
             thisSerializer.writeString(dyForIdx0)
-        } else if (dy instanceof number) {
+        } else if (dy instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dyForIdx1  = dy as number
-            thisSerializer.writeNumber(dyForIdx1)
+            const dyForIdx1  = dy as double
+            thisSerializer.writeFloat64(dyForIdx1)
         } else if (dy instanceof Resource) {
             thisSerializer.writeInt8((2).toByte())
             const dyForIdx2  = dy as Resource

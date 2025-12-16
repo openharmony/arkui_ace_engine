@@ -577,6 +577,8 @@ public:
 
     OffsetF ConvertPoint(OffsetF position, const RefPtr<FrameNode>& parent);
 
+    OffsetF ConvertPositionToWindow(OffsetF position, bool fromWindow);
+
     friend RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
 
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
@@ -1487,6 +1489,9 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
 
+    void OnContentChangeRegister(const ContentChangeConfig& config);
+    void OnContentChangeUnregister();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1662,6 +1667,7 @@ private:
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
+    void OnHoverWithHightLight(bool isHover) const;
     bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

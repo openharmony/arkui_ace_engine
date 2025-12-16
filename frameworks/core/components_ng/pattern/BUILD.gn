@@ -67,6 +67,8 @@ build_component_ng("pattern_ng") {
     "canvas/canvas_modifier.cpp",
     "canvas/canvas_paint_method.cpp",
     "canvas/canvas_pattern.cpp",
+    "canvas/canvas_render_context_deferred.cpp",
+    "canvas/canvas_render_context_immediate.cpp",
     "canvas/canvas_rendering_context_2d_model_ng.cpp",
     "canvas/custom_paint_paint_method.cpp",
     "canvas/custom_paint_util.cpp",
@@ -103,6 +105,7 @@ build_component_ng("pattern_ng") {
     "container_picker/container_picker_accessibility_property.cpp",
     "container_picker/container_picker_layout_algorithm.cpp",
     "container_picker/container_picker_model.cpp",
+    "container_picker/container_picker_model_static.cpp",
     "container_picker/container_picker_paint_method.cpp",
     "container_picker/container_picker_pattern.cpp",
     "counter/counter_layout_algorithm.cpp",
@@ -506,6 +509,8 @@ build_component_ng("pattern_ng") {
     "scrollable/scrollable_pattern_multi_thread.cpp",
     "scrollable/scrollable_utils.cpp",
     "scrollable/scroller_observer_manager.cpp",
+    "scrollable/selectable_item_event_hub.cpp",
+    "scrollable/selectable_utils.cpp",
     "search/search_event_hub.cpp",
     "search/search_gesture_event_hub.cpp",
     "search/search_layout_algorithm.cpp",
@@ -558,6 +563,7 @@ build_component_ng("pattern_ng") {
     "shape/shape_paint_property.cpp",
     "sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
     "sheet/content_cover/sheet_content_cover_object.cpp",
+    "sheet/sheet_mask_accessibility_property.cpp",
     "sheet/sheet_object.cpp",
     "sheet/sheet_wrapper_accessibility_property.cpp",
     "sheet/side/sheet_presentation_side_layout_algorithm.cpp",
@@ -796,6 +802,7 @@ build_component_ng("pattern_ng") {
   deps = [
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
+    "$ace_root/advanced_ui_component/imageGeneratorDialog/interfaces:imageGeneratorDialog",
   ]
 
   if (!build_ohos_sdk && !is_arkui_x) {

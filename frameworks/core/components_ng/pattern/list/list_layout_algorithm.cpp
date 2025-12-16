@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -46,6 +47,32 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
 constexpr float SCROLL_SNAP_VELOCITY_TH = 780;
+
+RefPtr<LayoutWrapper> CreateDummyListItemChild()
+{
+    auto wrapper = ListItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    wrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+    return wrapper;
+}
+
+/**
+ * @brief If developer enables supportEmptyBranchInLazyLoading. And Index in the range of
+ *        LazyForEach/RepeatVirtualScroll, try to create empty branch LayoutWrapper for the index.
+ */
+static RefPtr<LayoutWrapper> GetListItemWidthEmptyBranch(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
+{
+    const auto& layoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false) &&
+        ScrollableUtils::IsChildLazy(layoutWrapper->GetHostNode(), index)) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        if (!wrapper) {
+            wrapper = CreateDummyListItemChild();
+        }
+        return wrapper;
+    }
+    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+}
 } // namespace
 
 void ListLayoutAlgorithm::UpdateListItemConstraint(
@@ -2512,7 +2539,8 @@ void ListLayoutAlgorithm::PredictBuildV2(
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
-        auto wrapper = frameNode->GetOrCreateChildByIndex(index + pattern->GetItemStartIndex(), show, true);
+        auto wrapper =
+            GetListItemWidthEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2884,5 +2912,13 @@ void ListLayoutAlgorithm::CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapp
     pattern->GetRepeatCountInfo(host, repeatDifference, firstRepeatCount_, totalItemCount_);
     pattern->SetRepeatDifference(repeatDifference);
     totalItemCount_ = (repeatDifference > 0 ? firstRepeatCount_ : totalItemCount_) - itemStartIndex_;
+}
+
+RefPtr<LayoutWrapper> ListLayoutAlgorithm::GetListItem(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache) const
+{
+    index = (!isStackFromEnd_ ? index : totalItemCount_ - index - 1) + itemStartIndex_;
+
+    return GetListItemWidthEmptyBranch(layoutWrapper, index, addToRenderTree, isCache);
 }
 } // namespace OHOS::Ace::NG

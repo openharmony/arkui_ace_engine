@@ -2299,6 +2299,33 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDefaultFileSelectorShow001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetDefaultFileSelectorShow001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+    WebModelStatic::SetDefaultFileSelectorShow(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webPatternStatic->GetDefaultFileSelectorShowCallback()(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetOnDetectedBlankScreen
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2865,6 +2892,34 @@ HWTEST_F(WebModelStaticTest, SetEnableSelectedDataDetector001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnTextSelectionChange
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnTextSelectionChange, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnTextSelectionChange(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnTextSelectionChangeEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetEnableImageAnalyzer001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -3031,6 +3086,64 @@ HWTEST_F(WebModelStaticTest, SetJavaScriptProxy001, TestSize.Level1)
     };
     WebModelStatic::SetJavaScriptProxy(AccessibilityManager::RawPtr(frameNode), callback);
     webPatternStatic->CallJsProxyCallback();
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetCameraCaptureStateChangedId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetCameraCaptureStateChangedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelStatic::SetCameraCaptureStateChangedId(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->FireOnCameraCaptureStateChangedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetMicrophoneCaptureStateChangedId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetMicrophoneCaptureStateChangedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelStatic::SetMicrophoneCaptureStateChangedId(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->FireOnMicrophoneCaptureStateChangedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
 #endif
 }

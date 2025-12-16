@@ -915,4 +915,60 @@ HWTEST_F(RichEditorEventTestNg, OnFocusNodeChange001, TestSize.Level0)
     EXPECT_FALSE(richEditorPattern->blockKbInFloatingWindow_);
 }
 
+/**
+ * @tc.name: SetStopBackPress001
+ * @tc.desc: test SetStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, SetStopBackPress001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetStopBackPress(true);
+    EXPECT_TRUE(richEditorPattern->IsStopBackPress());
+
+    richEditorModel.SetStopBackPress(false);
+    EXPECT_FALSE(richEditorPattern->IsStopBackPress());
+}
+
+/**
+ * @tc.name: SetOnCopy001
+ * @tc.desc: test SetOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, SetOnCopy, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onCopy = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    auto setOnPaste = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(false);
+        return;
+    };
+
+    richEditorModel.SetOnCopy(onCopy);
+    richEditorModel.SetOnPaste(setOnPaste);
+    TextCommonEvent event;
+    eventHub->FireOnCopy(event);
+    EXPECT_TRUE(event.IsPreventDefault());
+    eventHub->FireOnPaste(event);
+    EXPECT_FALSE(event.IsPreventDefault());
+}
 }

@@ -44,6 +44,8 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
 
+    void FlushUpdateAndMarkDirty() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ConditionScopeNode);
 };

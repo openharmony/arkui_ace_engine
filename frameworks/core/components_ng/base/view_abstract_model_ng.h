@@ -312,6 +312,11 @@ public:
         ViewAbstract::SetCompositingFilter(compositingFilter);
     }
 
+    void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override
+    {
+        ViewAbstract::SetMaterialFilter(materialFilter);
+    }
+
     void SetSystemMaterial(const UiMaterial* material) override
     {
         ViewAbstract::SetSystemMaterial(material);
@@ -1648,7 +1653,10 @@ public:
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override;
+
+    void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
@@ -2018,6 +2026,8 @@ public:
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
     static void RemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
+        MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty = false);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

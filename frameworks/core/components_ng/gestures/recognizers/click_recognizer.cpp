@@ -737,6 +737,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "distanceThreshold: " << distanceThreshold_.Value() << ", "
         << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();

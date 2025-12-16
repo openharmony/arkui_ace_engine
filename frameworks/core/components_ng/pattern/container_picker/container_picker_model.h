@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerPickerModel {
 public:
     static void Create();
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetCanLoop(const bool isLoop);
     static void SetEnableHapticFeedback(const bool isEnableHapticFeedback);
     static void SetOnChange(ContainerPickerChangeEvent&& onChange);
@@ -41,6 +42,11 @@ public:
     static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style);
+    static void SetSelectedIndex(FrameNode* frameNode, int32_t index);
+    static int32_t GetSelectedIndex(FrameNode* frameNode);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static bool GetCanLoop(FrameNode* frameNode);
+    static PickerIndicatorStyle GetIndicatorStyle(FrameNode* frameNode);
     static void ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void ProcessResourceObj(FrameNode* frameNode, const std::string& key, const RefPtr<ResourceObject>& resObj);
 };

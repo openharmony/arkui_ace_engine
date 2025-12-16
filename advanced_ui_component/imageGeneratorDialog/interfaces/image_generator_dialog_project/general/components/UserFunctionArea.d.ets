@@ -1,0 +1,41 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { styleItem } from "./CanvasFramework";
+@Builder
+export declare function UserInteractiveTabBarBuilder(x13: string): void;
+declare class StyleSelectTabBarParams {
+    name: string;
+    icon: Resource;
+    bgColor?: ResourceColor;
+}
+@Builder
+export declare function StyleSelectTabBarBuilder(p13: StyleSelectTabBarParams): void;
+@Builder
+export declare function StyleSelectBuilder(h13: Array<styleItem>): void;
+@ComponentV2
+export declare struct FunctionAreaPlaceholder {
+    build(): void;
+}
+@ComponentV2
+export declare struct StyleSelect {
+    @Local
+    curSelectedStyle: string | undefined;
+    @Param
+    readonly stylesArray: Array<styleItem>;
+    updateSelectIndex(w11: string): void;
+    build(): void;
+}
+export {};

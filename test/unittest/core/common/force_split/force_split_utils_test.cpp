@@ -46,67 +46,67 @@ void ForceSplitUtilsTest::TearDownTestSuite()
 }
 
 /**
- * @tc.name: ParseForceSplitConfig001
+ * @tc.name: ParseSystemForceSplitConfig001
  * @tc.desc: Branch: if (!configJson) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig001, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig001, TestSize.Level1)
 {
     std::string configStr = "";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig002
+ * @tc.name: ParseSystemForceSplitConfig002
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig002, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig002, TestSize.Level1)
 {
     std::string configStr = "[ ]";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig003
+ * @tc.name: ParseSystemForceSplitConfig003
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig003, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig003, TestSize.Level1)
 {
     std::string configStr = "{ \"enableHook\": true }";
     NG::ForceSplitConfig config;
     config.isArkUIHookEnabled = false;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.isArkUIHookEnabled);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig004
+ * @tc.name: ParseSystemForceSplitConfig004
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
  *                   if (!navOptions || !navOptions->IsObject()) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig004, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig004, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationOptions\": [] }";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig005
+ * @tc.name: ParseSystemForceSplitConfig005
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
@@ -114,28 +114,28 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig004, TestSize.Level1)
  *                   if (navOptions->Contains(NAVIGATION_OPTIONS_ID_KEY)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig005, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig005, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationOptions\": { \"id\": true } }";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
     EXPECT_FALSE(config.navigationId.has_value());
 
     configStr = "{ \"navigationOptions\": { \"id\": \"\" } }";
-    ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_FALSE(config.navigationId.has_value());
 
     configStr = "{ \"navigationOptions\": { \"id\": \"myNavId\" } }";
-    ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.navigationId.has_value());
     EXPECT_EQ(config.navigationId.value(), "myNavId");
 }
 
 /**
- * @tc.name: ParseForceSplitConfig006
+ * @tc.name: ParseSystemForceSplitConfig006
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
@@ -143,23 +143,23 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig005, TestSize.Level1)
  *                   if (navOptions->Contains(NAVIGATION_OPTIONS_DEPTH_KEY)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig006, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig006, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationOptions\": { \"depth\": true } }";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
     EXPECT_FALSE(config.navigationDepth.has_value());
 
     configStr = "{ \"navigationOptions\": { \"depth\": 3 } }";
-    ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.navigationDepth.has_value());
     EXPECT_EQ(config.navigationDepth.value(), 3);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig007
+ * @tc.name: ParseSystemForceSplitConfig007
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
@@ -167,22 +167,22 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig006, TestSize.Level1)
  *                   if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig007, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig007, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationOptions\": { \"disablePlaceholder\": 123 } }";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
 
     configStr = "{ \"navigationOptions\": { \"disablePlaceholder\": true } }";
     config.navigationDisablePlaceholder = false;
-    ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.navigationDisablePlaceholder);
 }
 
 /**
- * @tc.name: ParseForceSplitConfig008
+ * @tc.name: ParseSystemForceSplitConfig008
  * @tc.desc: Branch: if (!configJson) { => false
  *                   if (!configJson->IsObject()) { => false
  *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
@@ -190,16 +190,16 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig007, TestSize.Level1)
  *                   if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig008, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig008, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationOptions\": { \"disableDivider\": 123 } }";
     NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_FALSE(ret);
 
     configStr = "{ \"navigationOptions\": { \"disableDivider\": true } }";
     config.navigationDisableDivider = false;
-    ret = NG::ForceSplitUtils::ParseForceSplitConfig(configStr, config);
+    ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.navigationDisableDivider);
 }

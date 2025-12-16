@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_static.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
@@ -146,7 +146,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> convValue = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
+        convValue = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(value->value, DimensionUnit::FP);
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);

@@ -27,9 +27,6 @@ constexpr int32_t MAX_PENDING_EVENT_COUNT = 20;
 StatisticEventReporter::StatisticEventReporter()
 {
     appInfo_.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    appInfo_.abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
-    appInfo_.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
-    appInfo_.versionCode = AceApplicationInfo::GetInstance().GetAppVersionCode();
 }
 
 std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventType)
@@ -48,6 +45,7 @@ void StatisticEventReporter::SendEvent(StatisticEventType eventType)
     if (iter == statisitcEventMap_.end()) {
         std::string eventName = ConvertToEventName(eventType);
         if (eventName == "") {
+            TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "invalid statistic event type");
             return;
         }
         statisitcEventMap_[eventType] = { eventName, 1 };

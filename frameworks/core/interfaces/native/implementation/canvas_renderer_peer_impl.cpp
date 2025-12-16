@@ -25,6 +25,8 @@
 #include "canvas_gradient_peer.h"
 #include "canvas_pattern_peer.h"
 
+#include "core/pipeline/base/constants.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::set<std::string> FONT_WEIGHTS = {
@@ -387,7 +389,7 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
         gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * ACE_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;
@@ -481,39 +483,6 @@ RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
     LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap PixelMap is not supported on current platform.");
     return nullptr;
 #endif
-}
-void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDataParam& params)
-{
-    CHECK_NULL_VOID(renderingContext2DModel_);
-    int32_t imgWidth = src.dirtyWidth;
-    int32_t imgHeight = src.dirtyHeight;
-    // Parse other parameters
-    Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
-    ParseImageData(imageData, params);
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
-                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
-                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
-    // copy the data from the image data.
-    std::vector<uint32_t> vbuffer = src.data;
-    auto* buffer = (uint8_t*)vbuffer.data();
-    int32_t bufferLength = vbuffer.size() * sizeof(uint32_t);
-    size_t dataSize =
-        (imageData.dirtyWidth > 0 && imageData.dirtyHeight > 0) ? imageData.dirtyWidth * imageData.dirtyHeight : 0;
-    imageData.data = std::vector<uint32_t>(dataSize);
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
-                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
-                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
-                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
-                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
-                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
-            }
-        }
-    }
-    renderingContext2DModel_->PutImageData(imageData);
 }
 void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& imageData)
 {

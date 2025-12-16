@@ -41,7 +41,7 @@ import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
 import { ActionSheetOptions } from 'arkui/component/actionSheet';
 import { TimePickerDialogOptions } from "arkui/component/timePicker"
-import { TextPickerDialogOptions } from "arkui/component/textPicker"
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from "arkui/component/textPicker"
 import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -63,7 +63,7 @@ import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { UIContextAtomicServiceBar, UIContextGetInfo } from 'arkui/component/idlize';
 import { GlobalScope, SheetOptions } from '#generated';
-import { default as mediaquery } from '@ohos/mediaquery';
+import { default as mediaquery } from '@ohos.mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from '#generated';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
@@ -204,6 +204,12 @@ export class FocusControllerImpl extends FocusController {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         focusController.setKeyProcessingMode(mode);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public isActive(): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = focusController.isActive();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 }
 
@@ -1200,7 +1206,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1222,7 +1228,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1243,7 +1249,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<IncrementalNode>(nodeFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1637,8 +1643,8 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return animatorRet;
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
@@ -1660,22 +1666,22 @@ export class UIContextImpl extends UIContext {
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
         return ret as HeightBreakpoint;
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
          return ArkUIAniModule._Common_px2vp(value, this.instanceId_);
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
          return ArkUIAniModule._Common_fp2px(value, this.instanceId_);
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
          return ArkUIAniModule._Common_px2fp(value, this.instanceId_);
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
           return ArkUIAniModule._Common_lpx2px(value, this.instanceId_);
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
@@ -1699,7 +1705,7 @@ export class UIContextImpl extends UIContext {
         this.setFrameCallback(onFrameFunc, onIdleFunc, 0)
         ArkUIAniModule._Common_Restore_InstanceId()
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         const onFrameFunc = frameCallback.onFrame
         const onIdleFunc = frameCallback.onIdle
@@ -1776,7 +1782,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt ): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         DialogExtender.showTextPickerDialog(options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1789,7 +1795,7 @@ export class UIContextImpl extends UIContext {
     }
 
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         IUIContext.freezeUINode(id, isFrozen);
         ArkUIAniModule._Common_Restore_InstanceId()

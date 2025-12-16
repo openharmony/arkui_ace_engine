@@ -92,6 +92,7 @@ struct OptionParam {
 
     bool isAIMenuOption = false;
     bool isAskCeliaOption = false;
+    std::vector<OptionParam> subMenuItems = {};
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -124,6 +125,11 @@ struct OptionParam {
         bool enabledParam, uint32_t symbolId)
         : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
           symbolId(symbolId)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam, uint32_t symbolId, const std::vector<OptionParam>& subMenuItems)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam),
+          symbolId(symbolId), subMenuItems(subMenuItems)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
@@ -266,6 +272,7 @@ public:
     static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(const UiMaterial* material);
 
     // outer border
@@ -345,6 +352,7 @@ public:
     static void SetAlign(std::string localizedAlignment);
     static void SetLayoutGravity(Alignment alignment);
     static void SetIsMirrorable(bool isMirrorable);
+    static void SetIsMirrorable(FrameNode* frameNode, bool isMirrorable);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetChainStyle(const ChainInfo& chainInfo);
     static void SetBias(const BiasPair& biasPair);
@@ -716,6 +724,7 @@ public:
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, std::string localizedAlignment);
     static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
         const SysOptions& sysOptions = SysOptions());
@@ -780,6 +789,7 @@ public:
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
+    static std::optional<MotionPathOption> GetMotionPath(FrameNode* frameNode);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
@@ -1076,11 +1086,15 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void FreezeUINodeById(const std::string& id, bool isFreeze);
     static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
+    static void SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
@@ -1090,6 +1104,7 @@ public:
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
@@ -1166,6 +1181,7 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
     int32_t expectedUpdateInterval);
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
+void SetFocusableMultiThread(FrameNode* frameNode, bool focusable);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
 void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);

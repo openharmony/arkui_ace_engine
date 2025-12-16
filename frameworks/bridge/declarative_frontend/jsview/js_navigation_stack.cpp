@@ -21,8 +21,10 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -479,6 +481,65 @@ bool JSNavigationStack::CreateHomeDestination(const WeakPtr<NG::UINode>& customN
         pattern->SetNavigationStack(WeakClaim(this));
     }
     homeDestinationNode_ = WeakPtr(desNode);
+    return true;
+}
+
+bool JSNavigationStack::CreateEmptyRelatedPage(
+    RefPtr<NG::UINode>& targetNode, RefPtr<NG::NavDestinationGroupNode>& destNode)
+{
+    targetNode = AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+    if (!GetNavDestinationNodeInUINode(targetNode, destNode)) {
+        return false;
+    }
+    CHECK_NULL_RETURN(destNode, false);
+    auto context = destNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    auto phContent = NG::ForceSplitUtils::CreatePlaceHolderContent(context);
+    CHECK_NULL_RETURN(phContent, false);
+    auto contentNode = destNode->GetContentNode();
+    CHECK_NULL_RETURN(contentNode, false);
+    contentNode->AddChild(phContent);
+    auto property = destNode->GetLayoutProperty<NG::NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    property->UpdateHideTitleBar(true);
+    property->UpdateHideToolBar(true);
+    auto eventHub = destNode->GetEventHub<NG::EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(false);
+    }
+    auto focusHub = destNode->GetOrCreateFocusHub();
+    if (focusHub) {
+        focusHub->SetFocusable(false);
+    }
+    return true;
+}
+
+bool JSNavigationStack::CreateRelatedDestination(
+    const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node)
+{
+    RefPtr<NG::UINode> targetNode = nullptr;
+    RefPtr<NG::NavDestinationGroupNode> desNode = nullptr;
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    JSRef<JSVal> undefinedVal = JSVal::Undefined();
+    if (ERROR_CODE_NO_ERROR != LoadDestination(name, undefinedVal, customNode, targetNode, desNode)) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "failed to create related Destination , create empty relatedPage");
+        if (!CreateEmptyRelatedPage(targetNode, desNode)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create empty relatedPage");
+            return false;
+        }
+    }
+    CHECK_NULL_RETURN(targetNode, false);
+    CHECK_NULL_RETURN(desNode, false);
+    node = targetNode;
+    auto pattern = desNode->GetPattern<NG::NavDestinationPattern>();
+    if (pattern) {
+        pattern->SetName(name);
+        pattern->SetIndex(-1);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, undefinedVal);
+        pattern->SetNavPathInfo(pathInfo);
+        pattern->SetNavigationStack(WeakClaim(this));
+    }
     return true;
 }
 

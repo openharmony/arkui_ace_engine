@@ -120,6 +120,11 @@ void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
     LOGE("Not support SetObscured in old pipeline");
 }
 
+void FormModelImpl::SetColorMode(int32_t colorMode)
+{
+    LOGE("Not support SetColorMode in old pipeline");
+}
+
 int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
     const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {

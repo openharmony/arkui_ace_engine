@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
@@ -48,12 +47,22 @@ export var AccessibilitySelectedType;
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
-
+class LengthMetricsUtils {
+  constructor() {}
+  static getInstance() {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+  isNaturalNumber(metrics) {
+    return metrics.value >= 0;
+  }
+}
 class LengthMetricsCache {
-  static _cache = new Map();
   static get(key, defaultValue) {
-    if (this._cache.has(key)) {
-      return this._cache.get(key);
+    if (LengthMetricsCache._cache.has(key)) {
+      return LengthMetricsCache._cache.get(key);
     }
     try {
       const res = {
@@ -64,14 +73,14 @@ class LengthMetricsCache {
         moduleName: '__harDefaultModuleName__',
       };
       const metrics = LengthMetrics.resource(res);
-      this._cache.set(key, metrics);
+      LengthMetricsCache._cache.set(key, metrics);
       return metrics;
     } catch (error) {
       return defaultValue;
     }
   }
 }
-
+LengthMetricsCache._cache = new Map();
 export function Chip(options, parent = null) {
   const __options__ = options;
   {
@@ -101,11 +110,15 @@ export function Chip(options, parent = null) {
               chipAccessibilityLevel: options.accessibilityLevel,
               onClose: options.onClose,
               onClicked: options.onClicked,
+              maxFontScale: options.maxFontScale,
+              minFontScale: options.minFontScale,
+              chipPadding: options.padding,
+              chipFontSize: options.fontSize,
             },
             undefined,
             elmtId,
             () => {},
-            { page: 'library/src/main/ets/components/MainPage.ets', line: 224, col: 3 }
+            { page: 'library/src/main/ets/components/chip_v16.ets', line: 224, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -130,6 +143,10 @@ export function Chip(options, parent = null) {
               chipAccessibilityLevel: options.accessibilityLevel,
               onClose: options.onClose,
               onClicked: options.onClicked,
+              maxFontScale: options.maxFontScale,
+              minFontScale: options.minFontScale,
+              chipPadding: options.padding,
+              chipFontSize: options.fontSize,
             };
           };
           componentCall.paramsGenerator_ = paramsLambda;
@@ -153,6 +170,10 @@ export function Chip(options, parent = null) {
             chipAccessibilitySelectedType: options.accessibilitySelectedType,
             chipAccessibilityDescription: options.accessibilityDescription,
             chipAccessibilityLevel: options.accessibilityLevel,
+            maxFontScale: options.maxFontScale,
+            minFontScale: options.minFontScale,
+            chipPadding: options.padding,
+            chipFontSize: options.fontSize,
           });
         }
       },
@@ -642,6 +663,10 @@ export class ChipComponent extends ViewPU {
       this,
       'chipAccessibilityLevel'
     );
+    this.__maxFontScale = new SynchedPropertyObjectOneWayPU(params.maxFontScale, this, 'maxFontScale');
+    this.__minFontScale = new SynchedPropertyObjectOneWayPU(params.minFontScale, this, 'minFontScale');
+    this.__chipPadding = new SynchedPropertyObjectOneWayPU(params.chipPadding, this, 'chipPadding');
+    this.__chipFontSize = new SynchedPropertyObjectOneWayPU(params.chipFontSize, this, 'chipFontSize');
     this.__isChipExist = new ObservedPropertySimplePU(true, this, 'isChipExist');
     this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'chipScale');
     this.__chipOpacity = new ObservedPropertySimplePU(1, this, 'chipOpacity');
@@ -755,6 +780,10 @@ export class ChipComponent extends ViewPU {
     this.__chipAccessibilitySelectedType.reset(params.chipAccessibilitySelectedType);
     this.__chipAccessibilityDescription.reset(params.chipAccessibilityDescription);
     this.__chipAccessibilityLevel.reset(params.chipAccessibilityLevel);
+    this.__maxFontScale.reset(params.maxFontScale);
+    this.__minFontScale.reset(params.minFontScale);
+    this.__chipPadding.reset(params.chipPadding);
+    this.__chipFontSize.reset(params.chipFontSize);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
     this.__chipSize.purgeDependencyOnElmtId(rmElmtId);
@@ -775,6 +804,10 @@ export class ChipComponent extends ViewPU {
     this.__chipAccessibilitySelectedType.purgeDependencyOnElmtId(rmElmtId);
     this.__chipAccessibilityDescription.purgeDependencyOnElmtId(rmElmtId);
     this.__chipAccessibilityLevel.purgeDependencyOnElmtId(rmElmtId);
+    this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__minFontScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__chipPadding.purgeDependencyOnElmtId(rmElmtId);
+    this.__chipFontSize.purgeDependencyOnElmtId(rmElmtId);
     this.__isChipExist.purgeDependencyOnElmtId(rmElmtId);
     this.__chipScale.purgeDependencyOnElmtId(rmElmtId);
     this.__chipOpacity.purgeDependencyOnElmtId(rmElmtId);
@@ -803,6 +836,10 @@ export class ChipComponent extends ViewPU {
     this.__chipAccessibilitySelectedType.aboutToBeDeleted();
     this.__chipAccessibilityDescription.aboutToBeDeleted();
     this.__chipAccessibilityLevel.aboutToBeDeleted();
+    this.__maxFontScale.aboutToBeDeleted();
+    this.__minFontScale.aboutToBeDeleted();
+    this.__chipPadding.aboutToBeDeleted();
+    this.__chipFontSize.aboutToBeDeleted();
     this.__isChipExist.aboutToBeDeleted();
     this.__chipScale.aboutToBeDeleted();
     this.__chipOpacity.aboutToBeDeleted();
@@ -921,6 +958,30 @@ export class ChipComponent extends ViewPU {
   }
   set chipAccessibilityLevel(newValue) {
     this.__chipAccessibilityLevel.set(newValue);
+  }
+  get maxFontScale() {
+    return this.__maxFontScale.get();
+  }
+  set maxFontScale(newValue) {
+    this.__maxFontScale.set(newValue);
+  }
+  get minFontScale() {
+    return this.__minFontScale.get();
+  }
+  set minFontScale(newValue) {
+    this.__minFontScale.set(newValue);
+  }
+  get chipPadding() {
+    return this.__chipPadding.get();
+  }
+  set chipPadding(newValue) {
+    this.__chipPadding.set(newValue);
+  }
+  get chipFontSize() {
+    return this.__chipFontSize.get();
+  }
+  set chipFontSize(newValue) {
+    this.__chipFontSize.set(newValue);
   }
   get isChipExist() {
     return this.__isChipExist.get();
@@ -1107,7 +1168,9 @@ export class ChipComponent extends ViewPU {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
-            SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+            SymbolGlyph.fontSize(this.getFontSizeForSymbol());
+            SymbolGlyph.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
+            SymbolGlyph.minFontScale(ObservedObject.GetRawObject(this.minFontScale));
             SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.PREFIX_SYMBOL));
             SymbolGlyph.flexShrink(0);
             SymbolGlyph.attributeModifier.bind(this)(this.getPrefixSymbolModifier());
@@ -1147,6 +1210,8 @@ export class ChipComponent extends ViewPU {
       Text.fontColor(this.getLabelFontColor());
       Text.fontFamily(this.getLabelFontFamily());
       Text.fontWeight(this.getLabelFontWeight());
+      Text.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
+      Text.minFontScale(ObservedObject.GetRawObject(this.minFontScale));
       Text.margin(this.getLabelMargin());
     }, Text);
     Text.pop();
@@ -1170,7 +1235,9 @@ export class ChipComponent extends ViewPU {
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
-            SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+            SymbolGlyph.fontSize(this.getFontSizeForSymbol());
+            SymbolGlyph.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
+            SymbolGlyph.minFontScale(ObservedObject.GetRawObject(this.minFontScale));
             SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL));
             SymbolGlyph.attributeModifier.bind(this)(this.getSuffixSymbolModifier());
             SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
@@ -1236,7 +1303,9 @@ export class ChipComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+            SymbolGlyph.fontSize(this.getCloseOptionsFontsize());
+            SymbolGlyph.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
+            SymbolGlyph.minFontScale(ObservedObject.GetRawObject(this.minFontScale));
             SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL));
           }, SymbolGlyph);
           Button.pop();
@@ -1479,19 +1548,22 @@ export class ChipComponent extends ViewPU {
     if (typeof this.chipSize === 'string') {
       constraintSize.maxWidth = this.getChipMaxWidth();
       if (this.chipSize === ChipSize.SMALL) {
-        constraintSize.minHeight =
-          this.isChipActivated() ? this.theme.chipNode.activatedSmallHeight : this.theme.chipNode.smallHeight;
+        constraintSize.minHeight = this.isChipActivated()
+          ? this.theme.chipNode.activatedSmallHeight
+          : this.theme.chipNode.smallHeight;
       } else {
-        constraintSize.minHeight =
-          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+        constraintSize.minHeight = this.isChipActivated()
+          ? this.theme.chipNode.activatedNormalHeight
+          : this.theme.chipNode.normalHeight;
       }
     } else {
       if (typeof this.chipSize?.width === 'undefined' || !this.isValidLength(this.chipSize.width)) {
         constraintSize.maxWidth = this.getChipMaxWidth();
       }
       if (typeof this.chipSize?.height === 'undefined' || !this.isValidLength(this.chipSize.height)) {
-        constraintSize.minHeight =
-          this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
+        constraintSize.minHeight = this.isChipActivated()
+          ? this.theme.chipNode.activatedNormalHeight
+          : this.theme.chipNode.normalHeight;
       }
     }
     return constraintSize;
@@ -1527,12 +1599,26 @@ export class ChipComponent extends ViewPU {
     return chipSize;
   }
   getChipPadding() {
-    const chipTheme = this.theme.chipNode;
+    let chipTheme = this.theme.chipNode;
+    let res;
     if (this.isSmallChipSize()) {
-      return this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+      res = this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
     } else {
-      return this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+      res = this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
     }
+    if (this.chipPadding?.top && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.top)) {
+      res.top = this.chipPadding.top;
+    }
+    if (this.chipPadding?.bottom && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.bottom)) {
+      res.bottom = this.chipPadding.bottom;
+    }
+    if (this.chipPadding?.start && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.start)) {
+      res.start = this.chipPadding.start;
+    }
+    if (this.chipPadding?.end && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.end)) {
+      res.end = this.chipPadding.end;
+    }
+    return res;
   }
   getLabelMargin() {
     const localizedLabelMargin = {
@@ -1599,7 +1685,21 @@ export class ChipComponent extends ViewPU {
   getLabelFontFamily() {
     return this.label?.fontFamily ?? this.theme.label.fontFamily;
   }
-  defaultSymbolFontsize() {
+  getFontSizeForSymbol() {
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
+    }
+    return this.isSmallChipSize()
+      ? this.theme.defaultSymbol.smallSymbolFontSize
+      : this.theme.defaultSymbol.normalSymbolFontSize;
+  }
+  getCloseOptionsFontsize() {
+    if (!!this.closeOptions?.fontSize && this.isValidLength(this.closeOptions?.fontSize)) {
+      return this.closeOptions.fontSize;
+    }
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
+    }
     return this.isSmallChipSize()
       ? this.theme.defaultSymbol.smallSymbolFontSize
       : this.theme.defaultSymbol.normalSymbolFontSize;
@@ -1627,6 +1727,9 @@ export class ChipComponent extends ViewPU {
   getLabelFontSize() {
     if (typeof this.label.fontSize !== 'undefined' && this.isValidLength(this.label.fontSize)) {
       return this.label.fontSize;
+    }
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
       return this.theme.label.smallFontSize;

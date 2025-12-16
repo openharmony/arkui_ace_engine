@@ -201,6 +201,7 @@ struct UpdateParagraphStyle {
         lineBreakStrategy.reset();
         paragraphSpacing.reset();
         textVerticalAlign.reset();
+        textDirection.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
@@ -208,6 +209,7 @@ struct UpdateParagraphStyle {
     std::optional<LineBreakStrategy> lineBreakStrategy;
     std::optional<Dimension> paragraphSpacing;
     std::optional<TextVerticalAlign> textVerticalAlign;
+    std::optional<TextDirection> textDirection;
 
     std::string ToString() const
     {
@@ -218,6 +220,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textVerticalAlign);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textDirection);
         return jsonValue->ToString();
     }
 };
@@ -422,11 +425,16 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetEnableAutoSpacing(bool enabled) {};
+    virtual void SetCompressLeadingPunctuation(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};
     virtual void SetScrollBarColor(std::optional<Color> value) {};
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
     virtual void SetSingleLine(bool iaEnable) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

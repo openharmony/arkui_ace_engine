@@ -1824,6 +1824,10 @@ void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swip
 
 void SwiperModelNG::SetFillType(int32_t fillType)
 {
+    if (!InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+            static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), fillType)) {
+        fillType = 0;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, fillType);
 }
 
@@ -1834,14 +1838,23 @@ void SwiperModelNG::ResetFillType()
 
 void SwiperModelNG::SetFillType(FrameNode* frameNode, int32_t options)
 {
+    if (!InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+            static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), options)) {
+        options = 0;
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, options, frameNode);
 }
 
 int32_t SwiperModelNG::GetFillType(FrameNode* frameNode)
 {
-    int32_t value = 0;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, FillType, value, frameNode, value);
     return value;
+}
+
+void SwiperModelNG::ResetFillType(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
 }
 
 void SwiperModelNG::ResetDisplayCountWithObject()

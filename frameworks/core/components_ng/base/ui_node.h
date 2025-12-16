@@ -291,6 +291,16 @@ public:
     void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
+    void SetLastParent(WeakPtr<UINode> lastParent)
+    {
+        lastParent_ = lastParent;
+    }
+
+    WeakPtr<UINode> GetLastParent()
+    {
+        return lastParent_;
+    }
+
     // performance.
     PipelineContext* GetContext() const;
     PipelineContext* GetAttachedContext() const;
@@ -1341,6 +1351,7 @@ private:
     WeakPtr<UINode> parent_; // maybe wrong when not on the tree
     WeakPtr<UINode> adoptParent_; // maybe wrong when not on the tree
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
+    WeakPtr<UINode> lastParent_; // for dumpinfo of the @Component. don't use ancestor_ because it may be clear.
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;

@@ -119,6 +119,21 @@ public:
         return "";
     }
 
+    const RefPtr<NG::PageInfo> GetLastPageInfo()
+    {
+        return nullptr;
+    }
+
+    std::string GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+    {
+        return "";
+    }
+
+    std::string GetCurrentPageName()
+    {
+        return "";
+    }
+
     auto Get()
     {
         return this;

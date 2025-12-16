@@ -22,6 +22,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "generated/test_fixtures.h"
 #include "arkoala_api_generated.h"
 

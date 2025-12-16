@@ -16,13 +16,9 @@
 #include "ui_service_statistic_event.h"
 
 namespace OHOS::Ace {
-AppInfoParcel::AppInfoParcel(const std::string& bundleName, const std::string& abilityName,
-    const std::string& versionName, const std::string& versionCode)
+AppInfoParcel::AppInfoParcel(const std::string& bundleName)
 {
     bundleName_ = bundleName;
-    abilityName_ = abilityName;
-    versionName_ = versionName;
-    versionCode_ = versionCode;
 }
 
 const std::string& AppInfoParcel::GetBundleName() const
@@ -30,33 +26,9 @@ const std::string& AppInfoParcel::GetBundleName() const
     return bundleName_;
 }
 
-const std::string& AppInfoParcel::GetAbilityName() const
-{
-    return abilityName_;
-}
-
-const std::string& AppInfoParcel::GetVersionName() const
-{
-    return versionName_;
-}
-
-const std::string& AppInfoParcel::GetVersionCode() const
-{
-    return versionCode_;
-}
-
 bool AppInfoParcel::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteString(bundleName_)) {
-        return false;
-    }
-    if (!parcel.WriteString(abilityName_)) {
-        return false;
-    }
-    if (!parcel.WriteString(versionName_)) {
-        return false;
-    }
-    if (!parcel.WriteString(versionCode_)) {
         return false;
     }
     return true;
@@ -68,28 +40,8 @@ AppInfoParcel *AppInfoParcel::Unmarshalling(Parcel& parcel)
     if (!parcel.ReadString(bundleName)) {
         return nullptr;
     }
-    std::string abilityName;
-    if (!parcel.ReadString(abilityName)) {
-        return nullptr;
-    }
-    std::string versionName;
-    if (!parcel.ReadString(versionName)) {
-        return nullptr;
-    }
-    std::string versionCode;
-    if (!parcel.ReadString(versionCode)) {
-        return nullptr;
-    }
-    AppInfoParcel* appInfoParcel = new AppInfoParcel(bundleName, abilityName, versionName, versionCode);
+    AppInfoParcel* appInfoParcel = new AppInfoParcel(bundleName);
     return appInfoParcel;
-}
-
-bool AppInfoParcel::EqualTo(const AppInfoParcel& appInfo)
-{
-    return GetBundleName() == appInfo.GetBundleName() &&
-        GetAbilityName() == appInfo.GetAbilityName() &&
-        GetVersionName() == appInfo.GetVersionName() &&
-        GetVersionCode() == appInfo.GetVersionCode();
 }
 
 StatisticEventInfoParcel::StatisticEventInfoParcel(const std::string& eventName, int32_t eventCount)

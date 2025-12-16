@@ -307,6 +307,12 @@ public:
         return false;
     }
 
+    virtual bool CreateRelatedDestination(
+        const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node)
+    {
+        return false;
+    }
+
     virtual void UpdatePreTopInfo() {}
 
     virtual bool IsStaticStack()

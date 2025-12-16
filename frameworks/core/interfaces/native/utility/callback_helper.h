@@ -19,6 +19,9 @@
 #pragma once
 
 #include <type_traits>
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
+#endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
@@ -26,6 +29,10 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
+
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode);
+#endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 
 namespace GeneratedApiImpl {
     ExtensionCompanionNode* GetCompanion(Ark_NodeHandle nodePtr);
@@ -138,8 +145,13 @@ public:
     template<typename... Params>
     RefPtr<UINode> BuildSync(Params&&... args) const
     {
-        return Referenced::Claim(reinterpret_cast<UINode*>(
+        auto node = Referenced::Claim(reinterpret_cast<UINode*>(
             InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(std::forward<Params>(args)...)));
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            return CreateProxyNode(node);
+#else
+            return node;
+#endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     }
 
     template <typename... Params>
@@ -150,7 +162,11 @@ public:
             CHECK_NULL_VOID(builderHandler);
             auto node = Referenced::Claim(reinterpret_cast<UINode*>(retValue));
             CHECK_NULL_VOID(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+            builderHandler(CreateProxyNode(node));
+#else
             builderHandler(node);
+#endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
         };
         auto continuation = CallbackKeeper::Claim<Callback_Pointer_Void>(std::move(handler));
         Invoke(std::forward<Params>(args)..., continuation.ArkValue());

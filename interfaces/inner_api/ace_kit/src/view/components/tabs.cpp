@@ -323,4 +323,14 @@ void Tabs::SetOnAnimationStart(OnAnimationStartEvent onAnimationStart)
     NG::TabsModelNG::SetOnAnimationStart(Referenced::RawPtr(tabsNode), std::move(onAnimationStart));
 }
 
+void Tabs::SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event)
+{
+    auto tabBarNode = GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+    auto aceFrameNode = reinterpret_cast<NG::FrameNode*>(tabBarNode->GetHandle());
+    CHECK_NULL_VOID(aceFrameNode);
+    auto tabBarPattern = aceFrameNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetOnTabBarItemsChangeEvent(std::move(event));
+}
 } // namespace OHOS::Ace::Kit

@@ -332,8 +332,11 @@ public:
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+    
+    void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override {};
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
     {

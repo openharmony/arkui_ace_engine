@@ -890,6 +890,14 @@ class ArkSafeAreaExpandOpts {
   }
 }
 
+class ArkBorderRadiusOpts {
+  value: Length | BorderRadiuses | LocalizedBorderRadius = undefined;
+  type: RenderStrategy = undefined;
+  isEqual(another: ArkBorderRadiusOpts) {
+    return (this.value === another.value) && (this.type === another.type);
+  }
+}
+
 class ArkEnableStatusBar {
   enable: boolean | undefined = undefined;
   animated?: boolean | undefined = undefined;
@@ -2011,6 +2019,19 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavigationMenu {
+  menu: Array<NavigationMenuItem> | undefined;
+  options: NavigationMenuOptions | undefined;
+
+  constructor() {
+    this.menu = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkNavigationMenu): boolean {
+    return (this.menu === another.menu) && (this.options === another.options);
+  }
+}
+
 class ArkNavBackButton {
   icon: any;
   text: ResourceStr | undefined;
@@ -2148,4 +2169,14 @@ class ArkChainWeight {
       this.vertical === another.vertical
     );
   }
+}
+
+class ArkSelectedDragPreviewStyle {
+    color?: ResourceColor;
+    constructor() {
+      this.color = undefined;
+    }
+    isEqual(another: SelectedDragPreviewStyle): boolean {
+      return this.color === another.color;
+    }
 }

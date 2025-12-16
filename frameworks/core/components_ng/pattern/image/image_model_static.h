@@ -40,6 +40,10 @@ public:
     static void SetImageSourceSize(FrameNode* frameNode, const std::optional<std::pair<Dimension, Dimension>>& size);
     static void SetImageFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetSupportSvg2(FrameNode* frameNode, bool enable);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
@@ -47,6 +51,8 @@ public:
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter);
     static void SetDrawableDescriptor(FrameNode* frameNode, DrawableDescriptor* drawableAddr);
+    static void SetHdrBrightness(FrameNode* frameNode, const std::optional<float>& hdrBrightness);
+    static void ResetDraggable(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_H

@@ -1947,81 +1947,6 @@ std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicW
     return scale;
 }
 
-TransformParam CustomPaintPaintMethod::GetTransform() const
-{
-    TransformParam param;
-    param.scaleX = matrix_.Get(static_cast<int>(RSMatrix::Index::SCALE_X));
-    param.scaleY = matrix_.Get(static_cast<int>(RSMatrix::Index::SCALE_Y));
-    param.skewX = matrix_.Get(static_cast<int>(RSMatrix::Index::SKEW_X));
-    param.skewY = matrix_.Get(static_cast<int>(RSMatrix::Index::SKEW_Y));
-    param.translateX = matrix_.Get(static_cast<int>(RSMatrix::Index::TRANS_X));
-    param.translateY = matrix_.Get(static_cast<int>(RSMatrix::Index::TRANS_Y));
-    return param;
-}
-
-void CustomPaintPaintMethod::SaveProperties()
-{
-    matrixStates_.push_back(matrix_);
-    lineDashStates_.push_back(lineDash_);
-}
-
-void CustomPaintPaintMethod::RestoreProperties()
-{
-    if (!matrixStates_.empty()) {
-        matrix_ = matrixStates_.back();
-        matrixStates_.pop_back();
-    }
-    if (!lineDashStates_.empty()) {
-        lineDash_ = lineDashStates_.back();
-        lineDashStates_.pop_back();
-    }
-}
-
-void CustomPaintPaintMethod::ResetTransformMatrix()
-{
-    matrix_.Reset();
-}
-
-void CustomPaintPaintMethod::ResetLineDash()
-{
-    std::vector<double>().swap(lineDash_.lineDash);
-    lineDash_.dashOffset = 0.0;
-}
-
-void CustomPaintPaintMethod::RotateMatrix(double angle)
-{
-    RSMatrix matrix;
-    matrix.Rotate(angle * HALF_CIRCLE_ANGLE / ACE_PI, 0, 0);
-    matrix_.PreConcat(matrix);
-}
-
-void CustomPaintPaintMethod::ScaleMatrix(double sx, double sy)
-{
-    RSMatrix matrix;
-    matrix.SetScale(sx, sy);
-    matrix_.PreConcat(matrix);
-}
-
-void CustomPaintPaintMethod::SetTransformMatrix(const TransformParam& param)
-{
-    matrix_.SetMatrix(
-        param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
-}
-
-void CustomPaintPaintMethod::TransformMatrix(const TransformParam& param)
-{
-    RSMatrix matrix;
-    matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
-    matrix_.PreConcat(matrix);
-}
-
-void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
-{
-    if (tx || ty) {
-        matrix_.PreTranslate(tx, ty);
-    }
-}
-
 void CustomPaintPaintMethod::SaveLayer()
 {
     CHECK_NULL_VOID(rsCanvas_);
@@ -2053,8 +1978,6 @@ void CustomPaintPaintMethod::ResetStates()
     rsPath_.Reset();
     rsPath2d_.Reset();
     std::vector<PaintHolder>().swap(saveStates_);
-    std::vector<RSMatrix>().swap(matrixStates_);
-    std::vector<LineDashParam>().swap(lineDashStates_);
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
     colorMatrix_ = RSColorMatrix();

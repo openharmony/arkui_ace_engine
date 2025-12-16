@@ -29,6 +29,8 @@ namespace OHOS::Ace::Framework {
 void JsRegisterViews(BindingTarget globalObj, void* nativeEngine = nullptr, bool isCustomEnvSupported = false);
 void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList,
     bool isReload = false, void* nativeEngine = nullptr);
+void JsRegisterFormJsXNodeLite(BindingTarget globalObj);
+void JsRegisterFormJsXNodeFull(BindingTarget globalObj, bool isLiteSetRegistered);
 void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine);
 
 } // namespace OHOS::Ace::Framework
