@@ -42,6 +42,7 @@ public:
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
+    using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -100,6 +101,9 @@ public:
     virtual void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) {};
     virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
     virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
+    virtual void SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function) {};
+    virtual void GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config) {};
+    virtual void ReportHitTestNodeInfos(const std::string& data) {};
     /**
      * @description: Report web editing area focus/blur/textChange event
      * @param type The type of event (focus, blur, or textChange), defaults to empty string
@@ -202,6 +206,7 @@ protected:
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetPixelMapFunction getPixelMapFunction_ = 0;
+    GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;

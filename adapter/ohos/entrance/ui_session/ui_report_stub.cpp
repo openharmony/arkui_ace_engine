@@ -124,6 +124,13 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendContentChange(type, simpleTree);
             break;
         }
+        case REPORT_HIT_TEST_NODE_INFOS: {
+            std::string result = data.ReadString();
+            int32_t partNum = data.ReadInt32();
+            bool isLastPart = data.ReadBool();
+            ReportHitTestNodeInfos(result, partNum, isLastPart);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -172,6 +179,19 @@ void UiReportStub::ReportInspectorTreeValue(const std::string& data, int32_t par
     if (inspectorTreeCallback_ != nullptr) {
         inspectorTreeCallback_(data, partNum, isLastPart);
     }
+}
+
+void UiReportStub::ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart)
+{
+    if (getHitTestNodeInfoCallback_ != nullptr) {
+        getHitTestNodeInfoCallback_(data, partNum, isLastPart);
+    }
+}
+
+void UiReportStub::RegisterGetHitTestNodeInfoCallback(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    getHitTestNodeInfoCallback_ = std::move(eventCallback);
 }
 
 void UiReportStub::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)

@@ -355,6 +355,43 @@ void UiSessionManagerOhos::SaveRegisterForWebFunction(NotifyAllWebFunction&& fun
     notifyWebFunction_ = std::move(function);
 }
 
+void UiSessionManagerOhos::SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    getHitTestInfoFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (getHitTestInfoFunction_) {
+        getHitTestInfoFunction_(config);
+    }
+}
+
+void UiSessionManagerOhos::ReportHitTestNodeInfos(const std::string& data)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService == nullptr) {
+            LOGW("report hitTestNodeInfos failed,process id:%{public}d", pair.first);
+            continue;
+        }
+
+        size_t partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
+        for (size_t i = 0; i <= partSize; i++) {
+            if (i != partSize) {
+                reportService->ReportHitTestNodeInfos(
+                    data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
+            } else {
+                reportService->ReportHitTestNodeInfos(data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
+            }
+        }
+    }
+}
+
+
 void UiSessionManagerOhos::SaveForSendCommandFunction(NotifySendCommandFunction&& function)
 {
     notifySendCommandFunction_ = std::move(function);

@@ -137,6 +137,32 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
     }
 }
 
+void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportHitTestNodeInfos write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(partNum)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (!messageData.WriteBool(isLastPart)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_HIT_TEST_NODE_INFOS, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportHitTestNodeInfos send request failed");
+    }
+}
+
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
     if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {

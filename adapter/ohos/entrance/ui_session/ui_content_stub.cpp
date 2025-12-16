@@ -185,6 +185,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             UnregisterContentChangeCallbackInner(data, reply, option);
             break;
         }
+        case GET_HIT_TEST_NODE_INFO_FOR_TOUCH: {
+            GetHitTestNodeInfoForTouchInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -437,6 +441,14 @@ int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, Message
     }
     GetVisibleInspectorTree(nullptr, configImplPtr->GetConfig());
     delete configImplPtr;
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetHitTestNodeInfoForTouchInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    InteractionParamConfig settedParamConfig = { data.ReadBool() };
+    GetLatestHitTestNodeInfosForTouch(nullptr, settedParamConfig);
     return NO_ERROR;
 }
 

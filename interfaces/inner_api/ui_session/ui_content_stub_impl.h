@@ -68,6 +68,9 @@ public:
         override;
     int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig()) override;
+    int32_t GetLatestHitTestNodeInfosForTouch(
+        const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        InteractionParamConfig config = InteractionParamConfig()) override;
     int32_t ExeAppAIFunction(
         const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
         override;

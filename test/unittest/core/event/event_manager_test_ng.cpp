@@ -1472,4 +1472,43 @@ HWTEST_F(EventManagerTestNg, SwipeRecognizerAxisDirection001, TestSize.Level1)
     ASSERT_NE(swipeFree, nullptr);
     EXPECT_EQ(swipeFree->GetAxisDirection(), Axis::FREE);
 }
+
+/**
+ * @tc.name: AddHitTestInfoRecord
+ * @tc.desc: Test AddHitTestInfoRecord.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto node1 = FrameNode::GetOrCreateFrameNode("node1", 1001, nullptr);
+    ASSERT_NE(node1, nullptr);
+    auto node2 = FrameNode::GetOrCreateFrameNode("node2", 1002, nullptr);
+    ASSERT_NE(node2, nullptr);
+    /**
+     * @tc.steps: step2. set hitTestRecordInfo_.
+     */
+    HitTestRecordInfo info;
+    info.isRealTouch = true;
+    info.screenX = 0.0f;
+    info.screenY = 0.0f;
+    info.fingerId = 0;
+    info.type = TouchType::DOWN;
+    eventManager->hitTestRecordInfo_ = info;
+    /**
+     * @tc.steps: step3. AddHitTestInfoRecord.
+     * @tc.expected: size is correct.
+     */
+    eventManager->AddHitTestInfoRecord(nullptr);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 0);
+    eventManager->AddHitTestInfoRecord(node1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 1);
+    eventManager->AddHitTestInfoRecord(node2);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 2);
+}
 } // namespace OHOS::Ace::NG

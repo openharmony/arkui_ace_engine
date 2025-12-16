@@ -5865,7 +5865,24 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
+    SaveGetHitTestInfoCallback(taskExecutor);
     SetContentChangeDetectCallback(taskExecutor);
+}
+
+void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getHitTestInfoCallback = [weakTaskExecutor = taskExecutor](InteractionParamConfig config) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [config]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetHitTestInfos(config);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
+    };
+    UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
