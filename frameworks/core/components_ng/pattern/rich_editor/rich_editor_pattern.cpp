@@ -9432,7 +9432,6 @@ void RichEditorPattern::CreateDragNode()
             info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
         }
     }
-    info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
@@ -9440,6 +9439,9 @@ void RichEditorPattern::CreateDragNode()
             info.dragBackgroundColor = placeholderSpanItem->dragBackgroundColor_;
             info.isDragShadowNeeded = placeholderSpanItem->isDragShadowNeeded_;
         }
+    }
+    if (!info.dragBackgroundColor.has_value()) {
+        info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     }
     dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
     CHECK_NULL_VOID(dragNode_);
@@ -10993,11 +10995,14 @@ std::string RichEditorPattern::GetCustomKeyboardInJson() const
 
 Color RichEditorPattern::GetSelectedDragPreviewStyleColor() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, Color::WHITE);
-    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Color::WHITE);
-    return layoutProperty->GetSelectedDragPreviewStyleValue(Color::WHITE);
+    if (layoutProperty->HasSelectedDragPreviewStyle()) {
+        return layoutProperty->GetSelectedDragPreviewStyleValue();
+    }
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, Color::WHITE);
+    return richEditorTheme->GetDragBackgroundColor();
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
