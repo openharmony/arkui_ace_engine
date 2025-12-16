@@ -2949,7 +2949,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 newTopNavDestination->SetIsOnAnimation(false);
             }
             if (!preIsHomeDest) {
-                preTopNavDestination->CleanContent();
+                // skip clean, Otherwise, it will affect the custom component's lifeCycle aboutTodisappear in
+                // navDestinationContent.
+                preTopNavDestination->CleanContent(false, false, true);
                 auto parent = preTopNavDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination);
