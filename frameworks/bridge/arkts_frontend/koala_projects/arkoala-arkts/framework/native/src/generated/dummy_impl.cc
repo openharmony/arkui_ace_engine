@@ -41815,6 +41815,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_OffsetResult OffsetImpl(Ark_Scroller peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("offset(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void ScrollToIndexImpl(Ark_VMContext vmContext,
                            Ark_Scroller peer,
                            Ark_Int32 value,
@@ -49911,6 +49923,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerAccessor::FlingImpl,
             ScrollerAccessor::ScrollPageImpl,
             ScrollerAccessor::CurrentOffsetImpl,
+            ScrollerAccessor::OffsetImpl,
             ScrollerAccessor::ScrollToIndexImpl,
             ScrollerAccessor::ScrollByImpl,
             ScrollerAccessor::IsAtEndImpl,

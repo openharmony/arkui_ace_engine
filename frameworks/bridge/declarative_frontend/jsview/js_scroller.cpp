@@ -72,6 +72,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("fling", &JSScroller::Fling);
     JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
+    JSClass<JSScroller>::CustomMethod("offset", &JSScroller::Offset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
     JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
     JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
@@ -317,6 +318,20 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
     if (!scrollController) {
         EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
             "The controller does not bind a component when calling CurrentOffset function");
+        return;
+    }
+    auto retObj = JSRef<JSObject>::New();
+    ContainerScope scope(instanceId_);
+    auto offset = scrollController->GetCurrentOffset();
+    retObj->SetProperty("xOffset", offset.GetX());
+    retObj->SetProperty("yOffset", offset.GetY());
+    args.SetReturnValue(retObj);
+}
+
+void JSScroller::Offset(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         return;
     }
     auto retObj = JSRef<JSObject>::New();

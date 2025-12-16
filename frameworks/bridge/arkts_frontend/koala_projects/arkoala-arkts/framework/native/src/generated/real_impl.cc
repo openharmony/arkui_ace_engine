@@ -17386,6 +17386,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_OffsetResult OffsetImpl(Ark_Scroller peer)
+    {
+        return {};
+    }
     void ScrollToIndexImpl(Ark_VMContext vmContext,
                            Ark_Scroller peer,
                            Ark_Int32 value,
@@ -22097,6 +22101,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerAccessor::FlingImpl,
             ScrollerAccessor::ScrollPageImpl,
             ScrollerAccessor::CurrentOffsetImpl,
+            ScrollerAccessor::OffsetImpl,
             ScrollerAccessor::ScrollToIndexImpl,
             ScrollerAccessor::ScrollByImpl,
             ScrollerAccessor::IsAtEndImpl,

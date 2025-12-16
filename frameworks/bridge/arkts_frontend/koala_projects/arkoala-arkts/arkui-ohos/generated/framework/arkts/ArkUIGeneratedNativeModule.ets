@@ -5671,6 +5671,7 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_fling(ptr: KPointer, velocity: KDouble): void
     native static _Scroller_scrollPage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
+    native static _Scroller_offset(ptr: KPointer): KInteropReturnBuffer
     native static _Scroller_scrollToIndex(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_isAtEnd(ptr: KPointer): boolean

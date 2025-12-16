@@ -36614,6 +36614,20 @@ KInteropReturnBuffer impl_Scroller_currentOffset(KVMContext vmContext, Ark_Nativ
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_CTX_1(Scroller_currentOffset, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_Scroller_offset(Ark_NativePointer thisPtr) {
+        Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
+        const auto &retValue = GetAccessors()->getScrollerAccessor()->offset(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            OffsetResult_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(Scroller_offset, KInteropReturnBuffer, Ark_NativePointer)
 void impl_Scroller_scrollToIndex(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 value, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
