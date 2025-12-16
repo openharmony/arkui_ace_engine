@@ -44,7 +44,7 @@ protected:
     /**
      * @brief Check if Sections info align with actual children and if internal data structures are consistent.
      */
-    static bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
+    bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
     /**
      * @return true if the item is a cache item outside viewport.

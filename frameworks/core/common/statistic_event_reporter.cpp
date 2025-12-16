@@ -34,6 +34,8 @@ std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventT
     switch (eventType) {
         case StatisticEventType::FA_APP_START:
             return "FA_APP_START";
+        case StatisticEventType::CALL_SET_CACHE_RANGE:
+            return "CALL_SET_CACHE_RANGE";
         default:
             return "";
     }

@@ -667,6 +667,7 @@ private:
     RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
     void ResetForExtScroll() override;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
+    void CheckValidPredictItem();
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -728,6 +729,7 @@ private:
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
 
     EditModeOptions editModeOptions_;
+    std::unordered_map<int32_t, int32_t> predictItemTimes_;
 };
 } // namespace OHOS::Ace::NG
 

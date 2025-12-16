@@ -1375,6 +1375,8 @@ void Scrollable::StartSpringMotion(
         finalPosition_ = extent.Leading();
     } else {
         OnAnimateStop();
+        EventReport::ReportScrollableErrorEvent("Scrollable", ScrollableErrorType::START_SPRING_MOTION_ERROR,
+            "Edge spring animation not activated");
         return;
     }
 

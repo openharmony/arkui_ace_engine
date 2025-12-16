@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 class PipelineBase;
 enum class StatisticEventType {
     FA_APP_START = 0,
+    CALL_SET_CACHE_RANGE,
 };
 
 struct StatisticAppInfo {
