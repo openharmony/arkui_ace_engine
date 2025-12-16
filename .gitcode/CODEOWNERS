@@ -825,6 +825,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_build_im
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_impl.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.inl @arkui_statemgmt
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.cpp @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.cpp @arkui_framework_xnode
